@@ -7906,7 +7906,20 @@ static void GetRegistersForValue(SelectionDAG &DAG, const SDLoc &DL,
   // Get the actual register value type.  This is important, because the user
   // may have asked for (e.g.) the AX register in i32 type.  We need to
   // remember that AX is actually i16 to get the right extension.
-  const MVT RegVT = *TRI.legalclasstypes_begin(*RC);
+  MVT RegVT = *TRI.legalclasstypes_begin(*RC);
+  // Try harder for vectors just in case sizes don't match.
+  // FIXME: This is caused by having nxv1i1 in the same register class as
+  // nxv1i64 in EPI.
+  if (RegVT.isVector() && RefOpInfo.ConstraintVT.isVector() &&
+      RegVT.getSizeInBits() != RefOpInfo.ConstraintVT.getSizeInBits()) {
+    auto E = TRI.legalclasstypes_end(*RC);
+    auto I = std::find_if(TRI.legalclasstypes_begin(*RC), E,
+                          [&RefOpInfo](const MVT::SimpleValueType &VTy) {
+                            return MVT(VTy) == RefOpInfo.ConstraintVT;
+                          });
+    if (I != E)
+      RegVT = *I;
+  }
 
   if (OpInfo.ConstraintVT != MVT::Other) {
     // If this is an FP operand in an integer register (or visa versa), or more

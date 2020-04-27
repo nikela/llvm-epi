@@ -3758,6 +3758,7 @@ RISCVTargetLowering::getConstraintType(StringRef Constraint) const {
     default:
       break;
     case 'f':
+    case 'v':
       return C_RegisterClass;
     case 'I':
     case 'J':
@@ -3787,7 +3788,12 @@ RISCVTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
         return std::make_pair(0U, &RISCV::FPR64RegClass);
       break;
     case 'v':
-      return std::make_pair(0U, &RISCV::VRRegClass);
+      for (const auto *RC : {&RISCV::VRRegClass, &RISCV::VRM2RegClass,
+                             &RISCV::VRM4RegClass, &RISCV::VRM8RegClass}) {
+        if (TRI->isTypeLegalForClass(*RC, VT.SimpleTy))
+          return std::make_pair(0U, RC);
+      }
+      break;
     default:
       break;
     }

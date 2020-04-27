@@ -130,9 +130,29 @@ bool RISCVAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
   case MachineOperand::MO_Immediate:
     OS << MO.getImm();
     return false;
-  case MachineOperand::MO_Register:
-    OS << RISCVInstPrinter::getRegisterName(MO.getReg());
+  case MachineOperand::MO_Register: {
+    const MachineBasicBlock *MBB = MI->getParent();
+    assert(MBB && "MI expected to be in a basic block");
+    const MachineFunction *MF = MBB->getParent();
+    assert(MF && "MBB expected to be in a machine function");
+
+    const TargetRegisterInfo *TRI =
+        MF->getSubtarget<RISCVSubtarget>().getRegisterInfo();
+    assert(TRI && "TargetRegisterInfo expected");
+
+    Register Reg = MO.getReg();
+
+    const TargetRegisterClass *RC = TRI->getMinimalPhysRegClass(Reg);
+    if (RC->hasSuperClassEq(&RISCV::VRM2RegClass) ||
+        RC->hasSuperClassEq(&RISCV::VRM4RegClass) ||
+        RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
+      Reg = TRI->getSubReg(Reg, RISCV::sub_vrm2);
+      assert(Reg && "Subregister does not exist");
+    }
+
+    OS << RISCVInstPrinter::getRegisterName(Reg);
     return false;
+  }
   case MachineOperand::MO_GlobalAddress:
     PrintSymbolOperand(MO, OS);
     return false;
