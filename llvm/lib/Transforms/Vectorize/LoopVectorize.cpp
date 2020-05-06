@@ -2630,9 +2630,20 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
               LoopVectorPreHeader->getModule(), Intrinsic::vp_store,
               {StoredValTy, VecPtr->getType()});
 
+        auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
+          // The outermost mask can be lowered as an all ones mask when using
+          // EVL.
+          if (isa<VPInstruction>(BlockInMask) &&
+              cast<VPInstruction>(BlockInMask)->getOpcode() ==
+                  VPInstruction::ICmpULE)
+            return Builder.getTrueVector(EC);
+          else
+            return BlockInMaskParts[Part];
+        };
+
           Value *BlockInMaskPart =
               isMaskRequired
-                  ? BlockInMaskParts[Part]
+                  ? MaskValue(Part, StoredValTy->getElementCount())
                   : Builder.getTrueVector(StoredValTy->getElementCount());
 
           Value *EVLPartTrunc = Builder.CreateTrunc(
@@ -2674,8 +2685,20 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
 
         VectorType *VecTy =
             cast<VectorType>(VecPtr->getType()->getPointerElementType());
+
+        auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
+          // The outermost mask can be lowered as an all ones mask when using
+          // EVL.
+          if (isa<VPInstruction>(BlockInMask) &&
+              cast<VPInstruction>(BlockInMask)->getOpcode() ==
+                  VPInstruction::ICmpULE)
+            return Builder.getTrueVector(EC);
+          else
+            return BlockInMaskParts[Part];
+        };
+
         Value *BlockInMaskPart =
-            isMaskRequired ? BlockInMaskParts[Part]
+            isMaskRequired ? MaskValue(Part, VecTy->getElementCount())
                            : Builder.getTrueVector(VecTy->getElementCount());
 
         Value *EVLPartTrunc = Builder.CreateTrunc(
@@ -4595,8 +4618,12 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   };
 
   auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
-    return BlockInMask ? State.get(BlockInMask, Part)
-                       : Builder.getTrueVector(EC);
+    // The outermost mask can be lowered as an all ones mask when using EVL.
+    if (isa<VPInstruction>(BlockInMask) &&
+        cast<VPInstruction>(BlockInMask)->getOpcode() == VPInstruction::ICmpULE)
+      return Builder.getTrueVector(EC);
+    else
+      return State.get(BlockInMask, Part);
   };
 
   auto EVLValue = [&](unsigned Part) -> Value * {
@@ -7389,9 +7416,6 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
 
   if (OrigLoop->getHeader() == BB) {
     if (!CM.blockNeedsPredication(BB))
-      return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
-
-    if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
 
     // Introduce the early-exit compare IV <= BTC to form header block mask.

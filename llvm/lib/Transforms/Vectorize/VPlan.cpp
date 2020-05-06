@@ -459,7 +459,8 @@ void VPlan::execute(VPTransformState *State) {
     IRBuilder<> Builder(State->CFG.PrevBB->getTerminator());
     auto *TCMO = Builder.CreateSub(TC, ConstantInt::get(TC->getType(), 1),
                                    "trip.count.minus.1");
-    Value *VTCMO = Builder.CreateVectorSplat(State->VF, TCMO, "broadcast");
+    Value *VTCMO = Builder.CreateVectorSplat({State->VF, State->IsScalable},
+                                             TCMO, "broadcast");
     for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part)
       State->set(BackedgeTakenCount, VTCMO, Part);
   }
@@ -757,15 +758,20 @@ void VPWidenRecipe::print(raw_ostream &O, const Twine &Indent,
   O << "\"  " << VPlanIngredient(&Ingredient) << "\\l\"";
 }
 
+static bool isOuterMask(VPValue *V) {
+  return isa<VPInstruction>(V) &&
+         cast<VPInstruction>(V)->getOpcode() == VPInstruction::ICmpULE;
+}
+
 void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                                     VPSlotTracker &SlotTracker) const {
   O << " +\n" << Indent << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
   O << ", ";
   VPValue *Mask = getMask();
-  if (Mask)
-    Mask->printAsOperand(O, SlotTracker);
-  else
+  if (isOuterMask(Mask))
     O << "ALL-ONES-MASK";
+  else
+    Mask->printAsOperand(O, SlotTracker);
   O << ", ";
   getEVL()->printAsOperand(O, SlotTracker);
   O << "\\l\"";
@@ -853,7 +859,8 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.CanonicalIV;
   Type *STy = CanonicalIV->getType();
   IRBuilder<> Builder(State.CFG.PrevBB->getTerminator());
-  Value *VStart = Builder.CreateVectorSplat(State.VF, CanonicalIV, "broadcast");
+  Value *VStart = Builder.CreateVectorSplat({State.VF, State.IsScalable},
+                                            CanonicalIV, "broadcast");
   for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part) {
     SmallVector<Constant *, 8> Indices;
     for (unsigned Lane = 0, VF = State.VF; Lane < VF; ++Lane)
@@ -886,10 +893,10 @@ void VPPredicatedWidenMemoryInstructionRecipe::print(
   getAddr()->printAsOperand(O, SlotTracker);
   O << ", ";
   VPValue *Mask = getMask();
-  if (Mask)
-    Mask->printAsOperand(O, SlotTracker);
-  else
+  if (isOuterMask(Mask))
     O << "ALL-ONES-MASK";
+  else
+    Mask->printAsOperand(O, SlotTracker);
   O << ", ";
   getEVL()->printAsOperand(O, SlotTracker);
   O << "\\l\"";
