@@ -2592,6 +2592,16 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
     return Builder.CreateBitCast(PartPtr, DataTy->getPointerTo(AddressSpace));
   };
 
+  auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
+    // The outermost mask can be lowered as an all ones mask when using
+    // EVL.
+    if (isa<VPInstruction>(BlockInMask) &&
+        cast<VPInstruction>(BlockInMask)->getOpcode() == VPInstruction::ICmpULE)
+      return Builder.getTrueVector(EC);
+    else
+      return BlockInMaskParts[Part];
+  };
+
   // Handle Stores:
   if (SI) {
     setDebugLocFromInst(Builder, SI);
@@ -2629,18 +2639,6 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
           Function *VPIntr = Intrinsic::getDeclaration(
               LoopVectorPreHeader->getModule(), Intrinsic::vp_store,
               {StoredValTy, VecPtr->getType()});
-
-        auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
-          // The outermost mask can be lowered as an all ones mask when using
-          // EVL.
-          if (isa<VPInstruction>(BlockInMask) &&
-              cast<VPInstruction>(BlockInMask)->getOpcode() ==
-                  VPInstruction::ICmpULE)
-            return Builder.getTrueVector(EC);
-          else
-            return BlockInMaskParts[Part];
-        };
-
           Value *BlockInMaskPart =
               isMaskRequired
                   ? MaskValue(Part, StoredValTy->getElementCount())
@@ -2685,18 +2683,6 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
 
         VectorType *VecTy =
             cast<VectorType>(VecPtr->getType()->getPointerElementType());
-
-        auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
-          // The outermost mask can be lowered as an all ones mask when using
-          // EVL.
-          if (isa<VPInstruction>(BlockInMask) &&
-              cast<VPInstruction>(BlockInMask)->getOpcode() ==
-                  VPInstruction::ICmpULE)
-            return Builder.getTrueVector(EC);
-          else
-            return BlockInMaskParts[Part];
-        };
-
         Value *BlockInMaskPart =
             isMaskRequired ? MaskValue(Part, VecTy->getElementCount())
                            : Builder.getTrueVector(VecTy->getElementCount());
@@ -7231,6 +7217,7 @@ void LoopVectorizationPlanner::executePlan(InnerLoopVectorizer &ILV,
   State.CFG.PrevBB = ILV.createVectorizedLoopSkeleton();
   State.TripCount = ILV.getOrCreateTripCount(nullptr);
   State.CanonicalIV = ILV.Induction;
+  State.PreferPredicatedVectorOps = ILV.preferPredicatedVectorOps();
 
   //===------------------------------------------------===//
   //

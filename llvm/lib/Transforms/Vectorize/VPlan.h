@@ -250,6 +250,9 @@ struct VPTransformState {
   // Is this scalable vectorization?
   bool IsScalable;
 
+  // Generate predicated vector intrinsics?
+  bool PreferPredicatedVectorOps;
+
   /// Hold the indices to generate specific scalar instructions. Null indicates
   /// that all instances are to be generated, using either scalar or vector
   /// instructions.

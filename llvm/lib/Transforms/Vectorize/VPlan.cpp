@@ -28,9 +28,12 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
 #include "llvm/Support/Casting.h"
@@ -863,9 +866,39 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
                                             CanonicalIV, "broadcast");
   for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part) {
     SmallVector<Constant *, 8> Indices;
-    for (unsigned Lane = 0, VF = State.VF; Lane < VF; ++Lane)
-      Indices.push_back(ConstantInt::get(STy, Part * VF + Lane));
-    Constant *VStep = ConstantVector::get(Indices);
+    Value *VStep = nullptr;
+    if (!State.IsScalable) {
+      for (unsigned Lane = 0, VF = State.VF; Lane < VF; ++Lane)
+        Indices.push_back(ConstantInt::get(STy, Part * VF + Lane));
+      VStep = ConstantVector::get(Indices);
+    } else {
+      // FIXME: For predicated vectorization if interleaving is enabled, each
+      // part will work on EVL lanes, which means the lanes for part Part will
+      // start from index (Part * EVL/*of previous part*/) rather than (Part *
+      // VF) or (Part * Vscale * VF) for scalable vectors.
+      // For now, since we do not support interleaving for predicated
+      // vectorization, instruction for (Part * EVL) is 0 and not generated.
+      // Note that, if interleaving is forced with predicated vectorizations the
+      // loop vectorizer would have already bailed out.
+      VStep = Builder.CreateIntrinsic(
+          Intrinsic::experimental_vector_stepvector,
+          VectorType::get(STy, {State.VF, State.IsScalable}), {}, nullptr,
+          "stepvector");
+      // If not using predicated vector ops, generate instructions for scalable
+      // vectors equivalent to Part * VF + Lane.
+      if (!State.PreferPredicatedVectorOps) {
+        Value *Vscale = Builder.CreateIntrinsic(
+            Intrinsic::vscale, Type::getInt32Ty(Builder.getContext()), {},
+            nullptr, "vscale");
+        // Actual VF is vscale x VF, so generate a splat of (Part * vscale * VF)
+        Value *VFxVscale =
+            Builder.CreateMul(ConstantInt::get(STy, Part * State.VF), Vscale);
+        Value *SplatVFxVscale =
+            Builder.CreateVectorSplat({State.VF, State.IsScalable}, VFxVscale);
+        // Finally add to step vector, equivalent to Part * VF + Lane.
+        VStep = Builder.CreateAdd(VStep, SplatVFxVscale);
+      }
+    }
     // Add the consecutive indices to the vector value.
     Value *CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
     State.set(getVPValue(), CanonicalVectorIV, Part);
