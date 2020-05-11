@@ -5,3 +5,4 @@ ninja check-llvm-debuginfo-riscv
 ninja check-llvm-mc-riscv
 ninja check-llvm-object-riscv
 ninja check-llvm-transforms-simplifycfg-riscv
+ninja check-llvm-transforms-loopvectorize
