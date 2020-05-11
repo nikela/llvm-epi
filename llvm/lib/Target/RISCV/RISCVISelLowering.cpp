@@ -1324,11 +1324,16 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   }
   case Intrinsic::vp_select: {
-    VOpsPerm = {3, 1, 2};
+    VOpsPerm = {2, 3, 1};
     MaskOpNo = -1;
     EVLOpNo = 4;
     IsMasked = false;
-    if (Op.getValueType().getVectorElementType() != MVT::i1) {
+
+    const EVT &ElementType = Op.getValueType().getVectorElementType();
+    if (ElementType.isFloatingPoint()) {
+      EPIIntNo = Intrinsic::epi_vfmerge;
+      break;
+    } else if (ElementType != MVT::i1) {
       EPIIntNo = Intrinsic::epi_vmerge;
       break;
     }
