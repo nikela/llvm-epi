@@ -139,13 +139,13 @@ define void @test_vsetvl_interleave_vlmul(<vscale x 1 x double>* %vm1, <vscale x
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e64,m1
 ; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e64,m2
-; CHECK-O0-NEXT:    vfadd.vv v2, v2, v2
+; CHECK-O0-NEXT:    vfadd.vv v4, v2, v2
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a1, a2, e64,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a0)
 ; CHECK-O0-NEXT:    vsetvli a1, a2, e64,m2
-; CHECK-O0-NEXT:    vse.v v2, (a0)
+; CHECK-O0-NEXT:    vse.v v4, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_interleave_vlmul:
@@ -157,13 +157,13 @@ define void @test_vsetvl_interleave_vlmul(<vscale x 1 x double>* %vm1, <vscale x
 ; CHECK-O2-NEXT:    vsetvli a0, a2, e64,m1
 ; CHECK-O2-NEXT:    vfadd.vv v1, v1, v1
 ; CHECK-O2-NEXT:    vsetvli a0, a2, e64,m2
-; CHECK-O2-NEXT:    vfadd.vv v2, v2, v2
+; CHECK-O2-NEXT:    vfadd.vv v4, v2, v2
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a1, a2, e64,m1
 ; CHECK-O2-NEXT:    vse.v v1, (a0)
 ; CHECK-O2-NEXT:    vsetvli a1, a2, e64,m2
-; CHECK-O2-NEXT:    vse.v v2, (a0)
+; CHECK-O2-NEXT:    vse.v v4, (a0)
 ; CHECK-O2-NEXT:    ret
 {
   %gvl_m1 = call i64 @llvm.epi.vsetvl(

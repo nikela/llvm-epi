@@ -348,7 +348,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    vsrl.vv v28, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vsll.vv v2, v2, v4, v0.t
+; CHECK-O0-NEXT:    vsll.vv v30, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    vse.v v6, (a3), v0.t
@@ -387,7 +387,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    vse.v v28, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v2, (a3), v0.t
+; CHECK-O0-NEXT:    vse.v v30, (a3), v0.t
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp)
 ; CHECK-O0-NEXT:    ld ra, 40(sp)
@@ -413,7 +413,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O2-NEXT:    vxor.vv v24, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vsra.vv v26, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vsrl.vv v28, v2, v4, v0.t
-; CHECK-O2-NEXT:    vsll.vv v2, v2, v4, v0.t
+; CHECK-O2-NEXT:    vsll.vv v30, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vse.v v6, (a0), v0.t
 ; CHECK-O2-NEXT:    vse.v v16, (a0), v0.t
 ; CHECK-O2-NEXT:    vse.v v18, (a0), v0.t
@@ -426,7 +426,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O2-NEXT:    vse.v v24, (a0), v0.t
 ; CHECK-O2-NEXT:    vse.v v26, (a0), v0.t
 ; CHECK-O2-NEXT:    vse.v v28, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v2, (a0), v0.t
+; CHECK-O2-NEXT:    vse.v v30, (a0), v0.t
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 

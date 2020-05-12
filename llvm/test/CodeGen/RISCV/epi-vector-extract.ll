@@ -157,9 +157,9 @@ define signext i64 @extract_nxv8i64(<vscale x 8 x i64> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8
-; CHECK-NEXT:    vslidedown.vx v16, v16, a0
+; CHECK-NEXT:    vslidedown.vx v8, v16, a0
 ; CHECK-NEXT:    vsetvli zero, zero, e64,m1
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %elem = extractelement <vscale x 8 x i64> %v, i64 %idx
@@ -170,9 +170,9 @@ define signext i32 @extract_nxv16i32(<vscale x 16 x i32> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8
-; CHECK-NEXT:    vslidedown.vx v16, v16, a0
+; CHECK-NEXT:    vslidedown.vx v8, v16, a0
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %elem = extractelement <vscale x 16 x i32> %v, i64 %idx
@@ -183,9 +183,9 @@ define signext i16 @extract_nxv32i16(<vscale x 32 x i16> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv32i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8
-; CHECK-NEXT:    vslidedown.vx v16, v16, a0
+; CHECK-NEXT:    vslidedown.vx v8, v16, a0
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %elem = extractelement <vscale x 32 x i16> %v, i64 %idx
