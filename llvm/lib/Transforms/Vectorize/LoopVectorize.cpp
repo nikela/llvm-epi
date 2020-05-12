@@ -145,6 +145,7 @@
 #include "llvm/Transforms/Utils/SizeOpts.h"
 #include "llvm/Transforms/Vectorize/LoopVectorizationLegality.h"
 #include <algorithm>
+#include <bits/stdint-uintn.h>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -4599,6 +4600,10 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       return {Intrinsic::vp_fneg, true};
     case Intrinsic::fma:
       return {Intrinsic::vp_fma, true};
+    case Instruction::SExt:
+      return {Intrinsic::vp_sext, false};
+    case Instruction::ZExt:
+      return {Intrinsic::vp_zext, false};
     }
     return {Intrinsic::not_intrinsic, false};
   };
@@ -4658,6 +4663,31 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       Value *AllFalse = Builder.getFalseVector(OpTy->getElementCount());
       Value *V = Builder.CreateSelect(MaskArg, C, AllFalse);
 
+      VectorLoopValueMap.setVectorValue(&I, Part, V);
+      addMetadata(V, &I);
+    }
+    return;
+  }
+
+  if (Opcode == Instruction::SExt || Opcode == Instruction::ZExt) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+
+    assert(isa<IntegerType>(CI->getType()) && "Invalid destination Int type.");
+    IntegerType *DestElemTy = cast<IntegerType>(CI->getType());
+    IntegerType *SrcElemTy = cast<IntegerType>(CI->getOperand(0)->getType());
+    assert(DestElemTy->getBitWidth() > SrcElemTy->getBitWidth() &&
+           "Cannot extend to a smaller size.");
+
+    for (unsigned Part = 0; Part < UF; ++Part) {
+      Value *SrcVal = getOrCreateVectorValue(CI->getOperand(0), Part);
+      VectorType *SrcTy = cast<VectorType>(SrcVal->getType());
+      VectorType *DestTy =
+          VectorType::get(DestElemTy, SrcTy->getElementCount());
+      Value *V = Builder.CreateIntrinsic(
+          VPIntrInstr(CI->getOpcode()).Intr, {DestTy, SrcTy},
+          {SrcVal, MaskValue(Part, DestTy->getElementCount()), EVLValue(Part)},
+          nullptr, "vp.cast");
       VectorLoopValueMap.setVectorValue(&I, Part, V);
       addMetadata(V, &I);
     }

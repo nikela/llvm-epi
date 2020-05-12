@@ -1308,6 +1308,21 @@ def int_vp_select : Intrinsic<[ llvm_anyvector_ty ],
                               [ IntrNoMem, IntrNoSync, IntrWillReturn
                                 /*, Passthru<2>, Mask<0>, VectorLength<3>*/ ]>;
 
+// Extension 
+def int_vp_sext : Intrinsic<[ llvm_anyvector_ty],
+                            [ llvm_anyvector_ty,
+                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                              llvm_i32_ty ],
+                            [ IntrNoMem, IntrNoSync, IntrWillReturn,
+                              /*Mask<1>, VectorLength<2>*/ ]>;
+
+def int_vp_zext : Intrinsic<[ llvm_anyvector_ty],
+                            [ llvm_anyvector_ty,
+                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                              llvm_i32_ty ],
+                            [ IntrNoMem, IntrNoSync, IntrWillReturn,
+                              /*Mask<1>, VectorLength<2>*/ ]>;
+
 // END FIXME: TO BE REPLACED
 
 // Binary operators
