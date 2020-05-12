@@ -106,8 +106,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsgnjn.vv v5, v5, v5
 ; CHECK-NEXT:    vfadd.vv v21, v16, v19
 ; CHECK-NEXT:    lui a0, %hi(.LCPI0_0)
-; CHECK-NEXT:    addi a0, a0, %lo(.LCPI0_0)
-; CHECK-NEXT:    fld ft0, 0(a0)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a0)
 ; CHECK-NEXT:    vfsub.vv v8, v1, v21
 ; CHECK-NEXT:    vfsub.vv v7, v1, v7
 ; CHECK-NEXT:    vfsub.vv v16, v19, v16
@@ -217,8 +216,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    addi a1, zero, 208
 ; CHECK-NEXT:    mul a1, s2, a1
 ; CHECK-NEXT:    lui a2, %hi(.LCPI0_1)
-; CHECK-NEXT:    addi a2, a2, %lo(.LCPI0_1)
-; CHECK-NEXT:    fld ft0, 0(a2)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_1)(a2)
 ; CHECK-NEXT:    add a1, s3, a1
 ; CHECK-NEXT:    vsxe.v v18, (a1), v1
 ; CHECK-NEXT:    vfadd.vv v17, v22, v19
@@ -241,16 +239,14 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfmacc.vf v4, ft0, v23
 ; CHECK-NEXT:    vfmacc.vf v3, ft0, v20
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_2)
-; CHECK-NEXT:    addi a1, a1, %lo(.LCPI0_2)
-; CHECK-NEXT:    fld ft0, 0(a1)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_2)(a1)
 ; CHECK-NEXT:    vsxe.v v16, (a0), v1
 ; CHECK-NEXT:    vsxe.v v1, (a0), v1
 ; CHECK-NEXT:    vfsgnjn.vv v6, v1, v1
 ; CHECK-NEXT:    vfmsac.vf v5, ft0, v1
 ; CHECK-NEXT:    vfmacc.vf v7, ft0, v1
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_3)
-; CHECK-NEXT:    addi a1, a1, %lo(.LCPI0_3)
-; CHECK-NEXT:    fld ft0, 0(a1)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_3)(a1)
 ; CHECK-NEXT:    vfsgnjn.vv v5, v5, v5
 ; CHECK-NEXT:    vfsub.vv v5, v6, v5
 ; CHECK-NEXT:    vfadd.vv v6, v7, v1

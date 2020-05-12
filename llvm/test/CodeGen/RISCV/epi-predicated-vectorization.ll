@@ -8,8 +8,7 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    blt a0, a5, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    lui a5, %hi(.LCPI0_0)
-; CHECK-NEXT:    addi a5, a5, %lo(.LCPI0_0)
-; CHECK-NEXT:    fld ft0, 0(a5)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a5)
 ; CHECK-NEXT:    mv a5, zero
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a6, a0, 32
