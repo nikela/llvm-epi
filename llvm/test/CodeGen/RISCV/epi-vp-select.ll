@@ -260,8 +260,8 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-NEXT:    vmxor.mm v0, v16, v1
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m2
 ; CHECK-O0-NEXT:    vmv.v.i v2, 0
-; CHECK-O0-NEXT:    vmerge.vim v2, v2, 1, v0
-; CHECK-O0-NEXT:    vse.v v2, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
@@ -274,8 +274,8 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    vmxor.mm v0, v16, v1
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e64,m2
 ; CHECK-O2-NEXT:    vmv.v.i v2, 0
-; CHECK-O2-NEXT:    vmerge.vim v2, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O2-NEXT:    vse.v v4, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 
