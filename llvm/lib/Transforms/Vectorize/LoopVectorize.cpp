@@ -8769,47 +8769,46 @@ LoopVectorizeResult LoopVectorizePass::runImpl(
 
 PreservedAnalyses LoopVectorizePass::run(Function &F,
                                          FunctionAnalysisManager &AM) {
-  auto &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
-  auto &LI = AM.getResult<LoopAnalysis>(F);
-  auto &TTI = AM.getResult<TargetIRAnalysis>(F);
-  auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
-  auto &BFI = AM.getResult<BlockFrequencyAnalysis>(F);
-  auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
-  auto &AA = AM.getResult<AAManager>(F);
-  auto &AC = AM.getResult<AssumptionAnalysis>(F);
-  auto &DB = AM.getResult<DemandedBitsAnalysis>(F);
-  auto &ORE = AM.getResult<OptimizationRemarkEmitterAnalysis>(F);
-  MemorySSA *MSSA = EnableMSSALoopDependency
-                        ? &AM.getResult<MemorySSAAnalysis>(F).getMSSA()
-                        : nullptr;
+    auto &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
+    auto &LI = AM.getResult<LoopAnalysis>(F);
+    auto &TTI = AM.getResult<TargetIRAnalysis>(F);
+    auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
+    auto &BFI = AM.getResult<BlockFrequencyAnalysis>(F);
+    auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
+    auto &AA = AM.getResult<AAManager>(F);
+    auto &AC = AM.getResult<AssumptionAnalysis>(F);
+    auto &DB = AM.getResult<DemandedBitsAnalysis>(F);
+    auto &ORE = AM.getResult<OptimizationRemarkEmitterAnalysis>(F);
+    MemorySSA *MSSA = EnableMSSALoopDependency
+                          ? &AM.getResult<MemorySSAAnalysis>(F).getMSSA()
+                          : nullptr;
 
-  auto &LAM = AM.getResult<LoopAnalysisManagerFunctionProxy>(F).getManager();
-  std::function<const LoopAccessInfo &(Loop &)> GetLAA =
-      [&](Loop &L) -> const LoopAccessInfo & {
-    LoopStandardAnalysisResults AR = {AA, AC, DT, LI, SE, TLI, TTI, MSSA};
-    return LAM.getResult<LoopAccessAnalysis>(L, AR);
-  };
-  const ModuleAnalysisManager &MAM =
-      AM.getResult<ModuleAnalysisManagerFunctionProxy>(F).getManager();
-  ProfileSummaryInfo *PSI =
-      MAM.getCachedResult<ProfileSummaryAnalysis>(*F.getParent());
-  LoopVectorizeResult Result =
-      runImpl(F, SE, LI, TTI, DT, BFI, &TLI, DB, AA, AC, GetLAA, ORE, PSI);
-  if (!Result.MadeAnyChange)
-    return PreservedAnalyses::all();
-  PreservedAnalyses PA;
+    auto &LAM = AM.getResult<LoopAnalysisManagerFunctionProxy>(F).getManager();
+    std::function<const LoopAccessInfo &(Loop &)> GetLAA =
+        [&](Loop &L) -> const LoopAccessInfo & {
+      LoopStandardAnalysisResults AR = {AA, AC, DT, LI, SE, TLI, TTI, MSSA};
+      return LAM.getResult<LoopAccessAnalysis>(L, AR);
+    };
+    auto &MAMProxy = AM.getResult<ModuleAnalysisManagerFunctionProxy>(F);
+    ProfileSummaryInfo *PSI =
+        MAMProxy.getCachedResult<ProfileSummaryAnalysis>(*F.getParent());
+    LoopVectorizeResult Result =
+        runImpl(F, SE, LI, TTI, DT, BFI, &TLI, DB, AA, AC, GetLAA, ORE, PSI);
+    if (!Result.MadeAnyChange)
+      return PreservedAnalyses::all();
+    PreservedAnalyses PA;
 
-  // We currently do not preserve loopinfo/dominator analyses with outer loop
-  // vectorization. Until this is addressed, mark these analyses as preserved
-  // only for non-VPlan-native path.
-  // TODO: Preserve Loop and Dominator analyses for VPlan-native path.
-  if (!EnableVPlanNativePath) {
-    PA.preserve<LoopAnalysis>();
-    PA.preserve<DominatorTreeAnalysis>();
-  }
-  PA.preserve<BasicAA>();
-  PA.preserve<GlobalsAA>();
-  if (!Result.MadeCFGChange)
-    PA.preserveSet<CFGAnalyses>();
-  return PA;
+    // We currently do not preserve loopinfo/dominator analyses with outer loop
+    // vectorization. Until this is addressed, mark these analyses as preserved
+    // only for non-VPlan-native path.
+    // TODO: Preserve Loop and Dominator analyses for VPlan-native path.
+    if (!EnableVPlanNativePath) {
+      PA.preserve<LoopAnalysis>();
+      PA.preserve<DominatorTreeAnalysis>();
+    }
+    PA.preserve<BasicAA>();
+    PA.preserve<GlobalsAA>();
+    if (!Result.MadeCFGChange)
+      PA.preserveSet<CFGAnalyses>();
+    return PA;
 }
