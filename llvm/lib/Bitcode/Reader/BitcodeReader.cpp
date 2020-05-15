@@ -1469,6 +1469,8 @@ static Attribute::AttrKind getAttrFromCode(uint64_t Code) {
     return Attribute::NoCfCheck;
   case bitc::ATTR_KIND_NO_UNWIND:
     return Attribute::NoUnwind;
+  case bitc::ATTR_KIND_NULL_POINTER_IS_VALID:
+    return Attribute::NullPointerIsValid;
   case bitc::ATTR_KIND_OPT_FOR_FUZZING:
     return Attribute::OptForFuzzing;
   case bitc::ATTR_KIND_OPTIMIZE_FOR_SIZE:
@@ -1654,7 +1656,7 @@ Error BitcodeReader::parseAttributeGroupBlock() {
         }
       }
 
-      UpgradeFramePointerAttributes(B);
+      UpgradeAttributes(B);
       MAttributeGroups[GrpID] = AttributeList::get(Context, Idx, B);
       break;
     }
@@ -4920,7 +4922,9 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       MaybeAlign Align;
       if (Error Err = parseAlignmentValue(Record[OpNum], Align))
         return Err;
-      I = new StoreInst(Val, Ptr, Record[OpNum + 1], Align);
+      if (!Align)
+        Align = TheModule->getDataLayout().getABITypeAlign(Val->getType());
+      I = new StoreInst(Val, Ptr, Record[OpNum + 1], *Align);
       InstructionList.push_back(I);
       break;
     }
@@ -4953,7 +4957,9 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       MaybeAlign Align;
       if (Error Err = parseAlignmentValue(Record[OpNum], Align))
         return Err;
-      I = new StoreInst(Val, Ptr, Record[OpNum + 1], Align, Ordering, SSID);
+      if (!Align)
+        return error("Alignment missing from atomic store");
+      I = new StoreInst(Val, Ptr, Record[OpNum + 1], *Align, Ordering, SSID);
       InstructionList.push_back(I);
       break;
     }
