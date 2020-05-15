@@ -145,7 +145,6 @@
 #include "llvm/Transforms/Utils/SizeOpts.h"
 #include "llvm/Transforms/Vectorize/LoopVectorizationLegality.h"
 #include <algorithm>
-#include <bits/stdint-uintn.h>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -4609,7 +4608,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     case Instruction::Trunc:
       return {Intrinsic::vp_trunc, false};
     case Instruction::FPTrunc:
-      return {Intrinsic::vp_trunc, true};
+      return {Intrinsic::vp_fptrunc, true};
     case Instruction::FPToUI:
       return {Intrinsic::vp_fptoui, true};
     case Instruction::FPToSI:

@@ -1355,10 +1355,10 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]
                                   llvm_i32_ty ]>;
 
   def int_vp_fpext : Intrinsic<[ llvm_anyvector_ty ],
-                                [ llvm_anyvector_ty,
-                                  llvm_metadata_ty,
-                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                  llvm_i32_ty ]>;
+                               [ llvm_anyvector_ty,
+                                 llvm_metadata_ty,
+                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                 llvm_i32_ty ]>;
 }
                                 
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ] in {
@@ -1377,11 +1377,11 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ]
                                   llvm_i32_ty ]>;
 
   def int_vp_fptrunc : Intrinsic<[ llvm_anyvector_ty ],
-                                [ llvm_anyvector_ty,
-                                  llvm_metadata_ty,
-                                  llvm_metadata_ty,
-                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                  llvm_i32_ty ]>;
+                                 [ llvm_anyvector_ty,
+                                   llvm_metadata_ty,
+                                   llvm_metadata_ty,
+                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                   llvm_i32_ty ]>;
 }
 
 // END FIXME: TO BE REPLACED
