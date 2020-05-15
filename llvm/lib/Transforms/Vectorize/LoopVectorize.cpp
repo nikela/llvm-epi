@@ -4604,6 +4604,26 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       return {Intrinsic::vp_sext, false};
     case Instruction::ZExt:
       return {Intrinsic::vp_zext, false};
+    case Instruction::FPExt:
+      return {Intrinsic::vp_fpext, true};
+    case Instruction::Trunc:
+      return {Intrinsic::vp_trunc, false};
+    case Instruction::FPTrunc:
+      return {Intrinsic::vp_trunc, true};
+    case Instruction::FPToUI:
+      return {Intrinsic::vp_fptoui, true};
+    case Instruction::FPToSI:
+      return {Intrinsic::vp_fptosi, true};
+    case Instruction::UIToFP:
+      return {Intrinsic::vp_uitofp, true};
+    case Instruction::SIToFP:
+      return {Intrinsic::vp_sitofp, true};
+    case Instruction::IntToPtr:
+      return {Intrinsic::vp_inttoptr, false};
+    case Instruction::PtrToInt:
+      return {Intrinsic::vp_ptrtoint, false};
+    case Instruction::BitCast:
+      return {Intrinsic::vp_bitcast, false};
     }
     return {Intrinsic::not_intrinsic, false};
   };
@@ -4622,8 +4642,32 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     return Builder.CreateTrunc(EVLPart, Type::getInt32Ty(Builder.getContext()));
   };
 
+  auto CreateCast = [&](CastInst *CI, Value *Round, Value *Except) {
+    for (unsigned Part = 0; Part < UF; ++Part) {
+      Value *SrcVal = getOrCreateVectorValue(CI->getOperand(0), Part);
+      VectorType *SrcTy = cast<VectorType>(SrcVal->getType());
+      VectorType *DestTy =
+          VectorType::get(CI->getType(), SrcTy->getElementCount());
+      SmallVector<Value *, 5> Ops;
+      Ops.push_back(SrcVal);
+      if (Round)
+        Ops.push_back(Round);
+      if (Except)
+        Ops.push_back(Except);
+      Ops.push_back(MaskValue(Part, DestTy->getElementCount()));
+      Ops.push_back(EVLValue(Part));
+      Value *V =
+          Builder.CreateIntrinsic(VPIntrInstr(CI->getOpcode()).Intr,
+                                  {DestTy, SrcTy}, Ops, nullptr, "vp.cast");
+      VectorLoopValueMap.setVectorValue(&I, Part, V);
+      addMetadata(V, &I);
+    }
+
+  };
+
   auto Opcode = I.getOpcode();
 
+  //===------------------- compare instructions ---------------------------===//
   if (Opcode == Instruction::ICmp || Opcode == Instruction::FCmp) {
     // Widen compares. Generate vector compares.
     bool FCmp = (I.getOpcode() == Instruction::FCmp);
@@ -4669,34 +4713,107 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     return;
   }
 
-  if (Opcode == Instruction::SExt || Opcode == Instruction::ZExt) {
+  assert(VPIntrInstr(Opcode).Intr != Intrinsic::not_intrinsic &&
+         "Opcode does not have predicated vector intrinsic support.");
+
+  //===------------------- Int-to-Int cast instructions -------------------===//
+  if (Opcode == Instruction::SExt || Opcode == Instruction::ZExt ||
+      Opcode == Instruction::Trunc) {
     auto *CI = cast<CastInst>(&I);
     setDebugLocFromInst(Builder, CI);
 
     assert(isa<IntegerType>(CI->getType()) && "Invalid destination Int type.");
     IntegerType *DestElemTy = cast<IntegerType>(CI->getType());
     IntegerType *SrcElemTy = cast<IntegerType>(CI->getOperand(0)->getType());
-    assert(DestElemTy->getBitWidth() > SrcElemTy->getBitWidth() &&
-           "Cannot extend to a smaller size.");
-
-    for (unsigned Part = 0; Part < UF; ++Part) {
-      Value *SrcVal = getOrCreateVectorValue(CI->getOperand(0), Part);
-      VectorType *SrcTy = cast<VectorType>(SrcVal->getType());
-      VectorType *DestTy =
-          VectorType::get(DestElemTy, SrcTy->getElementCount());
-      Value *V = Builder.CreateIntrinsic(
-          VPIntrInstr(CI->getOpcode()).Intr, {DestTy, SrcTy},
-          {SrcVal, MaskValue(Part, DestTy->getElementCount()), EVLValue(Part)},
-          nullptr, "vp.cast");
-      VectorLoopValueMap.setVectorValue(&I, Part, V);
-      addMetadata(V, &I);
-    }
-    return;
+    if (Opcode == Instruction::Trunc)
+      assert(DestElemTy->getBitWidth() < SrcElemTy->getBitWidth() &&
+             "Cannot truncate to a larger size.");
+    else
+      assert(DestElemTy->getBitWidth() > SrcElemTy->getBitWidth() &&
+             "Cannot extend to a smaller size.");
+    return CreateCast(CI, nullptr, nullptr);
   }
 
-  assert(VPIntrInstr(Opcode).Intr != Intrinsic::not_intrinsic &&
-         "Opcode does not have predicated vector intrinsic support.");
+  //===------------------- Float-to-Float cast instructions ---------------===//
+  if (Opcode == Instruction::FPExt || Opcode == Instruction::FPTrunc) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+    Type *DestElemTy = CI->getType();
+    Type *SrcElemTy = CI->getOperand(0)->getType();
+    assert(DestElemTy->isFloatingPointTy() && SrcElemTy->isFloatingPointTy() &&
+           "Invalid destination/source type for float extension.");
+    if (Opcode == Instruction::FPTrunc)
+      assert(DestElemTy->getTypeID() < SrcElemTy->getTypeID() &&
+             "Cannot extend to a larger size.");
+    else
+      assert(DestElemTy->getTypeID() > SrcElemTy->getTypeID() &&
+             "Cannot extend to a smaller size.");
+    Value *Except = getConstrainedFPExcept(Builder.getContext(),
+                                           fp::ExceptionBehavior::ebIgnore);
+    Value *Round =
+        Opcode == Instruction::FPTrunc
+            ? getConstrainedFPRounding(Builder.getContext(),
+                                       RoundingMode::NearestTiesToEven)
+            : nullptr;
+    return CreateCast(CI, Round, Except);
+  }
 
+  //===------------------- Float-to-Int cast instructions -----------------===//
+  if (Opcode == Instruction::FPToUI || Opcode == Instruction::FPToSI) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+    Type *DestElemTy = CI->getType();
+    Type *SrcElemTy = CI->getOperand(0)->getType();
+    assert(DestElemTy->isIntegerTy() && SrcElemTy->isFloatingPointTy() &&
+           "Invalid destination/source type for float to int cast.");
+    Value *Except = getConstrainedFPExcept(Builder.getContext(),
+                                           fp::ExceptionBehavior::ebIgnore);
+    return CreateCast(CI, nullptr, Except);
+  }
+
+  //===------------------- Int-to-Float cast instructions -----------------===//
+  if (Opcode == Instruction::UIToFP || Opcode == Instruction::SIToFP) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+    Type *DestElemTy = CI->getType();
+    Type *SrcElemTy = CI->getOperand(0)->getType();
+    assert(SrcElemTy->isIntegerTy() && DestElemTy->isFloatingPointTy() &&
+           "Invalid destination/source type for float to int cast.");
+    Value *Except = getConstrainedFPExcept(Builder.getContext(),
+                                           fp::ExceptionBehavior::ebIgnore);
+    Value *Round = getConstrainedFPRounding(Builder.getContext(),
+                                            RoundingMode::NearestTiesToEven);
+    return CreateCast(CI, Round, Except);
+  }
+
+  //===------------------- Int-Ptr cast instructions ----------------------===//
+  if (Opcode == Instruction::IntToPtr || Opcode == Instruction::PtrToInt) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+    Type *DestElemTy = CI->getType();
+    Type *SrcElemTy = CI->getOperand(0)->getType();
+    if (Opcode == Instruction::IntToPtr)
+      assert(SrcElemTy->isIntegerTy() && DestElemTy->isPointerTy() &&
+             "Invalid destination/source type for int to ptr cast.");
+    else
+      assert(DestElemTy->isIntegerTy() && SrcElemTy->isPointerTy() &&
+             "Invalid destination/source type for ptr to int cast.");
+    return CreateCast(CI, nullptr, nullptr);
+  }
+
+  //===------------------- bitcast cast instructions ----------------------===//
+  if (Opcode == Instruction::BitCast) {
+    auto *CI = cast<CastInst>(&I);
+    setDebugLocFromInst(Builder, CI);
+    Type *DestElemTy = CI->getType();
+    Type *SrcElemTy = CI->getOperand(0)->getType();
+    assert(SrcElemTy->getPrimitiveSizeInBits() ==
+               DestElemTy->getPrimitiveSizeInBits() &&
+           "Invalid destination/source type for bitcast.");
+    return CreateCast(CI, nullptr, nullptr);
+  }
+
+  //===------------------- Other Binary and Unary Ops ---------------------===//
   assert(((Instruction::isBinaryOp(Opcode) && I.getNumOperands() == 2) ||
           (Instruction::isUnaryOp(Opcode) && I.getNumOperands() == 1)) &&
          "Invalid number of operands.");

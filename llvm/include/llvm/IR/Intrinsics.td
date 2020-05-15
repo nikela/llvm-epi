@@ -1308,20 +1308,81 @@ def int_vp_select : Intrinsic<[ llvm_anyvector_ty ],
                               [ IntrNoMem, IntrNoSync, IntrWillReturn
                                 /*, Passthru<2>, Mask<0>, VectorLength<3>*/ ]>;
 
-// Extension 
-def int_vp_sext : Intrinsic<[ llvm_anyvector_ty],
+// Cast
+let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<1>, VectorLength<2>*/ ] in {
+def int_vp_sext : Intrinsic<[ llvm_anyvector_ty ],
                             [ llvm_anyvector_ty,
                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty ],
-                            [ IntrNoMem, IntrNoSync, IntrWillReturn,
-                              /*Mask<1>, VectorLength<2>*/ ]>;
+                              llvm_i32_ty ]>;
 
-def int_vp_zext : Intrinsic<[ llvm_anyvector_ty],
+def int_vp_zext : Intrinsic<[ llvm_anyvector_ty ],
                             [ llvm_anyvector_ty,
                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty ],
-                            [ IntrNoMem, IntrNoSync, IntrWillReturn,
-                              /*Mask<1>, VectorLength<2>*/ ]>;
+                              llvm_i32_ty ]>;
+
+def int_vp_trunc : Intrinsic<[ llvm_anyvector_ty ],
+                             [ llvm_anyvector_ty,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty ]>;
+
+def int_vp_bitcast : Intrinsic<[ llvm_anyvector_ty ],
+                               [ llvm_anyvector_ty,
+                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                 llvm_i32_ty ]>;
+
+def int_vp_ptrtoint : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+
+def int_vp_inttoptr : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+}
+
+let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ] in {
+  def int_vp_fptosi : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+   
+  def int_vp_fptoui : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+
+  def int_vp_fpext : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+}
+                                
+let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ] in {
+  def int_vp_sitofp : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+   
+  def int_vp_uitofp : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+
+  def int_vp_fptrunc : Intrinsic<[ llvm_anyvector_ty ],
+                                [ llvm_anyvector_ty,
+                                  llvm_metadata_ty,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty ]>;
+}
 
 // END FIXME: TO BE REPLACED
 
