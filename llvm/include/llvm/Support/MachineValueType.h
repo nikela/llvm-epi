@@ -142,68 +142,69 @@ namespace llvm {
       v2f64          =  87,   //    2 x f64
       v4f64          =  88,   //    4 x f64
       v8f64          =  89,   //    8 x f64
+      v16f64         =  90,   //   16 x f64
 
       FIRST_FP_FIXEDLEN_VECTOR_VALUETYPE = v2f16,
-      LAST_FP_FIXEDLEN_VECTOR_VALUETYPE = v8f64,
+      LAST_FP_FIXEDLEN_VECTOR_VALUETYPE = v16f64,
 
       FIRST_FIXEDLEN_VECTOR_VALUETYPE = v1i1,
-      LAST_FIXEDLEN_VECTOR_VALUETYPE = v8f64,
+      LAST_FIXEDLEN_VECTOR_VALUETYPE = v16f64,
 
-      nxv1i1         =  90,   // n x  1 x i1
-      nxv2i1         =  91,   // n x  2 x i1
-      nxv4i1         =  92,   // n x  4 x i1
-      nxv8i1         =  93,   // n x  8 x i1
-      nxv16i1        =  94,   // n x 16 x i1
-      nxv32i1        =  95,   // n x 32 x i1
+      nxv1i1         =  91,   // n x  1 x i1
+      nxv2i1         =  92,   // n x  2 x i1
+      nxv4i1         =  93,   // n x  4 x i1
+      nxv8i1         =  94,   // n x  8 x i1
+      nxv16i1        =  95,   // n x 16 x i1
+      nxv32i1        =  96,   // n x 32 x i1
 
-      nxv1i8         =  96,   // n x  1 x i8
-      nxv2i8         =  97,   // n x  2 x i8
-      nxv4i8         =  98,   // n x  4 x i8
-      nxv8i8         =  99,   // n x  8 x i8
-      nxv16i8        =  100,   // n x 16 x i8
-      nxv32i8        =  101,   // n x 32 x i8
+      nxv1i8         =  97,   // n x  1 x i8
+      nxv2i8         =  98,   // n x  2 x i8
+      nxv4i8         =  99,   // n x  4 x i8
+      nxv8i8         =  100,  // n x  8 x i8
+      nxv16i8        =  101,  // n x 16 x i8
+      nxv32i8        =  102,  // n x 32 x i8
 
-      nxv1i16        =  102,  // n x  1 x i16
-      nxv2i16        =  103,  // n x  2 x i16
-      nxv4i16        =  104,  // n x  4 x i16
-      nxv8i16        =  105,  // n x  8 x i16
-      nxv16i16       =  106,  // n x 16 x i16
-      nxv32i16       =  107,  // n x 32 x i16
+      nxv1i16        =  103,  // n x  1 x i16
+      nxv2i16        =  104,  // n x  2 x i16
+      nxv4i16        =  105,  // n x  4 x i16
+      nxv8i16        =  106,  // n x  8 x i16
+      nxv16i16       =  107,  // n x 16 x i16
+      nxv32i16       =  108,  // n x 32 x i16
 
-      nxv1i32        =  108,  // n x  1 x i32
-      nxv2i32        =  109,  // n x  2 x i32
-      nxv4i32        =  110,  // n x  4 x i32
-      nxv8i32        =  111,  // n x  8 x i32
-      nxv16i32       =  112,  // n x 16 x i32
-      nxv32i32       =  113,  // n x 32 x i32
+      nxv1i32        =  109,  // n x  1 x i32
+      nxv2i32        =  110,  // n x  2 x i32
+      nxv4i32        =  111,  // n x  4 x i32
+      nxv8i32        =  112,  // n x  8 x i32
+      nxv16i32       =  113,  // n x 16 x i32
+      nxv32i32       =  114,  // n x 32 x i32
 
-      nxv1i64        =  114,  // n x  1 x i64
-      nxv2i64        =  115,  // n x  2 x i64
-      nxv4i64        =  116,  // n x  4 x i64
-      nxv8i64        =  117,  // n x  8 x i64
-      nxv16i64       =  118,  // n x 16 x i64
-      nxv32i64       =  119,  // n x 32 x i64
+      nxv1i64        =  115,  // n x  1 x i64
+      nxv2i64        =  116,  // n x  2 x i64
+      nxv4i64        =  117,  // n x  4 x i64
+      nxv8i64        =  118,  // n x  8 x i64
+      nxv16i64       =  119,  // n x 16 x i64
+      nxv32i64       =  120,  // n x 32 x i64
 
       // EPIVR Masks
-      nxv16i4        =  120,   // n x 16 x i4
-      nxv32i2        =  121,   // n x 32 x i2
-      nxv64i1        =  122,   // n x 64 x i1
+      nxv16i4        =  121,   // n x 16 x i4
+      nxv32i2        =  122,   // n x 32 x i2
+      nxv64i1        =  123,   // n x 64 x i1
 
       FIRST_INTEGER_SCALABLE_VECTOR_VALUETYPE = nxv1i1,
       LAST_INTEGER_SCALABLE_VECTOR_VALUETYPE = nxv64i1,
 
-      nxv2f16        =  123,  // n x  2 x f16
-      nxv4f16        =  124,  // n x  4 x f16
-      nxv8f16        =  125,  // n x  8 x f16
-      nxv1f32        =  126,  // n x  1 x f32
-      nxv2f32        =  127,  // n x  2 x f32
-      nxv4f32        =  128,  // n x  4 x f32
-      nxv8f32        =  129,  // n x  8 x f32
-      nxv16f32       =  130,  // n x 16 x f32
-      nxv1f64        =  131,  // n x  1 x f64
-      nxv2f64        =  132,  // n x  2 x f64
-      nxv4f64        =  133,  // n x  4 x f64
-      nxv8f64        =  134,  // n x  8 x f64
+      nxv2f16        =  124,  // n x  2 x f16
+      nxv4f16        =  125,  // n x  4 x f16
+      nxv8f16        =  126,  // n x  8 x f16
+      nxv1f32        =  127,  // n x  1 x f32
+      nxv2f32        =  128,  // n x  2 x f32
+      nxv4f32        =  129,  // n x  4 x f32
+      nxv8f32        =  130,  // n x  8 x f32
+      nxv16f32       =  131,  // n x 16 x f32
+      nxv1f64        =  132,  // n x  1 x f64
+      nxv2f64        =  133,  // n x  2 x f64
+      nxv4f64        =  134,  // n x  4 x f64
+      nxv8f64        =  135,  // n x  8 x f64
 
       FIRST_FP_SCALABLE_VECTOR_VALUETYPE = nxv2f16,
       LAST_FP_SCALABLE_VECTOR_VALUETYPE = nxv8f64,
@@ -214,20 +215,20 @@ namespace llvm {
       FIRST_VECTOR_VALUETYPE = v1i1,
       LAST_VECTOR_VALUETYPE  = nxv8f64,
 
-      x86mmx         =  135,   // This is an X86 MMX value
+      x86mmx         =  136,   // This is an X86 MMX value
 
-      Glue           =  136,   // This glues nodes together during pre-RA sched
+      Glue           =  137,   // This glues nodes together during pre-RA sched
 
-      isVoid         =  137,   // This has no value
+      isVoid         =  138,   // This has no value
 
-      Untyped        =  138,   // This value takes a register, but has
+      Untyped        =  139,   // This value takes a register, but has
                                // unspecified type.  The register class
                                // will be determined by the opcode.
 
-      exnref         =  139,   // WebAssembly's exnref type
+      exnref         =  140,   // WebAssembly's exnref type
 
       FIRST_VALUETYPE = 1,     // This is always the beginning of the list.
-      LAST_VALUETYPE =  140,   // This always remains at the end of the list.
+      LAST_VALUETYPE =  141,   // This always remains at the end of the list.
 
       // This is the current maximum for LAST_VALUETYPE.
       // MVT::MAX_ALLOWED_VALUETYPE is used for asserts and to size bit vectors
@@ -381,7 +382,7 @@ namespace llvm {
     bool is1024BitVector() const {
       return (SimpleTy == MVT::v1024i1 || SimpleTy == MVT::v128i8 ||
               SimpleTy == MVT::v64i16  || SimpleTy == MVT::v32i32 ||
-              SimpleTy == MVT::v16i64);
+              SimpleTy == MVT::v16i64  || SimpleTy == MVT::v16f64);
     }
 
     /// Return true if this is a 2048-bit vector type.
@@ -547,6 +548,7 @@ namespace llvm {
       case v2f64:
       case v4f64:
       case v8f64:
+      case v16f64:
       case nxv1f64:
       case nxv2f64:
       case nxv4f64:
@@ -601,6 +603,7 @@ namespace llvm {
       case v16i64:
       case v16f16:
       case v16f32:
+      case v16f64:
       case nxv16i1:
       case nxv16i4:
       case nxv16i8:
@@ -823,6 +826,7 @@ namespace llvm {
       case v64i16:
       case v32i32:
       case v16i64:
+      case v16f64:
       case v32f32: return TypeSize::Fixed(1024);
       case nxv32i32:
       case nxv16i64: return TypeSize::Scalable(1024);
@@ -1032,6 +1036,7 @@ namespace llvm {
         if (NumElements == 2)  return MVT::v2f64;
         if (NumElements == 4)  return MVT::v4f64;
         if (NumElements == 8)  return MVT::v8f64;
+        if (NumElements == 16) return MVT::v16f64;
         break;
       }
       return (MVT::SimpleValueType)(MVT::INVALID_SIMPLE_VALUE_TYPE);

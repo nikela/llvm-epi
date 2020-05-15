@@ -27,8 +27,8 @@ def i16    : ValueType<16 ,  6>;   // 16-bit integer value
 def i32    : ValueType<32 ,  7>;   // 32-bit integer value
 def i64    : ValueType<64 ,  8>;   // 64-bit integer value
 def i128   : ValueType<128,  9>;   // 128-bit integer value
-def f16    : ValueType<16 ,  10>;   // 16-bit floating point value
-def f32    : ValueType<32 ,  11>;   // 34-bit floating point value
+def f16    : ValueType<16 ,  10>;  // 16-bit floating point value
+def f32    : ValueType<32 ,  11>;  // 34-bit floating point value
 def f64    : ValueType<64 , 12>;   // 64-bit floating point value
 def f80    : ValueType<80 , 13>;   // 80-bit floating point value
 def f128   : ValueType<128, 14>;   // 128-bit floating point value
@@ -114,65 +114,66 @@ def v1f64    : ValueType<64, 86>;     //    1 x f64 vector value
 def v2f64    : ValueType<128, 87>;    //    2 x f64 vector value
 def v4f64    : ValueType<256, 88>;    //    4 x f64 vector value
 def v8f64    : ValueType<512, 89>;    //    8 x f64 vector value
+def v16f64   : ValueType<1024, 90>;   //   16 x f64 vector value
 
-def nxv1i1  : ValueType<1,   90>;  // n x  1 x i1  vector value
-def nxv2i1  : ValueType<2,   91>;  // n x  2 x i1  vector value
-def nxv4i1  : ValueType<4,   92>;  // n x  4 x i1  vector value
-def nxv8i1  : ValueType<8,   93>;  // n x  8 x i1  vector value
-def nxv16i1 : ValueType<16,  94>;  // n x 16 x i1  vector value
-def nxv32i1 : ValueType<32,  95>;  // n x 32 x i1  vector value
+def nxv1i1  : ValueType<1,   91>;  // n x  1 x i1  vector value
+def nxv2i1  : ValueType<2,   92>;  // n x  2 x i1  vector value
+def nxv4i1  : ValueType<4,   93>;  // n x  4 x i1  vector value
+def nxv8i1  : ValueType<8,   94>;  // n x  8 x i1  vector value
+def nxv16i1 : ValueType<16,  95>;  // n x 16 x i1  vector value
+def nxv32i1 : ValueType<32,  96>;  // n x 32 x i1  vector value
 
-def nxv1i8  : ValueType<8,   96>;  // n x  1 x i8  vector value
-def nxv2i8  : ValueType<16,  97>;  // n x  2 x i8  vector value
-def nxv4i8  : ValueType<32,  98>;  // n x  4 x i8  vector value
-def nxv8i8  : ValueType<64,  99>;  // n x  8 x i8  vector value
-def nxv16i8 : ValueType<128, 100>;  // n x 16 x i8  vector value
-def nxv32i8 : ValueType<256, 101>;  // n x 32 x i8  vector value
+def nxv1i8  : ValueType<8,   97>;  // n x  1 x i8  vector value
+def nxv2i8  : ValueType<16,  98>;  // n x  2 x i8  vector value
+def nxv4i8  : ValueType<32,  99>;  // n x  4 x i8  vector value
+def nxv8i8  : ValueType<64,  100>; // n x  8 x i8  vector value
+def nxv16i8 : ValueType<128, 101>; // n x 16 x i8  vector value
+def nxv32i8 : ValueType<256, 102>; // n x 32 x i8  vector value
 
-def nxv1i16 : ValueType<16,  102>; // n x  1 x i16 vector value
-def nxv2i16 : ValueType<32,  103>; // n x  2 x i16 vector value
-def nxv4i16 : ValueType<64,  104>; // n x  4 x i16 vector value
-def nxv8i16 : ValueType<128, 105>; // n x  8 x i16 vector value
-def nxv16i16: ValueType<256, 106>; // n x 16 x i16 vector value
-def nxv32i16: ValueType<512, 107>; // n x 32 x i16 vector value
+def nxv1i16 : ValueType<16,  103>; // n x  1 x i16 vector value
+def nxv2i16 : ValueType<32,  104>; // n x  2 x i16 vector value
+def nxv4i16 : ValueType<64,  105>; // n x  4 x i16 vector value
+def nxv8i16 : ValueType<128, 106>; // n x  8 x i16 vector value
+def nxv16i16: ValueType<256, 107>; // n x 16 x i16 vector value
+def nxv32i16: ValueType<512, 108>; // n x 32 x i16 vector value
 
-def nxv1i32 : ValueType<32,  108>; // n x  1 x i32 vector value
-def nxv2i32 : ValueType<64,  109>; // n x  2 x i32 vector value
-def nxv4i32 : ValueType<128, 110>; // n x  4 x i32 vector value
-def nxv8i32 : ValueType<256, 111>; // n x  8 x i32 vector value
-def nxv16i32: ValueType<512, 112>; // n x 16 x i32 vector value
-def nxv32i32: ValueType<1024,113>; // n x 32 x i32 vector value
+def nxv1i32 : ValueType<32,  109>; // n x  1 x i32 vector value
+def nxv2i32 : ValueType<64,  110>; // n x  2 x i32 vector value
+def nxv4i32 : ValueType<128, 111>; // n x  4 x i32 vector value
+def nxv8i32 : ValueType<256, 112>; // n x  8 x i32 vector value
+def nxv16i32: ValueType<512, 113>; // n x 16 x i32 vector value
+def nxv32i32: ValueType<1024,114>; // n x 32 x i32 vector value
 
-def nxv1i64 : ValueType<64,  114>; // n x  1 x i64 vector value
-def nxv2i64 : ValueType<128, 115>; // n x  2 x i64 vector value
-def nxv4i64 : ValueType<256, 116>; // n x  4 x i64 vector value
-def nxv8i64 : ValueType<512, 117>; // n x  8 x i64 vector value
-def nxv16i64: ValueType<1024,118>; // n x 16 x i64 vector value
-def nxv32i64: ValueType<2048,119>; // n x 32 x i64 vector value
+def nxv1i64 : ValueType<64,  115>; // n x  1 x i64 vector value
+def nxv2i64 : ValueType<128, 116>; // n x  2 x i64 vector value
+def nxv4i64 : ValueType<256, 117>; // n x  4 x i64 vector value
+def nxv8i64 : ValueType<512, 118>; // n x  8 x i64 vector value
+def nxv16i64: ValueType<1024,119>; // n x 16 x i64 vector value
+def nxv32i64: ValueType<2048,120>; // n x 32 x i64 vector value
 
 // EPIVR Masks
-def nxv16i4 : ValueType<64, 120>;   // n x 16 x i4 vector value
-def nxv32i2 : ValueType<64, 121>;   // n x 32 x i2 vector value
-def nxv64i1 : ValueType<64, 122>;   // n x 64 x i1 vector value
+def nxv16i4 : ValueType<64, 121>;   // n x 16 x i4 vector value
+def nxv32i2 : ValueType<64, 122>;   // n x 32 x i2 vector value
+def nxv64i1 : ValueType<64, 123>;   // n x 64 x i1 vector value
 
-def nxv2f16  : ValueType<32 , 123>; // n x  2 x f16 vector value
-def nxv4f16  : ValueType<64 , 124>; // n x  4 x f16 vector value
-def nxv8f16  : ValueType<128, 125>; // n x  8 x f16 vector value
-def nxv1f32  : ValueType<32 , 126>; // n x  1 x f32 vector value
-def nxv2f32  : ValueType<64 , 127>; // n x  2 x f32 vector value
-def nxv4f32  : ValueType<128, 128>; // n x  4 x f32 vector value
-def nxv8f32  : ValueType<256, 129>; // n x  8 x f32 vector value
-def nxv16f32 : ValueType<512, 130>; // n x 16 x f32 vector value
-def nxv1f64  : ValueType<64,  131>; // n x  1 x f64 vector value
-def nxv2f64  : ValueType<128, 132>; // n x  2 x f64 vector value
-def nxv4f64  : ValueType<256, 133>; // n x  4 x f64 vector value
-def nxv8f64  : ValueType<512, 134>; // n x  8 x f64 vector value
+def nxv2f16  : ValueType<32 , 124>; // n x  2 x f16 vector value
+def nxv4f16  : ValueType<64 , 125>; // n x  4 x f16 vector value
+def nxv8f16  : ValueType<128, 126>; // n x  8 x f16 vector value
+def nxv1f32  : ValueType<32 , 127>; // n x  1 x f32 vector value
+def nxv2f32  : ValueType<64 , 128>; // n x  2 x f32 vector value
+def nxv4f32  : ValueType<128, 129>; // n x  4 x f32 vector value
+def nxv8f32  : ValueType<256, 130>; // n x  8 x f32 vector value
+def nxv16f32 : ValueType<512, 131>; // n x 16 x f32 vector value
+def nxv1f64  : ValueType<64,  132>; // n x  1 x f64 vector value
+def nxv2f64  : ValueType<128, 133>; // n x  2 x f64 vector value
+def nxv4f64  : ValueType<256, 134>; // n x  4 x f64 vector value
+def nxv8f64  : ValueType<512, 135>; // n x  8 x f64 vector value
 
-def x86mmx : ValueType<64 , 135>;   // X88 MMX value
-def FlagVT : ValueType<0  , 136>;   // Pre-RA sched glue
-def isVoid : ValueType<0  , 137>;   // Produces no value
-def untyped: ValueType<8  , 138>;   // Produces an untyped value
-def exnref: ValueType<0, 139>;      // WebAssembly's exnref type
+def x86mmx : ValueType<64 , 136>;   // X88 MMX value
+def FlagVT : ValueType<0  , 137>;   // Pre-RA sched glue
+def isVoid : ValueType<0  , 138>;   // Produces no value
+def untyped: ValueType<8  , 139>;   // Produces an untyped value
+def exnref: ValueType<0, 140>;      // WebAssembly's exnref type
 
 def token  : ValueType<0  , 248>;   // TokenTy
 def MetadataVT: ValueType<0, 249>;  // Metadata
