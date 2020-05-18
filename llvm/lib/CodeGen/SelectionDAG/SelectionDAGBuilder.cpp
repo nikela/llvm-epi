@@ -3895,7 +3895,7 @@ void SelectionDAGBuilder::visitAlloca(const AllocaInst &I) {
   uint64_t TySize = (Ty->isVectorTy() && isa<ScalableVectorType>(Ty))
                         ? 1
                         : DL.getTypeAllocSize(Ty);
-  MaybeAlign Alignment = max(DL.getPrefTypeAlign(Ty), I.getAlign());
+  MaybeAlign Alignment = std::max(DL.getPrefTypeAlign(Ty), I.getAlign());
 
   SDValue AllocSize = getValue(I.getArraySize());
 
@@ -3961,7 +3961,7 @@ void SelectionDAGBuilder::visitLoad(const LoadInst &I) {
   SDValue Ptr = getValue(SV);
 
   Type *Ty = I.getType();
-  Align Alignment = DL->getValueOrABITypeAlignment(I.getAlign(), Ty);
+  Align Alignment = I.getAlign();
 
   AAMDNodes AAInfo;
   I.getAAMetadata(AAInfo);
@@ -4156,8 +4156,7 @@ void SelectionDAGBuilder::visitStore(const StoreInst &I) {
   SDValue Root = I.isVolatile() ? getRoot() : getMemoryRoot();
   SmallVector<SDValue, 4> Chains(std::min(MaxParallelChains, NumValues));
   SDLoc dl = getCurSDLoc();
-  Align Alignment =
-      DL->getValueOrABITypeAlignment(I.getAlign(), SrcV->getType());
+  Align Alignment = I.getAlign();
   AAMDNodes AAInfo;
   I.getAAMetadata(AAInfo);
 
@@ -9520,8 +9519,7 @@ static void tryToElideArgumentCopy(
                   "object size\n");
     return;
   }
-  Align RequiredAlignment = AI->getAlign().getValueOr(
-      FuncInfo.MF->getDataLayout().getABITypeAlign(AI->getAllocatedType()));
+  Align RequiredAlignment = AI->getAlign();
   if (MFI.getObjectAlign(FixedIndex) < RequiredAlignment) {
     LLVM_DEBUG(dbgs() << "  argument copy elision failed: alignment of alloca "
                          "greater than stack argument alignment ("
