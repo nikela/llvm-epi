@@ -618,5 +618,16 @@ multiclass epi_store {
 defm int_epi_vstore : epi_store;
 defm int_epi_vstore_unordered : epi_store;
 
+// EPI Extensions
+
+class EPIZipCommon
+     : Intrinsic< [ llvm_anyvector_ty, LLVMMatchType<0> ],
+                  [ LLVMMatchType<0>, LLVMMatchType<0>, llvm_i64_ty ],
+                  [ IntrNoMem ] >;
+
+def int_epi_vzip2 : EPIZipCommon;
+def int_epi_vunzip2 : EPIZipCommon;
+def int_epi_vtrn : EPIZipCommon;
+
 } // TargetPrefix = "epi"
 
