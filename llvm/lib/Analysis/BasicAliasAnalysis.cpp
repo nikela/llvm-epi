@@ -1424,8 +1424,45 @@ AliasResult BasicAAResult::aliasGEP(
     // pointer, we know they cannot alias.
 
     // If both accesses are unknown size, we can't do anything useful here.
-    if (V1Size == LocationSize::unknown() && V2Size == LocationSize::unknown())
+    if (V1Size == LocationSize::unknown() &&
+        V2Size == LocationSize::unknown()) {
+      // However this is too pessimistic in the specific case we want a struct
+      // of scalable vectors (which is used to implement intrinsics). In this
+      // case if the UnderlyingV1 is the same as V2, the type is a pointer to a
+      // struct and the indices are <0, X> where X != 0, then this is NoAlias.
+      auto IsPointerToStruct = [](Type *Ty) {
+        return isa<PointerType>(Ty) &&
+               isa<StructType>(cast<PointerType>(Ty)->getElementType());
+      };
+
+      auto GEPIndexesField = [](const GEPOperator *GEP) {
+        if (!GEP->isInBounds() || GEP->getNumIndices() != 2 ||
+            !GEP->hasAllConstantIndices())
+          return false;
+
+        // This is unlikely but just in case.
+        if (GEP->hasAllZeroIndices())
+          return false;
+
+        auto I = GEP->idx_begin();
+        const ConstantInt *Idx0 = cast<const ConstantInt>(*I++);
+        const ConstantInt *Idx1 = cast<const ConstantInt>(*I);
+
+        if (!Idx0->isZero())
+          return false;
+        if (Idx1->isZero())
+          return false;
+
+        return true;
+      };
+
+      // FIXME: This is perhaps too specific.
+      if (UnderlyingV1 == V2 && IsPointerToStruct(UnderlyingV1->getType()) &&
+          GEPIndexesField(GEP1))
+        return NoAlias;
+
       return MayAlias;
+    }
 
     AliasResult R = aliasCheck(UnderlyingV1, LocationSize::unknown(),
                                AAMDNodes(), V2, LocationSize::unknown(),
