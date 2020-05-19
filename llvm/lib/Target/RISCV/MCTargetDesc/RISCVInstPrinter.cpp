@@ -161,6 +161,15 @@ void RISCVInstPrinter::printVTypeI(const MCInst *MI, unsigned OpNo,
   O << "e" << Sew << ",m" << Lmul;
 }
 
+void RISCVInstPrinter::printVRTupleOp(const MCInst *MI, unsigned OpNo,
+                                      const MCSubtargetInfo &STI,
+                                      raw_ostream &O) {
+  const MCOperand &MO = MI->getOperand(OpNo);
+
+  assert(MO.isReg() && "printVRTupleOp can only print register operands");
+  printRegName(O, MO.getReg());
+}
+
 void RISCVInstPrinter::printVMaskReg(const MCInst *MI, unsigned OpNo,
                                      const MCSubtargetInfo &STI,
                                      raw_ostream &O) {

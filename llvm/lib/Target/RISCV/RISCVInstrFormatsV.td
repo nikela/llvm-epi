@@ -298,3 +298,24 @@ class RVInstVSX<bits<3> nf, RISCVMOP mop, RISCVWidth width,
 
   let Uses = [VTYPE, VL];
 }
+
+// EPI extensions - We put them in CUSTOM-0 to avoid clashing with
+// the evolution of V itself
+class RVCustomInstVV<bits<6> funct6, RISCVVFormat opv, dag outs, dag ins,
+                     string opcodestr, string argstr>
+    : RVInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  bits<5> vs2;
+  bits<5> vs1;
+  bits<5> vd;
+  bit vm;
+
+  let Inst{31-26} = funct6;
+  let Inst{25} = vm;
+  let Inst{24-20} = vs2;
+  let Inst{19-15} = vs1;
+  let Inst{14-12} = opv.Value;
+  let Inst{11-7} = vd;
+  let Opcode = OPC_CUSTOM_0.Value;
+
+  let Uses = [VTYPE, VL];
+}

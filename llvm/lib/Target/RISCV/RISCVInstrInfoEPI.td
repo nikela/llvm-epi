@@ -34,6 +34,52 @@ def riscv_sign_extend_inreg : SDNode<"RISCVISD::SIGN_EXTEND_BITS_INREG",
                                       SDTCisVec<0>, SDTCisInt<0>,
                                       SDTCisInt<2>]>>;
 
+def riscv_vzip2 : SDNode<"RISCVISD::VZIP2",
+                         SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>,
+                                             SDTCisVec<1>, SDTCisInt<3>]>>;
+
+def riscv_vunzip2 : SDNode<"RISCVISD::VUNZIP2",
+                           SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>,
+                                               SDTCisVec<1>, SDTCisInt<3>]>>;
+
+def riscv_vtrn : SDNode<"RISCVISD::VTRN",
+                        SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>, SDTCisVec<1>,
+                                            SDTCisInt<3>]>>;
+
+
+//===----------------------------------------------------------------------===//
+// EPI custom instructions
+//===----------------------------------------------------------------------===//
+
+def VTupleRegAsmOperand : AsmOperandClass {
+  let Name = "RVVTupleRegOpOperand";
+  let RenderMethod = "addRegOperands";
+  let PredicateMethod = "isReg";
+  let ParserMethod = "parseTupleVRegister";
+}
+
+def VTupleRegOp: RegisterOperand<VRTuple> {
+  let ParserMatchClass = VTupleRegAsmOperand;
+  let PrintMethod = "printOperand";
+}
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
+// op vd, vs2, vs1, vm
+class VCustom_VV_VV<bits<6> funct6, RISCVVFormat opv, string opcodestr>
+    : RVCustomInstVV<funct6, opv, (outs VTupleRegOp:$vd),
+                     (ins VRegOp:$vs2, VRegOp:$vs1, VMaskOp:$vm),
+                     opcodestr, "$vd, $vs2, $vs1${vm}">;
+}
+
+// FIXME: Should we use some other predicate?
+let Predicates = [HasStdExtV] in {
+
+def VZIP2_VV : VCustom_VV_VV<0b110101, OPIVV, "vzip2.vv">;
+def VUNZIP2_VV : VCustom_VV_VV<0b110110, OPIVV, "vunzip2.vv">;
+def VTRN_VV : VCustom_VV_VV<0b110111, OPIVV, "vtrn.vv">;
+
+}
+
 //===----------------------------------------------------------------------===//
 
 class VMask<bits<1> vtype>
@@ -208,6 +254,8 @@ defset list<VectorTypeInfo> AllVectors = {
     def Vtype8xf64  : FloatVectorTypeInfo<nxv8f64,  nxv8i1,  64, VRM8, f64, FPR64>;
   }
 }
+
+defvar NoGroupVectors = !listconcat(NoGroupIntegerVectors, NoGroupFloatVectors);
 
 // This functor is used to obtain the int vector type that has the same SEW and
 // multiplier as the input parameter type
@@ -3339,5 +3387,42 @@ def : Pat<(nxv1i1 (setule (nxv1i64 VR:$rs1), (nxv1i64 VR:$rs2))),
 
 defm "" : pat_load<"E">;
 defm "" : pat_store<"E">;
+
+}
+
+//===----------------------------------------------------------------------===//
+// EPI custom instructions
+//===----------------------------------------------------------------------===//
+let Predicates = [HasStdExtV] in {
+
+let VLMul = 1, hasSideEffects = 0, mayLoad = 0, mayStore = 0,
+    usesCustomInserter = 1 in {
+
+defm PseudoVZIP2_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
+defm PseudoVUNZIP2_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
+defm PseudoVTRN_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
+
+}
+
+foreach vti = NoGroupVectors in {
+
+    def : Pat<(riscv_vzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
+                           (i64 GPR:$vl)),
+              (PseudoVZIP2_VV_M1
+               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
+
+    def : Pat<(riscv_vunzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
+                             (i64 GPR:$vl)),
+              (PseudoVUNZIP2_VV_M1
+               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
+
+    def : Pat<(riscv_vtrn (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
+                          (i64 GPR:$vl)),
+              (PseudoVTRN_VV_M1
+               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
+}
 
 }

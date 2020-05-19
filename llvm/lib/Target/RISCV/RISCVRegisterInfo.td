@@ -375,3 +375,11 @@ def VMV0 : RegisterClass<"RISCV", VMaskVT.types, 64, (add V0)> {
   let Size = 64;
   let AllowsNoRegister = 1;
 }
+
+// This pairs (V1, V2), ..., (V30, V31), (V31, V0), (V0, V1)
+def vtfirst : SubRegIndex<0, -1>;
+def vtsecond : SubRegIndex<0, -1>;
+def VSeqPairs : RegisterTuples<[vtfirst, vtsecond],
+        [(add (sequence "V%u", 1, 31), V0),
+         (rotl (add (sequence "V%u", 1, 31), V0), 1)]>;
+def VRTuple : VReg<[untyped], (add VSeqPairs), 1>;
