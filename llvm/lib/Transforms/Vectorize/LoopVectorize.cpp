@@ -1019,7 +1019,7 @@ public:
 
   /// \return An upper bound for the vectorization factor, or None if
   /// vectorization and interleaving should be avoided up front.
-  Optional<unsigned> computeMaxVF();
+  Optional<unsigned> computeMaxVF(unsigned UserVF, unsigned UserIC);
 
   /// \return True if runtime checks are required for vectorization, and false
   /// otherwise.
@@ -1256,27 +1256,27 @@ public:
 
   /// Returns true if the target machine supports masked store operation
   /// for the given \p DataType and kind of access to \p Ptr.
-  bool isLegalMaskedStore(Type *DataType, Value *Ptr, MaybeAlign Alignment) {
+  bool isLegalMaskedStore(Type *DataType, Value *Ptr, Align Alignment) {
     return Legal->isConsecutivePtr(Ptr) &&
            TTI.isLegalMaskedStore(DataType, Alignment);
   }
 
   /// Returns true if the target machine supports masked load operation
   /// for the given \p DataType and kind of access to \p Ptr.
-  bool isLegalMaskedLoad(Type *DataType, Value *Ptr, MaybeAlign Alignment) {
+  bool isLegalMaskedLoad(Type *DataType, Value *Ptr, Align Alignment) {
     return Legal->isConsecutivePtr(Ptr) &&
            TTI.isLegalMaskedLoad(DataType, Alignment);
   }
 
   /// Returns true if the target machine supports masked scatter operation
   /// for the given \p DataType.
-  bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) {
+  bool isLegalMaskedScatter(Type *DataType, Align Alignment) {
     return TTI.isLegalMaskedScatter(DataType, Alignment);
   }
 
   /// Returns true if the target machine supports masked gather operation
   /// for the given \p DataType.
-  bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) {
+  bool isLegalMaskedGather(Type *DataType, Align Alignment) {
     return TTI.isLegalMaskedGather(DataType, Alignment);
   }
 
@@ -5423,7 +5423,8 @@ bool LoopVectorizationCostModel::runtimeChecksRequired() {
   return false;
 }
 
-Optional<unsigned> LoopVectorizationCostModel::computeMaxVF() {
+Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
+                                                            unsigned UserIC) {
   if (Legal->getRuntimePointerChecking()->Need && TTI.hasBranchDivergence()) {
     // TODO: It may by useful to do since it's still likely to be dynamically
     // uniform if the target can skip.
@@ -5446,6 +5447,8 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF() {
 
   switch (ScalarEpilogueStatus) {
   case CM_ScalarEpilogueAllowed: {
+    if (UserVF) return UserVF;
+
     Optional<unsigned> MaxVF = isScalable() ? computeFeasibleScalableMaxVF()
                                             : computeFeasibleMaxVF(TC);
     if (!MaxVF)
@@ -5490,17 +5493,23 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF() {
     InterleaveInfo.invalidateGroupsRequiringScalarEpilogue();
   }
 
-  Optional<unsigned> MaxVF =
-      isScalable() ? computeFeasibleScalableMaxVF() : computeFeasibleMaxVF(TC);
-  if (!MaxVF) {
-    reportVectorizationFailure(
-        "Cannot vectorize operations on unsupported scalable vector type",
-        "Cannot vectorize operations on unsupported scalable vector type",
-        "UnsupportedScalableVectorType", ORE, TheLoop);
-    return None;
+  Optional<unsigned> MaxVF;
+  if (UserVF) {
+    MaxVF = UserVF;
+  } else {
+    MaxVF = isScalable() ? computeFeasibleScalableMaxVF()
+                         : computeFeasibleMaxVF(TC);
+    if (!MaxVF) {
+      reportVectorizationFailure(
+          "Cannot vectorize operations on unsupported scalable vector type",
+          "Cannot vectorize operations on unsupported scalable vector type",
+          "UnsupportedScalableVectorType", ORE, TheLoop);
+      return None;
+    }
   }
 
-  if (TC > 0 && TC % MaxVF.getValue() == 0) {
+  unsigned MaxVFtimesIC = UserIC ? MaxVF * UserIC : MaxVF;
+  if (TC > 0 && TC % MaxVFtimesIC == 0) {
     // Accept MaxVF if we do not have a tail.
     LLVM_DEBUG(dbgs() << "LV: No tail will remain for any chosen VF.\n");
     return MaxVF;
@@ -7124,9 +7133,10 @@ LoopVectorizationPlanner::planInVPlanNativePath(unsigned UserVF) {
   return VectorizationFactor::Disabled();
 }
 
-Optional<VectorizationFactor> LoopVectorizationPlanner::plan(unsigned UserVF) {
+Optional<VectorizationFactor> LoopVectorizationPlanner::plan(unsigned UserVF,
+                                                             unsigned UserIC) {
   assert(OrigLoop->empty() && "Inner loop expected.");
-  Optional<unsigned> MaybeMaxVF = CM.computeMaxVF();
+  Optional<unsigned> MaybeMaxVF = CM.computeMaxVF(UserVF, UserIC);
   if (!MaybeMaxVF) // Cases that should not to be vectorized nor interleaved.
     return None;
 
@@ -8386,7 +8396,7 @@ static bool processLoopInVPlanNativePath(
   // Mark the loop as already vectorized to avoid vectorizing again.
   Hints.setAlreadyVectorized();
 
-  LLVM_DEBUG(verifyFunction(*L->getHeader()->getParent()));
+  assert(!verifyFunction(*L->getHeader()->getParent(), &dbgs()));
   return true;
 }
 
@@ -8526,15 +8536,15 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   // Use the planner for vectorization.
   LoopVectorizationPlanner LVP(L, LI, TLI, TTI, &LVL, CM, IAI, PSE);
 
-  // Get user vectorization factor.
+  // Get user vectorization factor and interleave count.
   unsigned UserVF = Hints.getWidth();
+  unsigned UserIC = Hints.getInterleave();
 
   // Plan how to best vectorize, return the best VF and its cost.
-  Optional<VectorizationFactor> MaybeVF = LVP.plan(UserVF);
+  Optional<VectorizationFactor> MaybeVF = LVP.plan(UserVF, UserIC);
 
   VectorizationFactor VF = VectorizationFactor::Disabled();
   unsigned IC = 1;
-  unsigned UserIC = Hints.getInterleave();
 
   if (MaybeVF && *MaybeVF != VectorizationFactor::Disabled()) {
     VF = *MaybeVF;
@@ -8688,7 +8698,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     Hints.setAlreadyVectorized();
   }
 
-  LLVM_DEBUG(verifyFunction(*L->getHeader()->getParent()));
+  assert(!verifyFunction(*L->getHeader()->getParent()));
   return true;
 }
 
