@@ -5493,19 +5493,19 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
     InterleaveInfo.invalidateGroupsRequiringScalarEpilogue();
   }
 
-  Optional<unsigned> MaxVF;
-  if (UserVF) {
-    MaxVF = UserVF;
-  } else {
-    MaxVF = isScalable() ? computeFeasibleScalableMaxVF()
-                         : computeFeasibleMaxVF(TC);
-    if (!MaxVF) {
+  unsigned MaxVF = UserVF;
+  if (!MaxVF) {
+    Optional<unsigned> FeasibleMaxVF = isScalable()
+                                           ? computeFeasibleScalableMaxVF()
+                                           : computeFeasibleMaxVF(TC);
+    if (!FeasibleMaxVF) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
       return None;
     }
+    MaxVF = FeasibleMaxVF.getValue();
   }
 
   unsigned MaxVFtimesIC = UserIC ? MaxVF * UserIC : MaxVF;
