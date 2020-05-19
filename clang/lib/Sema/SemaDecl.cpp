@@ -7907,10 +7907,11 @@ void Sema::CheckVariableDeclarationType(VarDecl *NewVD) {
   }
 
   // EPI vector variables can't be global
-  if (T->isVectorType() &&
-      cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
-          VectorType::EPIVector &&
-      NewVD->hasGlobalStorage() && !NewVD->isStaticDataMember()) {
+  if (((T->isVectorType() &&
+        cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
+            VectorType::EPIVector) ||
+       (T->isRecordType() && T->getAsRecordDecl()->getHasEPIVectorFields())) &&
+      (NewVD->hasGlobalStorage() && !NewVD->isStaticDataMember())) {
     if (NewVD->isFileVarDecl())
       Diag(NewVD->getLocation(), diag::err_epi_decl_in_file_scope);
     else if (NewVD->isStaticLocal())
@@ -16359,7 +16360,7 @@ FieldDecl *Sema::HandleField(Scope *S, RecordDecl *Record,
     }
   }
 
-  // Do not allow EPI vectors as fields.
+  // Do not allow EPI vectors as fields in user code.
   if (T->isVectorType() &&
       cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
           VectorType::EPIVector) {

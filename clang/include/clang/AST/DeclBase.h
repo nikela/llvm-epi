@@ -1466,10 +1466,14 @@ class DeclContext {
 
     /// Represents the way this type is passed to a function.
     uint64_t ArgPassingRestrictions : 2;
+
+    /// States if this record has EPI vectors as fields.
+    // FIXME: This is not super elegant but does the job.
+    bool HasEPIVectorFields : 1;
   };
 
   /// Number of non-inherited bits in RecordDeclBitfields.
-  enum { NumRecordDeclBits = 14 };
+  enum { NumRecordDeclBits = 15 };
 
   /// Stores the bits used by OMPDeclareReductionDecl.
   /// If modified NumOMPDeclareReductionDeclBits and the accessor

@@ -371,6 +371,8 @@ bool Declarator::isDeclarationOfFunction() const {
 #define GENERIC_IMAGE_TYPE(ImgType, Id) case TST_##ImgType##_t:
 #include "clang/Basic/OpenCLImageTypes.def"
 #define EPI_VECTOR_TYPE(Scale, TypeName) case TST_EPI_##Scale##x##TypeName:
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case TST_EPI_##Scale##x##TypeName##x##TupleSize:
 #include "clang/Basic/EPITypes.def"
       return false;
 
@@ -572,9 +574,12 @@ const char *DeclSpec::getSpecifierName(DeclSpec::TST T,
   case DeclSpec::TST_##ImgType##_t: \
     return #ImgType "_t";
 #include "clang/Basic/OpenCLImageTypes.def"
-#define EPI_VECTOR_TYPE(Scale, TypeName) \
-  case DeclSpec::TST_EPI_##Scale##x##TypeName: \
+#define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
+  case DeclSpec::TST_EPI_##Scale##x##TypeName:                                 \
     return "__epi_" #Scale "x" #TypeName;
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case DeclSpec::TST_EPI_##Scale##x##TypeName##x##TupleSize:                   \
+    return "__epi_" #Scale "x" #TypeName "x" #TupleSize;
 #include "clang/Basic/EPITypes.def"
   case DeclSpec::TST_error:       return "(error)";
   }

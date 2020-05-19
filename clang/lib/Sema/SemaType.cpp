@@ -1702,6 +1702,15 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
     break;                                                                     \
   }
 
+#define EPI_TUPLE_VECTOR_TYPE(Scale, Type, TupleSize)                          \
+  case DeclSpec::TST_EPI_##Scale##x##Type##x##TupleSize: {                     \
+    QualType ElemType = EPI_ELEM_TYPE_##Type;                                  \
+    QualType VectorType =                                                      \
+        Context.getVectorType(ElemType, Scale, VectorType::EPIVector);         \
+    Result = Context.getEPITupleVectorType(VectorType, TupleSize);             \
+    break;                                                                     \
+  }
+
 #include "clang/Basic/EPITypes.def"
 #undef EPI_ELEM_TYPE_f16
 #undef EPI_ELEM_TYPE_f32
@@ -2336,9 +2345,10 @@ QualType Sema::BuildArrayType(QualType T, ArrayType::ArraySizeModifier ASM,
   }
 
   // We do not allow building arrays to EPI vectors.
-  if (T->isVectorType() &&
-      cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
-          VectorType::EPIVector) {
+  if ((T->isVectorType() &&
+       cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
+           VectorType::EPIVector) ||
+      (T->isRecordType() && T->getAsRecordDecl()->getHasEPIVectorFields())) {
     Diag(Loc, diag::err_epi_array_to_type) << T;
     return QualType();
   }
@@ -4762,9 +4772,11 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       }
 
       // We do not allow building pointers to EPI vectors.
-      if (T->isVectorType() &&
-          cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
-              VectorType::EPIVector) {
+      if ((T->isVectorType() &&
+           cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
+               VectorType::EPIVector) ||
+          (T->isRecordType() &&
+           T->getAsRecordDecl()->getHasEPIVectorFields())) {
         S.Diag(D.getIdentifierLoc(), diag::err_epi_pointer_to_type) << T;
         D.setInvalidType(true);
       }
@@ -4783,9 +4795,11 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
       }
 
       // We do not allow building references to EPI vectors.
-      if (T->isVectorType() &&
-          cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
-              VectorType::EPIVector) {
+      if ((T->isVectorType() &&
+           cast<VectorType>(T.getCanonicalType())->getVectorKind() ==
+               VectorType::EPIVector) ||
+          (T->isRecordType() &&
+           T->getAsRecordDecl()->getHasEPIVectorFields())) {
         S.Diag(D.getIdentifierLoc(), diag::err_epi_reference_to_type) << T;
         D.setInvalidType(true);
       }

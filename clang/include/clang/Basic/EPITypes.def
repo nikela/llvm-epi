@@ -12,6 +12,11 @@
 //
 //  Two types with the same Scale represent the same number of elements but
 //  the physical size is determined by the size of Type * Scale.
+//
+//  Tuples of vector types are defined using
+//    EPI_TUPLE_VECTOR_TYPE(Scale, Type, TupleSize)
+//  where TupleSize is the number of components of EPI_VECTOR_TYPE(Scale, Type)
+//  it has.
 
 // TODO: Still missing subregister sizes like EPI_VECTOR_TYPE(1, f32)
 
@@ -64,4 +69,21 @@ EPI_VECTOR_TYPE(16, i1)
 EPI_VECTOR_TYPE(32, i1)
 EPI_VECTOR_TYPE(64, i1)
 
+// Tuples
+EPI_TUPLE_VECTOR_TYPE(8, i8, 2)
+EPI_TUPLE_VECTOR_TYPE(4, i16, 2)
+EPI_TUPLE_VECTOR_TYPE(2, i32, 2)
+EPI_TUPLE_VECTOR_TYPE(1, i64, 2)
+EPI_TUPLE_VECTOR_TYPE(2, f32, 2)
+EPI_TUPLE_VECTOR_TYPE(1, f64, 2)
+
+// There is no explicit use case for these tuple types yet.
+// Not fully implemented.
+EPI_TUPLE_VECTOR_TYPE(1, i64, 4)
+EPI_TUPLE_VECTOR_TYPE(1, i64, 8)
+
+EPI_TUPLE_VECTOR_TYPE(1, f64, 4)
+EPI_TUPLE_VECTOR_TYPE(1, f64, 8)
+
+#undef EPI_TUPLE_VECTOR_TYPE
 #undef EPI_VECTOR_TYPE

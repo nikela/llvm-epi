@@ -1918,9 +1918,7 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
     const auto *VT = cast<VectorType>(T);
     TypeInfo EltInfo = getTypeInfo(VT->getElementType());
     if (VT->getVectorKind() == VectorType::EPIVector) {
-      // EPI vectors don't have a number of elements. Handle them like
-      // incomplete/VL arrays above.
-      Width = 0;
+      Width = EltInfo.Width * VT->getNumElements();
       if (VT->getElementType()->isBooleanType()) {
         // FIXME: Assumes ELEN=64
         Align = std::max(8u, 64 / VT->getNumElements());
@@ -3725,6 +3723,56 @@ ASTContext::getDependentVectorType(QualType VecType, Expr *SizeExpr,
 
   Types.push_back(New);
   return QualType(New, 0);
+}
+
+/// Return the unique reference to an EPI tuple vector type. The result is a
+/// struct TupleSize fields with of type VectorType x NumElts (EPIVector).
+QualType ASTContext::getEPITupleVectorType(QualType VectorType,
+                                           unsigned TupleSize) const {
+  assert(TupleSize > 1 && "A tuple vector must have more than one element");
+
+  llvm::FoldingSetNodeID ID;
+  EPITupleVectorType::Profile(ID, VectorType, TupleSize);
+
+  void *InsertPos = nullptr;
+  if (EPITupleVectorType *ETVTI =
+          EPITupleVectorTypes.FindNodeOrInsertPos(ID, InsertPos))
+    return getTypedefType(ETVTI->TD);
+
+  std::string RecordName;
+  llvm::raw_string_ostream OS(RecordName);
+  // This relies on this returning something like "__epi_1xf64"
+  OS << VectorType.getCanonicalType().getAsString() << "x" << TupleSize;
+
+  RecordDecl *RD = buildImplicitRecord(RecordName);
+  RD->startDefinition();
+
+  // Add fields
+  for (unsigned FieldCount = 0; FieldCount < TupleSize; FieldCount++) {
+    SmallVector<char, 4> FieldNameStorage;
+
+    FieldDecl *Field = FieldDecl::Create(
+        *this, RD, SourceLocation(), SourceLocation(),
+        &Idents.get(
+            (Twine("v") + Twine(FieldCount)).toStringRef(FieldNameStorage)),
+        VectorType,
+        /*TInfo=*/nullptr, /* BitWidth=*/nullptr, /* Mutable= */ false,
+        ICIS_NoInit);
+    Field->setAccess(AS_public);
+
+    RD->addDecl(Field);
+  }
+
+  RD->setHasEPIVectorFields(true);
+  RD->completeDefinition();
+
+  TypedefDecl *TD = buildImplicitTypedef(getTagDeclType(RD), RecordName);
+
+  EPITupleVectorType *New =
+      new (*this, TypeAlignment) EPITupleVectorType(TD, VectorType, TupleSize);
+  EPITupleVectorTypes.InsertNode(New, InsertPos);
+
+  return getTypedefType(TD);
 }
 
 /// getExtVectorType - Return the unique reference to an extended vector type of

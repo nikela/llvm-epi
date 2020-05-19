@@ -3957,6 +3957,12 @@ void Parser::ParseDeclarationSpecifiers(DeclSpec &DS,
     isInvalid = DS.SetTypeSpecType(DeclSpec::TST_EPI_##Scale##x##TypeName,     \
                                    Loc, PrevSpec, DiagID, Policy);             \
     break;
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:                       \
+    isInvalid = DS.SetTypeSpecType(                                            \
+        DeclSpec::TST_EPI_##Scale##x##TypeName##x##TupleSize, Loc, PrevSpec,   \
+        DiagID, Policy);                                                       \
+    break;
 #include "clang/Basic/EPITypes.def"
     case tok::kw___unknown_anytype:
       isInvalid = DS.SetTypeSpecType(TST_unknown_anytype, Loc,
@@ -4965,6 +4971,8 @@ bool Parser::isKnownToBeTypeSpecifier(const Token &Tok) const {
 #include "clang/Basic/OpenCLImageTypes.def"
 #define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   case tok::kw___epi_##Scale##x##TypeName:
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:
 #include "clang/Basic/EPITypes.def"
 
     // struct-or-union-specifier (C99) or class-specifier (C++)
@@ -5048,6 +5056,8 @@ bool Parser::isTypeSpecifierQualifier() {
 #include "clang/Basic/OpenCLImageTypes.def"
 #define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   case tok::kw___epi_##Scale##x##TypeName:
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:
 #include "clang/Basic/EPITypes.def"
 
     // struct-or-union-specifier (C99) or class-specifier (C++)
@@ -5329,7 +5339,10 @@ bool Parser::isDeclarationSpecifier(bool DisambiguatingWithExpression) {
   case tok::kw___write_only:
 #define GENERIC_IMAGE_TYPE(ImgType, Id) case tok::kw_##ImgType##_t:
 #include "clang/Basic/OpenCLImageTypes.def"
-#define EPI_VECTOR_TYPE(Scale, TypeName) case tok::kw___epi_##Scale##x##TypeName:
+#define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
+  case tok::kw___epi_##Scale##x##TypeName:
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:
 #include "clang/Basic/EPITypes.def"
 
     return true;

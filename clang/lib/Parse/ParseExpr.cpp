@@ -1508,6 +1508,8 @@ ExprResult Parser::ParseCastExpression(CastParseKind ParseKind,
 #define GENERIC_IMAGE_TYPE(ImgType, Id) case tok::kw_##ImgType##_t:
 #include "clang/Basic/OpenCLImageTypes.def"
 #define EPI_VECTOR_TYPE(Scale, TypeName) case tok::kw___epi_##Scale##x##TypeName:
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:
 #include "clang/Basic/EPITypes.def"
   {
     if (!getLangOpts().CPlusPlus) {

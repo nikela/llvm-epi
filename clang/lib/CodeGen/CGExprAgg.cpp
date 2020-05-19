@@ -1944,6 +1944,17 @@ void CodeGenFunction::EmitAggregateCopy(LValue Dest, LValue Src, QualType Ty,
     }
   }
 
+  // Load and store EPI types instead.
+  // FIXME: This is similar to SVE sizeless.
+  if ((Ty->isVectorType() &&
+       cast<VectorType>(Ty.getCanonicalType())->getVectorKind() ==
+           VectorType::EPIVector) ||
+      (Ty->isRecordType() && Ty->getAsRecordDecl()->getHasEPIVectorFields())) {
+    llvm::Value *Value = Builder.CreateLoad(SrcPtr);
+    Builder.CreateStore(Value, DestPtr);
+    return;
+  }
+
   if (getLangOpts().CUDAIsDevice) {
     if (Ty->isCUDADeviceBuiltinSurfaceType()) {
       if (getTargetHooks().emitCUDADeviceBuiltinSurfaceDeviceCopy(*this, Dest,

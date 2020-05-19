@@ -107,4 +107,7 @@ void bar(void) {
 
   // CHECK: __epi_64xi1 x34;
   __epi_64xi1 x34;
+
+  // CHECK: __epi_1xi64x2 x35;
+  __epi_1xi64x2 x35;
 }

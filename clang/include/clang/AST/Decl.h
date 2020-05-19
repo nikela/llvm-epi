@@ -3923,6 +3923,14 @@ public:
     RecordDeclBits.ParamDestroyedInCallee = V;
   }
 
+  bool getHasEPIVectorFields() const {
+    return RecordDeclBits.HasEPIVectorFields;
+  }
+
+  void setHasEPIVectorFields(bool V) {
+    RecordDeclBits.HasEPIVectorFields = V;
+  }
+
   /// Determines whether this declaration represents the
   /// injected class name.
   ///

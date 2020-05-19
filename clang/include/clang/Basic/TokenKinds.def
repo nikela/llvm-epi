@@ -607,8 +607,10 @@ KEYWORD(__contravariant              , KEYOBJC)
 KEYWORD(__kindof                     , KEYOBJC)
 
 // EPI extensions
-#define EPI_VECTOR_TYPE(Scale, TypeName)                                      \
+#define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   KEYWORD(__epi_##Scale##x##TypeName, KEYEPI)
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  KEYWORD(__epi_##Scale##x##TypeName##x##TupleSize, KEYEPI)
 #include "clang/Basic/EPITypes.def"
 
 // Alternate spelling for various tokens.  There are GCC extensions in all

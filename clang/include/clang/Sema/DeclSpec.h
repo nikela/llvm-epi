@@ -312,6 +312,9 @@ public:
 #define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   static const TST TST_EPI_##Scale##x##TypeName =                              \
       clang::TST_EPI_##Scale##x##TypeName;
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  static const TST TST_EPI_##Scale##x##TypeName##x##TupleSize =                \
+      clang::TST_EPI_##Scale##x##TypeName##x##TupleSize;
 #include "clang/Basic/EPITypes.def"
   static const TST TST_error = clang::TST_error;
 

@@ -4072,9 +4072,11 @@ bool Sema::CheckUnaryExprOrTypeTraitOperand(Expr *E,
     return true;
   }
 
-  if (ExprTy->isVectorType() &&
-      cast<VectorType>(ExprTy.getCanonicalType())->getVectorKind() ==
-          VectorType::EPIVector) {
+  if ((ExprTy->isVectorType() &&
+       cast<VectorType>(ExprTy.getCanonicalType())->getVectorKind() ==
+           VectorType::EPIVector) ||
+      (ExprTy->isRecordType() &&
+       ExprTy->getAsRecordDecl()->getHasEPIVectorFields())) {
     Diag(E->getExprLoc(), diag::err_epi_sizeof_alignof_vector_type)
         << ExprKind << E->getSourceRange();
     return true;
@@ -4174,9 +4176,11 @@ bool Sema::CheckUnaryExprOrTypeTraitOperand(QualType ExprType,
     return true;
   }
 
-  if (ExprType->isVectorType() &&
-      cast<VectorType>(ExprType.getCanonicalType())->getVectorKind() ==
-          VectorType::EPIVector) {
+  if ((ExprType->isVectorType() &&
+       cast<VectorType>(ExprType.getCanonicalType())->getVectorKind() ==
+           VectorType::EPIVector) ||
+      (ExprType->isRecordType() &&
+       ExprType->getAsRecordDecl()->getHasEPIVectorFields())) {
     Diag(OpLoc, diag::err_epi_sizeof_alignof_vector_type)
         << ExprKind << ExprRange;
     return true;
@@ -13116,9 +13120,11 @@ QualType Sema::CheckAddressOfOperand(ExprResult &OrigOp, SourceLocation OpLoc) {
       if (vd->getStorageClass() == SC_Register &&
           !getLangOpts().CPlusPlus) {
         AddressOfError = AO_Register_Variable;
-      } else if (vd->getType()->isVectorType() &&
-                 cast<VectorType>(vd->getType().getCanonicalType())
-                         ->getVectorKind() == VectorType::EPIVector) {
+      } else if ((vd->getType()->isVectorType() &&
+                  cast<VectorType>(vd->getType().getCanonicalType())
+                          ->getVectorKind() == VectorType::EPIVector) ||
+                 (vd->getType()->isRecordType() &&
+                  vd->getType()->getAsRecordDecl()->getHasEPIVectorFields())) {
         // EPI vectors will never be stored in memory as such so don't allow
         // getting their addresses.
         AddressOfError = AO_EPI_Vector;

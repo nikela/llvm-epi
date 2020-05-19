@@ -1689,6 +1689,9 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
 #define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   case tok::kw___epi_##Scale##x##TypeName:                                     \
     return TPResult::True;
+#define EPI_TUPLE_VECTOR_TYPE(Scale, TypeName, TupleSize)                      \
+  case tok::kw___epi_##Scale##x##TypeName##x##TupleSize:                       \
+    return TPResult::True;
 #include "clang/Basic/EPITypes.def"
 
   case tok::kw__ExtInt: {

@@ -169,6 +169,26 @@ struct TypeInfo {
       : Width(Width), Align(Align), AlignIsRequired(AlignIsRequired) {}
 };
 
+class EPITupleVectorType : public llvm::FoldingSetNode {
+public:
+  TypedefDecl *TD;
+  QualType VectorType;
+  unsigned TupleSize;
+
+  EPITupleVectorType(TypedefDecl *TD, QualType VectorType, unsigned TupleSize)
+      : TD(TD), VectorType(VectorType), TupleSize(TupleSize) {}
+
+  static void Profile(llvm::FoldingSetNodeID &ID, QualType VectorType,
+                      unsigned TupleSize) {
+    ID.AddPointer(VectorType.getAsOpaquePtr());
+    ID.AddInteger(TupleSize);
+  }
+
+  void Profile(llvm::FoldingSetNodeID &ID) {
+    Profile(ID, VectorType, TupleSize);
+  }
+};
+
 /// Holds long-lived AST nodes (such as types and decls) that can be
 /// referred to throughout the semantic analysis of a file.
 class ASTContext : public RefCountedBase<ASTContext> {
@@ -194,6 +214,7 @@ class ASTContext : public RefCountedBase<ASTContext> {
       DependentAddressSpaceTypes;
   mutable llvm::FoldingSet<VectorType> VectorTypes;
   mutable llvm::FoldingSet<DependentVectorType> DependentVectorTypes;
+  mutable llvm::FoldingSet<EPITupleVectorType> EPITupleVectorTypes;
   mutable llvm::FoldingSet<ConstantMatrixType> MatrixTypes;
   mutable llvm::FoldingSet<DependentSizedMatrixType> DependentSizedMatrixTypes;
   mutable llvm::FoldingSet<FunctionNoProtoType> FunctionNoProtoTypes;
@@ -1312,6 +1333,10 @@ public:
   QualType getDependentVectorType(QualType VectorType, Expr *SizeExpr,
                                   SourceLocation AttrLoc,
                                   VectorType::VectorKind VecKind) const;
+
+  /// Return the unique reference to an EPI tuple vector type. The result is a
+  /// struct TupleSize fields with of type VectorType x NumElts (EPIVector).
+  QualType getEPITupleVectorType(QualType VectorType, unsigned TupleSize) const;
 
   /// Return the unique reference to an extended vector type
   /// of the specified element type and size.
