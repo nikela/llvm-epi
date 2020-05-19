@@ -523,7 +523,7 @@ StringRef StructType::getName() const {
 bool StructType::isValidElementType(Type *ElemTy) {
   return !ElemTy->isVoidTy() && !ElemTy->isLabelTy() &&
          !ElemTy->isMetadataTy() && !ElemTy->isFunctionTy() &&
-         !ElemTy->isTokenTy() && !isa<ScalableVectorType>(ElemTy);
+         !ElemTy->isTokenTy();
 }
 
 bool StructType::isLayoutIdentical(StructType *Other) const {

@@ -1,4 +1,6 @@
 ; RUN: not opt -S -verify < %s 2>&1 | FileCheck %s
+; XFAIL: *
+; EPI: We want to allow scalables inside structs.
 
 ;; Structs cannot contain scalable vectors; make sure we detect them even
 ;; when nested inside other aggregates.
