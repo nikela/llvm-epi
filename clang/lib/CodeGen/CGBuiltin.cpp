@@ -4453,7 +4453,7 @@ static Value *EmitTargetArchBuiltinExpr(CodeGenFunction *CGF,
     return CGF->EmitAMDGPUBuiltinExpr(BuiltinID, E);
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
-    return CGF->EmitRISCVBuiltinExpr(BuiltinID, E);
+    return CGF->EmitRISCVBuiltinExpr(BuiltinID, E, ReturnValue);
   case llvm::Triple::systemz:
     return CGF->EmitSystemZBuiltinExpr(BuiltinID, E);
   case llvm::Triple::nvptx:
@@ -14215,7 +14215,8 @@ Value *CodeGenFunction::EmitPPCBuiltinExpr(unsigned BuiltinID,
 }
 
 Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
-                                             const CallExpr *E) {
+                                             const CallExpr *E,
+                                             ReturnValueSlot ReturnValue) {
   SmallVector<Value *, 4> Ops;
 
   llvm::Type* ResultType = ConvertType(E->getType());

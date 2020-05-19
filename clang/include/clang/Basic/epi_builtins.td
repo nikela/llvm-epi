@@ -71,6 +71,11 @@
 //      elements of the same width
 //   F: given a vector type, compute the vector type with floating-point type
 //      elements of the same width
+//   T: given a vector type, compute a tuple type with a single element of
+//      of the vector type. Given a tuple type, add an additional element to
+//      the tuple, of the same type as the existing one. A tuple of a single
+//      element (e.g Tv) is not valid, so the minimum valid tuple must have two
+//      elements (e.g. TTv)
 //
 // Following with the example above, if t is "i", then "Ue" will yield unsigned
 // int and "Fv" will yield __epi_2xf32 (again assuming LMUL=1), Fw would
@@ -135,6 +140,13 @@ class EPIBuiltin<string suffix, string prototype,
                           return llvm::UndefValue::get(ResultType); }];
   code ManualCodegenMask = [{ CGM.ErrorUnsupported(E, "EPI builtin");
                               return llvm::UndefValue::get(ResultType); }];
+
+  // We always assign to the ID variable the LLVM intrinsic identifier value.
+  // This allows sharing manual code between builtins. In the case this is not
+  // ideal (e.g. the code sets a different value unconditionally and a
+  // compiler diagnoses a warning for this automatically emitted assignment)
+  // setting this to zero will disable emitting the assignment.
+  bit CodegenSetID = 1;
 
   // If HasManualCodegen = 0 then we emit automatic clang codegen. It describes
   // what types we have to use to obtain the specific LLVM intrinsic.
@@ -678,4 +690,41 @@ let LMUL = [1], HasMask = 0, HasVL = 0, Name = "cast", IntrinsicName = "" in
       return Builder.CreateZExt(Ops[0], ResultType);
   } }] in
   def cast_from_mask : EPIBuiltin<"vm", "vm", "csil">;
+}
+
+// EPI experimental extensions
+let LMUL = [1], HasMask = 0,
+    ManualCodegen = [{
+{
+IntrinsicTypes = { Ops[0]->getType() };
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, Ops, "");
+llvm::Value *V = Builder.CreateInsertValue(
+     llvm::UndefValue::get(ResultType),
+     Builder.CreateExtractValue(CallValue, {0}),
+     {0});
+V = Builder.CreateInsertValue(
+     V,
+     Builder.CreateExtractValue(CallValue, {1}),
+     {1});
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}]
+in {
+
+let IntrinsicName = "vzip2" in
+def vzip2 : EPIBuiltin<"TTv", "TTvvv", "csildf">;
+
+let IntrinsicName = "vunzip2" in
+def vunzip2 : EPIBuiltin<"TTv", "TTvvv", "csildf">;
+
+// Like a zip but first zip the elements in even-numbered positions and
+// then the elements in odd-numbered positions.
+let IntrinsicName = "vtrn" in
+def vtrn : EPIBuiltin<"TTv", "TTvvv", "csildf">;
+
 }

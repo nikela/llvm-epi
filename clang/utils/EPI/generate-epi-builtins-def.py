@@ -13,7 +13,7 @@ IMPLEMENTED_LMULS = [1, 2, 4, 8]
 
 # Prototype kinds
 PRIMARIES = "evwm0us"
-MODIFIERS = "PKCUIF"
+MODIFIERS = "PKCUIFT"
 
 runtime_error = False
 
@@ -106,7 +106,7 @@ class TypeVector(Type):
         self.scale = scale
 
     def __str__(self):
-        return "<" + self.scale + " x " + str(self.element_type) + ">"
+        return "<" + str(self.scale) + " x " + str(self.element_type) + ">"
 
     def render_for_name(self):
         t = self.element_type.render_for_name()
@@ -115,6 +115,24 @@ class TypeVector(Type):
     def render_for_clang(self):
         t = self.element_type.render_for_clang()
         return "QV{}{}".format(self.scale, t)
+
+
+class TypeTuple(Type):
+    def __init__(self, tuple_size, vector_type):
+        assert tuple_size > 0
+        self.tuple_size = tuple_size
+        self.vector_type = vector_type
+
+    def __str__(self):
+        return "{" + ", ".join([str(self.vector_type)] * self.tuple_size) + "}"
+
+    def render_for_name(self):
+        t = self.vector_type.render_for_name()
+        return "{}x{}".format(t, self.tuple_size)
+
+    def render_for_clang(self):
+        t = self.vector_type.render_for_clang()
+        return "{}{}".format("".join(["T"] * self.tuple_size), t)
 
 
 class TypeModified(Type):
@@ -279,6 +297,19 @@ class PrototypeModifier(Prototype):
                     "Cannot convert element type '{}' to floating or integer vector"
                     .format(element_type.letter))
             return TypeVector(new_element_type, t.scale)
+        elif self.letter == "T":
+            if not isinstance(t, TypeVector) and not isinstance(t, TypeTuple):
+                raise Exception(
+                    "T modifier can only be applied to vector types or tuples types. Current type is '{}'"
+                    .format(t))
+            tuple_size = 1
+            vector_type = t
+            if isinstance(t, TypeTuple):
+                tuple_size = t.tuple_size + 1
+                vector_type = t.vector_type
+            return TypeTuple(tuple_size, vector_type)
+        else:
+            raise Exception("Unhandled modifier {}", self.letter)
 
 
 def process_tblgen_file(tablegen, input_tablegen, include_paths):
@@ -470,7 +501,7 @@ def instantiate_builtins(j):
     for b in result:
         if b.full_name in builtin_set :
             if builtin_set[b.full_name] != str(b):
-                logging.error("Builtin '{}' has already been defined as '{}' but this one is '{}'".format(b.full_name, str(builtin_names[b.full_name]), str(b)))
+                logging.error("Builtin '{}' has already been defined as '{}' but this one is '{}'".format(b.full_name, str(builtin_set[b.full_name]), str(b)))
                 error = True
         else:
             builtin_set[b.full_name] = str(b)
@@ -516,12 +547,19 @@ def emit_codegen(out_file, j):
     code_set = {}
     for b in inst_builtins:
         code_case = ""
+
+        if b.builtin["CodegenSetID"] != 0:
+            if not b.masked and b.builtin["IntrinsicName"]:
+                code_case += "  ID = Intrinsic::epi_{};\n".format(b.builtin["IntrinsicName"]);
+            if b.masked and b.builtin["IntrinsicNameMask"]:
+                code_case += "  ID = Intrinsic::epi_{};\n".format(b.builtin["IntrinsicNameMask"]);
+
         if b.builtin["HasManualCodegen"] != 0:
             s = ""
             if b.masked:
-                s = b.builtin["ManualCodegenMask"]
+                s += b.builtin["ManualCodegenMask"]
             else:
-                s = b.builtin["ManualCodegen"]
+                s += b.builtin["ManualCodegen"]
             if not s.endswith("\n"):
                 s += "\n"
             code_case += s;
@@ -549,10 +587,6 @@ def emit_codegen(out_file, j):
             code_case += ", ".join(intr_types)
             code_case += " };\n";
 
-        if not b.masked and b.builtin["IntrinsicName"]:
-            code_case += "  ID = Intrinsic::epi_{};\n".format(b.builtin["IntrinsicName"]);
-        if b.masked and b.builtin["IntrinsicNameMask"]:
-            code_case += "  ID = Intrinsic::epi_{};\n".format(b.builtin["IntrinsicNameMask"]);
         code_case += "  break;\n"
 
         if code_case not in code_set:

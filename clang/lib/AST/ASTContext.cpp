@@ -9855,6 +9855,7 @@ static QualType DecodeTypeFromStr(const char *&Str, const ASTContext &Context,
   int HowLong = 0;
   bool Signed = false, Unsigned = false;
   bool EPIVector = false;
+  int EPITupleSize = 0;
   RequiresICE = false;
 
   // Read the prefixed modifiers first.
@@ -9867,6 +9868,9 @@ static QualType DecodeTypeFromStr(const char *&Str, const ASTContext &Context,
     default: Done = true; --Str; break;
     case 'I':
       RequiresICE = true;
+      break;
+    case 'T':
+      EPITupleSize++;
       break;
     case 'Q':
       EPIVector = true;
@@ -9948,6 +9952,9 @@ static QualType DecodeTypeFromStr(const char *&Str, const ASTContext &Context,
       break;
     }
   }
+
+  assert((!EPITupleSize || EPIVector) &&
+         "EPI Tuple vectors are only valid with EPI Vectors");
 
   QualType Type;
 
@@ -10076,6 +10083,11 @@ static QualType DecodeTypeFromStr(const char *&Str, const ASTContext &Context,
     Type = Context.getVectorType(ElementType, NumElements,
                                  EPIVector ? VectorType::EPIVector
                                            : VectorType::GenericVector);
+    if (EPITupleSize) {
+      assert(EPITupleSize > 1 && "Tuples must have more than one element");
+      assert(EPIVector && "EPI Tuples are only for EPI Vectors");
+      Type = Context.getEPITupleVectorType(Type, EPITupleSize);
+    }
 
     break;
   }
