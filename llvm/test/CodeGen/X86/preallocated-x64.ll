@@ -1,4 +1,5 @@
 ; RUN: llc %s -mtriple=x86_64-windows-msvc -o /dev/null 2>&1
+; REQUIRES: asserts
 ; XFAIL: *
 
 declare token @llvm.call.preallocated.setup(i32)
