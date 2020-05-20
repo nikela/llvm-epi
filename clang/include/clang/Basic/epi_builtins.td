@@ -317,7 +317,7 @@ let ManualCodegen = [{
 let Name = "vload", IntrinsicName = "", HasVL = 0, HasMask = 0, LMUL = [1],
     ManualCodegen = [{ {
         clang::CharUnits Align =
-            getNaturalPointeeTypeAlignment(E->getArg(0)->getType());
+            CGM.getNaturalPointeeTypeAlignment(E->getArg(0)->getType());
         llvm::Type *MemType = ConvertTypeForMem(E->getType());
         Ops[0] = Builder.CreateBitCast(Ops[0],
                                        llvm::PointerType::getUnqual(MemType));
@@ -392,7 +392,7 @@ let HasMergeOperand = 0 in
   ManualCodegen = [{ {
     assert(Ops.size() == 2);
     clang::CharUnits Align =
-      getNaturalPointeeTypeAlignment(E->getArg(0)->getType());
+      CGM.getNaturalPointeeTypeAlignment(E->getArg(0)->getType());
     llvm::Type *MemType = ConvertTypeForMem(E->getArg(1)->getType());
     std::swap(Ops[0], Ops[1]);
     // Ops[0] = Value
