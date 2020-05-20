@@ -1,4 +1,5 @@
 ; RUN: llc < %s -mtriple=i686-pc-win32 | FileCheck %s
+; REQUIRES: asserts
 ; XFAIL: *
 
 declare token @llvm.call.preallocated.setup(i32)
