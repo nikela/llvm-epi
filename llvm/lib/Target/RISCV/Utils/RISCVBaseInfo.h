@@ -47,8 +47,6 @@ enum {
   InstFormatOther = 17,
 
   InstFormatMask = 31,
-
-  InstVectorWithMask = (0x1 << 5),
 };
 
 // RISC-V Specific Machine Operand Flags

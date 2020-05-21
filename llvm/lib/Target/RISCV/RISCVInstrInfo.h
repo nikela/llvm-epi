@@ -132,5 +132,25 @@ public:
 protected:
   const RISCVSubtarget &STI;
 };
-}
+
+namespace RISCV {
+// Match with the definitions in RISCVInstrFormatsV.td
+enum RVVConstraintType {
+  NoConstraint = 0,
+  WidenV = 1,
+  WidenW = 2,
+  WidenCvt = 3,
+  QuadWiden = 4,
+  Narrow = 5,
+  Iota = 6,
+  SlideUp = 7,
+  Vrgather = 8,
+  Vcompress = 9,
+
+  ConstraintOffset = 5,
+  ConstraintMask = 0b1111
+};
+} // end namespace RISCV
+
+} // end namespace llvm
 #endif

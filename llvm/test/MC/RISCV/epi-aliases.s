@@ -1,6 +1,6 @@
-# RUN: llvm-mc --triple=riscv64 -mattr +v < %s --show-encoding 2>&1 \
-# RUN:    | FileCheck --check-prefix=ALIAS %s
-# RUN: llvm-mc --triple=riscv64 -mattr=+v --riscv-no-aliases < %s \
+# RUN: llvm-mc --triple=riscv64 -mattr +experimental-v < %s --show-encoding \
+# RUN:    2>&1 | FileCheck --check-prefix=ALIAS %s
+# RUN: llvm-mc --triple=riscv64 -mattr=+experimental-v --riscv-no-aliases < %s \
 # RUN:    --show-encoding 2>&1 | FileCheck --check-prefix=NO-ALIAS %s
 
 # ALIAS:    vsetvli s0, t3, e32,m1          # encoding: [0x57,0x74,0x8e,0x00]
@@ -22,12 +22,12 @@ vwcvtu.x.x.v v2, v1
 # ALIAS:    vwcvtu.x.x.v    v2, v1, v0.t    # encoding: [0x57,0x61,0x10,0xc0]
 # NO-ALIAS: vwaddu.vx       v2, v1, zero, v0.t # encoding: [0x57,0x61,0x10,0xc0]
 vwcvtu.x.x.v v2, v1, v0.t
-# ALIAS:    vnot.v  v0                      # encoding: [0x57,0xb0,0x0f,0x2e]
-# NO-ALIAS: vxor.vi v0, v0, -1              # encoding: [0x57,0xb0,0x0f,0x2e]
-vnot.v v0
-# ALIAS:    vnot.v  v0, v0.t                # encoding: [0x57,0xb0,0x0f,0x2c]
-# NO-ALIAS: vxor.vi v0, v0, -1, v0.t        # encoding: [0x57,0xb0,0x0f,0x2c]
-vnot.v v0, v0.t
+# ALIAS:    vnot.v  v0, v1                  # encoding: [0x57,0xb0,0x1f,0x2e]
+# NO-ALIAS: vxor.vi v0, v1, -1              # encoding: [0x57,0xb0,0x1f,0x2e]
+vnot.v v0, v1
+# ALIAS:    vnot.v  v0, v1, v0.t            # encoding: [0x57,0xb0,0x1f,0x2c]
+# NO-ALIAS: vxor.vi v0, v1, -1, v0.t        # encoding: [0x57,0xb0,0x1f,0x2c]
+vnot.v v0, v1, v0.t
 # ALIAS:    vmslt.vv        v0, v1, v0      # encoding: [0x57,0x00,0x10,0x6e]
 # NO-ALIAS: vmslt.vv        v0, v1, v0      # encoding: [0x57,0x00,0x10,0x6e]
 vmsgt.vv v0, v0, v1

@@ -162,7 +162,7 @@ static DecodeStatus DecodeVRRegisterClass(MCInst &Inst, uint64_t RegNo,
   return MCDisassembler::Success;
 }
 
-static DecodeStatus decodeVRMaskOp(MCInst &Inst, uint64_t RegNo,
+static DecodeStatus decodeVMaskReg(MCInst &Inst, uint64_t RegNo,
                                    uint64_t Address, const void *Decoder) {
   Register Reg = RISCV::NoRegister;
   switch (RegNo) {

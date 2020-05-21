@@ -48,23 +48,6 @@ class EPILookupIntrinsic<string basename> {
   Intrinsic I = !cast<Intrinsic>("int_epi_" # basename);
 }
 
-class SImmPlus1AsmOperand<int width> : AsmOperandClass {
-  let Name = "SImm" # width # "Plus1";
-  let RenderMethod = "addImmPlus1Operands";
-  let DiagnosticType = !strconcat("Invalid", Name);
-}
-
-def simm5plus1 : Operand<XLenVT>, ImmLeaf<XLenVT, [{return isInt<5>(Imm - 1);}]> {
-  let ParserMatchClass = SImmPlus1AsmOperand<5>;
-  let PrintMethod = "printImmPlus1";
-  let MCOperandPredicate = [{
-    int64_t Imm;
-    if (MCOp.evaluateAsConstantImm(Imm))
-      return isInt<5>(Imm);
-    return MCOp.isBareSymbolRef();
-  }];
-}
-
 //===----------------------------------------------------------------------===//
 // Utilities
 //===----------------------------------------------------------------------===//
@@ -116,64 +99,6 @@ def "PseudoVMSET_M"#vlmul : Pseudo<(outs VR:$rd), (ins GPR:$vl, ixlenimm:$sew), 
 }
 
 //===----------------------------------------------------------------------===//
-// Assembler Pseudo instructions
-//===----------------------------------------------------------------------===//
-
-// FIXME add Pseudo for vmsge{u}.vx
-
-def : InstAlias<"vwcvt.x.x.v $vd, $vs$vm",
-                (VWADD_VX VRRegOp:$vd, VRRegOp:$vs, X0, VRMaskRegOp:$vm)>;
-def : InstAlias<"vwcvtu.x.x.v $vd, $vs$vm",
-                (VWADDU_VX VRRegOp:$vd, VRRegOp:$vs, X0, VRMaskRegOp:$vm)>;
-
-def : InstAlias<"vnot.v $vd$vm",
-                (VXOR_VI VRRegOp:$vd, VRRegOp:$vd, -1, VRMaskRegOp:$vm)>;
-
-def : InstAlias<"vmsgt.vv $vd, $va, $vb$vm",
-                (VMSLT_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                          VRMaskRegOp:$vm), 0>;
-def : InstAlias<"vmsgtu.vv $vd, $va, $vb$vm",
-                (VMSLTU_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                           VRMaskRegOp:$vm), 0>;
-
-def : InstAlias<"vmsge.vv $vd, $va, $vb$vm",
-                (VMSLE_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                          VRMaskRegOp:$vm), 0>;
-def : InstAlias<"vmsgeu.vv $vd, $va, $vb$vm",
-                (VMSLEU_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                           VRMaskRegOp:$vm), 0>;
-
-def : InstAlias<"vmslt.vi $vd, $va, $i$vm",
-                (VMSLE_VI VRRegOp:$vd, VRRegOp:$va, simm5plus1:$i,
-                          VRMaskRegOp:$vm), 0>;
-def : InstAlias<"vmsltu.vi $vd, $va, $i$vm",
-                (VMSLEU_VI VRRegOp:$vd, VRRegOp:$va, simm5plus1:$i,
-                           VRMaskRegOp:$vm), 0>;
-
-def : InstAlias<"vmsge.vi $vd, $va, $i$vm",
-                (VMSGT_VI VRRegOp:$vd, VRRegOp:$va, simm5plus1:$i,
-                          VRMaskRegOp:$vm), 0>;
-def : InstAlias<"vmsgeu.vi $vd, $va, $i$vm",
-                (VMSGTU_VI VRRegOp:$vd, VRRegOp:$va, simm5plus1:$i,
-                           VRMaskRegOp:$vm), 0>;
-
-def : InstAlias<"vmfgt.vv $vd, $va, $vb$vm",
-                (VMFLT_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                          VRMaskRegOp:$vm), 0>;
-def : InstAlias<"vmfge.vv $vd, $va, $vb$vm",
-                (VMFLE_VV VRRegOp:$vd, VRRegOp:$vb, VRRegOp:$va,
-                           VRMaskRegOp:$vm), 0>;
-
-def : InstAlias<"vmcpy.m $vd, $vs",
-                (VMAND_MM VRRegOp:$vd, VRRegOp:$vs, VRRegOp:$vs)>;
-def : InstAlias<"vmclr.m $vd",
-                (VMXOR_MM VRRegOp:$vd, VRRegOp:$vd, VRRegOp:$vd)>;
-def : InstAlias<"vmset.m $vd",
-                (VMXNOR_MM VRRegOp:$vd, VRRegOp:$vd, VRRegOp:$vd)>;
-def : InstAlias<"vmnot.m $vd, $vs",
-                (VMNAND_MM VRRegOp:$vd, VRRegOp:$vs, VRRegOp:$vs)>;
-
-//===----------------------------------------------------------------------===//
 // Pseudo instructions we need for SPILL and RELOAD
 //===----------------------------------------------------------------------===//
 
@@ -190,9 +115,9 @@ def PseudoVRELOAD_M#vlmul : Pseudo<(outs reg_class:$rs1), (ins GPR:$rs2), []>;
 }
 
 defm "" : pseudo_spill_reload<VR, 1>;
-defm "" : pseudo_spill_reload<VR2, 2>;
-defm "" : pseudo_spill_reload<VR4, 4>;
-defm "" : pseudo_spill_reload<VR8, 8>;
+defm "" : pseudo_spill_reload<VRM2, 2>;
+defm "" : pseudo_spill_reload<VRM4, 4>;
+defm "" : pseudo_spill_reload<VRM8, 8>;
 
 }
 
@@ -248,21 +173,21 @@ defset list<VectorTypeInfo> AllVectors = {
     }
 
     defset list<VectorTypeInfo> GroupIntegerVectors = {
-      def Vtype16xi8  : VectorTypeInfo<nxv16i8,  nxv16i1, 8,  VR2>;
-      def Vtype32xi8  : VectorTypeInfo<nxv32i8,  nxv32i1, 8,  VR4>;
-//    def Vtype64xi8  : VectorTypeInfo<nxv64i8,  nxv64i1, 8,  VR8>; // FIXME undefined type
+      def Vtype16xi8  : VectorTypeInfo<nxv16i8,  nxv16i1, 8,  VRM2>;
+      def Vtype32xi8  : VectorTypeInfo<nxv32i8,  nxv32i1, 8,  VRM4>;
+//    def Vtype64xi8  : VectorTypeInfo<nxv64i8,  nxv64i1, 8,  VRM8>; // FIXME undefined type
 
-      def Vtype8xi16  : VectorTypeInfo<nxv8i16,  nxv8i1,  16, VR2>;
-      def Vtype16xi16 : VectorTypeInfo<nxv16i16, nxv16i1, 16, VR4>;
-      def Vtype32xi16 : VectorTypeInfo<nxv32i16, nxv32i1, 16, VR8>;
+      def Vtype8xi16  : VectorTypeInfo<nxv8i16,  nxv8i1,  16, VRM2>;
+      def Vtype16xi16 : VectorTypeInfo<nxv16i16, nxv16i1, 16, VRM4>;
+      def Vtype32xi16 : VectorTypeInfo<nxv32i16, nxv32i1, 16, VRM8>;
 
-      def Vtype4xi32  : VectorTypeInfo<nxv4i32,  nxv4i1,  32, VR2>;
-      def Vtype8xi32  : VectorTypeInfo<nxv8i32,  nxv8i1,  32, VR4>;
-      def Vtype16xi32 : VectorTypeInfo<nxv16i32, nxv16i1, 32, VR8>;
+      def Vtype4xi32  : VectorTypeInfo<nxv4i32,  nxv4i1,  32, VRM2>;
+      def Vtype8xi32  : VectorTypeInfo<nxv8i32,  nxv8i1,  32, VRM4>;
+      def Vtype16xi32 : VectorTypeInfo<nxv16i32, nxv16i1, 32, VRM8>;
 
-      def Vtype2xi64  : VectorTypeInfo<nxv2i64,  nxv2i1,  64, VR2>;
-      def Vtype4xi64  : VectorTypeInfo<nxv4i64,  nxv4i1,  64, VR4>;
-      def Vtype8xi64  : VectorTypeInfo<nxv8i64,  nxv8i1,  64, VR8>;
+      def Vtype2xi64  : VectorTypeInfo<nxv2i64,  nxv2i1,  64, VRM2>;
+      def Vtype4xi64  : VectorTypeInfo<nxv4i64,  nxv4i1,  64, VRM4>;
+      def Vtype8xi64  : VectorTypeInfo<nxv8i64,  nxv8i1,  64, VRM8>;
     }
   }
 
@@ -274,13 +199,13 @@ defset list<VectorTypeInfo> AllVectors = {
       def Vtype1xf64 : FloatVectorTypeInfo<nxv1f64, nxv1i1, 64, VR, f64, FPR64>;
     }
 
-    def Vtype4xf32  : FloatVectorTypeInfo<nxv4f32,  nxv4i1,  32, VR2, f32, FPR32>;
-    def Vtype8xf32  : FloatVectorTypeInfo<nxv8f32,  nxv8i1,  32, VR4, f32, FPR32>;
-    def Vtype16xf32 : FloatVectorTypeInfo<nxv16f32, nxv16i1, 32, VR8, f32, FPR32>;
+    def Vtype4xf32  : FloatVectorTypeInfo<nxv4f32,  nxv4i1,  32, VRM2, f32, FPR32>;
+    def Vtype8xf32  : FloatVectorTypeInfo<nxv8f32,  nxv8i1,  32, VRM4, f32, FPR32>;
+    def Vtype16xf32 : FloatVectorTypeInfo<nxv16f32, nxv16i1, 32, VRM8, f32, FPR32>;
 
-    def Vtype2xf64  : FloatVectorTypeInfo<nxv2f64,  nxv2i1,  64, VR2, f64, FPR64>;
-    def Vtype4xf64  : FloatVectorTypeInfo<nxv4f64,  nxv4i1,  64, VR4, f64, FPR64>;
-    def Vtype8xf64  : FloatVectorTypeInfo<nxv8f64,  nxv8i1,  64, VR8, f64, FPR64>;
+    def Vtype2xf64  : FloatVectorTypeInfo<nxv2f64,  nxv2i1,  64, VRM2, f64, FPR64>;
+    def Vtype4xf64  : FloatVectorTypeInfo<nxv4f64,  nxv4i1,  64, VRM4, f64, FPR64>;
+    def Vtype8xf64  : FloatVectorTypeInfo<nxv8f64,  nxv8i1,  64, VRM8, f64, FPR64>;
   }
 }
 
@@ -400,9 +325,9 @@ class VRegToWide<VReg Reg, VReg WideReg> {
 }
 
 defset list<VRegToWide> AllVRegToWidePairs = {
-  def : VRegToWide<VR, VR2>;
-  def : VRegToWide<VR2, VR4>;
-  def : VRegToWide<VR4, VR8>;
+  def : VRegToWide<VR, VRM2>;
+  def : VRegToWide<VRM2, VRM4>;
+  def : VRegToWide<VRM4, VRM8>;
 }
 
 def EPIIntrClassID : GenericEnum {
@@ -446,7 +371,7 @@ multiclass pseudo_nullary<VReg result_reg_class,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
                             (ins result_reg_class:$merge,
-                                 VRMaskRegOp:$vm,
+                                 VMaskOp:$vm,
                                  GPR:$vl, ixlenimm:$sew),
                             []>,
                      EPIPseudo;
@@ -473,7 +398,7 @@ multiclass pseudo_unary<VReg result_reg_class,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
                             (ins result_reg_class:$merge,
-                                 op_reg_class:$rs2, VRMaskRegOp:$vm,
+                                 op_reg_class:$rs2, VMaskOp:$vm,
                                  GPR:$vl, ixlenimm:$sew),
                             []>,
                      EPIPseudo;
@@ -488,7 +413,7 @@ multiclass pseudo_unary_nomerge<VReg result_reg_class,
       Uses = [VL, VTYPE], VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
-                            (ins op_reg_class:$rs2, VRMaskRegOp:$vm,
+                            (ins op_reg_class:$rs2, VMaskOp:$vm,
                                  GPR:$vl, ixlenimm:$sew),
                             []>,
                      EPIPseudo;
@@ -595,7 +520,7 @@ multiclass pseudo_binary<VReg result_reg_class,
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
                             (ins result_reg_class:$merge,
                                  op1_reg_class:$rs2, op2_kind:$rs1,
-                                 VRMaskRegOp:$vm, GPR:$vl, ixlenimm:$sew),
+                                 VMaskOp:$vm, GPR:$vl, ixlenimm:$sew),
                             []>,
                      EPIPseudo;
 }
@@ -625,7 +550,7 @@ multiclass pseudo_binary_mask_in<VReg result_reg_class,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
                             (ins op1_reg_class:$rs2, op2_kind:$rs1,
-                                 VRV0:$maskop, GPR:$vl, ixlenimm:$sew),
+                                 VMV0:$maskop, GPR:$vl, ixlenimm:$sew),
                             []>,
                      EPIPseudo;
 }
@@ -982,7 +907,7 @@ multiclass pseudo_ternary<VReg result_reg_class,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
     def "_M"#vlmul : Pseudo<(outs result_reg_class:$rd),
                                  (ins result_reg_class:$rs3, op1_reg_class:$rs1,
-                                      op2_reg_class:$rs2, VRMaskRegOp:$vm,
+                                      op2_reg_class:$rs2, VMaskOp:$vm,
                                       GPR:$vl, ixlenimm:$sew),
                                  []>,
                           EPIPseudo;
@@ -1266,7 +1191,7 @@ foreach evr = AllVRegs in
         BaseInstr = VLE_V in
       def PseudoVLE_V_M#vlmul
           : Pseudo<(outs evr:$rd),
-                   (ins evr:$merge, GPR:$rs1, VRMaskRegOp:$mask, GPR:$vl,
+                   (ins evr:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                     ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -1275,7 +1200,7 @@ foreach evr = AllVRegs in
         BaseInstr = VLSE_V in
       def PseudoVLSE_V_M#vlmul
           : Pseudo<(outs evr:$rd),
-                   (ins evr:$merge, GPR:$rs1, GPR:$rs2, VRMaskRegOp:$mask,
+                   (ins evr:$merge, GPR:$rs1, GPR:$rs2, VMaskOp:$mask,
                     GPR:$vl, ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -1284,7 +1209,7 @@ foreach evr = AllVRegs in
         BaseInstr = VLXE_V in
       def PseudoVLXE_V_M#vlmul
           : Pseudo<(outs evr:$rd),
-                   (ins evr:$merge, GPR:$rs1, evr:$rs2, VRMaskRegOp:$mask,
+                   (ins evr:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
                     GPR:$vl, ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -1300,7 +1225,7 @@ foreach evr = AllVRegs in
         BaseInstr = VSE_V in
       def PseudoVSE_V_M#vlmul
           : Pseudo<(outs),
-                   (ins evr:$rd, GPR:$rs1, VRMaskRegOp:$mask, GPR:$vl,
+                   (ins evr:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -1311,7 +1236,7 @@ foreach evr = AllVRegs in
         BaseInstr = VSSE_V in
       def PseudoVSSE_V_M#vlmul
           : Pseudo<(outs),
-                   (ins evr:$rd, GPR:$rs1, GPR:$rs2, VRMaskRegOp:$mask, GPR:$vl,
+                   (ins evr:$rd, GPR:$rs1, GPR:$rs2, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -1322,7 +1247,7 @@ foreach evr = AllVRegs in
         BaseInstr = VSXE_V in
       def PseudoVSXE_V_M#vlmul
           : Pseudo<(outs),
-                   (ins evr:$rd, GPR:$rs1, evr:$rs2, VRMaskRegOp:$mask, GPR:$vl,
+                   (ins evr:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
             EPIPseudo;
@@ -3161,7 +3086,7 @@ foreach vti = GroupIntegerVectors in {
                (vti.Mask zero_reg),
                VLMax,
                vti.SEW),
-              vreven),
+              sub_vrm2),
              vti.SEW)>;
 }
 

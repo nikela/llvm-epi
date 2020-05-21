@@ -35,6 +35,8 @@ static_assert(RISCV::F31_F == RISCV::F0_F + 31,
 static_assert(RISCV::F1_D == RISCV::F0_D + 1, "Register list not consecutive");
 static_assert(RISCV::F31_D == RISCV::F0_D + 31,
               "Register list not consecutive");
+static_assert(RISCV::V1 == RISCV::V0 + 1, "Register list not consecutive");
+static_assert(RISCV::V31 == RISCV::V0 + 31, "Register list not consecutive");
 
 RISCVRegisterInfo::RISCVRegisterInfo(unsigned HwMode)
     : RISCVGenRegisterInfo(RISCV::X1, /*DwarfFlavour*/0, /*EHFlavor*/0,
@@ -176,16 +178,16 @@ static Register computeVRSpillReloadInstructions(
   default:
     llvm_unreachable("Unexpected LMUL value");
   case 2:
-    VRegEven = RI.getSubReg(VReg, RISCV::vreven);
-    VRegOdd = RI.getSubReg(VReg, RISCV::vrodd);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm2);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm2_hi);
     break;
   case 4:
-    VRegEven = RI.getSubReg(VReg, RISCV::vr2even);
-    VRegOdd = RI.getSubReg(VReg, RISCV::vr2odd);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm4);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm4_hi);
     break;
   case 8:
-    VRegEven = RI.getSubReg(VReg, RISCV::vr4even);
-    VRegOdd = RI.getSubReg(VReg, RISCV::vr4odd);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm8);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm8_hi);
     break;
   }
 

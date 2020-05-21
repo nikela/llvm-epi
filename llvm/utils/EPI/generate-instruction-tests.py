@@ -527,7 +527,7 @@ def generate_instruction_tests(i):
 
 def emit_test_parsing(instructions):
     print "# Generated with utils/EPI/process.py"
-    print "# RUN: llvm-mc < %s -arch=riscv64 -mattr=+m,+f,+d,+a,+v | FileCheck %s"
+    print "# RUN: llvm-mc < %s -arch=riscv64 -mattr=+m,+f,+d,+a,+experimental-v | FileCheck %s"
     print ""
 
     def input_and_check(x):
@@ -632,7 +632,7 @@ def generate_expected_encodings(i):
 
 def emit_test_encoding(instructions):
     print "# Generated witu utils/EPI/process.py"
-    print "# RUN: llvm-mc < %s -arch=riscv64 -mattr=+m,+f,+d,+a,+v -show-encoding | FileCheck %s"
+    print "# RUN: llvm-mc < %s -arch=riscv64 -mattr=+m,+f,+d,+a,+experimental-v -show-encoding | FileCheck %s"
     print ""
     testcases_list = []
     encodings_list = []

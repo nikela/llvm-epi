@@ -85,7 +85,7 @@ public:
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const;
 
-  unsigned getVRMaskOp(const MCInst &MI, unsigned OpNo,
+  unsigned getVMaskReg(const MCInst &MI, unsigned OpNo,
                        SmallVectorImpl<MCFixup> &Fixups,
                        const MCSubtargetInfo &STI) const;
 };
@@ -417,7 +417,7 @@ unsigned RISCVMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
   return 0;
 }
 
-unsigned RISCVMCCodeEmitter::getVRMaskOp(const MCInst &MI, unsigned OpNo,
+unsigned RISCVMCCodeEmitter::getVMaskReg(const MCInst &MI, unsigned OpNo,
                                          SmallVectorImpl<MCFixup> &Fixups,
                                          const MCSubtargetInfo &STI) const {
   MCOperand MO = MI.getOperand(OpNo);

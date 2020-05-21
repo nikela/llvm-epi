@@ -558,11 +558,11 @@ void RISCVFrameLowering::prepareStorageSpilledVR(
     // class.
     if (ObjectSize <= RegInfo->getSpillSize(RISCV::VRRegClass))
       ShiftAmount = 0;
-    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VR2RegClass))
+    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VRM2RegClass))
       ShiftAmount = 1;
-    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VR4RegClass))
+    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VRM4RegClass))
       ShiftAmount = 2;
-    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VR8RegClass))
+    else if (ObjectSize == RegInfo->getSpillSize(RISCV::VRM8RegClass))
       ShiftAmount = 3;
     else
       llvm_unreachable("Unexpected object size");

@@ -1,4 +1,5 @@
-;RUN: opt %s -o %t -loop-reduce -mtriple riscv64 -mattr +m,+a,+f,+d,+v
+;RUN: opt %s -o %t -loop-reduce -mtriple riscv64 \
+;RUN:    -mattr +m,+a,+f,+d,+experimental-v
 
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n64-S128"
 

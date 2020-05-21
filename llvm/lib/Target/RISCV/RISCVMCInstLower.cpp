@@ -185,10 +185,10 @@ bool llvm::LowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {
       }
 
       const TargetRegisterClass *RC = TRI->getMinimalPhysRegClass(Reg);
-      if (RC->hasSuperClassEq(&RISCV::VR2RegClass) ||
-          RC->hasSuperClassEq(&RISCV::VR4RegClass) ||
-          RC->hasSuperClassEq(&RISCV::VR8RegClass)) {
-        Reg = TRI->getSubReg(Reg, RISCV::vreven);
+      if (RC->hasSuperClassEq(&RISCV::VRM2RegClass) ||
+          RC->hasSuperClassEq(&RISCV::VRM4RegClass) ||
+          RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
+        Reg = TRI->getSubReg(Reg, RISCV::sub_vrm2);
         assert(Reg && "Subregister does not exist");
       }
 

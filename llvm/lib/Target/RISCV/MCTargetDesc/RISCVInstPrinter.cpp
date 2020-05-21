@@ -153,20 +153,20 @@ void RISCVInstPrinter::printAtomicMemOp(const MCInst *MI, unsigned OpNo,
 void RISCVInstPrinter::printVTypeI(const MCInst *MI, unsigned OpNo,
                                    const MCSubtargetInfo &STI, raw_ostream &O) {
   unsigned Imm = MI->getOperand(OpNo).getImm();
-  unsigned sew = (Imm >> 2) & 0x7;
-  unsigned lmul = Imm & 0x3;
+  unsigned Sew = (Imm >> 2) & 0x7;
+  unsigned Lmul = Imm & 0x3;
 
-  lmul = 0x1 << lmul;
-  sew = 0x1 << (sew + 3);
-  O << "e" << sew << ",m" << lmul;
+  Lmul = 0x1 << Lmul;
+  Sew = 0x1 << (Sew + 3);
+  O << "e" << Sew << ",m" << Lmul;
 }
 
-void RISCVInstPrinter::printVRMaskOp(const MCInst *MI, unsigned OpNo,
+void RISCVInstPrinter::printVMaskReg(const MCInst *MI, unsigned OpNo,
                                      const MCSubtargetInfo &STI,
                                      raw_ostream &O) {
   const MCOperand &MO = MI->getOperand(OpNo);
 
-  assert(MO.isReg() && "printVRMaskOp can only print register operands");
+  assert(MO.isReg() && "printVMaskReg can only print register operands");
   if (MO.getReg() == RISCV::NoRegister)
     return;
   O << ", ";
@@ -174,12 +174,12 @@ void RISCVInstPrinter::printVRMaskOp(const MCInst *MI, unsigned OpNo,
   O << ".t";
 }
 
-void RISCVInstPrinter::printImmPlus1(const MCInst *MI, unsigned OpNo,
-                                     const MCSubtargetInfo &STI,
-                                     raw_ostream &O) {
+void RISCVInstPrinter::printSImm5Plus1(const MCInst *MI, unsigned OpNo,
+                                       const MCSubtargetInfo &STI,
+                                       raw_ostream &O) {
   const MCOperand &MO = MI->getOperand(OpNo);
 
-  assert(MO.isImm() && "printImmPlus1 can only print immediate operands");
+  assert(MO.isImm() && "printSImm5Plus1 can only print constant operands");
   O << MO.getImm() + 1;
 }
 

@@ -106,38 +106,38 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     //addRegisterClass(MVT::nxv2i8, &RISCV::VRRegClass); // FIXME illegal type
     //addRegisterClass(MVT::nxv4i8, &RISCV::VRRegClass); // FIXME illegal type
     addRegisterClass(MVT::nxv8i8, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv16i8, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv32i8, &RISCV::VR4RegClass);
-    //addRegisterClass(MVT::nxv64i8, &RISCV::VR8RegClass); // FIXME undefined type
+    addRegisterClass(MVT::nxv16i8, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv32i8, &RISCV::VRM4RegClass);
+    //addRegisterClass(MVT::nxv64i8, &RISCV::VRM8RegClass); // FIXME undefined type
 
     //addRegisterClass(MVT::nxv1i16, &RISCV::VRRegClass); // FIXME illegal type
     //addRegisterClass(MVT::nxv2i16, &RISCV::VRRegClass); // FIXME illegal type
     addRegisterClass(MVT::nxv4i16, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv8i16, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv16i16, &RISCV::VR4RegClass);
-    addRegisterClass(MVT::nxv32i16, &RISCV::VR8RegClass);
+    addRegisterClass(MVT::nxv8i16, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv16i16, &RISCV::VRM4RegClass);
+    addRegisterClass(MVT::nxv32i16, &RISCV::VRM8RegClass);
 
     //addRegisterClass(MVT::nxv1i32, &RISCV::VRRegClass); // FIXME illegal type
     addRegisterClass(MVT::nxv2i32, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv4i32, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv8i32, &RISCV::VR4RegClass);
-    addRegisterClass(MVT::nxv16i32, &RISCV::VR8RegClass);
+    addRegisterClass(MVT::nxv4i32, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv8i32, &RISCV::VRM4RegClass);
+    addRegisterClass(MVT::nxv16i32, &RISCV::VRM8RegClass);
 
     addRegisterClass(MVT::nxv1i64, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv2i64, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv4i64, &RISCV::VR4RegClass);
-    addRegisterClass(MVT::nxv8i64, &RISCV::VR8RegClass);
+    addRegisterClass(MVT::nxv2i64, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv4i64, &RISCV::VRM4RegClass);
+    addRegisterClass(MVT::nxv8i64, &RISCV::VRM8RegClass);
 
     //addRegisterClass(MVT::nxv1f32, &RISCV::VRRegClass); // FIXME illegal type
     addRegisterClass(MVT::nxv2f32, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv4f32, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv8f32, &RISCV::VR4RegClass);
-    addRegisterClass(MVT::nxv16f32, &RISCV::VR8RegClass);
+    addRegisterClass(MVT::nxv4f32, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv8f32, &RISCV::VRM4RegClass);
+    addRegisterClass(MVT::nxv16f32, &RISCV::VRM8RegClass);
 
     addRegisterClass(MVT::nxv1f64, &RISCV::VRRegClass);
-    addRegisterClass(MVT::nxv2f64, &RISCV::VR2RegClass);
-    addRegisterClass(MVT::nxv4f64, &RISCV::VR4RegClass);
-    addRegisterClass(MVT::nxv8f64, &RISCV::VR8RegClass);
+    addRegisterClass(MVT::nxv2f64, &RISCV::VRM2RegClass);
+    addRegisterClass(MVT::nxv4f64, &RISCV::VRM4RegClass);
+    addRegisterClass(MVT::nxv8f64, &RISCV::VRM8RegClass);
 
     setBooleanVectorContents(ZeroOrOneBooleanContent);
 
@@ -2425,14 +2425,14 @@ static const MCPhysReg ArgFPR64s[] = {
 static const MCPhysReg ArgVRs[] = {RISCV::V16, RISCV::V17, RISCV::V18,
                                     RISCV::V19, RISCV::V20, RISCV::V21,
                                     RISCV::V22, RISCV::V23};
-static const MCPhysReg ArgVR2s[] = {
-    RISCV::V16_2,
-    RISCV::V18_2,
-    RISCV::V20_2,
-    RISCV::V22_2,
+static const MCPhysReg ArgVRM2s[] = {
+    RISCV::V16M2,
+    RISCV::V18M2,
+    RISCV::V20M2,
+    RISCV::V22M2,
 };
-static const MCPhysReg ArgVR4s[] = {RISCV::V16_4, RISCV::V20_4};
-static const MCPhysReg ArgVR8s[] = {RISCV::V16_8};
+static const MCPhysReg ArgVRM4s[] = {RISCV::V16M4, RISCV::V20M4};
+static const MCPhysReg ArgVRM8s[] = {RISCV::V16M8};
 
 // Pass a 2*XLEN argument that has been split into two XLEN values through
 // registers or the stack as necessary.
@@ -2615,12 +2615,12 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
       } else {
         Reg = State.AllocateReg(ArgVRs);
       }
-    } else if (RC->hasSuperClassEq(&RISCV::VR2RegClass)) {
-      Reg = State.AllocateReg(ArgVR2s);
-    } else if (RC->hasSuperClassEq(&RISCV::VR4RegClass)) {
-      Reg = State.AllocateReg(ArgVR4s);
-    } else if (RC->hasSuperClassEq(&RISCV::VR8RegClass)) {
-      Reg = State.AllocateReg(ArgVR8s);
+    } else if (RC->hasSuperClassEq(&RISCV::VRM2RegClass)) {
+      Reg = State.AllocateReg(ArgVRM2s);
+    } else if (RC->hasSuperClassEq(&RISCV::VRM4RegClass)) {
+      Reg = State.AllocateReg(ArgVRM4s);
+    } else if (RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
+      Reg = State.AllocateReg(ArgVRM8s);
     } else {
       llvm_unreachable("Unhandled class register for ValueType");
     }
