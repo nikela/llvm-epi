@@ -772,32 +772,47 @@ public:
     return TTI::TCC_Basic;
   }
 
-  int getUserCost(const User *U, ArrayRef<const Value *> Operands,
-                  TTI::TargetCostKind CostKind) {
+  unsigned getIntrinsicCost(Intrinsic::ID IID, Type *RetTy,
+                            ArrayRef<Type *> ParamTys, const User *U,
+                            TTI::TargetCostKind CostKind) {
+    switch (IID) {
+    default:
+      break;
+    // TODO: other libc intrinsics.
+    case Intrinsic::memcpy:
+      return static_cast<T *>(this)->getMemcpyCost(dyn_cast<Instruction>(U));
+    }
+    IntrinsicCostAttributes Attrs(IID, RetTy, ParamTys);
+    return getIntrinsicInstrCost(Attrs, CostKind);
+  }
+
+  unsigned getIntrinsicCost(Intrinsic::ID IID, Type *RetTy,
+                            ArrayRef<const Value *> Arguments, const User *U,
+                            TTI::TargetCostKind CostKind) {
+    // Delegate to the generic intrinsic handling code. This mostly provides an
+    // opportunity for targets to (for example) special case the cost of
+    // certain intrinsics based on constants used as arguments.
+    SmallVector<Type *, 8> ParamTys;
+    ParamTys.reserve(Arguments.size());
+    for (unsigned Idx = 0, Size = Arguments.size(); Idx != Size; ++Idx)
+      ParamTys.push_back(Arguments[Idx]->getType());
+    return static_cast<T *>(this)->getIntrinsicCost(IID, RetTy, ParamTys, U,
+                                                    CostKind);
+  }
+
+  unsigned getUserCost(const User *U, ArrayRef<const Value *> Operands,
+                       TTI::TargetCostKind CostKind) {
     auto *TargetTTI = static_cast<T *>(this);
 
+    // FIXME: Unlikely to be true for anything but CodeSize.
     if (const auto *CB = dyn_cast<CallBase>(U)) {
-      // Special-case throughput here because it can make wild differences
-      // whether the arguments are passed around or just the arg types. The
-      // IntrinsicCostAttribute constructor used here will save all the
-      // available information.
-      // FIXME: More information isn't always useful and we shouldn't have to
-      // make a special case like this.
-      if (CostKind == TTI::TCK_RecipThroughput) {
-        if (auto *II = dyn_cast<IntrinsicInst>(CB)) {
-          IntrinsicCostAttributes Attrs(*II);
-          return TargetTTI->getIntrinsicInstrCost(Attrs, CostKind);
-        }
-        return -1; // We know nothing about this call.
-      }
-
-      // FIXME: Unlikely to be true for anything but CodeSize.
       const Function *F = CB->getCalledFunction();
       if (F) {
         FunctionType *FTy = F->getFunctionType();
         if (Intrinsic::ID IID = F->getIntrinsicID()) {
-          IntrinsicCostAttributes Attrs(IID, *CB);
-          return TargetTTI->getIntrinsicInstrCost(Attrs, CostKind);
+          SmallVector<Type *, 8> ParamTys(FTy->param_begin(), FTy->param_end());
+          return TargetTTI->getIntrinsicCost(IID, FTy->getReturnType(),
+                                             ParamTys, U, CostKind);
         }
 
         if (!TargetTTI->isLoweredToCall(F))
