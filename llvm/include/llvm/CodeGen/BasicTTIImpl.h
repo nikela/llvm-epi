@@ -296,42 +296,6 @@ public:
     return BaseT::getGEPCost(PointeeType, Ptr, Operands);
   }
 
-  int getExtCost(const Instruction *I, const Value *Src) {
-    if (getTLI()->isExtFree(I))
-      return TargetTransformInfo::TCC_Free;
-
-    if (isa<ZExtInst>(I) || isa<SExtInst>(I))
-      if (const LoadInst *LI = dyn_cast<LoadInst>(Src))
-        if (getTLI()->isExtLoad(LI, I, DL))
-          return TargetTransformInfo::TCC_Free;
-
-    return TargetTransformInfo::TCC_Basic;
-  }
-
-  unsigned getIntrinsicCost(Intrinsic::ID IID, Type *RetTy,
-                            ArrayRef<const Value *> Arguments, const User *U,
-                            TTI::TargetCostKind CostKind) {
-    return BaseT::getIntrinsicCost(IID, RetTy, Arguments, U, CostKind);
-  }
-
-  unsigned getIntrinsicCost(Intrinsic::ID IID, Type *RetTy,
-                            ArrayRef<Type *> ParamTys, const User *U,
-                            TTI::TargetCostKind CostKind) {
-    if (IID == Intrinsic::cttz) {
-      if (getTLI()->isCheapToSpeculateCttz())
-        return TargetTransformInfo::TCC_Basic;
-      return TargetTransformInfo::TCC_Expensive;
-    }
-
-    if (IID == Intrinsic::ctlz) {
-      if (getTLI()->isCheapToSpeculateCtlz())
-        return TargetTransformInfo::TCC_Basic;
-      return TargetTransformInfo::TCC_Expensive;
-    }
-
-    return BaseT::getIntrinsicCost(IID, RetTy, ParamTys, U, CostKind);
-  }
-
   unsigned getEstimatedNumberOfCaseClusters(const SwitchInst &SI,
                                             unsigned &JumpTableSize,
                                             ProfileSummaryInfo *PSI,
@@ -725,11 +689,21 @@ public:
           SrcSize == DstSize)
         return 0;
       break;
+    case Instruction::FPExt:
+      if (I && getTLI()->isExtFree(I))
+        return 0;
+      break;
     case Instruction::ZExt:
       if (TLI->isZExtFree(SrcLT.second, DstLT.second))
         return 0;
       LLVM_FALLTHROUGH;
-    case Instruction::SExt: {
+    case Instruction::SExt:
+      if (!I)
+        break;
+
+      if (getTLI()->isExtFree(I))
+        return 0;
+
       // If this is a zext/sext of a load, return 0 if the corresponding
       // extending load exists on target.
       if (I && isa<LoadInst>(I->getOperand(0))) {
@@ -741,7 +715,6 @@ public:
           return 0;
       }
       break;
-    }
     case Instruction::AddrSpaceCast:
       if (TLI->isFreeAddrSpaceCast(Src->getPointerAddressSpace(),
                                    Dst->getPointerAddressSpace()))
@@ -1094,21 +1067,40 @@ public:
   unsigned getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                  TTI::TargetCostKind CostKind) {
 
+    Intrinsic::ID IID = ICA.getID();
+    auto *ConcreteTTI = static_cast<T *>(this);
+
+    // Special case some scalar intrinsics.
+    if (CostKind != TTI::TCK_RecipThroughput) {
+      switch (IID) {
+      default:
+        break;
+      case Intrinsic::cttz:
+        if (getTLI()->isCheapToSpeculateCttz())
+          return TargetTransformInfo::TCC_Basic;
+        break;
+      case Intrinsic::ctlz:
+        if (getTLI()->isCheapToSpeculateCtlz())
+          return TargetTransformInfo::TCC_Basic;
+        break;
+      case Intrinsic::memcpy:
+        return ConcreteTTI->getMemcpyCost(ICA.getInst());
+      }
+      return BaseT::getIntrinsicInstrCost(ICA, CostKind);
+    }
+
     // TODO: Combine these two logic paths.
     if (ICA.isTypeBasedOnly())
       return getTypeBasedIntrinsicInstrCost(ICA, CostKind);
 
-    Intrinsic::ID IID = ICA.getID();
     const IntrinsicInst *I = ICA.getInst();
-    Type *RetTy = ICA.getReturnType();
     const SmallVectorImpl<Value *> &Args = ICA.getArgs();
-    unsigned VF = ICA.getVectorFactor();
     FastMathFlags FMF = ICA.getFlags();
-
+    Type *RetTy = ICA.getReturnType();
+    unsigned VF = ICA.getVectorFactor();
     unsigned RetVF =
         (RetTy->isVectorTy() ? cast<VectorType>(RetTy)->getNumElements() : 1);
     assert((RetVF == 1 || VF == 1) && "VF > 1 and RetVF is a vector type");
-    auto *ConcreteTTI = static_cast<T *>(this);
 
     switch (IID) {
     default: {
@@ -1595,13 +1587,14 @@ public:
                                                  CostKind) +
              ConcreteTTI->getArithmeticInstrCost(BinaryOperator::FAdd, RetTy,
                                                  CostKind);
-    if (IID == Intrinsic::experimental_constrained_fmuladd)
-      return ConcreteTTI->getIntrinsicCost(
-                 Intrinsic::experimental_constrained_fmul, RetTy, Tys, nullptr,
-                 CostKind) +
-             ConcreteTTI->getIntrinsicCost(
-                 Intrinsic::experimental_constrained_fadd, RetTy, Tys, nullptr,
-                 CostKind);
+    if (IID == Intrinsic::experimental_constrained_fmuladd) {
+      IntrinsicCostAttributes FMulAttrs(
+        Intrinsic::experimental_constrained_fmul, RetTy, Tys);
+      IntrinsicCostAttributes FAddAttrs(
+        Intrinsic::experimental_constrained_fadd, RetTy, Tys);
+      return ConcreteTTI->getIntrinsicInstrCost(FMulAttrs, CostKind) +
+             ConcreteTTI->getIntrinsicInstrCost(FAddAttrs, CostKind);
+    }
 
     // Else, assume that we need to scalarize this intrinsic. For math builtins
     // this will emit a costly libcall, adding call overhead and spills. Make it
