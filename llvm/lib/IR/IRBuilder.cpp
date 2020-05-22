@@ -531,6 +531,10 @@ CallInst *IRBuilderBase::CreateMaskedGather(Value *Ptrs, Align Alignment,
   if (!Mask)
     Mask = getTrueVector(NumElts);
 
+  if (isa<ScalableVectorType>(DataTy))
+    assert(isa<ScalableVectorType>(Mask->getType()) &&
+           "Cannot use fixed vector mask with scalable vector data.");
+
   if (!PassThru)
     PassThru = UndefValue::get(DataTy);
 
@@ -565,6 +569,10 @@ CallInst *IRBuilderBase::CreateMaskedScatter(Value *Data, Value *Ptrs,
 
   if (!Mask)
     Mask = getTrueVector(NumElts);
+
+  if (isa<ScalableVectorType>(DataTy))
+    assert(isa<ScalableVectorType>(Mask->getType()) &&
+           "Cannot use fixed vector mask with scalable vector data.");
 
   Type *OverloadedTypes[] = {DataTy, PtrsTy};
   Value *Ops[] = {Data, Ptrs, getInt32(Alignment.value()), Mask};

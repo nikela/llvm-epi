@@ -2614,14 +2614,30 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
       // not nullptr it also implies preference for predicated vectorization.
       Value *EVLPart = EVL ? State.get(EVL, Part) : nullptr;
       if (CreateGatherScatter) {
-        // TODO: Support predicated scatter gather.
-        assert(
-            !EVL &&
-            "Predicated intrinsics for scatter and gather not supported yet");
-        Value *MaskPart = isMaskRequired ? BlockInMaskParts[Part] : nullptr;
-        Value *VectorGep = State.get(Addr, Part);
-        NewSI = Builder.CreateMaskedScatter(StoredVal, VectorGep, Alignment,
-                                            MaskPart);
+        if (EVLPart) {
+          Value *VectorGep = State.get(Addr, Part);
+          auto PtrsTy = cast<VectorType>(VectorGep->getType());
+          auto DataTy = cast<VectorType>(StoredVal->getType());
+          ElementCount NumElts = PtrsTy->getElementCount();
+          // Conservatively use the mask emitted by VPlan instead of all-ones.
+          Value *BlockInMaskPart = isMaskRequired
+                                       ? BlockInMaskParts[Part]
+                                       : Builder.getTrueVector(NumElts);
+          Value *EVLPartTrunc = Builder.CreateTrunc(
+              EVLPart, Type::getInt32Ty(VectorGep->getType()->getContext()));
+          Value *Operands[] = {StoredVal, VectorGep,
+                               Builder.getInt32(Alignment.value()),
+                               BlockInMaskPart, EVLPartTrunc};
+          NewSI =
+              Builder.CreateIntrinsic(Intrinsic::vp_scatter, {DataTy, PtrsTy},
+                                      Operands, nullptr, "vp.scatter");
+
+        } else {
+          Value *MaskPart = isMaskRequired ? BlockInMaskParts[Part] : nullptr;
+          Value *VectorGep = State.get(Addr, Part);
+          NewSI = Builder.CreateMaskedScatter(StoredVal, VectorGep, Alignment,
+                                              MaskPart);
+        }
       } else {
         if (Reverse) {
           // If we store to reverse consecutive memory locations, then we need
@@ -2666,11 +2682,29 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
     Value *NewLI;
     Value *EVLPart = EVL ? State.get(EVL, Part) : nullptr;
     if (CreateGatherScatter) {
-      Value *MaskPart = isMaskRequired ? BlockInMaskParts[Part] : nullptr;
-      Value *VectorGep = State.get(Addr, Part);
-      NewLI = Builder.CreateMaskedGather(VectorGep, Alignment, MaskPart,
-                                         nullptr, "wide.masked.gather");
-      addMetadata(NewLI, LI);
+      if (EVLPart) {
+        Value *VectorGep = State.get(Addr, Part);
+        auto PtrsTy = cast<VectorType>(VectorGep->getType());
+        auto PtrTy = cast<PointerType>(PtrsTy->getElementType());
+        ElementCount NumElts = PtrsTy->getElementCount();
+        Type *DataTy = VectorType::get(PtrTy->getElementType(), NumElts);
+        // Conservatively use the mask emitted by VPlan instead of all-ones.
+        Value *BlockInMaskPart = isMaskRequired
+                                     ? BlockInMaskParts[Part]
+                                     : Builder.getTrueVector(NumElts);
+        Value *EVLPartTrunc = Builder.CreateTrunc(
+            EVLPart, Type::getInt32Ty(DataTy->getContext()));
+        Value *Operands[] = {VectorGep, Builder.getInt32(Alignment.value()),
+                             BlockInMaskPart, EVLPartTrunc};
+        NewLI = Builder.CreateIntrinsic(Intrinsic::vp_gather, {DataTy, PtrsTy},
+                                        Operands, nullptr, "vp.gather");
+      } else {
+        Value *MaskPart = isMaskRequired ? BlockInMaskParts[Part] : nullptr;
+        Value *VectorGep = State.get(Addr, Part);
+        NewLI = Builder.CreateMaskedGather(VectorGep, Alignment, MaskPart,
+                                           nullptr, "wide.masked.gather");
+        addMetadata(NewLI, LI);
+      }
     } else {
       auto *VecPtr = CreateVecPtr(Part, State.get(Addr, {0, 0}));
       // if EVLPart is not null, we can vectorize using predicated
