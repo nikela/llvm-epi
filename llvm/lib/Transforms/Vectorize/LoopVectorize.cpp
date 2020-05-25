@@ -2628,9 +2628,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
           Value *Operands[] = {StoredVal, VectorGep,
                                Builder.getInt32(Alignment.value()),
                                BlockInMaskPart, EVLPartTrunc};
-          NewSI =
-              Builder.CreateIntrinsic(Intrinsic::vp_scatter, {DataTy, PtrsTy},
-                                      Operands, nullptr, "vp.scatter");
+          NewSI = Builder.CreateIntrinsic(Intrinsic::vp_scatter,
+                                          {DataTy, PtrsTy}, Operands);
 
         } else {
           Value *MaskPart = isMaskRequired ? BlockInMaskParts[Part] : nullptr;
