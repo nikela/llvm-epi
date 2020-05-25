@@ -405,7 +405,7 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
 
   // Emit ".cfi_def_cfa_offset RealStackSize"
   unsigned CFIIndex = MF.addFrameInst(
-      MCCFIInstruction::createDefCfaOffset(nullptr, -RealStackSize));
+      MCCFIInstruction::cfiDefCfaOffset(nullptr, RealStackSize));
   BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
       .addCFIIndex(CFIIndex)
       .setMIFlag(MachineInstr::FrameSetup);
@@ -460,9 +460,9 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
               RealStackSize - RVFI->getVarArgsSaveSize(),
               MachineInstr::FrameSetup);
 
-    // Emit ".cfi_def_cfa $fp, -RVFI->getVarArgsSaveSize()"
-    unsigned CFIIndex = MF.addFrameInst(MCCFIInstruction::createDefCfa(
-        nullptr, RI->getDwarfRegNum(FPReg, true), -RVFI->getVarArgsSaveSize()));
+    // Emit ".cfi_def_cfa $fp, RVFI->getVarArgsSaveSize()"
+    unsigned CFIIndex = MF.addFrameInst(MCCFIInstruction::cfiDefCfa(
+        nullptr, RI->getDwarfRegNum(FPReg, true), RVFI->getVarArgsSaveSize()));
     BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
         .addCFIIndex(CFIIndex)
         .setMIFlag(MachineInstr::FrameSetup);
@@ -481,7 +481,7 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
     if (!hasFP(MF)) {
       // Emit ".cfi_def_cfa_offset StackSize"
       unsigned CFIIndex = MF.addFrameInst(
-          MCCFIInstruction::createDefCfaOffset(nullptr, -MFI.getStackSize()));
+          MCCFIInstruction::cfiDefCfaOffset(nullptr, MFI.getStackSize()));
       BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
           .addCFIIndex(CFIIndex);
     }

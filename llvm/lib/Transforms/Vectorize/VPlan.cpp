@@ -461,8 +461,11 @@ void VPlan::execute(VPTransformState *State) {
     IRBuilder<> Builder(State->CFG.PrevBB->getTerminator());
     auto *TCMO = Builder.CreateSub(TC, ConstantInt::get(TC->getType(), 1),
                                    "trip.count.minus.1");
-    Value *VTCMO = Builder.CreateVectorSplat({State->VF, State->IsScalable},
-                                             TCMO, "broadcast");
+    auto VF = State->VF;
+    Value *VTCMO = VF == 1 && !State->IsScalable
+                       ? TCMO
+                       : Builder.CreateVectorSplat({VF, State->IsScalable},
+                                                   TCMO, "broadcast");
     for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part)
       State->set(BackedgeTakenCount, VTCMO, Part);
   }
@@ -856,15 +859,20 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.CanonicalIV;
   Type *STy = CanonicalIV->getType();
   IRBuilder<> Builder(State.CFG.PrevBB->getTerminator());
-  Value *VStart = Builder.CreateVectorSplat({State.VF, State.IsScalable},
-                                            CanonicalIV, "broadcast");
+  auto VF = State.VF;
+  Value *VStart = VF == 1 && !State.IsScalable
+                      ? CanonicalIV
+                      : Builder.CreateVectorSplat({VF, State.IsScalable},
+                                                  CanonicalIV, "broadcast");
   for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part) {
-    SmallVector<Constant *, 8> Indices;
     Value *VStep = nullptr;
     if (!State.IsScalable) {
-      for (unsigned Lane = 0, VF = State.VF; Lane < VF; ++Lane)
+      SmallVector<Constant *, 8> Indices;
+      for (unsigned Lane = 0; Lane < VF; ++Lane)
         Indices.push_back(ConstantInt::get(STy, Part * VF + Lane));
-      VStep = ConstantVector::get(Indices);
+      // If VF == 1, there is only one iteration in the loop above, thus the
+      // element pushed back into Indices is ConstantInt::get(STy, Part)
+      VStep = VF == 1 ? Indices.back() : ConstantVector::get(Indices);
     } else {
       // FIXME: For predicated vectorization if interleaving is enabled, each
       // part will work on EVL lanes, which means the lanes for part Part will
@@ -878,8 +886,7 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
           Intrinsic::experimental_vector_stepvector,
           VectorType::get(STy, {State.VF, State.IsScalable}), {}, nullptr,
           "stepvector");
-      // If not using predicated vector ops, generate instructions for scalable
-      // vectors equivalent to Part * VF + Lane.
+
       if (!State.PreferPredicatedVectorOps) {
         Value *Vscale = Builder.CreateIntrinsic(
             Intrinsic::vscale, Type::getInt32Ty(Builder.getContext()), {},
@@ -893,6 +900,7 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
         VStep = Builder.CreateAdd(VStep, SplatVFxVscale);
       }
     }
+
     // Add the consecutive indices to the vector value.
     Value *CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
     State.set(getVPValue(), CanonicalVectorIV, Part);
