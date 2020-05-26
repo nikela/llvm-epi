@@ -5643,6 +5643,7 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
     MaxVF = FeasibleMaxVF.getValue();
   }
 
+  assert((UserVF || isPowerOf2_32(MaxVF)) && "MaxVF must be a power of 2");
   unsigned MaxVFtimesIC = UserIC ? MaxVF * UserIC : MaxVF;
   if (TC > 0 && TC % MaxVFtimesIC == 0) {
     // Accept MaxVF if we do not have a tail.
@@ -5728,6 +5729,9 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
 
   WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
+
+  // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
+  WidestRegister = PowerOf2Floor(WidestRegister);
 
   unsigned MaxVectorSize = WidestRegister / WidestType;
 
