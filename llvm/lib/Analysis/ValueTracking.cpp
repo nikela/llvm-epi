@@ -2550,6 +2550,11 @@ bool isKnownNonZero(const Value *V, const APInt &DemandedElts, unsigned Depth,
   // ExtractElement
   else if (const auto *EEI = dyn_cast<ExtractElementInst>(V)) {
     const Value *Vec = EEI->getVectorOperand();
+    // FIXME: We currently have no way to represent the DemandedElts of a
+    // scalable vector
+    if (isa<ScalableVectorType>(Vec->getType()))
+      return false;
+
     const Value *Idx = EEI->getIndexOperand();
     auto *CIdx = dyn_cast<ConstantInt>(Idx);
     unsigned NumElts = cast<FixedVectorType>(Vec->getType())->getNumElements();
