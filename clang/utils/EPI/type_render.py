@@ -21,6 +21,8 @@ class TypeRender:
                 TypeBuilder.CHAR, TypeBuilder.DOUBLE, TypeBuilder.FLOAT, \
                 TypeBuilder.BOOL]:
             raise Exception("Scalable but not a vector")
+        if self.type_builder.tuple_size == 1:
+            raise Exception("A tuple cannot have just one element")
 
         rendered = ""
 
@@ -32,21 +34,24 @@ class TypeRender:
             rendered += "const "
 
         if self.type_builder.scalable_vector:
+            tuple_size = ""
+            if self.type_builder.tuple_size > 0:
+                tuple_size = "{}x".format(self.type_builder.tuple_size)
             if self.type_builder.basic_type == TypeBuilder.INT:
                 if self.type_builder.short:
-                    rendered += "__epi_{}xi16".format(self.type_builder.vector_length)
+                    rendered += "__epi_{}{}xi16".format(tuple_size, self.type_builder.vector_length)
                 elif self.type_builder.long:
-                    rendered += "__epi_{}xi64".format(self.type_builder.vector_length)
+                    rendered += "__epi_{}{}xi64".format(tuple_size, self.type_builder.vector_length)
                 else:
-                    rendered += "__epi_{}xi32".format(self.type_builder.vector_length)
+                    rendered += "__epi_{}{}xi32".format(tuple_size, self.type_builder.vector_length)
             elif self.type_builder.basic_type == TypeBuilder.CHAR:
-                rendered += "__epi_{}xi8".format(self.type_builder.vector_length)
+                rendered += "__epi_{}{}xi8".format(tuple_size, self.type_builder.vector_length)
             elif self.type_builder.basic_type == TypeBuilder.BOOL:
-                rendered += "__epi_{}xi1".format(self.type_builder.vector_length)
+                rendered += "__epi_{}{}xi1".format(tuple_size, self.type_builder.vector_length)
             elif self.type_builder.basic_type == TypeBuilder.FLOAT:
-                rendered += "__epi_{}xf32".format(self.type_builder.vector_length)
+                rendered += "__epi_{}{}xf32".format(tuple_size, self.type_builder.vector_length)
             elif self.type_builder.basic_type == TypeBuilder.DOUBLE:
-                rendered += "__epi_{}xf64".format(self.type_builder.vector_length)
+                rendered += "__epi_{}{}xf64".format(tuple_size, self.type_builder.vector_length)
             else:
                 assert False, "Unreachable"
         else:

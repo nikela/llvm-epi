@@ -106,6 +106,11 @@ def DocEPIMaskOperations : DocEPIBuiltinCategory
   let Name = "Operations with masks";
 }
 
+def DocEPIExtensions : DocEPIBuiltinCategory
+{
+  let Name = "EPI custom extensions";
+}
+
 
 // FIXME: These will need to be documented but they are too niche
 // for us.
@@ -3971,4 +3976,187 @@ This operation is useful to compute wider-than-ELEN integer vector subtraction.}
   }];
 
   let ParameterNames = ["a", "b", "borrow_in"];
+}
+
+// EPI custom extensions
+
+def : DocEPIBuiltin<vzip2>
+{
+  let Category = DocEPIExtensions;
+  let Title = "Zip two vectors into a tuple of two vectors";
+
+  let Description = [{Use these builtins to "zip" two vectors into a pair of
+vector registers. This operation creates a pair of registers whose elements
+are pairs of the two input registers.
+
+Given two vectors `(a, b, c, d, e, f)` and `(0, 1, 2, 3, 4, 5)` the first element
+of the result tuple will be the vector `(a, 0, b, 1, c, 2)`. The second element
+of the result tuple will be the vector `(d, 3, e, 4, f, 5)`.
+}];
+
+  let Instruction = "vzip2.vv";
+  let Operation = [{
+    for element = 0 to gvl - 1
+       dest_element = 2 * element
+       if dest_element < VLMAX
+          result.v0[dest_element] = a[element]
+          result.v0[dest_element + 1] = b[element]
+       else
+          dest_element = dest_element - VLMAX
+          result.v1[dest_element] = a[element]
+          result.v1[dest_element + 1] = b[element]
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       dest_element = 2 * element
+       if mask[element] then
+         if dest_element < VLMAX
+            result.v0[dest_element] = a[element]
+            result.v0[dest_element + 1] = b[element]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = a[element]
+            result.v1[dest_element + 1] = b[element]
+       else
+         if dest_element < VLMAX
+            result.v0[dest_element] = merge.v0[dest_element]
+            result.v0[dest_element + 1] = merge.v0[dest_element + 1]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = merge.v1[dest_element]
+            result.v1[dest_element + 1] = merge.v1[dest_element + 1]
+  }];
+}
+
+def : DocEPIBuiltin<vunzip2>
+{
+  let Category = DocEPIExtensions;
+  let Title = "Unzip two vectors into a tuple of two vectors";
+
+  let Description = [{Use these builtins to "unzip" two vectors into a pair of
+ vector registers. This is the dual of the zip operation.
+
+Given two vectors `(a, 0, b, 1, c, 2)` and `(d, 3, e, 4, f, 5)` the first
+element of the result tuple will be the vector `(a, b, c, d, e, f)`. The second
+element of the result tuple will be the vector `(0, 1, 2, 3, 4, 5)`.
+}];
+
+  let Instruction = "vunzip2.vv";
+  let Operation = [{
+    for element = 0 to gvl - 1
+       src_element = 2 * element
+       if src_element < VLMAX
+          result.v0[element] = a[src_element]
+          result.v1[element] = a[src_element + 1]
+       else
+          src_element = src_element - VLMAX
+          result.v0[element] = b[src_element]
+          result.v1[element] = b[src_element + 1]
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       dest_element = 2 * element
+       src_element = 2 * element
+       if mask[element] then
+         if src_element < VLMAX
+            result.v0[element] = a[src_element]
+            result.v1[element] = a[src_element + 1]
+         else
+            src_element = src_element - VLMAX
+            result.v0[element] = b[src_element]
+            result.v1[element] = b[src_element + 1]
+       else
+         result.v0[element] = merge.v0[element]
+         result.v1[element] = merge.v1[element]
+  }];
+}
+
+def : DocEPIBuiltin<vtrn>
+{
+  let Category = DocEPIExtensions;
+  let Title = "Transpose two vectors into a tuple of two vectors";
+
+  let Description = [{Use these builtins to "transpose" two vectors into a 
+tuple of vectors. This is similar to 'zip' but first the even-numbered elements
+of the vectors are zipped followed by the odd-numbered elements.
+
+Given two vectors `(a, 0, b, 1, c, 2)` and `(d, 3, e, 4, f, 5)` the first
+element of the result tuple will be the vector `(a, d, b, e, c, f)`. The second
+element of the result tuple will be the vector `(0, 3, 1, 4, 2, 5)`.
+}];
+
+  let Instruction = "vtrn.vv";
+  let Operation = [{
+    # Even-numbered elements
+    element = 0
+    while element < gvl
+       dest_element = 2 * element
+       if dest_element < VLMAX
+          result.v0[dest_element] = a[element]
+          result.v0[dest_element + 1] = b[element]
+       else
+          dest_element = dest_element - VLMAX
+          result.v1[dest_element] = a[element]
+          result.v1[dest_element + 1] = b[element]
+       element = element + 2
+    # Odd-numbered elements
+    element = 1
+    while element < gvl
+       dest_element = 2 * element
+       if dest_element < VLMAX
+          result.v0[dest_element] = a[element]
+          result.v0[dest_element + 1] = b[element]
+       else
+          dest_element = dest_element - VLMAX
+          result.v1[dest_element] = a[element]
+          result.v1[dest_element + 1] = b[element]
+       element = element + 2
+  }];
+
+  let OperationMask = [{
+    # Even-numbered elements
+    element = 0
+    while element < gvl
+       dest_element = 2 * element
+       if mask[element] then
+         if dest_element < VLMAX
+            result.v0[dest_element] = a[element]
+            result.v0[dest_element + 1] = b[element]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = a[element]
+            result.v1[dest_element + 1] = b[element]
+       else
+         if dest_element < VLMAX
+            result.v0[dest_element] = merge.v0[dest_element]
+            result.v0[dest_element + 1] = merge.v0[dest_element + 1]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = merge.v1[dest_element]
+            result.v1[dest_element + 1] = merge.v1[dest_element + 1]
+       element = element + 2
+    # Odd-numbered elements
+    element = 1
+    while element < gvl
+       dest_element = 2 * element
+       if mask[element] then
+         if dest_element < VLMAX
+            result.v0[dest_element] = a[element]
+            result.v0[dest_element + 1] = b[element]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = a[element]
+            result.v1[dest_element + 1] = b[element]
+         element = element + 2
+       else
+         if dest_element < VLMAX
+            result.v0[dest_element] = merge.v0[dest_element]
+            result.v0[dest_element + 1] = merge.v0[dest_element + 1]
+         else
+            dest_element = dest_element - VLMAX
+            result.v1[dest_element] = merge.v1[dest_element]
+            result.v1[dest_element + 1] = merge.v1[dest_element + 1]
+  }];
 }

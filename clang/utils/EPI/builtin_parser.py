@@ -52,6 +52,8 @@ def parse_type(prototype):
                     continue
                 elif c == 'I':
                     built_type.set_must_be_constant()
+                elif c == 'T':
+                    built_type.add_tuple()
                 else:
                     part_of_type = 2
                     continue

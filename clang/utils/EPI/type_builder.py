@@ -20,6 +20,7 @@ class TypeBuilder:
         self.vector_length = -1
         self.pointer = False
         self.constant_type = False
+        self.tuple_size = 0
         # The following one is for integer expressions, not the type
         self.must_be_constant = False
 
@@ -91,3 +92,5 @@ class TypeBuilder:
             raise Exception("Already constant")
         self.must_be_constant = True
 
+    def add_tuple(self):
+        self.tuple_size += 1
