@@ -59,6 +59,9 @@ enum NodeType : unsigned {
   VMV_X_S,
   EXTRACT_VECTOR_ELT,
   SIGN_EXTEND_BITS_INREG,
+  VZIP2,
+  VUNZIP2,
+  VTRN,
 };
 }
 

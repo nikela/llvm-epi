@@ -1420,6 +1420,43 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
     EVT PtrVT = getPointerTy(DAG.getDataLayout());
     return DAG.getRegister(RISCV::X4, PtrVT);
   }
+  case Intrinsic::epi_vzip2:
+  case Intrinsic::epi_vunzip2:
+  case Intrinsic::epi_vtrn: {
+    SDVTList VTList = Op->getVTList();
+    assert(VTList.NumVTs == 2);
+    EVT VT = VTList.VTs[0];
+
+    unsigned TupleOpcode;
+    switch (IntNo) {
+    default:
+      llvm_unreachable("Invalid opcode");
+      break;
+    case Intrinsic::epi_vzip2:
+      TupleOpcode = RISCVISD::VZIP2;
+      break;
+    case Intrinsic::epi_vunzip2:
+      TupleOpcode = RISCVISD::VUNZIP2;
+      break;
+    case Intrinsic::epi_vtrn:
+      TupleOpcode = RISCVISD::VTRN;
+      break;
+    }
+
+    SDValue TupleNode =
+        DAG.getNode(TupleOpcode, DL, MVT::Untyped, Op->getOperand(1),
+                    Op->getOperand(2), Op->getOperand(3));
+    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtfirst, DL, MVT::i32);
+    MachineSDNode *FirstNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
+
+    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtsecond, DL, MVT::i32);
+    MachineSDNode *SecondNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
+
+    SDValue ExtractedOps[] = {SDValue(FirstNode, 0), SDValue(SecondNode, 0)};
+    return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
+  }
   case Intrinsic::vp_add:
   case Intrinsic::vp_sub:
   case Intrinsic::vp_mul:
@@ -3701,6 +3738,12 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "RISCVISD::EXTRACT_VECTOR_ELT";
   case RISCVISD::SIGN_EXTEND_BITS_INREG:
     return "RISCVISD::SIGN_EXTEND_BITS_INREG";
+  case RISCVISD::VZIP2:
+    return "RISCVISD::VZIP2";
+  case RISCVISD::VUNZIP2:
+    return "RISCVISD::VUNZIP2";
+  case RISCVISD::VTRN:
+    return "RISCVISD::VTRN";
   }
   return nullptr;
 }
