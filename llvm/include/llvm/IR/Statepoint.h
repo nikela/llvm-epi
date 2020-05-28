@@ -115,6 +115,25 @@ public:
   uint64_t getFlags() const {
     return cast<ConstantInt>(getArgOperand(FlagsPos))->getZExtValue();
   }
+
+  /// Return the value actually being called or invoked.
+  Value *getActualCalledOperand() const {
+    return getArgOperand(CalledFunctionPos);
+  }
+
+  /// Returns the function called if this is a wrapping a direct call, and null
+  /// otherwise.
+  Function *getActualCalledFunction() const {
+    return dyn_cast_or_null<Function>(getActualCalledOperand());
+  }
+
+  /// Return the type of the value returned by the call underlying the
+  /// statepoint.
+  Type *getActualReturnType() const {
+    auto *CalleeTy =
+      cast<PointerType>(getActualCalledOperand()->getType())->getElementType();
+    return cast<FunctionType>(CalleeTy)->getReturnType();
+  }
 };
 
 /// A wrapper around a GC intrinsic call, this provides most of the actual
@@ -128,18 +147,17 @@ class StatepointBase {
 
 protected:
   explicit StatepointBase(InstructionTy *I) {
-    StatepointCall = isStatepoint(I) ? cast<CallTy>(I) : nullptr;
+    StatepointCall = dyn_cast<GCStatepointInst>(I);
   }
 
   explicit StatepointBase(CallTy *Call) {
-    StatepointCall = isStatepoint(Call) ? Call : nullptr;
+    StatepointCall = dyn_cast<GCStatepointInst>(Call);
   }
 
 public:
   using arg_iterator = typename CallTy::const_op_iterator;
 
   enum {
-    CalledFunctionPos = GCStatepointInst::CalledFunctionPos,
     CallArgsBeginPos = GCStatepointInst::CallArgsBeginPos,
   };
 
@@ -162,21 +180,17 @@ public:
   uint64_t getID() const { return getCall()->getID(); }
   uint32_t getNumPatchBytes() const { return getCall()->getNumPatchBytes(); }
   int getNumCallArgs() const { return getCall()->getNumCallArgs(); }
-
-
-  /// Return the value actually being called or invoked.
   ValueTy *getCalledValue() const {
-    return getCall()->getArgOperand(CalledFunctionPos);
+    return getCall()->getActualCalledOperand();
+  }
+  Type *getActualReturnType() const { return getCall()->getActualReturnType(); }
+  FunTy *getCalledFunction() const {
+    return getCall()->getActualCalledFunction();
   }
 
+  
   // FIXME: Migrate users of this to `getCall` and remove it.
   InstructionTy *getInstruction() const { return getCall(); }
-
-  /// Return the function being called if this is a direct call, otherwise
-  /// return null (if it's an indirect call).
-  FunTy *getCalledFunction() const {
-    return dyn_cast<Function>(getCalledValue());
-  }
 
   /// Return the caller function for this statepoint.
   FunTy *getCaller() const { return getCall()->getCaller(); }
@@ -187,13 +201,6 @@ public:
     return getCall()->doesNotThrow() || (F ? F->doesNotThrow() : false);
   }
 
-  /// Return the type of the value returned by the call underlying the
-  /// statepoint.
-  Type *getActualReturnType() const {
-    auto *FTy = cast<FunctionType>(
-        cast<PointerType>(getCalledValue()->getType())->getElementType());
-    return FTy->getReturnType();
-  }
 
   size_t arg_size() const { return getNumCallArgs(); }
   arg_iterator arg_begin() const {
@@ -362,15 +369,13 @@ public:
   }
 
   /// The statepoint with which this gc.relocate is associated.
-  const CallBase *getStatepoint() const {
+  const GCStatepointInst *getStatepoint() const {
     const Value *Token = getArgOperand(0);
 
     // This takes care both of relocates for call statepoints and relocates
     // on normal path of invoke statepoint.
-    if (!isa<LandingPadInst>(Token)) {
-      assert(isStatepoint(Token));
-      return cast<CallBase>(Token);
-    }
+    if (!isa<LandingPadInst>(Token))
+      return cast<GCStatepointInst>(Token);
 
     // This relocate is on exceptional path of an invoke statepoint
     const BasicBlock *InvokeBB =
@@ -379,9 +384,8 @@ public:
     assert(InvokeBB && "safepoints should have unique landingpads");
     assert(InvokeBB->getTerminator() &&
            "safepoint block should be well formed");
-    assert(isStatepoint(InvokeBB->getTerminator()));
 
-    return cast<CallBase>(InvokeBB->getTerminator());
+    return cast<GCStatepointInst>(InvokeBB->getTerminator());
   }
 };
 

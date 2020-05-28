@@ -822,7 +822,7 @@ SelectionDAGBuilder::LowerStatepoint(const GCStatepointInst &I,
 #endif
 
   SDValue ActualCallee;
-  SDValue Callee = getValue(ISP.getCalledValue());
+  SDValue Callee = getValue(I.getActualCalledOperand());
 
   if (I.getNumPatchBytes() > 0) {
     // If we've been asked to emit a nop sequence instead of a call instruction
@@ -838,7 +838,7 @@ SelectionDAGBuilder::LowerStatepoint(const GCStatepointInst &I,
   StatepointLoweringInfo SI(DAG);
   populateCallLoweringInfo(SI.CLI, &I, GCStatepointInst::CallArgsBeginPos,
                            I.getNumCallArgs(), ActualCallee,
-                           ISP.getActualReturnType(), false /* IsPatchPoint */);
+                           I.getActualReturnType(), false /* IsPatchPoint */);
 
   // There may be duplication in the gc.relocate list; such as two copies of
   // each relocation on normal and exceptional path for an invoke.  We only
@@ -894,7 +894,7 @@ SelectionDAGBuilder::LowerStatepoint(const GCStatepointInst &I,
 
   // Export the result value if needed
   const GCResultInst *GCResult = ISP.getGCResult();
-  Type *RetTy = ISP.getActualReturnType();
+  Type *RetTy = I.getActualReturnType();
   if (!RetTy->isVoidTy() && GCResult) {
     if (GCResult->getParent() != I.getParent()) {
       // Result value will be used in a different basic block so we need to
@@ -970,7 +970,7 @@ void SelectionDAGBuilder::LowerCallSiteWithDeoptBundle(
 void SelectionDAGBuilder::visitGCResult(const GCResultInst &CI) {
   // The result value of the gc_result is simply the result of the actual
   // call.  We've already emitted this, so just grab the value.
-  const Instruction *I = CI.getStatepoint();
+  const GCStatepointInst *I = CI.getStatepoint();
 
   if (I->getParent() != CI.getParent()) {
     // Statepoint is in different basic block so we should have stored call
@@ -979,10 +979,7 @@ void SelectionDAGBuilder::visitGCResult(const GCResultInst &CI) {
     // register because statepoint and actual call return types can be
     // different, and getValue() will use CopyFromReg of the wrong type,
     // which is always i32 in our case.
-    PointerType *CalleeType = cast<PointerType>(
-        ImmutableStatepoint(I).getCalledValue()->getType());
-    Type *RetTy =
-        cast<FunctionType>(CalleeType->getElementType())->getReturnType();
+    Type *RetTy = I->getActualReturnType();
     SDValue CopyFromReg = getCopyFromRegs(I, RetTy);
 
     assert(CopyFromReg.getNode());
