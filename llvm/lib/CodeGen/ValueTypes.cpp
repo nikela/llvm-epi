@@ -298,6 +298,8 @@ Type *EVT::getTypeForEVT(LLVMContext &Context) const {
     return VectorType::get(Type::getInt8Ty(Context), 16, /*Scalable=*/ true);
   case MVT::nxv32i8:
     return VectorType::get(Type::getInt8Ty(Context), 32, /*Scalable=*/ true);
+  case MVT::nxv64i8:
+    return VectorType::get(Type::getInt8Ty(Context), 64, /*Scalable=*/ true);
   case MVT::nxv1i16:
     return VectorType::get(Type::getInt16Ty(Context), 1, /*Scalable=*/ true);
   case MVT::nxv2i16:
