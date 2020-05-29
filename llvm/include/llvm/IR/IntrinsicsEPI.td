@@ -549,32 +549,32 @@ multiclass epi_load {
   def ""              : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty ],
-                                  [ NoCapture<0>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
   def "_strided"      : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty, llvm_i64_ty ],
-                                  [ NoCapture<0>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
   def "_indexed"      : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_i64_ty ],
-                                  [ NoCapture<0>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
   def "_mask"         : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMMatchType<0>,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrReadMem ]>;
   def "_strided_mask" : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMMatchType<0>,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty, llvm_anyvector_ty,
                                     llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrReadMem ]>;
   def "_indexed_mask" : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMMatchType<0>,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_anyvector_ty,
                                     llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrReadMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrReadMem ]>;
 }
 
 defm int_epi_vload : epi_load;
@@ -585,34 +585,34 @@ multiclass epi_store {
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
   def "_strided"      : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty, llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
   def "_indexed"      : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
   def "_mask"         : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
   def "_strided_mask" : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty, llvm_anyvector_ty,
                                     llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
   def "_indexed_mask" : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_anyvector_ty, llvm_anyvector_ty,
                                     llvm_i64_ty ],
-                                  [ NoCapture<1>, IntrWriteMem ]>;
+                                  [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>;
 }
 
 defm int_epi_vstore : epi_store;

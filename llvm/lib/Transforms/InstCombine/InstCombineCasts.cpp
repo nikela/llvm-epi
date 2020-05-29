@@ -2546,7 +2546,7 @@ Instruction *InstCombiner::visitBitCast(BitCastInst &CI) {
     }
   }
 
-  if (VectorType *DestVTy = dyn_cast<VectorType>(DestTy)) {
+  if (FixedVectorType *DestVTy = dyn_cast<FixedVectorType>(DestTy)) {
     // Beware: messing with this target-specific oddity may cause trouble.
     if (DestVTy->getNumElements() == 1 && !SrcTy->isVectorTy() &&
         !isa<ScalableVectorType>(DestVTy) && SrcTy->isX86_MMXTy()) {
@@ -2576,8 +2576,8 @@ Instruction *InstCombiner::visitBitCast(BitCastInst &CI) {
     }
   }
 
-  if (VectorType *SrcVTy = dyn_cast<VectorType>(SrcTy)) {
-    if (SrcVTy->getNumElements() == 1 && !isa<ScalableVectorType>(SrcVTy)) {
+  if (FixedVectorType *SrcVTy = dyn_cast<FixedVectorType>(SrcTy)) {
+    if (SrcVTy->getNumElements() == 1) {
       // If our destination is not a vector, then make this a straight
       // scalar-scalar cast.
       if (!DestTy->isVectorTy()) {
