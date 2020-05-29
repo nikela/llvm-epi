@@ -480,17 +480,19 @@ def int_epi_vmv_x_s : Intrinsic< [ llvm_anyint_ty ],
                                  [ llvm_anyvector_ty ],
                                  [ IntrNoMem ] >, EPIIntrinsic<EPICIDvmv_x_s>;
 def int_epi_vmv_s_x : Intrinsic< [ llvm_anyvector_ty ],
-                                 [ llvm_anyint_ty, llvm_i64_ty ],
+                                 [ LLVMMatchType<0>, llvm_anyint_ty,
+                                   llvm_i64_ty ],
                                  [ IntrNoMem ] >, EPIIntrinsic<EPICIDvmv_s_x>
 {
-  let ExtendOperand = 1;
+  let ExtendOperand = 2;
 }
 
 def int_epi_vfmv_f_s : Intrinsic< [ llvm_anyfloat_ty ],
                                   [ llvm_anyvector_ty ],
                                   [ IntrNoMem ]>, EPIIntrinsic<EPICIDvfmv_f_s>;
 def int_epi_vfmv_s_f : Intrinsic< [ llvm_anyvector_ty ],
-                                  [ llvm_anyfloat_ty, llvm_i64_ty ],
+                                  [ LLVMMatchType<0>, llvm_anyfloat_ty,
+                                    llvm_i64_ty ],
                                   [ IntrNoMem ]>, EPIIntrinsic<EPICIDvfmv_s_f>;
 
 defm vfsqrt : epi_unary;

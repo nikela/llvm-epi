@@ -7236,6 +7236,7 @@ entry:
 
 
 declare <vscale x 8 x i8> @llvm.epi.vmv.s.x.nxv8i8.i8(
+  <vscale x 8 x i8>,
   i8,
   i64);
 
@@ -7245,6 +7246,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e8,m1
 ; CHECK:       vmv.s.x {{v[0-9]+}}, a0
   %a = call <vscale x 8 x i8> @llvm.epi.vmv.s.x.nxv8i8.i8(
+    <vscale x 8 x i8> undef,
     i8 undef,
     i64 undef)
 
@@ -7256,6 +7258,7 @@ entry:
 
 
 declare <vscale x 4 x i16> @llvm.epi.vmv.s.x.nxv4i16.i16(
+  <vscale x 4 x i16>,
   i16,
   i64);
 
@@ -7265,6 +7268,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e16,m1
 ; CHECK:       vmv.s.x {{v[0-9]+}}, a0
   %a = call <vscale x 4 x i16> @llvm.epi.vmv.s.x.nxv4i16.i16(
+    <vscale x 4 x i16> undef,
     i16 undef,
     i64 undef)
 
@@ -7276,6 +7280,7 @@ entry:
 
 
 declare <vscale x 2 x i32> @llvm.epi.vmv.s.x.nxv2i32.i32(
+  <vscale x 2 x i32>,
   i32,
   i64);
 
@@ -7285,6 +7290,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e32,m1
 ; CHECK:       vmv.s.x {{v[0-9]+}}, a0
   %a = call <vscale x 2 x i32> @llvm.epi.vmv.s.x.nxv2i32.i32(
+    <vscale x 2 x i32> undef,
     i32 undef,
     i64 undef)
 
@@ -7296,6 +7302,7 @@ entry:
 
 
 declare <vscale x 1 x i64> @llvm.epi.vmv.s.x.nxv1i64.i64(
+  <vscale x 1 x i64>,
   i64,
   i64);
 
@@ -7305,6 +7312,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e64,m1
 ; CHECK:       vmv.s.x {{v[0-9]+}}, a0
   %a = call <vscale x 1 x i64> @llvm.epi.vmv.s.x.nxv1i64.i64(
+    <vscale x 1 x i64> undef,
     i64 undef,
     i64 undef)
 
@@ -7316,6 +7324,7 @@ entry:
 
 
 declare <vscale x 2 x float> @llvm.epi.vfmv.s.f.nxv2f32.f32(
+  <vscale x 2 x float>,
   float,
   i64);
 
@@ -7325,6 +7334,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e32,m1
 ; CHECK:       vfmv.s.f {{v[0-9]+}}, ft0
   %a = call <vscale x 2 x float> @llvm.epi.vfmv.s.f.nxv2f32.f32(
+    <vscale x 2 x float> undef,
     float undef,
     i64 undef)
 
@@ -7336,6 +7346,7 @@ entry:
 
 
 declare <vscale x 1 x double> @llvm.epi.vfmv.s.f.nxv1f64.f64(
+  <vscale x 1 x double>,
   double,
   i64);
 
@@ -7345,6 +7356,7 @@ entry:
 ; CHECK:       vsetvli {{.*}}, a0, e64,m1
 ; CHECK:       vfmv.s.f {{v[0-9]+}}, ft0
   %a = call <vscale x 1 x double> @llvm.epi.vfmv.s.f.nxv1f64.f64(
+    <vscale x 1 x double> undef,
     double undef,
     i64 undef)
 

@@ -1086,16 +1086,18 @@ defm PseudoVREDMAXU    : pseudo_binary_v_vs;
 defm PseudoVREDMAX     : pseudo_binary_v_vs;
 
 let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
-    Uses = [VL, VTYPE], VLMul = VR.VLMul, MergeOpIndex = -1 in
+    Uses = [VL, VTYPE], VLMul = VR.VLMul in
 {
-  let VLIndex = -1, SEWIndex = 2, BaseInstr = VMV_X_S in
+  let VLIndex = -1, SEWIndex = 2, MergeOpIndex = -1, BaseInstr = VMV_X_S in
     def PseudoVMV_X_S : Pseudo<(outs GPR:$rd),
                                (ins VR:$rs2, ixlenimm:$sew),
                                []>,
                         EPIPseudo;
-  let VLIndex = 2, SEWIndex = 3, BaseInstr = VMV_S_X in
+  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
+      BaseInstr = VMV_S_X in
     def PseudoVMV_S_X : Pseudo<(outs VR:$rd),
-                               (ins GPR:$rs2, GPR:$vl, ixlenimm:$sew),
+                               (ins VR:$merge, GPR:$rs1, GPR:$vl,
+                                    ixlenimm:$sew),
                                []>,
                         EPIPseudo;
 }
@@ -1158,9 +1160,11 @@ let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
                                 (ins VR:$rs2, ixlenimm:$sew),
                                 []>,
                          EPIPseudo;
-  let VLIndex = 2, SEWIndex = 3, BaseInstr = VFMV_S_F in
+  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
+      BaseInstr = VFMV_S_F in
     def PseudoVFMV_S_F : Pseudo<(outs VR:$rd),
-                                (ins FPR32:$rs2, GPR:$vl, ixlenimm:$sew),
+                                (ins VR:$merge, FPR32:$rs2, GPR:$vl,
+                                     ixlenimm:$sew),
                                 []>,
                          EPIPseudo;
 }
@@ -2551,8 +2555,8 @@ foreach vti = [Vtype2xi32, Vtype4xi16, Vtype8xi8] in
             (PseudoVMV_X_S $rs2, vti.SEW)>;
 
 foreach vti = NoGroupIntegerVectors in
-  def : Pat<(vti.Vector (int_epi_vmv_s_x GPR:$rs2, GPR:$vl)),
-            (PseudoVMV_S_X $rs2, (NoX0 GPR:$vl), vti.SEW)>;
+  def : Pat<(vti.Vector (int_epi_vmv_s_x (vti.Vector VR:$merge), GPR:$rs1, GPR:$vl)),
+            (PseudoVMV_S_X $merge, $rs1, (NoX0 GPR:$vl), vti.SEW)>;
 
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1up", "PseudoVSLIDE1UP">;
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1down", "PseudoVSLIDE1DOWN">;
@@ -2661,9 +2665,10 @@ foreach fvti = NoGroupFloatVectors in
                   sub_32),
                  (PseudoVFMV_F_S $rs2, fvti.SEW))>;
 
-  def : Pat<(fvti.Vector (int_epi_vfmv_s_f
+  def : Pat<(fvti.Vector (int_epi_vfmv_s_f (fvti.Vector VR:$merge),
                           (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
             (PseudoVFMV_S_F
+             $merge,
              ToFPR32<fvti.Scalar, fvti.ScalarRegClass, "rs2">.ret,
              (NoX0 GPR:$vl), fvti.SEW)>;
 }

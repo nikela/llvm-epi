@@ -253,6 +253,14 @@ class EPIScalarToVecBuiltin<string suffix, string prototype,
   let IntrinsicTypes = [-1, 0];
 }
 
+class EPIScalarToScalarVecBuiltin<string suffix, string prototype,
+                                  string type_range>
+                                 : EPIBuiltin<suffix, prototype, type_range>
+{
+  let HasManualCodegen = 0;
+  let IntrinsicTypes = [-1, 1];
+}
+
 class EPIVecToScalarBuiltin<string suffix, string prototype,
                             string type_range>
                            : EPIBuiltin<suffix, prototype, type_range>
@@ -645,10 +653,10 @@ def viota : EPIMaskToIntBuiltin<"v", "vm", "csil">;
 def vid : EPINulBuiltin<"v", "v", "csil">;
 
 let LMUL = [1], HasMask = 0 in
-def vmv_s_x : EPIScalarToVecBuiltin<"v", "ve", "csil">;
+def vmv_s_x : EPIScalarToScalarVecBuiltin<"v", "vve", "csil">;
 
 let LMUL = [1], HasMask = 0 in
-def vfmv_s_f : EPIScalarToVecBuiltin<"v", "ve", "fd">;
+def vfmv_s_f : EPIScalarToScalarVecBuiltin<"v", "vve", "fd">;
 
 let LMUL = [1], HasMask = 0, HasVL = 0 in
 def vmv_x_s : EPIVecToScalarBuiltin<"v", "ev", "csil">;
