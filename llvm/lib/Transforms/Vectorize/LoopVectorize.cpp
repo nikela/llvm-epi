@@ -779,6 +779,9 @@ protected:
   /// The induction variable of the old basic block.
   PHINode *OldInduction = nullptr;
 
+  /// Index for the next iteration.
+  Instruction *NextIndex;
+
   /// Maps values from the original loop to their corresponding values in the
   /// vectorized loop. A key value can map to either vector values, scalar
   /// values or both kinds of values, depending on whether the key was
@@ -2814,11 +2817,12 @@ PHINode *InnerLoopVectorizer::createInductionVariable(Loop *L, Value *Start,
     CallInst *VscaleFuncCall = Builder.CreateCall(VscaleFunc, {});
     ScaleStep = Builder.CreateMul(VscaleFuncCall, Step, "index.vscale");
   }
-  Value *Next = Builder.CreateAdd(Induction, ScaleStep, "index.next");
+  NextIndex =
+      cast<Instruction>(Builder.CreateAdd(Induction, ScaleStep, "index.next"));
   Induction->addIncoming(Start, L->getLoopPreheader());
-  Induction->addIncoming(Next, Latch);
+  Induction->addIncoming(NextIndex, Latch);
   // Create the compare.
-  Value *ICmp = Builder.CreateICmpEQ(Next, End);
+  Value *ICmp = Builder.CreateICmpEQ(NextIndex, End);
   Builder.CreateCondBr(ICmp, L->getExitBlock(), Header);
 
   // Now we have two terminators. Remove the old one from the block.
@@ -3808,11 +3812,9 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
 }
 
 void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
-  Instruction *IndexNext =
-      cast<Instruction>(Induction->getIncomingValueForBlock(LoopVectorBody));
   // FIXME: Add support for interleaving.
-  ReplaceInstWithInst(IndexNext, BinaryOperator::Create(
-                                     Instruction::Add, IndexNext->getOperand(0),
+  ReplaceInstWithInst(NextIndex, BinaryOperator::Create(
+                                     Instruction::Add, NextIndex->getOperand(0),
                                      State.get(EVL, 0)));
 }
 
@@ -7416,8 +7418,6 @@ void LoopVectorizationPlanner::executePlan(InnerLoopVectorizer &ILV,
 
   // 3. Fix the vectorized code: take care of header phi's, live-outs,
   //    predication, updating analyses.
-  // TODO: We should not need to pass Plan->getEVL() once State is refactored to
-  // cache widened EVL values.
   ILV.fixVectorizedLoop(State);
 }
 
