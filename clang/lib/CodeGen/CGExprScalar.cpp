@@ -578,6 +578,7 @@ public:
   }
 
   Value *VisitArraySubscriptExpr(ArraySubscriptExpr *E);
+  Value *VisitMatrixSubscriptExpr(MatrixSubscriptExpr *E);
   Value *VisitShuffleVectorExpr(ShuffleVectorExpr *E);
   Value *VisitConvertVectorExpr(ConvertVectorExpr *E);
   Value *VisitMemberExpr(MemberExpr *E);
@@ -1668,8 +1669,8 @@ Value *ScalarExprEmitter::VisitShuffleVectorExpr(ShuffleVectorExpr *E) {
     //   n = extract mask i
     //   x = extract val n
     //   newv = insert newv, x, i
-    llvm::VectorType *RTy = llvm::VectorType::get(LTy->getElementType(),
-                                                  MTy->getNumElements());
+    auto *RTy = llvm::FixedVectorType::get(LTy->getElementType(),
+                                           MTy->getNumElements());
     Value* NewV = llvm::UndefValue::get(RTy);
     for (unsigned i = 0, e = MTy->getNumElements(); i != e; ++i) {
       Value *IIndx = llvm::ConstantInt::get(CGF.SizeTy, i);
@@ -1807,6 +1808,22 @@ Value *ScalarExprEmitter::VisitArraySubscriptExpr(ArraySubscriptExpr *E) {
     CGF.EmitBoundsCheck(E, E->getBase(), Idx, IdxTy, /*Accessed*/true);
 
   return Builder.CreateExtractElement(Base, Idx, "vecext");
+}
+
+Value *ScalarExprEmitter::VisitMatrixSubscriptExpr(MatrixSubscriptExpr *E) {
+  TestAndClearIgnoreResultAssign();
+
+  // Handle the vector case.  The base must be a vector, the index must be an
+  // integer value.
+  Value *RowIdx = Visit(E->getRowIdx());
+  Value *ColumnIdx = Visit(E->getColumnIdx());
+  Value *Matrix = Visit(E->getBase());
+
+  // TODO: Should we emit bounds checks with SanitizerKind::ArrayBounds?
+  llvm::MatrixBuilder<CGBuilderTy> MB(Builder);
+  return MB.CreateExtractElement(
+      Matrix, RowIdx, ColumnIdx,
+      E->getBase()->getType()->getAs<ConstantMatrixType>()->getNumRows());
 }
 
 static int getMaskElt(llvm::ShuffleVectorInst *SVI, unsigned Idx,
@@ -4458,10 +4475,8 @@ VisitAbstractConditionalOperator(const AbstractConditionalOperator *E) {
 
     llvm::Value *zeroVec = llvm::Constant::getNullValue(vecTy);
     llvm::Value *TestMSB = Builder.CreateICmpSLT(CondV, zeroVec);
-    llvm::Value *tmp = Builder.CreateSExt(TestMSB,
-                                          llvm::VectorType::get(elemType,
-                                                                numElem),
-                                          "sext");
+    llvm::Value *tmp = Builder.CreateSExt(
+        TestMSB, llvm::FixedVectorType::get(elemType, numElem), "sext");
     llvm::Value *tmp2 = Builder.CreateNot(tmp);
 
     // Cast float to int to perform ANDs if necessary.
@@ -4680,7 +4695,7 @@ Value *ScalarExprEmitter::VisitAsTypeExpr(AsTypeExpr *E) {
   // get a vec3.
   if (NumElementsSrc != 3 && NumElementsDst == 3) {
     if (!CGF.CGM.getCodeGenOpts().PreserveVec3Type) {
-      auto Vec4Ty = llvm::VectorType::get(
+      auto *Vec4Ty = llvm::FixedVectorType::get(
           cast<llvm::VectorType>(DstTy)->getElementType(), 4);
       Src = createCastsForTypeOfSameSize(Builder, CGF.CGM.getDataLayout(), Src,
                                          Vec4Ty);
