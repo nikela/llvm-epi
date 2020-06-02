@@ -2951,7 +2951,7 @@ multiclass pat_vop_binary<SDNode vop,
                           VReg op_reg_class,
                           bit swap = 0>
 {
-  foreach instruction = [!cast<Instruction>(instruction_name#"_VV_M"#vlmul)] in
+  defvar instruction = !cast<Instruction>(instruction_name#"_VV_M"#vlmul);
   def : Pat<(result_type (vop
                           (op_type op_reg_class:$rs1),
                           (op_type op_reg_class:$rs2))),
