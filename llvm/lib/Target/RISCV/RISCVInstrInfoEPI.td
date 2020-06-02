@@ -188,12 +188,27 @@ class VectorTypeInfo<ValueType Vec, ValueType Mas, int Sew, VReg Reg>
   VReg RegClass = Reg;
 }
 
+class GroupVectorTypeInfo<ValueType Vec, ValueType VecM1, ValueType Mas,
+                          int Sew, VReg Reg>
+    : VectorTypeInfo<Vec, Mas, Sew, Reg>
+{
+  ValueType VectorM1 = VecM1;
+}
+
 class FloatVectorTypeInfo<ValueType Vec, ValueType Mas, int Sew, VReg Reg,
                           ValueType Scal, RegisterClass ScalarReg>
     : VectorTypeInfo<Vec, Mas, Sew, Reg>
 {
   ValueType Scalar = Scal;
   RegisterClass ScalarRegClass = ScalarReg;
+}
+
+class GroupFloatVectorTypeInfo<ValueType Vec, ValueType VecM1, ValueType Mas,
+                               int Sew, VReg Reg, ValueType Scal,
+                               RegisterClass ScalarReg>
+    : FloatVectorTypeInfo<Vec, Mas, Sew, Reg, Scal, ScalarReg>
+{
+  ValueType VectorM1 = VecM1;
 }
 
 class VectorTypeInfoToWide<VectorTypeInfo vti, VectorTypeInfo wti>
@@ -227,22 +242,22 @@ defset list<VectorTypeInfo> AllVectors = {
       def Vtype1xi64 : VectorTypeInfo<nxv1i64, nxv1i1, 64, VR>;
     }
 
-    defset list<VectorTypeInfo> GroupIntegerVectors = {
-      def Vtype16xi8  : VectorTypeInfo<nxv16i8,  nxv16i1, 8,  VRM2>;
-      def Vtype32xi8  : VectorTypeInfo<nxv32i8,  nxv32i1, 8,  VRM4>;
-//    def Vtype64xi8  : VectorTypeInfo<nxv64i8,  nxv64i1, 8,  VRM8>; // FIXME undefined type
+    defset list<GroupVectorTypeInfo> GroupIntegerVectors = {
+      def Vtype16xi8  : GroupVectorTypeInfo<nxv16i8,  nxv8i8,  nxv16i1, 8,  VRM2>;
+      def Vtype32xi8  : GroupVectorTypeInfo<nxv32i8,  nxv8i8,  nxv32i1, 8,  VRM4>;
+//    def Vtype64xi8  : GroupVectorTypeInfo<nxv64i8,  nxv8i8,  nxv64i1, 8,  VRM8>; // FIXME undefined type
 
-      def Vtype8xi16  : VectorTypeInfo<nxv8i16,  nxv8i1,  16, VRM2>;
-      def Vtype16xi16 : VectorTypeInfo<nxv16i16, nxv16i1, 16, VRM4>;
-      def Vtype32xi16 : VectorTypeInfo<nxv32i16, nxv32i1, 16, VRM8>;
+      def Vtype8xi16  : GroupVectorTypeInfo<nxv8i16,  nxv4i16, nxv8i1,  16, VRM2>;
+      def Vtype16xi16 : GroupVectorTypeInfo<nxv16i16, nxv4i16, nxv16i1, 16, VRM4>;
+      def Vtype32xi16 : GroupVectorTypeInfo<nxv32i16, nxv4i16, nxv32i1, 16, VRM8>;
 
-      def Vtype4xi32  : VectorTypeInfo<nxv4i32,  nxv4i1,  32, VRM2>;
-      def Vtype8xi32  : VectorTypeInfo<nxv8i32,  nxv8i1,  32, VRM4>;
-      def Vtype16xi32 : VectorTypeInfo<nxv16i32, nxv16i1, 32, VRM8>;
+      def Vtype4xi32  : GroupVectorTypeInfo<nxv4i32,  nxv2i32, nxv4i1,  32, VRM2>;
+      def Vtype8xi32  : GroupVectorTypeInfo<nxv8i32,  nxv2i32, nxv8i1,  32, VRM4>;
+      def Vtype16xi32 : GroupVectorTypeInfo<nxv16i32, nxv2i32, nxv16i1, 32, VRM8>;
 
-      def Vtype2xi64  : VectorTypeInfo<nxv2i64,  nxv2i1,  64, VRM2>;
-      def Vtype4xi64  : VectorTypeInfo<nxv4i64,  nxv4i1,  64, VRM4>;
-      def Vtype8xi64  : VectorTypeInfo<nxv8i64,  nxv8i1,  64, VRM8>;
+      def Vtype2xi64  : GroupVectorTypeInfo<nxv2i64,  nxv1i64, nxv2i1,  64, VRM2>;
+      def Vtype4xi64  : GroupVectorTypeInfo<nxv4i64,  nxv1i64, nxv4i1,  64, VRM4>;
+      def Vtype8xi64  : GroupVectorTypeInfo<nxv8i64,  nxv1i64, nxv8i1,  64, VRM8>;
     }
   }
 
@@ -254,13 +269,15 @@ defset list<VectorTypeInfo> AllVectors = {
       def Vtype1xf64 : FloatVectorTypeInfo<nxv1f64, nxv1i1, 64, VR, f64, FPR64>;
     }
 
-    def Vtype4xf32  : FloatVectorTypeInfo<nxv4f32,  nxv4i1,  32, VRM2, f32, FPR32>;
-    def Vtype8xf32  : FloatVectorTypeInfo<nxv8f32,  nxv8i1,  32, VRM4, f32, FPR32>;
-    def Vtype16xf32 : FloatVectorTypeInfo<nxv16f32, nxv16i1, 32, VRM8, f32, FPR32>;
+    defset list<GroupFloatVectorTypeInfo> GroupFloatVectors = {
+      def Vtype4xf32  : GroupFloatVectorTypeInfo<nxv4f32,  nxv2f32, nxv4i1,  32, VRM2, f32, FPR32>;
+      def Vtype8xf32  : GroupFloatVectorTypeInfo<nxv8f32,  nxv2f32, nxv8i1,  32, VRM4, f32, FPR32>;
+      def Vtype16xf32 : GroupFloatVectorTypeInfo<nxv16f32, nxv2f32, nxv16i1, 32, VRM8, f32, FPR32>;
 
-    def Vtype2xf64  : FloatVectorTypeInfo<nxv2f64,  nxv2i1,  64, VRM2, f64, FPR64>;
-    def Vtype4xf64  : FloatVectorTypeInfo<nxv4f64,  nxv4i1,  64, VRM4, f64, FPR64>;
-    def Vtype8xf64  : FloatVectorTypeInfo<nxv8f64,  nxv8i1,  64, VRM8, f64, FPR64>;
+      def Vtype2xf64  : GroupFloatVectorTypeInfo<nxv2f64,  nxv1f64, nxv2i1,  64, VRM2, f64, FPR64>;
+      def Vtype4xf64  : GroupFloatVectorTypeInfo<nxv4f64,  nxv1f64, nxv4i1,  64, VRM4, f64, FPR64>;
+      def Vtype8xf64  : GroupFloatVectorTypeInfo<nxv8f64,  nxv1f64, nxv8i1,  64, VRM8, f64, FPR64>;
+    }
   }
 }
 
@@ -1456,34 +1473,34 @@ let Predicates = [HasStdExtV] in {
   }
 
   foreach vti = NoGroupIntegerVectors in {
-     def : Pat<(vti.Vector (zext (vti.Mask VR:$rs1))),
-               (PseudoVMAND_MM_M1 VR:$rs1, VR:$rs1, VLMax, vti.SEW)>;
-     // We don't have to do anything here because mask vectors only use the
-     // LSB of each element.
-     def : Pat<(vti.Mask (trunc (vti.Vector VR:$rs1))),
-               (COPY_TO_REGCLASS VR:$rs1, VR)>;
+    def : Pat<(vti.Vector (zext (vti.Mask VR:$rs1))),
+              (PseudoVMAND_MM_M1 VR:$rs1, VR:$rs1, VLMax, vti.SEW)>;
+    // We don't have to do anything here because mask vectors only use the
+    // LSB of each element.
+    def : Pat<(vti.Mask (trunc (vti.Vector VR:$rs1))),
+              (COPY_TO_REGCLASS VR:$rs1, VR)>;
   }
 
-  foreach vti = GroupIntegerVectors in {
-     def : Pat<(vti.Mask (trunc (vti.Vector vti.RegClass:$rs1))),
-               (!cast<Instruction>("PseudoVMSNE_VV_M"#vti.RegClass.VLMul)
-                (vti.Mask zero_reg),
-                (!cast<Instruction>("PseudoVAND_VI_M"#vti.RegClass.VLMul)
-                 (vti.Vector zero_reg),
-                 (vti.Vector vti.RegClass:$rs1), 1,
-                 (vti.Mask zero_reg),
-                 VLMax, vti.SEW),
-                (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul) 0,
-                 VLMax, vti.SEW),
-                (vti.Mask zero_reg),
-                VLMax, vti.SEW)>;
-     def : Pat<(vti.Vector (zext (vti.Mask V0))),
-               (!cast<Instruction>("PseudoVMERGE_VIM_M"#vti.RegClass.VLMul)
-                (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul) 0,
-                 VLMax, vti.SEW),
-                1,
-                (vti.Mask V0),
-                VLMax, vti.SEW)>;
+  foreach gvti = GroupIntegerVectors in {
+    def : Pat<(gvti.Mask (trunc (gvti.Vector gvti.RegClass:$rs1))),
+              (!cast<Instruction>("PseudoVMSNE_VV_M"#gvti.RegClass.VLMul)
+               (gvti.Mask zero_reg),
+               (!cast<Instruction>("PseudoVAND_VI_M"#gvti.RegClass.VLMul)
+                (gvti.Vector zero_reg),
+                (gvti.Vector gvti.RegClass:$rs1), 1,
+                (gvti.Mask zero_reg),
+                VLMax, gvti.SEW),
+               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
+                VLMax, gvti.SEW),
+               (gvti.Mask zero_reg),
+               VLMax, gvti.SEW)>;
+    def : Pat<(gvti.Vector (zext (gvti.Mask V0))),
+              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
+               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
+                VLMax, gvti.SEW),
+               1,
+               (gvti.Mask V0),
+               VLMax, gvti.SEW)>;
   }
 
   // FIXME Deal with {B,H,W} load/store (load + sext)
@@ -3155,28 +3172,28 @@ foreach vti = NoGroupIntegerVectors in {
 }
 
 // FIXME We should use extractelt here too, see comment above.
-foreach vti = GroupIntegerVectors in {
+foreach gvti = GroupIntegerVectors in {
   def : Pat<(i64 (!cast<SDNode>(!cond(
-                   !eq(!cast<string>(vti), !cast<string>(Vtype2xi64))
+                   !eq(!cast<string>(gvti), !cast<string>(Vtype2xi64))
                     : vector_extract,
-                   !eq(!cast<string>(vti), !cast<string>(Vtype4xi64))
+                   !eq(!cast<string>(gvti), !cast<string>(Vtype4xi64))
                     : vector_extract,
-                   !eq(!cast<string>(vti), !cast<string>(Vtype8xi64))
+                   !eq(!cast<string>(gvti), !cast<string>(Vtype8xi64))
                     : vector_extract,
                    1 : riscv_extract_vector_elt))
-                   (vti.Vector vti.RegClass:$rs2),
+                   (gvti.Vector gvti.RegClass:$rs2),
                    GPR:$rs1)),
             (PseudoVMV_X_S
              (EXTRACT_SUBREG
-              (!cast<Instruction>("PseudoVSLIDEDOWN_VX_M"#vti.RegClass.VLMul)
-               (vti.Vector zero_reg),
-               (vti.Vector vti.RegClass:$rs2),
+              (!cast<Instruction>("PseudoVSLIDEDOWN_VX_M"#gvti.RegClass.VLMul)
+               (gvti.Vector zero_reg),
+               (gvti.Vector gvti.RegClass:$rs2),
                GPR:$rs1,
-               (vti.Mask zero_reg),
+               (gvti.Mask zero_reg),
                VLMax,
-               vti.SEW),
+               gvti.SEW),
               sub_vrm2),
-             vti.SEW)>;
+             gvti.SEW)>;
 }
 
 foreach vti = AllIllegalIntegerVectors in {
