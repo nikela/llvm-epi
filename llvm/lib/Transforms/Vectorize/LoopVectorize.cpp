@@ -2334,7 +2334,7 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
   // Prepare for the vector type of the interleaved load/store.
   Type *ScalarTy = getMemInstValueType(Instr);
   unsigned InterleaveFactor = Group->getFactor();
-  Type *VecTy =
+  auto *VecTy =
       VectorType::get(ScalarTy, InterleaveFactor * VF, Cost->isScalable());
 
   // Prepare for the new pointers.
@@ -2454,7 +2454,7 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
   }
 
   // The sub vector type for current instruction.
-  VectorType *SubVT = VectorType::get(ScalarTy, VF, Cost->isScalable());
+  auto *SubVT = VectorType::get(ScalarTy, VF, Cost->isScalable());
 
   // Vectorize the interleaved store group.
   for (unsigned Part = 0; Part < UF; Part++) {
@@ -2526,7 +2526,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(Instruction *Instr,
          "CM decision is not to widen the memory instruction");
 
   Type *ScalarDataTy = getMemInstValueType(Instr);
-  Type *DataTy = VectorType::get(ScalarDataTy, VF, isScalable());
+  auto *DataTy = VectorType::get(ScalarDataTy, VF, isScalable());
   const Align Alignment = getLoadStoreAlignment(Instr);
 
   // Determine if the pointer operand of the access is either consecutive or
@@ -2960,7 +2960,7 @@ Value *InnerLoopVectorizer::createBitOrPointerCast(Value *V, VectorType *DstVTy,
          "Only one type should be a floating point type");
   Type *IntTy =
       IntegerType::getIntNTy(V->getContext(), DL.getTypeSizeInBits(SrcElemTy));
-  VectorType *VecIntTy = VectorType::get(IntTy, VF, Cost->isScalable());
+  auto *VecIntTy = VectorType::get(IntTy, VF, Cost->isScalable());
   Value *CastVal = Builder.CreateBitOrPointerCast(V, VecIntTy);
   return Builder.CreateBitOrPointerCast(CastVal, DstVTy);
 }
@@ -3636,7 +3636,7 @@ void InnerLoopVectorizer::truncateToMinimalBitwidths() {
       Type *OriginalTy = I->getType();
       Type *ScalarTruncatedTy =
           IntegerType::get(OriginalTy->getContext(), KV.second);
-      Type *TruncatedTy = VectorType::get(
+      auto *TruncatedTy = VectorType::get(
           ScalarTruncatedTy, cast<VectorType>(OriginalTy)->getNumElements(),
           Cost->isScalable());
       if (TruncatedTy == OriginalTy)
@@ -6687,7 +6687,7 @@ unsigned LoopVectorizationCostModel::getInterleaveGroupCost(Instruction *I,
   assert(Group && "Fail to get an interleaved access group.");
 
   unsigned InterleaveFactor = Group->getFactor();
-  VectorType *WideVecTy = VectorType::get(ValTy, VF * InterleaveFactor, isScalable());
+  auto *WideVecTy = VectorType::get(ValTy, VF * InterleaveFactor, isScalable());
 
   // Holds the indices of existing members in an interleaved load group.
   // An interleaved store group doesn't need this as it doesn't allow gaps.

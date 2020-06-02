@@ -669,15 +669,16 @@ llvm::Type *CodeGenTypes::ConvertType(QualType T) {
                                          VT->getNumElements(),
                                          /* Scalable */ 1);
     } else {
-      ResultType = llvm::VectorType::get(ConvertType(VT->getElementType()),
-                                         VT->getNumElements());
+      ResultType = llvm::FixedVectorType::get(ConvertType(VT->getElementType()),
+                                              VT->getNumElements());
     }
     break;
   }
   case Type::ConstantMatrix: {
     const ConstantMatrixType *MT = cast<ConstantMatrixType>(Ty);
-    ResultType = llvm::VectorType::get(ConvertType(MT->getElementType()),
-                                       MT->getNumRows() * MT->getNumColumns());
+    ResultType =
+        llvm::FixedVectorType::get(ConvertType(MT->getElementType()),
+                                   MT->getNumRows() * MT->getNumColumns());
     break;
   }
   case Type::FunctionNoProto:
