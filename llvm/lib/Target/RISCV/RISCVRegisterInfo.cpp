@@ -152,8 +152,8 @@ bool RISCVRegisterInfo::hasReservedSpillSlot(const MachineFunction &MF,
 
 static Register computeVRSpillReloadInstructions(
     MachineBasicBlock::iterator II, const Register &VReg,
-    const Register &HandleReg, unsigned LMUL, bool IsReload, bool KillVReg,
-    Register VLenBReg = 0, bool KillHandle = false) {
+    const Register &HandleReg, unsigned LMUL, bool IsReload, unsigned TupleSize,
+    bool KillVReg, Register VLenBReg = 0, bool KillHandle = false) {
   MachineBasicBlock &MBB = *II->getParent();
   MachineFunction &MF = *MBB.getParent();
   MachineRegisterInfo &MRI = MF.getRegInfo();
@@ -161,17 +161,48 @@ static Register computeVRSpillReloadInstructions(
   const RISCVInstrInfo &TII = *MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
   DebugLoc DL = II->getDebugLoc();
 
-  if (LMUL == 1) {
-    if (IsReload)
-      BuildMI(MBB, II, DL, TII.get(RISCV::VL1R_V), VReg)
-          .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
-    else
-      BuildMI(MBB, II, DL, TII.get(RISCV::VS1R_V))
-          .addReg(VReg, getKillRegState(KillVReg))
-          .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
+  assert(TupleSize != 1 && "TupleSize can't be 1");
 
-    return HandleReg;
+  if (LMUL == 1) {
+    if (!TupleSize) {
+      if (IsReload)
+        BuildMI(MBB, II, DL, TII.get(RISCV::VL1R_V), VReg)
+            .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
+      else
+        BuildMI(MBB, II, DL, TII.get(RISCV::VS1R_V))
+            .addReg(VReg, getKillRegState(KillVReg))
+            .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
+
+      return HandleReg;
+    } else {
+      assert(TupleSize == 2 && "Unexpected tuple size");
+      Register VRegFirst = RI.getSubReg(VReg, RISCV::vtfirst);
+      Register VRegSecond = RI.getSubReg(VReg, RISCV::vtsecond);
+
+      // Compute the second handle already so we can kill the first handle
+      // when spilling the first register.
+      assert(VLenBReg == 0 && "Unexpected register");
+      VLenBReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+      BuildMI(MBB, II, DL, TII.get(RISCV::PseudoReadVLENB), VLenBReg);
+
+      Register HandleRegSecond = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+      BuildMI(MBB, II, DL, TII.get(RISCV::ADD), HandleRegSecond)
+          .addReg(HandleReg)
+          .addReg(VLenBReg);
+
+      // First part.
+      computeVRSpillReloadInstructions(II, VRegFirst, HandleReg, LMUL, IsReload,
+                                       /* TupleSize */ 0, KillVReg);
+      // Second part.
+      computeVRSpillReloadInstructions(II, VRegSecond, HandleRegSecond, LMUL,
+                                       IsReload, /* TupleSize */ 0, KillVReg);
+      // We're done. Return zero_reg to make sure nobody attempts to use this
+      // for now.
+      return RISCV::NoRegister;
+    }
   }
+
+  assert(TupleSize == 0 && "No tuple vectors of LMUL>1 yet");
 
   Register VRegEven, VRegOdd;
   switch (LMUL) {
@@ -206,8 +237,9 @@ static Register computeVRSpillReloadInstructions(
 
   // Recursive call on the even subregister. The handle corresponding to the
   // latest spill/reload in the recursion is returned as a result.
-  Register LastHandleReg = computeVRSpillReloadInstructions(
-      II, VRegEven, HandleReg, LMUL / 2, IsReload, KillVReg, VLenBReg);
+  Register LastHandleReg =
+      computeVRSpillReloadInstructions(II, VRegEven, HandleReg, LMUL / 2,
+                                       IsReload, TupleSize, KillVReg, VLenBReg);
 
   Register HandleRegOdd = MRI.createVirtualRegister(&RISCV::GPRRegClass);
   BuildMI(MBB, II, DL, TII.get(RISCV::ADD), HandleRegOdd)
@@ -216,7 +248,7 @@ static Register computeVRSpillReloadInstructions(
 
   // Recursive call on the odd subregister. Return latest spill/reload handle.
   return computeVRSpillReloadInstructions(II, VRegOdd, HandleRegOdd, LMUL / 2,
-                                          IsReload, KillVReg, VLenBReg,
+                                          IsReload, TupleSize, KillVReg, VLenBReg,
                                           KillHandle);
 }
 
@@ -253,7 +285,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
     // FIXME: Are the following two needed now?
   case RISCV::VLE_V:
   case RISCV::VSE_V:
-    // The following two are handled later in this function
+    // The following are handled later in this function.
   case RISCV::PseudoVSPILL_M1:
   case RISCV::PseudoVRELOAD_M1:
   case RISCV::PseudoVSPILL_M2:
@@ -262,6 +294,9 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   case RISCV::PseudoVRELOAD_M4:
   case RISCV::PseudoVSPILL_M8:
   case RISCV::PseudoVRELOAD_M8:
+    // Vector tuples.
+  case RISCV::PseudoVSPILL_2xM1:
+  case RISCV::PseudoVRELOAD_2xM1:
     NeedsIndirectAddressing =
         MFI.getStackID(FrameIndex) == TargetStackID::EPIVector;
     break;
@@ -304,13 +339,17 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
         MI.getOpcode() == RISCV::PseudoVSPILL_M4 ||
         MI.getOpcode() == RISCV::PseudoVRELOAD_M4 ||
         MI.getOpcode() == RISCV::PseudoVSPILL_M8 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_M8) {
+        MI.getOpcode() == RISCV::PseudoVRELOAD_M8 ||
+        // Vector tuples.
+        MI.getOpcode() == RISCV::PseudoVSPILL_2xM1 ||
+        MI.getOpcode() == RISCV::PseudoVRELOAD_2xM1) {
 
       // Make sure we spill/reload all the bits using whole register
       // instructions.
       MachineOperand &OpReg = MI.getOperand(0);
       bool IsReload;
       unsigned LMUL;
+      unsigned TupleSize = 0;
       switch (MI.getOpcode()) {
       default:
         llvm_unreachable("Unexpected instruction");
@@ -330,9 +369,14 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
         IsReload = false; LMUL = 8; break;
       case RISCV::PseudoVRELOAD_M8:
         IsReload = true;  LMUL = 8; break;
+      case RISCV::PseudoVSPILL_2xM1:
+        IsReload = false;  LMUL = 1; TupleSize = 2; break;
+      case RISCV::PseudoVRELOAD_2xM1:
+        IsReload = true;  LMUL = 1; TupleSize = 2; break;
       }
       computeVRSpillReloadInstructions(II, OpReg.getReg(), HandleReg, LMUL,
-                                       IsReload, /* KillVReg */ OpReg.isKill());
+                                       IsReload, TupleSize,
+                                       /* KillVReg */ OpReg.isKill());
 
       // Remove the pseudo
       MI.eraseFromParent();

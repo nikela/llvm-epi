@@ -46,6 +46,8 @@ unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
   case RISCV::PseudoVRELOAD_M2:
   case RISCV::PseudoVRELOAD_M4:
   case RISCV::PseudoVRELOAD_M8:
+
+  case RISCV::PseudoVRELOAD_2xM1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -80,6 +82,8 @@ unsigned RISCVInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
   case RISCV::PseudoVSPILL_M2:
   case RISCV::PseudoVSPILL_M4:
   case RISCV::PseudoVSPILL_M8:
+
+  case RISCV::PseudoVSPILL_2xM1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -241,6 +245,13 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
+  } else if (RISCV::VRTupleRegClass.hasSubClassEq(RC)) {
+    RVFI->setHasSpilledVR();
+    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_2xM1))
+        .addReg(SrcReg, getKillRegState(IsKill))
+        .addFrameIndex(FI);
+    return;
   } else
     llvm_unreachable("Can't store this register to stack slot");
 
@@ -294,6 +305,12 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
     RVFI->setHasSpilledVR();
     FrameInfo.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M8), DstReg)
+        .addFrameIndex(FI);
+    return;
+  } else if (RISCV::VRTupleRegClass.hasSubClassEq(RC)) {
+    RVFI->setHasSpilledVR();
+    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_2xM1), DstReg)
         .addFrameIndex(FI);
     return;
   } else

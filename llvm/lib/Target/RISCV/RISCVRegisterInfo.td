@@ -382,4 +382,9 @@ def vtsecond : SubRegIndex<0, -1>;
 def VSeqPairs : RegisterTuples<[vtfirst, vtsecond],
         [(add (sequence "V%u", 1, 31), V0),
          (rotl (add (sequence "V%u", 1, 31), V0), 1)]>;
-def VRTuple : VReg<[untyped], (add VSeqPairs), 1>;
+
+def VRTuple : VReg<[untyped], (add VSeqPairs), 1>
+{
+  // SpillSize is the same as VRM2.
+  let Size = 128;
+}

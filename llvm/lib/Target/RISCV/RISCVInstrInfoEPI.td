@@ -165,6 +165,15 @@ defm "" : pseudo_spill_reload<VRM2, 2>;
 defm "" : pseudo_spill_reload<VRM4, 4>;
 defm "" : pseudo_spill_reload<VRM8, 8>;
 
+// Tuples.
+let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
+    Uses = [VL, VTYPE] in
+def PseudoVSPILL_2xM1 : Pseudo<(outs), (ins VRTuple:$rs1, GPR:$rs2), []>;
+
+let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
+    Uses = [VL, VTYPE] in
+def PseudoVRELOAD_2xM1 : Pseudo<(outs VRTuple:$rs1), (ins GPR:$rs2), []>;
+
 }
 
 //===----------------------------------------------------------------------===//
