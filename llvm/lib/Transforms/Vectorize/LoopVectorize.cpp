@@ -4860,8 +4860,9 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     // Add rounding mode and exception control args.
     // TODO: Add support for non-default values.
     if (VPIntrInstr(Opcode).IsFP) {
-      Ops.push_back(getConstrainedFPRounding(Builder.getContext(),
-                                             RoundingMode::NearestTiesToEven));
+      if (Opcode != Instruction::FNeg)
+        Ops.push_back(getConstrainedFPRounding(
+            Builder.getContext(), RoundingMode::NearestTiesToEven));
       Ops.push_back(getConstrainedFPExcept(Builder.getContext(),
                                            fp::ExceptionBehavior::ebIgnore));
     }
