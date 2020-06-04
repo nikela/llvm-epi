@@ -760,9 +760,19 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
       MF.getSubtarget<RISCVSubtarget>().getRegisterInfo();
 
   auto *RVFI = MF.getInfo<RISCVMachineFunctionInfo>();
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
+  const TargetRegisterClass *RC = &RISCV::GPRRegClass;
+  if (RVFI->hasSpilledVR()) {
+    // We conservatively add one extra emergency slots if we have seen PseudoVSPILL
+    // or PseudoVRELOAD because we may need it for vlenb.
+    int RegScavFI = MFI.CreateStackObject(
+        RegInfo->getSpillSize(*RC), RegInfo->getSpillAlignment(*RC), false);
+    RS->addScavengingFrameIndex(RegScavFI);
+  }
+
   // Go through all Stackslots coming from a VR alloca and make them VR_SPILL.
   // We need to this early otherwise we may be answering hasFP false.
-  MachineFrameInfo &MFI = MF.getFrameInfo();
   for (int FI = MFI.getObjectIndexBegin(), EFI = MFI.getObjectIndexEnd();
        FI < EFI; FI++) {
     // Get the (LLVM IR) allocation instruction

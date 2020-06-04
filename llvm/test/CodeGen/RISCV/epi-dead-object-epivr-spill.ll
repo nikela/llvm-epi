@@ -5,26 +5,26 @@
 define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is, i64 %os, i64 %v, i64 %ivs, i64 %ovs) nounwind {
 ; CHECK-LABEL: n1fv_32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -112
-; CHECK-NEXT:    sd ra, 104(sp)
-; CHECK-NEXT:    sd s0, 96(sp)
-; CHECK-NEXT:    sd s1, 88(sp)
-; CHECK-NEXT:    sd s2, 80(sp)
-; CHECK-NEXT:    sd s3, 72(sp)
-; CHECK-NEXT:    sd s4, 64(sp)
-; CHECK-NEXT:    sd s5, 56(sp)
-; CHECK-NEXT:    addi s0, sp, 112
+; CHECK-NEXT:    addi sp, sp, -128
+; CHECK-NEXT:    sd ra, 120(sp)
+; CHECK-NEXT:    sd s0, 112(sp)
+; CHECK-NEXT:    sd s1, 104(sp)
+; CHECK-NEXT:    sd s2, 96(sp)
+; CHECK-NEXT:    sd s3, 88(sp)
+; CHECK-NEXT:    sd s4, 80(sp)
+; CHECK-NEXT:    sd s5, 72(sp)
+; CHECK-NEXT:    addi s0, sp, 128
 ; CHECK-NEXT:    rdvlenb a1
-; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -72(s0)
-; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -80(s0)
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -88(s0)
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -96(s0)
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -104(s0)
+; CHECK-NEXT:    sub sp, sp, a1
+; CHECK-NEXT:    sd sp, -112(s0)
+; CHECK-NEXT:    sub sp, sp, a1
+; CHECK-NEXT:    sd sp, -120(s0)
 ; CHECK-NEXT:    mv s2, a5
 ; CHECK-NEXT:    mv s4, a4
 ; CHECK-NEXT:    mv s3, a2
@@ -32,33 +32,33 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    addi s5, zero, 8
 ; CHECK-NEXT:    vsetvli a0, s5, e64,m1
 ; CHECK-NEXT:    vid.v v2
-; CHECK-NEXT:    ld a0, -96(s0)
+; CHECK-NEXT:    ld a0, -112(s0)
 ; CHECK-NEXT:    vs1r.v v2, (a0)
 ; CHECK-NEXT:    vsrl.vi v1, v2, 1
-; CHECK-NEXT:    ld a0, -80(s0)
+; CHECK-NEXT:    ld a0, -96(s0)
 ; CHECK-NEXT:    vs1r.v v1, (a0)
 ; CHECK-NEXT:    vmul.vx v1, v1, a0
 ; CHECK-NEXT:    vand.vi v16, v2, 1
-; CHECK-NEXT:    ld a0, -72(s0)
+; CHECK-NEXT:    ld a0, -88(s0)
 ; CHECK-NEXT:    vs1r.v v16, (a0)
 ; CHECK-NEXT:    vmul.vv v2, v16, v1
-; CHECK-NEXT:    ld a0, -104(s0)
+; CHECK-NEXT:    ld a0, -120(s0)
 ; CHECK-NEXT:    vs1r.v v2, (a0)
 ; CHECK-NEXT:    vadd.vv v1, v1, v2
-; CHECK-NEXT:    ld a0, -88(s0)
+; CHECK-NEXT:    ld a0, -104(s0)
 ; CHECK-NEXT:    vs1r.v v1, (a0)
 ; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64
 ; CHECK-NEXT:    vsetvli a0, s5, e64,m1
-; CHECK-NEXT:    ld a0, -96(s0)
+; CHECK-NEXT:    ld a0, -112(s0)
 ; CHECK-NEXT:    vl1r.v v1, (a0)
 ; CHECK-NEXT:    vxor.vi v2, v1, 1
-; CHECK-NEXT:    ld a0, -80(s0)
+; CHECK-NEXT:    ld a0, -96(s0)
 ; CHECK-NEXT:    vl1r.v v1, (a0)
 ; CHECK-NEXT:    vmul.vv v1, v1, v1
-; CHECK-NEXT:    ld a0, -104(s0)
+; CHECK-NEXT:    ld a0, -120(s0)
 ; CHECK-NEXT:    vl1r.v v3, (a0)
 ; CHECK-NEXT:    vadd.vv v1, v1, v3
-; CHECK-NEXT:    ld a0, -88(s0)
+; CHECK-NEXT:    ld a0, -104(s0)
 ; CHECK-NEXT:    vl1r.v v13, (a0)
 ; CHECK-NEXT:    vlxe.v v20, (a0), v13
 ; CHECK-NEXT:    slli a0, s4, 7
@@ -186,7 +186,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsgnjn.vv v15, v15, v15, v0.t
 ; CHECK-NEXT:    vrgather.vv v8, v15, v2
 ; CHECK-NEXT:    vfsub.vv v15, v12, v8
-; CHECK-NEXT:    ld a1, -72(s0)
+; CHECK-NEXT:    ld a1, -88(s0)
 ; CHECK-NEXT:    vl1r.v v25, (a1)
 ; CHECK-NEXT:    vrgather.vv v24, v15, v25
 ; CHECK-NEXT:    vsxe.v v24, (a0), v1
