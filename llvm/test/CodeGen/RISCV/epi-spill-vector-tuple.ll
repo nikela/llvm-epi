@@ -19,15 +19,15 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    vsetvli a3, a2, e64,m1
 ; SPILL-O0-NEXT:    vle.v v1, (a0)
 ; SPILL-O0-NEXT:    vle.v v2, (a1)
-; SPILL-O0-NEXT:    vzip2.vv v3, v1, v2
-; SPILL-O0-NEXT:    vmv1r.v v1, v4
-; SPILL-O0-NEXT:    # kill: def $v3 killed $v3 killed $v3_v4
+; SPILL-O0-NEXT:    vzip2.vv v1, v1, v2
+; SPILL-O0-NEXT:    vmv1r.v v3, v2
+; SPILL-O0-NEXT:    # kill: def $v1 killed $v1 killed $v1_v2
 ; SPILL-O0-NEXT:    sd a2, -32(s0)
 ; SPILL-O0-NEXT:    sd a0, -40(s0)
 ; SPILL-O0-NEXT:    ld a0, -56(s0)
-; SPILL-O0-NEXT:    vs1r.v v1, (a0)
-; SPILL-O0-NEXT:    ld a0, -64(s0)
 ; SPILL-O0-NEXT:    vs1r.v v3, (a0)
+; SPILL-O0-NEXT:    ld a0, -64(s0)
+; SPILL-O0-NEXT:    vs1r.v v1, (a0)
 ; SPILL-O0-NEXT:    call foo
 ; SPILL-O0-NEXT:    ld a0, -32(s0)
 ; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1

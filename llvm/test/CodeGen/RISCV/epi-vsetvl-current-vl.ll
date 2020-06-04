@@ -16,12 +16,12 @@ define double @test_change_vtype_only_1(<vscale x 1 x double> %a, <vscale x 2 x 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1
 ; CHECK-O0-NEXT:    vfmv.f.s ft0, v16
-; CHECK-O0-NEXT:    fmv.s ft1, ft0
+; CHECK-O0-NEXT:    # kill: def $f0_d killed $f0_f
 ; CHECK-O0-NEXT:    vsetvli zero, zero, e32,m1
-; CHECK-O0-NEXT:    vfmv.f.s ft0, v17
-; CHECK-O0-NEXT:    fcvt.d.s ft2, ft0
-; CHECK-O0-NEXT:    fadd.d ft1, ft1, ft2
-; CHECK-O0-NEXT:    fmv.x.d a0, ft1
+; CHECK-O0-NEXT:    vfmv.f.s ft1, v17
+; CHECK-O0-NEXT:    fcvt.d.s ft1, ft1
+; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
+; CHECK-O0-NEXT:    fmv.x.d a0, ft0
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_change_vtype_only_1:
@@ -46,11 +46,11 @@ define double @test_change_vtype_only_2(<vscale x 1 x double> %a, <vscale x 1 x 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1
 ; CHECK-O0-NEXT:    vfmv.f.s ft0, v16
-; CHECK-O0-NEXT:    fmv.s ft1, ft0
-; CHECK-O0-NEXT:    vfmv.f.s ft0, v17
-; CHECK-O0-NEXT:    fmv.s ft2, ft0
-; CHECK-O0-NEXT:    fadd.d ft1, ft1, ft2
-; CHECK-O0-NEXT:    fmv.x.d a0, ft1
+; CHECK-O0-NEXT:    # kill: def $f0_d killed $f0_f
+; CHECK-O0-NEXT:    vfmv.f.s ft1, v17
+; CHECK-O0-NEXT:    # kill: def $f1_d killed $f1_f
+; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
+; CHECK-O0-NEXT:    fmv.x.d a0, ft0
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_change_vtype_only_2:

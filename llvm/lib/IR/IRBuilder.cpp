@@ -1006,7 +1006,8 @@ Value *IRBuilderBase::CreateVectorSplat(ElementCount NumElts, Value *V,
                           Name + ".splatinsert");
 
   // Shuffle the value across the desired number of elements.
-  Value *Zeros = ConstantAggregateZero::get(VectorType::get(I32Ty, NumElts));
+  Value *Zeros =
+      ConstantAggregateZero::get(VectorType::get(I32Ty, NumElts));
   return CreateShuffleVector(V, Undef, Zeros, Name + ".splat");
 }
 
