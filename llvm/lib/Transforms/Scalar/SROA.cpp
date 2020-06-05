@@ -3389,6 +3389,7 @@ private:
                             getAdjustedAlignment(&LI, 0), DL);
     Value *V = UndefValue::get(LI.getType());
     Splitter.emitSplitOps(LI.getType(), V, LI.getName() + ".fca");
+    Visited.erase(&LI);
     LI.replaceAllUsesWith(V);
     LI.eraseFromParent();
     return true;
@@ -3435,6 +3436,7 @@ private:
     StoreOpSplitter Splitter(&SI, *U, V->getType(), AATags,
                              getAdjustedAlignment(&SI, 0), DL);
     Splitter.emitSplitOps(V->getType(), V, V->getName() + ".fca");
+    Visited.erase(&SI);
     SI.eraseFromParent();
     return true;
   }
@@ -3481,6 +3483,7 @@ private:
 
     Value *NSel = Builder.CreateSelect(Sel->getCondition(), NTrue, NFalse,
                                        Sel->getName() + ".sroa.sel");
+    Visited.erase(&GEPI);
     GEPI.replaceAllUsesWith(NSel);
     GEPI.eraseFromParent();
     Instruction *NSelI = cast<Instruction>(NSel);
@@ -3529,6 +3532,7 @@ private:
       NewPN->addIncoming(NewVal, PHI->getIncomingBlock(I));
     }
 
+    Visited.erase(&GEPI);
     GEPI.replaceAllUsesWith(NewPN);
     GEPI.eraseFromParent();
     Visited.insert(NewPN);
