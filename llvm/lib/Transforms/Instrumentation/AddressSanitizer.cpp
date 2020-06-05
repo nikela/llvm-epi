@@ -644,7 +644,7 @@ struct AddressSanitizer {
   bool suppressInstrumentationSiteForDebug(int &Instrumented);
   bool instrumentFunction(Function &F, const TargetLibraryInfo *TLI);
   bool maybeInsertAsanInitAtFunctionEntry(Function &F);
-  void maybeInsertDynamicShadowAtFunctionEntry(Function &F);
+  bool maybeInsertDynamicShadowAtFunctionEntry(Function &F);
   void markEscapedLocalAllocas(Function &F);
 
 private:
@@ -2036,11 +2036,15 @@ void ModuleAddressSanitizer::InstrumentGlobalsCOFF(
   assert(ExtendedGlobals.size() == MetadataInitializers.size());
   auto &DL = M.getDataLayout();
 
+  SmallVector<GlobalValue *, 16> MetadataGlobals(ExtendedGlobals.size());
   for (size_t i = 0; i < ExtendedGlobals.size(); i++) {
     Constant *Initializer = MetadataInitializers[i];
     GlobalVariable *G = ExtendedGlobals[i];
     GlobalVariable *Metadata =
         CreateMetadataGlobal(M, Initializer, G->getName());
+    MDNode *MD = MDNode::get(M.getContext(), ValueAsMetadata::get(G));
+    Metadata->setMetadata(LLVMContext::MD_associated, MD);
+    MetadataGlobals[i] = Metadata;
 
     // The MSVC linker always inserts padding when linking incrementally. We
     // cope with that by aligning each struct to its size, which must be a power
@@ -2052,6 +2056,11 @@ void ModuleAddressSanitizer::InstrumentGlobalsCOFF(
 
     SetComdatForGlobalMetadata(G, Metadata, "");
   }
+
+  // Update llvm.compiler.used, adding the new metadata globals. This is
+  // needed so that during LTO these variables stay alive.
+  if (!MetadataGlobals.empty())
+    appendToCompilerUsed(M, MetadataGlobals);
 }
 
 void ModuleAddressSanitizer::InstrumentGlobalsELF(
@@ -2563,10 +2572,10 @@ bool AddressSanitizer::maybeInsertAsanInitAtFunctionEntry(Function &F) {
   return false;
 }
 
-void AddressSanitizer::maybeInsertDynamicShadowAtFunctionEntry(Function &F) {
+bool AddressSanitizer::maybeInsertDynamicShadowAtFunctionEntry(Function &F) {
   // Generate code only when dynamic addressing is needed.
   if (Mapping.Offset != kDynamicShadowSentinel)
-    return;
+    return false;
 
   IRBuilder<> IRB(&F.front().front());
   if (Mapping.InGlobal) {
@@ -2588,6 +2597,7 @@ void AddressSanitizer::maybeInsertDynamicShadowAtFunctionEntry(Function &F) {
         kAsanShadowMemoryDynamicAddress, IntptrTy);
     LocalDynamicShadow = IRB.CreateLoad(IntptrTy, GlobalDynamicAddress);
   }
+  return true;
 }
 
 void AddressSanitizer::markEscapedLocalAllocas(Function &F) {
@@ -2649,7 +2659,7 @@ bool AddressSanitizer::instrumentFunction(Function &F,
 
   FunctionStateRAII CleanupObj(this);
 
-  maybeInsertDynamicShadowAtFunctionEntry(F);
+  FunctionModified |= maybeInsertDynamicShadowAtFunctionEntry(F);
 
   // We can't instrument allocas used with llvm.localescape. Only static allocas
   // can be passed to that intrinsic.
