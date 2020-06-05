@@ -881,6 +881,7 @@ bool Sema::containsUnexpandedParameterPacks(Declarator &D) {
   case TST_auto:
   case TST_auto_type:
   case TST_decltype_auto:
+  case TST_BFloat16:
 #define GENERIC_IMAGE_TYPE(ImgType, Id) case TST_##ImgType##_t:
 #include "clang/Basic/OpenCLImageTypes.def"
 #define EPI_VECTOR_TYPE(Scale, TypeName) case TST_EPI_##Scale##x##TypeName:
