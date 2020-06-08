@@ -36576,16 +36576,21 @@ static SDValue combineShuffle(SDNode *N, SelectionDAG &DAG,
   // insert into a zero vector. This helps get VZEXT_MOVL closer to
   // scalar_to_vectors where 256/512 are canonicalized to an insert and a
   // 128-bit scalar_to_vector. This reduces the number of isel patterns.
-  if (N->getOpcode() == X86ISD::VZEXT_MOVL && !DCI.isBeforeLegalizeOps() &&
-      N->getOperand(0).getOpcode() == ISD::INSERT_SUBVECTOR &&
-      N->getOperand(0).hasOneUse() &&
-      N->getOperand(0).getOperand(0).isUndef() &&
-      isNullConstant(N->getOperand(0).getOperand(2))) {
-    SDValue In = N->getOperand(0).getOperand(1);
-    SDValue Movl = DAG.getNode(X86ISD::VZEXT_MOVL, dl, In.getValueType(), In);
-    return DAG.getNode(ISD::INSERT_SUBVECTOR, dl, VT,
-                       getZeroVector(VT.getSimpleVT(), Subtarget, DAG, dl),
-                       Movl, N->getOperand(0).getOperand(2));
+  if (N->getOpcode() == X86ISD::VZEXT_MOVL && !DCI.isBeforeLegalizeOps()) {
+    SDValue V = peekThroughOneUseBitcasts(N->getOperand(0));
+
+    if (V.getOpcode() == ISD::INSERT_SUBVECTOR && V.hasOneUse() &&
+        V.getOperand(0).isUndef() && isNullConstant(V.getOperand(2))) {
+      SDValue In = V.getOperand(1);
+      MVT SubVT =
+          MVT::getVectorVT(VT.getSimpleVT().getVectorElementType(),
+                           In.getValueSizeInBits() / VT.getScalarSizeInBits());
+      In = DAG.getBitcast(SubVT, In);
+      SDValue Movl = DAG.getNode(X86ISD::VZEXT_MOVL, dl, SubVT, In);
+      return DAG.getNode(ISD::INSERT_SUBVECTOR, dl, VT,
+                         getZeroVector(VT.getSimpleVT(), Subtarget, DAG, dl),
+                         Movl, V.getOperand(2));
+    }
   }
 
   return SDValue();
@@ -44765,11 +44770,11 @@ static SDValue combineX86INT_TO_FP(SDNode *N, SelectionDAG &DAG,
 
 static SDValue combineCVTP2I_CVTTP2I(SDNode *N, SelectionDAG &DAG,
                                      TargetLowering::DAGCombinerInfo &DCI) {
-  // FIXME: Handle strict fp nodes.
+  bool IsStrict = N->isTargetStrictFPOpcode();
   EVT VT = N->getValueType(0);
 
   // Convert a full vector load into vzload when not all bits are needed.
-  SDValue In = N->getOperand(0);
+  SDValue In = N->getOperand(IsStrict ? 1 : 0);
   MVT InVT = In.getSimpleValueType();
   if (VT.getVectorNumElements() < InVT.getVectorNumElements() &&
       ISD::isNormalLoad(In.getNode()) && In.hasOneUse()) {
@@ -44780,9 +44785,16 @@ static SDValue combineCVTP2I_CVTTP2I(SDNode *N, SelectionDAG &DAG,
     MVT LoadVT = MVT::getVectorVT(MemVT, 128 / NumBits);
     if (SDValue VZLoad = narrowLoadToVZLoad(LN, MemVT, LoadVT, DAG)) {
       SDLoc dl(N);
-      SDValue Convert = DAG.getNode(N->getOpcode(), dl, VT,
-                                    DAG.getBitcast(InVT, VZLoad));
-      DCI.CombineTo(N, Convert);
+      if (IsStrict) {
+        SDValue Convert =
+            DAG.getNode(N->getOpcode(), dl, {VT, MVT::Other},
+                        {N->getOperand(0), DAG.getBitcast(InVT, VZLoad)});
+        DCI.CombineTo(N, Convert, Convert.getValue(1));
+      } else {
+        SDValue Convert =
+            DAG.getNode(N->getOpcode(), dl, VT, DAG.getBitcast(InVT, VZLoad));
+        DCI.CombineTo(N, Convert);
+      }
       DAG.ReplaceAllUsesOfValueWith(SDValue(LN, 1), VZLoad.getValue(1));
       DCI.recursivelyDeleteUnusedNodes(LN);
       return SDValue(N, 0);
@@ -44853,18 +44865,22 @@ static SDValue combineCVTPH2PS(SDNode *N, SelectionDAG &DAG,
       return SDValue(N, 0);
     }
 
-    // FIXME: Shrink vector loads.
-    if (IsStrict)
-      return SDValue();
-
     // Convert a full vector load into vzload when not all bits are needed.
     if (ISD::isNormalLoad(Src.getNode()) && Src.hasOneUse()) {
-      LoadSDNode *LN = cast<LoadSDNode>(N->getOperand(0));
+      LoadSDNode *LN = cast<LoadSDNode>(N->getOperand(IsStrict ? 1 : 0));
       if (SDValue VZLoad = narrowLoadToVZLoad(LN, MVT::i64, MVT::v2i64, DAG)) {
         SDLoc dl(N);
-        SDValue Convert = DAG.getNode(N->getOpcode(), dl, MVT::v4f32,
-                                      DAG.getBitcast(MVT::v8i16, VZLoad));
-        DCI.CombineTo(N, Convert);
+        if (IsStrict) {
+          SDValue Convert = DAG.getNode(
+              N->getOpcode(), dl, {MVT::v4f32, MVT::Other},
+              {N->getOperand(0), DAG.getBitcast(MVT::v8i16, VZLoad)});
+          DCI.CombineTo(N, Convert, Convert.getValue(1));
+        } else {
+          SDValue Convert = DAG.getNode(N->getOpcode(), dl, MVT::v4f32,
+                                        DAG.getBitcast(MVT::v8i16, VZLoad));
+          DCI.CombineTo(N, Convert);
+        }
+
         DAG.ReplaceAllUsesOfValueWith(SDValue(LN, 1), VZLoad.getValue(1));
         DCI.recursivelyDeleteUnusedNodes(LN);
         return SDValue(N, 0);
@@ -47991,8 +48007,11 @@ SDValue X86TargetLowering::PerformDAGCombine(SDNode *N,
   case X86ISD::CVTUI2P:     return combineX86INT_TO_FP(N, DAG, DCI);
   case X86ISD::CVTP2SI:
   case X86ISD::CVTP2UI:
+  case X86ISD::STRICT_CVTTP2SI:
   case X86ISD::CVTTP2SI:
-  case X86ISD::CVTTP2UI:    return combineCVTP2I_CVTTP2I(N, DAG, DCI);
+  case X86ISD::STRICT_CVTTP2UI:
+  case X86ISD::CVTTP2UI:
+                            return combineCVTP2I_CVTTP2I(N, DAG, DCI);
   case X86ISD::STRICT_CVTPH2PS:
   case X86ISD::CVTPH2PS:    return combineCVTPH2PS(N, DAG, DCI);
   case X86ISD::BT:          return combineBT(N, DAG, DCI);
