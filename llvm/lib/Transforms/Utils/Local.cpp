@@ -2263,7 +2263,7 @@ bool llvm::removeUnreachableBlocks(Function &F, DomTreeUpdater *DTU,
   SmallSetVector<BasicBlock *, 8> DeadBlockSet;
   for (BasicBlock &BB : F) {
     // Skip reachable basic blocks
-    if (Reachable.find(&BB) != Reachable.end())
+    if (Reachable.count(&BB))
       continue;
     DeadBlockSet.insert(&BB);
   }

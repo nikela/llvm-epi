@@ -1119,7 +1119,7 @@ public:
     auto UniformsPerVF = Uniforms.find(VF);
     assert(UniformsPerVF != Uniforms.end() &&
            "VF not yet analyzed for uniformity");
-    return UniformsPerVF->second.find(I) != UniformsPerVF->second.end();
+    return UniformsPerVF->second.count(I);
   }
 
   /// Returns true if \p I is known to be scalar after vectorization.
@@ -1136,7 +1136,7 @@ public:
     auto ScalarsPerVF = Scalars.find(VF);
     assert(ScalarsPerVF != Scalars.end() &&
            "Scalar values are not calculated for VF");
-    return ScalarsPerVF->second.find(I) != ScalarsPerVF->second.end();
+    return ScalarsPerVF->second.count(I);
   }
 
   /// \returns True if instruction \p I can be truncated to a smaller bitwidth
@@ -3631,8 +3631,7 @@ void InnerLoopVectorizer::truncateToMinimalBitwidths() {
       continue;
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *I = getOrCreateVectorValue(KV.first, Part);
-      if (Erased.find(I) != Erased.end() || I->use_empty() ||
-          !isa<Instruction>(I))
+      if (Erased.count(I) || I->use_empty() || !isa<Instruction>(I))
         continue;
       Type *OriginalTy = I->getType();
       Type *ScalarTruncatedTy =
@@ -5171,7 +5170,7 @@ void LoopVectorizationCostModel::collectLoopScalars(unsigned VF) {
       }
     }
   for (auto *I : ScalarPtrs)
-    if (PossibleNonScalarPtrs.find(I) == PossibleNonScalarPtrs.end()) {
+    if (!PossibleNonScalarPtrs.count(I)) {
       LLVM_DEBUG(dbgs() << "LV: Found scalar instruction: " << *I << "\n");
       Worklist.insert(I);
     }
@@ -5478,7 +5477,7 @@ void LoopVectorizationCostModel::collectLoopUniforms(unsigned VF) {
   // Add to the Worklist all consecutive and consecutive-like pointers that
   // aren't also identified as possibly non-uniform.
   for (auto *V : ConsecutiveLikePtrs)
-    if (PossibleNonUniformPtrs.find(V) == PossibleNonUniformPtrs.end())
+    if (!PossibleNonUniformPtrs.count(V))
       addToWorklistIfAllowed(V);
 
   // Expand Worklist in topological order: whenever a new instruction
@@ -5919,7 +5918,7 @@ LoopVectorizationCostModel::getSmallestAndWidestTypes() {
       Type *T = I.getType();
 
       // Skip ignored values.
-      if (ValuesToIgnore.find(&I) != ValuesToIgnore.end())
+      if (ValuesToIgnore.count(&I))
         continue;
 
       // Only examine Loads, Stores and PHINodes.
@@ -6238,11 +6237,11 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<unsigned> VFs) {
       OpenIntervals.erase(ToRemove);
 
     // Ignore instructions that are never used within the loop.
-    if (Ends.find(I) == Ends.end())
+    if (!Ends.count(I))
       continue;
 
     // Skip ignored values.
-    if (ValuesToIgnore.find(I) != ValuesToIgnore.end())
+    if (ValuesToIgnore.count(I))
       continue;
 
     // For each VF find the maximum usage of registers.
@@ -6262,7 +6261,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<unsigned> VFs) {
         collectUniformsAndScalars(VFs[j]);
         for (auto Inst : OpenIntervals) {
           // Skip ignored values for VF > 1.
-          if (VecValuesToIgnore.find(Inst) != VecValuesToIgnore.end())
+          if (VecValuesToIgnore.count(Inst))
             continue;
           if (isScalarAfterVectorization(Inst, VFs[j])) {
             unsigned ClassID = TTI.getRegisterClassForType(false, Inst->getType());
@@ -6501,8 +6500,7 @@ LoopVectorizationCostModel::expectedCost(unsigned VF) {
     // For each instruction in the old loop.
     for (Instruction &I : BB->instructionsWithoutDebug()) {
       // Skip ignored values.
-      if (ValuesToIgnore.find(&I) != ValuesToIgnore.end() ||
-          (ValidVF && VecValuesToIgnore.find(&I) != VecValuesToIgnore.end()))
+      if (ValuesToIgnore.count(&I) || (ValidVF && VecValuesToIgnore.count(&I)))
         continue;
 
       VectorizationCostTy C = getInstructionCost(&I, VF);
@@ -6748,7 +6746,7 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, unsigned VF) {
   auto ForcedScalar = ForcedScalars.find(VF);
   if (ValidVF && ForcedScalar != ForcedScalars.end()) {
     auto InstSet = ForcedScalar->second;
-    if (InstSet.find(I) != InstSet.end())
+    if (InstSet.count(I))
       return VectorizationCostTy((getInstructionCost(I, 1).first * VF), false);
   }
 
@@ -6975,10 +6973,8 @@ unsigned LoopVectorizationCostModel::getInstructionCost(Instruction *I,
     bool ScalarPredicatedBB = false;
     BranchInst *BI = cast<BranchInst>(I);
     if (ValidVF && BI->isConditional() &&
-        (PredicatedBBsAfterVectorization.find(BI->getSuccessor(0)) !=
-             PredicatedBBsAfterVectorization.end() ||
-         PredicatedBBsAfterVectorization.find(BI->getSuccessor(1)) !=
-             PredicatedBBsAfterVectorization.end()))
+        (PredicatedBBsAfterVectorization.count(BI->getSuccessor(0)) ||
+         PredicatedBBsAfterVectorization.count(BI->getSuccessor(1))))
       ScalarPredicatedBB = true;
 
     if (ScalarPredicatedBB) {
@@ -7438,8 +7434,7 @@ void LoopVectorizationPlanner::collectTriviallyDeadInstructions(
     PHINode *Ind = Induction.first;
     auto *IndUpdate = cast<Instruction>(Ind->getIncomingValueForBlock(Latch));
     if (llvm::all_of(IndUpdate->users(), [&](User *U) -> bool {
-          return U == Ind || DeadInstructions.find(cast<Instruction>(U)) !=
-                                 DeadInstructions.end();
+          return U == Ind || DeadInstructions.count(cast<Instruction>(U));
         }))
       DeadInstructions.insert(IndUpdate);
 
@@ -8121,8 +8116,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
       // First filter out irrelevant instructions, to ensure no recipes are
       // built for them.
-      if (isa<BranchInst>(Instr) ||
-          DeadInstructions.find(Instr) != DeadInstructions.end())
+      if (isa<BranchInst>(Instr) || DeadInstructions.count(Instr))
         continue;
 
       if (auto Recipe =
