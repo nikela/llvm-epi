@@ -46,6 +46,24 @@ def riscv_vtrn : SDNode<"RISCVISD::VTRN",
                         SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>, SDTCisVec<1>,
                                             SDTCisInt<3>]>>;
 
+// Vector reduction nodes.
+def vecreduce_and : SDNode<"ISD::VECREDUCE_AND", SDTVecReduce>;
+def vecreduce_or  : SDNode<"ISD::VECREDUCE_OR", SDTVecReduce>;
+def vecreduce_xor : SDNode<"ISD::VECREDUCE_XOR", SDTVecReduce>;
+
+// Vector fp reduction.
+def SDTVecReduceFP : SDTypeProfile<1, 1, [SDTCisFP<0>, SDTCisVec<1>,
+                                          SDTCisFP<1>]>;
+
+def vecreduce_fadd : SDNode<"ISD::VECREDUCE_FADD", SDTVecReduceFP>;
+def vecreduce_fmax : SDNode<"ISD::VECREDUCE_FMAX", SDTVecReduceFP>;
+def vecreduce_fmin : SDNode<"ISD::VECREDUCE_FMIN", SDTVecReduceFP>;
+
+// Vector fp reduction with initial accumulator value (v2).
+def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
+                                            SDTCisVec<2>, SDTCisFP<2>]>;
+
+def vecreduce_strict_fadd : SDNode<"ISD::VECREDUCE_STRICT_FADD", SDTVecReduceFPV2>;
 
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
@@ -1384,6 +1402,12 @@ class FromFPR64<DAGOperand operand, dag input_dag> {
                       input_dag,
                       sub_32)),
                 input_dag);
+}
+
+class FPZero<DAGOperand operand> {
+  dag ret = !if(!eq(!cast<string>(operand),
+                    !cast<string>(FPR64)),
+                (FMV_D_X X0), (FMV_W_X X0));
 }
 
 multiclass pat_load_store<LLVMType type,
@@ -3029,6 +3053,143 @@ multiclass pat_vop_binary_common<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
+multiclass pat_vop_binary_reduction_int<SDNode vop,
+                                        string instruction_name>
+{
+  foreach vti = NoGroupIntegerVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M1");
+    def : Pat<(vop (vti.Vector vti.RegClass:$rs2)),
+              (PseudoVMV_X_S
+               (vti.Vector (instruction
+                (vti.Vector zero_reg),
+                (vti.Vector vti.RegClass:$rs2),
+                (PseudoVMV_S_X
+                 (vti.Vector zero_reg),
+                 X0,
+                 VLMax, vti.SEW),
+                (vti.Mask zero_reg),
+                VLMax, vti.SEW)),
+               vti.SEW)>;
+  }
+  foreach gvti = GroupIntegerVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M"#gvti.RegClass.VLMul);
+    def : Pat<(vop (gvti.Vector gvti.RegClass:$rs2)),
+              (PseudoVMV_X_S
+               (EXTRACT_SUBREG
+                (gvti.Vector (instruction
+                 (gvti.Vector zero_reg),
+                 (gvti.Vector gvti.RegClass:$rs2),
+                 (INSERT_SUBREG
+                  (IMPLICIT_DEF),
+                  (PseudoVMV_S_X
+                   (gvti.VectorM1 zero_reg),
+                   X0,
+                   VLMax, gvti.SEW),
+                  sub_vrm2),
+                 (gvti.Mask zero_reg),
+                 VLMax, gvti.SEW)),
+                sub_vrm2),
+               gvti.SEW)>;
+  }
+}
+
+// FIXME: Add patterns that can select masked versions
+multiclass pat_vop_binary_reduction_fp<SDNode vop,
+                                       string instruction_name>
+{
+  foreach fvti = NoGroupFloatVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M1");
+    def : Pat<(vop (fvti.Vector fvti.RegClass:$rs2)),
+              FromFPR64<fvti.ScalarRegClass,
+               (PseudoVFMV_F_S
+                (fvti.Vector (instruction
+                 (fvti.Vector zero_reg),
+                 (fvti.Vector fvti.RegClass:$rs2),
+                 (PseudoVFMV_S_F
+                  (fvti.Vector zero_reg),
+                  ToFPR64<fvti.ScalarRegClass, FPZero<fvti.ScalarRegClass>.ret>.ret,
+                  VLMax, fvti.SEW),
+                 (fvti.Mask zero_reg),
+                 VLMax, fvti.SEW)),
+                fvti.SEW)>.ret>;
+  }
+  foreach gfvti = GroupFloatVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M"#gfvti.RegClass.VLMul);
+    def : Pat<(vop (gfvti.Vector gfvti.RegClass:$rs2)),
+              FromFPR64<gfvti.ScalarRegClass,
+               (PseudoVFMV_F_S
+                (EXTRACT_SUBREG
+                 (gfvti.Vector (instruction
+                  (gfvti.Vector zero_reg),
+                  (gfvti.Vector gfvti.RegClass:$rs2),
+                  (INSERT_SUBREG
+                   (IMPLICIT_DEF),
+                   (PseudoVFMV_S_F
+                    (gfvti.VectorM1 zero_reg),
+                    ToFPR64<gfvti.ScalarRegClass, FPZero<gfvti.ScalarRegClass>.ret>.ret,
+                    VLMax, gfvti.SEW),
+                   sub_vrm2),
+                  (gfvti.Mask zero_reg),
+                  VLMax, gfvti.SEW)),
+                 sub_vrm2),
+                gfvti.SEW)>.ret>;
+  }
+}
+
+// FIXME: Add patterns that can select masked versions
+multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
+                                          string instruction_name>
+{
+  foreach fvti = NoGroupFloatVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M1");
+    def : Pat<(vop (fvti.Scalar fvti.ScalarRegClass:$init),
+                   (fvti.Vector fvti.RegClass:$rs2)),
+              FromFPR64<fvti.ScalarRegClass,
+               (PseudoVFMV_F_S
+                (fvti.Vector (instruction
+                 (fvti.Vector zero_reg),
+                 (fvti.Vector fvti.RegClass:$rs2),
+                 (PseudoVFMV_S_F
+                  (fvti.Vector zero_reg),
+                  ToFPR64<fvti.ScalarRegClass,
+                          (fvti.Scalar fvti.ScalarRegClass:$init)>.ret,
+                  VLMax, fvti.SEW),
+                 (fvti.Mask zero_reg),
+                 VLMax, fvti.SEW)),
+                fvti.SEW)>.ret>;
+  }
+  foreach gfvti = GroupFloatVectors in {
+    defvar instruction =
+      !cast<Instruction>(instruction_name#"_VS_M"#gfvti.RegClass.VLMul);
+    def : Pat<(vop (gfvti.Scalar gfvti.ScalarRegClass:$init),
+                   (gfvti.Vector gfvti.RegClass:$rs2)),
+              FromFPR64<gfvti.ScalarRegClass,
+               (PseudoVFMV_F_S
+                (EXTRACT_SUBREG
+                 (gfvti.Vector (instruction
+                  (gfvti.Vector zero_reg),
+                  (gfvti.Vector gfvti.RegClass:$rs2),
+                  (INSERT_SUBREG
+                   (IMPLICIT_DEF),
+                   (PseudoVFMV_S_F
+                    (gfvti.VectorM1 zero_reg),
+                    ToFPR64<gfvti.ScalarRegClass,
+                            (gfvti.Scalar gfvti.ScalarRegClass:$init)>.ret,
+                    VLMax, gfvti.SEW),
+                   sub_vrm2),
+                  (gfvti.Mask zero_reg),
+                  VLMax, gfvti.SEW)),
+                 sub_vrm2),
+                gfvti.SEW)>.ret>;
+  }
+}
+
+// FIXME: Add patterns that can select masked versions
 multiclass pat_vop_ternary<SDNode vop,
                            string instruction_name,
                            ValueType result_type,
@@ -3078,6 +3239,20 @@ defm "" : pat_vop_binary_common<and, "PseudoVAND", AllIntegerVectors>;
 defm "" : pat_vop_binary_common<fadd, "PseudoVFADD", AllFloatVectors>;
 defm "" : pat_vop_binary_common<fsub, "PseudoVFSUB", AllFloatVectors>;
 defm "" : pat_vop_binary_common<fmul, "PseudoVFMUL", AllFloatVectors>;
+
+defm "" : pat_vop_binary_reduction_int<vecreduce_add, "PseudoVREDSUM">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_and, "PseudoVREDAND">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_or, "PseudoVREDOR">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_xor, "PseudoVREDXOR">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_smax, "PseudoVREDMAX">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_smin, "PseudoVREDMIN">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_umax, "PseudoVREDMAXU">;
+defm "" : pat_vop_binary_reduction_int<vecreduce_umin, "PseudoVREDMINU">;
+
+defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_strict_fadd, "PseudoVFREDOSUM">;
+defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoVFREDSUM">;
+defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoVFREDMAX">;
+defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoVFREDMIN">;
 
 defm "" : pat_vop_ternary_common<fma, "PseudoVFMADD", AllFloatVectors>;
 
@@ -3150,11 +3325,12 @@ foreach mti = AllMasks in {
             (!cast<Instruction>("PseudoVMCLR_M"#mti.VLMul) VLMax, mti.SEW)>;
 }
 
-// FIXME We should use extractelt here, since vector_extract is deprecated.
-// However, it is illegal in extractelt to have a return type that is different
-// to the vector element type, which is what we need here. Insted, when using
-// a return type equal to the vector element type, the pattern disappears.
 foreach vti = NoGroupIntegerVectors in {
+  // FIXME We should use extractelt here, since vector_extract is deprecated.
+  // However, it is illegal in extractelt to have a return type that is
+  // different to the vector element type, which is what we need here. Insted,
+  // when using a return type equal to the vector element type, the pattern
+  // disappears.
   def : Pat<(i64 (!cast<SDNode>(!if(!eq(!cast<string>(vti),
                                      !cast<string>(Vtype1xi64)),
                                  vector_extract, riscv_extract_vector_elt))
@@ -3168,6 +3344,16 @@ foreach vti = NoGroupIntegerVectors in {
               (vti.Mask zero_reg),
               VLMax,
               vti.SEW),
+             vti.SEW)>;
+  // FIXME We should use insertelt here, since vector_insert is deprecated.
+  def : Pat<(vti.Vector (vector_insert
+                         (vti.Vector vti.RegClass:$merge),
+                         GPR:$rs1,
+                         (i64 0))),
+            (PseudoVMV_S_X
+             (vti.Vector vti.RegClass:$merge),
+             GPR:$rs1,
+             VLMax,
              vti.SEW)>;
 }
 
@@ -3232,6 +3418,15 @@ foreach vti = AllIllegalIntegerVectors in {
              (lvti.Mask zero_reg),
              VLMax,
              lvti.SEW)>;
+}
+
+foreach vti = AllIntegerVectors in {
+   def : Pat<(vti.Vector (vselect (vti.Mask V0), (vti.Vector vti.RegClass:$rs2), (vti.Vector vti.RegClass:$rs1))),
+             (!cast<Instruction>("PseudoVMERGE_VVM_M"#vti.RegClass.VLMul)
+              (vti.Vector vti.RegClass:$rs2),
+              (vti.Vector vti.RegClass:$rs1),
+              (vti.Mask V0),
+              VLMax, vti.SEW)>;
 }
 
 }

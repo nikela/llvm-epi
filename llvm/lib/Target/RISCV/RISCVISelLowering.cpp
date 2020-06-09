@@ -293,18 +293,18 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   // Effectively disable jump table generation.
   setMinimumJumpTableEntries(INT_MAX);
 
-  // EPI & VPred intrinsics may have illegal operands/results
-  for (auto VT : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i32}) {
-    setOperationAction(ISD::INTRINSIC_WO_CHAIN, VT, Custom);
-  }
-
-  // VPred intrinsics may have illegal operands/results
-  for (auto VT : {MVT::i32}) {
-    setOperationAction(ISD::INTRINSIC_W_CHAIN, VT, Custom);
-    setOperationAction(ISD::INTRINSIC_VOID, VT, Custom);
-  }
-
   if (Subtarget.hasStdExtV()) {
+    // EPI & VPred intrinsics may have illegal operands/results
+    for (auto VT : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i32}) {
+      setOperationAction(ISD::INTRINSIC_WO_CHAIN, VT, Custom);
+    }
+
+    // VPred intrinsics may have illegal operands/results
+    for (auto VT : {MVT::i32}) {
+      setOperationAction(ISD::INTRINSIC_W_CHAIN, VT, Custom);
+      setOperationAction(ISD::INTRINSIC_VOID, VT, Custom);
+    }
+
     // Custom-legalize this node for illegal result types.
     for (auto VT : {MVT::i8, MVT::i16, MVT::i32}) {
       setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
@@ -313,6 +313,31 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     // Custom-legalize this node for scalable vectors.
     for (auto VT : {MVT::nxv1i64, MVT::nxv2i32, MVT::nxv4i16}) {
       setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Custom);
+    }
+
+    // Vector integer reductions.
+    for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
+                    MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
+                    MVT::nxv2i32, MVT::nxv4i32, MVT::nxv8i32, MVT::nxv16i32,
+                    MVT::nxv1i64, MVT::nxv2i64, MVT::nxv4i64, MVT::nxv8i64}) {
+      setOperationAction(ISD::VECREDUCE_ADD, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_AND, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_OR, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_XOR, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_SMAX, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_SMIN, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_UMAX, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_UMIN, VT, Legal);
+    }
+
+    // Vector fp reductions.
+    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
+                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+      setOperationAction(ISD::VECREDUCE_STRICT_FADD, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_FADD, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_FMUL, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_FMAX, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_FMIN, VT, Legal);
     }
   }
 }
