@@ -184,6 +184,28 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     return;
   }
 
+  // VRTuple->VRTuple
+  if (RISCV::VRTupleRegClass.contains(DstReg, SrcReg)) {
+    // FIXME: use vmv2r.v when vehave implements it.
+    MachineFunction *MF = MBB.getParent();
+    const TargetRegisterInfo &RI = *MF->getSubtarget().getRegisterInfo();
+
+    Register SrcRegFirst = RI.getSubReg(SrcReg, RISCV::vtfirst);
+    Register DstRegFirst = RI.getSubReg(DstReg, RISCV::vtfirst);
+    assert(SrcRegFirst && DstRegFirst && "Subregister does not exist");
+
+    BuildMI(MBB, MBBI, DL, get(RISCV::VMV1R_V), DstRegFirst)
+        .addReg(SrcRegFirst, getKillRegState(KillSrc));
+
+    Register SrcRegSecond = RI.getSubReg(SrcReg, RISCV::vtsecond);
+    Register DstRegSecond = RI.getSubReg(DstReg, RISCV::vtsecond);
+    assert(SrcRegSecond && DstRegSecond && "Subregister does not exist");
+
+    BuildMI(MBB, MBBI, DL, get(RISCV::VMV1R_V), DstRegSecond)
+        .addReg(SrcRegSecond, getKillRegState(KillSrc));
+    return;
+  }
+
   llvm_unreachable("Impossible reg-to-reg copy");
 }
 
