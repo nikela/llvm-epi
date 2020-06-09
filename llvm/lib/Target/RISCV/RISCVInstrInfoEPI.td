@@ -535,7 +535,7 @@ multiclass pseudo_unary_v_f_nomask {
   {
     let VLMul = evr.VLMul in
     {
-      defm _F : pseudo_unary_nomask<evr, FPR32, evr.VLMul>;
+      defm _F : pseudo_unary_nomask<evr, FPR64, evr.VLMul>;
     }
   }
 }
@@ -868,7 +868,7 @@ multiclass pseudo_binary_v_vf {
     defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VF : pseudo_binary<evr, evr, FPR32, evr.VLMul, constraints>;
+      defm _VF : pseudo_binary<evr, evr, FPR64, evr.VLMul, constraints>;
     }
   }
 }
@@ -880,7 +880,7 @@ multiclass pseudo_binary_v_vfm {
     defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VFM : pseudo_binary_mask_in<evr, evr, FPR32, evr.VLMul, constraints>;
+      defm _VFM : pseudo_binary_mask_in<evr, evr, FPR64, evr.VLMul, constraints>;
     }
   }
 }
@@ -893,7 +893,7 @@ multiclass pseudo_binary_v_vv_vf {
     let VLMul = evr.VLMul in
     {
       defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints>;
-      defm _VF : pseudo_binary<evr, evr, FPR32, evr.VLMul, constraints>;
+      defm _VF : pseudo_binary<evr, evr, FPR64, evr.VLMul, constraints>;
     }
   }
 }
@@ -907,7 +907,7 @@ multiclass pseudo_binary_w_vv_vf {
     {
       defm _VV : pseudo_binary<evr.WideRegClass, evr.RegClass, evr.RegClass,
                                evr.RegClass.VLMul, constraints>;
-      defm _VF : pseudo_binary<evr.WideRegClass, evr.RegClass, FPR32,
+      defm _VF : pseudo_binary<evr.WideRegClass, evr.RegClass, FPR64,
                                evr.RegClass.VLMul, constraints>;
     }
   }
@@ -922,7 +922,7 @@ multiclass pseudo_binary_w_wv_wf {
     {
       defm _WV : pseudo_binary<evr.WideRegClass, evr.WideRegClass, evr.RegClass,
                                evr.RegClass.VLMul, constraints>;
-      defm _WF : pseudo_binary<evr.WideRegClass, evr.WideRegClass, FPR32,
+      defm _WF : pseudo_binary<evr.WideRegClass, evr.WideRegClass, FPR64,
                                evr.RegClass.VLMul, constraints>;
     }
   }
@@ -935,7 +935,7 @@ multiclass pseudo_binary_m_vf {
     defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VF : pseudo_binary<VR, evr, FPR32, evr.VLMul, constraints>;
+      defm _VF : pseudo_binary<VR, evr, FPR64, evr.VLMul, constraints>;
     }
   }
 }
@@ -948,7 +948,7 @@ multiclass pseudo_binary_m_vv_vf {
     let VLMul = evr.VLMul in
     {
       defm _VV : pseudo_binary<VR, evr, evr, evr.VLMul, constraints>;
-      defm _VF : pseudo_binary<VR, evr, FPR32, evr.VLMul, constraints>;
+      defm _VF : pseudo_binary<VR, evr, FPR64, evr.VLMul, constraints>;
     }
   }
 }
@@ -991,7 +991,7 @@ multiclass pseudo_ternary_v_vv_vf {
     let VLMul = evr.VLMul in
     {
       defm _VV : pseudo_ternary<evr, evr, evr, evr.VLMul, constraints>;
-      defm _VF : pseudo_ternary<evr, FPR32, evr, evr.VLMul, constraints>;
+      defm _VF : pseudo_ternary<evr, FPR64, evr, evr.VLMul, constraints>;
     }
   }
 }
@@ -1156,14 +1156,14 @@ let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
     Uses = [VL, VTYPE], VLMul = VR.VLMul, MergeOpIndex = -1 in
 {
   let VLIndex = -1, SEWIndex = 2, BaseInstr = VFMV_F_S in
-    def PseudoVFMV_F_S : Pseudo<(outs FPR32:$rd),
+    def PseudoVFMV_F_S : Pseudo<(outs FPR64:$rd),
                                 (ins VR:$rs2, ixlenimm:$sew),
                                 []>,
                          EPIPseudo;
   let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
       BaseInstr = VFMV_S_F in
     def PseudoVFMV_S_F : Pseudo<(outs VR:$rd),
-                                (ins VR:$merge, FPR32:$rs2, GPR:$vl,
+                                (ins VR:$merge, FPR64:$rs2, GPR:$vl,
                                      ixlenimm:$sew),
                                 []>,
                          EPIPseudo;
@@ -1346,14 +1346,27 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
 def VLMax : OutPatFrag<(ops), (i64 X0)>;
 
 // Floating point instructions with a scalar operand expect such operand to be
-// in a register of class FPR32. When dealing with the f64 variant of such
-// instructions we need to extract the FPR32 subregister from the FPR64 base
+// in a register of class FPR64. When dealing with the f32 variant of such
+// instructions we need to insert the FPR32 subregister into the FPR64 base
 // register to match the instruction operand
-class ToFPR32<ValueType type, DAGOperand operand, string name> {
+class ToFPR64<DAGOperand operand, dag input_dag> {
   dag ret = !if(!eq(!cast<string>(operand),
-                    !cast<string>(FPR64)),
-                (EXTRACT_SUBREG !dag(type, [FPR64], [name]), sub_32),
-                !dag(type, [operand], [name]));
+                    !cast<string>(FPR32)),
+                (INSERT_SUBREG (IMPLICIT_DEF), input_dag, sub_32),
+                input_dag);
+}
+
+// Floating point instructions with a scalar result will generate such result
+// in a register of class FPR64. When dealing with the f32 variant of a pattern
+// we need to demote the FPR64 base register generated by the instruction to
+// the FPR32 subregister expected by the type in the pattern
+class FromFPR64<DAGOperand operand, dag input_dag> {
+  dag ret = !if(!eq(!cast<string>(operand),
+                    !cast<string>(FPR32)),
+                (f32 (EXTRACT_SUBREG
+                      input_dag,
+                      sub_32)),
+                input_dag);
 }
 
 multiclass pat_load_store<LLVMType type,
@@ -1563,7 +1576,7 @@ multiclass pat_intrinsic_binary<string intrinsic_name,
               (instruction (result_type zero_reg)),
               (instruction
                (op1_type op1_reg_class:$rs1)),
-              (instruction ToFPR32<op2_type, op2_kind, "rs2">.ret),
+              (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
               (instruction
                (mask_type zero_reg),
                (NoX0 GPR:$vl),
@@ -1580,7 +1593,7 @@ multiclass pat_intrinsic_binary<string intrinsic_name,
               (instruction result_reg_class:$merge),
               (instruction
                op1_reg_class:$rs1),
-              (instruction ToFPR32<op2_type, op2_kind, "rs2">.ret),
+              (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
               (instruction
                (mask_type V0),
                (NoX0 GPR:$vl),
@@ -1611,7 +1624,7 @@ multiclass pat_intrinsic_binary_nomask<string intrinsic_name,
               (instruction), // empty prefix
               (instruction
                (op1_type op1_reg_class:$rs1)),
-              (instruction ToFPR32<op2_type, op2_kind, "rs2">.ret),
+              (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
               (instruction
                (NoX0 GPR:$vl),
                sew),
@@ -1643,7 +1656,7 @@ multiclass pat_intrinsic_binary_mask_in<string intrinsic_name,
               (instruction), // empty prefix
               (instruction
                op1_reg_class:$rs1),
-              (instruction ToFPR32<op2_type, op2_kind, "rs2">.ret),
+              (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
               (instruction
                (mask_type V0),
                (NoX0 GPR:$vl),
@@ -2153,7 +2166,7 @@ multiclass pat_intrinsic_ternary<string intrinsic_name,
                           (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name#_#kind#"_M"#vlmul)
              result_reg_class:$rs3,
-             ToFPR32<op1_type, op1_reg_class, "rs1">.ret,
+             ToFPR64<op1_reg_class, (op1_type op1_reg_class:$rs1)>.ret,
              op2_reg_class:$rs2,
              (mask_type zero_reg),
              (NoX0 GPR:$vl),
@@ -2167,7 +2180,7 @@ multiclass pat_intrinsic_ternary<string intrinsic_name,
                           (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name#_#kind#"_M"#vlmul)
              result_reg_class:$rs3,
-             ToFPR32<op1_type, op1_reg_class, "rs1">.ret,
+             ToFPR64<op1_reg_class, (op1_type op1_reg_class:$rs1)>.ret,
              op2_reg_class:$rs2,
              (mask_type V0),
              (NoX0 GPR:$vl),
@@ -2653,23 +2666,14 @@ defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnjx", "PseudoVFSGNJX">;
 foreach fvti = NoGroupFloatVectors in
 {
   def : Pat<(fvti.Scalar (int_epi_vfmv_f_s (fvti.Vector fvti.RegClass:$rs2))),
-             // Floating point instructions with a scalar result will always
-             // generate the result in a register of class FPR32. When dealing
-             // with the f64 variant of a pattern we need to promote the FPR32
-             // subregister generated by the instruction to the FPR64 base
-             // register expected by the type in the pattern
-             !if(!eq(!cast<string>(fvti.ScalarRegClass),
-                     !cast<string>(FPR64)),
-                 (SUBREG_TO_REG (i32 -1),
-                  (PseudoVFMV_F_S $rs2, fvti.SEW),
-                  sub_32),
-                 (PseudoVFMV_F_S $rs2, fvti.SEW))>;
+             FromFPR64<fvti.ScalarRegClass, (PseudoVFMV_F_S $rs2, fvti.SEW)>.ret>;
 
   def : Pat<(fvti.Vector (int_epi_vfmv_s_f (fvti.Vector VR:$merge),
                           (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
             (PseudoVFMV_S_F
              $merge,
-             ToFPR32<fvti.Scalar, fvti.ScalarRegClass, "rs2">.ret,
+             ToFPR64<fvti.ScalarRegClass,
+                     (fvti.Scalar fvti.ScalarRegClass:$rs2)>.ret,
              (NoX0 GPR:$vl), fvti.SEW)>;
 }
 
@@ -2934,7 +2938,8 @@ foreach fvti = AllFloatVectors in {
   def : Pat<(fvti.Vector (int_epi_vfmv_v_f
                          (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
             (!cast<Instruction>("PseudoVFMV_V_F_M"#fvti.RegClass.VLMul)
-             ToFPR32<fvti.Scalar, fvti.ScalarRegClass, "rs2">.ret,
+             ToFPR64<fvti.ScalarRegClass,
+                     (fvti.Scalar fvti.ScalarRegClass:$rs2)>.ret,
              (NoX0 GPR:$vl), fvti.SEW)>;
 }
 }
@@ -3025,7 +3030,7 @@ multiclass pat_vop_ternary<SDNode vop,
                           (op2_type op2_reg_class:$rs2))),
             (!cast<Instruction>(instruction_name#"_VV_M"#vlmul)
              result_reg_class:$rs3,
-             ToFPR32<op1_type, op1_reg_class, "rs1">.ret,
+             ToFPR64<op1_reg_class, (op1_type op1_reg_class:$rs1)>.ret,
              op2_reg_class:$rs2,
              (mask_type zero_reg),
              VLMax,
@@ -3065,7 +3070,8 @@ foreach fvti = AllFloatVectors in
 
   def : Pat<(fvti.Vector (riscv_vfmv_v_f fvti.ScalarRegClass:$value)),
             (!cast<Instruction>("PseudoVFMV_V_F_M"#fvti.RegClass.VLMul)
-             ToFPR32<fvti.Scalar, fvti.ScalarRegClass, "value">.ret,
+             ToFPR64<fvti.ScalarRegClass,
+                     (fvti.Scalar fvti.ScalarRegClass:$value)>.ret,
              VLMax,
              fvti.SEW)>;
 
