@@ -165,24 +165,16 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
       RISCV::VRM2RegClass.contains(DstReg, SrcReg) ||
       RISCV::VRM4RegClass.contains(DstReg, SrcReg) ||
       RISCV::VRM8RegClass.contains(DstReg, SrcReg)) {
-    MachineFunction *MF = MBB.getParent();
-    const TargetRegisterInfo &RI = *MF->getSubtarget().getRegisterInfo();
-
     unsigned VMVOpcode;
     if (RISCV::VRRegClass.contains(DstReg, SrcReg))
       VMVOpcode = RISCV::VMV1R_V;
+    else if (RISCV::VRM2RegClass.contains(DstReg, SrcReg))
+      VMVOpcode = RISCV::PseudoVMV2R_M2;
+    else if (RISCV::VRM4RegClass.contains(DstReg, SrcReg))
+      VMVOpcode = RISCV::PseudoVMV4R_M4;
     else {
-      if (RISCV::VRM2RegClass.contains(DstReg, SrcReg))
-        VMVOpcode = RISCV::VMV2R_V;
-      else if (RISCV::VRM4RegClass.contains(DstReg, SrcReg))
-        VMVOpcode = RISCV::VMV4R_V;
-      else {
-        assert(RISCV::VRM8RegClass.contains(DstReg, SrcReg));
-        VMVOpcode = RISCV::VMV8R_V;
-      }
-      SrcReg = RI.getSubReg(SrcReg, RISCV::sub_vrm2);
-      DstReg = RI.getSubReg(DstReg, RISCV::sub_vrm2);
-      assert(SrcReg && DstReg && "Subregister does not exist");
+      assert(RISCV::VRM8RegClass.contains(DstReg, SrcReg));
+      VMVOpcode = RISCV::PseudoVMV8R_M8;
     }
 
     // vmv<nf>r.v dest, src

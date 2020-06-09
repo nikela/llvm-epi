@@ -1311,6 +1311,26 @@ foreach evr = AllVRegs in
   }
 }
 
+//===----------------------------------------------------------------------===//
+// Pseudo instructions we need for COPY LMUL>1
+//===----------------------------------------------------------------------===//
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
+    MergeOpIndex = -1, VLIndex = -1, SEWIndex = -1 in
+{
+  let BaseInstr = VMV2R_V, VLMul = 2 in
+  def PseudoVMV2R_M2 : Pseudo<(outs VRM2:$rdest), (ins VRM2:$rs1), []>,
+                             EPIPseudo;
+
+  let BaseInstr = VMV4R_V, VLMul = 4 in
+  def PseudoVMV4R_M4 : Pseudo<(outs VRM4:$rdest), (ins VRM4:$rs1), []>,
+                             EPIPseudo;
+
+  let BaseInstr = VMV8R_V, VLMul = 8 in
+  def PseudoVMV8R_M8 : Pseudo<(outs VRM8:$rdest), (ins VRM8:$rs1), []>,
+                             EPIPseudo;
+}
+
 }
 
 //===----------------------------------------------------------------------===//
