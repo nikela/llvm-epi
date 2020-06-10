@@ -3,7 +3,7 @@
 ; RUN:     --verify-machineinstrs | FileCheck %s
 
 define <vscale x 1 x double> @load_mask_tied_merge_operand(i64 %gvl, <vscale x 1 x i1> %vmask1, <vscale x 1 x i1> %vmask2, <vscale x 1 x double> %vmerge, double* nocapture readonly %c) nounwind {
-; CHECK-LABEL: load_mask_tied_operand:
+; CHECK-LABEL: load_mask_tied_merge_operand:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1
