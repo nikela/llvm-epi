@@ -1242,7 +1242,8 @@ foreach evr = AllVRegs in
   let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
       usesCustomInserter = 1,
       VLMul = vlmul,
-      Constraints = !if(!gt(vlmul, 1), "@earlyclobber $rd", "") in
+      Constraints = Join<[!if(!gt(vlmul, 1), "@earlyclobber $rd", ""),
+                          "$rd = $merge"], ",">.ret in
   {
     let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
         BaseInstr = VLE_V in
