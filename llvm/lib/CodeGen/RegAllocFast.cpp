@@ -185,7 +185,10 @@ namespace {
     bool isLastUseOfLocalReg(const MachineOperand &MO) const;
 
     void addKillFlag(const LiveReg &LRI);
+#ifndef NDEBUG
     bool verifyRegStateMapping(const LiveReg &LR) const;
+#endif
+
     void killVirtReg(LiveReg &LR);
     void killVirtReg(Register VirtReg);
     void spillVirtReg(MachineBasicBlock::iterator MI, LiveReg &LR);
@@ -382,6 +385,7 @@ void RegAllocFast::addKillFlag(const LiveReg &LR) {
   }
 }
 
+#ifndef NDEBUG
 bool RegAllocFast::verifyRegStateMapping(const LiveReg &LR) const {
   for (MCRegUnitIterator UI(LR.PhysReg, TRI); UI.isValid(); ++UI) {
     if (RegUnitStates[*UI] != LR.VirtReg)
@@ -390,6 +394,7 @@ bool RegAllocFast::verifyRegStateMapping(const LiveReg &LR) const {
 
   return true;
 }
+#endif
 
 /// Mark virtreg as no longer available.
 void RegAllocFast::killVirtReg(LiveReg &LR) {
