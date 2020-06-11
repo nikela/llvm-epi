@@ -1399,7 +1399,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_frem:
     // FIXME Needs to be expanded.
-    report_fatal_error("Unimplemented intrinsic");
+    report_fatal_error("Unimplemented intrinsic vp_frem");
     break;
   case Intrinsic::vp_fma:
     VOpsPerm = {1, 2, 3};
@@ -1480,7 +1480,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     switch (FCmp) {
     case FCmpInst::FCMP_FALSE:
       // FIXME Lower to vmclr.
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_FALSE for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_OEQ:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfeq_mask : Intrinsic::epi_vmfeq;
@@ -1500,13 +1500,13 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
       break;
     case FCmpInst::FCMP_ONE:
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_ONE for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_ORD:
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_ORD for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_UEQ:
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_UEQ for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_UGT:
       return LowerVPUnorderedFCmp(Intrinsic::epi_vmfgt_mask, Op.getOperand(1),
@@ -1528,11 +1528,11 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
       break;
     case FCmpInst::FCMP_UNO:
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_UNO for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_TRUE:
       // FIXME Lower to vmset.
-      report_fatal_error("Unimplemented intrinsic");
+      report_fatal_error("Unimplemented case FCMP_TRUE for intrinsic vp_fcmp");
       break;
     }
     break;

@@ -3758,11 +3758,6 @@ void InnerLoopVectorizer::truncateToMinimalBitwidths() {
 }
 
 void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
-  // If using predicated vector ops, we need to increment index for the next
-  // vector iteration by the EVL used in current iteration.
-  if (preferPredicatedVectorOps())
-    fixEVLInduction(State);
-
   // Insert truncates and extends for any truncated instructions as hints to
   // InstCombine.
   if (VF > 1 || isScalable())
@@ -3793,6 +3788,11 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
   fixLCSSAPHIs();
   for (Instruction *PI : PredicatedInstructions)
     sinkScalarOperands(&*PI);
+
+  // If using predicated vector ops, we need to increment index for the next
+  // vector iteration by the EVL used in current iteration.
+  if (preferPredicatedVectorOps())
+    fixEVLInduction(State);
 
   // Remove redundant induction instructions.
   cse(LoopVectorBody);
