@@ -3412,6 +3412,11 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
   Opts.CompatibilityQualifiedIdBlockParamTypeChecking =
       Args.hasArg(OPT_fcompatibility_qualified_id_block_param_type_checking);
 
+  Opts.RelativeCXXABIVTables =
+      Args.hasFlag(OPT_fexperimental_relative_cxx_abi_vtables,
+                   OPT_fno_experimental_relative_cxx_abi_vtables,
+                   /*default=*/false);
+
   // -mepi.
   Opts.EPI = Args.hasArg(OPT_mepi);
 }
