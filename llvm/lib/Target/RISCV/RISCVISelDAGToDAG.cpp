@@ -153,7 +153,6 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       // By default we do not lower any intrinsic.
     default:
       break;
-
     case Intrinsic::epi_vsetvl: {
       assert(Node->getNumOperands() == 4);
       auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
@@ -195,6 +194,76 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
       ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL,
                                                MVT::i64, VLOperand, VTypeIOp));
+      return;
+    }
+    case Intrinsic::experimental_vector_reverse: {
+      // (Whole) vector reverse can be computed in RISCV-V as:
+      //  (VRGATHER_VV
+      //    InputVector,
+      //    (VRSUB_VX         # Computes permutation (VLMAX-1, VLMAX-2, ..., 0)
+      //      VID_V,
+      //      (ADDI (VLMAX), -1)))
+      assert(Node->getNumOperands() == 2);
+      SDValue Op = Node->getOperand(1);
+
+      uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+
+      ElementCount EC = VT.getVectorElementCount();
+      assert(EC.Scalable && "Unexpected VT");
+      uint64_t LMul = EC.Min * SEW / 64; // FIXME: ELEN=64 hardcoded.
+
+      unsigned VIDInst, VRSUBInst, VRGATHERInst;
+      switch (LMul) {
+      case 1:
+        VIDInst = RISCV::PseudoVID_V_M1;
+        VRSUBInst = RISCV::PseudoVRSUB_VX_M1;
+        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M1;
+        break;
+      case 2:
+        VIDInst = RISCV::PseudoVID_V_M2;
+        VRSUBInst = RISCV::PseudoVRSUB_VX_M2;
+        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M2;
+        break;
+      case 4:
+        VIDInst = RISCV::PseudoVID_V_M4;
+        VRSUBInst = RISCV::PseudoVRSUB_VX_M4;
+        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M4;
+        break;
+      case 8:
+        VIDInst = RISCV::PseudoVID_V_M8;
+        VRSUBInst = RISCV::PseudoVRSUB_VX_M8;
+        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M8;
+        break;
+      }
+
+      uint64_t VTypeI = (Log2_64(SEW / 8) << 2) | Log2_64(LMul);
+      SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
+      SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
+      auto *VSETVLI = CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, MVT::i64,
+                                             VLOperand, VTypeIOp);
+
+      auto *ADDI =
+          CurDAG->getMachineNode(RISCV::ADDI, DL, MVT::i64, SDValue(VSETVLI, 0),
+                                 CurDAG->getTargetConstant(-1, DL, MVT::i64));
+
+      SDValue NoReg = CurDAG->getRegister(RISCV::NoRegister, VT);
+      SDValue NoRegMask = CurDAG->getRegister(
+          RISCV::NoRegister, VT.changeVectorElementType(MVT::i1));
+      SDValue SEWOperand = CurDAG->getTargetConstant(SEW, DL, MVT::i64);
+
+      auto *VID = CurDAG->getMachineNode(
+          VIDInst, DL, VT, {NoReg, NoRegMask, VLOperand, SEWOperand});
+
+      auto *VRSUB =
+          CurDAG->getMachineNode(VRSUBInst, DL, VT,
+                                 {NoReg, SDValue(VID, 0), SDValue(ADDI, 0),
+                                  NoRegMask, VLOperand, SEWOperand});
+
+      auto *VRGATHER = CurDAG->getMachineNode(
+          VRGATHERInst, DL, VT,
+          {NoReg, Op, SDValue(VRSUB, 0), NoRegMask, VLOperand, SEWOperand});
+
+      ReplaceNode(Node, VRGATHER);
       return;
     }
     }
