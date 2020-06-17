@@ -6980,7 +6980,7 @@ unsigned LoopVectorizationCostModel::getInstructionCost(Instruction *I,
 
     if (ScalarPredicatedBB) {
       // Return cost for branches around scalarized and predicated blocks.
-      VectorType *Vec_i1Ty = VectorType::get(
+      auto *Vec_i1Ty = VectorType::get(
           IntegerType::getInt1Ty(RetTy->getContext()), VF, isScalable());
       return (TTI.getScalarizationOverhead(Vec_i1Ty, APInt::getAllOnesValue(VF),
                                            false, true) +
