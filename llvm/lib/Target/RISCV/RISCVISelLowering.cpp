@@ -1160,6 +1160,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   unsigned EVLOpNo;
   bool IsMasked;
   unsigned EPIIntNo;
+  bool IsLogical = Op.getValueType().isVector() &&
+                   Op.getValueType().getVectorElementType() == MVT::i1;
   switch (IntNo) {
   default:
     llvm_unreachable("Unexpected intrinsic");
@@ -1217,21 +1219,36 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-    EPIIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
+    if (IsLogical) {
+      EPIIntNo = Intrinsic::epi_vmand;
+      if (IsMasked)
+        report_fatal_error("Unimplemented masked logical AND operation");
+    } else
+      EPIIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
     break;
   case Intrinsic::vp_or:
     VOpsPerm = {1, 2};
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-    EPIIntNo = IsMasked ? Intrinsic::epi_vor_mask : Intrinsic::epi_vor;
+    if (IsLogical) {
+      EPIIntNo = Intrinsic::epi_vmor;
+      if (IsMasked)
+        report_fatal_error("Unimplemented masked logical OR operation");
+    } else
+      EPIIntNo = IsMasked ? Intrinsic::epi_vor_mask : Intrinsic::epi_vor;
     break;
   case Intrinsic::vp_xor:
     VOpsPerm = {1, 2};
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-    EPIIntNo = IsMasked ? Intrinsic::epi_vxor_mask : Intrinsic::epi_vxor;
+    if (IsLogical) {
+      EPIIntNo = Intrinsic::epi_vmxor;
+      if (IsMasked)
+        report_fatal_error("Unimplemented masked logical XOR operation");
+    } else
+      EPIIntNo = IsMasked ? Intrinsic::epi_vxor_mask : Intrinsic::epi_vxor;
     break;
   case Intrinsic::vp_ashr:
     VOpsPerm = {1, 2};
