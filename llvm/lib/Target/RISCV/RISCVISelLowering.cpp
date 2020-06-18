@@ -1095,6 +1095,55 @@ SDValue RISCVTargetLowering::lowerShiftRightParts(SDValue Op, SelectionDAG &DAG,
   return DAG.getMergeValues(Parts, DL);
 }
 
+static SDValue LowerVPUnorderedFCmp(unsigned EPIIntNo, const SDValue &Op1,
+                                    const SDValue &Op2, const SDValue &EVL,
+                                    EVT VT, SelectionDAG &DAG,
+                                    const SDLoc &DL) {
+  // Note: Implementing masked intrinsic as unmasked (this is correct given
+  // that masked-off elements are undef and the operation is only applied
+  // to ordered elements).
+  //
+  // %0 = vmfeq.vv %a, %a
+  // %1 = vmfeq.vv %b, %b
+  // %2 = vmand.mm %0, %1
+  // v0 = %2
+  // %3 = vm<fcmp>.vv %a, %b, v0.t
+  // %result = vmornot.mm %3, %2
+
+  assert(EVL.getValueType() == MVT::i32 && "Unexpected operand");
+  SDValue AnyExtEVL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, EVL);
+
+  SDValue FeqOp1Operands[] = {
+      DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64), Op1, Op1,
+      AnyExtEVL
+  };
+  SDValue FeqOp2Operands[] = {
+      DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64), Op2, Op2,
+      AnyExtEVL
+  };
+  SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, FeqOp1Operands);
+  SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, FeqOp2Operands);
+
+  SDValue AndOperands[] = {
+      DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FeqOp1, FeqOp2,
+      AnyExtEVL
+  };
+  SDValue And = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, AndOperands);
+
+  SDValue FCmpOperands[] = {
+      DAG.getTargetConstant(EPIIntNo, DL, MVT::i64),
+      DAG.getRegister(RISCV::NoRegister, VT), // Merge.
+      Op1, Op2, And, AnyExtEVL
+  };
+  SDValue FCmp = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, FCmpOperands);
+
+  SDValue OrNotOperands[] = {
+      DAG.getTargetConstant(Intrinsic::epi_vmornot, DL, MVT::i64), FCmp, And,
+      AnyExtEVL
+  };
+  return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, OrNotOperands);
+}
+
 static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   SDLoc DL(Op);
@@ -1332,17 +1381,21 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       report_fatal_error("Unimplemented intrinsic");
       break;
     case FCmpInst::FCMP_UGT:
-      report_fatal_error("Unimplemented intrinsic");
-      break;
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmfgt_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_UGE:
-      report_fatal_error("Unimplemented intrinsic");
-      break;
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmfge_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_ULT:
-      report_fatal_error("Unimplemented intrinsic");
-      break;
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmflt_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_ULE:
-      report_fatal_error("Unimplemented intrinsic");
-      break;
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmfle_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_UNE:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
       break;

@@ -49,6 +49,33 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <v
 ; CHECK-O0-NEXT:    vmfle.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O0-NEXT:    vmfeq.vv v1, v17, v17
+; CHECK-O0-NEXT:    vmfeq.vv v2, v16, v16
+; CHECK-O0-NEXT:    vmand.mm v1, v2, v1
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vmflt.vv v2, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v2, v2, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O0-NEXT:    vse.v v2, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O0-NEXT:    vmfle.vv v2, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v2, v2, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O0-NEXT:    vse.v v2, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O0-NEXT:    vmflt.vv v2, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v2, v2, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O0-NEXT:    vse.v v2, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O0-NEXT:    vmfle.vv v2, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v1, v2, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1
@@ -63,29 +90,54 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <v
 ;
 ; CHECK-O2-LABEL: test_vp_fcmp:
 ; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    vmv1r.v v1, v0
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
-; CHECK-O2-NEXT:    vmfeq.vv v1, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v2, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
-; CHECK-O2-NEXT:    vse.v v1, (a1)
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
-; CHECK-O2-NEXT:    vmfle.vv v1, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v2, v17, v16, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
-; CHECK-O2-NEXT:    vse.v v1, (a1)
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
-; CHECK-O2-NEXT:    vmflt.vv v1, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v2, v17, v16, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
-; CHECK-O2-NEXT:    vse.v v1, (a1)
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
-; CHECK-O2-NEXT:    vmflt.vv v1, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v2, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
-; CHECK-O2-NEXT:    vse.v v1, (a1)
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
-; CHECK-O2-NEXT:    vmfle.vv v1, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v2, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
-; CHECK-O2-NEXT:    vse.v v1, (a1)
+; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O2-NEXT:    vmfeq.vv v2, v17, v17
+; CHECK-O2-NEXT:    vmfeq.vv v3, v16, v16
+; CHECK-O2-NEXT:    vmand.mm v0, v3, v2
+; CHECK-O2-NEXT:    vmflt.vv v2, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v2, v2, v0
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O2-NEXT:    vmfle.vv v2, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v2, v2, v0
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O2-NEXT:    vmflt.vv v2, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v2, v2, v0
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1
+; CHECK-O2-NEXT:    vmfle.vv v2, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v2, v2, v0
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1
+; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmfne.vv v1, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1
 ; CHECK-O2-NEXT:    vse.v v1, (a1)
@@ -132,21 +184,21 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <v
   ;%zext_ueq = zext <vscale x 1 x i1> %ueq to <vscale x 1 x i64>
   ;store <vscale x 1 x i64> %zext_ueq, <vscale x 1 x i64>* %store_addr
 
-  ;%ugt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 10, <vscale x 1 x i1> %m, i32 %n)
-  ;%zext_ugt = zext <vscale x 1 x i1> %ugt to <vscale x 1 x i64>
-  ;store <vscale x 1 x i64> %zext_ugt, <vscale x 1 x i64>* %store_addr
+  %ugt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 10, <vscale x 1 x i1> %m, i32 %n)
+  %zext_ugt = zext <vscale x 1 x i1> %ugt to <vscale x 1 x i64>
+  store <vscale x 1 x i64> %zext_ugt, <vscale x 1 x i64>* %store_addr
 
-  ;%uge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 11, <vscale x 1 x i1> %m, i32 %n)
-  ;%zext_uge = zext <vscale x 1 x i1> %uge to <vscale x 1 x i64>
-  ;store <vscale x 1 x i64> %zext_uge, <vscale x 1 x i64>* %store_addr
+  %uge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 11, <vscale x 1 x i1> %m, i32 %n)
+  %zext_uge = zext <vscale x 1 x i1> %uge to <vscale x 1 x i64>
+  store <vscale x 1 x i64> %zext_uge, <vscale x 1 x i64>* %store_addr
 
-  ;%ult = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 12, <vscale x 1 x i1> %m, i32 %n)
-  ;%zext_ult = zext <vscale x 1 x i1> %ult to <vscale x 1 x i64>
-  ;store <vscale x 1 x i64> %zext_ult, <vscale x 1 x i64>* %store_addr
+  %ult = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 12, <vscale x 1 x i1> %m, i32 %n)
+  %zext_ult = zext <vscale x 1 x i1> %ult to <vscale x 1 x i64>
+  store <vscale x 1 x i64> %zext_ult, <vscale x 1 x i64>* %store_addr
 
-  ;%ule = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 13, <vscale x 1 x i1> %m, i32 %n)
-  ;%zext_ule = zext <vscale x 1 x i1> %ule to <vscale x 1 x i64>
-  ;store <vscale x 1 x i64> %zext_ule, <vscale x 1 x i64>* %store_addr
+  %ule = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 13, <vscale x 1 x i1> %m, i32 %n)
+  %zext_ule = zext <vscale x 1 x i1> %ule to <vscale x 1 x i64>
+  store <vscale x 1 x i64> %zext_ule, <vscale x 1 x i64>* %store_addr
 
   %une = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 14, <vscale x 1 x i1> %m, i32 %n)
   %zext_une = zext <vscale x 1 x i1> %une to <vscale x 1 x i64>
@@ -208,6 +260,37 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <v
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
 ; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmfeq.vv v1, v17, v17
+; CHECK-O0-NEXT:    vmfeq.vv v4, v16, v16
+; CHECK-O0-NEXT:    vmand.mm v1, v4, v1
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vmflt.vv v4, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmfle.vv v4, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmflt.vv v4, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmfle.vv v4, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1
@@ -229,39 +312,70 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <v
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O2-NEXT:    vmfeq.vv v0, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
-; CHECK-O2-NEXT:    vmv.v.i v2, 0
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmv.v.i v4, 0
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmfle.vv v0, v17, v16, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmflt.vv v0, v17, v16, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmflt.vv v0, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmfle.vv v0, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmfeq.vv v2, v17, v17
+; CHECK-O2-NEXT:    vmfeq.vv v3, v16, v16
+; CHECK-O2-NEXT:    vmand.mm v2, v3, v2
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmflt.vv v3, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmfle.vv v3, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmflt.vv v3, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmfle.vv v3, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmfne.vv v0, v16, v17, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e64,m2
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse.v v4, (a1)
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 
@@ -305,21 +419,21 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <v
   ;%zext_ueq = zext <vscale x 2 x i1> %ueq to <vscale x 2 x i64>
   ;store <vscale x 2 x i64> %zext_ueq, <vscale x 2 x i64>* %store_addr
 
-  ;%ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ugt = zext <vscale x 2 x i1> %ugt to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ugt, <vscale x 2 x i64>* %store_addr
+  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ugt = zext <vscale x 2 x i1> %ugt to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ugt, <vscale x 2 x i64>* %store_addr
 
-  ;%uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_uge = zext <vscale x 2 x i1> %uge to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_uge, <vscale x 2 x i64>* %store_addr
+  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
+  %zext_uge = zext <vscale x 2 x i1> %uge to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_uge, <vscale x 2 x i64>* %store_addr
 
-  ;%ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ult = zext <vscale x 2 x i1> %ult to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ult, <vscale x 2 x i64>* %store_addr
+  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ult = zext <vscale x 2 x i1> %ult to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ult, <vscale x 2 x i64>* %store_addr
 
-  ;%ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ule = zext <vscale x 2 x i1> %ule to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ule, <vscale x 2 x i64>* %store_addr
+  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ule = zext <vscale x 2 x i1> %ule to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ule, <vscale x 2 x i64>* %store_addr
 
   %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 14, <vscale x 2 x i1> %m, i32 %n)
   %zext_une = zext <vscale x 2 x i1> %une to <vscale x 2 x i64>
@@ -386,6 +500,43 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
 ; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O0-NEXT:    vmfeq.vv v1, v18, v18
+; CHECK-O0-NEXT:    vmfeq.vv v4, v16, v16
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmand.mm v1, v4, v1
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O0-NEXT:    vmflt.vv v4, v18, v16, v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O0-NEXT:    vmfle.vv v4, v18, v16, v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O0-NEXT:    vmflt.vv v4, v16, v18, v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
+; CHECK-O0-NEXT:    vmv1r.v v0, v1
+; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O0-NEXT:    vmfle.vv v4, v16, v18, v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O0-NEXT:    vmornot.mm v0, v4, v1
+; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2
@@ -440,6 +591,43 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O2-NEXT:    vmv1r.v v0, v2
 ; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
 ; CHECK-O2-NEXT:    vse.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O2-NEXT:    vmfeq.vv v2, v18, v18
+; CHECK-O2-NEXT:    vmfeq.vv v3, v16, v16
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmand.mm v2, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmflt.vv v3, v18, v16, v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmfle.vv v3, v18, v16, v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmflt.vv v3, v16, v18, v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v6, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v6, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2
+; CHECK-O2-NEXT:    vmv1r.v v0, v2
+; CHECK-O2-NEXT:    vmfle.vv v3, v16, v18, v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1
+; CHECK-O2-NEXT:    vmornot.mm v0, v3, v2
+; CHECK-O2-NEXT:    vsetvli a2, zero, e64,m2
+; CHECK-O2-NEXT:    vmerge.vim v2, v4, 1, v0
+; CHECK-O2-NEXT:    vse.v v2, (a1)
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m2
 ; CHECK-O2-NEXT:    vmv1r.v v0, v1
 ; CHECK-O2-NEXT:    vmfne.vv v1, v16, v18, v0.t
@@ -490,21 +678,21 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
   ;%zext_ueq = zext <vscale x 2 x i1> %ueq to <vscale x 2 x i64>
   ;store <vscale x 2 x i64> %zext_ueq, <vscale x 2 x i64>* %store_addr
 
-  ;%ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ugt = zext <vscale x 2 x i1> %ugt to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ugt, <vscale x 2 x i64>* %store_addr
+  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ugt = zext <vscale x 2 x i1> %ugt to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ugt, <vscale x 2 x i64>* %store_addr
 
-  ;%uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_uge = zext <vscale x 2 x i1> %uge to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_uge, <vscale x 2 x i64>* %store_addr
+  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
+  %zext_uge = zext <vscale x 2 x i1> %uge to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_uge, <vscale x 2 x i64>* %store_addr
 
-  ;%ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ult = zext <vscale x 2 x i1> %ult to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ult, <vscale x 2 x i64>* %store_addr
+  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ult = zext <vscale x 2 x i1> %ult to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ult, <vscale x 2 x i64>* %store_addr
 
-  ;%ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
-  ;%zext_ule = zext <vscale x 2 x i1> %ule to <vscale x 2 x i64>
-  ;store <vscale x 2 x i64> %zext_ule, <vscale x 2 x i64>* %store_addr
+  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
+  %zext_ule = zext <vscale x 2 x i1> %ule to <vscale x 2 x i64>
+  store <vscale x 2 x i64> %zext_ule, <vscale x 2 x i64>* %store_addr
 
   %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 14, <vscale x 2 x i1> %m, i32 %n)
   %zext_une = zext <vscale x 2 x i1> %une to <vscale x 2 x i64>
