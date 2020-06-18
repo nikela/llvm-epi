@@ -1294,9 +1294,22 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     EPIIntNo = IsMasked ? Intrinsic::epi_vfmacc_mask : Intrinsic::epi_vfmacc;
     break;
   case Intrinsic::vp_fneg:
-    // FIXME Needs to be expanded.
-    report_fatal_error("Unimplemented intrinsic");
+    VOpsPerm = {1, 1};
+    MaskOpNo = 2;
+    EVLOpNo = 3;
+    IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+    EPIIntNo =
+        IsMasked ? Intrinsic::epi_vfsgnjn_mask : Intrinsic::epi_vfsgnjn;
     break;
+  case Intrinsic::vp_sitofp: {
+    VOpsPerm = {1};
+    MaskOpNo = 2;
+    EVLOpNo = 3;
+    IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+    EPIIntNo =
+        IsMasked ? Intrinsic::epi_vfcvt_f_x_mask : Intrinsic::epi_vfcvt_f_x;
+    break;
+  }
   case Intrinsic::vp_icmp: {
     VOpsPerm = {1, 2};
     MaskOpNo = 4;
@@ -1566,6 +1579,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
   case Intrinsic::vp_icmp:
   case Intrinsic::vp_fcmp:
   case Intrinsic::vp_select:
+  case Intrinsic::vp_sitofp:
     return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
   }
 }
