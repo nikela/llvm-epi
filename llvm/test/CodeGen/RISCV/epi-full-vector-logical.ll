@@ -138,56 +138,92 @@ define void @nxv8i1(<vscale x 8 x i1> %a, <vscale x 8 x i1> %b) nounwind {
   ret void
 }
 
-; FIXME: Enable the following tests when storing whole LMUL > 1 masks is
-; supported.
+define void @nxv16i1(<vscale x 16 x i1> %a, <vscale x 16 x i1> %b) nounwind {
+; CHECK-LABEL: nxv16i1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vmv1r.v v1, v0
+; CHECK-NEXT:    lui a0, %hi(scratch)
+; CHECK-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2
+; CHECK-NEXT:    vmand.mm v0, v0, v16
+; CHECK-NEXT:    vmv.v.i v2, 0
+; CHECK-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-NEXT:    vmor.mm v0, v1, v16
+; CHECK-NEXT:    vse.v v4, (a0)
+; CHECK-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-NEXT:    vmxor.mm v0, v1, v16
+; CHECK-NEXT:    vse.v v4, (a0)
+; CHECK-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-NEXT:    vse.v v4, (a0)
+; CHECK-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 16 x i8>*
 
-;define void @nxv16i1(<vscale x 16 x i1> %a, <vscale x 16 x i1> %b) nounwind {
-;  %store_addr = bitcast i8* @scratch to <vscale x 16 x i4>*
-;
-;  %log_1 = and <vscale x 16 x i1> %a, %b
-;  %val_1 = zext <vscale x 16 x i1> %log_1 to <vscale x 16 x i4>
-;  store <vscale x 16 x i4> %val_1, <vscale x 16 x i4>* %store_addr
-;
-;  %log_2 = or <vscale x 16 x i1> %a, %b
-;  %val_2 = zext <vscale x 16 x i1> %log_2 to <vscale x 16 x i4>
-;  store <vscale x 16 x i4> %val_2, <vscale x 16 x i4>* %store_addr
-;
-;  %log_3 = xor <vscale x 16 x i1> %a, %b
-;  %val_3 = zext <vscale x 16 x i1> %log_3 to <vscale x 16 x i4>
-;  store <vscale x 16 x i4> %val_3, <vscale x 16 x i4>* %store_addr
-;
-;  ret void
-;}
+  %log_1 = and <vscale x 16 x i1> %a, %b
+  %val_1 = zext <vscale x 16 x i1> %log_1 to <vscale x 16 x i8>
+  store <vscale x 16 x i8> %val_1, <vscale x 16 x i8>* %store_addr
 
-;define void @nxv32i1(<vscale x 32 x i1> %a, <vscale x 32 x i1> %b) nounwind {
-;  %store_addr = bitcast i8* @scratch to <vscale x 32 x i2>*
-;
-;  %log_1 = and <vscale x 32 x i1> %a, %b
-;  %val_1 = zext <vscale x 32 x i1> %log_1 to <vscale x 32 x i2>
-;  store <vscale x 32 x i2> %val_1, <vscale x 32 x i2>* %store_addr
-;
-;  %log_2 = or <vscale x 32 x i1> %a, %b
-;  %val_2 = zext <vscale x 32 x i1> %log_2 to <vscale x 32 x i2>
-;  store <vscale x 32 x i2> %val_2, <vscale x 32 x i2>* %store_addr
-;
-;  %log_3 = xor <vscale x 32 x i1> %a, %b
-;  %val_3 = zext <vscale x 32 x i1> %log_3 to <vscale x 32 x i2>
-;  store <vscale x 32 x i2> %val_3, <vscale x 32 x i2>* %store_addr
-;
-;  ret void
-;}
+  %log_2 = or <vscale x 16 x i1> %a, %b
+  %val_2 = zext <vscale x 16 x i1> %log_2 to <vscale x 16 x i8>
+  store <vscale x 16 x i8> %val_2, <vscale x 16 x i8>* %store_addr
+
+  %log_3 = xor <vscale x 16 x i1> %a, %b
+  %val_3 = zext <vscale x 16 x i1> %log_3 to <vscale x 16 x i8>
+  store <vscale x 16 x i8> %val_3, <vscale x 16 x i8>* %store_addr
+
+  ret void
+}
+
+define void @nxv32i1(<vscale x 32 x i1> %a, <vscale x 32 x i1> %b) nounwind {
+; CHECK-LABEL: nxv32i1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vmv1r.v v1, v0
+; CHECK-NEXT:    lui a0, %hi(scratch)
+; CHECK-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4
+; CHECK-NEXT:    vmand.mm v0, v0, v16
+; CHECK-NEXT:    vmv.v.i v4, 0
+; CHECK-NEXT:    vmerge.vim v20, v4, 1, v0
+; CHECK-NEXT:    vmor.mm v0, v1, v16
+; CHECK-NEXT:    vse.v v20, (a0)
+; CHECK-NEXT:    vmerge.vim v20, v4, 1, v0
+; CHECK-NEXT:    vmxor.mm v0, v1, v16
+; CHECK-NEXT:    vse.v v20, (a0)
+; CHECK-NEXT:    vmerge.vim v16, v4, 1, v0
+; CHECK-NEXT:    vse.v v16, (a0)
+; CHECK-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 32 x i8>*
+
+  %log_1 = and <vscale x 32 x i1> %a, %b
+  %val_1 = zext <vscale x 32 x i1> %log_1 to <vscale x 32 x i8>
+  store <vscale x 32 x i8> %val_1, <vscale x 32 x i8>* %store_addr
+
+  %log_2 = or <vscale x 32 x i1> %a, %b
+  %val_2 = zext <vscale x 32 x i1> %log_2 to <vscale x 32 x i8>
+  store <vscale x 32 x i8> %val_2, <vscale x 32 x i8>* %store_addr
+
+  %log_3 = xor <vscale x 32 x i1> %a, %b
+  %val_3 = zext <vscale x 32 x i1> %log_3 to <vscale x 32 x i8>
+  store <vscale x 32 x i8> %val_3, <vscale x 32 x i8>* %store_addr
+
+  ret void
+}
+
+; FIXME enable when nxv64i8 is supported
 
 ;define void @nxv64i1(<vscale x 64 x i1> %a, <vscale x 64 x i1> %b) nounwind {
-;  %store_addr = bitcast i8* @scratch to <vscale x 64 x i1>*
+;  %store_addr = bitcast i8* @scratch to <vscale x 64 x i8>*
 ;
 ;  %log_1 = and <vscale x 64 x i1> %a, %b
-;  store <vscale x 64 x i1> %log_1, <vscale x 64 x i1>* %store_addr
+;  %val_1 = zext <vscale x 64 x i1> %log_1 to <vscale x 64 x i8>
+;  store <vscale x 64 x i8> %val_1, <vscale x 64 x i8>* %store_addr
 ;
 ;  %log_2 = or <vscale x 64 x i1> %a, %b
-;  store <vscale x 64 x i1> %log_2, <vscale x 64 x i1>* %store_addr
+;  %val_2 = zext <vscale x 64 x i1> %log_2 to <vscale x 64 x i8>
+;  store <vscale x 64 x i8> %val_2, <vscale x 64 x i8>* %store_addr
 ;
 ;  %log_3 = xor <vscale x 64 x i1> %a, %b
-;  store <vscale x 64 x i1> %log_3, <vscale x 64 x i1>* %store_addr
+;  %val_3 = zext <vscale x 64 x i1> %log_2 to <vscale x 64 x i8>
+;  store <vscale x 64 x i8> %val_3, <vscale x 64 x i8>* %store_addr
 ;
 ;  ret void
 ;}

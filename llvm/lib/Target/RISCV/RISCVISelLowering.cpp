@@ -313,8 +313,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::INTRINSIC_VOID, VT, Custom);
     }
 
-    // Custom-legalize this node for illegal result types.
-    for (auto VT : {MVT::i8, MVT::i16, MVT::i32}) {
+    // Custom-legalize this node for illegal result types or mask operands.
+    for (auto VT : {MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i1, MVT::nxv2i1,
+                    MVT::nxv4i1, MVT::nxv8i1, MVT::nxv16i1, MVT::nxv32i1,
+                    MVT::nxv64i1}) {
       setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
     }
 
@@ -633,6 +635,54 @@ SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
   return SextInreg;
 }
 
+SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
+                                                     SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT VectorVT = Op.getOperand(0).getValueType();
+
+  if (VectorVT.getVectorElementType() != MVT::i1)
+    return SDValue();
+
+  // Extend logical vector type before extracting an element:
+  //
+  // Before:
+  //   (i64 (extract_vector_elt (nxv1i1), i64))
+  // After:
+  //   (i64 (extract_vector_elt (nxv1i64 (any_extend (nxv1i1))), i64))
+  //
+  // Before:
+  //   (i64 (extract_vector_elt (nxv2i1), i64))
+  // After:
+  //   (i64 (extract_vector_elt (nxv2i32 (any_extend (nxv2i1))), i64))
+  //
+  // For LMUL>1 logical types we use LMUL>1 integer types (as opposed to LMUL=1
+  // sub-byte types. Eg. nxv16i8 instead of nxv8i8 with two i4 elements in each
+  // i8).
+  // Before:
+  //   (i64 (extract_vector_elt (nxv16i1), i64))
+  // After:
+  //   (i64 (extract_vector_elt (nxv16i8 (any_extend (nxv16i1))), i64))
+
+  MVT ExtVectorEltVT =
+      VectorVT.getVectorMinNumElements() <= 8
+          ? MVT::getIntegerVT(64 / VectorVT.getVectorMinNumElements())
+          : MVT::i8; // FIXME: ELEN=64 hardcoded.
+  EVT ExtVectorVT = VectorVT.changeVectorElementType(ExtVectorEltVT);
+
+  unsigned Opcode = ExtVectorEltVT == MVT::i64 ? ISD::EXTRACT_VECTOR_ELT
+                                               : RISCVISD::EXTRACT_VECTOR_ELT;
+
+  SDValue ExtOp0 =
+      DAG.getNode(ISD::ANY_EXTEND, DL, ExtVectorVT, Op.getOperand(0));
+
+  MVT ScalarResVT = Op.getValueType().getSimpleVT(); // Type already legalized.
+  SDValue ExtractElt =
+      DAG.getNode(Opcode, DL, ScalarResVT, ExtOp0, Op.getOperand(1));
+
+  return DAG.getNode(ISD::AssertZext, DL, ScalarResVT, ExtractElt,
+                     DAG.getValueType(MVT::i1));
+}
+
 void RISCVTargetLowering::LowerOperationWrapper(
     SDNode *N, SmallVectorImpl<SDValue> &Results, SelectionDAG &DAG) const {
   SDValue Result = LowerOperation(SDValue(N, 0), DAG);
@@ -692,6 +742,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSPLAT_VECTOR(Op, DAG);
   case ISD::SIGN_EXTEND_INREG:
     return lowerSIGN_EXTEND_INREG(Op, DAG);
+  case ISD::EXTRACT_VECTOR_ELT:
+    return lowerEXTRACT_VECTOR_ELT(Op, DAG);
   }
 }
 

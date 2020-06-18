@@ -2,6 +2,9 @@
 ; RUN: llc -mtriple riscv64 -mattr +m,+a,+f,+d,+experimental-v -o - \
 ; RUN:     --verify-machineinstrs %s | FileCheck %s
 
+; Note: Check epi-vp-logical.ll and epi-full-vector-logical.ll contain
+; extensive LMUL>1 zext and trunc testcases.
+
 define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_1:
 ; CHECK:       # %bb.0:

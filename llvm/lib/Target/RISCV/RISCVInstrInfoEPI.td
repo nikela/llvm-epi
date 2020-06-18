@@ -1499,6 +1499,8 @@ let Predicates = [HasStdExtV] in {
   foreach vti = NoGroupIntegerVectors in {
     def : Pat<(vti.Vector (zext (vti.Mask VR:$rs1))),
               (PseudoVMAND_MM_M1 VR:$rs1, VR:$rs1, VLMax, vti.SEW)>;
+    def : Pat<(vti.Vector (anyext (vti.Mask VR:$rs1))),
+              (COPY_TO_REGCLASS VR:$rs1, VR)>;
     // We don't have to do anything here because mask vectors only use the
     // LSB of each element.
     def : Pat<(vti.Mask (trunc (vti.Vector VR:$rs1))),
@@ -1506,6 +1508,21 @@ let Predicates = [HasStdExtV] in {
   }
 
   foreach gvti = GroupIntegerVectors in {
+    def : Pat<(gvti.Vector (zext (gvti.Mask V0))),
+              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
+               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
+                VLMax, gvti.SEW),
+               1,
+               (gvti.Mask V0),
+               VLMax, gvti.SEW)>;
+    // No way to do 'anyext' to lmul>1, so we 'zext' instead.
+    def : Pat<(gvti.Vector (anyext (gvti.Mask V0))),
+              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
+               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
+                VLMax, gvti.SEW),
+               1,
+               (gvti.Mask V0),
+               VLMax, gvti.SEW)>;
     def : Pat<(gvti.Mask (trunc (gvti.Vector gvti.RegClass:$rs1))),
               (!cast<Instruction>("PseudoVMSNE_VV_M"#gvti.RegClass.VLMul)
                (gvti.Mask zero_reg),
@@ -1517,13 +1534,6 @@ let Predicates = [HasStdExtV] in {
                (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
                 VLMax, gvti.SEW),
                (gvti.Mask zero_reg),
-               VLMax, gvti.SEW)>;
-    def : Pat<(gvti.Vector (zext (gvti.Mask V0))),
-              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
-               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
-                VLMax, gvti.SEW),
-               1,
-               (gvti.Mask V0),
                VLMax, gvti.SEW)>;
   }
 
