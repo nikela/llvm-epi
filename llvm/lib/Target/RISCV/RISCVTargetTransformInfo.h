@@ -20,6 +20,7 @@
 #include "RISCVTargetMachine.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/BasicTTIImpl.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 
 namespace llvm {
@@ -37,6 +38,87 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
   const RISCVTargetLowering *getTLI() const { return TLI; }
 
   bool isLegalMaskedLoadStore(Type *DataType) const;
+
+  /// Estimate a cost of Broadcast as an extract and sequence of insert
+  /// operations.
+  unsigned getBroadcastShuffleOverhead(ScalableVectorType *VTy) {
+    unsigned MinCost = 0;
+    // Broadcast cost is equal to the cost of extracting the zero'th element
+    // plus the cost of inserting it into every element of the result vector.
+    // TODO: Implement getVectorInstrCost
+    MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0);
+
+    for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
+    }
+    return MinCost;
+  }
+
+  /// Estimate a cost of shuffle as a sequence of extract and insert
+  /// operations.
+  unsigned getPermuteShuffleOverhead(ScalableVectorType *VTy) {
+    unsigned MinCost = 0;
+    // Shuffle cost is equal to the cost of extracting element from its argument
+    // plus the cost of inserting them onto the result vector.
+
+    // e.g. <4 x float> has a mask of <0,5,2,7> i.e we need to extract from
+    // index 0 of first vector, index 1 of second vector,index 2 of first
+    // vector and finally index 3 of second vector and insert them at index
+    // <0,1,2,3> of result vector.
+    for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i);
+    }
+    return MinCost;
+  }
+
+  /// Estimate a cost of subvector extraction as a sequence of extract and
+  /// insert operations.
+  unsigned getExtractSubvectorOverhead(ScalableVectorType *VTy, int Index,
+                                       ScalableVectorType *SubVTy) {
+    // assert(VTy && SubVTy && "Can only extract subvectors from vectors");
+    // int NumSubElts = SubVTy->getNumElements();
+    // assert((Index + NumSubElts) <= (int)VTy->getNumElements() &&
+    //       "SK_ExtractSubvector index out of range");
+
+    // unsigned Cost = 0;
+    //// Subvector extraction cost is equal to the cost of extracting element
+    /// from / the source type plus the cost of inserting them into the result
+    /// vector / type.
+    // for (int i = 0; i != NumSubElts; ++i) {
+    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
+    //      Instruction::ExtractElement, VTy, i + Index);
+    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
+    //      Instruction::InsertElement, SubVTy, i);
+    //}
+    // return Cost;
+    // FIXME: Compute cost using slideleft
+    return 1;
+  }
+
+  /// Estimate a cost of subvector insertion as a sequence of extract and
+  /// insert operations.
+  unsigned getInsertSubvectorOverhead(ScalableVectorType *VTy, int Index,
+                                      ScalableVectorType *SubVTy) {
+    // assert(VTy && SubVTy && "Can only insert subvectors into vectors");
+    // int NumSubElts = SubVTy->getNumElements();
+    // assert((Index + NumSubElts) <= (int)VTy->getNumElements() &&
+    //       "SK_InsertSubvector index out of range");
+
+    // unsigned Cost = 0;
+    //// Subvector insertion cost is equal to the cost of extracting element
+    ///from / the source type plus the cost of inserting them into the result
+    ///vector / type.
+    // for (int i = 0; i != NumSubElts; ++i) {
+    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
+    //      Instruction::ExtractElement, SubVTy, i);
+    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
+    //      Instruction::InsertElement, VTy, i + Index);
+    //}
+    // return Cost;
+    // FIXME: Compute cost that makes sense for scalable vectors. Retuen MinCost
+    return 1;
+  }
 
 public:
   explicit RISCVTTIImpl(const RISCVTargetMachine *TM, const Function &F)
@@ -59,6 +141,11 @@ public:
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
+  unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
+  unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp, int Index,
+                          VectorType *SubTp);
+  unsigned getScalarizationOverhead(VectorType *InTy, const APInt &DemandedElts,
+                                    bool Insert, bool Extract);
 };
 
 } // end namespace llvm

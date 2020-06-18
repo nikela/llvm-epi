@@ -11,6 +11,7 @@
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/CodeGen/TargetLowering.h"
+#include "llvm/IR/DerivedTypes.h"
 using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
@@ -163,4 +164,43 @@ bool RISCVTTIImpl::isLegalMaskedGather(Type *DataType,
 bool RISCVTTIImpl::isLegalMaskedScatter(Type *DataType,
                                         MaybeAlign Alignment) const {
   return isLegalMaskedLoadStore(DataType);
+}
+
+unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
+                                          unsigned Index) {
+  // TODO: Implement
+  return 0;
+}
+
+unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
+                                      int Index, VectorType *SubTp) {
+  switch (Kind) {
+  case TTI::SK_Broadcast: {
+    // TODO: Move to getBroadcastShuffleOverhead
+    unsigned ExtractCost = 1u;
+    unsigned InsertMinCost = Tp->getElementCount().Min;
+    return ExtractCost + InsertMinCost;
+  }
+  case TTI::SK_Select:
+  case TTI::SK_Reverse:
+  case TTI::SK_Transpose:
+  case TTI::SK_PermuteSingleSrc:
+  case TTI::SK_PermuteTwoSrc:
+    return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
+  case TTI::SK_ExtractSubvector:
+    return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                       cast<ScalableVectorType>(SubTp));
+  case TTI::SK_InsertSubvector:
+    return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                      cast<ScalableVectorType>(SubTp));
+  }
+    return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
+}
+
+unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
+                                                const APInt &DemandedElts,
+                                                bool Insert, bool Extract) {
+
+  // TODO: Implementation
+  return 0;
 }
