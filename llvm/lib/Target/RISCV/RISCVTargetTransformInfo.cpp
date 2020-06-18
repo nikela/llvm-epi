@@ -168,19 +168,26 @@ bool RISCVTTIImpl::isLegalMaskedScatter(Type *DataType,
 
 unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
                                           unsigned Index) {
-  // TODO: Implement
-  return 0;
+  assert(isa<ScalableVectorType>(Val) && "This must be a scalable vector type");
+
+  // FIXME: For now we use the simplest assumption that the base cost of a
+  // single vector insert/extract op is 1. This may not be entirely correct. If
+  // there is a vector split due to legalization, we cannot normalize the index
+  // to the new type because of unknown vector length.
+
+  // Legalize the type.
+  std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, Val);
+  // This type is legalized to a scalar type.
+  if (!LT.second.isVector())
+    return 0;
+  return 1;
 }
 
 unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                       int Index, VectorType *SubTp) {
   switch (Kind) {
-  case TTI::SK_Broadcast: {
-    // TODO: Move to getBroadcastShuffleOverhead
-    unsigned ExtractCost = 1u;
-    unsigned InsertMinCost = Tp->getElementCount().Min;
-    return ExtractCost + InsertMinCost;
-  }
+  case TTI::SK_Broadcast:
+    return getBroadcastShuffleOverhead(cast<ScalableVectorType>(Tp));
   case TTI::SK_Select:
   case TTI::SK_Reverse:
   case TTI::SK_Transpose:

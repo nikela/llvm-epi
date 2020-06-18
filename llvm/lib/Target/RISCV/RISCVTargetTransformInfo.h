@@ -45,7 +45,9 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     unsigned MinCost = 0;
     // Broadcast cost is equal to the cost of extracting the zero'th element
     // plus the cost of inserting it into every element of the result vector.
-    // TODO: Implement getVectorInstrCost
+    // FIXME: For scalable vectors for now we compute the MinCost based on Min
+    // number of elements but this does not represent the correct cost. This
+    // would be fixed once the cost model has support for scalable vectors.
     MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0);
 
     for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
@@ -61,10 +63,13 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // Shuffle cost is equal to the cost of extracting element from its argument
     // plus the cost of inserting them onto the result vector.
 
-    // e.g. <4 x float> has a mask of <0,5,2,7> i.e we need to extract from
-    // index 0 of first vector, index 1 of second vector,index 2 of first
-    // vector and finally index 3 of second vector and insert them at index
-    // <0,1,2,3> of result vector.
+    // e.g. for a fixed vector <4 x float> has a mask of <0,5,2,7> i.e we need
+    // to extract from index 0 of first vector, index 1 of second vector,index 2
+    // of first vector and finally index 3 of second vector and insert them at
+    // index <0,1,2,3> of result vector.
+    // FIXME: For scalable vectors for now we compute the MinCost based on Min
+    // number of elements but this does not represent the correct cost. This
+    // would be fixed once the cost model has support for scalable vectors.
     for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
       MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
       MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i);
@@ -76,48 +81,45 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
   /// insert operations.
   unsigned getExtractSubvectorOverhead(ScalableVectorType *VTy, int Index,
                                        ScalableVectorType *SubVTy) {
-    // assert(VTy && SubVTy && "Can only extract subvectors from vectors");
-    // int NumSubElts = SubVTy->getNumElements();
-    // assert((Index + NumSubElts) <= (int)VTy->getNumElements() &&
-    //       "SK_ExtractSubvector index out of range");
+    assert(VTy && SubVTy && "Can only extract subvectors from vectors");
+    // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
-    // unsigned Cost = 0;
-    //// Subvector extraction cost is equal to the cost of extracting element
-    /// from / the source type plus the cost of inserting them into the result
-    /// vector / type.
-    // for (int i = 0; i != NumSubElts; ++i) {
-    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
-    //      Instruction::ExtractElement, VTy, i + Index);
-    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
-    //      Instruction::InsertElement, SubVTy, i);
-    //}
-    // return Cost;
-    // FIXME: Compute cost using slideleft
-    return 1;
+    unsigned NumSubElts = SubVTy->getElementCount().Min;
+    unsigned MinCost = 0;
+    // Subvector extraction cost is equal to the cost of extracting element
+    // from the source type plus the cost of inserting them into the result
+    // vector type.
+    // FIXME: For scalable vectors for now we compute the MinCost based on Min
+    // number of elements but this does not represent the correct cost. This
+    // would be fixed once the cost model has support for scalable vectors.
+    for (unsigned i = 0; i != NumSubElts; ++i) {
+      MinCost +=
+          getVectorInstrCost(Instruction::ExtractElement, VTy, i + Index);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, SubVTy, i);
+    }
+    return MinCost;
   }
 
   /// Estimate a cost of subvector insertion as a sequence of extract and
   /// insert operations.
   unsigned getInsertSubvectorOverhead(ScalableVectorType *VTy, int Index,
                                       ScalableVectorType *SubVTy) {
-    // assert(VTy && SubVTy && "Can only insert subvectors into vectors");
-    // int NumSubElts = SubVTy->getNumElements();
-    // assert((Index + NumSubElts) <= (int)VTy->getNumElements() &&
-    //       "SK_InsertSubvector index out of range");
+    assert(VTy && SubVTy && "Can only insert subvectors into vectors");
+    // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
-    // unsigned Cost = 0;
-    //// Subvector insertion cost is equal to the cost of extracting element
-    ///from / the source type plus the cost of inserting them into the result
-    ///vector / type.
-    // for (int i = 0; i != NumSubElts; ++i) {
-    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
-    //      Instruction::ExtractElement, SubVTy, i);
-    //  Cost += static_cast<T *>(this)->getVectorInstrCost(
-    //      Instruction::InsertElement, VTy, i + Index);
-    //}
-    // return Cost;
-    // FIXME: Compute cost that makes sense for scalable vectors. Retuen MinCost
-    return 1;
+    unsigned NumSubElts = SubVTy->getElementCount().Min;
+    unsigned MinCost = 0;
+    // Subvector insertion cost is equal to the cost of extracting element
+    // from the source type plus the cost of inserting them into the result
+    // vector type.
+    // FIXME: For scalable vectors for now we compute the MinCost based on Min
+    // number of elements but this does not represent the correct cost. This
+    // would be fixed once the cost model has support for scalable vectors.
+    for (unsigned i = 0; i != NumSubElts; ++i) {
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, SubVTy, i);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i + Index);
+    }
+    return MinCost;
   }
 
 public:
