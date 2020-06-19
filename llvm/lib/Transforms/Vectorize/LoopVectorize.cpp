@@ -6773,6 +6773,9 @@ unsigned LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
   Type *RetTy = ToVectorTy(I->getType(), VF, isScalable());
   if (!RetTy->isVoidTy() &&
       (!isa<LoadInst>(I) || !TTI.supportsEfficientVectorElementLoadStore()))
+    // FIXME: For scalable vectors DemandedElts for computing scalarization
+    // overhead currently models ElementCount.Min number of elements. This would
+    // be changed in the future.
     Cost += TTI.getScalarizationOverhead(
         cast<VectorType>(RetTy), APInt::getAllOnesValue(VF), true, false);
 
@@ -6790,6 +6793,7 @@ unsigned LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
 
   // Skip operands that do not require extraction/scalarization and do not incur
   // any overhead.
+  // FIXME: For scalable vectors, VF here is the ElementCount.Min value.
   return Cost + TTI.getOperandsScalarizationOverhead(
                     filterExtractingOperands(Ops, VF), VF);
 }

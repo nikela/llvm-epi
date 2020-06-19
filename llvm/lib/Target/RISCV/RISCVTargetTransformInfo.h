@@ -146,8 +146,12 @@ public:
   unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
   unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp, int Index,
                           VectorType *SubTp);
+  unsigned getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
+                                            unsigned MinNumElts);
   unsigned getScalarizationOverhead(VectorType *InTy, const APInt &DemandedElts,
                                     bool Insert, bool Extract);
+  unsigned getScalarizationOverhead(VectorType *InTy, bool Insert,
+                                    bool Extract);
 };
 
 } // end namespace llvm

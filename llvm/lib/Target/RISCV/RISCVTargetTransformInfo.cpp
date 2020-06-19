@@ -204,10 +204,68 @@ unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
     return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
 }
 
+/// Estimate the overhead of scalarizing an instructions unique
+/// non-constant operands. The types of the arguments are ordinarily
+/// scalar, in which case the costs are multiplied with VF.
+unsigned
+RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
+                                               unsigned MinNumElts) {
+  unsigned MinCost = 0;
+  SmallPtrSet<const Value *, 4> UniqueOperands;
+  for (const Value *A : Args) {
+    if (!isa<Constant>(A) && UniqueOperands.insert(A).second) {
+      auto *VecTy = dyn_cast<VectorType>(A->getType());
+      if (VecTy) {
+        // If A is a vector operand, VF should correspond to A.
+        assert(MinNumElts ==
+                   cast<ScalableVectorType>(VecTy)->getElementCount().Min &&
+               "Vector argument does not match VF");
+      } else
+        VecTy = ScalableVectorType::get(A->getType(), MinNumElts);
+
+      MinCost += getScalarizationOverhead(VecTy, false, true);
+    }
+  }
+  return MinCost;
+}
+
 unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
                                                 const APInt &DemandedElts,
                                                 bool Insert, bool Extract) {
+  // FIXME: a bitfield is not a reasonable abstraction for talking about
+  // which elements are needed from a scalable vector.
+  // For scalable vectors DemenadedElts currently represent ElementCount.Min
+  // number of elements.
+  auto *Ty = cast<ScalableVectorType>(InTy);
 
-  // TODO: Implementation
-  return 0;
+  assert(DemandedElts.getBitWidth() == Ty->getElementCount().Min &&
+         "Vector size mismatch");
+
+  unsigned MinCost = 0;
+
+  for (unsigned i = 0, e = Ty->getElementCount().Min; i < e; ++i) {
+    if (!DemandedElts[i])
+      continue;
+    if (Insert)
+      MinCost += getVectorInstrCost(Instruction::InsertElement, Ty, i);
+    if (Extract)
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, Ty, i);
+  }
+
+  return MinCost;
+}
+
+/// Helper wrapper for the DemandedElts variant of getScalarizationOverhead.
+unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy, bool Insert,
+                                                bool Extract) {
+  auto *Ty = cast<ScalableVectorType>(InTy);
+
+  // FIXME: DemandedElts represents active lanes using the number of elements.
+  // For scalable vectors it represents min number of elements (vscale = 1).
+  // This works fine as long as the cost model is based on the same model of
+  // vscale = 1. Once the cost model is changed to represent scalability, we
+  // would need a different ADT capable of representing scalable number of
+  // elements.
+  APInt MinDemandedElts = APInt::getAllOnesValue(Ty->getElementCount().Min);
+  return getScalarizationOverhead(Ty, MinDemandedElts, Insert, Extract);
 }
