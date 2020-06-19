@@ -222,6 +222,10 @@ public:
     return false;
   }
 
+  bool isNoopAddrSpaceCast(unsigned FromAS, unsigned ToAS) const {
+    return getTLI()->isNoopAddrSpaceCast(FromAS, ToAS);
+  }
+
   Value *rewriteIntrinsicWithAddressSpace(IntrinsicInst *II, Value *OldV,
                                           Value *NewV) const {
     return nullptr;
@@ -462,9 +466,8 @@ public:
     return BaseT::preferPredicateOverEpilogue(L, LI, SE, AC, TLI, DT, LAI);
   }
 
-  bool emitGetActiveLaneMask(Loop *L, LoopInfo *LI, ScalarEvolution &SE,
-                             bool TailFold) {
-    return BaseT::emitGetActiveLaneMask(L, LI, SE, TailFold);
+  bool emitGetActiveLaneMask() {
+    return BaseT::emitGetActiveLaneMask();
   }
 
   int getInstructionLatency(const Instruction *I) {

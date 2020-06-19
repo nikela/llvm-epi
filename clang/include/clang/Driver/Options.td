@@ -1280,6 +1280,8 @@ defm xray_always_emit_typedevents : OptInFFlag<"xray-always-emit-typedevents",
 
 defm xray_ignore_loops : OptInFFlag<"xray-ignore-loops",
   "Don't instrument functions with loops unless they also meet the minimum function size">;
+defm xray_function_index : OptOutFFlag<"xray-function-index", "",
+  "Omit function index section at the expense of single-function patching performance">;
 
 def fxray_link_deps : Flag<["-"], "fxray-link-deps">, Group<f_Group>,
   Flags<[CC1Option]>,
@@ -2315,6 +2317,9 @@ def msign_return_address_EQ : Joined<["-"], "msign-return-address=">,
   HelpText<"Select return address signing scope">;
 def mbranch_protection_EQ : Joined<["-"], "mbranch-protection=">,
   HelpText<"Enforce targets of indirect branches and function returns">;
+
+def mharden_sls_EQ : Joined<["-"], "mharden-sls=">,
+  HelpText<"Select straight-line speculation hardening scope">;
 
 def msimd128 : Flag<["-"], "msimd128">, Group<m_wasm_Features_Group>;
 def munimplemented_simd128 : Flag<["-"], "munimplemented-simd128">, Group<m_wasm_Features_Group>;
