@@ -3336,14 +3336,12 @@ foreach mti = AllMasks in {
 }
 
 foreach vti = NoGroupIntegerVectors in {
-  // FIXME We should use extractelt here, since vector_extract is deprecated.
-  // However, it is illegal in extractelt to have a return type that is
-  // different to the vector element type, which is what we need here. Insted,
-  // when using a return type equal to the vector element type, the pattern
-  // disappears.
-  def : Pat<(i64 (!cast<SDNode>(!if(!eq(!cast<string>(vti),
-                                     !cast<string>(Vtype1xi64)),
-                                 vector_extract, riscv_extract_vector_elt))
+  // Note: It is not valid in extractelt to have a return type that is different
+  // to the vector element type. For those cases (EltTy != i64) we use a custom
+  // node. There is another (deprecated) node vector_extract that won't fail in
+  // tablegen, but it won't emit a matcher, so it is not usable either.
+  def : Pat<(i64 (!cast<SDNode>(!if(!eq(vti.SEW, 64),
+                                 extractelt, riscv_extract_vector_elt))
                    (vti.Vector vti.RegClass:$rs2),
                    GPR:$rs1)),
             (PseudoVMV_X_S
@@ -3355,11 +3353,21 @@ foreach vti = NoGroupIntegerVectors in {
               VLMax,
               vti.SEW),
              vti.SEW)>;
-  // FIXME We should use insertelt here, since vector_insert is deprecated.
-  def : Pat<(vti.Vector (vector_insert
+
+  def : Pat<(i64 (!cast<SDNode>(!if(!eq(vti.SEW, 64),
+                                 extractelt, riscv_extract_vector_elt))
+                  (vti.Vector vti.RegClass:$rs2), 0)),
+            (PseudoVMV_X_S
+             (vti.Vector vti.RegClass:$rs2),
+             vti.SEW)>;
+
+  // Note: We use the (deprecated) node vector_insert when the input element
+  // type is different to the result vector element type, since this is invalid
+  // for insertelt.
+  def : Pat<(vti.Vector (!cast<SDNode>(!if(!eq(vti.SEW, 64),
+                                        insertelt, vector_insert))
                          (vti.Vector vti.RegClass:$merge),
-                         GPR:$rs1,
-                         (i64 0))),
+                         GPR:$rs1, 0)),
             (PseudoVMV_S_X
              (vti.Vector vti.RegClass:$merge),
              GPR:$rs1,
@@ -3367,16 +3375,41 @@ foreach vti = NoGroupIntegerVectors in {
              vti.SEW)>;
 }
 
-// FIXME We should use extractelt here too, see comment above.
+foreach fvti = NoGroupFloatVectors in {
+  def : Pat<(fvti.Scalar (extractelt (fvti.Vector fvti.RegClass:$rs2),
+                          GPR:$rs1)),
+            FromFPR64<fvti.ScalarRegClass,
+                      (PseudoVFMV_F_S
+                       (PseudoVSLIDEDOWN_VX_M1
+                        (fvti.Vector zero_reg),
+                        (fvti.Vector fvti.RegClass:$rs2),
+                        GPR:$rs1,
+                        (fvti.Mask zero_reg),
+                        VLMax,
+                        fvti.SEW),
+                       fvti.SEW)>.ret>;
+
+  def : Pat<(fvti.Scalar (extractelt (fvti.Vector fvti.RegClass:$rs2), 0)),
+            FromFPR64<fvti.ScalarRegClass,
+                      (PseudoVFMV_F_S $rs2, fvti.SEW)>.ret>;
+
+  def : Pat<(fvti.Vector (insertelt (fvti.Vector fvti.RegClass:$merge),
+                         (fvti.Scalar fvti.ScalarRegClass:$rs1), 0)),
+            (PseudoVFMV_S_F
+             (fvti.Vector fvti.RegClass:$merge),
+             ToFPR64<fvti.ScalarRegClass,
+                     (fvti.Scalar fvti.ScalarRegClass:$rs1)>.ret,
+             VLMax, fvti.SEW)>;
+}
+
 foreach gvti = GroupIntegerVectors in {
-  def : Pat<(i64 (!cast<SDNode>(!cond(
-                   !eq(!cast<string>(gvti), !cast<string>(Vtype2xi64))
-                    : vector_extract,
-                   !eq(!cast<string>(gvti), !cast<string>(Vtype4xi64))
-                    : vector_extract,
-                   !eq(!cast<string>(gvti), !cast<string>(Vtype8xi64))
-                    : vector_extract,
-                   1 : riscv_extract_vector_elt))
+  // Note: It is not valid in extractelt to have a return type that is different
+  // to the vector element type. For those cases (EltTy != i64) we use a custom
+  // node. There is another (deprecated) node vector_extract that won't fail in
+  // tablegen, but it won't emit a matcher, so it is not usable either.
+  def : Pat<(i64 (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
+                                 extractelt,
+                                 riscv_extract_vector_elt))
                    (gvti.Vector gvti.RegClass:$rs2),
                    GPR:$rs1)),
             (PseudoVMV_X_S
@@ -3390,6 +3423,71 @@ foreach gvti = GroupIntegerVectors in {
                gvti.SEW),
               sub_vrm2),
              gvti.SEW)>;
+
+  def : Pat<(i64 (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
+                                 extractelt,
+                                 riscv_extract_vector_elt))
+                   (gvti.Vector gvti.RegClass:$rs2), 0)),
+            (PseudoVMV_X_S
+             (EXTRACT_SUBREG
+              (gvti.Vector gvti.RegClass:$rs2),
+              sub_vrm2),
+             gvti.SEW)>;
+
+  // Note: We use the (deprecated) node vector_insert when the input element
+  // type is different to the result vector element type, since this is invalid
+  // for insertelt.
+  def : Pat<(gvti.Vector (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
+                                         insertelt, vector_insert))
+                         (gvti.Vector gvti.RegClass:$merge),
+                         GPR:$rs1, 0)),
+            (INSERT_SUBREG (IMPLICIT_DEF),
+             (PseudoVMV_S_X
+              (EXTRACT_SUBREG
+               (gvti.Vector gvti.RegClass:$merge),
+               sub_vrm2),
+              GPR:$rs1,
+              VLMax,
+              gvti.SEW),
+             sub_vrm2)>;
+}
+
+foreach gfvti = GroupFloatVectors in {
+  def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.RegClass:$rs2),
+                           GPR:$rs1)),
+            FromFPR64<gfvti.ScalarRegClass,
+                      (PseudoVFMV_F_S
+                       (EXTRACT_SUBREG
+                        (!cast<Instruction>("PseudoVSLIDEDOWN_VX_M"#gfvti.RegClass.VLMul)
+                         (gfvti.Vector zero_reg),
+                         (gfvti.Vector gfvti.RegClass:$rs2),
+                         GPR:$rs1,
+                         (gfvti.Mask zero_reg),
+                         VLMax,
+                         gfvti.SEW),
+                        sub_vrm2),
+                       gfvti.SEW)>.ret>;
+
+  def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.RegClass:$rs2), 0)),
+            FromFPR64<gfvti.ScalarRegClass,
+                      (PseudoVFMV_F_S
+                       (EXTRACT_SUBREG
+                        (gfvti.Vector gfvti.RegClass:$rs2),
+                        sub_vrm2),
+                       gfvti.SEW)>.ret>;
+
+  def : Pat<(gfvti.Vector (insertelt (gfvti.Vector gfvti.RegClass:$merge),
+                          (gfvti.Scalar gfvti.ScalarRegClass:$rs1), 0)),
+            (INSERT_SUBREG (IMPLICIT_DEF),
+             (PseudoVFMV_S_F
+              (EXTRACT_SUBREG
+               (gfvti.Vector gfvti.RegClass:$merge),
+               sub_vrm2),
+              ToFPR64<gfvti.ScalarRegClass,
+                      (gfvti.Scalar gfvti.ScalarRegClass:$rs1)>.ret,
+              VLMax,
+              gfvti.SEW),
+             sub_vrm2)>;
 }
 
 foreach vti = AllIllegalIntegerVectors in {
