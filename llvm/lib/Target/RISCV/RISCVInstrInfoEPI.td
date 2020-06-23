@@ -3537,6 +3537,16 @@ foreach vti = AllIntegerVectors in {
               VLMax, vti.SEW)>;
 }
 
+foreach fvti = AllFloatVectors in {
+  def : Pat<(fabs (fvti.Vector fvti.RegClass:$rs2)),
+            (!cast<Instruction>("PseudoVFSGNJX_VV_M"#fvti.RegClass.VLMul)
+             (fvti.Vector zero_reg),
+             (fvti.Vector fvti.RegClass:$rs2),
+             (fvti.Vector fvti.RegClass:$rs2),
+             (fvti.Mask zero_reg),
+             VLMax, fvti.SEW)>;
+}
+
 }
 
 //===----------------------------------------------------------------------===//
