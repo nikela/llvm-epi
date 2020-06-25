@@ -152,6 +152,8 @@ public:
                                     bool Insert, bool Extract);
   unsigned getScalarizationOverhead(VectorType *InTy, bool Insert,
                                     bool Extract);
+  unsigned getScalarizationOverhead(VectorType *InTy,
+                                    ArrayRef<const Value *> Args);
 };
 
 } // end namespace llvm

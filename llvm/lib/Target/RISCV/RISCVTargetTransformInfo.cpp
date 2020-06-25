@@ -12,6 +12,7 @@
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/Support/Casting.h"
 using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
@@ -168,40 +169,36 @@ bool RISCVTTIImpl::isLegalMaskedScatter(Type *DataType,
 
 unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
                                           unsigned Index) {
-  assert(isa<ScalableVectorType>(Val) && "This must be a scalable vector type");
-
-  // FIXME: For now we use the simplest assumption that the base cost of a
-  // single vector insert/extract op is 1. This may not be entirely correct. If
-  // there is a vector split due to legalization, we cannot normalize the index
-  // to the new type because of unknown vector length.
-
-  // Legalize the type.
-  std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, Val);
-  // This type is legalized to a scalar type.
-  if (!LT.second.isVector())
-    return 0;
-  return 1;
+  // FIXME: Implement a more precise cost computation model.
+  // For now this function is simply a wrapper over the base implementation
+  // (i.e. return the legalization cost of the scalar type of the vector
+  // elements). It is the simplest reasonable assumption that does not break
+  // existing calls to this function, including for FixedVectorTypes.
+  return BaseT::getVectorInstrCost(Opcode, Val, Index);
 }
 
 unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                       int Index, VectorType *SubTp) {
-  switch (Kind) {
-  case TTI::SK_Broadcast:
-    return getBroadcastShuffleOverhead(cast<ScalableVectorType>(Tp));
-  case TTI::SK_Select:
-  case TTI::SK_Reverse:
-  case TTI::SK_Transpose:
-  case TTI::SK_PermuteSingleSrc:
-  case TTI::SK_PermuteTwoSrc:
-    return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
-  case TTI::SK_ExtractSubvector:
-    return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
-                                       cast<ScalableVectorType>(SubTp));
-  case TTI::SK_InsertSubvector:
-    return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
-                                      cast<ScalableVectorType>(SubTp));
+  if (isa<ScalableVectorType>(Tp) &&
+      (!SubTp || isa<ScalableVectorType>(SubTp))) {
+    switch (Kind) {
+    case TTI::SK_Broadcast:
+      return getBroadcastShuffleOverhead(cast<ScalableVectorType>(Tp));
+    case TTI::SK_Select:
+    case TTI::SK_Reverse:
+    case TTI::SK_Transpose:
+    case TTI::SK_PermuteSingleSrc:
+    case TTI::SK_PermuteTwoSrc:
+      return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
+    case TTI::SK_ExtractSubvector:
+      return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                         cast<ScalableVectorType>(SubTp));
+    case TTI::SK_InsertSubvector:
+      return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                        cast<ScalableVectorType>(SubTp));
+    }
   }
-    return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
+  return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
 }
 
 /// Estimate the overhead of scalarizing an instructions unique
@@ -236,20 +233,19 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
   // which elements are needed from a scalable vector.
   // For scalable vectors DemenadedElts currently represent ElementCount.Min
   // number of elements.
-  auto *Ty = cast<ScalableVectorType>(InTy);
 
-  assert(DemandedElts.getBitWidth() == Ty->getElementCount().Min &&
-         "Vector size mismatch");
+  unsigned NumELts = InTy->getElementCount().Min;
+  assert(DemandedElts.getBitWidth() == NumELts && "Vector size mismatch");
 
   unsigned MinCost = 0;
 
-  for (unsigned i = 0, e = Ty->getElementCount().Min; i < e; ++i) {
+  for (unsigned i = 0, e = NumELts; i < e; ++i) {
     if (!DemandedElts[i])
       continue;
     if (Insert)
-      MinCost += getVectorInstrCost(Instruction::InsertElement, Ty, i);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, InTy, i);
     if (Extract)
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, Ty, i);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, InTy, i);
   }
 
   return MinCost;
@@ -258,14 +254,27 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
 /// Helper wrapper for the DemandedElts variant of getScalarizationOverhead.
 unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy, bool Insert,
                                                 bool Extract) {
-  auto *Ty = cast<ScalableVectorType>(InTy);
-
   // FIXME: DemandedElts represents active lanes using the number of elements.
   // For scalable vectors it represents min number of elements (vscale = 1).
   // This works fine as long as the cost model is based on the same model of
   // vscale = 1. Once the cost model is changed to represent scalability, we
   // would need a different ADT capable of representing scalable number of
   // elements.
-  APInt MinDemandedElts = APInt::getAllOnesValue(Ty->getElementCount().Min);
-  return getScalarizationOverhead(Ty, MinDemandedElts, Insert, Extract);
+  APInt MinDemandedElts = APInt::getAllOnesValue(InTy->getElementCount().Min);
+  return getScalarizationOverhead(InTy, MinDemandedElts, Insert, Extract);
+}
+
+unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
+                                                ArrayRef<const Value *> Args) {
+  unsigned Cost = 0;
+
+  Cost += getScalarizationOverhead(InTy, true, false);
+  if (!Args.empty())
+    Cost += getOperandsScalarizationOverhead(Args, InTy->getElementCount().Min);
+  else
+    // When no information on arguments is provided, we add the cost
+    // associated with one argument as a heuristic.
+    Cost += getScalarizationOverhead(InTy, false, true);
+
+  return Cost;
 }
