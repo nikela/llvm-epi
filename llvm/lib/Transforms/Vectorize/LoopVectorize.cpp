@@ -6667,7 +6667,7 @@ unsigned LoopVectorizationCostModel::getGatherScatterCost(Instruction *I,
   Type *ValTy = getMemInstValueType(I);
   auto *VectorTy = cast<VectorType>(ToVectorTy(ValTy, VF, isScalable()));
   const Align Alignment = getLoadStoreAlignment(I);
-  Value *Ptr = getLoadStorePointerOperand(I);
+  const Value *Ptr = getLoadStorePointerOperand(I);
 
   return TTI.getAddressComputationCost(VectorTy) +
          TTI.getGatherScatterOpCost(I->getOpcode(), VectorTy, Ptr,

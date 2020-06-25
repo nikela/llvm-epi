@@ -72,6 +72,7 @@ add_clang_library(clangSema
 
   DEPENDS
   ClangOpenCLBuiltinsImpl
+  omp_gen
   builtins_epi
 
   LINK_LIBS
