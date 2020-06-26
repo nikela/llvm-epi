@@ -3531,13 +3531,13 @@ foreach vti = AllIllegalIntegerVectors in {
              lvti.SEW)>;
 }
 
-foreach vti = AllIntegerVectors in {
-   def : Pat<(vti.Vector (vselect (vti.Mask V0), (vti.Vector vti.RegClass:$rs2), (vti.Vector vti.RegClass:$rs1))),
-             (!cast<Instruction>("PseudoVMERGE_VVM_M"#vti.RegClass.VLMul)
-              (vti.Vector vti.RegClass:$rs2),
-              (vti.Vector vti.RegClass:$rs1),
-              (vti.Mask V0),
-              VLMax, vti.SEW)>;
+foreach vti = AllVectors in {
+  def : Pat<(vti.Vector (vselect (vti.Mask V0), (vti.Vector vti.RegClass:$rs2), (vti.Vector vti.RegClass:$rs1))),
+            (!cast<Instruction>("PseudoVMERGE_VVM_M"#vti.RegClass.VLMul)
+             (vti.Vector vti.RegClass:$rs2),
+             (vti.Vector vti.RegClass:$rs1),
+             (vti.Mask V0),
+             VLMax, vti.SEW)>;
 }
 
 foreach fvti = AllFloatVectors in {
