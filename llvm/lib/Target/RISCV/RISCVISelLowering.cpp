@@ -325,6 +325,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Custom);
     }
 
+    // Custom-legalize this node for scalable vectors.
+    for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
+                    MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
+                    MVT::nxv2i32, MVT::nxv4i32, MVT::nxv8i32, MVT::nxv16i32,
+                    MVT::nxv1i64, MVT::nxv2i64, MVT::nxv4i64, MVT::nxv8i64,
+                    MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
+                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+      setOperationAction(ISD::MGATHER, VT, Custom);
+    }
+
     // Vector integer reductions.
     for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
                     MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
@@ -635,6 +645,40 @@ SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
   return SextInreg;
 }
 
+SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+  assert(VT.isScalableVector() && "Unexpected type");
+
+  SDValue Indices = Op.getOperand(4);
+  EVT IndexVT = Indices.getValueType();
+  assert(IndexVT == VT.changeVectorElementTypeToInteger() &&
+         "Unexpected type for indices");
+
+  SDValue VSLLOperands[] = {
+      DAG.getTargetConstant(Intrinsic::epi_vsll, DL, MVT::i64),
+      Indices,
+      DAG.getTargetConstant(Log2_64(Op.getConstantOperandVal(5)), DL,
+                            MVT::i64), // log2(Scale).
+      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+  };
+  SDValue Offsets =
+      DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, IndexVT, VSLLOperands);
+
+  SDValue VLXEOperands[] = {
+      Op.getOperand(0), // Chain.
+      DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL, MVT::i64),
+      Op.getOperand(1), // Merge.
+      Op.getOperand(3), // Base address.
+      Offsets,
+      Op.getOperand(2), // Mask.
+      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+  };
+
+  return DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
+}
+
 SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
                                                      SelectionDAG &DAG) const {
   SDLoc DL(Op);
@@ -742,6 +786,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSPLAT_VECTOR(Op, DAG);
   case ISD::SIGN_EXTEND_INREG:
     return lowerSIGN_EXTEND_INREG(Op, DAG);
+  case ISD::MGATHER:
+    return lowerMGATHER(Op, DAG);
   case ISD::EXTRACT_VECTOR_ELT:
     return lowerEXTRACT_VECTOR_ELT(Op, DAG);
   }
