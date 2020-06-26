@@ -1582,8 +1582,11 @@ def : Pat<(int_vscale), (PseudoVSCALE)>;
 
 // FIXME: These patterns can be improved.
 def : Pat<(vscale 1), (PseudoVSCALE)>;
+def : Pat<(vscale -1), (SUB X0, (PseudoVSCALE))>;
 def : Pat<(vscale pow2uimm5:$mul),
           (SLLI (PseudoVSCALE), (Log2 imm:$mul))>;
+def : Pat<(vscale (i64 GPR:$imm)),
+          (MUL (PseudoVSCALE), $imm)>;
 
 }
 
