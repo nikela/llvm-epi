@@ -464,7 +464,7 @@ public:
     return 1;
   }
 
-  unsigned getMaskedMemoryOpCost(unsigned Opcode, Type *Src, unsigned Alignment,
+  unsigned getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
                                  unsigned AddressSpace,
                                  TTI::TargetCostKind CostKind) {
     return 1;
@@ -472,19 +472,15 @@ public:
 
   unsigned getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                   const Value *Ptr, bool VariableMask,
-                                  unsigned Alignment,
-                                  TTI::TargetCostKind CostKind,
+                                  Align Alignment, TTI::TargetCostKind CostKind,
                                   const Instruction *I = nullptr) {
     return 1;
   }
 
-  unsigned getInterleavedMemoryOpCost(unsigned Opcode, Type *VecTy,
-                                      unsigned Factor,
-                                      ArrayRef<unsigned> Indices,
-                                      unsigned Alignment, unsigned AddressSpace,
-                                      TTI::TargetCostKind CostKind,
-                                      bool UseMaskForCond,
-                                      bool UseMaskForGaps) {
+  unsigned getInterleavedMemoryOpCost(
+      unsigned Opcode, Type *VecTy, unsigned Factor, ArrayRef<unsigned> Indices,
+      Align Alignment, unsigned AddressSpace, TTI::TargetCostKind CostKind,
+      bool UseMaskForCond, bool UseMaskForGaps) {
     return 1;
   }
 
@@ -611,14 +607,12 @@ public:
 
   bool isLegalToVectorizeStore(StoreInst *SI) const { return true; }
 
-  bool isLegalToVectorizeLoadChain(unsigned ChainSizeInBytes,
-                                   unsigned Alignment,
+  bool isLegalToVectorizeLoadChain(unsigned ChainSizeInBytes, Align Alignment,
                                    unsigned AddrSpace) const {
     return true;
   }
 
-  bool isLegalToVectorizeStoreChain(unsigned ChainSizeInBytes,
-                                    unsigned Alignment,
+  bool isLegalToVectorizeStoreChain(unsigned ChainSizeInBytes, Align Alignment,
                                     unsigned AddrSpace) const {
     return true;
   }
