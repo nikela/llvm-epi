@@ -3355,9 +3355,11 @@ static bool TryToSinkInstruction(Instruction *I, BasicBlock *DestBlock) {
   I->moveBefore(&*InsertPos);
   ++NumSunkInst;
 
-  // Drop the debug loc. This prevents single-stepping from going backwards.
-  // See HowToUpdateDebugInfo.rst for the full rationale.
-  I->setDebugLoc(DebugLoc());
+  // Drop the debug loc of non-inlinable instructions. This prevents
+  // single-stepping from going backwards. See HowToUpdateDebugInfo.rst for
+  // the full rationale.
+  if (!isa<CallBase>(I))
+    I->setDebugLoc(DebugLoc());
 
   // Also sink all related debug uses from the source basic block. Otherwise we
   // get debug use before the def. Attempt to salvage debug uses first, to
