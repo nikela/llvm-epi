@@ -52,13 +52,16 @@ def FeatureXSAVE   : SubtargetFeature<"xsave", "HasXSAVE", "true",
                                        "Support xsave instructions">;
 
 def FeatureXSAVEOPT: SubtargetFeature<"xsaveopt", "HasXSAVEOPT", "true",
-                                       "Support xsaveopt instructions">;
+                                       "Support xsaveopt instructions",
+                                       [FeatureXSAVE]>;
 
 def FeatureXSAVEC  : SubtargetFeature<"xsavec", "HasXSAVEC", "true",
-                                       "Support xsavec instructions">;
+                                       "Support xsavec instructions",
+                                       [FeatureXSAVE]>;
 
 def FeatureXSAVES  : SubtargetFeature<"xsaves", "HasXSAVES", "true",
-                                       "Support xsaves instructions">;
+                                       "Support xsaves instructions",
+                                       [FeatureXSAVE]>;
 
 def FeatureSSE1    : SubtargetFeature<"sse", "X86SSELevel", "SSE1",
                                       "Enable SSE instructions">;
@@ -943,6 +946,8 @@ def ProcessorFeatures {
   // Excavator
   list<SubtargetFeature> BdVer4AdditionalFeatures = [FeatureAVX2,
                                                      FeatureBMI2,
+                                                     FeatureMOVBE,
+                                                     FeatureRDRAND,
                                                      FeatureMWAITX];
   list<SubtargetFeature> BdVer4InheritableFeatures =
     !listconcat(BdVer3InheritableFeatures, BdVer4AdditionalFeatures);

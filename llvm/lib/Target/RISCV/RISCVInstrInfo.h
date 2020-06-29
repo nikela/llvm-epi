@@ -140,12 +140,11 @@ enum RVVConstraintType {
   WidenV = 1,
   WidenW = 2,
   WidenCvt = 3,
-  QuadWiden = 4,
-  Narrow = 5,
-  Iota = 6,
-  SlideUp = 7,
-  Vrgather = 8,
-  Vcompress = 9,
+  Narrow = 4,
+  Iota = 5,
+  SlideUp = 6,
+  Vrgather = 7,
+  Vcompress = 8,
 
   ConstraintOffset = 5,
   ConstraintMask = 0b1111

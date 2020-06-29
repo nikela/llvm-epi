@@ -224,6 +224,7 @@ SkylakeCommon:
     LLVM_FALLTHROUGH;
   case CK_Nehalem:
     setFeatureEnabledImpl(Features, "sse4.2", true);
+    setFeatureEnabledImpl(Features, "popcnt", true);
     LLVM_FALLTHROUGH;
   case CK_Penryn:
     setFeatureEnabledImpl(Features, "sse4.1", true);
@@ -281,6 +282,7 @@ SkylakeCommon:
     setFeatureEnabledImpl(Features, "rdrnd", true);
     setFeatureEnabledImpl(Features, "pclmul", true);
     setFeatureEnabledImpl(Features, "sse4.2", true);
+    setFeatureEnabledImpl(Features, "popcnt", true);
     setFeatureEnabledImpl(Features, "prfchw", true);
     LLVM_FALLTHROUGH;
   case CK_Bonnell:
@@ -307,6 +309,7 @@ SkylakeCommon:
     setFeatureEnabledImpl(Features, "rdseed", true);
     setFeatureEnabledImpl(Features, "adx", true);
     setFeatureEnabledImpl(Features, "lzcnt", true);
+    setFeatureEnabledImpl(Features, "popcnt", true);
     setFeatureEnabledImpl(Features, "bmi", true);
     setFeatureEnabledImpl(Features, "bmi2", true);
     setFeatureEnabledImpl(Features, "fma", true);
@@ -336,6 +339,7 @@ SkylakeCommon:
     setFeatureEnabledImpl(Features, "popcnt", true);
     setFeatureEnabledImpl(Features, "sahf", true);
     setFeatureEnabledImpl(Features, "prfchw", true);
+    setFeatureEnabledImpl(Features, "cx16", true);
     LLVM_FALLTHROUGH;
   case CK_K8SSE3:
     setFeatureEnabledImpl(Features, "sse3", true);
@@ -359,6 +363,7 @@ SkylakeCommon:
     setFeatureEnabledImpl(Features, "bmi", true);
     setFeatureEnabledImpl(Features, "f16c", true);
     setFeatureEnabledImpl(Features, "xsaveopt", true);
+    setFeatureEnabledImpl(Features, "xsave", true);
     setFeatureEnabledImpl(Features, "movbe", true);
     LLVM_FALLTHROUGH;
   case CK_BTVER1:
@@ -412,6 +417,8 @@ SkylakeCommon:
   case CK_BDVER4:
     setFeatureEnabledImpl(Features, "avx2", true);
     setFeatureEnabledImpl(Features, "bmi2", true);
+    setFeatureEnabledImpl(Features, "movbe", true);
+    setFeatureEnabledImpl(Features, "rdrnd", true);
     setFeatureEnabledImpl(Features, "mwaitx", true);
     LLVM_FALLTHROUGH;
   case CK_BDVER3:
@@ -458,6 +465,12 @@ SkylakeCommon:
       llvm::find(FeaturesVec, "-mmx") == FeaturesVec.end())
     Features["mmx"] = true;
 
+  // Enable xsave if avx is enabled and xsave is not explicitly disabled.
+  I = Features.find("avx");
+  if (I != Features.end() && I->getValue() &&
+      llvm::find(FeaturesVec, "-xsave") == FeaturesVec.end())
+    Features["xsave"] = true;
+
   return true;
 }
 
@@ -475,7 +488,6 @@ void X86TargetInfo::setSSELevel(llvm::StringMap<bool> &Features,
       LLVM_FALLTHROUGH;
     case AVX:
       Features["avx"] = true;
-      Features["xsave"] = true;
       LLVM_FALLTHROUGH;
     case SSE42:
       Features["sse4.2"] = true;
@@ -525,8 +537,7 @@ void X86TargetInfo::setSSELevel(llvm::StringMap<bool> &Features,
     LLVM_FALLTHROUGH;
   case AVX:
     Features["fma"] = Features["avx"] = Features["f16c"] = false;
-    Features["xsave"] = Features["xsaveopt"] = Features["vaes"] = false;
-    Features["vpclmulqdq"] = false;
+    Features["vaes"] = Features["vpclmulqdq"] = false;
     setXOPLevel(Features, FMA4, false);
     LLVM_FALLTHROUGH;
   case AVX2:
@@ -711,7 +722,7 @@ void X86TargetInfo::setFeatureEnabledImpl(llvm::StringMap<bool> &Features,
       setSSELevel(Features, SSE41, Enabled);
   } else if (Name == "xsave") {
     if (!Enabled)
-      Features["xsaveopt"] = false;
+      Features["xsaveopt"] = Features["xsavec"] = Features["xsaves"] = false;
   } else if (Name == "xsaveopt" || Name == "xsavec" || Name == "xsaves") {
     if (Enabled)
       Features["xsave"] = true;

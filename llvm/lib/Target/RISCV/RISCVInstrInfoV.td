@@ -6,8 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 ///
-/// This file describes the RISC-V instructions from the standard 'V',
-/// Vector instruction set extension.
+/// This file describes the RISC-V instructions from the standard 'V' Vector
+/// extension, version 0.8.
+/// This version is still experimental as the 'V' extension hasn't been
+/// ratified yet.
 ///
 //===----------------------------------------------------------------------===//
 

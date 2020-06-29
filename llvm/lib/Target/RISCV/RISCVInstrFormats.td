@@ -56,12 +56,11 @@ def NoConstraint : RISCVVConstraint<0>;
 def WidenV       : RISCVVConstraint<1>;
 def WidenW       : RISCVVConstraint<2>;
 def WidenCvt     : RISCVVConstraint<3>;
-def QuadWiden    : RISCVVConstraint<4>;
-def Narrow       : RISCVVConstraint<5>;
-def Iota         : RISCVVConstraint<6>;
-def SlideUp      : RISCVVConstraint<7>;
-def Vrgather     : RISCVVConstraint<8>;
-def Vcompress    : RISCVVConstraint<9>;
+def Narrow       : RISCVVConstraint<4>;
+def Iota         : RISCVVConstraint<5>;
+def SlideUp      : RISCVVConstraint<6>;
+def Vrgather     : RISCVVConstraint<7>;
+def Vcompress    : RISCVVConstraint<8>;
 
 // The following opcode names match those given in Table 19.1 in the
 // RISC-V User-level ISA specification ("RISC-V base opcode map").

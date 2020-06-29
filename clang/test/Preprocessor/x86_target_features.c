@@ -269,6 +269,12 @@
 
 // NOSSE42POPCNT: #define __POPCNT__ 1
 
+// RUN: %clang -target i386-unknown-unknown -march=nehalem -mno-sse4.2 -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=CPUPOPCNT %s
+// RUN: %clang -target i386-unknown-unknown -march=silvermont -mno-sse4.2 -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=CPUPOPCNT %s
+// RUN: %clang -target i386-unknown-unknown -march=knl -mno-sse4.2 -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=CPUPOPCNT %s
+
+// CPUPOPCNT: #define __POPCNT__ 1
+
 // RUN: %clang -target i386-unknown-unknown -march=pentium -msse -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=SSEMMX %s
 
 // SSEMMX: #define __MMX__ 1
@@ -417,9 +423,11 @@
 // XSAVES: #define __XSAVES__ 1
 // XSAVES: #define __XSAVE__ 1
 
-// RUN: %clang -target i386-unknown-unknown -march=atom -mxsaveopt -mno-xsave -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=NOXSAVE %s
+// RUN: %clang -target i386-unknown-unknown -march=atom -mxsaveopt -mxsavec -mxsaves -mno-xsave -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=NOXSAVE %s
 
+// NOXSAVE-NOT: #define __XSAVEC__ 1
 // NOXSAVE-NOT: #define __XSAVEOPT__ 1
+// NOXSAVE-NOT: #define __XSAVES__ 1
 // NOXSAVE-NOT: #define __XSAVE__ 1
 
 // RUN: %clang -target i386-unknown-unknown -march=atom -mclflushopt -x c -E -dM -o - %s | FileCheck -match-full-lines --check-prefix=CLFLUSHOPT %s

@@ -804,6 +804,7 @@ public:
     case VSEW::SEW_1024:
       return "e1024";
     }
+    return "";
   }
 
   static StringRef getLMULStr(VLMUL Lmul) {
@@ -817,6 +818,7 @@ public:
     case VLMUL::LMUL_8:
       return "m8";
     }
+    return "";
   }
 
   StringRef getVType(SmallString<32> &Buf) const {
@@ -934,6 +936,7 @@ public:
     RISCVMCExpr::VariantKind VK = RISCVMCExpr::VK_RISCV_None;
     bool IsConstant = evaluateConstantImm(getImm(), Imm, VK);
     assert(IsConstant && "Expect constant value!");
+    (void)IsConstant;
     Inst.addOperand(MCOperand::createImm(Imm - 1));
   }
 
@@ -1120,10 +1123,6 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
   case Match_InvalidSImm6:
     return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 5),
                                       (1 << 5) - 1);
-  case Match_InvalidSImm5Plus1:
-    return generateImmOutOfRangeError(
-        Operands, ErrorInfo, -(1 << 4) + 1, (1 << 4),
-        "immediate must be in the range");
   case Match_InvalidSImm6NonZero:
     return generateImmOutOfRangeError(
         Operands, ErrorInfo, -(1 << 5), (1 << 5) - 1,
@@ -1229,6 +1228,11 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
   case Match_InvalidVMaskRegister: {
     SMLoc ErrorLoc = ((RISCVOperand &)*Operands[ErrorInfo]).getStartLoc();
     return Error(ErrorLoc, "operand must be v0.t");
+  }
+  case Match_InvalidSImm5Plus1: {
+    return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 4) + 1,
+                                      (1 << 4),
+                                      "immediate must be in the range");
   }
   }
 
@@ -2352,12 +2356,26 @@ bool RISCVAsmParser::validateInstruction(MCInst &Inst,
       if (DestReg == Src2Reg)
         return Error(Loc, "The destination vector register group cannot overlap"
                           " the source vector register group.");
+      if (TargetFlags == RISCV::WidenV) {
+        // Assume DestReg LMUL is 2 at least for widening/narrowing operations.
+        if (DestReg + 1 == Src2Reg)
+          return Error(Loc,
+                       "The destination vector register group cannot overlap"
+                       " the source vector register group.");
+      }
     }
     if (Inst.getOperand(2).isReg()) {
       unsigned Src1Reg = Inst.getOperand(2).getReg();
       if (DestReg == Src1Reg)
         return Error(Loc, "The destination vector register group cannot overlap"
                           " the source vector register group.");
+      if (TargetFlags == RISCV::WidenV || TargetFlags == RISCV::WidenW) {
+        // Assume DestReg LMUL is 2 at least for widening/narrowing operations.
+        if (DestReg + 1 == Src1Reg)
+          return Error(Loc,
+                       "The destination vector register group cannot overlap"
+                       " the source vector register group.");
+      }
     }
     if (Inst.getNumOperands() == 4) {
       unsigned MaskReg = Inst.getOperand(3).getReg();
@@ -2371,11 +2389,21 @@ bool RISCVAsmParser::validateInstruction(MCInst &Inst,
     if (DestReg == Src2Reg)
       return Error(Loc, "The destination vector register group cannot overlap"
                         " the source vector register group.");
+    // Assume Src2Reg LMUL is 2 at least for widening/narrowing operations.
+    if (DestReg == Src2Reg + 1)
+      return Error(Loc, "The destination vector register group cannot overlap"
+                        " the source vector register group.");
   } else if (TargetFlags == RISCV::WidenCvt || TargetFlags == RISCV::Iota) {
     unsigned Src2Reg = Inst.getOperand(1).getReg();
     if (DestReg == Src2Reg)
       return Error(Loc, "The destination vector register group cannot overlap"
                         " the source vector register group.");
+    if (TargetFlags == RISCV::WidenCvt) {
+      // Assume DestReg LMUL is 2 at least for widening/narrowing operations.
+      if (DestReg + 1 == Src2Reg)
+        return Error(Loc, "The destination vector register group cannot overlap"
+                          " the source vector register group.");
+    }
     if (Inst.getNumOperands() == 3) {
       unsigned MaskReg = Inst.getOperand(2).getReg();
 

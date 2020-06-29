@@ -1074,7 +1074,7 @@ bool Vectorizer::vectorizeStoreChain(
       return false;
   }
 
-  if (!TTI.isLegalToVectorizeStoreChain(SzInBytes, Alignment.value(), AS)) {
+  if (!TTI.isLegalToVectorizeStoreChain(SzInBytes, Alignment, AS)) {
     auto Chains = splitOddVectorElts(Chain, Sz);
     return vectorizeStoreChain(Chains.first, InstructionsProcessed) |
            vectorizeStoreChain(Chains.second, InstructionsProcessed);
@@ -1220,7 +1220,7 @@ bool Vectorizer::vectorizeLoadChain(
       return false;
   }
 
-  if (!TTI.isLegalToVectorizeLoadChain(SzInBytes, Alignment.value(), AS)) {
+  if (!TTI.isLegalToVectorizeLoadChain(SzInBytes, Alignment, AS)) {
     auto Chains = splitOddVectorElts(Chain, Sz);
     return vectorizeLoadChain(Chains.first, InstructionsProcessed) |
            vectorizeLoadChain(Chains.second, InstructionsProcessed);

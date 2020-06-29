@@ -351,6 +351,7 @@ def : SysReg<"tdata3", 0x7A3>;
 //===-----------------------------------------------
 def : SysReg<"dcsr", 0x7B0>;
 def : SysReg<"dpc", 0x7B1>;
+
 // "dscratch" is an alternative name for "dscratch0" which appeared in earlier
 // drafts of the RISC-V debug spec
 let AltName = "dscratch" in

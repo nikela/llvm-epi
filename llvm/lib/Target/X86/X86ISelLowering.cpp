@@ -37053,18 +37053,6 @@ bool X86TargetLowering::SimplifyDemandedVectorEltsForTargetNode(
       ExtSizeInBits = SizeInBits / 4;
 
     switch (Opc) {
-      // Zero upper elements.
-    case X86ISD::VZEXT_MOVL: {
-      SDLoc DL(Op);
-      SDValue Ext0 =
-          extractSubVector(Op.getOperand(0), 0, TLO.DAG, DL, ExtSizeInBits);
-      SDValue ExtOp =
-          TLO.DAG.getNode(Opc, DL, Ext0.getValueType(), Ext0);
-      SDValue UndefVec = TLO.DAG.getUNDEF(VT);
-      SDValue Insert =
-          insertSubVector(UndefVec, ExtOp, 0, TLO.DAG, DL, ExtSizeInBits);
-      return TLO.CombineTo(Op, Insert);
-    }
       // Subvector broadcast.
     case X86ISD::SUBV_BROADCAST: {
       SDLoc DL(Op);
@@ -37080,11 +37068,6 @@ bool X86TargetLowering::SimplifyDemandedVectorEltsForTargetNode(
       return TLO.CombineTo(Op, insertSubVector(TLO.DAG.getUNDEF(VT), Src, 0,
                                                TLO.DAG, DL, ExtSizeInBits));
     }
-      // Target unary shuffles by immediate:
-    case X86ISD::PSHUFD:
-    case X86ISD::PSHUFLW:
-    case X86ISD::PSHUFHW:
-    case X86ISD::VPERMILPI:
       // Byte shifts by immediate.
     case X86ISD::VSHLDQ:
     case X86ISD::VSRLDQ:
@@ -37122,10 +37105,20 @@ bool X86TargetLowering::SimplifyDemandedVectorEltsForTargetNode(
       }
       break;
     }
-      // Target Shuffles.
+      // Zero upper elements.
+    case X86ISD::VZEXT_MOVL:
+      // Target unary shuffles by immediate:
+    case X86ISD::PSHUFD:
+    case X86ISD::PSHUFLW:
+    case X86ISD::PSHUFHW:
+    case X86ISD::VPERMILPI:
+      // (Non-Lane Crossing) Target Shuffles.
+    case X86ISD::VPERMILPV:
+    case X86ISD::VPERMIL2:
     case X86ISD::PSHUFB:
     case X86ISD::UNPCKL:
     case X86ISD::UNPCKH:
+    case X86ISD::BLENDI:
       // Saturated Packs.
     case X86ISD::PACKSS:
     case X86ISD::PACKUS:
@@ -37135,36 +37128,25 @@ bool X86TargetLowering::SimplifyDemandedVectorEltsForTargetNode(
     case X86ISD::FHADD:
     case X86ISD::FHSUB: {
       SDLoc DL(Op);
+      SmallVector<SDValue, 4> Ops;
+      for (unsigned i = 0, e = Op.getNumOperands(); i != e; ++i) {
+        SDValue SrcOp = Op.getOperand(i);
+        EVT SrcVT = SrcOp.getValueType();
+        assert((!SrcVT.isVector() || SrcVT.getSizeInBits() == SizeInBits) &&
+               "Unsupported vector size");
+        Ops.push_back(SrcVT.isVector() ? extractSubVector(SrcOp, 0, TLO.DAG, DL,
+                                                          ExtSizeInBits)
+                                       : SrcOp);
+      }
       MVT ExtVT = VT.getSimpleVT();
       ExtVT = MVT::getVectorVT(ExtVT.getScalarType(),
                                ExtSizeInBits / ExtVT.getScalarSizeInBits());
-      SDValue Ext0 =
-          extractSubVector(Op.getOperand(0), 0, TLO.DAG, DL, ExtSizeInBits);
-      SDValue Ext1 =
-          extractSubVector(Op.getOperand(1), 0, TLO.DAG, DL, ExtSizeInBits);
-      SDValue ExtOp = TLO.DAG.getNode(Opc, DL, ExtVT, Ext0, Ext1);
+      SDValue ExtOp = TLO.DAG.getNode(Opc, DL, ExtVT, Ops);
       SDValue UndefVec = TLO.DAG.getUNDEF(VT);
       SDValue Insert =
           insertSubVector(UndefVec, ExtOp, 0, TLO.DAG, DL, ExtSizeInBits);
       return TLO.CombineTo(Op, Insert);
     }
-      // Vector blend by immediate.
-    case X86ISD::BLENDI: {
-      SDLoc DL(Op);
-      MVT ExtVT = VT.getSimpleVT();
-      ExtVT = MVT::getVectorVT(ExtVT.getScalarType(),
-                               ExtSizeInBits / ExtVT.getScalarSizeInBits());
-      SDValue Ext0 =
-          extractSubVector(Op.getOperand(0), 0, TLO.DAG, DL, ExtSizeInBits);
-      SDValue Ext1 =
-          extractSubVector(Op.getOperand(1), 0, TLO.DAG, DL, ExtSizeInBits);
-      SDValue ExtOp =
-          TLO.DAG.getNode(Opc, DL, ExtVT, Ext0, Ext1, Op.getOperand(2));
-      SDValue UndefVec = TLO.DAG.getUNDEF(VT);
-      SDValue Insert =
-          insertSubVector(UndefVec, ExtOp, 0, TLO.DAG, DL, ExtSizeInBits);
-      return TLO.CombineTo(Op, Insert);
-    } 
     }
   }
 
@@ -43443,6 +43425,20 @@ static SDValue combineLoad(SDNode *N, SelectionDAG &DAG,
     }
   }
 
+  // Cast ptr32 and ptr64 pointers to the default address space before a load.
+  unsigned AddrSpace = Ld->getAddressSpace();
+  if (AddrSpace == X86AS::PTR64 || AddrSpace == X86AS::PTR32_SPTR ||
+      AddrSpace == X86AS::PTR32_UPTR) {
+    MVT PtrVT = TLI.getPointerTy(DAG.getDataLayout());
+    if (PtrVT != Ld->getBasePtr().getSimpleValueType()) {
+      SDValue Cast =
+          DAG.getAddrSpaceCast(dl, PtrVT, Ld->getBasePtr(), AddrSpace, 0);
+      return DAG.getLoad(RegVT, dl, Ld->getChain(), Cast, Ld->getPointerInfo(),
+                         Ld->getOriginalAlign(),
+                         Ld->getMemOperand()->getFlags());
+    }
+  }
+
   return SDValue();
 }
 
@@ -43868,6 +43864,20 @@ static SDValue combineStore(SDNode *N, SelectionDAG &DAG,
     }
 
     return SDValue();
+  }
+
+  // Cast ptr32 and ptr64 pointers to the default address space before a store.
+  unsigned AddrSpace = St->getAddressSpace();
+  if (AddrSpace == X86AS::PTR64 || AddrSpace == X86AS::PTR32_SPTR ||
+      AddrSpace == X86AS::PTR32_UPTR) {
+    MVT PtrVT = TLI.getPointerTy(DAG.getDataLayout());
+    if (PtrVT != St->getBasePtr().getSimpleValueType()) {
+      SDValue Cast =
+          DAG.getAddrSpaceCast(dl, PtrVT, St->getBasePtr(), AddrSpace, 0);
+      return DAG.getStore(St->getChain(), dl, StoredVal, Cast,
+                          St->getPointerInfo(), St->getOriginalAlign(),
+                          St->getMemOperand()->getFlags(), St->getAAInfo());
+    }
   }
 
   // Turn load->store of MMX types into GPR load/stores.  This avoids clobbering
@@ -48028,13 +48038,25 @@ static SDValue combineScalarToVector(SDNode *N, SelectionDAG &DAG) {
                            Src.getOperand(1));
 
   // Reduce v2i64 to v4i32 if we don't need the upper bits.
-  // TODO: Move to DAGCombine?
-  if (VT == MVT::v2i64 && Src.getOpcode() == ISD::ANY_EXTEND &&
-      Src.getValueType() == MVT::i64 && Src.hasOneUse() &&
-      Src.getOperand(0).getScalarValueSizeInBits() <= 32)
-    return DAG.getBitcast(
-        VT, DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v4i32,
-                        DAG.getAnyExtOrTrunc(Src.getOperand(0), DL, MVT::i32)));
+  // TODO: Move to DAGCombine/SimplifyDemandedBits?
+  if (VT == MVT::v2i64 || VT == MVT::v2f64) {
+    auto IsAnyExt64 = [](SDValue Op) {
+      if (Op.getValueType() != MVT::i64 || !Op.hasOneUse())
+        return SDValue();
+      if (Op.getOpcode() == ISD::ANY_EXTEND &&
+          Op.getOperand(0).getScalarValueSizeInBits() <= 32)
+        return Op.getOperand(0);
+      if (auto *Ld = dyn_cast<LoadSDNode>(Op))
+        if (Ld->getExtensionType() == ISD::EXTLOAD &&
+            Ld->getMemoryVT().getScalarSizeInBits() <= 32)
+          return Op;
+      return SDValue();
+    };
+    if (SDValue ExtSrc = IsAnyExt64(peekThroughOneUseBitcasts(Src)))
+      return DAG.getBitcast(
+          VT, DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v4i32,
+                          DAG.getAnyExtOrTrunc(ExtSrc, DL, MVT::i32)));
+  }
 
   // Combine (v2i64 (scalar_to_vector (i64 (bitconvert (mmx))))) to MOVQ2DQ.
   if (VT == MVT::v2i64 && Src.getOpcode() == ISD::BITCAST &&
