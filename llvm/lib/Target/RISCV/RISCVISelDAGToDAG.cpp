@@ -246,22 +246,23 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
           CurDAG->getMachineNode(RISCV::ADDI, DL, MVT::i64, SDValue(VSETVLI, 0),
                                  CurDAG->getTargetConstant(-1, DL, MVT::i64));
 
-      SDValue NoReg = CurDAG->getRegister(RISCV::NoRegister, VT);
+      SDValue Undef = SDValue(
+          CurDAG->getMachineNode(TargetOpcode::IMPLICIT_DEF, DL, VT), 0);
       SDValue NoRegMask = CurDAG->getRegister(
           RISCV::NoRegister, VT.changeVectorElementType(MVT::i1));
       SDValue SEWOperand = CurDAG->getTargetConstant(SEW, DL, MVT::i64);
 
       auto *VID = CurDAG->getMachineNode(
-          VIDInst, DL, VT, {NoReg, NoRegMask, VLOperand, SEWOperand});
+          VIDInst, DL, VT, {Undef, NoRegMask, VLOperand, SEWOperand});
 
       auto *VRSUB =
           CurDAG->getMachineNode(VRSUBInst, DL, VT,
-                                 {NoReg, SDValue(VID, 0), SDValue(ADDI, 0),
+                                 {Undef, SDValue(VID, 0), SDValue(ADDI, 0),
                                   NoRegMask, VLOperand, SEWOperand});
 
       auto *VRGATHER = CurDAG->getMachineNode(
           VRGATHERInst, DL, VT,
-          {NoReg, Op, SDValue(VRSUB, 0), NoRegMask, VLOperand, SEWOperand});
+          {Undef, Op, SDValue(VRSUB, 0), NoRegMask, VLOperand, SEWOperand});
 
       ReplaceNode(Node, VRGATHER);
       return;

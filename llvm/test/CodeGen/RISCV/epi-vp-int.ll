@@ -21,50 +21,65 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
 ; CHECK-O0-NEXT:    ld a4, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a4)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v3
 ; CHECK-O0-NEXT:    vadd.vv v3, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v4
 ; CHECK-O0-NEXT:    vsub.vv v4, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v5
 ; CHECK-O0-NEXT:    vmul.vv v5, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v6
 ; CHECK-O0-NEXT:    vdiv.vv v6, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v7
 ; CHECK-O0-NEXT:    vrem.vv v7, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v16
 ; CHECK-O0-NEXT:    vdivu.vv v16, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v17
 ; CHECK-O0-NEXT:    vremu.vv v17, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v18
 ; CHECK-O0-NEXT:    vand.vv v18, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v19
 ; CHECK-O0-NEXT:    vor.vv v19, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v20
 ; CHECK-O0-NEXT:    vxor.vv v20, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v21
 ; CHECK-O0-NEXT:    vsra.vv v21, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v22
 ; CHECK-O0-NEXT:    vsrl.vv v22, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vsll.vv v1, v1, v2, v0.t
+; CHECK-O0-NEXT:    # implicit-def: $v23
+; CHECK-O0-NEXT:    vsll.vv v23, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    vse.v v3, (a3), v0.t
@@ -103,7 +118,7 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    vse.v v22, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v1, (a3), v0.t
+; CHECK-O0-NEXT:    vse.v v23, (a3), v0.t
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp)
 ; CHECK-O0-NEXT:    ld ra, 40(sp)
@@ -186,22 +201,37 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a2, e32,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1)
+; CHECK-O0-NEXT:    # implicit-def: $v3
 ; CHECK-O0-NEXT:    vadd.vv v3, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v4
 ; CHECK-O0-NEXT:    vsub.vv v4, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v5
 ; CHECK-O0-NEXT:    vmul.vv v5, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v6
 ; CHECK-O0-NEXT:    vdiv.vv v6, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v7
 ; CHECK-O0-NEXT:    vrem.vv v7, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v16
 ; CHECK-O0-NEXT:    vdivu.vv v16, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v17
 ; CHECK-O0-NEXT:    vremu.vv v17, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v18
 ; CHECK-O0-NEXT:    vand.vv v18, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v19
 ; CHECK-O0-NEXT:    vor.vv v19, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v20
 ; CHECK-O0-NEXT:    vxor.vv v20, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v21
 ; CHECK-O0-NEXT:    vsra.vv v21, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v22
 ; CHECK-O0-NEXT:    vsrl.vv v22, v1, v2
-; CHECK-O0-NEXT:    vsll.vv v1, v1, v2
+; CHECK-O0-NEXT:    # implicit-def: $v23
+; CHECK-O0-NEXT:    vsll.vv v23, v1, v2
 ; CHECK-O0-NEXT:    vse.v v3, (a3)
 ; CHECK-O0-NEXT:    vse.v v4, (a3)
 ; CHECK-O0-NEXT:    vse.v v5, (a3)
@@ -214,7 +244,7 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    vse.v v20, (a3)
 ; CHECK-O0-NEXT:    vse.v v21, (a3)
 ; CHECK-O0-NEXT:    vse.v v22, (a3)
-; CHECK-O0-NEXT:    vse.v v1, (a3)
+; CHECK-O0-NEXT:    vse.v v23, (a3)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_int_2:
@@ -305,49 +335,64 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
 ; CHECK-O0-NEXT:    ld a4, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a4)
+; CHECK-O0-NEXT:    # implicit-def: $v2m2
 ; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m2
 ; CHECK-O0-NEXT:    vle.v v2, (a0), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v4m2
 ; CHECK-O0-NEXT:    vle.v v4, (a1), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v6m2
 ; CHECK-O0-NEXT:    vadd.vv v6, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v16m2
 ; CHECK-O0-NEXT:    vsub.vv v16, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v18m2
 ; CHECK-O0-NEXT:    vmul.vv v18, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v20m2
 ; CHECK-O0-NEXT:    vdiv.vv v20, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v22m2
 ; CHECK-O0-NEXT:    vrem.vv v22, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8m2
 ; CHECK-O0-NEXT:    vdivu.vv v8, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v10m2
 ; CHECK-O0-NEXT:    vremu.vv v10, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v12m2
 ; CHECK-O0-NEXT:    vand.vv v12, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v14m2
 ; CHECK-O0-NEXT:    vor.vv v14, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v24m2
 ; CHECK-O0-NEXT:    vxor.vv v24, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v26m2
 ; CHECK-O0-NEXT:    vsra.vv v26, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v28m2
 ; CHECK-O0-NEXT:    vsrl.vv v28, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v30m2
 ; CHECK-O0-NEXT:    vsll.vv v30, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)

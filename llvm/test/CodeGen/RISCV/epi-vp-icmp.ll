@@ -21,60 +21,70 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale 
 ; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmseq.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsne.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsle.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmslt.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m1
 ; CHECK-O0-NEXT:    vmslt.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1
 ; CHECK-O0-NEXT:    vmsle.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1
@@ -190,60 +200,70 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscal
 ; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmseq.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsne.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsle.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmslt.vv v1, v17, v16, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e32,m1
 ; CHECK-O0-NEXT:    vmslt.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1
 ; CHECK-O0-NEXT:    vse.v v1, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1
 ; CHECK-O0-NEXT:    vmsle.vv v1, v16, v17, v0.t
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1
@@ -359,6 +379,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmseq.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e64,m2
@@ -368,6 +389,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsne.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -376,6 +398,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v18, v16, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -384,6 +407,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v18, v16, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -392,6 +416,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsltu.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -400,6 +425,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsleu.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -408,6 +434,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsle.vv v1, v18, v16, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -416,6 +443,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmslt.vv v1, v18, v16, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -424,6 +452,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a2, a0, e64,m2
 ; CHECK-O0-NEXT:    vmslt.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
@@ -432,6 +461,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vse.v v4, (a1)
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2
 ; CHECK-O0-NEXT:    vmsle.vv v1, v16, v18, v0.t
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1

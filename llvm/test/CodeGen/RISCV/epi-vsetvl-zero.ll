@@ -34,11 +34,13 @@ define void @test_vsetvl_avl(<vscale x 1 x double>* %v, i64 signext %avl) nounwi
 ; CHECK-O0-LABEL: test_vsetvl_avl:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
-; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vfadd.vv v2, v1, v1
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse.v v1, (a0)
+; CHECK-O0-NEXT:    vse.v v2, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-DISABLED-LABEL: test_vsetvl_avl:
@@ -91,11 +93,13 @@ define void @test_vsetvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, zero
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
-; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vfadd.vv v2, v1, v1
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse.v v1, (a0)
+; CHECK-O0-NEXT:    vse.v v2, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-DISABLED-LABEL: test_vsetvl_zero:
@@ -149,11 +153,13 @@ define void @test_vsetvlmax(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0-LABEL: test_vsetvlmax:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
-; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vfadd.vv v2, v1, v1
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse.v v1, (a0)
+; CHECK-O0-NEXT:    vse.v v2, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-DISABLED-LABEL: test_vsetvlmax:
@@ -205,12 +211,14 @@ define void @test_gvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0-LABEL: test_gvl_zero:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, zero
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
-; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vfadd.vv v2, v1, v1
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse.v v1, (a0)
+; CHECK-O0-NEXT:    vse.v v2, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-DISABLED-LABEL: test_gvl_zero:
@@ -259,6 +267,7 @@ define void @test_gvl_zero(<vscale x 1 x double>* %v) nounwind
 define void @test_implicit_vlmax(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0-LABEL: test_implicit_vlmax:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)

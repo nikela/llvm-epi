@@ -12,8 +12,10 @@ define void @test_vp_logical(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, i
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e64,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1)
 ; CHECK-O0-NEXT:    vmand.mm v3, v1, v2
 ; CHECK-O0-NEXT:    vmor.mm v4, v1, v2
@@ -79,8 +81,10 @@ define void @test_vp_logical_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1,
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e32,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1)
 ; CHECK-O0-NEXT:    vmand.mm v3, v1, v2
 ; CHECK-O0-NEXT:    vmor.mm v4, v1, v2
@@ -146,8 +150,10 @@ define void @test_vp_logical_3(<vscale x 4 x i16>* %a0, <vscale x 4 x i16>* %a1,
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e16,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1)
 ; CHECK-O0-NEXT:    vmand.mm v3, v1, v2
 ; CHECK-O0-NEXT:    vmor.mm v4, v1, v2
@@ -213,8 +219,10 @@ define void @test_vp_logical_4(<vscale x 8 x i8>* %a0, <vscale x 8 x i8>* %a1, i
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vle.v v2, (a1)
 ; CHECK-O0-NEXT:    vmand.mm v3, v1, v2
 ; CHECK-O0-NEXT:    vmor.mm v4, v1, v2
@@ -280,14 +288,20 @@ define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1,
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v2m2
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m2
 ; CHECK-O0-NEXT:    vle.v v2, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v4m2
 ; CHECK-O0-NEXT:    vle.v v4, (a1)
+; CHECK-O0-NEXT:    # implicit-def: $v6m2
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m2
 ; CHECK-O0-NEXT:    vand.vi v6, v2, 1
 ; CHECK-O0-NEXT:    vmv.v.i v2, 0
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vmsne.vv v1, v6, v2
+; CHECK-O0-NEXT:    # implicit-def: $v6m2
 ; CHECK-O0-NEXT:    vand.vi v6, v4, 1
+; CHECK-O0-NEXT:    # implicit-def: $v4
 ; CHECK-O0-NEXT:    vmsne.vv v4, v6, v2
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m2
 ; CHECK-O0-NEXT:    vmand.mm v0, v1, v4
@@ -365,14 +379,20 @@ define void @test_vp_logical_6(<vscale x 32 x i8>* %a0, <vscale x 32 x i8>* %a1,
 ; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v4m4
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m4
 ; CHECK-O0-NEXT:    vle.v v4, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v16m4
 ; CHECK-O0-NEXT:    vle.v v16, (a1)
+; CHECK-O0-NEXT:    # implicit-def: $v20m4
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m4
 ; CHECK-O0-NEXT:    vand.vi v20, v4, 1
 ; CHECK-O0-NEXT:    vmv.v.i v4, 0
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vmsne.vv v1, v20, v4
+; CHECK-O0-NEXT:    # implicit-def: $v20m4
 ; CHECK-O0-NEXT:    vand.vi v20, v16, 1
+; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vmsne.vv v2, v20, v4
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m4
 ; CHECK-O0-NEXT:    vmand.mm v0, v1, v2

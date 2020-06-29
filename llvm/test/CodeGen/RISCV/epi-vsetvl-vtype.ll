@@ -31,12 +31,14 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    #APP
 ; CHECK-O0-NEXT:    rdvtype t0; vsetvl x0, a2, t0
 ; CHECK-O0-NEXT:    #NO_APP
+; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1
 ; CHECK-O0-NEXT:    vle.v v1, (a0)
-; CHECK-O0-NEXT:    vfadd.vv v1, v1, v1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vfadd.vv v2, v1, v1
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse.v v1, (a0)
+; CHECK-O0-NEXT:    vse.v v2, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_vtype:

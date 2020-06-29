@@ -1230,7 +1230,7 @@ static SDValue LowerVPUnorderedFCmp(unsigned EPIIntNo, const SDValue &Op1,
 
   SDValue FCmpOperands[] = {
       DAG.getTargetConstant(EPIIntNo, DL, MVT::i64),
-      DAG.getRegister(RISCV::NoRegister, VT), // Merge.
+      DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
       Op1, Op2, And, AnyExtEVL
   };
   SDValue FCmp = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, FCmpOperands);
@@ -1589,7 +1589,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
   if (IsMasked && IntNo != Intrinsic::vp_fma)
     Operands.push_back(
-        DAG.getRegister(RISCV::NoRegister, Op.getValueType())); // Merge.
+        DAG.getNode(ISD::UNDEF, DL, Op.getValueType())); // Merge.
   for (auto VOp : VOpsPerm)
     Operands.push_back(Op.getOperand(VOp));
   if (IsMasked)
@@ -1727,15 +1727,15 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
       };
     else
       Operands = {
-          Op.getOperand(0),                                          // Chain.
+          Op.getOperand(0),                                    // Chain.
           DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL,
                                 MVT::i64),
-          DAG.getRegister(RISCV::NoRegister, Op.getValueType()),     // Merge.
-          Op.getOperand(2),                                          // Address.
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()),      // Merge.
+          Op.getOperand(2),                                    // Address.
           // FIXME Alignment ignored.
-          Op.getOperand(4),                                          // Mask.
+          Op.getOperand(4),                                    // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5))                              // EVL.
+                      Op.getOperand(5))                        // EVL.
       };
 
     SDValue Result =
@@ -2612,6 +2612,20 @@ static MachineBasicBlock *emitComputeVMCLR(MachineInstr &MI,
   return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4, VLMul);
 }
 
+static MachineBasicBlock *emitImplicitVRTuple(MachineInstr &MI,
+                                              MachineBasicBlock *BB) {
+  MachineFunction &MF = *BB->getParent();
+  DebugLoc DL = MI.getDebugLoc();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+
+  Register DestReg = MI.getOperand(0).getReg();
+  BuildMI(*BB, MI, DL, TII.get(RISCV::IMPLICIT_DEF), DestReg);
+
+  // The pseudo instruction is gone now.
+  MI.eraseFromParent();
+  return BB;
+}
+
 MachineBasicBlock *
 RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
@@ -2642,6 +2656,8 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   case RISCV::PseudoVMCLR_M4:
   case RISCV::PseudoVMCLR_M8:
     return emitComputeVMCLR(MI, BB);
+  case RISCV::PseudoImplicitVRTuple:
+    return emitImplicitVRTuple(MI, BB);
   }
 
   switch (MI.getOpcode()) {

@@ -1421,13 +1421,13 @@ multiclass pat_load_store<LLVMType type,
   // Load
   def : Pat<(type (load GPR:$rs1)),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
-             (type zero_reg),
+             (type (IMPLICIT_DEF)),
              GPR:$rs1,
              (mask_type zero_reg),
              VLMax, sew)>;
   def : Pat<(type (load AddrFI:$rs1)),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
-             (type zero_reg),
+             (type (IMPLICIT_DEF)),
              AddrFI:$rs1,
              (mask_type zero_reg),
              VLMax, sew)>;
@@ -1457,13 +1457,13 @@ multiclass pat_load_store_mask<LLVMType type,
   // Load
   def : Pat<(type (trunc (integer_type (load GPR:$rs1)))),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
-             (type zero_reg),
+             (type (IMPLICIT_DEF)),
              GPR:$rs1,
              (type zero_reg),
              VLMax, sew)>;
   def : Pat<(type (trunc (integer_type (load AddrFI:$rs1)))),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
-             (type zero_reg),
+             (type (IMPLICIT_DEF)),
              AddrFI:$rs1,
              (type zero_reg),
              VLMax, sew)>;
@@ -1525,9 +1525,9 @@ let Predicates = [HasStdExtV] in {
                VLMax, gvti.SEW)>;
     def : Pat<(gvti.Mask (trunc (gvti.Vector gvti.RegClass:$rs1))),
               (!cast<Instruction>("PseudoVMSNE_VV_M"#gvti.RegClass.VLMul)
-               (gvti.Mask zero_reg),
+               (gvti.Mask (IMPLICIT_DEF)),
                (!cast<Instruction>("PseudoVAND_VI_M"#gvti.RegClass.VLMul)
-                (gvti.Vector zero_reg),
+                (gvti.Vector (IMPLICIT_DEF)),
                 (gvti.Vector gvti.RegClass:$rs1), 1,
                 (gvti.Mask zero_reg),
                 VLMax, gvti.SEW),
@@ -1627,7 +1627,7 @@ multiclass pat_intrinsic_binary<string intrinsic_name,
                           (op2_type op2_kind:$rs2),
                           (i64 GPR:$vl))),
             swap_helper<
-              (instruction (result_type zero_reg)),
+              (instruction (result_type (IMPLICIT_DEF))),
               (instruction
                (op1_type op1_reg_class:$rs1)),
               (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
@@ -2372,7 +2372,7 @@ multiclass pat_intrinsic_unary<string intrinsic_name,
                           (op1_type op1_reg_class:$rs1),
                           (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name#_#kind#"_M"#vlmul)
-             (result_type zero_reg),
+             (result_type (IMPLICIT_DEF)),
              op1_reg_class:$rs1,
              (mask_type zero_reg),
              (NoX0 GPR:$vl), sew)>;
@@ -2780,7 +2780,7 @@ foreach vti = AllFloatVectors in
   def : Pat<(vti.Vector (int_epi_vfsqrt (vti.Vector vti.RegClass:$rs2),
                          GPR:$vl)),
             (!cast<Instruction>("PseudoVFSQRT_V_M" # vti.RegClass.VLMul)
-             (vti.Vector zero_reg),
+             (vti.Vector (IMPLICIT_DEF)),
              $rs2,
              (vti.Mask zero_reg),
              (NoX0 GPR:$vl), vti.SEW)>;
@@ -2808,7 +2808,7 @@ foreach vti = AllFloatVectors in
 foreach vti = AllIntegerVectors in {
   def : Pat<(vti.Vector (int_epi_viota (vti.Mask VR:$rs2), GPR:$vl)),
             (!cast<Instruction>("PseudoVIOTA_M_M"#vti.RegClass.VLMul)
-             (vti.Vector zero_reg),
+             (vti.Vector (IMPLICIT_DEF)),
              $rs2,
              (vti.Mask zero_reg),
              (NoX0 GPR:$vl), vti.SEW)>;
@@ -2835,7 +2835,7 @@ multiclass pat_conversions_same_sew<string intrinsic_float_to_int,
                             (fvti.Vector fvti.RegClass:$rs2),
                             GPR:$vl)),
               (!cast<Instruction>(instruction_float_to_int#"_M"#vlmul)
-               (ivti.Vector zero_reg),
+               (ivti.Vector (IMPLICIT_DEF)),
                $rs2,
                (ivti.Mask zero_reg),
                (NoX0 GPR:$vl), fvti.SEW)>;
@@ -2854,7 +2854,7 @@ multiclass pat_conversions_same_sew<string intrinsic_float_to_int,
                             (ivti.Vector fvti.RegClass:$rs2),
                             GPR:$vl)),
               (!cast<Instruction>(instruction_int_to_float#"_M"#vlmul)
-               (fvti.Vector zero_reg),
+               (fvti.Vector (IMPLICIT_DEF)),
                $rs2,
                (fvti.Mask zero_reg),
                (NoX0 GPR:$vl), fvti.SEW)>;
@@ -2906,7 +2906,7 @@ multiclass pat_intrinsic_binary_int_w_vX0<string intrinsic_name,
                            (vti.Vector vti.RegClass:$rs1),
                            (i64 GPR:$vl))),
               (!cast<Instruction>(instruction_name#"_M"#vlmul)
-               (wti.Vector zero_reg),
+               (wti.Vector (IMPLICIT_DEF)),
                vti.RegClass:$rs1,
                /* rs2 */ X0,
                (wti.Mask zero_reg),
@@ -2939,7 +2939,7 @@ multiclass pat_intrinsic_binary_int_v_wX0<string intrinsic_name,
                            (wti.Vector wti.RegClass:$rs1),
                            (i64 GPR:$vl))),
               (!cast<Instruction>(instruction_name#"_M"#vlmul)
-               (vti.Vector zero_reg),
+               (vti.Vector (IMPLICIT_DEF)),
                wti.RegClass:$rs1,
                /* rs2 */ X0,
                (vti.Mask zero_reg),
@@ -2967,7 +2967,7 @@ defm : pat_intrinsic_binary_int_v_wX0<"int_epi_vncvt_x_x", "PseudoVNSRL_WX">;
 foreach vti = AllIntegerVectors in {
   def : Pat<(vti.Vector (int_epi_vid GPR:$vl)),
             (!cast<Instruction>("PseudoVID_V_M"#vti.RegClass.VLMul)
-             (vti.Vector zero_reg),
+             (vti.Vector (IMPLICIT_DEF)),
              (vti.Mask zero_reg),
              (NoX0 GPR:$vl), vti.SEW)>;
   def : Pat<(vti.Vector (int_epi_vid_mask (vti.Vector vti.RegClass:$merge),
@@ -3020,7 +3020,7 @@ multiclass pat_vop_binary<SDNode vop,
                           (op_type op_reg_class:$rs1),
                           (op_type op_reg_class:$rs2))),
             swap_helper<
-              (instruction (result_type zero_reg)),
+              (instruction (result_type (IMPLICIT_DEF))),
               (instruction op_reg_class:$rs1),
               (instruction op_reg_class:$rs2),
               (instruction (mask_type zero_reg),
@@ -3075,10 +3075,10 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
     def : Pat<(vop (vti.Vector vti.RegClass:$rs2)),
               (PseudoVMV_X_S
                (vti.Vector (instruction
-                (vti.Vector zero_reg),
+                (vti.Vector (IMPLICIT_DEF)),
                 (vti.Vector vti.RegClass:$rs2),
                 (PseudoVMV_S_X
-                 (vti.Vector zero_reg),
+                 (vti.Vector (IMPLICIT_DEF)),
                  X0,
                  VLMax, vti.SEW),
                 (vti.Mask zero_reg),
@@ -3092,12 +3092,12 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
               (PseudoVMV_X_S
                (EXTRACT_SUBREG
                 (gvti.Vector (instruction
-                 (gvti.Vector zero_reg),
+                 (gvti.Vector (IMPLICIT_DEF)),
                  (gvti.Vector gvti.RegClass:$rs2),
                  (INSERT_SUBREG
                   (IMPLICIT_DEF),
                   (PseudoVMV_S_X
-                   (gvti.VectorM1 zero_reg),
+                   (gvti.VectorM1 (IMPLICIT_DEF)),
                    X0,
                    VLMax, gvti.SEW),
                   sub_vrm2),
@@ -3119,10 +3119,10 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
               FromFPR64<fvti.ScalarRegClass,
                (PseudoVFMV_F_S
                 (fvti.Vector (instruction
-                 (fvti.Vector zero_reg),
+                 (fvti.Vector (IMPLICIT_DEF)),
                  (fvti.Vector fvti.RegClass:$rs2),
                  (PseudoVFMV_S_F
-                  (fvti.Vector zero_reg),
+                  (fvti.Vector (IMPLICIT_DEF)),
                   ToFPR64<fvti.ScalarRegClass, FPZero<fvti.ScalarRegClass>.ret>.ret,
                   VLMax, fvti.SEW),
                  (fvti.Mask zero_reg),
@@ -3137,12 +3137,12 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
                (PseudoVFMV_F_S
                 (EXTRACT_SUBREG
                  (gfvti.Vector (instruction
-                  (gfvti.Vector zero_reg),
+                  (gfvti.Vector (IMPLICIT_DEF)),
                   (gfvti.Vector gfvti.RegClass:$rs2),
                   (INSERT_SUBREG
                    (IMPLICIT_DEF),
                    (PseudoVFMV_S_F
-                    (gfvti.VectorM1 zero_reg),
+                    (gfvti.VectorM1 (IMPLICIT_DEF)),
                     ToFPR64<gfvti.ScalarRegClass, FPZero<gfvti.ScalarRegClass>.ret>.ret,
                     VLMax, gfvti.SEW),
                    sub_vrm2),
@@ -3165,10 +3165,10 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
               FromFPR64<fvti.ScalarRegClass,
                (PseudoVFMV_F_S
                 (fvti.Vector (instruction
-                 (fvti.Vector zero_reg),
+                 (fvti.Vector (IMPLICIT_DEF)),
                  (fvti.Vector fvti.RegClass:$rs2),
                  (PseudoVFMV_S_F
-                  (fvti.Vector zero_reg),
+                  (fvti.Vector (IMPLICIT_DEF)),
                   ToFPR64<fvti.ScalarRegClass,
                           (fvti.Scalar fvti.ScalarRegClass:$init)>.ret,
                   VLMax, fvti.SEW),
@@ -3185,12 +3185,12 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                (PseudoVFMV_F_S
                 (EXTRACT_SUBREG
                  (gfvti.Vector (instruction
-                  (gfvti.Vector zero_reg),
+                  (gfvti.Vector (IMPLICIT_DEF)),
                   (gfvti.Vector gfvti.RegClass:$rs2),
                   (INSERT_SUBREG
                    (IMPLICIT_DEF),
                    (PseudoVFMV_S_F
-                    (gfvti.VectorM1 zero_reg),
+                    (gfvti.VectorM1 (IMPLICIT_DEF)),
                     ToFPR64<gfvti.ScalarRegClass,
                             (gfvti.Scalar gfvti.ScalarRegClass:$init)>.ret,
                     VLMax, gfvti.SEW),
@@ -3282,7 +3282,7 @@ foreach fvti = AllFloatVectors in
 
   def : Pat<(fvti.Vector (sint_to_fp (ivti.Vector ivti.RegClass:$value))),
             (!cast<Instruction>("PseudoVFCVT_F_X_V_M" # fvti.RegClass.VLMul)
-             (fvti.Vector zero_reg),
+             (fvti.Vector (IMPLICIT_DEF)),
              $value,
              (ivti.Mask zero_reg),
              VLMax,
@@ -3290,7 +3290,7 @@ foreach fvti = AllFloatVectors in
 
   def : Pat<(fvti.Vector (uint_to_fp (ivti.Vector ivti.RegClass:$value))),
             (!cast<Instruction>("PseudoVFCVT_F_XU_V_M" # fvti.RegClass.VLMul)
-             (fvti.Vector zero_reg),
+             (fvti.Vector (IMPLICIT_DEF)),
              $value,
              (ivti.Mask zero_reg),
              VLMax,
@@ -3298,7 +3298,7 @@ foreach fvti = AllFloatVectors in
 
   def : Pat<(ivti.Vector (fp_to_sint (fvti.Vector fvti.RegClass:$value))),
             (!cast<Instruction>("PseudoVFCVT_X_F_V_M" # fvti.RegClass.VLMul)
-             (ivti.Vector zero_reg),
+             (ivti.Vector (IMPLICIT_DEF)),
              $value,
              (fvti.Mask zero_reg),
              VLMax,
@@ -3306,7 +3306,7 @@ foreach fvti = AllFloatVectors in
 
   def : Pat<(ivti.Vector (fp_to_uint (fvti.Vector fvti.RegClass:$value))),
             (!cast<Instruction>("PseudoVFCVT_XU_F_V_M" # fvti.RegClass.VLMul)
-             (ivti.Vector zero_reg),
+             (ivti.Vector (IMPLICIT_DEF)),
              $value,
              (fvti.Mask zero_reg),
              VLMax,
@@ -3326,7 +3326,7 @@ foreach vti = AllIntegerVectors in
 
   def : Pat<(vti.Vector (int_experimental_vector_stepvector)),
             (!cast<Instruction>("PseudoVID_V_M"#vti.RegClass.VLMul)
-             (vti.Vector zero_reg),
+             (vti.Vector (IMPLICIT_DEF)),
              (vti.Mask zero_reg),
              VLMax, vti.SEW)>;
 }
@@ -3349,7 +3349,7 @@ foreach vti = NoGroupIntegerVectors in {
                    GPR:$rs1)),
             (PseudoVMV_X_S
              (PseudoVSLIDEDOWN_VX_M1
-              (vti.Vector zero_reg),
+              (vti.Vector (IMPLICIT_DEF)),
               (vti.Vector vti.RegClass:$rs2),
               GPR:$rs1,
               (vti.Mask zero_reg),
@@ -3384,7 +3384,7 @@ foreach fvti = NoGroupFloatVectors in {
             FromFPR64<fvti.ScalarRegClass,
                       (PseudoVFMV_F_S
                        (PseudoVSLIDEDOWN_VX_M1
-                        (fvti.Vector zero_reg),
+                        (fvti.Vector (IMPLICIT_DEF)),
                         (fvti.Vector fvti.RegClass:$rs2),
                         GPR:$rs1,
                         (fvti.Mask zero_reg),
@@ -3418,7 +3418,7 @@ foreach gvti = GroupIntegerVectors in {
             (PseudoVMV_X_S
              (EXTRACT_SUBREG
               (!cast<Instruction>("PseudoVSLIDEDOWN_VX_M"#gvti.RegClass.VLMul)
-               (gvti.Vector zero_reg),
+               (gvti.Vector (IMPLICIT_DEF)),
                (gvti.Vector gvti.RegClass:$rs2),
                GPR:$rs1,
                (gvti.Mask zero_reg),
@@ -3462,7 +3462,7 @@ foreach gfvti = GroupFloatVectors in {
                       (PseudoVFMV_F_S
                        (EXTRACT_SUBREG
                         (!cast<Instruction>("PseudoVSLIDEDOWN_VX_M"#gfvti.RegClass.VLMul)
-                         (gfvti.Vector zero_reg),
+                         (gfvti.Vector (IMPLICIT_DEF)),
                          (gfvti.Vector gfvti.RegClass:$rs2),
                          GPR:$rs1,
                          (gfvti.Mask zero_reg),
@@ -3499,9 +3499,9 @@ foreach vti = AllIllegalIntegerVectors in {
   def : Pat<(lvti.Vector (riscv_sign_extend_inreg (lvti.Vector VR:$rs2),
                           uimm5:$rs1)),
             (PseudoVSRA_VI_M1
-             (lvti.Vector zero_reg),
+             (lvti.Vector (IMPLICIT_DEF)),
              (PseudoVSLL_VI_M1
-              (lvti.Vector zero_reg),
+              (lvti.Vector (IMPLICIT_DEF)),
               $rs2, uimm5:$rs1,
               (lvti.Mask zero_reg),
               VLMax,
@@ -3518,9 +3518,9 @@ foreach vti = AllIllegalIntegerVectors in {
   def : Pat<(lvti.Vector (riscv_sign_extend_inreg (lvti.Vector VR:$rs2),
                           GPR:$rs1)),
             (PseudoVSRA_VX_M1
-             (lvti.Vector zero_reg),
+             (lvti.Vector (IMPLICIT_DEF)),
              (PseudoVSLL_VX_M1
-              (lvti.Vector zero_reg),
+              (lvti.Vector (IMPLICIT_DEF)),
               $rs2, $rs1,
               (lvti.Mask zero_reg),
               VLMax,
@@ -3543,7 +3543,7 @@ foreach vti = AllIntegerVectors in {
 foreach fvti = AllFloatVectors in {
   def : Pat<(fabs (fvti.Vector fvti.RegClass:$rs2)),
             (!cast<Instruction>("PseudoVFSGNJX_VV_M"#fvti.RegClass.VLMul)
-             (fvti.Vector zero_reg),
+             (fvti.Vector (IMPLICIT_DEF)),
              (fvti.Vector fvti.RegClass:$rs2),
              (fvti.Vector fvti.RegClass:$rs2),
              (fvti.Mask zero_reg),
@@ -3627,7 +3627,7 @@ multiclass pat_load<string width> {
 
     def : Pat<(vti.Vector (int_epi_vload GPR:$rs1, GPR:$vl)),
               (!cast<Instruction>("PseudoVL"#width#"_V_M"#vlmul)
-               (vti.Vector zero_reg),
+               (vti.Vector (IMPLICIT_DEF)),
                $rs1,
                (vti.Mask zero_reg),
                (NoX0 GPR:$vl),
@@ -3635,7 +3635,7 @@ multiclass pat_load<string width> {
 
     def : Pat<(vti.Vector (int_epi_vload_strided GPR:$rs1, GPR:$rs2, GPR:$vl)),
               (!cast<Instruction>("PseudoVLS"#width#"_V_M"#vlmul)
-               (vti.Vector zero_reg),
+               (vti.Vector (IMPLICIT_DEF)),
                $rs1, $rs2,
                (vti.Mask zero_reg),
                (NoX0 GPR:$vl),
@@ -3644,7 +3644,7 @@ multiclass pat_load<string width> {
     def : Pat<(vti.Vector (int_epi_vload_indexed GPR:$rs1,
                            (ivti.Vector vti.RegClass:$rs2), GPR:$vl)),
               (!cast<Instruction>("PseudoVLX"#width#"_V_M"#vlmul)
-               (vti.Vector zero_reg),
+               (vti.Vector (IMPLICIT_DEF)),
                $rs1, $rs2,
                (vti.Mask zero_reg),
                (NoX0 GPR:$vl),
@@ -3756,8 +3756,8 @@ def : Pat<(masked_st (nxv1f64 VR:$value), GPR:$addr, undef, (nxv1i1 V0)),
               VR:$value, GPR:$addr, (nxv1i1 V0), /* vl */ X0, 64)>;
 
 def : Pat<(nxv1i1 (setule (nxv1i64 VR:$rs1), (nxv1i64 VR:$rs2))),
-          (PseudoVMSLEU_VV_M1 (nxv1i64 zero_reg), VR:$rs1, VR:$rs2, (nxv1i1 zero_reg),
-                              /* vl */ X0, 64)>;
+          (PseudoVMSLEU_VV_M1 (nxv1i64 (IMPLICIT_DEF)), VR:$rs1, VR:$rs2,
+           (nxv1i1 zero_reg), /* vl */ X0, 64)>;
 
 defm "" : pat_load<"E">;
 defm "" : pat_store<"E">;
@@ -3778,24 +3778,27 @@ defm PseudoVTRN_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
 
 }
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
+def PseudoImplicitVRTuple : Pseudo<(outs VRTuple:$rd), (ins), []>;
+
 foreach vti = NoGroupVectors in {
 
     def : Pat<(riscv_vzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                            (i64 GPR:$vl)),
               (PseudoVZIP2_VV_M1
-               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vunzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                              (i64 GPR:$vl)),
               (PseudoVUNZIP2_VV_M1
-               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vtrn (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                           (i64 GPR:$vl)),
               (PseudoVTRN_VV_M1
-               (untyped zero_reg), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 }
 
