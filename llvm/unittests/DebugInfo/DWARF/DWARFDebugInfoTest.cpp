@@ -1379,8 +1379,7 @@ TEST(DWARFDebugInfo, TestEmptyChildren) {
                          "    Children:        DW_CHILDREN_yes\n"
                          "    Attributes:\n"
                          "debug_info:\n"
-                         "  - Length:\n"
-                         "      TotalLength:          0\n"
+                         "  - Length:          0\n"
                          "    Version:         4\n"
                          "    AbbrOffset:      0\n"
                          "    AddrSize:        8\n"
@@ -1916,8 +1915,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidCURef) {
           - Attribute:       DW_AT_type
             Form:            DW_FORM_ref4
     debug_info:
-      - Length:
-          TotalLength:     22
+      - Length:          22
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -1965,8 +1963,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddr) {
           - Attribute:       DW_AT_type
             Form:            DW_FORM_ref_addr
     debug_info:
-      - Length:
-          TotalLength:     22
+      - Length:          22
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2006,8 +2003,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRanges) {
           - Attribute:       DW_AT_ranges
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2044,8 +2040,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRnglists) {
           - Attribute:       DW_AT_ranges
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     17
+      - Length:          17
         Version:         5
         UnitType:        DW_UT_compile
         AbbrOffset:      0
@@ -2082,8 +2077,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStmtList) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2117,8 +2111,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStrp) {
           - Attribute:       DW_AT_name
             Form:            DW_FORM_strp
     debug_info:
-      - Length:
-          TotalLength:     12
+      - Length:          12
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2159,8 +2152,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddrBetween) {
           - Attribute:       DW_AT_type
             Form:            DW_FORM_ref_addr
     debug_info:
-      - Length:
-          TotalLength:     22
+      - Length:          22
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2201,8 +2193,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineSequence) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2270,8 +2261,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineFileIndex) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2341,8 +2331,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineTablePorlogueDirIndex) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2413,8 +2402,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyDuplicateFileWarning) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2490,8 +2478,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
           - Attribute:       DW_AT_stmt_list
             Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2500,8 +2487,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
             Values:
               - Value:           0x0000000000000001
               - Value:           0x0000000000000000
-      - Length:
-          TotalLength:     16
+      - Length:          16
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2617,8 +2603,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCURangesIncomplete) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     46
+      - Length:          46
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2677,8 +2662,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyLexicalBlockRanges) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     52
+      - Length:          52
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2735,8 +2719,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingFunctionRanges) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     55
+      - Length:          55
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2802,8 +2785,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingLexicalBlockRanges) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     85
+      - Length:          85
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2864,8 +2846,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidDIERange) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     34
+      - Length:          34
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2921,8 +2902,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyElidedDoesntFail) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     71
+      - Length:          71
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
@@ -2984,8 +2964,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyNestedFunctions) {
           - Attribute:       DW_AT_high_pc
             Form:            DW_FORM_addr
     debug_info:
-      - Length:
-          TotalLength:     73
+      - Length:          73
         Version:         4
         AbbrOffset:      0
         AddrSize:        8
