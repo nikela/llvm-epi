@@ -2886,14 +2886,13 @@ void SelectionDAGBuilder::visitCallBr(const CallBrInst &I) {
 
   // Retrieve successors.
   MachineBasicBlock *Return = FuncInfo.MBBMap[I.getDefaultDest()];
-  Return->setInlineAsmBrDefaultTarget();
 
   // Update successor info.
   addSuccessorWithProb(CallBrMBB, Return, BranchProbability::getOne());
   for (unsigned i = 0, e = I.getNumIndirectDests(); i < e; ++i) {
     MachineBasicBlock *Target = FuncInfo.MBBMap[I.getIndirectDest(i)];
     addSuccessorWithProb(CallBrMBB, Target, BranchProbability::getZero());
-    CallBrMBB->addInlineAsmBrIndirectTarget(Target);
+    Target->setIsInlineAsmBrIndirectTarget();
   }
   CallBrMBB->normalizeSuccProbs();
 
@@ -2966,16 +2965,6 @@ void SelectionDAGBuilder::UpdateSplitBlock(MachineBasicBlock *First,
   for (unsigned i = 0, e = SL->BitTestCases.size(); i != e; ++i)
     if (SL->BitTestCases[i].Parent == First)
       SL->BitTestCases[i].Parent = Last;
-
-  // SelectionDAGISel::FinishBasicBlock will add PHI operands for the
-  // successors of the fallthrough block. Here, we add PHI operands for the
-  // successors of the INLINEASM_BR block itself.
-  if (First->getFirstTerminator()->getOpcode() == TargetOpcode::INLINEASM_BR)
-    for (std::pair<MachineInstr *, unsigned> &pair : FuncInfo.PHINodesToUpdate)
-      if (First->isSuccessor(pair.first->getParent()))
-        MachineInstrBuilder(*First->getParent(), pair.first)
-            .addReg(pair.second)
-            .addMBB(First);
 }
 
 void SelectionDAGBuilder::visitIndirectBr(const IndirectBrInst &I) {
@@ -7858,7 +7847,6 @@ public:
   }
 };
 
-using SDISelAsmOperandInfoVector = SmallVector<SDISelAsmOperandInfo, 16>;
 
 } // end anonymous namespace
 
@@ -7920,9 +7908,9 @@ static SDValue getAddressForMemoryInput(SDValue Chain, const SDLoc &Location,
   Type *Ty = OpVal->getType();
   auto &DL = DAG.getDataLayout();
   uint64_t TySize = DL.getTypeAllocSize(Ty);
-  unsigned Align = DL.getPrefTypeAlignment(Ty);
   MachineFunction &MF = DAG.getMachineFunction();
-  int SSFI = MF.getFrameInfo().CreateStackObject(TySize, Align, false);
+  int SSFI = MF.getFrameInfo().CreateStackObject(
+      TySize, DL.getPrefTypeAlign(Ty), false);
   SDValue StackSlot = DAG.getFrameIndex(SSFI, TLI.getFrameIndexTy(DL));
   Chain = DAG.getTruncStore(Chain, Location, OpInfo.CallOperand, StackSlot,
                             MachinePointerInfo::getFixedStack(MF, SSFI),
@@ -8117,7 +8105,7 @@ void SelectionDAGBuilder::visitInlineAsm(const CallBase &Call) {
   const InlineAsm *IA = cast<InlineAsm>(Call.getCalledOperand());
 
   /// ConstraintOperands - Information about all of the constraints.
-  SDISelAsmOperandInfoVector ConstraintOperands;
+  SmallVector<SDISelAsmOperandInfo, 16> ConstraintOperands;
 
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   TargetLowering::AsmOperandInfoVector TargetConstraints = TLI.ParseConstraints(
@@ -8643,7 +8631,7 @@ void SelectionDAGBuilder::visitVAArg(const VAArgInst &I) {
   SDValue V = DAG.getVAArg(
       TLI.getMemValueType(DAG.getDataLayout(), I.getType()), getCurSDLoc(),
       getRoot(), getValue(I.getOperand(0)), DAG.getSrcValue(I.getOperand(0)),
-      DL.getABITypeAlignment(I.getType()));
+      DL.getABITypeAlign(I.getType()).value());
   DAG.setRoot(V.getValue(1));
 
   if (I.getType()->isPointerTy())

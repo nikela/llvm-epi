@@ -168,61 +168,64 @@ namespace llvm {
       nxv8i1         = 106,   // n x  8 x i1
       nxv16i1        = 107,   // n x 16 x i1
       nxv32i1        = 108,   // n x 32 x i1
+      nxv64i1        = 109,   // n x  64 x i1
 
-      nxv1i8         = 109,   // n x  1 x i8
-      nxv2i8         = 110,   // n x  2 x i8
-      nxv4i8         = 111,   // n x  4 x i8
-      nxv8i8         = 112,   // n x  8 x i8
-      nxv16i8        = 113,   // n x 16 x i8
-      nxv32i8        = 114,   // n x 32 x i8
-      nxv64i8        = 115,   // n x 64 x i8
+      nxv1i8         = 110,   // n x  1 x i8
+      nxv2i8         = 111,   // n x  2 x i8
+      nxv4i8         = 112,   // n x  4 x i8
+      nxv8i8         = 113,   // n x  8 x i8
+      nxv16i8        = 114,   // n x 16 x i8
+      nxv32i8        = 115,   // n x 32 x i8
+      nxv64i8        = 116,   // n x  64 x i8
 
-      nxv1i16        = 116,  // n x  1 x i16
-      nxv2i16        = 117,  // n x  2 x i16
-      nxv4i16        = 118,  // n x  4 x i16
-      nxv8i16        = 119,  // n x  8 x i16
-      nxv16i16       = 120,  // n x 16 x i16
-      nxv32i16       = 121,  // n x 32 x i16
+      nxv1i16        = 117,  // n x  1 x i16
+      nxv2i16        = 118,  // n x  2 x i16
+      nxv4i16        = 119,  // n x  4 x i16
+      nxv8i16        = 120,  // n x  8 x i16
+      nxv16i16       = 121,  // n x 16 x i16
+      nxv32i16       = 122,  // n x 32 x i16
 
-      nxv1i32        = 122,  // n x  1 x i32
-      nxv2i32        = 123,  // n x  2 x i32
-      nxv4i32        = 124,  // n x  4 x i32
-      nxv8i32        = 125,  // n x  8 x i32
-      nxv16i32       = 126,  // n x 16 x i32
-      nxv32i32       = 127,  // n x 32 x i32
+      nxv1i32        = 123,  // n x  1 x i32
+      nxv2i32        = 124,  // n x  2 x i32
+      nxv4i32        = 125,  // n x  4 x i32
+      nxv8i32        = 126,  // n x  8 x i32
+      nxv16i32       = 127,  // n x 16 x i32
+      nxv32i32       = 128,  // n x 32 x i32
 
-      nxv1i64        = 128,  // n x  1 x i64
-      nxv2i64        = 129,  // n x  2 x i64
-      nxv4i64        = 130,  // n x  4 x i64
-      nxv8i64        = 131,  // n x  8 x i64
-      nxv16i64       = 132,  // n x 16 x i64
-      nxv32i64       = 133,  // n x 32 x i64
+      nxv1i64        = 129,  // n x  1 x i64
+      nxv2i64        = 130,  // n x  2 x i64
+      nxv4i64        = 131,  // n x  4 x i64
+      nxv8i64        = 132,  // n x  8 x i64
+      nxv16i64       = 133,  // n x 16 x i64
+      nxv32i64       = 134,  // n x 32 x i64
 
       // EPIVR Masks
-      nxv16i4        =  134,   // n x 16 x i4
-      nxv32i2        =  135,   // n x 32 x i2
-      nxv64i1        =  136,   // n x 64 x i1
+      nxv16i4        =  135,   // n x 16 x i4
+      nxv32i2        =  136,   // n x 32 x i2
 
       FIRST_INTEGER_SCALABLE_VECTOR_VALUETYPE = nxv1i1,
-      LAST_INTEGER_SCALABLE_VECTOR_VALUETYPE = nxv64i1,
+      LAST_INTEGER_SCALABLE_VECTOR_VALUETYPE = nxv32i2,
 
-      nxv2f16        = 137,  // n x  2 x f16
-      nxv4f16        = 138,  // n x  4 x f16
-      nxv8f16        = 139,  // n x  8 x f16
-      nxv2bf16       = 140,  // n x  2 x bf16
-      nxv4bf16       = 141,  // n x  4 x bf16
-      nxv8bf16       = 142,  // n x  8 x bf16
-      nxv1f32        = 143,  // n x  1 x f32
-      nxv2f32        = 144,  // n x  2 x f32
-      nxv4f32        = 145,  // n x  4 x f32
-      nxv8f32        = 146,  // n x  8 x f32
-      nxv16f32       = 147,  // n x 16 x f32
-      nxv1f64        = 148,  // n x  1 x f64
-      nxv2f64        = 149,  // n x  2 x f64
-      nxv4f64        = 150,  // n x  4 x f64
-      nxv8f64        = 151,  // n x  8 x f64
+      nxv1f16        = 137,   // n x   1 x f16
+      nxv2f16        = 138,  // n x  2 x f16
+      nxv4f16        = 139,  // n x  4 x f16
+      nxv8f16        = 140,  // n x  8 x f16
+      nxv16f16       = 141,   // n x  16 x f16
+      nxv32f16       = 142,   // n x  32 x f16
+      nxv2bf16       = 143,  // n x  2 x bf16
+      nxv4bf16       = 144,  // n x  4 x bf16
+      nxv8bf16       = 145,  // n x  8 x bf16
+      nxv1f32        = 146,  // n x  1 x f32
+      nxv2f32        = 147,  // n x  2 x f32
+      nxv4f32        = 148,  // n x  4 x f32
+      nxv8f32        = 149,  // n x  8 x f32
+      nxv16f32       = 150,  // n x 16 x f32
+      nxv1f64        = 151,  // n x  1 x f64
+      nxv2f64        = 152,  // n x  2 x f64
+      nxv4f64        = 153,  // n x  4 x f64
+      nxv8f64        = 154,  // n x  8 x f64
 
-      FIRST_FP_SCALABLE_VECTOR_VALUETYPE = nxv2f16,
+      FIRST_FP_SCALABLE_VECTOR_VALUETYPE = nxv1f16,
       LAST_FP_SCALABLE_VECTOR_VALUETYPE = nxv8f64,
 
       FIRST_SCALABLE_VECTOR_VALUETYPE = nxv1i1,
@@ -231,20 +234,20 @@ namespace llvm {
       FIRST_VECTOR_VALUETYPE = v1i1,
       LAST_VECTOR_VALUETYPE  = nxv8f64,
 
-      x86mmx         = 152,   // This is an X86 MMX value
+      x86mmx         = 155,   // This is an X86 MMX value
 
-      Glue           = 153,   // This glues nodes together during pre-RA sched
+      Glue           = 156,   // This glues nodes together during pre-RA sched
 
-      isVoid         = 154,   // This has no value
+      isVoid         = 157,   // This has no value
 
-      Untyped        = 155,   // This value takes a register, but has
+      Untyped        = 158,   // This value takes a register, but has
                               // unspecified type.  The register class
                               // will be determined by the opcode.
 
-      exnref         = 156,   // WebAssembly's exnref type
+      exnref         = 159,   // WebAssembly's exnref type
 
       FIRST_VALUETYPE =  1,   // This is always the beginning of the list.
-      LAST_VALUETYPE = 157,   // This always remains at the end of the list.
+      LAST_VALUETYPE = 160,   // This always remains at the end of the list.
 
       // This is the current maximum for LAST_VALUETYPE.
       // MVT::MAX_ALLOWED_VALUETYPE is used for asserts and to size bit vectors
@@ -549,9 +552,12 @@ namespace llvm {
       case v32f16:
       case v64f16:
       case v128f16:
+      case nxv1f16:
       case nxv2f16:
       case nxv4f16:
-      case nxv8f16: return f16;
+      case nxv8f16:
+      case nxv16f16:
+      case nxv32f16: return f16;
       case v2bf16:
       case v3bf16:
       case v4bf16:
@@ -625,7 +631,8 @@ namespace llvm {
       case v64f16:
       case v64bf16:
       case v64f32:
-      case nxv64i1: return 64;
+      case nxv64i1:
+      case nxv64i8: return 64;
       case v32i1:
       case v32i8:
       case v32i16:
@@ -640,8 +647,8 @@ namespace llvm {
       case nxv32i8:
       case nxv32i16:
       case nxv32i32:
-      case nxv32i64: return 32;
-      case nxv64i8: return 64;
+      case nxv32i64:
+      case nxv32f16: return 32;
       case v16i1:
       case v16i8:
       case v16i16:
@@ -657,6 +664,7 @@ namespace llvm {
       case nxv16i16:
       case nxv16i32:
       case nxv16i64:
+      case nxv16f16:
       case nxv16f32: return 16;
       case v8i1:
       case v8i8:
@@ -732,6 +740,7 @@ namespace llvm {
       case nxv1i16:
       case nxv1i32:
       case nxv1i64:
+      case nxv1f16:
       case nxv1f32:
       case nxv1f64: return 1;
       }
@@ -792,7 +801,8 @@ namespace llvm {
       case v1i16: return TypeSize::Fixed(16);
       case nxv16i1:
       case nxv2i8:
-      case nxv1i16: return TypeSize::Scalable(16);
+      case nxv1i16:
+      case nxv1f16: return TypeSize::Scalable(16);
       case f32 :
       case i32 :
       case v32i1:
@@ -874,6 +884,7 @@ namespace llvm {
       case nxv16i16:
       case nxv8i32:
       case nxv4i64:
+      case nxv16f16:
       case nxv8f32:
       case nxv4f64: return TypeSize::Scalable(256);
       case v512i1:
@@ -889,6 +900,7 @@ namespace llvm {
       case nxv32i16:
       case nxv16i32:
       case nxv8i64:
+      case nxv32f16:
       case nxv16f32:
       case nxv8f64: return TypeSize::Scalable(512);
       case v1024i1:
@@ -1183,9 +1195,12 @@ namespace llvm {
           if (NumElements == 32) return MVT::nxv32i64;
           break;
         case MVT::f16:
+          if (NumElements == 1)  return MVT::nxv1f16;
           if (NumElements == 2)  return MVT::nxv2f16;
           if (NumElements == 4)  return MVT::nxv4f16;
           if (NumElements == 8)  return MVT::nxv8f16;
+          if (NumElements == 16)  return MVT::nxv16f16;
+          if (NumElements == 32)  return MVT::nxv32f16;
           break;
         case MVT::bf16:
           if (NumElements == 2)  return MVT::nxv2bf16;

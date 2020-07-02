@@ -301,6 +301,12 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   // Effectively disable jump table generation.
   setMinimumJumpTableEntries(INT_MAX);
 
+  // Jumps are expensive, compared to logic
+  setJumpIsExpensive();
+
+  // We can use any register for comparisons
+  setHasMultipleConditionRegisters();
+
   if (Subtarget.hasStdExtV()) {
     // EPI & VPred intrinsics may have illegal operands/results
     for (auto VT : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i32}) {
@@ -2251,7 +2257,7 @@ static MachineBasicBlock *emitSplitF64Pseudo(MachineInstr &MI,
   Register HiReg = MI.getOperand(1).getReg();
   Register SrcReg = MI.getOperand(2).getReg();
   const TargetRegisterClass *SrcRC = &RISCV::FPR64RegClass;
-  int FI = MF.getInfo<RISCVMachineFunctionInfo>()->getMoveF64FrameIndex();
+  int FI = MF.getInfo<RISCVMachineFunctionInfo>()->getMoveF64FrameIndex(MF);
 
   TII.storeRegToStackSlot(*BB, MI, SrcReg, MI.getOperand(2).isKill(), FI, SrcRC,
                           RI);
@@ -2283,7 +2289,7 @@ static MachineBasicBlock *emitBuildPairF64Pseudo(MachineInstr &MI,
   Register LoReg = MI.getOperand(1).getReg();
   Register HiReg = MI.getOperand(2).getReg();
   const TargetRegisterClass *DstRC = &RISCV::FPR64RegClass;
-  int FI = MF.getInfo<RISCVMachineFunctionInfo>()->getMoveF64FrameIndex();
+  int FI = MF.getInfo<RISCVMachineFunctionInfo>()->getMoveF64FrameIndex(MF);
 
   MachineMemOperand *MMO =
       MF.getMachineMemOperand(MachinePointerInfo::getFixedStack(MF, FI),

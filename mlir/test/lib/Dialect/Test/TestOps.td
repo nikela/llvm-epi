@@ -90,6 +90,10 @@ def MultiTensorRankOf : TEST_Op<"multi_tensor_rank_of"> {
   );
 }
 
+def TEST_TestType : DialectType<Test_Dialect,
+    CPred<"$_self.isa<::mlir::TestType>()">, "test">,
+    BuildableType<"$_builder.getType<::mlir::TestType>()">;
+
 //===----------------------------------------------------------------------===//
 // Test Symbols
 //===----------------------------------------------------------------------===//
@@ -1338,6 +1342,14 @@ def FormatTwoVariadicOperandsNoBuildableTypeOp
   let assemblyFormat = [{
     `(` $a `:` type($a) `)` `->` `(` $b `:` type($b) `)`  attr-dict
   }];
+}
+
+def FormatInferVariadicTypeFromNonVariadic
+    : TEST_Op<"format_infer_variadic_type_from_non_variadic",
+              [SameOperandsAndResultType]> {
+  let arguments = (ins Variadic<AnyType>:$operands);
+  let results = (outs AnyType:$result);
+  let assemblyFormat = "$operands attr-dict `:` type($result)";
 }
 
 //===----------------------------------------------------------------------===//

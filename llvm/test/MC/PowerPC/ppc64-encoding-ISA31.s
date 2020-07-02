@@ -3,7 +3,6 @@
 # RUN: llvm-mc -triple powerpc64le-unknown-linux-gnu --show-encoding %s | \
 # RUN:   FileCheck -check-prefix=CHECK-LE %s
 
-
 # CHECK-BE: plxv 63, 8589934591(0), 1       # encoding: [0x04,0x11,0xff,0xff
 # CHECK-BE-SAME:                                         0xcf,0xe0,0xff,0xff]
 # CHECK-LE: plxv 63, 8589934591(0), 1       # encoding: [0xff,0xff,0x11,0x04
@@ -224,4 +223,137 @@
 # CHECK-LE: pld 1, 8589934591(0), 1               # encoding: [0xff,0xff,0x11,0x04,
 # CHECK-LE-SAME:                                               0xff,0xff,0x20,0xe4]
             pld 1, 8589934591(0), 1
-
+# CHECK-BE: vpdepd 1, 2, 0                        # encoding: [0x10,0x22,0x05,0xcd]
+# CHECK-LE: vpdepd 1, 2, 0                        # encoding: [0xcd,0x05,0x22,0x10]
+            vpdepd 1, 2, 0
+# CHECK-BE: vpextd 1, 2, 0                        # encoding: [0x10,0x22,0x05,0x8d]
+# CHECK-LE: vpextd 1, 2, 0                        # encoding: [0x8d,0x05,0x22,0x10]
+            vpextd 1, 2, 0
+# CHECK-BE: pdepd 1, 2, 4                         # encoding: [0x7c,0x41,0x21,0x38]
+# CHECK-LE: pdepd 1, 2, 4                         # encoding: [0x38,0x21,0x41,0x7c]
+            pdepd 1, 2, 4
+# CHECK-BE: pextd 1, 2, 4                         # encoding: [0x7c,0x41,0x21,0x78]
+# CHECK-LE: pextd 1, 2, 4                         # encoding: [0x78,0x21,0x41,0x7c]
+            pextd 1, 2, 4
+# CHECK-BE: vcfuged 1, 2, 4                       # encoding: [0x10,0x22,0x25,0x4d]
+# CHECK-LE: vcfuged 1, 2, 4                       # encoding: [0x4d,0x25,0x22,0x10]
+            vcfuged 1, 2, 4
+# CHECK-BE: cfuged 1, 2, 4                        # encoding: [0x7c,0x41,0x21,0xb8]
+# CHECK-LE: cfuged 1, 2, 4                        # encoding: [0xb8,0x21,0x41,0x7c]
+            cfuged 1, 2, 4
+# CHECK-BE: vgnb 1, 2, 2                          # encoding: [0x10,0x22,0x14,0xcc]
+# CHECK-LE: vgnb 1, 2, 2                          # encoding: [0xcc,0x14,0x22,0x10]
+            vgnb 1, 2, 2
+# CHECK-BE: xxeval 32, 1, 2, 3, 2                 # encoding: [0x05,0x00,0x00,0x02,
+# CHECK-BE-SAME:                                               0x88,0x01,0x10,0xd1]
+# CHECK-LE: xxeval 32, 1, 2, 3, 2                 # encoding: [0x02,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0xd1,0x10,0x01,0x88]
+            xxeval 32, 1, 2, 3, 2
+# CHECK-BE: vclzdm 1, 2, 3                        # encoding: [0x10,0x22,0x1f,0x84]
+# CHECK-LE: vclzdm 1, 2, 3                        # encoding: [0x84,0x1f,0x22,0x10]
+            vclzdm 1, 2, 3
+# CHECK-BE: vctzdm 1, 2, 3                        # encoding: [0x10,0x22,0x1f,0xc4]
+# CHECK-LE: vctzdm 1, 2, 3                        # encoding: [0xc4,0x1f,0x22,0x10]
+            vctzdm 1, 2, 3
+# CHECK-BE: cntlzdm 1, 3, 2                       # encoding: [0x7c,0x61,0x10,0x76]
+# CHECK-LE: cntlzdm 1, 3, 2                       # encoding: [0x76,0x10,0x61,0x7c]
+            cntlzdm 1, 3, 2
+# CHECK-BE: cnttzdm 1, 3, 2                       # encoding: [0x7c,0x61,0x14,0x76]
+# CHECK-LE: cnttzdm 1, 3, 2                       # encoding: [0x76,0x14,0x61,0x7c]
+            cnttzdm 1, 3, 2
+# CHECK-BE: xxgenpcvbm 0, 1, 2                    # encoding: [0xf0,0x02,0x0f,0x28]
+# CHECK-LE: xxgenpcvbm 0, 1, 2                    # encoding: [0x28,0x0f,0x02,0xf0]
+            xxgenpcvbm 0, 1, 2
+# CHECK-BE: xxgenpcvhm 0, 1, 2                    # encoding: [0xf0,0x02,0x0f,0x2a]
+# CHECK-LE: xxgenpcvhm 0, 1, 2                    # encoding: [0x2a,0x0f,0x02,0xf0]
+            xxgenpcvhm 0, 1, 2
+# CHECK-BE: xxgenpcvwm 0, 1, 2                    # encoding: [0xf0,0x02,0x0f,0x68]
+# CHECK-LE: xxgenpcvwm 0, 1, 2                    # encoding: [0x68,0x0f,0x02,0xf0]
+            xxgenpcvwm 0, 1, 2
+# CHECK-BE: xxgenpcvdm 0, 1, 2                    # encoding: [0xf0,0x02,0x0f,0x6a]
+# CHECK-LE: xxgenpcvdm 0, 1, 2                    # encoding: [0x6a,0x0f,0x02,0xf0]
+            xxgenpcvdm 0, 1, 2
+# CHECK-BE: vclrlb 1, 4, 3                        # encoding: [0x10,0x24,0x19,0x8d]
+# CHECK-LE: vclrlb 1, 4, 3                        # encoding: [0x8d,0x19,0x24,0x10]
+            vclrlb 1, 4, 3
+# CHECK-BE: vclrrb 1, 4, 3                        # encoding: [0x10,0x24,0x19,0xcd]
+# CHECK-LE: vclrrb 1, 4, 3                        # encoding: [0xcd,0x19,0x24,0x10]
+            vclrrb 1, 4, 3
+# Boundary conditions of 8RR_DForm_IMM32_XT6's immediates
+# CHECK-BE: xxspltiw 63, 4294901760               # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe7,0x00,0x00]
+# CHECK-LE: xxspltiw 63, 4294901760               # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0x00,0x00,0xe7,0x83]
+            xxspltiw 63, 4294901760
+# CHECK-BE: xxspltiw 63, 65535                    # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x83,0xe7,0xff,0xff]
+# CHECK-LE: xxspltiw 63, 65535                    # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe7,0x83]
+            xxspltiw 63, 65535
+# CHECK-BE: xxspltiw 63, 4294967295               # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe7,0xff,0xff]
+# CHECK-LE: xxspltiw 63, 4294967295               # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe7,0x83]
+            xxspltiw 63, 4294967295
+# CHECK-BE: xxspltiw 63, -1                       # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe7,0xff,0xff]
+# CHECK-LE: xxspltiw 63, -1                       # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe7,0x83]
+            xxspltiw 63, -1
+# CHECK-BE: xxspltidp 63, 4294967295              # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe5,0xff,0xff]
+# CHECK-LE: xxspltidp 63, 4294967295              # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe5,0x83]
+            xxspltidp 63, 4294967295
+# Boundary conditions of 8RR_DForm_IMM32_XT6_IX's immediates
+# CHECK-BE: xxsplti32dx 63, 1, 4294901760         # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe3,0x00,0x00]
+# CHECK-LE: xxsplti32dx 63, 1, 4294901760         # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0x00,0x00,0xe3,0x83]
+            xxsplti32dx 63, 1, 4294901760
+# CHECK-BE: xxsplti32dx 63, 1, 65535              # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x83,0xe3,0xff,0xff]
+# CHECK-LE: xxsplti32dx 63, 1, 65535              # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe3,0x83]
+            xxsplti32dx 63, 1, 65535
+# CHECK-BE: xxsplti32dx 63, 1, 4294967295         # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe3,0xff,0xff]
+# CHECK-LE: xxsplti32dx 63, 1, 4294967295         # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe3,0x83]
+            xxsplti32dx 63, 1, 4294967295
+# CHECK-BE: xxsplti32dx 63, 1, -1                 # encoding: [0x05,0x00,0xff,0xff,
+# CHECK-BE-SAME:                                               0x83,0xe3,0xff,0xff]
+# CHECK-LE: xxsplti32dx 63, 1, -1                 # encoding: [0xff,0xff,0x00,0x05,
+# CHECK-LE-SAME:                                               0xff,0xff,0xe3,0x83]
+            xxsplti32dx 63, 1, -1
+# CHECK-BE: xxpermx 6, 63, 21, 34, 2              # encoding: [0x05,0x00,0x00,0x02,
+# CHECK-BE-SAME:                                               0x88,0xdf,0xa8,0x8c]
+# CHECK-LE: xxpermx 6, 63, 21, 34, 2              # encoding: [0x02,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0x8c,0xa8,0xdf,0x88]
+            xxpermx 6, 63, 21, 34, 2
+# CHECK-BE: xxblendvb 6, 63, 21, 34               # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x84,0xdf,0xa8,0x8c]
+# CHECK-LE: xxblendvb 6, 63, 21, 34               # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0x8c,0xa8,0xdf,0x84]
+            xxblendvb 6, 63, 21, 34
+# CHECK-BE: xxblendvh 6, 63, 21, 34               # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x84,0xdf,0xa8,0x9c]
+# CHECK-LE: xxblendvh 6, 63, 21, 34               # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0x9c,0xa8,0xdf,0x84]
+            xxblendvh 6, 63, 21, 34
+# CHECK-BE: xxblendvw 6, 63, 21, 34               # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x84,0xdf,0xa8,0xac]
+# CHECK-LE: xxblendvw 6, 63, 21, 34               # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0xac,0xa8,0xdf,0x84]
+            xxblendvw 6, 63, 21, 34
+# CHECK-BE: xxblendvd 6, 63, 21, 34               # encoding: [0x05,0x00,0x00,0x00,
+# CHECK-BE-SAME:                                               0x84,0xdf,0xa8,0xbc]
+# CHECK-LE: xxblendvd 6, 63, 21, 34               # encoding: [0x00,0x00,0x00,0x05,
+# CHECK-LE-SAME:                                               0xbc,0xa8,0xdf,0x84]
+            xxblendvd 6, 63, 21, 34
+# CHECK-BE: vsldbi 2, 3, 4, 5                     # encoding: [0x10,0x43,0x21,0x56]
+# CHECK-LE: vsldbi 2, 3, 4, 5                     # encoding: [0x56,0x21,0x43,0x10]
+            vsldbi 2, 3, 4, 5
+# CHECK-BE: vsrdbi 2, 3, 4, 5                     # encoding: [0x10,0x43,0x23,0x56]
+# CHECK-LE: vsrdbi 2, 3, 4, 5                     # encoding: [0x56,0x23,0x43,0x10]
+            vsrdbi 2, 3, 4, 5
