@@ -6808,6 +6808,19 @@ unsigned LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
   if (VF == 1 && !isScalable())
     return 0;
 
+  // In some cases like predicated memory ops on scalable vector types of
+  // <vscale x 1 x <T>>, cost model may compute a lower cost for scalarization
+  // than masked gather/scatter and thus deciding to predicate and scalarize an
+  // instruction (CM_Scalarize instead of CM_GatherScatter). Note that the TTI
+  // reports scalarization overhead based on ElementCount.Min.
+  // Scalarization would not work for scalable vectors since we do not know
+  // vscale at compile time.
+  // FIXME: The solution until there is a scalable vector type aware cost model
+  // in place is to artificially inflate the scalarization overhead to force the
+  // Cost Model to decide against scalarization.
+  if (isScalable())
+    return 1048576;
+
   unsigned Cost = 0;
   Type *RetTy = ToVectorTy(I->getType(), VF, isScalable());
   if (!RetTy->isVoidTy() &&
