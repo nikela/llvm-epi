@@ -96,8 +96,8 @@ Instruction *InstCombiner::PromoteCastOfAllocation(BitCastInst &CI,
   if (isa<ScalableVectorType>(CastElTy))
     return nullptr;
 
-  unsigned AllocElTyAlign = DL.getABITypeAlignment(AllocElTy);
-  unsigned CastElTyAlign = DL.getABITypeAlignment(CastElTy);
+  Align AllocElTyAlign = DL.getABITypeAlign(AllocElTy);
+  Align CastElTyAlign = DL.getABITypeAlign(CastElTy);
   if (CastElTyAlign < AllocElTyAlign) return nullptr;
 
   // If the allocation has multiple uses, only promote it if we are strictly
