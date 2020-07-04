@@ -11731,6 +11731,12 @@ static SDValue lowerShuffleAsBlend(const SDLoc &DL, MVT VT, SDValue V1,
       return getVectorMaskingNode(V2, MaskNode, V1, Subtarget, DAG);
     }
 
+    // If we have VPTERNLOG, we can use that as a bit blend.
+    if (Subtarget.hasVLX())
+      if (SDValue BitBlend =
+              lowerShuffleAsBitBlend(DL, VT, V1, V2, Mask, DAG))
+        return BitBlend;
+
     // Scale the blend by the number of bytes per element.
     int Scale = VT.getScalarSizeInBits() / 8;
 
@@ -42934,6 +42940,10 @@ static SDValue combineLogicBlendIntoPBLENDV(SDNode *N, SelectionDAG &DAG,
 
   // PBLENDVB is only available on SSE 4.1.
   if (!Subtarget.hasSSE41())
+    return SDValue();
+
+  // If we have VPTERNLOG we should prefer that since PBLENDVB is multiple uops.
+  if (Subtarget.hasVLX())
     return SDValue();
 
   MVT BlendVT = VT.is256BitVector() ? MVT::v32i8 : MVT::v16i8;
