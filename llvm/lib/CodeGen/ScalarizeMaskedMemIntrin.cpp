@@ -396,6 +396,9 @@ static void scalarizeMaskedGather(CallInst *CI, bool &ModifiedDT) {
   Value *Mask = CI->getArgOperand(2);
   Value *Src0 = CI->getArgOperand(3);
 
+  assert(!isa<ScalableVectorType>(CI->getType()) &&
+         "Cannot scalarize masked gather for scalable vector types");
+
   VectorType *VecType = cast<VectorType>(CI->getType());
   Type *EltTy = VecType->getElementType();
 
@@ -521,6 +524,7 @@ static void scalarizeMaskedScatter(CallInst *CI, bool &ModifiedDT) {
   Value *Mask = CI->getArgOperand(3);
 
   assert(isa<VectorType>(Src->getType()) &&
+         !isa<ScalableVectorType>(Src->getType()) &&
          "Unexpected data type in masked scatter intrinsic");
   assert(
       isa<VectorType>(Ptrs->getType()) &&

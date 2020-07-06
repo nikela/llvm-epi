@@ -3246,6 +3246,7 @@ let Predicates = [HasStdExtV] in {
 defm "" : pat_vop_binary_common<add, "PseudoVADD", AllIntegerVectors>;
 defm "" : pat_vop_binary_common<sub, "PseudoVSUB", AllIntegerVectors>;
 defm "" : pat_vop_binary_common<mul, "PseudoVMUL", AllIntegerVectors>;
+defm "" : pat_vop_binary_common<shl, "PseudoVSLL", AllIntegerVectors>;
 
 defm "" : pat_vop_binary_common<and, "PseudoVAND", AllIntegerVectors>;
 

@@ -662,15 +662,20 @@ SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const
   assert(IndexVT == VT.changeVectorElementTypeToInteger() &&
          "Unexpected type for indices");
 
-  SDValue VSLLOperands[] = {
-      DAG.getTargetConstant(Intrinsic::epi_vsll, DL, MVT::i64),
-      Indices,
-      DAG.getTargetConstant(Log2_64(Op.getConstantOperandVal(5)), DL,
-                            MVT::i64), // log2(Scale).
-      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
-  };
-  SDValue Offsets =
-      DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, IndexVT, VSLLOperands);
+  SDValue Offsets;
+  if (Op.getConstantOperandVal(5) == 1) {
+    Offsets = Indices;
+  } else {
+    SDValue VSLLOperands[] = {
+        DAG.getTargetConstant(Intrinsic::epi_vsll, DL, MVT::i64), Indices,
+        DAG.getConstant(Log2_64(Op.getConstantOperandVal(5)), DL,
+                        MVT::i64),           // log2(Scale).
+        DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+    };
+    // FIXME: This may overflow. It might be OK for i64 since a GEP in i64 gets
+    // expanded to this.
+    Offsets = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, IndexVT, VSLLOperands);
+  }
 
   SDValue VLXEOperands[] = {
       Op.getOperand(0), // Chain.
@@ -1747,7 +1752,55 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), Operands);
     return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
-    break;
+  }
+  case Intrinsic::vp_gather: {
+    EVT VT = Op.getValueType();
+    EVT OffsetsVT = VT.changeVectorElementTypeToInteger();
+
+    SDValue BaseAddr;
+    SDValue Offsets;
+    SDValue Addresses = Op.getOperand(2);
+    unsigned Opcode = Addresses.getOpcode();
+    if (Opcode == ISD::SPLAT_VECTOR) {
+      BaseAddr = Addresses.getOperand(0);
+      Offsets =
+          DAG.getNode(ISD::SPLAT_VECTOR, DL, OffsetsVT,
+                      DAG.getConstant(0, DL, OffsetsVT.getVectorElementType()));
+    } else if (Opcode == ISD::ADD) {
+      // FIXME: This doesn't work with scalar types <64 bits since the offsets
+      // vector will be sign-extended to i64. Truncating isn't an option for
+      // i32 and i16, as it would make the `shl` (to convert element index to
+      // byte offset) unsafe.
+      assert(OffsetsVT.getScalarType().getSizeInBits() == 64 &&
+             "Unsupported scalar type for gather");
+
+      SDValue Op0 = Addresses.getOperand(0);
+      SDValue Op1 = Addresses.getOperand(1);
+      if (Op0.getOpcode() == ISD::SPLAT_VECTOR) {
+        BaseAddr = Op0.getOperand(0);
+        Offsets = Op1;
+      } else if (Op1.getOpcode() == ISD::SPLAT_VECTOR) {
+        BaseAddr = Op1.getOperand(0);
+        Offsets = Op0;
+      }
+    }
+
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
+
+    // FIXME Address alignment operand (3) ignored.
+    SDValue VLXEOperands[] = {
+        Op.getOperand(0), // Chain.
+        DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL, MVT::i64),
+        DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
+        BaseAddr,
+        Offsets,
+        Op.getOperand(4), // Mask.
+        VL
+    };
+    SDValue Result =
+        DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
+
+    return Result;
   }
   }
 
