@@ -3241,6 +3241,39 @@ multiclass pat_vop_ternary_common<SDNode vop,
   }
 }
 
+// FIXME: Add patterns that can select masked versions
+multiclass pat_vop_unary<SDNode vop,
+                         string instruction_name,
+                         ValueType result_type,
+                         ValueType op_type,
+                         ValueType mask_type,
+                         int sew,
+                         int vlmul,
+                         VReg result_reg_class,
+                         VReg op_reg_class>
+{
+  def : Pat<(result_type (vop
+                          (op_type op_reg_class:$rs2))),
+            (!cast<Instruction>(instruction_name#"_V_M"#vlmul)
+             (result_type (IMPLICIT_DEF)),
+             op_reg_class:$rs2,
+             (mask_type zero_reg),
+             VLMax,
+             sew)>;
+}
+
+multiclass pat_vop_unary_common<SDNode vop,
+                                string instruction_name,
+                                list<VectorTypeInfo> vtilist>
+{
+  foreach vti = vtilist in
+  {
+    defm : pat_vop_unary<vop, instruction_name,
+                         vti.Vector, vti.Vector, vti.Mask, vti.SEW,
+                         vti.RegClass.VLMul, vti.RegClass, vti.RegClass>;
+  }
+}
+
 let Predicates = [HasStdExtV] in {
 
 defm "" : pat_vop_binary_common<add, "PseudoVADD", AllIntegerVectors>;
@@ -3269,6 +3302,8 @@ defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoVFREDMIN">;
 
 defm "" : pat_vop_ternary_common<fma, "PseudoVFMADD", AllFloatVectors>;
+
+defm "" : pat_vop_unary_common<fsqrt, "PseudoVFSQRT", AllFloatVectors>;
 
 foreach fvti = AllFloatVectors in
 {
