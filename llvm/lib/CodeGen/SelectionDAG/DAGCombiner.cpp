@@ -638,6 +638,19 @@ namespace {
           : MemNode(N), OffsetFromBase(Offset) {}
     };
 
+    // Classify the origin of a stored value.
+    enum class StoreSource { Unknown, Constant, Extract, Load };
+    StoreSource getStoreSource(SDValue StoreVal) {
+      if (isa<ConstantSDNode>(StoreVal) || isa<ConstantFPSDNode>(StoreVal))
+        return StoreSource::Constant;
+      if (StoreVal.getOpcode() == ISD::EXTRACT_VECTOR_ELT ||
+          StoreVal.getOpcode() == ISD::EXTRACT_SUBVECTOR)
+        return StoreSource::Extract;
+      if (isa<LoadSDNode>(StoreVal))
+        return StoreSource::Load;
+      return StoreSource::Unknown;
+    }
+
     /// This is a helper function for visitMUL to check the profitability
     /// of folding (mul (add x, c1), c2) -> (add (mul x, c2), c1*c2).
     /// MulNode is the original multiply, AddNode is (add x, c1),
@@ -665,43 +678,39 @@ namespace {
     /// can be combined into narrow loads.
     bool BackwardsPropagateMask(SDNode *N);
 
-    /// Helper function for MergeConsecutiveStores which merges the
-    /// component store chains.
+    /// Helper function for mergeConsecutiveStores which merges the component
+    /// store chains.
     SDValue getMergeStoreChains(SmallVectorImpl<MemOpLink> &StoreNodes,
                                 unsigned NumStores);
 
-    /// This is a helper function for MergeConsecutiveStores. When the
-    /// source elements of the consecutive stores are all constants or
-    /// all extracted vector elements, try to merge them into one
-    /// larger store introducing bitcasts if necessary.  \return True
-    /// if a merged store was created.
-    bool MergeStoresOfConstantsOrVecElts(SmallVectorImpl<MemOpLink> &StoreNodes,
+    /// This is a helper function for mergeConsecutiveStores. When the source
+    /// elements of the consecutive stores are all constants or all extracted
+    /// vector elements, try to merge them into one larger store introducing
+    /// bitcasts if necessary.  \return True if a merged store was created.
+    bool mergeStoresOfConstantsOrVecElts(SmallVectorImpl<MemOpLink> &StoreNodes,
                                          EVT MemVT, unsigned NumStores,
                                          bool IsConstantSrc, bool UseVector,
                                          bool UseTrunc);
 
-    /// This is a helper function for MergeConsecutiveStores. Stores
-    /// that potentially may be merged with St are placed in
-    /// StoreNodes. RootNode is a chain predecessor to all store
-    /// candidates.
+    /// This is a helper function for mergeConsecutiveStores. Stores that
+    /// potentially may be merged with St are placed in StoreNodes. RootNode is
+    /// a chain predecessor to all store candidates.
     void getStoreMergeCandidates(StoreSDNode *St,
                                  SmallVectorImpl<MemOpLink> &StoreNodes,
                                  SDNode *&Root);
 
-    /// Helper function for MergeConsecutiveStores. Checks if
-    /// candidate stores have indirect dependency through their
-    /// operands. RootNode is the predecessor to all stores calculated
-    /// by getStoreMergeCandidates and is used to prune the dependency check.
-    /// \return True if safe to merge.
+    /// Helper function for mergeConsecutiveStores. Checks if candidate stores
+    /// have indirect dependency through their operands. RootNode is the
+    /// predecessor to all stores calculated by getStoreMergeCandidates and is
+    /// used to prune the dependency check. \return True if safe to merge.
     bool checkMergeStoreCandidatesForDependencies(
         SmallVectorImpl<MemOpLink> &StoreNodes, unsigned NumStores,
         SDNode *RootNode);
 
     /// Merge consecutive store operations into a wide store.
     /// This optimization uses wide integers or vectors when possible.
-    /// \return number of stores that were merged into a merged store (the
-    /// affected nodes are stored as a prefix in \p StoreNodes).
-    bool MergeConsecutiveStores(StoreSDNode *St);
+    /// \return true if stores were merged.
+    bool mergeConsecutiveStores(StoreSDNode *St);
 
     /// Try to transform a truncation where C is a constant:
     ///     (trunc (and X, C)) -> (and (trunc X), (trunc C))
@@ -15854,7 +15863,7 @@ SDValue DAGCombiner::getMergeStoreChains(SmallVectorImpl<MemOpLink> &StoreNodes,
   return DAG.getTokenFactor(StoreDL, Chains);
 }
 
-bool DAGCombiner::MergeStoresOfConstantsOrVecElts(
+bool DAGCombiner::mergeStoresOfConstantsOrVecElts(
     SmallVectorImpl<MemOpLink> &StoreNodes, EVT MemVT, unsigned NumStores,
     bool IsConstantSrc, bool UseVector, bool UseTrunc) {
   // Make sure we have something to merge.
@@ -16028,14 +16037,12 @@ void DAGCombiner::getStoreMergeCandidates(
   if (BasePtr.getBase().isUndef())
     return;
 
-  bool IsConstantSrc = isa<ConstantSDNode>(Val) || isa<ConstantFPSDNode>(Val);
-  bool IsExtractVecSrc = (Val.getOpcode() == ISD::EXTRACT_VECTOR_ELT ||
-                          Val.getOpcode() == ISD::EXTRACT_SUBVECTOR);
-  bool IsLoadSrc = isa<LoadSDNode>(Val);
+  StoreSource StoreSrc = getStoreSource(Val);
+  assert(StoreSrc != StoreSource::Unknown && "Expected known source for store");
   BaseIndexOffset LBasePtr;
   // Match on loadbaseptr if relevant.
   EVT LoadVT;
-  if (IsLoadSrc) {
+  if (StoreSrc == StoreSource::Load) {
     auto *Ld = cast<LoadSDNode>(Val);
     LBasePtr = BaseIndexOffset::match(Ld, DAG);
     LoadVT = Ld->getMemoryVT();
@@ -16063,7 +16070,7 @@ void DAGCombiner::getStoreMergeCandidates(
     // Allow merging constants of different types as integers.
     bool NoTypeMatch = (MemVT.isInteger()) ? !MemVT.bitsEq(Other->getMemoryVT())
                                            : Other->getMemoryVT() != MemVT;
-    if (IsLoadSrc) {
+    if (StoreSrc == StoreSource::Load) {
       if (NoTypeMatch)
         return false;
       // The Load's Base Ptr must also match
@@ -16087,13 +16094,13 @@ void DAGCombiner::getStoreMergeCandidates(
       } else
         return false;
     }
-    if (IsConstantSrc) {
+    if (StoreSrc == StoreSource::Constant) {
       if (NoTypeMatch)
         return false;
       if (!(isa<ConstantSDNode>(OtherBC) || isa<ConstantFPSDNode>(OtherBC)))
         return false;
     }
-    if (IsExtractVecSrc) {
+    if (StoreSrc == StoreSource::Extract) {
       // Do not merge truncated stores here.
       if (Other->isTruncatingStore())
         return false;
@@ -16234,7 +16241,7 @@ bool DAGCombiner::checkMergeStoreCandidatesForDependencies(
   return true;
 }
 
-bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
+bool DAGCombiner::mergeConsecutiveStores(StoreSDNode *St) {
   if (OptLevel == CodeGenOpt::None || !EnableStoreMerging)
     return false;
 
@@ -16245,36 +16252,19 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
   EVT MemVT = St->getMemoryVT();
   if (MemVT.isScalableVector())
     return false;
-
-  int64_t ElementSizeBytes = MemVT.getStoreSize();
-  unsigned NumMemElts = MemVT.isVector() ? MemVT.getVectorNumElements() : 1;
-
-  if (MemVT.getSizeInBits() * 2 > MaximumLegalStoreInBits)
+  if (!MemVT.isSimple() || MemVT.getSizeInBits() * 2 > MaximumLegalStoreInBits)
     return false;
 
-  bool NoVectors = DAG.getMachineFunction().getFunction().hasFnAttribute(
-      Attribute::NoImplicitFloat);
-
   // This function cannot currently deal with non-byte-sized memory sizes.
+  int64_t ElementSizeBytes = MemVT.getStoreSize();
   if (ElementSizeBytes * 8 != (int64_t)MemVT.getSizeInBits())
     return false;
 
-  if (!MemVT.isSimple())
-    return false;
-
-  // Perform an early exit check. Do not bother looking at stored values that
-  // are not constants, loads, or extracted vector elements.
+  // Do not bother looking at stored values that are not constants, loads, or
+  // extracted vector elements.
   SDValue StoredVal = peekThroughBitcasts(St->getValue());
-  bool IsLoadSrc = isa<LoadSDNode>(StoredVal);
-  bool IsConstantSrc = isa<ConstantSDNode>(StoredVal) ||
-                       isa<ConstantFPSDNode>(StoredVal);
-  bool IsExtractVecSrc = (StoredVal.getOpcode() == ISD::EXTRACT_VECTOR_ELT ||
-                          StoredVal.getOpcode() == ISD::EXTRACT_SUBVECTOR);
-  bool IsNonTemporalStore = St->isNonTemporal();
-  bool IsNonTemporalLoad =
-      IsLoadSrc && cast<LoadSDNode>(StoredVal)->isNonTemporal();
-
-  if (!IsConstantSrc && !IsLoadSrc && !IsExtractVecSrc)
+  StoreSource StoreSrc = getStoreSource(StoredVal);
+  if (StoreSrc == StoreSource::Unknown)
     return false;
 
   SmallVector<MemOpLink, 8> StoreNodes;
@@ -16292,6 +16282,16 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
     return LHS.OffsetFromBase < RHS.OffsetFromBase;
   });
 
+  unsigned NumMemElts = MemVT.isVector() ? MemVT.getVectorNumElements() : 1;
+  bool AllowVectors = !DAG.getMachineFunction().getFunction().hasFnAttribute(
+      Attribute::NoImplicitFloat);
+
+  bool IsNonTemporalStore = St->isNonTemporal();
+  bool IsNonTemporalLoad = StoreSrc == StoreSource::Load &&
+                           cast<LoadSDNode>(StoredVal)->isNonTemporal();
+  LLVMContext &Context = *DAG.getContext();
+  const DataLayout &DL = DAG.getDataLayout();
+
   // Store Merge attempts to merge the lowest stores. This generally
   // works out as if successful, as the remaining stores are checked
   // after the first collection of stores is merged. However, in the
@@ -16299,8 +16299,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
   // p[0], p[1], p[2], p[3]}, we would fail and miss the subsequent
   // mergeable cases. To prevent this, we prune such stores from the
   // front of StoreNodes here.
-
-  bool RV = false;
+  bool MadeChange = false;
   while (StoreNodes.size() > 1) {
     size_t StartIdx = 0;
     while ((StartIdx + 1 < StoreNodes.size()) &&
@@ -16310,7 +16309,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
 
     // Bail if we don't have enough candidates to merge.
     if (StartIdx + 1 >= StoreNodes.size())
-      return RV;
+      return MadeChange;
 
     if (StartIdx)
       StoreNodes.erase(StoreNodes.begin(), StoreNodes.begin() + StartIdx);
@@ -16334,12 +16333,8 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
       continue;
     }
 
-    // The node with the lowest store address.
-    LLVMContext &Context = *DAG.getContext();
-    const DataLayout &DL = DAG.getDataLayout();
-
-    // Store the constants into memory as one consecutive store.
-    if (IsConstantSrc) {
+    if (StoreSrc == StoreSource::Constant) {
+      // Store the constants into memory as one consecutive store.
       while (NumConsecutiveStores >= 2) {
         LSBaseSDNode *FirstInChain = StoreNodes[0].MemNode;
         unsigned FirstStoreAS = FirstInChain->getAddressSpace();
@@ -16400,7 +16395,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
           // noimplicitfloat attribute.
           if ((!NonZero ||
                TLI.storeOfVectorConstantIsCheap(MemVT, i + 1, FirstStoreAS)) &&
-              !NoVectors) {
+              AllowVectors) {
             // Find a legal type for the vector store.
             unsigned Elts = (i + 1) * NumMemElts;
             EVT Ty = EVT::getVectorVT(Context, MemVT.getScalarType(), Elts);
@@ -16413,7 +16408,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
           }
         }
 
-        bool UseVector = (LastLegalVectorType > LastLegalType) && !NoVectors;
+        bool UseVector = (LastLegalVectorType > LastLegalType) && AllowVectors;
         unsigned NumElem = (UseVector) ? LastLegalVectorType : LastLegalType;
 
         // Check if we found a legal integer type that creates a meaningful
@@ -16446,8 +16441,8 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
           continue;
         }
 
-        RV |= MergeStoresOfConstantsOrVecElts(StoreNodes, MemVT, NumElem, true,
-                                              UseVector, LastIntegerTrunc);
+        MadeChange |= mergeStoresOfConstantsOrVecElts(
+            StoreNodes, MemVT, NumElem, true, UseVector, LastIntegerTrunc);
 
         // Remove merged stores for next iteration.
         StoreNodes.erase(StoreNodes.begin(), StoreNodes.begin() + NumElem);
@@ -16458,7 +16453,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
 
     // When extracting multiple vector elements, try to store them
     // in one vector store rather than a sequence of scalar stores.
-    if (IsExtractVecSrc) {
+    if (StoreSrc == StoreSource::Extract) {
       // Loop on Consecutive Stores on success.
       while (NumConsecutiveStores >= 2) {
         LSBaseSDNode *FirstInChain = StoreNodes[0].MemNode;
@@ -16513,7 +16508,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
           continue;
         }
 
-        RV |= MergeStoresOfConstantsOrVecElts(
+        MadeChange |= mergeStoresOfConstantsOrVecElts(
             StoreNodes, MemVT, NumStoresToMerge, false, true, false);
 
         StoreNodes.erase(StoreNodes.begin(),
@@ -16526,6 +16521,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
     // Below we handle the case of multiple consecutive stores that
     // come from multiple consecutive loads. We merge them into a single
     // wide load and a single wide store.
+    assert(StoreSrc == StoreSource::Load && "Expected load source for store");
 
     // Look for load nodes which are used by the stored values.
     SmallVector<MemOpLink, 8> LoadNodes;
@@ -16659,7 +16655,7 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
       // Only use vector types if the vector type is larger than the integer
       // type. If they are the same, use integers.
       bool UseVectorTy =
-          LastLegalVectorType > LastLegalIntegerType && !NoVectors;
+          LastLegalVectorType > LastLegalIntegerType && AllowVectors;
       unsigned LastLegalType =
           std::max(LastLegalVectorType, LastLegalIntegerType);
 
@@ -16758,8 +16754,8 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
                                       SDValue(NewLoad.getNode(), 1));
       }
 
-      // Replace the all stores with the new store. Recursively remove
-      // corresponding value if its no longer used.
+      // Replace all stores with the new store. Recursively remove corresponding
+      // values if they are no longer used.
       for (unsigned i = 0; i < NumElem; ++i) {
         SDValue Val = StoreNodes[i].MemNode->getOperand(1);
         CombineTo(StoreNodes[i].MemNode, NewStore);
@@ -16767,13 +16763,13 @@ bool DAGCombiner::MergeConsecutiveStores(StoreSDNode *St) {
           recursivelyDeleteUnusedNodes(Val.getNode());
       }
 
-      RV = true;
+      MadeChange = true;
       StoreNodes.erase(StoreNodes.begin(), StoreNodes.begin() + NumElem);
       LoadNodes.erase(LoadNodes.begin(), LoadNodes.begin() + NumElem);
       NumConsecutiveStores -= NumElem;
     }
   }
-  return RV;
+  return MadeChange;
 }
 
 SDValue DAGCombiner::replaceStoreChain(StoreSDNode *ST, SDValue BetterChain) {
@@ -17043,7 +17039,7 @@ SDValue DAGCombiner::visitSTORE(SDNode *N) {
       // There can be multiple store sequences on the same chain.
       // Keep trying to merge store sequences until we are unable to do so
       // or until we merge the last store on the chain.
-      bool Changed = MergeConsecutiveStores(ST);
+      bool Changed = mergeConsecutiveStores(ST);
       if (!Changed) break;
       // Return N as merge only uses CombineTo and no worklist clean
       // up is necessary.
@@ -21898,10 +21894,10 @@ bool operator!=(const UnitT &, const UnitT &) { return false; }
 // redundant, as this function gets called when visiting every store
 // node, so why not let the work be done on each store as it's visited?
 //
-// I believe this is mainly important because MergeConsecutiveStores
+// I believe this is mainly important because mergeConsecutiveStores
 // is unable to deal with merging stores of different sizes, so unless
 // we improve the chains of all the potential candidates up-front
-// before running MergeConsecutiveStores, it might only see some of
+// before running mergeConsecutiveStores, it might only see some of
 // the nodes that will eventually be candidates, and then not be able
 // to go from a partially-merged state to the desired final
 // fully-merged state.
