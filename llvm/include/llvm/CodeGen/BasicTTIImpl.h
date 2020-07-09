@@ -916,7 +916,7 @@ public:
     if (CostKind != TTI::TCK_RecipThroughput)
       return Cost;
 
-    if (isa<ScalableVectorType>(Src) &&
+    if (Src->isVectorTy() &&
         Src->getPrimitiveSizeInBits() < LT.second.getSizeInBits()) {
       // This is a vector load that legalizes to a larger type than the vector
       // itself. Unless the corresponding extending load or truncating store is
