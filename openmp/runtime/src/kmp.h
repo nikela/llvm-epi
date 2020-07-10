@@ -2496,6 +2496,9 @@ typedef struct kmp_base_task_team {
   std::atomic<kmp_int32> tt_unfinished_threads; /* #threads still active */
 
   KMP_ALIGN_CACHE
+  std::atomic<kmp_int32> tt_unfinished_free_agents; /* #free agent threads still active */
+
+  KMP_ALIGN_CACHE
   volatile kmp_uint32
       tt_active; /* is the team still actively executing tasks */
 } kmp_base_task_team_t;
@@ -2695,6 +2698,17 @@ typedef struct KMP_ALIGN_CACHE kmp_base_info {
   std::atomic<bool> th_blocking;
 #endif
   kmp_cg_root_t *th_cg_roots; // list of cg_roots associated with this thread
+  bool is_free_agent; // This is a free_agent thread.
+  bool *is_free_agent_active; // Reference to the is_free_agent_thread_active array.
+                              // This is for convenience.
+  int free_agent_id;
+
+  // List of teams we can enter as a free agent thread
+  kmp_bootstrap_lock_t allowed_teams_lock;
+  int allowed_teams_capacity;
+  int allowed_teams_length;
+  kmp_task_team_t** allowed_teams;
+
 } kmp_base_info_t;
 
 typedef union KMP_ALIGN_CACHE kmp_info {
@@ -2885,6 +2899,11 @@ typedef struct kmp_base_root {
 #if KMP_AFFINITY_SUPPORTED
   int r_affinity_assigned;
 #endif // KMP_AFFINITY_SUPPORTED
+
+  /* Free agent threads */
+  unsigned int num_free_agent_threads; // Number of free agent threads.
+  kmp_info_t **free_agent_threads; // Threads that are free agent in this root.
+  bool *is_free_agent_thread_active; // States if a free agent thread is enabled or not.
 } kmp_base_root_t;
 
 typedef union KMP_ALIGN_CACHE kmp_root {
@@ -3791,6 +3810,10 @@ KMP_EXPORT void __kmpc_copyprivate(ident_t *loc, kmp_int32 global_tid,
                                    void (*cpy_func)(void *, void *),
                                    kmp_int32 didit);
 
+KMP_EXPORT void __kmp_enable_tasking_in_serial_mode(
+  ident_t *loc_ref, kmp_int32 gtid,
+  bool proxy, bool detachable, bool hidden_helper);
+
 extern void KMPC_SET_NUM_THREADS(int arg);
 extern void KMPC_SET_DYNAMIC(int flag);
 extern void KMPC_SET_NESTED(int flag);
@@ -4128,6 +4151,31 @@ typedef enum kmp_severity_t {
 } kmp_severity_t;
 extern void __kmpc_error(ident_t *loc, int severity, const char *message);
 
+// Free agent threads API.
+typedef enum kmp_free_agent_thread_start_t {
+  kmp_free_agent_inactive = 0,
+  kmp_free_agent_active = 1
+} kmp_free_agent_thread_start_t;
+extern kmp_free_agent_thread_start_t __kmp_free_agent_thread_start;
+extern unsigned int __kmp_free_agent_num_threads;
+extern kmp_proc_bind_t __kmp_free_agent_proc_bind;
+extern char *__kmp_free_agent_affinity_proclist;
+extern kmp_affin_mask_t *__kmp_free_agent_affinity_masks;
+extern unsigned __kmp_free_agent_affinity_num_masks;
+// Returns the number of free agent threads. They may not have been created yet.
+unsigned int __kmp_get_num_free_agent_threads();
+// Returns the free agent thread id
+int __kmp_get_free_agent_id();
+// Sets the active status of free agent threads. They may not have been
+// created yet.
+void __kmp_set_free_agent_thread_active_status(unsigned int thread_num,
+                                               bool active);
+
+void __kmp_add_allowed_task_team(kmp_info_t *free_agent,
+                                 kmp_task_team_t *task_team);
+void __kmp_remove_allowed_task_team(kmp_info_t *free_agent,
+                                    kmp_task_team_t *task_team);
+
 #ifdef __cplusplus
 }
 #endif
@@ -4362,5 +4410,67 @@ template <typename T1, typename T2>
 static inline void __kmp_type_convert(T1 src, T2 *dest) {
   *dest = kmp_convert<T1, T2>::to(src);
 }
+
+#if KMP_ARCH_X86 || KMP_ARCH_X86_64
+// Propagate any changes to the floating point control registers out to the team
+// We try to avoid unnecessary writes to the relevant cache line in the team
+// structure, so we don't make changes unless they are needed.
+inline static void propagateFPControl(kmp_team_t *team) {
+  if (__kmp_inherit_fp_control) {
+    kmp_int16 x87_fpu_control_word;
+    kmp_uint32 mxcsr;
+
+    // Get primary thread's values of FPU control flags (both X87 and vector)
+    __kmp_store_x87_fpu_control_word(&x87_fpu_control_word);
+    __kmp_store_mxcsr(&mxcsr);
+    mxcsr &= KMP_X86_MXCSR_MASK;
+
+    // There is no point looking at t_fp_control_saved here.
+    // If it is TRUE, we still have to update the values if they are different
+    // from those we now have. If it is FALSE we didn't save anything yet, but
+    // our objective is the same. We have to ensure that the values in the team
+    // are the same as those we have.
+    // So, this code achieves what we need whether or not t_fp_control_saved is
+    // true. By checking whether the value needs updating we avoid unnecessary
+    // writes that would put the cache-line into a written state, causing all
+    // threads in the team to have to read it again.
+    KMP_CHECK_UPDATE(team->t.t_x87_fpu_control_word, x87_fpu_control_word);
+    KMP_CHECK_UPDATE(team->t.t_mxcsr, mxcsr);
+    // Although we don't use this value, other code in the runtime wants to know
+    // whether it should restore them. So we must ensure it is correct.
+    KMP_CHECK_UPDATE(team->t.t_fp_control_saved, TRUE);
+  } else {
+    // Similarly here. Don't write to this cache-line in the team structure
+    // unless we have to.
+    KMP_CHECK_UPDATE(team->t.t_fp_control_saved, FALSE);
+  }
+}
+
+// Do the opposite, setting the hardware registers to the updated values from
+// the team.
+inline static void updateHWFPControl(kmp_team_t *team) {
+  if (__kmp_inherit_fp_control && team->t.t_fp_control_saved) {
+    // Only reset the fp control regs if they have been changed in the team.
+    // the parallel region that we are exiting.
+    kmp_int16 x87_fpu_control_word;
+    kmp_uint32 mxcsr;
+    __kmp_store_x87_fpu_control_word(&x87_fpu_control_word);
+    __kmp_store_mxcsr(&mxcsr);
+    mxcsr &= KMP_X86_MXCSR_MASK;
+
+    if (team->t.t_x87_fpu_control_word != x87_fpu_control_word) {
+      __kmp_clear_x87_fpu_status_word();
+      __kmp_load_x87_fpu_control_word(&team->t.t_x87_fpu_control_word);
+    }
+
+    if (team->t.t_mxcsr != mxcsr) {
+      __kmp_load_mxcsr(&team->t.t_mxcsr);
+    }
+  }
+}
+#else
+#define propagateFPControl(x) ((void)0)
+#define updateHWFPControl(x) ((void)0)
+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
 
 #endif /* KMP_H */

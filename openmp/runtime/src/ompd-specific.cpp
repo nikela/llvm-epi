@@ -92,10 +92,11 @@ void ompd_init() {
   int lib_path_length;
   if (strrchr(dl_info.dli_fname, '/')) {
     lib_path_length = strrchr(dl_info.dli_fname, '/') - dl_info.dli_fname;
+
     libname =
         (char *)malloc(lib_path_length + 12 /*for '/libompd.so' and '\0'*/);
-    strncpy(libname, dl_info.dli_fname, lib_path_length);
-    memcpy(libname + lib_path_length, "/libompd.so\0", 12);
+    strcpy(libname, dl_info.dli_fname);
+    memcpy(strrchr(libname, '/'), "/libompd.so\0", 12);
   }
 #endif
 

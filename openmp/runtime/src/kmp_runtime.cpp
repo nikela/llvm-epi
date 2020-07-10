@@ -1021,68 +1021,6 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
   KMP_MB();
 }
 
-#if KMP_ARCH_X86 || KMP_ARCH_X86_64
-// Propagate any changes to the floating point control registers out to the team
-// We try to avoid unnecessary writes to the relevant cache line in the team
-// structure, so we don't make changes unless they are needed.
-inline static void propagateFPControl(kmp_team_t *team) {
-  if (__kmp_inherit_fp_control) {
-    kmp_int16 x87_fpu_control_word;
-    kmp_uint32 mxcsr;
-
-    // Get primary thread's values of FPU control flags (both X87 and vector)
-    __kmp_store_x87_fpu_control_word(&x87_fpu_control_word);
-    __kmp_store_mxcsr(&mxcsr);
-    mxcsr &= KMP_X86_MXCSR_MASK;
-
-    // There is no point looking at t_fp_control_saved here.
-    // If it is TRUE, we still have to update the values if they are different
-    // from those we now have. If it is FALSE we didn't save anything yet, but
-    // our objective is the same. We have to ensure that the values in the team
-    // are the same as those we have.
-    // So, this code achieves what we need whether or not t_fp_control_saved is
-    // true. By checking whether the value needs updating we avoid unnecessary
-    // writes that would put the cache-line into a written state, causing all
-    // threads in the team to have to read it again.
-    KMP_CHECK_UPDATE(team->t.t_x87_fpu_control_word, x87_fpu_control_word);
-    KMP_CHECK_UPDATE(team->t.t_mxcsr, mxcsr);
-    // Although we don't use this value, other code in the runtime wants to know
-    // whether it should restore them. So we must ensure it is correct.
-    KMP_CHECK_UPDATE(team->t.t_fp_control_saved, TRUE);
-  } else {
-    // Similarly here. Don't write to this cache-line in the team structure
-    // unless we have to.
-    KMP_CHECK_UPDATE(team->t.t_fp_control_saved, FALSE);
-  }
-}
-
-// Do the opposite, setting the hardware registers to the updated values from
-// the team.
-inline static void updateHWFPControl(kmp_team_t *team) {
-  if (__kmp_inherit_fp_control && team->t.t_fp_control_saved) {
-    // Only reset the fp control regs if they have been changed in the team.
-    // the parallel region that we are exiting.
-    kmp_int16 x87_fpu_control_word;
-    kmp_uint32 mxcsr;
-    __kmp_store_x87_fpu_control_word(&x87_fpu_control_word);
-    __kmp_store_mxcsr(&mxcsr);
-    mxcsr &= KMP_X86_MXCSR_MASK;
-
-    if (team->t.t_x87_fpu_control_word != x87_fpu_control_word) {
-      __kmp_clear_x87_fpu_status_word();
-      __kmp_load_x87_fpu_control_word(&team->t.t_x87_fpu_control_word);
-    }
-
-    if (team->t.t_mxcsr != mxcsr) {
-      __kmp_load_mxcsr(&team->t.t_mxcsr);
-    }
-  }
-}
-#else
-#define propagateFPControl(x) ((void)0)
-#define updateHWFPControl(x) ((void)0)
-#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
-
 static void __kmp_alloc_argv_entries(int argc, kmp_team_t *team,
                                      int realloc); // forward declaration
 
@@ -1114,8 +1052,6 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     KMP_DEBUG_ASSERT(
         this_thr->th.th_task_team ==
         this_thr->th.th_team->t.t_task_team[this_thr->th.th_task_state]);
-    KMP_DEBUG_ASSERT(serial_team->t.t_task_team[this_thr->th.th_task_state] ==
-                     NULL);
     KA_TRACE(20, ("__kmpc_serialized_parallel: T#%d pushing task_team %p / "
                   "team %p, new task_team = NULL\n",
                   global_tid, this_thr->th.th_task_team, this_thr->th.th_team));
@@ -1207,6 +1143,13 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     serial_team->t.t_sched.sched = this_thr->th.th_team->t.t_sched.sched;
     this_thr->th.th_team = serial_team;
     serial_team->t.t_master_tid = this_thr->th.th_info.ds.ds_tid;
+
+    // reset task_team if exists
+    if (serial_team->t.t_task_team[0]) {
+      TCW_4(serial_team->t.t_task_team[0]->tt.tt_found_tasks, FALSE);
+      TCW_4(serial_team->t.t_task_team[0]->tt.tt_found_proxy_tasks, FALSE);
+      TCW_4(serial_team->t.t_task_team[0]->tt.tt_active, TRUE);
+    }
 
     KF_TRACE(10, ("__kmpc_serialized_parallel: T#%d curtask=%p\n", global_tid,
                   this_thr->th.th_current_task));
@@ -1342,6 +1285,12 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
         OMPT_GET_FRAME_ADDRESS(0);
   }
 #endif
+  // If this parallel has been serialized, make sure tasking is enabled for
+  // it when there are free agent threads.
+  if (__kmp_free_agent_num_threads != 0) {
+    __kmp_enable_tasking_in_serial_mode(loc, __kmp_entry_gtid(),
+        /*proxy=*/ true, /*detachable=*/ false, /*hidden_helper=*/ false);
+  }
 }
 
 /* most of the work for a fork */
@@ -2318,8 +2267,9 @@ void __kmp_join_call(ident_t *loc, int gtid
                   __kmp_gtid_from_thread(master_th), team,
                   team->t.t_task_team[master_th->th.th_task_state],
                   master_th->th.th_task_team));
-    KMP_DEBUG_ASSERT(master_th->th.th_task_team ==
-                     team->t.t_task_team[master_th->th.th_task_state]);
+    KMP_DEBUG_ASSERT((master_th->th.th_team == master_th->th.th_serial_team) ||
+                     (master_th->th.th_task_team ==
+                        team->t.t_task_team[master_th->th.th_task_state]));
   }
 #endif
 
@@ -3634,6 +3584,39 @@ static int __kmp_expand_threads(int nNeed) {
   return added;
 }
 
+// FIXME - Sort this.
+static kmp_info_t *__kmp_allocate_free_agent_thread(kmp_root_t *root, int new_tid);
+
+// Start free agent threads
+static void __kmp_create_free_agent_threads(void) {
+  int gtid = __kmp_entry_gtid();
+  kmp_root_t *root = __kmp_threads[gtid]->th.th_root;
+
+  for (unsigned int i = 0; i < root->r.num_free_agent_threads; i++) {
+    kmp_info_t *new_thr = root->r.free_agent_threads[i];
+    int new_gtid = new_thr->th.th_info.ds.ds_gtid;
+    /* actually fork it and create the new worker thread */
+    KF_TRACE(
+        10, ("__kmp_create_free_agent_threads: before __kmp_create_worker: %p\n", new_thr));
+    __kmp_create_worker(new_gtid, new_thr, __kmp_stksize);
+    KF_TRACE(10,
+            ("__kmp_create_free_agent_threads: after __kmp_create_worker: %p\n", new_thr));
+
+    KA_TRACE(20, ("__kmp_create_free_agent_threads: T#%d forked T#%d\n", __kmp_get_gtid(),
+                  new_gtid));
+  }
+}
+
+// Allocate free agent threads
+static void __kmp_allocate_free_agent_threads(kmp_root_t *root) {
+  root->r.num_free_agent_threads = __kmp_free_agent_num_threads;
+  root->r.free_agent_threads = (kmp_info_t**)__kmp_allocate(
+      sizeof(*root->r.free_agent_threads) * root->r.num_free_agent_threads);
+  for (unsigned int i = 0; i < root->r.num_free_agent_threads; i++) {
+    root->r.free_agent_threads[i] = __kmp_allocate_free_agent_thread(root, i);
+  }
+}
+
 /* Register the current thread as a root thread and obtain our gtid. We must
    have the __kmp_initz_lock held at this point. Argument TRUE only if are the
    thread that calls from __kmp_do_serial_initialize() */
@@ -3894,6 +3877,25 @@ int __kmp_register_root(int initial_thread) {
   if (ompd_state & OMPD_ENABLE_BP)
     ompd_bp_thread_begin();
 #endif
+
+  bool thread_starts_active = __kmp_free_agent_thread_start == kmp_free_agent_active;
+  root->r.is_free_agent_thread_active = (bool*)__kmp_allocate(
+      sizeof(*root->r.is_free_agent_thread_active) * __kmp_free_agent_num_threads);
+  // FIXME: Maybe there is a "calloc" like allocate?
+  for (unsigned int i = 0; i < __kmp_free_agent_num_threads; i++) {
+    root->r.is_free_agent_thread_active[i] = thread_starts_active;
+  }
+
+  __kmp_allocate_free_agent_threads(root);
+
+  // The root team is a serial team, so enable tasking for it
+  // if we have free agent threads.
+  if (__kmp_free_agent_num_threads != 0) {
+    __kmp_enable_tasking_in_serial_mode(/*loc=*/ NULL, gtid,
+        /*proxy=*/ true, /*detachable=*/ false, /*hidden_helper=*/ false);
+    // x86 needs this.
+    propagateFPControl(root_thread->th.th_team);
+  }
 
   KMP_MB();
   __kmp_release_bootstrap_lock(&__kmp_forkjoin_lock);
@@ -4266,14 +4268,15 @@ static void __kmp_initialize_info(kmp_info_t *this_thr, kmp_team_t *team,
    thread from the thread pool. if none is available, we will fork a new one
    assuming we are able to create a new one. this should be assured, as the
    caller should check on this first. */
-kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
-                                  int new_tid) {
+   static
+kmp_info_t *__kmp_allocate_thread_common(kmp_root_t *root, kmp_team_t *team,
+                                  int new_tid, bool is_free_agent) {
   kmp_team_t *serial_team;
   kmp_info_t *new_thr;
   int new_gtid;
 
   KA_TRACE(20, ("__kmp_allocate_thread: T#%d\n", __kmp_get_gtid()));
-  KMP_DEBUG_ASSERT(root && team);
+  KMP_DEBUG_ASSERT(root);
 #if !KMP_NESTED_HOT_TEAMS
   KMP_DEBUG_ASSERT(KMP_MASTER_GTID(__kmp_get_gtid()));
 #endif
@@ -4438,6 +4441,7 @@ kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
   }
 
   // add the reserve serialized team, initialized from the team's primary thread
+  if (team)
   {
     kmp_internal_control_t r_icvs = __kmp_get_x_global_icvs(team);
     KF_TRACE(10, ("__kmp_allocate_thread: before th_serial/serial_team\n"));
@@ -4448,7 +4452,6 @@ kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
 #endif
                                           proc_bind_default, &r_icvs,
                                           0 USE_NESTED_HOT_ARG(NULL));
-  }
   KMP_ASSERT(serial_team);
   serial_team->t.t_serialized = 0; // AC: the team created in reserve, not for
   // execution (it is unused for now).
@@ -4459,6 +4462,7 @@ kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
 
   /* setup the thread structures */
   __kmp_initialize_info(new_thr, team, new_tid, new_gtid);
+  }
 
 #if USE_FAST_MEMORY
   __kmp_initialize_fast_memory(new_thr);
@@ -4536,17 +4540,91 @@ kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
   }
 #endif /* KMP_ADJUST_BLOCKTIME */
 
-  /* actually fork it and create the new worker thread */
-  KF_TRACE(
-      10, ("__kmp_allocate_thread: before __kmp_create_worker: %p\n", new_thr));
-  __kmp_create_worker(new_gtid, new_thr, __kmp_stksize);
-  KF_TRACE(10,
-           ("__kmp_allocate_thread: after __kmp_create_worker: %p\n", new_thr));
+  if (!is_free_agent) {
+    new_thr->th.is_free_agent = false;
 
-  KA_TRACE(20, ("__kmp_allocate_thread: T#%d forked T#%d\n", __kmp_get_gtid(),
-                new_gtid));
+    /* actually fork it and create the new worker thread */
+    KF_TRACE(
+        10, ("__kmp_allocate_thread: before __kmp_create_worker: %p\n", new_thr));
+    __kmp_create_worker(new_gtid, new_thr, __kmp_stksize);
+    KF_TRACE(10,
+            ("__kmp_allocate_thread: after __kmp_create_worker: %p\n", new_thr));
+
+    KA_TRACE(20, ("__kmp_allocate_thread: T#%d forked T#%d\n", __kmp_get_gtid(),
+                  new_gtid));
+  } else {
+    /* Worker creation is posponed, we need to keep the gtid */
+    new_thr->th.th_info.ds.ds_gtid = new_gtid;
+  }
   KMP_MB();
   return new_thr;
+}
+
+kmp_info_t *__kmp_allocate_thread(kmp_root_t *root, kmp_team_t *team,
+                                  int new_tid) {
+  KMP_DEBUG_ASSERT(root && team);
+  return __kmp_allocate_thread_common(root, team, new_tid, false);
+}
+
+static
+kmp_info_t *__kmp_allocate_free_agent_thread(kmp_root_t *root, int new_tid) {
+  // FIXME - Copied from __kmp_init_implicit_task.
+  kmp_info_t *thread = __kmp_allocate_thread_common(root, NULL, new_tid, true);
+  // Free agent threads don't have a team so __kmp_allocate_thread_common won't
+  // give it a root.
+  thread->th.th_root = root;
+  thread->th.is_free_agent = true;
+  thread->th.is_free_agent_active = &root->r.is_free_agent_thread_active[new_tid];
+  thread->th.free_agent_id = new_tid;
+  kmp_taskdata_t *task =
+    (kmp_taskdata_t *)__kmp_allocate(sizeof(kmp_taskdata_t) * 1);
+  thread->th.th_current_task = task;
+
+  thread->th.allowed_teams_capacity = 2;
+  thread->th.allowed_teams_length = 0;
+  thread->th.allowed_teams = (kmp_task_team_t **)__kmp_allocate(
+      sizeof(kmp_task_team_t *) * thread->th.allowed_teams_capacity);
+  __kmp_init_bootstrap_lock(&thread->th.allowed_teams_lock);
+
+  KF_TRACE(
+      10,
+      ("__kmp_allocate_free_agent_thread(enter): T#:%d team=%p task=%p, reinit=%s\n",
+       new_tid, NULL, task, "FALSE"));
+
+  task->td_task_id = KMP_GEN_TASK_ID();
+  task->td_team = NULL;
+  //    task->td_parent   = NULL;  // fix for CQ230101 (broken parent task info
+  //    in debugger)
+  task->td_ident = NULL;
+  task->td_taskwait_ident = NULL;
+  task->td_taskwait_counter = 0;
+  task->td_taskwait_thread = 0;
+
+  task->td_flags.tiedness = TASK_TIED;
+  task->td_flags.tasktype = TASK_IMPLICIT;
+  task->td_flags.proxy = TASK_FULL;
+
+  // All implicit tasks are executed immediately, not deferred
+  task->td_flags.task_serial = 1;
+  task->td_flags.tasking_ser = (__kmp_tasking_mode == tskm_immediate_exec);
+  task->td_flags.team_serial = 0;
+
+  task->td_flags.started = 1;
+  task->td_flags.executing = 1;
+  task->td_flags.complete = 0;
+  task->td_flags.freed = 0;
+
+  task->td_depnode = NULL;
+  task->td_last_tied = task;
+
+  task->td_allow_completion_event.ed.task = nullptr;
+
+  KMP_DEBUG_ASSERT(task->td_incomplete_child_tasks == 0);
+  KMP_DEBUG_ASSERT(task->td_allocated_child_tasks == 0);
+
+  KF_TRACE(10, ("__kmp_allocate_free_agent_thread(exit): T#:%d team=%p task=%p\n", new_tid,
+        NULL, task));
+  return thread;
 }
 
 /* Reinitialize team for reuse.
@@ -6661,7 +6739,7 @@ void __kmp_register_library_startup(void) {
       __kmp_str_split(tail, '-', &flag_val_str, &tail);
       file_name = tail;
       if (tail != NULL) {
-        unsigned long *flag_addr = 0;
+        long *flag_addr = 0;
         unsigned long flag_val = 0;
         KMP_SSCANF(flag_addr_str, "%p", RCAST(void **, &flag_addr));
         KMP_SSCANF(flag_val_str, "%lx", &flag_val);
@@ -7155,6 +7233,17 @@ static void __kmp_do_middle_initialize(void) {
   // number of cores on the machine.
   __kmp_affinity_initialize();
 
+  // Run through the __kmp_threads array and set the affinity mask
+  // for each root thread that is currently registered with the RTL.
+  for (i = 0; i < __kmp_threads_capacity; i++) {
+    if (TCR_PTR(__kmp_threads[i]) != NULL) {
+      // Free agent threads may have been allocated at this point,
+      // and they are not root threads
+      if (!__kmp_threads[i]->th.is_free_agent) {
+        __kmp_affinity_set_init_mask(i, TRUE);
+      }
+    }
+  }
 #endif /* KMP_AFFINITY_SUPPORTED */
 
   KMP_ASSERT(__kmp_xproc > 0);
@@ -7229,7 +7318,11 @@ static void __kmp_do_middle_initialize(void) {
       __kmp_zero_bt = TRUE;
     }
   }
+
 #endif /* KMP_ADJUST_BLOCKTIME */
+
+  /* Create and start free agent threads here. */
+  __kmp_create_free_agent_threads();
 
   /* we have finished middle initialization */
   TCW_SYNC_4(__kmp_init_middle, TRUE);
@@ -8950,7 +9043,7 @@ void __kmp_hidden_helper_threads_initz_routine() {
 
   KMP_ATOMIC_ST_REL(&__kmp_hit_hidden_helper_threads_num, 0);
 
-  __kmpc_fork_call(nullptr, 0, __kmp_hidden_helper_wrapper_fn);
+  __kmpc_fork_call(nullptr, 0, microtask_t(__kmp_hidden_helper_wrapper_fn));
 
   // Set the initialization flag to FALSE
   TCW_SYNC_4(__kmp_init_hidden_helper, FALSE);
@@ -9042,4 +9135,36 @@ void __kmp_set_nesting_mode_threads() {
   }
   if (__kmp_nesting_mode == 1) // turn on nesting for this case only
     set__max_active_levels(thread, __kmp_nesting_mode_nlevels);
+}
+
+unsigned int __kmp_get_num_free_agent_threads() {
+  // Ensure the runtime has been initialized here.
+  (void)__kmp_entry_gtid();
+  return __kmp_free_agent_num_threads;
+}
+
+void __kmp_set_free_agent_thread_active_status(unsigned int thread_num,
+                                               bool active) {
+  // The runtime may initialize here if needed.
+  int gtid = __kmp_entry_gtid();
+  // FIXME: Should this be a hard error rather than silently ignore it?
+  if (thread_num >= __kmp_free_agent_num_threads)
+    return;
+  __kmp_threads[gtid]->th.th_root->r.is_free_agent_thread_active[thread_num] =
+      active;
+
+  if (active) {
+    kmp_info_t *free_agent_thread =
+      __kmp_threads[gtid]->th.th_root->r.free_agent_threads[thread_num];
+    __kmp_null_resume_wrapper(free_agent_thread);
+  }
+}
+
+int __kmp_get_free_agent_id() {
+  // The runtime may initialize here if needed.
+  int gtid = __kmp_entry_gtid();
+  if (__kmp_threads[gtid]->th.is_free_agent) {
+    return __kmp_threads[gtid]->th.free_agent_id;
+  } else
+    return -1;
 }

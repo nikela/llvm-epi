@@ -349,7 +349,8 @@ static kmp_int32 __kmp_push_task(kmp_int32 gtid, kmp_task_t *task) {
   }
 
   // The first check avoids building task_team thread data if serialized
-  if (UNLIKELY(taskdata->td_flags.task_serial)) {
+  if (taskdata->td_flags.task_serial &&
+      (!task_team || !task_team->tt.tt_found_proxy_tasks)) {
     KA_TRACE(20, ("__kmp_push_task: T#%d team serialized; returning "
                   "TASK_NOT_PUSHED for task %p\n",
                   gtid, taskdata));
@@ -442,6 +443,21 @@ static kmp_int32 __kmp_push_task(kmp_int32 gtid, kmp_task_t *task) {
   if (UNLIKELY(hidden_helper)) {
     // Wake hidden helper threads up if they're sleeping
     __kmp_hidden_helper_worker_thread_signal();
+  }
+
+  // Traverse all the free agent threads, if we find one that is sleeping, resume it
+  // so we give it a chance to execute the task.
+  for (unsigned int i = 0; i < __kmp_free_agent_num_threads; i++) {
+    kmp_info_t *free_agent_thread =
+      __kmp_threads[gtid]->th.th_root->r.free_agent_threads[i];
+    if (*free_agent_thread->th.is_free_agent_active) {
+      kmp_flag_64<> *flag = RCAST(kmp_flag_64<> *,
+          CCAST(void *, free_agent_thread->th.th_sleep_loc));
+      if (flag && flag->is_sleeping()) {
+        flag->resume(free_agent_thread->th.th_info.ds.ds_gtid);
+        break;
+      }
+    }
   }
 
   return TASK_SUCCESSFULLY_PUSHED;
@@ -940,7 +956,7 @@ static void __kmp_task_finish(kmp_int32 gtid, kmp_task_t *task,
     // serialized, or task is detachable and event has already been fulfilled
     if (!(taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser) ||
         taskdata->td_flags.detachable == TASK_DETACHABLE ||
-        taskdata->td_flags.hidden_helper) {
+        taskdata->td_flags.hidden_helper || __kmp_free_agent_num_threads != 0) {
       __kmp_release_deps(gtid, taskdata);
       // Predecrement simulated by "- 1" calculation
 #if KMP_DEBUG
@@ -1173,6 +1189,60 @@ static size_t __kmp_round_up_to_val(size_t size, size_t val) {
   return size;
 } // __kmp_round_up_to_va
 
+// __kmp_enable_tasking_in_serial_mode: This is used when a TASK_PROXY, TASK_DETACHABLE
+// or hidden_helper task is allocated to ensure we have tasking enabled.
+// Also is used by TAMPI to tell the runtime tasks (detachable) with events will be made
+//
+// loc_ref: source location information
+// gtid: global thread number.
+// proxy: allocated proxy task
+// detachable: allocated detachable task
+// hidden_helper: allocated hidden_helper task
+void __kmp_enable_tasking_in_serial_mode(
+    ident_t *loc_ref, kmp_int32 gtid,
+    bool proxy, bool detachable, bool hidden_helper) {
+  kmp_info_t *thread = __kmp_threads[gtid];
+  kmp_team_t *team = thread->th.th_team;
+  kmp_info_t *encountering_thread = thread;
+
+  /* are we running in a sequential parallel or tskm_immediate_exec... we need
+     tasking support enabled */
+  if ((encountering_thread->th.th_task_team) == NULL) {
+    /* This should only happen if the team is serialized
+        setup a task team and propagate it to the thread */
+    KMP_DEBUG_ASSERT(team->t.t_serialized);
+    KA_TRACE(30,
+             ("T#%d creating task team in __kmp_task_alloc for proxy task\n",
+              gtid));
+    __kmp_task_team_setup(
+        encountering_thread, team,
+        1); // 1 indicates setup the current team regardless of nthreads
+    encountering_thread->th.th_task_team =
+        team->t.t_task_team[encountering_thread->th.th_task_state];
+  }
+  kmp_task_team_t *task_team = encountering_thread->th.th_task_team;
+
+  /* tasking must be enabled now as the task might not be pushed */
+  if (!KMP_TASKING_ENABLED(task_team)) {
+    KA_TRACE(
+        30,
+        ("T#%d enabling tasking in __kmp_task_alloc for proxy task\n", gtid));
+    __kmp_enable_tasking(task_team, encountering_thread);
+    kmp_int32 tid = encountering_thread->th.th_info.ds.ds_tid;
+    kmp_thread_data_t *thread_data = &task_team->tt.tt_threads_data[tid];
+    // No lock needed since only owner can allocate
+    if (thread_data->td.td_deque == NULL) {
+      __kmp_alloc_task_deque(encountering_thread, thread_data);
+    }
+  }
+  if ((proxy || detachable) &&
+      task_team->tt.tt_found_proxy_tasks == FALSE)
+    TCW_4(task_team->tt.tt_found_proxy_tasks, TRUE);
+  if (hidden_helper &&
+      task_team->tt.tt_hidden_helper_task_encountered == FALSE)
+    TCW_4(task_team->tt.tt_hidden_helper_task_encountered, TRUE);
+}
+
 // __kmp_task_alloc: Allocate the taskdata and task data structures for a task
 //
 // loc_ref: source location information
@@ -1194,6 +1264,12 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   kmp_info_t *thread = __kmp_threads[gtid];
   kmp_team_t *team = thread->th.th_team;
   kmp_taskdata_t *parent_task = thread->th.th_current_task;
+  if (thread->th.is_free_agent) {
+    // GROSS HACK because free agent threads do not belong to a team but they
+    // can execute tasks that create new tasks that logically belong to the same
+    // team as the parent task.
+    team = parent_task->td_team;
+  }
   size_t shareds_offset;
 
   if (UNLIKELY(!TCR_4(__kmp_init_middle)))
@@ -1237,41 +1313,10 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
       flags->tiedness = TASK_UNTIED;
       flags->merged_if0 = 1;
     }
-    /* are we running in a sequential parallel or tskm_immediate_exec... we need
-       tasking support enabled */
-    if ((thread->th.th_task_team) == NULL) {
-      /* This should only happen if the team is serialized
-          setup a task team and propagate it to the thread */
-      KMP_DEBUG_ASSERT(team->t.t_serialized);
-      KA_TRACE(30,
-               ("T#%d creating task team in __kmp_task_alloc for proxy task\n",
-                gtid));
-      // 1 indicates setup the current team regardless of nthreads
-      __kmp_task_team_setup(thread, team, 1);
-      thread->th.th_task_team = team->t.t_task_team[thread->th.th_task_state];
-    }
-    kmp_task_team_t *task_team = thread->th.th_task_team;
-
-    /* tasking must be enabled now as the task might not be pushed */
-    if (!KMP_TASKING_ENABLED(task_team)) {
-      KA_TRACE(
-          30,
-          ("T#%d enabling tasking in __kmp_task_alloc for proxy task\n", gtid));
-      __kmp_enable_tasking(task_team, thread);
-      kmp_int32 tid = thread->th.th_info.ds.ds_tid;
-      kmp_thread_data_t *thread_data = &task_team->tt.tt_threads_data[tid];
-      // No lock needed since only owner can allocate
-      if (thread_data->td.td_deque == NULL) {
-        __kmp_alloc_task_deque(thread, thread_data);
-      }
-    }
-
-    if ((flags->proxy == TASK_PROXY || flags->detachable == TASK_DETACHABLE) &&
-        task_team->tt.tt_found_proxy_tasks == FALSE)
-      TCW_4(task_team->tt.tt_found_proxy_tasks, TRUE);
-    if (flags->hidden_helper &&
-        task_team->tt.tt_hidden_helper_task_encountered == FALSE)
-      TCW_4(task_team->tt.tt_hidden_helper_task_encountered, TRUE);
+    __kmp_enable_tasking_in_serial_mode(
+      loc_ref, gtid,
+      flags->proxy == TASK_PROXY, flags->detachable == TASK_DETACHABLE,
+      flags->hidden_helper);
   }
 
   // Calculate shared structure offset including padding after kmp_task_t struct
@@ -1362,6 +1407,8 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   taskdata->td_flags.complete = 0;
   taskdata->td_flags.freed = 0;
 
+  taskdata->td_flags.native = flags->native;
+
   KMP_ATOMIC_ST_RLX(&taskdata->td_incomplete_child_tasks, 0);
   // start at one because counts current task and children
   KMP_ATOMIC_ST_RLX(&taskdata->td_allocated_child_tasks, 1);
@@ -1382,7 +1429,8 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   // not serialized or if it is a proxy or detachable or hidden helper task
   if (flags->proxy == TASK_PROXY || flags->detachable == TASK_DETACHABLE ||
       flags->hidden_helper ||
-      !(taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser)) {
+      !(taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser) ||
+      __kmp_free_agent_num_threads != 0) {
     KMP_ATOMIC_INC(&parent_task->td_incomplete_child_tasks);
     if (parent_task->td_taskgroup)
       KMP_ATOMIC_INC(&parent_task->td_taskgroup->count);
@@ -1391,11 +1439,12 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
     if (taskdata->td_parent->td_flags.tasktype == TASK_EXPLICIT) {
       KMP_ATOMIC_INC(&taskdata->td_parent->td_allocated_child_tasks);
     }
-    if (flags->hidden_helper) {
-      taskdata->td_flags.task_serial = FALSE;
-      // Increment the number of hidden helper tasks to be executed
-      KMP_ATOMIC_INC(&__kmp_unexecuted_hidden_helper_tasks);
-    }
+  }
+
+  if (flags->hidden_helper) {
+    taskdata->td_flags.task_serial = FALSE;
+    // Increment the number of hidden helper tasks to be executed
+    KMP_ATOMIC_INC(&__kmp_unexecuted_hidden_helper_tasks);
   }
 
   KA_TRACE(20, ("__kmp_task_alloc(exit): T#%d created task %p parent=%p\n",
@@ -2826,18 +2875,20 @@ static kmp_task_t *__kmp_steal_task(kmp_info_t *victim_thr, kmp_int32 gtid,
     victim_td->td.td_deque_tail = target; // tail -= 1 (wrapped))
   }
   if (*thread_finished) {
-    // We need to un-mark this victim as a finished victim.  This must be done
-    // before releasing the lock, or else other threads (starting with the
-    // primary thread victim) might be prematurely released from the barrier!!!
+    if (!__kmp_threads[gtid]->th.is_free_agent) {
+      // We need to un-mark this victim as a finished victim.  This must be done
+      // before releasing the lock, or else other threads (starting with the
+      // primary thread victim) might be prematurely released from the
+      // barrier!!!
 #if KMP_DEBUG
-    kmp_int32 count =
+      kmp_int32 count =
 #endif
-        KMP_ATOMIC_INC(unfinished_threads);
-    KA_TRACE(
-        20,
-        ("__kmp_steal_task: T#%d inc unfinished_threads to %d: task_team=%p\n",
-         gtid, count + 1, task_team));
-    *thread_finished = FALSE;
+          KMP_ATOMIC_INC(unfinished_threads);
+      KA_TRACE(20, ("__kmp_steal_task: T#%d inc unfinished_threads to %d: "
+                    "task_team=%p\n",
+                    gtid, count + 1, task_team));
+      *thread_finished = FALSE;
+    }
   }
   TCW_4(victim_td->td.td_deque_ntasks, ntasks - 1);
 
@@ -2877,6 +2928,9 @@ static inline int __kmp_execute_tasks_template(
   kmp_int32 nthreads, victim_tid = -2, use_own_tasks = 1, new_victim = 0,
                       tid = thread->th.th_info.ds.ds_tid;
 
+  // Assuming free agent threads have tid 0
+  KMP_DEBUG_ASSERT(!thread->th.is_free_agent || tid == 0);
+
   KMP_DEBUG_ASSERT(__kmp_tasking_mode != tskm_immediate_exec);
   KMP_DEBUG_ASSERT(thread == __kmp_threads[gtid]);
 
@@ -2894,27 +2948,53 @@ static inline int __kmp_execute_tasks_template(
 
   nthreads = task_team->tt.tt_nproc;
   unfinished_threads = &(task_team->tt.tt_unfinished_threads);
-  KMP_DEBUG_ASSERT(nthreads > 1 || task_team->tt.tt_found_proxy_tasks ||
+
+  // FIXME: We are not sure about this why it happens. Looks like free agent
+  // threads can be here even if there are no proxy tasks and this is a serial
+  // team.
+  KMP_DEBUG_ASSERT(thread->th.is_free_agent || nthreads > 1 ||
+                   task_team->tt.tt_found_proxy_tasks ||
                    task_team->tt.tt_hidden_helper_task_encountered);
   KMP_DEBUG_ASSERT(*unfinished_threads >= 0);
+
+  // Used by free agent threads to perform a steal of
+  // every thread of the team one time before exit.
+  int free_agent_victim_tid = -1;
+
+  // Free agent threads use victim_tid as last_stolen directly
+  if (thread->th.is_free_agent) {
+    victim_tid = -1;
+    tid = thread->th.free_agent_id % nthreads;
+    free_agent_victim_tid = (tid + 1) % nthreads;
+  }
 
   while (1) { // Outer loop keeps trying to find tasks in case of single thread
     // getting tasks from target constructs
     while (1) { // Inner loop to find a task and execute it
       task = NULL;
       if (use_own_tasks) { // check on own queue first
-        task = __kmp_remove_my_task(thread, gtid, task_team, is_constrained);
+        if (thread->th.is_free_agent) {
+          // Free agent threads own queue is tid 0
+          task = __kmp_steal_task(threads_data[tid].td.td_thr, gtid, task_team,
+                                  unfinished_threads, thread_finished,
+                                  is_constrained);
+        } else {
+          task = __kmp_remove_my_task(thread, gtid, task_team, is_constrained);
+        }
       }
       if ((task == NULL) && (nthreads > 1)) { // Steal a task
         int asleep = 1;
         use_own_tasks = 0;
-        // Try to steal from the last place I stole from successfully.
+        // Try to steal from the last place I stole from successfully
+        // if this is not a free agent thread.
         if (victim_tid == -2) { // haven't stolen anything yet
           victim_tid = threads_data[tid].td.td_deque_last_stolen;
           if (victim_tid !=
               -1) // if we have a last stolen from victim, get the thread
             other_thread = threads_data[victim_tid].td.td_thr;
         }
+        // victim_tid is either -1 or a real tid.
+        KMP_DEBUG_ASSERT(victim_tid != -2);
         if (victim_tid != -1) { // found last victim
           asleep = 0;
         } else if (!new_victim) { // no recent steals and we haven't already
@@ -2923,9 +3003,13 @@ static inline int __kmp_execute_tasks_template(
             // Pick a random thread. Initial plan was to cycle through all the
             // threads, and only return if we tried to steal from every thread,
             // and failed.  Arch says that's not such a great idea.
-            victim_tid = __kmp_get_random(thread) % (nthreads - 1);
-            if (victim_tid >= tid) {
-              ++victim_tid; // Adjusts random distribution to exclude self
+            if (thread->th.is_free_agent) {
+              victim_tid = free_agent_victim_tid;
+            } else {
+              victim_tid = __kmp_get_random(thread) % (nthreads - 1);
+              if (victim_tid >= tid) {
+                ++victim_tid; // Adjusts random distribution to exclude self
+              }
             }
             // Found a potential victim
             other_thread = threads_data[victim_tid].td.td_thr;
@@ -2961,16 +3045,22 @@ static inline int __kmp_execute_tasks_template(
                                   is_constrained);
         }
         if (task != NULL) { // set last stolen to victim
-          if (threads_data[tid].td.td_deque_last_stolen != victim_tid) {
-            threads_data[tid].td.td_deque_last_stolen = victim_tid;
-            // The pre-refactored code did not try more than 1 successful new
-            // vicitm, unless the last one generated more local tasks;
-            // new_victim keeps track of this
-            new_victim = 1;
+          if (!thread->th.is_free_agent) {
+            if (threads_data[tid].td.td_deque_last_stolen != victim_tid)
+              threads_data[tid].td.td_deque_last_stolen = victim_tid;
           }
+          // The pre-refactored code did not try more than 1 successful new
+          // victim, unless the last one generated more local tasks;
+          // new_victim keeps track of this
+          new_victim = 1;
         } else { // No tasks found; unset last_stolen
-          KMP_CHECK_UPDATE(threads_data[tid].td.td_deque_last_stolen, -1);
-          victim_tid = -2; // no successful victim found
+          if (thread->th.is_free_agent) {
+            // free agent threads use victim_tid as last_stolen directly
+            victim_tid = -1;
+          } else {
+            KMP_CHECK_UPDATE(threads_data[tid].td.td_deque_last_stolen, -1);
+            victim_tid = -2; // no successful victim found
+          }
         }
       }
 
@@ -2987,6 +3077,8 @@ static inline int __kmp_execute_tasks_template(
         __kmp_itt_task_starting(itt_sync_obj);
       }
 #endif /* USE_ITT_BUILD && USE_ITT_NOTIFY */
+        KA_TRACE(20, ("__kmp_execute_tasks_template: T#%d team %p\n",
+                      gtid, thread->th.th_team));
       __kmp_invoke_task(gtid, task, current_task);
 #if USE_ITT_BUILD
       if (itt_sync_obj != NULL)
@@ -3004,6 +3096,10 @@ static inline int __kmp_execute_tasks_template(
              gtid));
         return TRUE;
       }
+      if (thread->th.is_free_agent && !*thread->th.is_free_agent_active) {
+        return TRUE;
+      }
+
       if (thread->th.th_task_team == NULL) {
         break;
       }
@@ -3019,23 +3115,40 @@ static inline int __kmp_execute_tasks_template(
       }
     }
 
+    if (!final_spin && __kmp_free_agent_num_threads != 0 &&
+        KMP_ATOMIC_LD_ACQ(&current_task->td_incomplete_child_tasks) == 0) {
+      // So this is like a taskwait but we could not find a task (perhaps a
+      // free agent got a chance to execute it first)
+      KA_TRACE(15, ("__kmp_execute_tasks_template: T#%d spin condition "
+                    "satisfied without having executed any task\n",
+                    gtid));
+      return TRUE;
+    }
+
     // The task source has been exhausted. If in final spin loop of barrier,
     // check if termination condition is satisfied. The work queue may be empty
     // but there might be proxy tasks still executing.
     if (final_spin &&
         KMP_ATOMIC_LD_ACQ(&current_task->td_incomplete_child_tasks) == 0) {
+      if (thread->th.is_free_agent && !*thread_finished) {
+        // Free agent threads do not decrement
+        *thread_finished = TRUE;
       // First, decrement the #unfinished threads, if that has not already been
       // done.  This decrement might be to the spin location, and result in the
       // termination condition being satisfied.
-      if (!*thread_finished) {
+      } else if (!thread->th.is_free_agent && !*thread_finished) {
+        // At least one free agent thread is in my task_team. It can potencially
+        // create tasks so I stay here.
+        if (KMP_ATOMIC_LD_ACQ(&task_team->tt.tt_unfinished_free_agents) == 0) {
 #if KMP_DEBUG
         kmp_int32 count = -1 +
 #endif
-            KMP_ATOMIC_DEC(unfinished_threads);
-        KA_TRACE(20, ("__kmp_execute_tasks_template: T#%d dec "
-                      "unfinished_threads to %d task_team=%p\n",
-                      gtid, count, task_team));
-        *thread_finished = TRUE;
+          KMP_ATOMIC_DEC(unfinished_threads);
+          KA_TRACE(20, ("__kmp_execute_tasks_template: T#%d dec "
+                        "unfinished_threads to %d task_team=%p\n",
+                        gtid, count, task_team));
+          *thread_finished = TRUE;
+        }
       }
 
       // It is now unsafe to reference thread->th.th_team !!!
@@ -3063,9 +3176,14 @@ static inline int __kmp_execute_tasks_template(
     // We could be getting tasks from target constructs; if this is the only
     // thread, keep trying to execute tasks from own queue
     if (nthreads == 1 &&
-        KMP_ATOMIC_LD_ACQ(&current_task->td_incomplete_child_tasks))
+        !thread->th.is_free_agent &&
+        KMP_ATOMIC_LD_ACQ(&current_task->td_incomplete_child_tasks)) {
       use_own_tasks = 1;
-    else {
+    } else if (thread->th.is_free_agent) {
+      free_agent_victim_tid = (free_agent_victim_tid + 1) % nthreads;
+      if (free_agent_victim_tid == tid)
+        return FALSE;
+    } else {
       KA_TRACE(15,
                ("__kmp_execute_tasks_template: T#%d can't find work\n", gtid));
       return FALSE;
@@ -3467,6 +3585,7 @@ static kmp_task_team_t *__kmp_allocate_task_team(kmp_info_t *thread,
   task_team->tt.tt_nproc = nthreads = team->t.t_nproc;
 
   KMP_ATOMIC_ST_REL(&task_team->tt.tt_unfinished_threads, nthreads);
+  KMP_ATOMIC_ST_REL(&task_team->tt.tt_unfinished_free_agents, 0);
   TCW_4(task_team->tt.tt_hidden_helper_task_encountered, FALSE);
   TCW_4(task_team->tt.tt_active, TRUE);
 
@@ -3601,6 +3720,8 @@ void __kmp_task_team_setup(kmp_info_t *this_thr, kmp_team_t *team, int always) {
                   this_thr->th.th_task_state));
   }
 
+  kmp_task_team_t* other_task_team = NULL;
+
   // After threads exit the release, they will call sync, and then point to this
   // other task_team; make sure it is allocated and properly initialized. As
   // threads spin in the barrier release phase, they will continue to use the
@@ -3618,6 +3739,7 @@ void __kmp_task_team_setup(kmp_info_t *this_thr, kmp_team_t *team, int always) {
                     "task_team %p for team %d at parity=%d\n",
                     __kmp_gtid_from_thread(this_thr),
                     team->t.t_task_team[other_team], team->t.t_id, other_team));
+      other_task_team = team->t.t_task_team[other_team];
     } else { // Leave the old task team struct in place for the upcoming region;
       // adjust as needed
       kmp_task_team_t *task_team = team->t.t_task_team[other_team];
@@ -3657,6 +3779,18 @@ void __kmp_task_team_setup(kmp_info_t *this_thr, kmp_team_t *team, int always) {
         }
       }
     }
+  }
+
+  // Allow free agent threads to use this task team
+  kmp_task_team_t* task_team = team->t.t_task_team[this_thr->th.th_task_state];
+
+  for (unsigned int i = 0; i < __kmp_free_agent_num_threads; i++) {
+    kmp_info_t *free_agent = this_thr->th.th_root->r.free_agent_threads[i];
+    __kmp_acquire_bootstrap_lock(&free_agent->th.allowed_teams_lock);
+    __kmp_add_allowed_task_team(free_agent, task_team);
+    if (other_task_team)
+      __kmp_add_allowed_task_team(free_agent, other_task_team);
+    __kmp_release_bootstrap_lock(&free_agent->th.allowed_teams_lock);
   }
 }
 
@@ -3709,6 +3843,25 @@ void __kmp_task_team_wait(
                 &task_team->tt.tt_unfinished_threads),
           0U);
       flag.wait(this_thr, TRUE USE_ITT_BUILD_ARG(itt_sync_obj));
+
+
+      // This team is not allowed anymore for free agent threads
+      for (unsigned int i = 0; i < __kmp_free_agent_num_threads; i++) {
+        kmp_info_t *free_agent = this_thr->th.th_root->r.free_agent_threads[i];
+        __kmp_acquire_bootstrap_lock(&free_agent->th.allowed_teams_lock);
+        __kmp_remove_allowed_task_team(free_agent, task_team);
+        __kmp_release_bootstrap_lock(&free_agent->th.allowed_teams_lock);
+      }
+      if (__kmp_free_agent_num_threads > 0) {
+        std::atomic<kmp_int32> *unfinished_threads;
+        unfinished_threads = &(task_team->tt.tt_unfinished_threads);
+        kmp_int32 count =  KMP_ATOMIC_INC(unfinished_threads);
+        KMP_ASSERT(count == 0);
+
+      }
+      kmp_flag_32<false, false> spin_flag(RCAST(
+          std::atomic<kmp_uint32> *, &task_team->tt.tt_unfinished_free_agents), 0U);
+      spin_flag.wait(this_thr, TRUE USE_ITT_BUILD_ARG(itt_sync_obj));
     }
     // Deactivate the old task team, so that the worker threads will stop
     // referencing it while spinning.
@@ -3726,6 +3879,8 @@ void __kmp_task_team_wait(
 
     TCW_PTR(this_thr->th.th_task_team, NULL);
   }
+
+  // TODO: USE KMP_YIELD??
 }
 
 // __kmp_tasking_barrier:
@@ -4106,7 +4261,8 @@ kmp_task_t *__kmp_task_dup_alloc(kmp_info_t *thread, kmp_task_t *task_src) {
 
   // Only need to keep track of child task counts if team parallel and tasking
   // not serialized
-  if (!(taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser)) {
+  if (!(taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser)
+      || __kmp_free_agent_num_threads != 0) {
     KMP_ATOMIC_INC(&parent_task->td_incomplete_child_tasks);
     if (parent_task->td_taskgroup)
       KMP_ATOMIC_INC(&parent_task->td_taskgroup->count);
@@ -4782,4 +4938,39 @@ void __kmpc_taskloop_5(ident_t *loc, int gtid, kmp_task_t *task, int if_val,
   __kmp_taskloop(loc, gtid, task, if_val, lb, ub, st, nogroup, sched, grainsize,
                  modifier, task_dup);
   KA_TRACE(20, ("__kmpc_taskloop_5(exit): T#%d\n", gtid));
+}
+
+// These two functions assume the mutex of allowed_teams has been acquire.
+void __kmp_add_allowed_task_team(kmp_info_t *free_agent,
+                                 kmp_task_team_t *task_team) {
+  // Realloc if needed.
+  if (free_agent->th.allowed_teams_length ==
+      free_agent->th.allowed_teams_capacity) {
+    free_agent->th.allowed_teams_capacity *= 2;
+    kmp_task_team_t **new_buffer = (kmp_task_team_t **)__kmp_allocate(
+        sizeof(kmp_task_team_t *) * free_agent->th.allowed_teams_capacity);
+    KMP_MEMCPY_S(
+        new_buffer,
+        sizeof(kmp_task_team_t *) * free_agent->th.allowed_teams_capacity,
+        free_agent->th.allowed_teams,
+        sizeof(kmp_task_team_t *) * free_agent->th.allowed_teams_length);
+    free_agent->th.allowed_teams = new_buffer;
+    KMP_ASSERT(free_agent->th.allowed_teams_length + 1 <
+               free_agent->th.allowed_teams_capacity);
+  }
+
+  free_agent->th.allowed_teams[free_agent->th.allowed_teams_length] = task_team;
+  free_agent->th.allowed_teams_length++;
+}
+
+void __kmp_remove_allowed_task_team(kmp_info_t *free_agent,
+                                    kmp_task_team_t *task_team) {
+  for (int i = 0; i < free_agent->th.allowed_teams_length; i++) {
+    if (free_agent->th.allowed_teams[i] == task_team) {
+      free_agent->th.allowed_teams[i]
+        = reinterpret_cast<kmp_task_team_t*>(
+            reinterpret_cast<kmp_uintptr_t>(task_team) | 1);
+      return;
+    }
+  }
 }

@@ -87,6 +87,11 @@ VERSION {
         __kmp_itt_init_ittlib;
 #endif /* USE_ITT_BUILD */
 
+    # Free agent threads API
+    __kmp_get_num_free_agent_threads;
+    __kmp_set_free_agent_thread_active_status;
+    __kmp_get_free_agent_id;
+
     local: # Non-exported symbols.
 
         *;         # All other symbols are not exported.
