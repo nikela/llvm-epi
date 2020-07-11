@@ -58,6 +58,9 @@ private:
   bool expandAtomicCmpXchg(MachineBasicBlock &MBB,
                            MachineBasicBlock::iterator MBBI, bool IsMasked,
                            int Width, MachineBasicBlock::iterator &NextMBBI);
+
+  // TODO: Remove.
+  bool expandVSETVL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
 };
 
 char RISCVExpandAtomicPseudo::ID = 0;
@@ -81,6 +84,34 @@ bool RISCVExpandAtomicPseudo::expandMBB(MachineBasicBlock &MBB) {
   }
 
   return Modified;
+}
+
+// TODO: Remove.
+bool RISCVExpandAtomicPseudo::expandVSETVL(MachineBasicBlock &MBB,
+                                     MachineBasicBlock::iterator MBBI) {
+  MachineInstr &MI = *MBBI;
+  assert(MI.getNumOperands() == 5 && "Unexpected instruction format");
+
+  MachineFunction &MF = *MBB.getParent();
+  DebugLoc DL = MI.getDebugLoc();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+
+  const MCInstrDesc *MCInstr;
+  if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
+    MCInstr = &TII.get(RISCV::VSETVLI);
+  } else if (MI.getOpcode() == RISCV::PseudoVSETVL) {
+    MCInstr = &TII.get(RISCV::VSETVL);
+  } else {
+    llvm_unreachable("Unexpected pseudo instruction");
+  }
+  assert(MCInstr->getNumOperands() == 3 && "Unexpected instruction format");
+
+  BuildMI(MBB, MI, DL, *MCInstr, /* DstReg */ MI.getOperand(0).getReg())
+      .add(MI.getOperand(1))  // VL
+      .add(MI.getOperand(2)); // VType
+
+  MI.eraseFromParent(); // The pseudo instruction is gone now.
+  return true;
 }
 
 bool RISCVExpandAtomicPseudo::expandMI(MachineBasicBlock &MBB,
@@ -121,6 +152,14 @@ bool RISCVExpandAtomicPseudo::expandMI(MachineBasicBlock &MBB,
     return expandAtomicCmpXchg(MBB, MBBI, false, 64, NextMBBI);
   case RISCV::PseudoMaskedCmpXchg32:
     return expandAtomicCmpXchg(MBB, MBBI, true, 32, NextMBBI);
+
+  // FIXME: This should not be here but we need to expand VSETVL later than in
+  // RISCVExpandPseudoInsts.
+  // TODO: Put those in a specific pass other than the one for expanding
+  // atomics.
+  case RISCV::PseudoVSETVL:
+  case RISCV::PseudoVSETVLI:
+    return expandVSETVL(MBB, MBBI);
   }
 
   return false;

@@ -4,7 +4,7 @@
 ; RUN: llc -mtriple riscv32 -relocation-model=pic -verify-machineinstrs < %s | FileCheck %s --check-prefix=RV32-PIC
 ; RUN: llc -mtriple riscv64 -relocation-model=pic -verify-machineinstrs < %s | FileCheck %s --check-prefix=RV64-PIC
 
-define dso_local signext i32 @foo(i32 signext %w) nounwind {
+define signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-NOPIC-LABEL: foo:
 ; RV32-NOPIC:       # %bb.0: # %entry
 ; RV32-NOPIC-NEXT:    addi sp, sp, -16
@@ -55,17 +55,16 @@ define dso_local signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-PIC:       # %bb.0: # %entry
 ; RV32-PIC-NEXT:    addi sp, sp, -16
 ; RV32-PIC-NEXT:    sw ra, 12(sp)
-; RV32-PIC-NEXT:  .LBB0_5: # %entry
-; RV32-PIC-NEXT:    # Label of block must be emitted
-; RV32-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_5)
+; RV32-PIC-NEXT:  .Ltmp0:
+; RV32-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp1)
+; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.Ltmp0)
 ; RV32-PIC-NEXT:    addi a2, zero, 101
 ; RV32-PIC-NEXT:    sw a1, 8(sp)
 ; RV32-PIC-NEXT:    blt a0, a2, .LBB0_3
 ; RV32-PIC-NEXT:  # %bb.1: # %if.then
 ; RV32-PIC-NEXT:    lw a0, 8(sp)
 ; RV32-PIC-NEXT:    jr a0
-; RV32-PIC-NEXT:  .Ltmp0: # Block address taken
+; RV32-PIC-NEXT:  .Ltmp1: # Block address taken
 ; RV32-PIC-NEXT:  .LBB0_2: # %return
 ; RV32-PIC-NEXT:    addi a0, zero, 4
 ; RV32-PIC-NEXT:    j .LBB0_4
@@ -80,17 +79,16 @@ define dso_local signext i32 @foo(i32 signext %w) nounwind {
 ; RV64-PIC:       # %bb.0: # %entry
 ; RV64-PIC-NEXT:    addi sp, sp, -16
 ; RV64-PIC-NEXT:    sd ra, 8(sp)
-; RV64-PIC-NEXT:  .LBB0_5: # %entry
-; RV64-PIC-NEXT:    # Label of block must be emitted
-; RV64-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_5)
+; RV64-PIC-NEXT:  .Ltmp0:
+; RV64-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp1)
+; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.Ltmp0)
 ; RV64-PIC-NEXT:    addi a2, zero, 101
 ; RV64-PIC-NEXT:    sd a1, 0(sp)
 ; RV64-PIC-NEXT:    blt a0, a2, .LBB0_3
 ; RV64-PIC-NEXT:  # %bb.1: # %if.then
 ; RV64-PIC-NEXT:    ld a0, 0(sp)
 ; RV64-PIC-NEXT:    jr a0
-; RV64-PIC-NEXT:  .Ltmp0: # Block address taken
+; RV64-PIC-NEXT:  .Ltmp1: # Block address taken
 ; RV64-PIC-NEXT:  .LBB0_2: # %return
 ; RV64-PIC-NEXT:    addi a0, zero, 4
 ; RV64-PIC-NEXT:    j .LBB0_4
