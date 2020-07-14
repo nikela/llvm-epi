@@ -29,7 +29,8 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    vsetvli a2, a1, e64,m1
 ; CHECK-O0-NEXT:    srli a2, a2, 1
 ; CHECK-O0-NEXT:    #APP
-; CHECK-O0-NEXT:    rdvtype t0; vsetvl x0, a2, t0
+; CHECK-O0-NEXT:    rdvtype t0
+; CHECK-O0-NEXT:    vsetvl zero, a2, t0
 ; CHECK-O0-NEXT:    #NO_APP
 ; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1
@@ -46,7 +47,8 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a2, a1, e64,m1
 ; CHECK-O2-NEXT:    srli a2, a2, 1
 ; CHECK-O2-NEXT:    #APP
-; CHECK-O2-NEXT:    rdvtype t0; vsetvl x0, a2, t0
+; CHECK-O2-NEXT:    rdvtype t0
+; CHECK-O2-NEXT:    vsetvl zero, a2, t0
 ; CHECK-O2-NEXT:    #NO_APP
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1
 ; CHECK-O2-NEXT:    vle.v v1, (a0)

@@ -9,9 +9,10 @@
 define void @foo() nounwind {
 ; RV32-LABEL: foo:
 ; RV32:       # %bb.0: # %entry
-; RV32-NEXT:  .Ltmp0:
+; RV32-NEXT:  .LBB0_1: # %entry
+; RV32-NEXT:    # Label of block must be emitted
 ; RV32-NEXT:    auipc a0, %tls_ie_pcrel_hi(y)
-; RV32-NEXT:    lw a0, %pcrel_lo(.Ltmp0)(a0)
+; RV32-NEXT:    lw a0, %pcrel_lo(.LBB0_1)(a0)
 ; RV32-NEXT:    add a0, a0, tp
 ; RV32-NEXT:    lw a1, 0(a0)
 ; RV32-NEXT:    addi a1, a1, 1
@@ -20,9 +21,10 @@ define void @foo() nounwind {
 ;
 ; RV64-LABEL: foo:
 ; RV64:       # %bb.0: # %entry
-; RV64-NEXT:  .Ltmp0:
+; RV64-NEXT:  .LBB0_1: # %entry
+; RV64-NEXT:    # Label of block must be emitted
 ; RV64-NEXT:    auipc a0, %tls_ie_pcrel_hi(y)
-; RV64-NEXT:    ld a0, %pcrel_lo(.Ltmp0)(a0)
+; RV64-NEXT:    ld a0, %pcrel_lo(.LBB0_1)(a0)
 ; RV64-NEXT:    add a0, a0, tp
 ; RV64-NEXT:    lw a1, 0(a0)
 ; RV64-NEXT:    addi a1, a1, 1
