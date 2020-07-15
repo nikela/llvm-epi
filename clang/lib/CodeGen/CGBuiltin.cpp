@@ -6366,6 +6366,12 @@ Value *CodeGenFunction::GetValueForARMHint(unsigned BuiltinID) {
                             llvm::ConstantInt::get(Int32Ty, Value));
 }
 
+enum SpecialRegisterAccessKind {
+  NormalRead,
+  VolatileRead,
+  Write,
+};
+
 // Generates the IR for the read/write special register builtin,
 // ValueType is the type of the value that is to be written or read,
 // RegisterType is the type of the register being written to or read from.
@@ -6373,7 +6379,7 @@ static Value *EmitSpecialRegisterBuiltin(CodeGenFunction &CGF,
                                          const CallExpr *E,
                                          llvm::Type *RegisterType,
                                          llvm::Type *ValueType,
-                                         bool IsRead,
+                                         SpecialRegisterAccessKind AccessKind,
                                          StringRef SysReg = "") {
   // write and register intrinsics only support 32 and 64 bit operations.
   assert((RegisterType->isIntegerTy(32) || RegisterType->isIntegerTy(64))
@@ -6398,8 +6404,12 @@ static Value *EmitSpecialRegisterBuiltin(CodeGenFunction &CGF,
   assert(!(RegisterType->isIntegerTy(32) && ValueType->isIntegerTy(64))
             && "Can't fit 64-bit value in 32-bit register");
 
-  if (IsRead) {
-    llvm::Function *F = CGM.getIntrinsic(llvm::Intrinsic::read_register, Types);
+  if (AccessKind != Write) {
+    assert(AccessKind == NormalRead || AccessKind == VolatileRead);
+    llvm::Function *F = CGM.getIntrinsic(
+        AccessKind == VolatileRead ? llvm::Intrinsic::read_volatile_register
+                                   : llvm::Intrinsic::read_register,
+        Types);
     llvm::Value *Call = Builder.CreateCall(F, Metadata);
 
     if (MixedTypes)
@@ -6778,9 +6788,11 @@ Value *CodeGenFunction::EmitARMBuiltinExpr(unsigned BuiltinID,
       BuiltinID == ARM::BI__builtin_arm_wsr64 ||
       BuiltinID == ARM::BI__builtin_arm_wsrp) {
 
-    bool IsRead = BuiltinID == ARM::BI__builtin_arm_rsr ||
-                  BuiltinID == ARM::BI__builtin_arm_rsr64 ||
-                  BuiltinID == ARM::BI__builtin_arm_rsrp;
+    SpecialRegisterAccessKind AccessKind = Write;
+    if (BuiltinID == ARM::BI__builtin_arm_rsr ||
+        BuiltinID == ARM::BI__builtin_arm_rsr64 ||
+        BuiltinID == ARM::BI__builtin_arm_rsrp)
+      AccessKind = VolatileRead;
 
     bool IsPointerBuiltin = BuiltinID == ARM::BI__builtin_arm_rsrp ||
                             BuiltinID == ARM::BI__builtin_arm_wsrp;
@@ -6799,7 +6811,8 @@ Value *CodeGenFunction::EmitARMBuiltinExpr(unsigned BuiltinID,
       ValueType = RegisterType = Int32Ty;
     }
 
-    return EmitSpecialRegisterBuiltin(*this, E, RegisterType, ValueType, IsRead);
+    return EmitSpecialRegisterBuiltin(*this, E, RegisterType, ValueType,
+                                      AccessKind);
   }
 
   // Deal with MVE builtins
@@ -8839,9 +8852,11 @@ Value *CodeGenFunction::EmitAArch64BuiltinExpr(unsigned BuiltinID,
       BuiltinID == AArch64::BI__builtin_arm_wsr64 ||
       BuiltinID == AArch64::BI__builtin_arm_wsrp) {
 
-    bool IsRead = BuiltinID == AArch64::BI__builtin_arm_rsr ||
-                  BuiltinID == AArch64::BI__builtin_arm_rsr64 ||
-                  BuiltinID == AArch64::BI__builtin_arm_rsrp;
+    SpecialRegisterAccessKind AccessKind = Write;
+    if (BuiltinID == AArch64::BI__builtin_arm_rsr ||
+        BuiltinID == AArch64::BI__builtin_arm_rsr64 ||
+        BuiltinID == AArch64::BI__builtin_arm_rsrp)
+      AccessKind = VolatileRead;
 
     bool IsPointerBuiltin = BuiltinID == AArch64::BI__builtin_arm_rsrp ||
                             BuiltinID == AArch64::BI__builtin_arm_wsrp;
@@ -8859,7 +8874,8 @@ Value *CodeGenFunction::EmitAArch64BuiltinExpr(unsigned BuiltinID,
       ValueType = Int32Ty;
     }
 
-    return EmitSpecialRegisterBuiltin(*this, E, RegisterType, ValueType, IsRead);
+    return EmitSpecialRegisterBuiltin(*this, E, RegisterType, ValueType,
+                                      AccessKind);
   }
 
   if (BuiltinID == AArch64::BI_ReadStatusReg ||
@@ -14826,7 +14842,7 @@ Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
   }
   case AMDGPU::BI__builtin_amdgcn_read_exec: {
     CallInst *CI = cast<CallInst>(
-      EmitSpecialRegisterBuiltin(*this, E, Int64Ty, Int64Ty, true, "exec"));
+      EmitSpecialRegisterBuiltin(*this, E, Int64Ty, Int64Ty, NormalRead, "exec"));
     CI->setConvergent();
     return CI;
   }
@@ -14835,7 +14851,7 @@ Value *CodeGenFunction::EmitAMDGPUBuiltinExpr(unsigned BuiltinID,
     StringRef RegName = BuiltinID == AMDGPU::BI__builtin_amdgcn_read_exec_lo ?
       "exec_lo" : "exec_hi";
     CallInst *CI = cast<CallInst>(
-      EmitSpecialRegisterBuiltin(*this, E, Int32Ty, Int32Ty, true, RegName));
+      EmitSpecialRegisterBuiltin(*this, E, Int32Ty, Int32Ty, NormalRead, RegName));
     CI->setConvergent();
     return CI;
   }
