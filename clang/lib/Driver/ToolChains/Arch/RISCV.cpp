@@ -571,6 +571,7 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
         D.Diag(diag::err_drv_invalid_riscv_epi_ext);
       else
         Features.push_back("+experimental-v");
+        Features.push_back("+experimental-zvlsseg");
     }
   }
 
