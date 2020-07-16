@@ -402,11 +402,13 @@ public:
                       const TargetTransformInfo *TTI, AssumptionCache *AC,
                       OptimizationRemarkEmitter *ORE, unsigned VecWidth,
                       unsigned UnrollFactor, LoopVectorizationLegality *LVL,
-                      LoopVectorizationCostModel *CM)
+                      LoopVectorizationCostModel *CM, BlockFrequencyInfo *BFI,
+                      ProfileSummaryInfo *PSI)
       : OrigLoop(OrigLoop), PSE(PSE), LI(LI), DT(DT), TLI(TLI), TTI(TTI),
         AC(AC), ORE(ORE), VF(VecWidth), UF(UnrollFactor),
         Builder(PSE.getSE()->getContext()),
-        VectorLoopValueMap(UnrollFactor, VecWidth), Legal(LVL), Cost(CM) {}
+        VectorLoopValueMap(UnrollFactor, VecWidth), Legal(LVL), Cost(CM),
+        BFI(BFI), PSI(PSI) {}
   virtual ~InnerLoopVectorizer() = default;
 
   /// Create a new empty loop. Unlink the old loop and connect the new one.
@@ -816,6 +818,10 @@ protected:
   // Vector of original scalar PHIs whose corresponding widened PHIs need to be
   // fixed up at the end of vector code generation.
   SmallVector<PHINode *, 8> OrigPHIsToFix;
+
+  /// BFI and PSI are used to check for profile guided size optimizations.
+  BlockFrequencyInfo *BFI;
+  ProfileSummaryInfo *PSI;
 };
 
 class InnerLoopUnroller : public InnerLoopVectorizer {
@@ -826,9 +832,10 @@ public:
                     const TargetTransformInfo *TTI, AssumptionCache *AC,
                     OptimizationRemarkEmitter *ORE, unsigned UnrollFactor,
                     LoopVectorizationLegality *LVL,
-                    LoopVectorizationCostModel *CM)
+                    LoopVectorizationCostModel *CM, BlockFrequencyInfo *BFI,
+                    ProfileSummaryInfo *PSI)
       : InnerLoopVectorizer(OrigLoop, PSE, LI, DT, TLI, TTI, AC, ORE, 1,
-                            UnrollFactor, LVL, CM) {}
+                            UnrollFactor, LVL, CM, BFI, PSI) {}
 
 private:
   Value *getBroadcastInstrs(Value *V) override;
@@ -3035,7 +3042,9 @@ void InnerLoopVectorizer::emitSCEVChecks(Loop *L, BasicBlock *Bypass) {
     if (C->isZero())
       return;
 
-  assert(!SCEVCheckBlock->getParent()->hasOptSize() &&
+  assert(!(SCEVCheckBlock->getParent()->hasOptSize() ||
+           llvm::shouldOptimizeForSize(L->getHeader(), PSI, BFI,
+                                       PGSOQueryType::IRPass)) &&
          "Cannot SCEV check stride or overflow when optimizing for size");
 
   SCEVCheckBlock->setName("vector.scevcheck");
@@ -3081,7 +3090,9 @@ void InnerLoopVectorizer::emitMemRuntimeChecks(Loop *L, BasicBlock *Bypass) {
   assert(MemRuntimeCheck && "no RT checks generated although RtPtrChecking "
                             "claimed checks are required");
 
-  if (MemCheckBlock->getParent()->hasOptSize()) {
+  if (MemCheckBlock->getParent()->hasOptSize() ||
+      llvm::shouldOptimizeForSize(L->getHeader(), PSI, BFI,
+                                  PGSOQueryType::IRPass)) {
     assert(Cost->Hints->getForce() == LoopVectorizeHints::FK_Enabled &&
            "Cannot emit memory checks when optimizing for size, unless forced "
            "to vectorize.");
@@ -8595,7 +8606,7 @@ static bool processLoopInVPlanNativePath(
   LVP.setBestPlan(VF.getWidth(), 1);
 
   InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.getWidth(), 1,
-                         LVL, &CM);
+                         LVL, &CM, BFI, PSI);
   LLVM_DEBUG(dbgs() << "Vectorizing outer loop in \""
                     << L->getHeader()->getParent()->getName() << "\"\n");
   LVP.executePlan(LB, DT);
@@ -8659,7 +8670,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   // Check if it is legal to vectorize the loop.
   LoopVectorizationRequirements Requirements(*ORE);
   LoopVectorizationLegality LVL(L, PSE, DT, TTI, TLI, AA, F, GetLAA, LI, ORE,
-                                &Requirements, &Hints, DB, AC);
+                                &Requirements, &Hints, DB, AC, BFI, PSI);
   if (!LVL.canVectorize(EnableVPlanNativePath)) {
     LLVM_DEBUG(dbgs() << "LV: Not vectorizing: Cannot prove legality.\n");
     Hints.emitRemarkWithHints();
@@ -8859,8 +8870,8 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     assert(IC > 1 && "interleave count should not be 1 or 0");
     // If we decided that it is not legal to vectorize the loop, then
     // interleave it.
-    InnerLoopUnroller Unroller(L, PSE, LI, DT, TLI, TTI, AC, ORE, IC, &LVL,
-                               &CM);
+    InnerLoopUnroller Unroller(L, PSE, LI, DT, TLI, TTI, AC, ORE, IC, &LVL, &CM,
+                               BFI, PSI);
     LVP.executePlan(Unroller, DT);
 
     ORE->emit([&]() {
@@ -8872,7 +8883,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   } else {
     // If we decided that it is *legal* to vectorize the loop, then do it.
     InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.getWidth(), IC,
-                           &LVL, &CM);
+                           &LVL, &CM, BFI, PSI);
     LVP.executePlan(LB, DT);
     ++LoopsVectorized;
 
