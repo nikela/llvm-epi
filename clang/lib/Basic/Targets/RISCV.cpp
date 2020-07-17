@@ -14,6 +14,7 @@
 #include "clang/Basic/MacroBuilder.h"
 #include "clang/Basic/TargetBuiltins.h"
 #include "llvm/ADT/StringSwitch.h"
+#include "llvm/Support/TargetParser.h"
 
 using namespace clang;
 using namespace clang::targets;
@@ -200,4 +201,24 @@ bool RISCVTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
 
 void RISCVTargetInfo::adjust(LangOptions &Opts) {
   TargetInfo::adjust(Opts);
+}
+
+bool RISCV32TargetInfo::isValidCPUName(StringRef Name) const {
+  return llvm::RISCV::checkCPUKind(llvm::RISCV::parseCPUKind(Name),
+                                   /*Is64Bit=*/false);
+}
+
+void RISCV32TargetInfo::fillValidCPUList(
+    SmallVectorImpl<StringRef> &Values) const {
+  llvm::RISCV::fillValidCPUArchList(Values, false);
+}
+
+bool RISCV64TargetInfo::isValidCPUName(StringRef Name) const {
+  return llvm::RISCV::checkCPUKind(llvm::RISCV::parseCPUKind(Name),
+                                   /*Is64Bit=*/true);
+}
+
+void RISCV64TargetInfo::fillValidCPUList(
+    SmallVectorImpl<StringRef> &Values) const {
+  llvm::RISCV::fillValidCPUArchList(Values, true);
 }
