@@ -350,7 +350,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Custom);
     }
 
-    // Custom-legalize this node for scalable vectors.
+    // Custom-legalize these nodes for scalable vectors.
     for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
                     MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
                     MVT::nxv2i32, MVT::nxv4i32, MVT::nxv8i32, MVT::nxv16i32,
@@ -358,6 +358,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                     MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::MGATHER, VT, Custom);
+      setOperationAction(ISD::SELECT, VT, Custom);
     }
 
     // Register libcalls for fp EXP functions.
@@ -1089,7 +1090,38 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
   SDValue TrueV = Op.getOperand(1);
   SDValue FalseV = Op.getOperand(2);
   SDLoc DL(Op);
+  EVT VT = Op.getValueType();
   MVT XLenVT = Subtarget.getXLenVT();
+
+  if (VT.isScalableVector()) {
+    // FIXME ELEN=64 hardcoded.
+    unsigned MLEN = 64 / VT.getVectorMinNumElements();
+
+    if (MLEN < 8) {
+      // E.g. (nxv64i1:copy (nxv8i8:splat (i8:sext (i1:trunc (i64:CondV)))))
+      SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, MVT::i1, CondV);
+      SDValue Sext = DAG.getNode(ISD::SIGN_EXTEND, DL, MVT::i8, Trunc);
+      SDValue VecCondV = DAG.getNode(ISD::SPLAT_VECTOR, DL, MVT::nxv8i8, Sext);
+
+      SDValue RC =
+          DAG.getTargetConstant(RISCV::VRRegClass.getID(), DL, MVT::i64);
+      SDValue CastVecCondV = SDValue(
+          DAG.getMachineNode(TargetOpcode::COPY_TO_REGCLASS, DL,
+                             VT.changeVectorElementType(MVT::i1), VecCondV, RC),
+          0);
+      return DAG.getNode(ISD::VSELECT, DL, VT, {CastVecCondV, TrueV, FalseV});
+    }
+
+    // MLEN >= 8. Note this is only valid in RVV-0.8. In RVV-0.9 MLEN=1.
+    // E.g. (nxv2i1:trunc (nxv2i32:splat (i32:trunc (i64:CondV))))
+    MVT EltVT = MVT::getIntegerVT(MLEN);
+    SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, EltVT, CondV);
+    SDValue VecCondV = DAG.getNode(ISD::SPLAT_VECTOR, DL,
+                                   VT.changeVectorElementType(EltVT), Trunc);
+    SDValue TruncVecCondV = DAG.getNode(
+        ISD::TRUNCATE, DL, VT.changeVectorElementType(MVT::i1), VecCondV);
+    return DAG.getNode(ISD::VSELECT, DL, VT, {TruncVecCondV, TrueV, FalseV});
+  }
 
   // If the result type is XLenVT and CondV is the output of a SETCC node
   // which also operated on XLenVT inputs, then merge the SETCC node into the
@@ -1097,7 +1129,7 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
   // compare+branch instructions. i.e.:
   // (select (setcc lhs, rhs, cc), truev, falsev)
   // -> (riscvisd::select_cc lhs, rhs, cc, truev, falsev)
-  if (Op.getSimpleValueType() == XLenVT && CondV.getOpcode() == ISD::SETCC &&
+  if (VT.getSimpleVT() == XLenVT && CondV.getOpcode() == ISD::SETCC &&
       CondV.getOperand(0).getSimpleValueType() == XLenVT) {
     SDValue LHS = CondV.getOperand(0);
     SDValue RHS = CondV.getOperand(1);
