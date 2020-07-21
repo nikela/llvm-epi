@@ -34,6 +34,16 @@ def riscv_sign_extend_inreg : SDNode<"RISCVISD::SIGN_EXTEND_BITS_INREG",
                                       SDTCisVec<0>, SDTCisInt<0>,
                                       SDTCisInt<2>]>>;
 
+def riscv_vlseg2 : SDNode<"RISCVISD::VLSEG2",
+                          SDTypeProfile<1, 3, [SDTCisPtrTy<1>, SDTCisInt<2>,
+                                               SDTCisInt<3>]>,
+                          [SDNPHasChain, SDNPMayLoad]>;
+
+def riscv_vsseg2 : SDNode<"RISCVISD::VSSEG2",
+                          SDTypeProfile<0, 4, [SDTCisPtrTy<1>, SDTCisInt<2>,
+                                               SDTCisInt<3>]>,
+                          [SDNPHasChain, SDNPMayStore]>;
+
 def riscv_vzip2 : SDNode<"RISCVISD::VZIP2",
                          SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>,
                                              SDTCisVec<1>, SDTCisInt<3>]>>;
@@ -1369,6 +1379,41 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
   let BaseInstr = VMV8R_V, VLMul = 8 in
   def PseudoVMV8R_M8 : Pseudo<(outs VRM8:$rdest), (ins VRM8:$rs1), []>,
                              EPIPseudo;
+}
+
+}
+
+let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
+
+// FIXME: Generalize for LMUL>1
+
+let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
+    usesCustomInserter = 1,
+    VLMul = 1 in
+{
+  let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
+      BaseInstr = VLSEG2E_V in
+    def PseudoVLSEG2E_V_M1
+        : Pseudo<(outs VRTuple:$rd),
+                 (ins VRTuple:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
+                  ixlenimm:$sew),
+                 []>,
+          EPIPseudo;
+}
+
+let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
+    usesCustomInserter = 1,
+    VLMul = 1 in
+{
+  let Uses = [VL, VTYPE],
+      VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
+      BaseInstr = VSSEG2E_V in
+    def PseudoVSSEG2E_V_M1
+        : Pseudo<(outs),
+                 (ins VRTuple:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
+                      ixlenimm:$sew),
+                 []>,
+          EPIPseudo;
 }
 
 }
@@ -3800,6 +3845,41 @@ defm "" : pat_store<"E">;
 
 }
 
+let Predicates = [HasStdExtV] in {
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
+def PseudoImplicitVRTuple : Pseudo<(outs VRTuple:$rd), (ins), []>;
+
+}
+
+let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
+
+foreach vti = NoGroupVectors in {
+
+  def : Pat<(riscv_vlseg2 GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
+            (PseudoVLSEG2E_V_M1
+             (PseudoImplicitVRTuple),
+             $rs1,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+  def : Pat<(riscv_vsseg2 VRTuple:$rs3, GPR:$rs1,
+             GPR:$vl, (XLenVT vti.SEW)),
+            (PseudoVSSEG2E_V_M1
+             $rs3, $rs1,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+}
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
+def PseudoVBuildTuple2 : Pseudo<(outs VRTuple:$rd),
+                                (ins VR:$rs1, VR:$rs2), []>;
+
+}
+
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
 //===----------------------------------------------------------------------===//
@@ -3813,9 +3893,6 @@ defm PseudoVUNZIP2_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
 defm PseudoVTRN_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
 
 }
-
-let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
-def PseudoImplicitVRTuple : Pseudo<(outs VRTuple:$rd), (ins), []>;
 
 foreach vti = NoGroupVectors in {
 

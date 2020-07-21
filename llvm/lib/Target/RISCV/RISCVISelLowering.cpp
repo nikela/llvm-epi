@@ -334,6 +334,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::INTRINSIC_VOID, VT, Custom);
     }
 
+    // Some tuple operations are chained and need custom lowering.
+    setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::Other, Custom);
+    setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
+
     // Custom-legalize this node for illegal result types or mask operands.
     for (auto VT : {MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i1, MVT::nxv2i1,
                     MVT::nxv4i1, MVT::nxv8i1, MVT::nxv16i1, MVT::nxv32i1,
@@ -1785,6 +1789,62 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
   }
 }
 
+// FIXME: This does not handle fractional LMUL.
+static std::pair<int64_t, int64_t> getSewLMul(MVT VT) {
+  switch (VT.SimpleTy) {
+  default:
+    llvm_unreachable("Unexpected type");
+    // LMUL=1
+  case MVT::nxv1i64:
+  case MVT::nxv1f64:
+    return {64, 1};
+  case MVT::nxv2i32:
+  case MVT::nxv2f32:
+    return {32, 1};
+  case MVT::nxv4i16:
+  case MVT::nxv4f16:
+    return {16, 1};
+  case MVT::nxv8i8:
+    return {8, 1};
+    // LMUL=2
+  case MVT::nxv2i64:
+  case MVT::nxv2f64:
+    return {64, 2};
+  case MVT::nxv4i32:
+  case MVT::nxv4f32:
+    return {32, 2};
+  case MVT::nxv8i16:
+  case MVT::nxv8f16:
+    return {16, 2};
+  case MVT::nxv16i8:
+    return {8, 2};
+    // LMUL=4
+  case MVT::nxv4i64:
+  case MVT::nxv4f64:
+    return {64, 4};
+  case MVT::nxv8i32:
+  case MVT::nxv8f32:
+    return {32, 4};
+  case MVT::nxv16i16:
+  case MVT::nxv16f16:
+    return {16, 4};
+  case MVT::nxv32i8:
+    return {8, 4};
+    // LMUL=8
+  case MVT::nxv8i64:
+  case MVT::nxv8f64:
+    return {64, 8};
+  case MVT::nxv16i32:
+  case MVT::nxv16f32:
+    return {32, 8};
+  case MVT::nxv32i16:
+  case MVT::nxv32f16:
+    return {16, 8};
+  case MVT::nxv64i8:
+    return {8, 8};
+  }
+}
+
 SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                     SelectionDAG &DAG) const {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
@@ -1877,6 +1937,35 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
 
     return Result;
   }
+  case Intrinsic::epi_vlseg2: {
+    SDVTList VTList = Op->getVTList();
+    SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
+    EVT VT = VTList.VTs[0];
+
+    int64_t LMUL;
+    int64_t SEWBits;
+    std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+
+    MVT XLenVT = Subtarget.getXLenVT();
+    SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+
+    SDValue TupleNode =
+        DAG.getNode(RISCVISD::VLSEG2, DL, VTs,
+                    {/* Chain */ Op->getOperand(0), Op->getOperand(2),
+                     Op->getOperand(3), SEW});
+
+    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtfirst, DL, MVT::i32);
+    MachineSDNode *FirstNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
+
+    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtsecond, DL, MVT::i32);
+    MachineSDNode *SecondNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
+
+    SDValue ExtractedOps[] = {SDValue(FirstNode, 0), SDValue(SecondNode, 0),
+                              SDValue(TupleNode.getNode(), 1)};
+    return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
+  }
   }
 
   return SDValue();
@@ -1925,6 +2014,29 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
 
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
     break;
+  }
+  case Intrinsic::epi_vsseg2: {
+    // Chain: Op->getOperand(0)
+    // First: Op->getOperand(2)
+    // Second: Op->getOperand(3)
+    // Addr: Op->getOperand(4)
+    // GVL: Op->getOperand(5)
+    EVT VT = Op->getOperand(2).getValueType();
+    int64_t LMUL;
+    int64_t SEWBits;
+    std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+
+    MVT XLenVT = Subtarget.getXLenVT();
+    SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+
+    MachineSDNode *Tuple =
+        DAG.getMachineNode(RISCV::PseudoVBuildTuple2, DL, MVT::Untyped,
+                           {Op->getOperand(2), Op->getOperand(3)});
+
+    SDVTList VTs = DAG.getVTList(MVT::Other);
+    return DAG.getNode(RISCVISD::VSSEG2, DL, VTs,
+                       {/* Chain */ Op->getOperand(0), SDValue(Tuple, 0),
+                        Op->getOperand(4), Op->getOperand(5), SEW});
   }
   }
 
@@ -2760,6 +2872,34 @@ static MachineBasicBlock *emitImplicitVRTuple(MachineInstr &MI,
   return BB;
 }
 
+static MachineBasicBlock *emitVBuildTuple2(MachineInstr &MI,
+                                           MachineBasicBlock *BB) {
+  MachineFunction &MF = *BB->getParent();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+
+  DebugLoc DL = MI.getDebugLoc();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+
+  Register ScratchReg = MRI.createVirtualRegister(&RISCV::VRTupleRegClass);
+  BuildMI(*BB, MI, DL, TII.get(RISCV::IMPLICIT_DEF), ScratchReg);
+
+  Register ScratchReg2 = MRI.createVirtualRegister(&RISCV::VRTupleRegClass);
+  BuildMI(*BB, MI, DL, TII.get(RISCV::INSERT_SUBREG), ScratchReg2)
+      .addReg(ScratchReg)
+      .addReg(MI.getOperand(1).getReg())
+      .addImm(RISCV::vtfirst);
+
+  Register DestReg = MI.getOperand(0).getReg();
+  BuildMI(*BB, MI, DL, TII.get(RISCV::INSERT_SUBREG), DestReg)
+      .addReg(ScratchReg2)
+      .addReg(MI.getOperand(2).getReg())
+      .addImm(RISCV::vtsecond);
+
+  // The pseudo instruction is gone now.
+  MI.eraseFromParent();
+  return BB;
+}
+
 MachineBasicBlock *
 RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
@@ -2792,6 +2932,8 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
     return emitComputeVMCLR(MI, BB);
   case RISCV::PseudoImplicitVRTuple:
     return emitImplicitVRTuple(MI, BB);
+  case RISCV::PseudoVBuildTuple2:
+    return emitVBuildTuple2(MI, BB);
   }
 
   switch (MI.getOpcode()) {
@@ -4132,6 +4274,10 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "RISCVISD::EXTRACT_VECTOR_ELT";
   case RISCVISD::SIGN_EXTEND_BITS_INREG:
     return "RISCVISD::SIGN_EXTEND_BITS_INREG";
+  case RISCVISD::VLSEG2:
+    return "RISCVISD::VLSEG2";
+  case RISCVISD::VSSEG2:
+    return "RISCVISD::VSSEG2";
   case RISCVISD::VZIP2:
     return "RISCVISD::VZIP2";
   case RISCVISD::VUNZIP2:

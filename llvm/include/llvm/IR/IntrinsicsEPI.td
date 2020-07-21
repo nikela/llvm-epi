@@ -581,6 +581,13 @@ multiclass epi_load {
 
 defm int_epi_vload : epi_load;
 
+multiclass epi_vlseg2 {
+  def ""              : Intrinsic<[ llvm_anyvector_ty, LLVMMatchType<0> ],
+                                  [ LLVMPointerToElt<0>, llvm_i64_ty ],
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
+}
+defm int_epi_vlseg2 : epi_vlseg2;
+
 // Stores
 multiclass epi_store {
   def ""              : Intrinsic<[],
@@ -618,7 +625,14 @@ multiclass epi_store {
 }
 
 defm int_epi_vstore : epi_store;
-defm int_epi_vstore_unordered : epi_store;
+
+multiclass epi_vsseg2 {
+  def ""              : Intrinsic<[],
+                                  [ llvm_anyvector_ty, LLVMMatchType<0>,
+                                    LLVMPointerToElt<0>, llvm_i64_ty ],
+                                  [ NoCapture<ArgIndex<2>>, IntrWriteMem ]>;
+}
+defm int_epi_vsseg2 : epi_vsseg2;
 
 // EPI Extensions
 
