@@ -4376,10 +4376,26 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
           createMinMaxOp(Builder, MinMaxKind, ReducedPartRdx, RdxPart);
   }
 
+  BasicBlock *RdxBlock = nullptr;
+
   // Create the reduction after the loop. Note that inloop reductions create the
   // target reduction in the loop using a Reduction recipe.
   if (VF.isVector() && !IsInLoopReductionPhi) {
     bool NoNaN = Legal->hasFunNoNaNAttr();
+    // For certain backends like RISC-V it is hard to lower some reduction
+    // operations like multiply effectively. In such cases we can generate a
+    // reduction loop in the loop vectorizer.
+    // FIXME: Decision to generate reduction loop here must come from the TTI.
+    if (isScalable()) {
+      // Create a new block betweent the vector body and the middle block.
+      RdxBlock = LoopMiddleBlock;
+      LoopMiddleBlock->setName("reduction.loop");
+      LoopMiddleBlock = SplitBlock(LoopMiddleBlock, &LoopMiddleBlock->front(),
+                                   DT, LI, nullptr, "middle.block");
+      // Reset the insert point and debug location to the new middle block.
+      Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
+      setDebugLocFromInst(Builder, LoopMiddleBlock->getTerminator());
+    }
     ReducedPartRdx =
         createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx, NoNaN);
     // If the reduction can be performed in a smaller type, we need to extend
