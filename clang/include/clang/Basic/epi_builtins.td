@@ -425,6 +425,50 @@ let HasMergeOperand = 0 in
   def vstore_mask : EPIBuiltin<"m", "0PUem", "csil">;
 }
 
+/* Segmented load/stores */
+// TODO: add remaining kinds of loads and stores
+// TODO: only for nf=2
+// TODO: only for LMUL=1
+// TODO: add masked version
+let HasMask = 0, LMUL = [1] in {
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0] };
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, Ops, "");
+llvm::Value *V = Builder.CreateInsertValue(
+     llvm::UndefValue::get(ResultType),
+     Builder.CreateExtractValue(CallValue, {0}),
+     {0});
+V = Builder.CreateInsertValue(
+     V,
+     Builder.CreateExtractValue(CallValue, {1}),
+     {1});
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}] in
+def vlseg2 : EPIBuiltin<"TTv", "TTvPCe", "csilfd">;
+
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0] };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {0}));
+FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {1}));
+FlatOps.push_back(Ops[0]);
+FlatOps.push_back(Ops[2]);
+
+std::swap(Ops, FlatOps);
+}
+}] in
+def vsseg2 : EPIBuiltin<"TTv", "0PCeTTv", "csilfd">;
+}
+
 def vadd : EPIBinBuiltin<"v", "vvv", "csil">;
 def vsub : EPIBinBuiltin<"v", "vvv", "csil">;
 

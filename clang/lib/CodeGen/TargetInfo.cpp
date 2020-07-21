@@ -10603,6 +10603,12 @@ ABIArgInfo RISCVABIInfo::classifyArgumentType(QualType Ty, bool IsFixed,
     }
   }
 
+  // An EPI tuple is passed as an LLVM value. The backend will then determine
+  // how it will be actually passed.
+  if (Ty->isRecordType() && Ty->getAsRecordDecl()->getHasEPIVectorFields()) {
+    return ABIArgInfo::getDirect(CGT.ConvertType(Ty));
+  }
+
   uint64_t NeededAlign = getContext().getTypeAlign(Ty);
   bool MustUseStack = false;
 

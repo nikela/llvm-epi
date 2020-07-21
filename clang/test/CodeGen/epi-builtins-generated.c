@@ -9230,6 +9230,90 @@ __epi_4xi64 test_vload_unsigned_4xi64_mask(__epi_4xi64 arg_0, const unsigned lon
     return __builtin_epi_vload_unsigned_4xi64_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
+// CHECK-O2-LABEL: @test_vlseg2_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
+//
+__epi_8xi8x2 test_vlseg2_8xi8x2(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_8xi8x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
+//
+__epi_4xi16x2 test_vlseg2_4xi16x2(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_4xi16x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
+//
+__epi_2xi32x2 test_vlseg2_2xi32x2(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_2xi32x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
+//
+__epi_1xi64x2 test_vlseg2_1xi64x2(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_1xi64x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
+//
+__epi_2xf32x2 test_vlseg2_2xf32x2(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_2xf32x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
+//
+__epi_1xf64x2 test_vlseg2_1xf64x2(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg2_1xf64x2(arg_0, arg_1);
+}
+
 // CHECK-O2-LABEL: @test_vmacc_8xi8(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.epi.vmacc.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
@@ -23470,6 +23554,66 @@ __epi_4xi64 test_vsrl_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
     return __builtin_epi_vsrl_4xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
+// CHECK-O2-LABEL: @test_vsseg2_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_8xi8x2(const signed char*  arg_0, __epi_8xi8x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_8xi8x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_4xi16x2(const signed short int*  arg_0, __epi_4xi16x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_4xi16x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_2xi32x2(const signed int*  arg_0, __epi_2xi32x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_2xi32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_1xi64x2(const signed long int*  arg_0, __epi_1xi64x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_1xi64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_2xf32x2(const float*  arg_0, __epi_2xf32x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_2xf32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_1xf64x2(const double*  arg_0, __epi_1xf64x2 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg2_1xf64x2(arg_0, arg_1, arg_2);
+}
+
 // CHECK-O2-LABEL: @test_vssra_8xi8(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.epi.vssra.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
@@ -26700,21 +26844,12 @@ __epi_4xi64 test_vsub_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
 
 // CHECK-O2-LABEL: @test_vtrn_8xi8x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_8XI8X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vtrn.nxv8i8(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP1]], <vscale x 8 x i8>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP2]], <vscale x 8 x i8>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_8xi8x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 8 x i8>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
 //
 __epi_8xi8x2 test_vtrn_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -26723,21 +26858,12 @@ __epi_8xi8x2 test_vtrn_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vtrn_4xi16x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_4XI16X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vtrn.nxv4i16(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP1]], <vscale x 4 x i16>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP2]], <vscale x 4 x i16>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_4xi16x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 4 x i16>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
 //
 __epi_4xi16x2 test_vtrn_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -26746,21 +26872,12 @@ __epi_4xi16x2 test_vtrn_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vtrn_2xi32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XI32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vtrn.nxv2i32(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP2]], <vscale x 2 x i32>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xi32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x i32>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
 //
 __epi_2xi32x2 test_vtrn_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -26769,21 +26886,12 @@ __epi_2xi32x2 test_vtrn_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vtrn_1xi64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XI64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vtrn.nxv1i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP2]], <vscale x 1 x i64>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
 //
 __epi_1xi64x2 test_vtrn_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -26792,21 +26900,12 @@ __epi_1xi64x2 test_vtrn_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vtrn_1xf64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XF64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vtrn.nxv1f64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP1]], <vscale x 1 x double>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP2]], <vscale x 1 x double>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_1xf64x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 1 x double>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
 //
 __epi_1xf64x2 test_vtrn_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -26815,21 +26914,12 @@ __epi_1xf64x2 test_vtrn_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vtrn_2xf32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XF32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vtrn.nxv2f32(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP1]], <vscale x 2 x float>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP2]], <vscale x 2 x float>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xf32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x float>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
 //
 __epi_2xf32x2 test_vtrn_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {
@@ -26838,21 +26928,12 @@ __epi_2xf32x2 test_vtrn_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vunzip2_8xi8x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_8XI8X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vunzip2.nxv8i8(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP1]], <vscale x 8 x i8>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP2]], <vscale x 8 x i8>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_8xi8x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 8 x i8>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
 //
 __epi_8xi8x2 test_vunzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -26861,21 +26942,12 @@ __epi_8xi8x2 test_vunzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vunzip2_4xi16x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_4XI16X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vunzip2.nxv4i16(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP1]], <vscale x 4 x i16>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP2]], <vscale x 4 x i16>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_4xi16x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 4 x i16>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
 //
 __epi_4xi16x2 test_vunzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -26884,21 +26956,12 @@ __epi_4xi16x2 test_vunzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vunzip2_2xi32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XI32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vunzip2.nxv2i32(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP2]], <vscale x 2 x i32>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xi32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x i32>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
 //
 __epi_2xi32x2 test_vunzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -26907,21 +26970,12 @@ __epi_2xi32x2 test_vunzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vunzip2_1xi64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XI64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vunzip2.nxv1i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP2]], <vscale x 1 x i64>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
 //
 __epi_1xi64x2 test_vunzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -26930,21 +26984,12 @@ __epi_1xi64x2 test_vunzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vunzip2_1xf64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XF64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vunzip2.nxv1f64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP1]], <vscale x 1 x double>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP2]], <vscale x 1 x double>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_1xf64x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 1 x double>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
 //
 __epi_1xf64x2 test_vunzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -26953,21 +26998,12 @@ __epi_1xf64x2 test_vunzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vunzip2_2xf32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XF32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vunzip2.nxv2f32(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP1]], <vscale x 2 x float>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP2]], <vscale x 2 x float>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xf32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x float>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
 //
 __epi_2xf32x2 test_vunzip2_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {
@@ -30636,21 +30672,12 @@ __epi_4xi64 test_vxor_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
 
 // CHECK-O2-LABEL: @test_vzip2_8xi8x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_8XI8X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vzip2.nxv8i8(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP1]], <vscale x 8 x i8>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_8XI8X2]], %struct.__epi_8xi8x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 8 x i8> [[TMP2]], <vscale x 8 x i8>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_8xi8x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 8 x i8>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
 //
 __epi_8xi8x2 test_vzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -30659,21 +30686,12 @@ __epi_8xi8x2 test_vzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vzip2_4xi16x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_4XI16X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vzip2.nxv4i16(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP1]], <vscale x 4 x i16>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_4XI16X2]], %struct.__epi_4xi16x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 4 x i16> [[TMP2]], <vscale x 4 x i16>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_4xi16x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 4 x i16>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
 //
 __epi_4xi16x2 test_vzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -30682,21 +30700,12 @@ __epi_4xi16x2 test_vzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vzip2_2xi32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XI32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vzip2.nxv2i32(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XI32X2]], %struct.__epi_2xi32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x i32> [[TMP2]], <vscale x 2 x i32>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xi32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x i32>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
 //
 __epi_2xi32x2 test_vzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -30705,21 +30714,12 @@ __epi_2xi32x2 test_vzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vzip2_1xi64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XI64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vzip2.nxv1i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x i64> [[TMP2]], <vscale x 1 x i64>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 0, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XI64X2]], %struct.__epi_1xi64x2* [[RETVAL]], i64 0, i32 1, i64 0
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
 //
 __epi_1xi64x2 test_vzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -30728,21 +30728,12 @@ __epi_1xi64x2 test_vzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vzip2_1xf64x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_1XF64X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vzip2.nxv1f64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP1]], <vscale x 1 x double>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_1XF64X2]], %struct.__epi_1xf64x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 1 x double> [[TMP2]], <vscale x 1 x double>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_1xf64x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 1 x double>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
 //
 __epi_1xf64x2 test_vzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -30751,21 +30742,12 @@ __epi_1xf64x2 test_vzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vzip2_2xf32x2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[RETVAL:%.*]] = alloca [[STRUCT___EPI_2XF32X2:%.*]], align 8
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vzip2.nxv2f32(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 0
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP1]], <vscale x 2 x float>* [[DOTFCA_0_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_GEP:%.*]] = getelementptr inbounds [[STRUCT___EPI_2XF32X2]], %struct.__epi_2xf32x2* [[RETVAL]], i64 0, i32 1
-// CHECK-O2-NEXT:    store <vscale x 2 x float> [[TMP2]], <vscale x 2 x float>* [[DOTFCA_1_GEP]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_GEP1:%.*]] = bitcast %struct.__epi_2xf32x2* [[RETVAL]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_0_LOAD:%.*]] = load i64, i64* [[DOTFCA_0_GEP1]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_0_INSERT:%.*]] = insertvalue [2 x i64] undef, i64 [[DOTFCA_0_LOAD]], 0
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = bitcast <vscale x 2 x float>* [[DOTFCA_1_GEP]] to i64*
-// CHECK-O2-NEXT:    [[DOTFCA_1_LOAD:%.*]] = load i64, i64* [[TMP3]], align 8
-// CHECK-O2-NEXT:    [[DOTFCA_1_INSERT:%.*]] = insertvalue [2 x i64] [[DOTFCA_0_INSERT]], i64 [[DOTFCA_1_LOAD]], 1
-// CHECK-O2-NEXT:    ret [2 x i64] [[DOTFCA_1_INSERT]]
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
 //
 __epi_2xf32x2 test_vzip2_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {

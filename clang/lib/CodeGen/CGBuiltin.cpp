@@ -14569,8 +14569,16 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
 
   llvm::Type* ResultType = ConvertType(E->getType());
 
-  for (unsigned i = 0, e = E->getNumArgs(); i != e; i++)
-    Ops.push_back(EmitScalarExpr(E->getArg(i)));
+  for (unsigned i = 0, e = E->getNumArgs(); i != e; i++) {
+    const Expr *Arg = E->getArg(i);
+    if (hasAggregateEvaluationKind(Arg->getType())) {
+      LValue L = EmitAggExprToLValue(Arg);
+      llvm::Value *AggValue = Builder.CreateLoad(L.getAddress(*this));
+      Ops.push_back(AggValue);
+    } else {
+      Ops.push_back(EmitScalarExpr(Arg));
+    }
+  }
 
   Intrinsic::ID ID = Intrinsic::not_intrinsic;
 

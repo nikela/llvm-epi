@@ -2016,11 +2016,6 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
     break;
   }
   case Intrinsic::epi_vsseg2: {
-    // Chain: Op->getOperand(0)
-    // First: Op->getOperand(2)
-    // Second: Op->getOperand(3)
-    // Addr: Op->getOperand(4)
-    // GVL: Op->getOperand(5)
     EVT VT = Op->getOperand(2).getValueType();
     int64_t LMUL;
     int64_t SEWBits;
@@ -2029,6 +2024,9 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
     MVT XLenVT = Subtarget.getXLenVT();
     SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
 
+    // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
+    // so we use a pseudo instruction that we will expand later into proper
+    // INSERT_SUBREGs using the right register class.
     MachineSDNode *Tuple =
         DAG.getMachineNode(RISCV::PseudoVBuildTuple2, DL, MVT::Untyped,
                            {Op->getOperand(2), Op->getOperand(3)});

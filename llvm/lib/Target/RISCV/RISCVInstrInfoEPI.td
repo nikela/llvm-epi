@@ -1388,8 +1388,7 @@ let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
 // FIXME: Generalize for LMUL>1
 
 let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
-    usesCustomInserter = 1,
-    VLMul = 1 in
+    usesCustomInserter = 1, VLMul = 1 in
 {
   let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
       BaseInstr = VLSEG2E_V in
@@ -1402,8 +1401,7 @@ let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
 }
 
 let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
-    usesCustomInserter = 1,
-    VLMul = 1 in
+    usesCustomInserter = 1, VLMul = 1 in
 {
   let Uses = [VL, VTYPE],
       VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
@@ -3855,7 +3853,6 @@ def PseudoImplicitVRTuple : Pseudo<(outs VRTuple:$rd), (ins), []>;
 let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
 
 foreach vti = NoGroupVectors in {
-
   def : Pat<(riscv_vlseg2 GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
             (PseudoVLSEG2E_V_M1
              (PseudoImplicitVRTuple),
@@ -3864,14 +3861,12 @@ foreach vti = NoGroupVectors in {
              (NoX0 GPR:$vl),
              vti.SEW)>;
 
-  def : Pat<(riscv_vsseg2 VRTuple:$rs3, GPR:$rs1,
-             GPR:$vl, (XLenVT vti.SEW)),
+  def : Pat<(riscv_vsseg2 VRTuple:$rs3, GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
             (PseudoVSSEG2E_V_M1
              $rs3, $rs1,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
              vti.SEW)>;
-
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
