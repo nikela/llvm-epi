@@ -356,6 +356,22 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::MGATHER, VT, Custom);
     }
 
+    // Register libcalls for fp EXP functions.
+    setLibcallName(RTLIB::EXP_NXV1F64, "__epi_exp_nxv1f64");
+    setLibcallName(RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64");
+    setLibcallName(RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64");
+    setLibcallName(RTLIB::EXP_NXV8F64, "__epi_exp_nxv8f64");
+    setLibcallName(RTLIB::EXP_NXV2F32, "__epi_exp_nxv2f32");
+    setLibcallName(RTLIB::EXP_NXV4F32, "__epi_exp_nxv4f32");
+    setLibcallName(RTLIB::EXP_NXV8F32, "__epi_exp_nxv8f32");
+    setLibcallName(RTLIB::EXP_NXV16F32, "__epi_exp_nxv16f32");
+
+    // Custom-legalize these nodes for fp scalable vectors.
+    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
+                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+      setOperationAction(ISD::FEXP, VT, Custom);
+    }
+
     // Vector integer reductions.
     for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
                     MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
@@ -753,6 +769,48 @@ SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
                      DAG.getValueType(MVT::i1));
 }
 
+SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+
+  RTLIB::Libcall LC;
+  switch (VT.getSimpleVT().SimpleTy) {
+  default:
+    llvm_unreachable("Unexpected VT");
+  case MVT::nxv1f64:
+    LC = RTLIB::EXP_NXV1F64;
+    break;
+  case MVT::nxv2f64:
+    LC = RTLIB::EXP_NXV2F64;
+    break;
+  case MVT::nxv4f64:
+    LC = RTLIB::EXP_NXV4F64;
+    break;
+  case MVT::nxv8f64:
+    LC = RTLIB::EXP_NXV8F64;
+    break;
+  case MVT::nxv2f32:
+    LC = RTLIB::EXP_NXV2F32;
+    break;
+  case MVT::nxv4f32:
+    LC = RTLIB::EXP_NXV4F32;
+    break;
+  case MVT::nxv8f32:
+    LC = RTLIB::EXP_NXV8F32;
+    break;
+  case MVT::nxv16f32:
+    LC = RTLIB::EXP_NXV16F32;
+    break;
+  }
+
+  MakeLibCallOptions CallOptions;
+  SDValue Chain;
+  SDValue Result;
+  std::tie(Result, Chain) = makeLibCall(DAG, LC, Op.getValueType(),
+                                        Op.getOperand(0), CallOptions, DL);
+  return Result;
+}
+
 void RISCVTargetLowering::LowerOperationWrapper(
     SDNode *N, SmallVectorImpl<SDValue> &Results, SelectionDAG &DAG) const {
   SDValue Result = LowerOperation(SDValue(N, 0), DAG);
@@ -816,6 +874,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerMGATHER(Op, DAG);
   case ISD::EXTRACT_VECTOR_ELT:
     return lowerEXTRACT_VECTOR_ELT(Op, DAG);
+  case ISD::FEXP:
+    return lowerFEXP(Op, DAG);
   }
 }
 
