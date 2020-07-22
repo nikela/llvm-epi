@@ -38,6 +38,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Transforms/InstCombine/InstCombineWorklist.h"
+#include "llvm/Transforms/InstCombine/InstCombiner.h"
 #include <cassert>
 #include <utility>
 
@@ -57,7 +58,7 @@ static Value *createMinMax(InstCombiner::BuilderTy &Builder,
 /// constant of a binop.
 static Instruction *foldSelectBinOpIdentity(SelectInst &Sel,
                                             const TargetLibraryInfo &TLI,
-                                            InstCombiner &IC) {
+                                            InstCombinerImpl &IC) {
   // The select condition must be an equality compare with a constant operand.
   Value *X;
   Constant *C;
@@ -279,8 +280,8 @@ static APInt getSelectFoldableConstant(BinaryOperator *I) {
 }
 
 /// We have (select c, TI, FI), and we know that TI and FI have the same opcode.
-Instruction *InstCombiner::foldSelectOpOp(SelectInst &SI, Instruction *TI,
-                                          Instruction *FI) {
+Instruction *InstCombinerImpl::foldSelectOpOp(SelectInst &SI, Instruction *TI,
+                                              Instruction *FI) {
   // Don't break up min/max patterns. The hasOneUse checks below prevent that
   // for most cases, but vector min/max with bitcasts can be transformed. If the
   // one-use restrictions are eased for other patterns, we still don't want to
@@ -418,8 +419,8 @@ static bool isSelect01(const APInt &C1I, const APInt &C2I) {
 
 /// Try to fold the select into one of the operands to allow further
 /// optimization.
-Instruction *InstCombiner::foldSelectIntoOp(SelectInst &SI, Value *TrueVal,
-                                            Value *FalseVal) {
+Instruction *InstCombinerImpl::foldSelectIntoOp(SelectInst &SI, Value *TrueVal,
+                                                Value *FalseVal) {
   // See the comment above GetSelectFoldableOperands for a description of the
   // transformation we are doing here.
   auto ConstIntOrVector = [&](Value *OOp, APInt CI) -> Value * {
@@ -1037,9 +1038,9 @@ static bool adjustMinMax(SelectInst &Sel, ICmpInst &Cmp) {
 /// select (icmp Pred X, C1), C2, X --> select (icmp Pred' X, C2), X, C2
 /// Note: if C1 != C2, this will change the icmp constant to the existing
 /// constant operand of the select.
-static Instruction *
-canonicalizeMinMaxWithConstant(SelectInst &Sel, ICmpInst &Cmp,
-                               InstCombiner &IC) {
+static Instruction *canonicalizeMinMaxWithConstant(SelectInst &Sel,
+                                                   ICmpInst &Cmp,
+                                                   InstCombinerImpl &IC) {
   if (!Cmp.hasOneUse() || !isa<Constant>(Cmp.getOperand(1)))
     return nullptr;
 
@@ -1083,7 +1084,7 @@ canonicalizeMinMaxWithConstant(SelectInst &Sel, ICmpInst &Cmp,
 /// Canonicalize all these variants to 1 pattern.
 /// This makes CSE more likely.
 static Instruction *canonicalizeAbsNabs(SelectInst &Sel, ICmpInst &Cmp,
-                                        InstCombiner &IC) {
+                                        InstCombinerImpl &IC) {
   if (!Cmp.hasOneUse() || !isa<Constant>(Cmp.getOperand(1)))
     return nullptr;
 
@@ -1266,7 +1267,7 @@ static Instruction *canonicalizeClampLike(SelectInst &Sel0, ICmpInst &Cmp0,
                                   APInt::getAllOnesValue(
                                       C0->getType()->getScalarSizeInBits()))))
       return nullptr; // Can't do, have all-ones element[s].
-    C0 = AddOne(C0);
+    C0 = InstCombiner::AddOne(C0);
     std::swap(X, Sel1);
     break;
   case ICmpInst::Predicate::ICMP_UGE:
@@ -1326,7 +1327,7 @@ static Instruction *canonicalizeClampLike(SelectInst &Sel0, ICmpInst &Cmp0,
                                   APInt::getSignedMaxValue(
                                       C2->getType()->getScalarSizeInBits()))))
       return nullptr; // Can't do, have signed max element[s].
-    C2 = AddOne(C2);
+    C2 = InstCombiner::AddOne(C2);
     LLVM_FALLTHROUGH;
   case ICmpInst::Predicate::ICMP_SGE:
     // Also non-canonical, but here we don't need to change C2,
@@ -1373,7 +1374,7 @@ static Instruction *canonicalizeClampLike(SelectInst &Sel0, ICmpInst &Cmp0,
 // and swap the hands of select.
 static Instruction *
 tryToReuseConstantFromSelectInComparison(SelectInst &Sel, ICmpInst &Cmp,
-                                         InstCombiner &IC) {
+                                         InstCombinerImpl &IC) {
   ICmpInst::Predicate Pred;
   Value *X;
   Constant *C0;
@@ -1388,7 +1389,7 @@ tryToReuseConstantFromSelectInComparison(SelectInst &Sel, ICmpInst &Cmp,
 
   // If comparison predicate is non-canonical, then we certainly won't be able
   // to make it canonical; canonicalizeCmpWithConstant() already tried.
-  if (!isCanonicalPredicate(Pred))
+  if (!InstCombiner::isCanonicalPredicate(Pred))
     return nullptr;
 
   // If the [input] type of comparison and select type are different, lets abort
@@ -1416,7 +1417,8 @@ tryToReuseConstantFromSelectInComparison(SelectInst &Sel, ICmpInst &Cmp,
     return nullptr;
 
   // Check the constant we'd have with flipped-strictness predicate.
-  auto FlippedStrictness = getFlippedStrictnessPredicateAndConstant(Pred, C0);
+  auto FlippedStrictness =
+      InstCombiner::getFlippedStrictnessPredicateAndConstant(Pred, C0);
   if (!FlippedStrictness)
     return nullptr;
 
@@ -1439,8 +1441,8 @@ tryToReuseConstantFromSelectInComparison(SelectInst &Sel, ICmpInst &Cmp,
 }
 
 /// Visit a SelectInst that has an ICmpInst as its first operand.
-Instruction *InstCombiner::foldSelectInstWithICmp(SelectInst &SI,
-                                                  ICmpInst *ICI) {
+Instruction *InstCombinerImpl::foldSelectInstWithICmp(SelectInst &SI,
+                                                      ICmpInst *ICI) {
   if (Value *V = foldSelectValueEquivalence(SI, *ICI, SQ))
     return replaceInstUsesWith(SI, V);
 
@@ -1592,11 +1594,11 @@ static bool canSelectOperandBeMappingIntoPredBlock(const Value *V,
 
 /// We have an SPF (e.g. a min or max) of an SPF of the form:
 ///   SPF2(SPF1(A, B), C)
-Instruction *InstCombiner::foldSPFofSPF(Instruction *Inner,
-                                        SelectPatternFlavor SPF1,
-                                        Value *A, Value *B,
-                                        Instruction &Outer,
-                                        SelectPatternFlavor SPF2, Value *C) {
+Instruction *InstCombinerImpl::foldSPFofSPF(Instruction *Inner,
+                                            SelectPatternFlavor SPF1, Value *A,
+                                            Value *B, Instruction &Outer,
+                                            SelectPatternFlavor SPF2,
+                                            Value *C) {
   if (Outer.getType() != Inner->getType())
     return nullptr;
 
@@ -1913,7 +1915,7 @@ foldOverflowingAddSubSelect(SelectInst &SI, InstCombiner::BuilderTy &Builder) {
   return CallInst::Create(F, {X, Y});
 }
 
-Instruction *InstCombiner::foldSelectExtConst(SelectInst &Sel) {
+Instruction *InstCombinerImpl::foldSelectExtConst(SelectInst &Sel) {
   Constant *C;
   if (!match(Sel.getTrueValue(), m_Constant(C)) &&
       !match(Sel.getFalseValue(), m_Constant(C)))
@@ -2014,8 +2016,8 @@ static Instruction *canonicalizeSelectToShuffle(SelectInst &SI) {
 /// to a vector select by splatting the condition. A splat may get folded with
 /// other operations in IR and having all operands of a select be vector types
 /// is likely better for vector codegen.
-static Instruction *canonicalizeScalarSelectOfVecs(
-    SelectInst &Sel, InstCombiner &IC) {
+static Instruction *canonicalizeScalarSelectOfVecs(SelectInst &Sel,
+                                                   InstCombinerImpl &IC) {
   auto *Ty = dyn_cast<VectorType>(Sel.getType());
   if (!Ty)
     return nullptr;
@@ -2185,7 +2187,7 @@ static Instruction *moveAddAfterMinMax(SelectPatternFlavor SPF, Value *X,
 }
 
 /// Match a sadd_sat or ssub_sat which is using min/max to clamp the value.
-Instruction *InstCombiner::matchSAddSubSat(SelectInst &MinMax1) {
+Instruction *InstCombinerImpl::matchSAddSubSat(SelectInst &MinMax1) {
   Type *Ty = MinMax1.getType();
 
   // We are looking for a tree of:
@@ -2385,7 +2387,8 @@ static Instruction *foldSelectToCopysign(SelectInst &Sel,
   bool IsTrueIfSignSet;
   ICmpInst::Predicate Pred;
   if (!match(Cond, m_OneUse(m_ICmp(Pred, m_BitCast(m_Value(X)), m_APInt(C)))) ||
-      !isSignBitCheck(Pred, *C, IsTrueIfSignSet) || X->getType() != SelType)
+      !InstCombiner::isSignBitCheck(Pred, *C, IsTrueIfSignSet) ||
+      X->getType() != SelType)
     return nullptr;
 
   // If needed, negate the value that will be the sign argument of the copysign:
@@ -2406,7 +2409,7 @@ static Instruction *foldSelectToCopysign(SelectInst &Sel,
   return CopySign;
 }
 
-Instruction *InstCombiner::foldVectorSelect(SelectInst &Sel) {
+Instruction *InstCombinerImpl::foldVectorSelect(SelectInst &Sel) {
   auto *VecTy = dyn_cast<FixedVectorType>(Sel.getType());
   if (!VecTy)
     return nullptr;
@@ -2536,7 +2539,7 @@ static Instruction *foldSelectToPhi(SelectInst &Sel, const DominatorTree &DT,
   return nullptr;
 }
 
-Instruction *InstCombiner::visitSelectInst(SelectInst &SI) {
+Instruction *InstCombinerImpl::visitSelectInst(SelectInst &SI) {
   Value *CondVal = SI.getCondition();
   Value *TrueVal = SI.getTrueValue();
   Value *FalseVal = SI.getFalseValue();
