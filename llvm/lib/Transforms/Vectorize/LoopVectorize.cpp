@@ -616,6 +616,11 @@ protected:
   /// vectorizing this phi node.
   void fixReduction(PHINode *Phi);
 
+  /// Generate a reduction loop in the loop vectorizer for when the backend
+  /// prefers not to lower the call to reduction intrinsic.
+  Value *generateReductionLoop(BasicBlock *RdxBlockPH, Value *ReducedPartRdx,
+                               Value *Identity);
+
   /// Clear NSW/NUW flags from reduction instructions if necessary.
   void clearReductionWrapFlags(RecurrenceDescriptor &RdxDesc);
 
@@ -4376,28 +4381,24 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
           createMinMaxOp(Builder, MinMaxKind, ReducedPartRdx, RdxPart);
   }
 
-  BasicBlock *RdxBlock = nullptr;
+  BasicBlock *RdxBlockPH = nullptr;
 
   // Create the reduction after the loop. Note that inloop reductions create the
   // target reduction in the loop using a Reduction recipe.
   if (VF.isVector() && !IsInLoopReductionPhi) {
     bool NoNaN = Legal->hasFunNoNaNAttr();
+
     // For certain backends like RISC-V it is hard to lower some reduction
     // operations like multiply effectively. In such cases we can generate a
     // reduction loop in the loop vectorizer.
     // FIXME: Decision to generate reduction loop here must come from the TTI.
-    if (isScalable()) {
-      // Create a new block betweent the vector body and the middle block.
-      RdxBlock = LoopMiddleBlock;
-      LoopMiddleBlock->setName("reduction.loop");
-      LoopMiddleBlock = SplitBlock(LoopMiddleBlock, &LoopMiddleBlock->front(),
-                                   DT, LI, nullptr, "middle.block");
-      // Reset the insert point and debug location to the new middle block.
-      Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
-      setDebugLocFromInst(Builder, LoopMiddleBlock->getTerminator());
-    }
-    ReducedPartRdx =
-        createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx, NoNaN);
+    if (isScalable() && Op == Instruction::Mul)
+      ReducedPartRdx =
+          generateReductionLoop(RdxBlockPH, ReducedPartRdx, Identity);
+    else
+      ReducedPartRdx =
+          createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx, NoNaN);
+
     // If the reduction can be performed in a smaller type, we need to extend
     // the reduction to the wider type before we branch to the original loop.
     if (Phi->getType() != RdxDesc.getRecurrenceType())
@@ -4437,6 +4438,87 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   int SelfEdgeBlockIdx = (IncomingEdgeBlockIdx ? 0 : 1);
   Phi->setIncomingValue(SelfEdgeBlockIdx, BCBlockPhi);
   Phi->setIncomingValue(IncomingEdgeBlockIdx, LoopExitInst);
+}
+
+Value *InnerLoopVectorizer::generateReductionLoop(BasicBlock *RdxBlockPH,
+                                                  Value *ReducedPartRdx,
+                                                  Value *Identity) {
+  VectorType *RdxTy = cast<VectorType>(ReducedPartRdx->getType());
+  VectorType *IdenTy = cast<VectorType>(Identity->getType());
+  assert(RdxTy->getElementCount() == IdenTy->getElementCount() &&
+         "Identity vector does not have same length as reduction vector");
+
+  RdxBlockPH = LoopMiddleBlock;
+  LoopMiddleBlock->setName("reduction.loop.ph");
+  LoopMiddleBlock = SplitBlock(LoopMiddleBlock, &LoopMiddleBlock->front(), DT,
+                               LI, nullptr, "middle.block");
+  // Reset Debug Location to stay at the terminator of Middle Block. See
+  // explanation at the previous call to setDebugLocFromInst.
+  setDebugLocFromInst(Builder, LoopMiddleBlock->getTerminator());
+
+  // Create reduction loop body
+  BasicBlock *RdxBlock = SplitBlock(RdxBlockPH, &RdxBlockPH->front(), DT, LI,
+                                    nullptr, "reduction.loop.body");
+
+  // Insert instruction to get runtime vector length in reduction preheader.
+  Builder.SetInsertPoint(&*RdxBlockPH->getFirstInsertionPt());
+  CallInst *Vscale = emitVscaleCall(Builder, RdxBlockPH->getModule(),
+                                    Type::getInt32Ty(RdxBlockPH->getContext()));
+  Value *InitLen =
+      Builder.CreateMul(Builder.getInt32(VF), Vscale, "vscale.x.vf");
+
+  // Insert loop in the reduction loop body.
+  Builder.SetInsertPoint(&*RdxBlock->getFirstInsertionPt());
+
+  // Insert Phis for operating vector length and reduced vector.
+  PHINode *CurrLen = Builder.CreatePHI(InitLen->getType(), 2, "current.len");
+  CurrLen->addIncoming(InitLen, RdxBlockPH);
+  PHINode *CurrVec =
+      Builder.CreatePHI(ReducedPartRdx->getType(), 2, "current.vec");
+  CurrVec->addIncoming(ReducedPartRdx, RdxBlockPH);
+
+  // Compute half of vector len.
+  Constant *Two = ConstantInt::get(InitLen->getType(), 2);
+  auto *HalfLenQuotient = Builder.CreateUDiv(CurrLen, Two);
+  auto *HalfLenRemainder = Builder.CreateURem(CurrLen, Two);
+  Value *HalfLen =
+      Builder.CreateAdd(HalfLenQuotient, HalfLenRemainder, "halflen");
+
+  // Create a vector with first half of the current vector.
+  Value *StepVec =
+      Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector, RdxTy,
+                              {}, nullptr, "index.vec");
+  Value *HalLenSplat =
+      Builder.CreateVectorSplat(RdxTy->getElementCount(), HalfLen, "halflen");
+  Value *HalfMask = Builder.CreateICmpULT(StepVec, HalLenSplat);
+  Value *FirstHalf =
+      Builder.CreateSelect(HalfMask, CurrVec, Identity, "first.half");
+
+  // Create a vector with the second half of the current vector.
+  Value *SecondHalf = Builder.CreateIntrinsic(
+      Intrinsic::experimental_vector_slideleftfill, {RdxTy, HalfLen->getType()},
+      {CurrVec, Identity, HalfLen}, nullptr, "second.half");
+
+  // Finally multiply the two half vectors to create the reduction vector that
+  // will be used as the current vector for the next iteration or be the final
+  // result if HalfLen is 1.
+  // FIXME: Add support for other reduction operations - FMul, Add, FAdd
+  Value *RdxVec = Builder.CreateMul(FirstHalf, SecondHalf, "reduction.vec");
+
+  // Create new terminator for the reduction loop.
+  Value *ExitCond =
+      Builder.CreateICmpEQ(HalfLen, ConstantInt::get(HalfLen->getType(), 1));
+  BranchInst *CurrTerminator = cast<BranchInst>(RdxBlock->getTerminator());
+  Builder.CreateCondBr(ExitCond, CurrTerminator->getSuccessor(0), RdxBlock);
+  CurrTerminator->eraseFromParent();
+
+  // Fix the Phis for the current vector and current length.
+  CurrLen->addIncoming(HalfLen, RdxBlock);
+  CurrVec->addIncoming(RdxVec, RdxBlock);
+
+  // Reset Insertion Point.
+  Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
+  return Builder.CreateExtractElement(RdxVec, Builder.getInt32(0), "reduced");
 }
 
 void InnerLoopVectorizer::clearReductionWrapFlags(
