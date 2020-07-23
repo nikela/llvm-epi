@@ -76,6 +76,12 @@ def DocEPILaneManipulation : DocEPIBuiltinCategory
   let Index = 50;
 }
 
+def DocEPISegmentedLoadsStores : DocEPIBuiltinCategory
+{
+  let Name = "Segmented load/stores";
+  let Index = 60;
+}
+
 def DocEPIBitManipulation : DocEPIBuiltinCategory
 {
   let Name = "Bit manipulation";
@@ -3976,6 +3982,53 @@ This operation is useful to compute wider-than-ELEN integer vector subtraction.}
   }];
 
   let ParameterNames = ["a", "b", "borrow_in"];
+}
+
+// Segmented loads/stores
+
+def : DocEPIBuiltin<vlseg2>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of two elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg2e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vsseg2>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of two elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg2e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
 }
 
 // EPI custom extensions
