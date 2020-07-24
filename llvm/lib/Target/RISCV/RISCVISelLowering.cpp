@@ -358,6 +358,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                     MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::MGATHER, VT, Custom);
+      setOperationAction(ISD::MSCATTER, VT, Custom);
       setOperationAction(ISD::SELECT, VT, Custom);
     }
 
@@ -687,8 +688,7 @@ SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
   return SextInreg;
 }
 
-SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
   assert(VT.isScalableVector() && "Unexpected type");
@@ -708,8 +708,8 @@ SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const
                         MVT::i64),           // log2(Scale).
         DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
     };
-    // FIXME: This may overflow. It might be OK for i64 since a GEP in i64 gets
-    // expanded to this.
+    // FIXME: This may overflow. RVV-0.9 provides mechanisms to decouple the
+    // index width from the data element width, solving this problem.
     Offsets = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, IndexVT, VSLLOperands);
   }
 
@@ -719,11 +719,52 @@ SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const
       Op.getOperand(1), // Merge.
       Op.getOperand(3), // Base address.
       Offsets,
-      Op.getOperand(2), // Mask.
+      Op.getOperand(2),                    // Mask.
       DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
   };
 
   return DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
+}
+
+SDValue RISCVTargetLowering::lowerMSCATTER(SDValue Op,
+                                           SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT VT = Op.getOperand(1).getValueType();
+  assert(VT.isScalableVector() && "Unexpected type");
+
+  SDValue Indices = Op.getOperand(4);
+  EVT IndexVT = Indices.getValueType();
+  assert(IndexVT == VT.changeVectorElementTypeToInteger() &&
+         "Unexpected type for indices");
+
+  SDValue Offsets;
+  if (Op.getConstantOperandVal(5) == 1) {
+    Offsets = Indices;
+  } else {
+    SDValue VSLLOperands[] = {
+        DAG.getTargetConstant(Intrinsic::epi_vsll, DL, MVT::i64), Indices,
+        DAG.getConstant(Log2_64(Op.getConstantOperandVal(5)), DL,
+                        MVT::i64),           // log2(Scale).
+        DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+    };
+    // FIXME: This may overflow. RVV-0.9 provides mechanisms to decouple the
+    // index width from the data element width, solving this problem.
+    Offsets = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, IndexVT, VSLLOperands);
+  }
+
+  // Val, OutChain = GATHER (InChain, PassThru, Mask, BasePtr, Index, Scale)
+  //      OutChain = SCATTER(InChain, Value,    Mask, BasePtr, Index, Scale)
+  SDValue VSXEOperands[] = {
+      Op.getOperand(0), // Chain.
+      DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
+      Op.getOperand(1), // Data
+      Op.getOperand(3), // Base address.
+      Offsets,
+      Op.getOperand(2),                    // Mask.
+      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+  };
+
+  return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
 }
 
 SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
@@ -877,6 +918,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSIGN_EXTEND_INREG(Op, DAG);
   case ISD::MGATHER:
     return lowerMGATHER(Op, DAG);
+  case ISD::MSCATTER:
+    return lowerMSCATTER(Op, DAG);
   case ISD::EXTRACT_VECTOR_ELT:
     return lowerEXTRACT_VECTOR_ELT(Op, DAG);
   case ISD::FEXP:
@@ -1877,6 +1920,50 @@ static std::pair<int64_t, int64_t> getSewLMul(MVT VT) {
   }
 }
 
+// Decomposes a vector of addresses into a base address plus a vector of
+// offsets.
+static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
+                                     SDLoc DL, SelectionDAG &DAG,
+                                     SDValue &BaseAddr, SDValue &Offsets) {
+  unsigned Opcode = Addresses.getOpcode();
+  if (Opcode == ISD::SPLAT_VECTOR) {
+    // Addresses is a splat vector. Set the BaseAddr as the splatted value
+    // and the offsets to zero.
+    BaseAddr = Addresses.getOperand(0);
+    Offsets =
+        DAG.getNode(ISD::SPLAT_VECTOR, DL, OffsetsVT,
+                    DAG.getConstant(0, DL, OffsetsVT.getVectorElementType()));
+    return;
+  }
+
+  if (Opcode == ISD::ADD) {
+    // Addresses is either (add a, (splat b)) or (add (splat a), b). Compute the
+    // base address as int the previous case and use the addend as offsets.
+    SDValue Op0 = Addresses.getOperand(0);
+    SDValue Op1 = Addresses.getOperand(1);
+    if (Op0.getOpcode() == ISD::SPLAT_VECTOR ||
+        Op1.getOpcode() == ISD::SPLAT_VECTOR) {
+      if (Op0.getOpcode() == ISD::SPLAT_VECTOR) {
+        BaseAddr = Op0.getOperand(0);
+        Offsets = Op1;
+      } else {
+        BaseAddr = Op1.getOperand(0);
+        Offsets = Op0;
+      }
+      assert(OffsetsVT == Offsets.getValueType() &&
+             "Unexpected type for the offsets vector");
+      return;
+    }
+  }
+
+  // Fallback to setting the base address to zero and the offsets to the
+  // Addresses vector.
+  assert(OffsetsVT == Addresses.getValueType() &&
+         "Unexpected type for the offsets vector");
+  BaseAddr = DAG.getConstant(0, DL, MVT::i64);
+  Offsets = Addresses;
+}
+
 SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                     SelectionDAG &DAG) const {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
@@ -1927,30 +2014,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
     SDValue BaseAddr;
     SDValue Offsets;
     SDValue Addresses = Op.getOperand(2);
-    unsigned Opcode = Addresses.getOpcode();
-    if (Opcode == ISD::SPLAT_VECTOR) {
-      BaseAddr = Addresses.getOperand(0);
-      Offsets =
-          DAG.getNode(ISD::SPLAT_VECTOR, DL, OffsetsVT,
-                      DAG.getConstant(0, DL, OffsetsVT.getVectorElementType()));
-    } else if (Opcode == ISD::ADD) {
-      // FIXME: This doesn't work with scalar types <64 bits since the offsets
-      // vector will be sign-extended to i64. Truncating isn't an option for
-      // i32 and i16, as it would make the `shl` (to convert element index to
-      // byte offset) unsafe.
-      assert(OffsetsVT.getScalarType().getSizeInBits() == 64 &&
-             "Unsupported scalar type for gather");
-
-      SDValue Op0 = Addresses.getOperand(0);
-      SDValue Op1 = Addresses.getOperand(1);
-      if (Op0.getOpcode() == ISD::SPLAT_VECTOR) {
-        BaseAddr = Op0.getOperand(0);
-        Offsets = Op1;
-      } else if (Op1.getOpcode() == ISD::SPLAT_VECTOR) {
-        BaseAddr = Op1.getOperand(0);
-        Offsets = Op0;
-      }
-    }
+    GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
 
     SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
 
@@ -2067,6 +2131,32 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
     return DAG.getNode(RISCVISD::VSSEG2, DL, VTs,
                        {/* Chain */ Op->getOperand(0), SDValue(Tuple, 0),
                         Op->getOperand(4), Op->getOperand(5), SEW});
+  }
+  case Intrinsic::vp_scatter: {
+    SDValue Data = Op.getOperand(2);
+    EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
+
+    SDValue BaseAddr;
+    SDValue Offsets;
+    SDValue Addresses = Op.getOperand(3);
+    GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
+
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(6));
+
+    // FIXME Address alignment operand (4) ignored.
+    SDValue VSXEOperands[] = {
+        Op.getOperand(0), // Chain.
+        DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
+        Data,
+        BaseAddr,
+        Offsets,
+        Op.getOperand(5), // Mask.
+        VL
+    };
+    SDValue Result =
+        DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
+
+    return Result;
   }
   }
 

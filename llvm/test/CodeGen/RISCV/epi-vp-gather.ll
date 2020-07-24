@@ -2,8 +2,8 @@
 ; RUN: llc -mtriple riscv64 -mattr=+experimental-v -verify-machineinstrs < %s \
 ; RUN:    | FileCheck %s
 
-define <vscale x 1 x i64> @nxv1i64(i64* %ptr, <vscale x 1 x i64> %indices, <vscale x 1 x i1> %mask, i32 %evl) {
-; CHECK-LABEL: nxv1i64:
+define <vscale x 1 x i64> @nxv1i64_1(i64* %ptr, <vscale x 1 x i64> %indices, <vscale x 1 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv1i64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64,m1
 ; CHECK-NEXT:    vmv.v.i v1, 3
@@ -11,33 +11,101 @@ define <vscale x 1 x i64> @nxv1i64(i64* %ptr, <vscale x 1 x i64> %indices, <vsca
 ; CHECK-NEXT:    vsetvli a1, a1, e64,m1
 ; CHECK-NEXT:    vlxe.v v16, (a0), v1, v0.t
 ; CHECK-NEXT:    ret
-  %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
-  %2 = call <vscale x 1 x i64> @llvm.vp.gather.nxv1i64.nxv1p0i64(<vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
-  ret <vscale x 1 x i64> %2
+  %ptrs = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
+  %data = call <vscale x 1 x i64> @llvm.vp.gather.nxv1i64.nxv1p0i64(<vscale x 1 x i64*> %ptrs, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  ret <vscale x 1 x i64> %data
 }
 
-; FIXME: Enable when gather of element types <i64 is supported.
+define <vscale x 1 x i64> @nxv1i64_2(<vscale x 1 x i64*> %ptrs, <vscale x 1 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv1i64_2:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1
+; CHECK-NEXT:    vlxe.v v16, (zero), v16, v0.t
+; CHECK-NEXT:    ret
+  %data = call <vscale x 1 x i64> @llvm.vp.gather.nxv1i64.nxv1p0i64(<vscale x 1 x i64*> %ptrs, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  ret <vscale x 1 x i64> %data
+}
 
-;define <vscale x 2 x float> @nxv2f32(float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) {
-;  %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
-;  %2 = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> %1, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
-;  ret <vscale x 2 x float> %2
+define <vscale x 1 x i64> @nxv1i64_3(i64* %ptr, <vscale x 1 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv1i64_3:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a2, zero, e64,m1
+; CHECK-NEXT:    vmv.v.i v1, 0
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1
+; CHECK-NEXT:    vlxe.v v16, (a0), v1, v0.t
+; CHECK-NEXT:    ret
+  %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
+  %splat = shufflevector <vscale x 1 x i64*> %head, <vscale x 1 x i64*> undef, <vscale x 1 x i32> zeroinitializer
+  %data = call <vscale x 1 x i64> @llvm.vp.gather.nxv1i64.nxv1p0i64(<vscale x 1 x i64*> %splat, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  ret <vscale x 1 x i64> %data
+}
+
+; FIXME: Unsupported.
+;define <vscale x 2 x float> @nxv2f32_1(float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
+;  %ptrs = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
+;  %data = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> %ptrs, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+;  ret <vscale x 2 x float> %data
 ;}
 
-;define <vscale x 16 x i8> @nxv16i8(i8* %ptr, <vscale x 16 x i8> %indices, <vscale x 16 x i1> %mask, i32 %evl) {
-;  %1 = getelementptr i8, i8* %ptr, <vscale x 16 x i8> %indices
-;  %2 = call <vscale x 16 x i8> @llvm.vp.gather.nxv16i8.nxv16p0i8(<vscale x 16 x i8*> %1, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
-;  ret <vscale x 16 x i8> %2
+;define <vscale x 2 x float> @nxv2f32_2(<vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
+;  %data = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> %ptrs, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+;  ret <vscale x 2 x float> %data
 ;}
 
-;define <vscale x 16 x i16> @nxv16i16(i16* %ptr, <vscale x 16 x i16> %indices, <vscale x 16 x i1> %mask, i32 %evl) {
-;  %1 = getelementptr i16, i16* %ptr, <vscale x 16 x i16> %indices
-;  %2 = call <vscale x 16 x i16> @llvm.vp.gather.nxv16i16.nxv16p0i16(<vscale x 16 x i16*> %1, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
-;  ret <vscale x 16 x i16> %2
+define <vscale x 2 x float> @nxv2f32_3(float* %ptr, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv2f32_3:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a2, zero, e32,m1
+; CHECK-NEXT:    vmv.v.i v1, 0
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1
+; CHECK-NEXT:    vlxe.v v16, (a0), v1, v0.t
+; CHECK-NEXT:    ret
+  %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
+  %splat = shufflevector <vscale x 2 x float*> %head, <vscale x 2 x float*> undef, <vscale x 2 x i32> zeroinitializer
+  %data = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> %splat, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  ret <vscale x 2 x float> %data
+}
+
+; FIXME: Unsupported.
+;define <vscale x 16 x i8> @nxv16i8_1(i8* %ptr, <vscale x 16 x i8> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %ptrs = getelementptr i8, i8* %ptr, <vscale x 16 x i8> %indices
+;  %data = call <vscale x 16 x i8> @llvm.vp.gather.nxv16i8.nxv16p0i8(<vscale x 16 x i8*> %ptrs, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i8> %data
 ;}
 
-define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask, i32 %evl) {
-; CHECK-LABEL: nxv8f64:
+;define <vscale x 16 x i8> @nxv16i8_2(<vscale x 16 x i8*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %data = call <vscale x 16 x i8> @llvm.vp.gather.nxv16i8.nxv16p0i8(<vscale x 16 x i8*> %ptrs, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i8> %data
+;}
+
+;define <vscale x 16 x i8> @nxv16i8_3(i8* %ptr, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %head = insertelement <vscale x 16 x i8*> undef, i8* %ptr, i32 0
+;  %splat = shufflevector <vscale x 16 x i8*> %head, <vscale x 16 x i8*> undef, <vscale x 16 x i32> zeroinitializer
+;  %data = call <vscale x 16 x i8> @llvm.vp.gather.nxv16i8.nxv16p0i8(<vscale x 16 x i8*> %splat, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i8> %data
+;}
+
+; FIXME: Unsupported.
+;define <vscale x 16 x i16> @nxv16i16_1(i16* %ptr, <vscale x 16 x i16> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %ptrs = getelementptr i16, i16* %ptr, <vscale x 16 x i16> %indices
+;  %data = call <vscale x 16 x i16> @llvm.vp.gather.nxv16i16.nxv16p0i16(<vscale x 16 x i16*> %ptrs, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i16> %data
+;}
+
+;define <vscale x 16 x i16> @nxv16i16_2(<vscale x 16 x i16*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %data = call <vscale x 16 x i16> @llvm.vp.gather.nxv16i16.nxv16p0i16(<vscale x 16 x i16*> %ptrs, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i16> %data
+;}
+
+;define <vscale x 16 x i16> @nxv16i16_3(i16* %ptr, <vscale x 16 x i16> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
+;  %head = insertelement <vscale x 16 x i16*> undef, i16* %ptr, i32 0
+;  %splat = shufflevector <vscale x 16 x i16*> %head, <vscale x 16 x i16*> undef, <vscale x 16 x i32> zeroinitializer
+;  %data = call <vscale x 16 x i16> @llvm.vp.gather.nxv16i16.nxv16p0i16(<vscale x 16 x i16*> %splat, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  ret <vscale x 16 x i16> %data
+;}
+
+define <vscale x 8 x double> @nxv8f64_1(double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv8f64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64,m8
 ; CHECK-NEXT:    vmv.v.i v8, 3
@@ -45,9 +113,34 @@ define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices,
 ; CHECK-NEXT:    vsetvli a1, a1, e64,m8
 ; CHECK-NEXT:    vlxe.v v16, (a0), v24, v0.t
 ; CHECK-NEXT:    ret
-  %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
-  %2 = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
-  ret <vscale x 8 x double> %2
+  %ptrs = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
+  %data = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  ret <vscale x 8 x double> %data
+}
+
+define <vscale x 8 x double> @nxv8f64_2(<vscale x 8 x double*> %ptrs, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv8f64_2:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a0, a0, e64,m8
+; CHECK-NEXT:    vlxe.v v8, (zero), v16, v0.t
+; CHECK-NEXT:    vmv8r.v v16, v8
+; CHECK-NEXT:    ret
+  %data = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  ret <vscale x 8 x double> %data
+}
+
+define <vscale x 8 x double> @nxv8f64_3(double* %ptr, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv8f64_3:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a2, zero, e64,m8
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vsetvli a1, a1, e64,m8
+; CHECK-NEXT:    vlxe.v v16, (a0), v8, v0.t
+; CHECK-NEXT:    ret
+  %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
+  %splat = shufflevector <vscale x 8 x double*> %head, <vscale x 8 x double*> undef, <vscale x 8 x i32> zeroinitializer
+  %data = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %splat, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  ret <vscale x 8 x double> %data
 }
 
 ; LMUL=1
