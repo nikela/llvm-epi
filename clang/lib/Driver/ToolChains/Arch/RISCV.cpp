@@ -645,12 +645,10 @@ StringRef riscv::getRISCVABI(const ArgList &Args, const llvm::Triple &Triple) {
     else
       return "ilp32d";
   } else {
-    // EPI specific: In riscv64 we always default to lp64d
-    return "lp64d";
-    // if (Triple.getOS() == llvm::Triple::UnknownOS)
-    //   return "lp64";
-    // else
-    //   return "lp64d";
+    if (Triple.getOS() == llvm::Triple::UnknownOS)
+      return "lp64";
+    else
+      return "lp64d";
   }
 }
 
