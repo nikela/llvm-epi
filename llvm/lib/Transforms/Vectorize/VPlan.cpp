@@ -787,7 +787,7 @@ static bool isOuterMask(VPValue *V) {
 
 void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                                     VPSlotTracker &SlotTracker) const {
-  O << " +\n" << Indent << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
+  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
   O << ", ";
   VPValue *Mask = getMask();
   if (isOuterMask(Mask))
@@ -796,7 +796,6 @@ void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
     Mask->printAsOperand(O, SlotTracker);
   O << ", ";
   getEVL()->printAsOperand(O, SlotTracker);
-  O << "\\l\"";
 }
 
 void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
@@ -932,14 +931,14 @@ void VPWidenCanonicalIVRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPWidenEVLRecipe::print(raw_ostream &O, const Twine &Indent,
                              VPSlotTracker &SlotTracker) const {
-  O << " +\n" << Indent << "\"EMIT ";
+  O << "\"EMIT ";
   getEVL()->printAsOperand(O, SlotTracker);
-  O << " = GENERATE-EXPLICIT-VECTOR-LENGTH \\l\"";
+  O << " = GENERATE-EXPLICIT-VECTOR-LENGTH";
 }
 
 void VPPredicatedWidenMemoryInstructionRecipe::print(
     raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
-  O << " +\n" << Indent << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
+  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
   O << ", ";
   getAddr()->printAsOperand(O, SlotTracker);
   O << ", ";
@@ -950,7 +949,6 @@ void VPPredicatedWidenMemoryInstructionRecipe::print(
     Mask->printAsOperand(O, SlotTracker);
   O << ", ";
   getEVL()->printAsOperand(O, SlotTracker);
-  O << "\\l\"";
 }
 
 template void DomTreeBuilder::Calculate<VPDominatorTree>(VPDominatorTree &DT);
