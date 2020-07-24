@@ -3329,6 +3329,11 @@ defm "" : pat_vop_binary_common<and, "PseudoVAND", AllIntegerVectors>;
 defm "" : pat_vop_binary_common<fadd, "PseudoVFADD", AllFloatVectors>;
 defm "" : pat_vop_binary_common<fsub, "PseudoVFSUB", AllFloatVectors>;
 defm "" : pat_vop_binary_common<fmul, "PseudoVFMUL", AllFloatVectors>;
+// FIXME: Our understanding from the spec is that the following is wrong and
+// should be 'fminimum' and 'fmaximum' instead. However this issue is found in
+// the base operations in F and D so for now we keep it coherent with those.
+defm "" : pat_vop_binary_common<fminnum, "PseudoVFMIN", AllFloatVectors>;
+defm "" : pat_vop_binary_common<fmaxnum, "PseudoVFMAX", AllFloatVectors>;
 
 defm "" : pat_vop_binary_reduction_int<vecreduce_add, "PseudoVREDSUM">;
 defm "" : pat_vop_binary_reduction_int<vecreduce_and, "PseudoVREDAND">;
