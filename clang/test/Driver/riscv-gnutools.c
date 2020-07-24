@@ -1,5 +1,3 @@
-// XFAIL: *
-
 // Check gnutools are invoked with propagated values for -mabi and -march.
 //
 // This test also checks the default -march/-mabi for certain targets.
