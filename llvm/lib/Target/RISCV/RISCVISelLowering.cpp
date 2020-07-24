@@ -1754,6 +1754,12 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
         {DAG.getTargetConstant(Intrinsic::epi_vmxor, DL, MVT::i64), OpB,
          XorAndMask, EVL});
   }
+  case Intrinsic::vp_bitcast: {
+    assert(Op.getValueType().getSizeInBits() ==
+               Op.getOperand(1).getValueType().getSizeInBits() &&
+           "Unable to bitcast values of unmatching sizes");
+    return Op.getOperand(1);
+  }
   }
 
   std::vector<SDValue> Operands;
@@ -1867,6 +1873,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
   case Intrinsic::vp_fcmp:
   case Intrinsic::vp_select:
   case Intrinsic::vp_sitofp:
+  case Intrinsic::vp_bitcast:
     return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
   }
 }
