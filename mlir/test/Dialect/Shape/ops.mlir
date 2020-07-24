@@ -1,4 +1,3 @@
-// RUN: mlir-opt -split-input-file %s | mlir-opt | FileCheck %s
 // Verify the printed output can be parsed.
 // RUN: mlir-opt %s | mlir-opt | FileCheck %s
 // Verify the generic form can be parsed.
@@ -85,9 +84,9 @@ func @test_parse_const_shape() {
   return
 }
 
-func @test_shape_of(%arg0: tensor<?xf32>) -> !shape.shape {
-  %0 = shape.shape_of %arg0 : tensor<?xf32>
-  return %0 : !shape.shape
+func @test_shape_of(%arg0: tensor<?xf32>) -> tensor<?xindex> {
+  %0 = shape.shape_of %arg0 : tensor<?xf32> -> tensor<?xindex>
+  return %0 : tensor<?xindex>
 }
 
 func @test_constraints() {
@@ -99,7 +98,7 @@ func @test_constraints() {
   %w3 = shape.const_witness false
   %w4 = shape.assuming_all %w0, %w1, %w2, %w3
   shape.assuming %w4 -> !shape.shape {
-    %2 = shape.any %0, %1
+    %2 = shape.any %0, %1 : !shape.shape
     shape.assuming_yield %2 : !shape.shape
   }
   return
@@ -137,13 +136,13 @@ func @test_from_extent_tensor(%arg: tensor<?xindex>) -> !shape.shape {
 }
 
 func @rank(%shape : !shape.shape) -> !shape.size {
-  %rank = shape.rank %shape : !shape.shape
+  %rank = shape.rank %shape : !shape.shape -> !shape.size
   return %rank : !shape.size
 }
 
-func @rank_on_extent_tensor(%shape : tensor<?xindex>) -> !shape.size {
-  %rank = shape.rank %shape : tensor<?xindex>
-  return %rank : !shape.size
+func @rank_on_extent_tensor(%shape : tensor<?xindex>) -> index {
+  %rank = shape.rank %shape : tensor<?xindex> -> index
+  return %rank : index
 }
 
 
@@ -161,3 +160,33 @@ func @shape_eq_on_mixed(%a : tensor<?xindex>, %b : !shape.shape) -> i1 {
   %result = shape.shape_eq %a, %b : tensor<?xindex>, !shape.shape
   return %result : i1
 }
+
+func @get_extent_on_shape(%arg : !shape.shape) -> !shape.size {
+  %c0 = shape.const_size 0
+  %result = shape.get_extent %arg, %c0 :
+      !shape.shape, !shape.size -> !shape.size
+  return %result : !shape.size
+}
+
+func @get_extent_on_extent_tensor(%arg : tensor<?xindex>) -> index {
+  %c0 = constant 0 : index
+  %result = shape.get_extent %arg, %c0 : tensor<?xindex>, index -> index
+  return %result : index
+}
+
+func @get_extent_on_mixed_operands(%arg : tensor<?xindex>) -> !shape.size {
+  %c0 = shape.const_size 0
+  %result = shape.get_extent %arg, %c0 : tensor<?xindex>, !shape.size -> !shape.size
+  return %result : !shape.size
+}
+
+func @any() {
+  %0 = shape.const_shape [1, 2, 3] : !shape.shape
+  %1 = shape.const_shape [4, 5, 6] : !shape.shape
+  %2 = shape.any %0, %1 : !shape.shape
+  %3 = shape.const_shape [1, 2, 3] : tensor<?xindex>
+  %4 = shape.const_shape [4, 5, 6] : tensor<?xindex>
+  %5 = shape.any %3, %4 : tensor<?xindex>
+  return
+}
+
