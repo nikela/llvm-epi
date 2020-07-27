@@ -866,6 +866,9 @@ bool llvm::maskIsAllZeroOrUndef(Value *Mask) {
     return false;
   if (ConstMask->isNullValue() || isa<UndefValue>(ConstMask))
     return true;
+  // Cannot check each element of a scalable vector at compile time.
+  if (isa<ScalableVectorType>(ConstMask->getType()))
+    return false;
   for (unsigned
            I = 0,
            E = cast<FixedVectorType>(ConstMask->getType())->getNumElements();
