@@ -126,22 +126,24 @@ class VWholeLoad<bits<3> nf, string opcodestr>
 }
 
 // segment load vd, (rs1), vm
-class VUnitStrideSegmentLoad<bits<3>nf, RISCVMOP mop, RISCVLSUMOP lumop, 
-                              RISCVWidth width, string opcodestr>
-    : RVInstVLU<nf, mop, lumop, width, (outs VRegOp:$vd),
+class VUnitStrideSegmentLoad<bits<3> nf, RISCVLSUMOP lumop,
+                             RISCVWidth width, string opcodestr>
+    : RVInstVLU<nf, width.Value{3}, lumop, width.Value{2-0},
+                (outs VRegOp:$vd),
                 (ins GPR:$rs1, VMaskOp:$vm), opcodestr, "$vd, (${rs1})$vm">;
 
 // segment load vd, (rs1), rs2, vm
-class VStridedSegmentLoad<bits<3>nf, RISCVMOP mop, RISCVWidth width, 
-                            string opcodestr>
-    : RVInstVLS<nf, mop, width, (outs VRegOp:$vd),
+class VStridedSegmentLoad<bits<3> nf, RISCVWidth width, string opcodestr>
+    : RVInstVLS<nf, width.Value{3}, width.Value{2-0},
+                (outs VRegOp:$vd),
                 (ins GPR:$rs1, GPR:$rs2, VMaskOp:$vm), opcodestr,
                 "$vd, (${rs1}), $rs2$vm">;
 
+
 // segment load vd, (rs1), vs2, vm
-class VIndexedSegmentLoad<bits<3>nf, RISCVMOP mop, RISCVWidth width,
-                            string opcodestr>
-    : RVInstVLX<nf, mop, width, (outs VRegOp:$vd),
+class VIndexedSegmentLoad<bits<3> nf, RISCVWidth width, string opcodestr>
+    : RVInstVLX<nf, width.Value{3}, width.Value{2-0},
+                (outs VRegOp:$vd),
                 (ins GPR:$rs1, VRegOp:$vs2, VMaskOp:$vm), opcodestr,
                 "$vd, (${rs1}), $vs2$vm">;
 } // hasSideEffects = 0, mayLoad = 1, mayStore = 0
@@ -175,24 +177,22 @@ class VWholeStore<bits<3> nf, string opcodestr>
   let Uses = [];
 }
 
-// segment store vs3, (rs1), vm
-class VUnitStrideSegmentStore<bits<3> nf, RISCVMOP mop, RISCVLSUMOP sumop, 
+// segment store vd, vs3, (rs1), vm
+class VUnitStrideSegmentStore<bits<3> nf, RISCVLSUMOP sumop, 
                               RISCVWidth width, string opcodestr>
-    : RVInstVSU<nf, mop, sumop, width, (outs), 
-                (ins VRegOp:$vs3, GPR:$rs1, VMaskOp:$vm), opcodestr,
+    : RVInstVSU<nf, width.Value{3}, sumop, width.Value{2-0},
+                (outs), (ins VRegOp:$vs3, GPR:$rs1, VMaskOp:$vm), opcodestr,
                 "$vs3, (${rs1})$vm">;
 
 // segment store vd, vs3, (rs1), rs2, vm
-class VStridedSegmentStore<bits<3> nf, RISCVMOP mop, RISCVWidth width, 
-                                string opcodestr>
-    : RVInstVSS<nf, mop, width, (outs),
+class VStridedSegmentStore<bits<3> nf, RISCVWidth width, string opcodestr>
+    : RVInstVSS<nf, width.Value{3}, width.Value{2-0}, (outs),
                 (ins VRegOp:$vs3, GPR:$rs1, GPR:$rs2, VMaskOp:$vm),
                 opcodestr, "$vs3, (${rs1}), $rs2$vm">;
-  
+
 // segment store vd, vs3, (rs1), vs2, vm
-class VIndexedSegmentStore<bits<3> nf, RISCVMOP mop, RISCVWidth width,
-                                string opcodestr>
-    : RVInstVSX<nf, mop, width, (outs),
+class VIndexedSegmentStore<bits<3> nf, RISCVMOP mop, RISCVWidth width, string opcodestr>
+    : RVInstVSX<nf, width.Value{3}, mop, width.Value{2-0}, (outs),
                 (ins VRegOp:$vs3, GPR:$rs1, VRegOp:$vs2, VMaskOp:$vm),
                 opcodestr, "$vs3, (${rs1}), $vs2$vm">;
 } // hasSideEffects = 0, mayLoad = 0, mayStore = 1
@@ -956,95 +956,72 @@ foreach nf = [1, 2, 4, 8] in {
 } // Predicates = [HasStdExtV]
 
 let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
-  // Vector Segment Load/Store Instructions
-foreach nf = 2-8 in {
-  def VLSEG#nf#B_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStride, LSWidthVByte, "vlseg"#nf#"b.v">;
-  def VLSEG#nf#H_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStride, LSWidthVHalf, "vlseg"#nf#"h.v">;
-  def VLSEG#nf#W_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStride, LSWidthVWord, "vlseg"#nf#"w.v">;
-  def VLSEG#nf#BU_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStride, LSWidthVByte, "vlseg"#nf#"bu.v">;
-  def VLSEG#nf#HU_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStride, LSWidthVHalf, "vlseg"#nf#"hu.v">;
-  def VLSEG#nf#WU_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStride, LSWidthVWord, "vlseg"#nf#"wu.v">;
-  def VLSEG#nf#E_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                            LUMOPUnitStride, LSWidthVSEW, "vlseg"#nf#"e.v">;
+  foreach nf=2-8 in {
+    def VLSEG#nf#E8_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth8, "vlseg"#nf#"e8.v">;
+    def VLSEG#nf#E16_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth16, "vlseg"#nf#"e16.v">;
+    def VLSEG#nf#E32_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth32, "vlseg"#nf#"e32.v">;
+    def VLSEG#nf#E64_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth64, "vlseg"#nf#"e64.v">;
+    def VLSEG#nf#E128_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth128, "vlseg"#nf#"e128.v">;
+    def VLSEG#nf#E256_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth256, "vlseg"#nf#"e256.v">;
+    def VLSEG#nf#E512_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth512, "vlseg"#nf#"e512.v">;
+    def VLSEG#nf#E1024_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStride, LSWidth1024, "vlseg"#nf#"e1024.v">;
 
-  def VLSEG#nf#BFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStrideFF, LSWidthVByte, "vlseg"#nf#"bff.v">;
-  def VLSEG#nf#HFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStrideFF, LSWidthVHalf, "vlseg"#nf#"hff.v">;
-  def VLSEG#nf#WFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideS,
-                          LUMOPUnitStrideFF, LSWidthVWord, "vlseg"#nf#"wff.v">;
-  def VLSEG#nf#BUFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStrideFF, LSWidthVByte, "vlseg"#nf#"buff.v">;
-  def VLSEG#nf#HUFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStrideFF, LSWidthVHalf, "vlseg"#nf#"huff.v">;
-  def VLSEG#nf#WUFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                          LUMOPUnitStrideFF, LSWidthVWord, "vlseg"#nf#"wuff.v">;
-  def VLSEG#nf#EFF_V : VUnitStrideSegmentLoad<!add(nf, -1), MOPLDUnitStrideU,
-                            LUMOPUnitStrideFF, LSWidthVSEW, "vlseg"#nf#"eff.v">;
+    def VLSEG#nf#E8FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth8, "vlseg"#nf#"e8ff.v">;
+    def VLSEG#nf#E16FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth16, "vlseg"#nf#"e16ff.v">;
+    def VLSEG#nf#E32FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth32, "vlseg"#nf#"e32ff.v">;
+    def VLSEG#nf#E64FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth64, "vlseg"#nf#"e64ff.v">;
+    def VLSEG#nf#E128FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth128, "vlseg"#nf#"e128ff.v">;
+    def VLSEG#nf#E256FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth256, "vlseg"#nf#"e256ff.v">;
+    def VLSEG#nf#E512FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth512, "vlseg"#nf#"e512ff.v">;
+    def VLSEG#nf#E1024FF_V : VUnitStrideSegmentLoad<!add(nf, -1), LUMOPUnitStrideFF, LSWidth1024, "vlseg"#nf#"e1024ff.v">;
 
-  def VLSSEG#nf#B_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedS,
-                                          LSWidthVByte, "vlsseg"#nf#"b.v">;
-  def VLSSEG#nf#H_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedS,
-                                          LSWidthVHalf, "vlsseg"#nf#"h.v">;
-  def VLSSEG#nf#W_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedS,
-                                          LSWidthVWord, "vlsseg"#nf#"w.v">;
-  def VLSSEG#nf#BU_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedU,
-                                           LSWidthVByte, "vlsseg"#nf#"bu.v">;
-  def VLSSEG#nf#HU_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedU,
-                                           LSWidthVHalf, "vlsseg"#nf#"hu.v">;
-  def VLSSEG#nf#WU_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedU,
-                                           LSWidthVWord, "vlsseg"#nf#"wu.v">;
-  def VLSSEG#nf#E_V : VStridedSegmentLoad<!add(nf, -1), MOPLDStridedU,
-                                          LSWidthVSEW, "vlsseg"#nf#"e.v">;
+    def VSSEG#nf#E8_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth8, "vsseg"#nf#"e8.v">;
+    def VSSEG#nf#E16_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth16, "vsseg"#nf#"e16.v">;
+    def VSSEG#nf#E32_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth32, "vsseg"#nf#"e32.v">;
+    def VSSEG#nf#E64_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth64, "vsseg"#nf#"e64.v">;
+    def VSSEG#nf#E128_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth128, "vsseg"#nf#"e128.v">;
+    def VSSEG#nf#E256_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth256, "vsseg"#nf#"e256.v">;
+    def VSSEG#nf#E512_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth512, "vsseg"#nf#"e512.v">;
+    def VSSEG#nf#E1024_V : VUnitStrideSegmentStore<!add(nf, -1), SUMOPUnitStride, LSWidth1024, "vsseg"#nf#"e1024.v">;
 
-  def VLXSEG#nf#B_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedS,
-                                          LSWidthVByte, "vlxseg"#nf#"b.v">;
-  def VLXSEG#nf#H_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedS,
-                                          LSWidthVHalf, "vlxseg"#nf#"h.v">;
-  def VLXSEG#nf#W_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedS,
-                                          LSWidthVWord, "vlxseg"#nf#"w.v">;
-  def VLXSEG#nf#BU_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedU,
-                                          LSWidthVByte, "vlxseg"#nf#"bu.v">;
-  def VLXSEG#nf#HU_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedU,
-                                          LSWidthVHalf, "vlxseg"#nf#"hu.v">;
-  def VLXSEG#nf#WU_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedU,
-                                          LSWidthVWord, "vlxseg"#nf#"wu.v">;
-  def VLXSEG#nf#E_V : VIndexedSegmentLoad<!add(nf, -1), MOPLDIndexedU,
-                                          LSWidthVSEW, "vlxseg"#nf#"e.v">;
+    // Vector Strided Instructions
+    def VLSSEG#nf#E8_V : VStridedSegmentLoad<!add(nf, -1), LSWidth8, "vlsseg"#nf#"e8.v">;
+    def VLSSEG#nf#E16_V : VStridedSegmentLoad<!add(nf, -1), LSWidth16, "vlsseg"#nf#"e16.v">;
+    def VLSSEG#nf#E32_V : VStridedSegmentLoad<!add(nf, -1), LSWidth32, "vlsseg"#nf#"e32.v">;
+    def VLSSEG#nf#E64_V : VStridedSegmentLoad<!add(nf, -1), LSWidth64, "vlsseg"#nf#"e64.v">;
+    def VLSSEG#nf#E128_V : VStridedSegmentLoad<!add(nf, -1), LSWidth128, "vlsseg"#nf#"e128.v">;
+    def VLSSEG#nf#E256_V : VStridedSegmentLoad<!add(nf, -1), LSWidth256, "vlsseg"#nf#"e256.v">;
+    def VLSSEG#nf#E512_V : VStridedSegmentLoad<!add(nf, -1), LSWidth512, "vlsseg"#nf#"e512.v">;
+    def VLSSEG#nf#E1024_V : VStridedSegmentLoad<!add(nf, -1), LSWidth1024, "vlsseg"#nf#"e1024.v">;
 
-  def VSSEG#nf#B_V : VUnitStrideSegmentStore<!add(nf, -1), MOPSTUnitStride,
-                          SUMOPUnitStride, LSWidthVByte, "vsseg"#nf#"b.v">;
-  def VSSEG#nf#H_V : VUnitStrideSegmentStore<!add(nf, -1), MOPSTUnitStride,
-                          SUMOPUnitStride, LSWidthVHalf, "vsseg"#nf#"h.v">;
-  def VSSEG#nf#W_V : VUnitStrideSegmentStore<!add(nf, -1), MOPSTUnitStride,
-                          SUMOPUnitStride, LSWidthVWord, "vsseg"#nf#"w.v">;
-  def VSSEG#nf#E_V : VUnitStrideSegmentStore<!add(nf, -1), MOPSTUnitStride,
-                          SUMOPUnitStride, LSWidthVSEW, "vsseg"#nf#"e.v">;
+    def VSSSEG#nf#E8_V : VStridedSegmentStore<!add(nf, -1), LSWidth8, "vssseg"#nf#"e8.v">;
+    def VSSSEG#nf#E16_V : VStridedSegmentStore<!add(nf, -1), LSWidth16, "vssseg"#nf#"e16.v">;
+    def VSSSEG#nf#E32_V : VStridedSegmentStore<!add(nf, -1), LSWidth32, "vssseg"#nf#"e32.v">;
+    def VSSSEG#nf#E64_V : VStridedSegmentStore<!add(nf, -1), LSWidth64, "vssseg"#nf#"e64.v">;
+    def VSSSEG#nf#E128_V : VStridedSegmentStore<!add(nf, -1), LSWidth128, "vssseg"#nf#"e128.v">;
+    def VSSSEG#nf#E256_V : VStridedSegmentStore<!add(nf, -1), LSWidth256, "vssseg"#nf#"e256.v">;
+    def VSSSEG#nf#E512_V : VStridedSegmentStore<!add(nf, -1), LSWidth512, "vssseg"#nf#"e512.v">;
+    def VSSSEG#nf#E1024_V : VStridedSegmentStore<!add(nf, -1), LSWidth1024, "vssseg"#nf#"e1024.v">;
 
-  def VSSSEG#nf#B_V : VStridedSegmentStore<!add(nf, -1), MOPSTStrided,
-                                          LSWidthVByte, "vssseg"#nf#"b.v">;
-  def VSSSEG#nf#H_V : VStridedSegmentStore<!add(nf, -1), MOPSTStrided,
-                                          LSWidthVHalf, "vssseg"#nf#"h.v">;
-  def VSSSEG#nf#W_V : VStridedSegmentStore<!add(nf, -1), MOPSTStrided,
-                                          LSWidthVWord, "vssseg"#nf#"w.v">;
-  def VSSSEG#nf#E_V : VStridedSegmentStore<!add(nf, -1), MOPSTStrided,
-                                          LSWidthVSEW, "vssseg"#nf#"e.v">;
+    // Vector Indexed Instructions
+    def VLXSEG#nf#EI8_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth8, "vlxseg"#nf#"ei8.v">;
+    def VLXSEG#nf#EI16_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth16, "vlxseg"#nf#"ei16.v">;
+    def VLXSEG#nf#EI32_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth32, "vlxseg"#nf#"ei32.v">;
+    def VLXSEG#nf#EI64_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth64, "vlxseg"#nf#"ei64.v">;
+    def VLXSEG#nf#EI128_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth128, "vlxseg"#nf#"ei128.v">;
+    def VLXSEG#nf#EI256_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth256, "vlxseg"#nf#"ei256.v">;
+    def VLXSEG#nf#EI512_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth512, "vlxseg"#nf#"ei512.v">;
+    def VLXSEG#nf#EI1024_V : VIndexedSegmentLoad<!add(nf, -1), LSWidth1024, "vlxseg"#nf#"ei1024.v">;
 
-  def VSXEG#nf#B_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder,
-                                          LSWidthVByte, "vsxseg"#nf#"b.v">;
-  def VSXEG#nf#H_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder,
-                                          LSWidthVHalf, "vsxseg"#nf#"h.v">;
-  def VSXEG#nf#W_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder,
-                                          LSWidthVWord, "vsxseg"#nf#"w.v">;
-  def VSXEG#nf#E_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder,
-                                          LSWidthVSEW, "vsxseg"#nf#"e.v">;
-}
-} // Predicates = [HasStdExtZvlsseg]
+    def VSXSEG#nf#EI8_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth8, "vsxseg"#nf#"ei8.v">;
+    def VSXSEG#nf#EI16_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth16, "vsxseg"#nf#"ei16.v">;
+    def VSXSEG#nf#EI32_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth32, "vsxseg"#nf#"ei32.v">;
+    def VSXSEG#nf#EI64_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth64, "vsxseg"#nf#"ei64.v">;
+    def VSXSEG#nf#EI128_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth128, "vsxseg"#nf#"ei128.v">;
+    def VSXSEG#nf#EI256_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth256, "vsxseg"#nf#"ei256.v">;
+    def VSXSEG#nf#EI512_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth512, "vsxseg"#nf#"ei512.v">;
+    def VSXSEG#nf#EI1024_V : VIndexedSegmentStore<!add(nf, -1), MOPSTIndexedOrder, LSWidth1024, "vsxseg"#nf#"ei1024.v">;
+  }
+} // Predicates = [HasStdExtV, HasStdExtZvlsseg]
 
 include "RISCVInstrInfoEPI.td"
