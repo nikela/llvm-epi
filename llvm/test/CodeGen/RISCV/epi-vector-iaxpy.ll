@@ -11,7 +11,7 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:    lui a4, 16
 ; CHECK-NEXT:    addiw a4, a4, -1
 ; CHECK-NEXT:    and a7, a0, a4
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    bgeu a7, a0, .LBB0_3
 ; CHECK-NEXT:  # %bb.2:
@@ -20,22 +20,22 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
 ; CHECK-NEXT:    mv a5, zero
 ; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    vsetvli t2, zero, e64,m1
+; CHECK-NEXT:    vsetvli t2, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    slli t1, t2, 2
 ; CHECK-NEXT:    remu a6, a7, t1
 ; CHECK-NEXT:    sub t0, a7, a6
-; CHECK-NEXT:    vsetvli a4, zero, e16,m1
+; CHECK-NEXT:    vsetvli a4, zero, e16,m1,tu,mu
 ; CHECK-NEXT:    vmv.v.x v1, a3
 ; CHECK-NEXT:    slli t2, t2, 3
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle.v v2, (a4)
+; CHECK-NEXT:    vle16.v v2, (a4)
 ; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vle.v v3, (a4)
+; CHECK-NEXT:    vle16.v v3, (a4)
 ; CHECK-NEXT:    vmul.vv v2, v2, v1
 ; CHECK-NEXT:    vadd.vv v2, v2, v3
-; CHECK-NEXT:    vse.v v2, (a4)
+; CHECK-NEXT:    vse16.v v2, (a4)
 ; CHECK-NEXT:    add a0, a0, t1
 ; CHECK-NEXT:    add a5, a5, t2
 ; CHECK-NEXT:    bne a0, t0, .LBB0_4
@@ -130,7 +130,7 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a7, a0, 32
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    bgeu a7, a0, .LBB1_3
 ; CHECK-NEXT:  # %bb.2:
@@ -139,22 +139,22 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
 ; CHECK-NEXT:    mv a5, zero
 ; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    vsetvli t2, zero, e64,m1
+; CHECK-NEXT:    vsetvli t2, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    slli t1, t2, 1
 ; CHECK-NEXT:    remu a6, a7, t1
 ; CHECK-NEXT:    sub t0, a7, a6
-; CHECK-NEXT:    vsetvli a4, zero, e32,m1
+; CHECK-NEXT:    vsetvli a4, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    vmv.v.x v1, a3
 ; CHECK-NEXT:    slli t2, t2, 3
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle.v v2, (a4)
+; CHECK-NEXT:    vle32.v v2, (a4)
 ; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vle.v v3, (a4)
+; CHECK-NEXT:    vle32.v v3, (a4)
 ; CHECK-NEXT:    vmul.vv v2, v2, v1
 ; CHECK-NEXT:    vadd.vv v2, v2, v3
-; CHECK-NEXT:    vse.v v2, (a4)
+; CHECK-NEXT:    vse32.v v2, (a4)
 ; CHECK-NEXT:    add a0, a0, t1
 ; CHECK-NEXT:    add a5, a5, t2
 ; CHECK-NEXT:    bne a0, t0, .LBB1_4
@@ -248,7 +248,7 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:    addi a4, zero, 1
 ; CHECK-NEXT:    blt a0, a4, .LBB2_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
-; CHECK-NEXT:    vsetvli a4, zero, e64,m1
+; CHECK-NEXT:    vsetvli a4, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    bgeu a0, a4, .LBB2_3
 ; CHECK-NEXT:  # %bb.2:
 ; CHECK-NEXT:    mv a7, zero
@@ -256,7 +256,7 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:  .LBB2_3: # %vector.ph
 ; CHECK-NEXT:    mv a5, zero
 ; CHECK-NEXT:    mv t2, zero
-; CHECK-NEXT:    vsetvli t0, zero, e64,m1
+; CHECK-NEXT:    vsetvli t0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    remu a6, a0, t0
 ; CHECK-NEXT:    sub a7, a0, a6
 ; CHECK-NEXT:    vmv.v.x v1, a3
@@ -264,12 +264,12 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:  .LBB2_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle.v v2, (a4)
+; CHECK-NEXT:    vle64.v v2, (a4)
 ; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vle.v v3, (a4)
+; CHECK-NEXT:    vle64.v v3, (a4)
 ; CHECK-NEXT:    vmul.vv v2, v2, v1
 ; CHECK-NEXT:    vadd.vv v2, v2, v3
-; CHECK-NEXT:    vse.v v2, (a4)
+; CHECK-NEXT:    vse64.v v2, (a4)
 ; CHECK-NEXT:    add t2, t2, t0
 ; CHECK-NEXT:    add a5, a5, t1
 ; CHECK-NEXT:    bne t2, a7, .LBB2_4

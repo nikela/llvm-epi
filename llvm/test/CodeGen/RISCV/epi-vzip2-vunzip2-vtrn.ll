@@ -23,12 +23,12 @@ declare void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double>, <vscale x 1 x doubl
 define void @vzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -48,12 +48,12 @@ entry:
 define void @vunzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vunzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -73,12 +73,12 @@ entry:
 define void @vtrn.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vtrn.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -98,12 +98,12 @@ entry:
 define void @vzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e32,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e32,m1,tu,mu
+; CHECK-NEXT:    vle32.v v1, (a0)
+; CHECK-NEXT:    vle32.v v2, (a1)
 ; CHECK-NEXT:    vzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse32.v v1, (a2)
+; CHECK-NEXT:    vse32.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -123,12 +123,12 @@ entry:
 define void @vunzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e32,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e32,m1,tu,mu
+; CHECK-NEXT:    vle32.v v1, (a0)
+; CHECK-NEXT:    vle32.v v2, (a1)
 ; CHECK-NEXT:    vunzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse32.v v1, (a2)
+; CHECK-NEXT:    vse32.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -148,12 +148,12 @@ entry:
 define void @vtrn.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e32,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e32,m1,tu,mu
+; CHECK-NEXT:    vle32.v v1, (a0)
+; CHECK-NEXT:    vle32.v v2, (a1)
 ; CHECK-NEXT:    vtrn.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse32.v v1, (a2)
+; CHECK-NEXT:    vse32.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -173,12 +173,12 @@ entry:
 define void @vzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*
@@ -198,12 +198,12 @@ entry:
 define void @vunzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vunzip2.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*
@@ -223,12 +223,12 @@ entry:
 define void @vtrn.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a4, a4, e64,m1
-; CHECK-NEXT:    vle.v v1, (a0)
-; CHECK-NEXT:    vle.v v2, (a1)
+; CHECK-NEXT:    vsetvli a4, a4, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a0)
+; CHECK-NEXT:    vle64.v v2, (a1)
 ; CHECK-NEXT:    vtrn.vv v1, v1, v2
-; CHECK-NEXT:    vse.v v1, (a2)
-; CHECK-NEXT:    vse.v v2, (a3)
+; CHECK-NEXT:    vse64.v v1, (a2)
+; CHECK-NEXT:    vse64.v v2, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*

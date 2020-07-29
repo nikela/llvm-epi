@@ -154,13 +154,6 @@ def HasStdExtZvlsseg : Predicate<"Subtarget->hasStdExtZvlsseg()">,
                         AssemblerPredicate<(all_of FeatureStdExtZvlsseg),
                         "'Zvlsseg' (Vector segment load/store instructions)">;
 
-def FeatureStdExtZvlsseg
-    : SubtargetFeature<"experimental-zvlsseg", "HasStdExtZvlsseg", "true",
-                       "'Zvlsseg' (Vector segment load/store instructions)">;
-def HasStdExtZvlsseg : Predicate<"Subtarget->hasStdExtZvlsseg()">,
-                        AssemblerPredicate<(all_of FeatureStdExtZvlsseg),
-                        "'Zvlsseg' (Vector segment load/store instructions)">;
-                        
 def FeatureStdExtV
     : SubtargetFeature<"experimental-v", "HasStdExtV", "true",
                        "'V' (Vector Instructions)",

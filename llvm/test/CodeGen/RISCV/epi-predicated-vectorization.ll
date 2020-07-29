@@ -18,30 +18,30 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    slli t0, a5, 3
 ; CHECK-NEXT:    add a7, a1, t0
 ; CHECK-NEXT:    sub t2, a6, a5
-; CHECK-NEXT:    vsetvli t1, t2, e64,m1
-; CHECK-NEXT:    vle.v v1, (a7)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli t1, t2, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v1, (a7)
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vmset.m v2
 ; CHECK-NEXT:    vfmv.v.f v3, ft0
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
 ; CHECK-NEXT:    vmflt.vv v1, v1, v3
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vmand.mm v1, v1, v2
 ; CHECK-NEXT:    add t3, a2, t0
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1
-; CHECK-NEXT:    vle.v v3, (t3)
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
+; CHECK-NEXT:    vle64.v v3, (t3)
 ; CHECK-NEXT:    add a0, a3, t0
-; CHECK-NEXT:    vle.v v4, (a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vle64.v v4, (a0)
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vmxor.mm v0, v1, v2
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
 ; CHECK-NEXT:    vfmul.vv v2, v3, v4, v0.t
 ; CHECK-NEXT:    add a0, a4, t0
-; CHECK-NEXT:    vse.v v2, (a0), v0.t
+; CHECK-NEXT:    vse64.v v2, (a0), v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v1
 ; CHECK-NEXT:    vfadd.vv v2, v3, v4, v0.t
 ; CHECK-NEXT:    add a5, a5, t1
-; CHECK-NEXT:    vse.v v2, (a7), v0.t
+; CHECK-NEXT:    vse64.v v2, (a7), v0.t
 ; CHECK-NEXT:    bne a5, a6, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.cond.cleanup
 ; CHECK-NEXT:    ret

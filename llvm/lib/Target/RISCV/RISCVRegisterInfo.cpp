@@ -274,17 +274,38 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   int OffsetIndex = -1;
   // FIXME: Improve this to make it more robust.
   switch (MI.getOpcode()) {
-  case RISCV::PseudoVLE_V_M1:
-  case RISCV::PseudoVLE_V_M2:
-  case RISCV::PseudoVLE_V_M4:
-  case RISCV::PseudoVLE_V_M8:
-  case RISCV::PseudoVSE_V_M1:
-  case RISCV::PseudoVSE_V_M2:
-  case RISCV::PseudoVSE_V_M4:
-  case RISCV::PseudoVSE_V_M8:
-    // FIXME: Are the following two needed now?
-  case RISCV::VLE_V:
-  case RISCV::VSE_V:
+  case RISCV::PseudoVLE8_V_M1:
+  case RISCV::PseudoVLE16_V_M1:
+  case RISCV::PseudoVLE32_V_M1:
+  case RISCV::PseudoVLE64_V_M1:
+  case RISCV::PseudoVLE8_V_M2:
+  case RISCV::PseudoVLE16_V_M2:
+  case RISCV::PseudoVLE32_V_M2:
+  case RISCV::PseudoVLE64_V_M2:
+  case RISCV::PseudoVLE8_V_M4:
+  case RISCV::PseudoVLE16_V_M4:
+  case RISCV::PseudoVLE32_V_M4:
+  case RISCV::PseudoVLE64_V_M4:
+  case RISCV::PseudoVLE8_V_M8:
+  case RISCV::PseudoVLE16_V_M8:
+  case RISCV::PseudoVLE32_V_M8:
+  case RISCV::PseudoVLE64_V_M8:
+  case RISCV::PseudoVSE8_V_M1:
+  case RISCV::PseudoVSE16_V_M1:
+  case RISCV::PseudoVSE32_V_M1:
+  case RISCV::PseudoVSE64_V_M1:
+  case RISCV::PseudoVSE8_V_M2:
+  case RISCV::PseudoVSE16_V_M2:
+  case RISCV::PseudoVSE32_V_M2:
+  case RISCV::PseudoVSE64_V_M2:
+  case RISCV::PseudoVSE8_V_M4:
+  case RISCV::PseudoVSE16_V_M4:
+  case RISCV::PseudoVSE32_V_M4:
+  case RISCV::PseudoVSE64_V_M4:
+  case RISCV::PseudoVSE8_V_M8:
+  case RISCV::PseudoVSE16_V_M8:
+  case RISCV::PseudoVSE32_V_M8:
+  case RISCV::PseudoVSE64_V_M8:
     // The following are handled later in this function.
   case RISCV::PseudoVSPILL_M1:
   case RISCV::PseudoVRELOAD_M1:

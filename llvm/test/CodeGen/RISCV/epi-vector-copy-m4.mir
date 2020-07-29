@@ -7,8 +7,8 @@ body: |
   bb.0.entry:
     liveins: $v4m4, $x10
     $v0m4 = COPY $v4m4
-    VSE_V $v0, $x10, $noreg, implicit $vl, implicit $vtype
+    VSE64_V $v0, $x10, $noreg, implicit $vl, implicit $vtype
 ...
 
 # CHECK: vmv4r.v v0, v4
-# CHECK-NEXT: vse.v v0, (a0)
+# CHECK-NEXT: vse64.v v0, (a0)

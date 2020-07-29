@@ -22,12 +22,12 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    ld a4, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a4)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
-; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m1
-; CHECK-O0-NEXT:    vle.v v1, (a0), v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vle64.v v1, (a0), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle.v v2, (a1), v0.t
+; CHECK-O0-NEXT:    vle64.v v2, (a1), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
@@ -82,43 +82,43 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    vsll.vv v23, v1, v2, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v3, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v3, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v4, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v4, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v5, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v5, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v6, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v6, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v7, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v7, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v16, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v16, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v17, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v17, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v18, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v18, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v19, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v19, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v20, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v20, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v21, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v21, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v22, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v22, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v23, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v23, (a3), v0.t
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp)
 ; CHECK-O0-NEXT:    ld ra, 40(sp)
@@ -127,9 +127,9 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ;
 ; CHECK-O2-LABEL: test_vp_int:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m1
-; CHECK-O2-NEXT:    vle.v v1, (a0), v0.t
-; CHECK-O2-NEXT:    vle.v v2, (a1), v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m1,tu,mu
+; CHECK-O2-NEXT:    vle64.v v1, (a0), v0.t
+; CHECK-O2-NEXT:    vle64.v v2, (a1), v0.t
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vadd.vv v3, v1, v2, v0.t
@@ -145,19 +145,19 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O2-NEXT:    vsra.vv v21, v1, v2, v0.t
 ; CHECK-O2-NEXT:    vsrl.vv v22, v1, v2, v0.t
 ; CHECK-O2-NEXT:    vsll.vv v1, v1, v2, v0.t
-; CHECK-O2-NEXT:    vse.v v3, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v4, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v5, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v6, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v7, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v16, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v17, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v18, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v19, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v20, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v21, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v22, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v1, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v3, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v4, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v5, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v6, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v7, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v16, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v17, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v18, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v19, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v20, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v21, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v22, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v1, (a0), v0.t
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i64>*
 
@@ -202,10 +202,10 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    lui a3, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
-; CHECK-O0-NEXT:    vsetvli a2, a2, e32,m1
-; CHECK-O0-NEXT:    vle.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a2, a2, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vle32.v v1, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle.v v2, (a1)
+; CHECK-O0-NEXT:    vle32.v v2, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
 ; CHECK-O0-NEXT:    vadd.vv v3, v1, v2
 ; CHECK-O0-NEXT:    # implicit-def: $v4
@@ -232,26 +232,26 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    vsrl.vv v22, v1, v2
 ; CHECK-O0-NEXT:    # implicit-def: $v23
 ; CHECK-O0-NEXT:    vsll.vv v23, v1, v2
-; CHECK-O0-NEXT:    vse.v v3, (a3)
-; CHECK-O0-NEXT:    vse.v v4, (a3)
-; CHECK-O0-NEXT:    vse.v v5, (a3)
-; CHECK-O0-NEXT:    vse.v v6, (a3)
-; CHECK-O0-NEXT:    vse.v v7, (a3)
-; CHECK-O0-NEXT:    vse.v v16, (a3)
-; CHECK-O0-NEXT:    vse.v v17, (a3)
-; CHECK-O0-NEXT:    vse.v v18, (a3)
-; CHECK-O0-NEXT:    vse.v v19, (a3)
-; CHECK-O0-NEXT:    vse.v v20, (a3)
-; CHECK-O0-NEXT:    vse.v v21, (a3)
-; CHECK-O0-NEXT:    vse.v v22, (a3)
-; CHECK-O0-NEXT:    vse.v v23, (a3)
+; CHECK-O0-NEXT:    vse32.v v3, (a3)
+; CHECK-O0-NEXT:    vse32.v v4, (a3)
+; CHECK-O0-NEXT:    vse32.v v5, (a3)
+; CHECK-O0-NEXT:    vse32.v v6, (a3)
+; CHECK-O0-NEXT:    vse32.v v7, (a3)
+; CHECK-O0-NEXT:    vse32.v v16, (a3)
+; CHECK-O0-NEXT:    vse32.v v17, (a3)
+; CHECK-O0-NEXT:    vse32.v v18, (a3)
+; CHECK-O0-NEXT:    vse32.v v19, (a3)
+; CHECK-O0-NEXT:    vse32.v v20, (a3)
+; CHECK-O0-NEXT:    vse32.v v21, (a3)
+; CHECK-O0-NEXT:    vse32.v v22, (a3)
+; CHECK-O0-NEXT:    vse32.v v23, (a3)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_int_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e32,m1
-; CHECK-O2-NEXT:    vle.v v1, (a0)
-; CHECK-O2-NEXT:    vle.v v2, (a1)
+; CHECK-O2-NEXT:    vsetvli a2, a2, e32,m1,tu,mu
+; CHECK-O2-NEXT:    vle32.v v1, (a0)
+; CHECK-O2-NEXT:    vle32.v v2, (a1)
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vadd.vv v3, v1, v2
@@ -267,19 +267,19 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O2-NEXT:    vsra.vv v21, v1, v2
 ; CHECK-O2-NEXT:    vsrl.vv v22, v1, v2
 ; CHECK-O2-NEXT:    vsll.vv v1, v1, v2
-; CHECK-O2-NEXT:    vse.v v3, (a0)
-; CHECK-O2-NEXT:    vse.v v4, (a0)
-; CHECK-O2-NEXT:    vse.v v5, (a0)
-; CHECK-O2-NEXT:    vse.v v6, (a0)
-; CHECK-O2-NEXT:    vse.v v7, (a0)
-; CHECK-O2-NEXT:    vse.v v16, (a0)
-; CHECK-O2-NEXT:    vse.v v17, (a0)
-; CHECK-O2-NEXT:    vse.v v18, (a0)
-; CHECK-O2-NEXT:    vse.v v19, (a0)
-; CHECK-O2-NEXT:    vse.v v20, (a0)
-; CHECK-O2-NEXT:    vse.v v21, (a0)
-; CHECK-O2-NEXT:    vse.v v22, (a0)
-; CHECK-O2-NEXT:    vse.v v1, (a0)
+; CHECK-O2-NEXT:    vse32.v v3, (a0)
+; CHECK-O2-NEXT:    vse32.v v4, (a0)
+; CHECK-O2-NEXT:    vse32.v v5, (a0)
+; CHECK-O2-NEXT:    vse32.v v6, (a0)
+; CHECK-O2-NEXT:    vse32.v v7, (a0)
+; CHECK-O2-NEXT:    vse32.v v16, (a0)
+; CHECK-O2-NEXT:    vse32.v v17, (a0)
+; CHECK-O2-NEXT:    vse32.v v18, (a0)
+; CHECK-O2-NEXT:    vse32.v v19, (a0)
+; CHECK-O2-NEXT:    vse32.v v20, (a0)
+; CHECK-O2-NEXT:    vse32.v v21, (a0)
+; CHECK-O2-NEXT:    vse32.v v22, (a0)
+; CHECK-O2-NEXT:    vse32.v v1, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
@@ -336,12 +336,12 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    ld a4, -40(s0)
 ; CHECK-O0-NEXT:    vs1r.v v0, (a4)
 ; CHECK-O0-NEXT:    # implicit-def: $v2m2
-; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m2
-; CHECK-O0-NEXT:    vle.v v2, (a0), v0.t
+; CHECK-O0-NEXT:    vsetvli a2, a2, e64,m2,tu,mu
+; CHECK-O0-NEXT:    vle64.v v2, (a0), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v4m2
-; CHECK-O0-NEXT:    vle.v v4, (a1), v0.t
+; CHECK-O0-NEXT:    vle64.v v4, (a1), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v6m2
@@ -396,43 +396,43 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    vsll.vv v30, v2, v4, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v6, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v6, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v16, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v16, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v18, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v18, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v20, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v20, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v22, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v22, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v8, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v8, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v10, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v10, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v12, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v12, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v14, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v14, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v24, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v24, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v26, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v26, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v28, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v28, (a3), v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
-; CHECK-O0-NEXT:    vse.v v30, (a3), v0.t
+; CHECK-O0-NEXT:    vse64.v v30, (a3), v0.t
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp)
 ; CHECK-O0-NEXT:    ld ra, 40(sp)
@@ -441,9 +441,9 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ;
 ; CHECK-O2-LABEL: test_vp_int_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m2
-; CHECK-O2-NEXT:    vle.v v2, (a0), v0.t
-; CHECK-O2-NEXT:    vle.v v4, (a1), v0.t
+; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m2,tu,mu
+; CHECK-O2-NEXT:    vle64.v v2, (a0), v0.t
+; CHECK-O2-NEXT:    vle64.v v4, (a1), v0.t
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vadd.vv v6, v2, v4, v0.t
@@ -459,19 +459,19 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O2-NEXT:    vsra.vv v26, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vsrl.vv v28, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vsll.vv v30, v2, v4, v0.t
-; CHECK-O2-NEXT:    vse.v v6, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v16, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v18, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v20, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v22, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v8, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v10, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v12, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v14, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v24, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v26, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v28, (a0), v0.t
-; CHECK-O2-NEXT:    vse.v v30, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v6, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v16, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v18, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v20, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v22, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v8, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v10, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v12, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v14, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v24, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v26, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v28, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v30, (a0), v0.t
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 

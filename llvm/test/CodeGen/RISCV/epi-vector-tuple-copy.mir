@@ -7,11 +7,11 @@ body: |
   bb.0.entry:
     liveins: $v2_v3, $x10, $x11
     $v4_v5 = COPY $v2_v3
-    VSE_V $v4, $x10, $noreg, implicit $vl, implicit $vtype
-    VSE_V $v5, $x11, $noreg, implicit $vl, implicit $vtype
+    VSE64_V $v4, $x10, $noreg, implicit $vl, implicit $vtype
+    VSE64_V $v5, $x11, $noreg, implicit $vl, implicit $vtype
 ...
 
 # CHECK: vmv1r.v v4, v2
 # CHECK: vmv1r.v v5, v3
-# CHECK-NEXT: vse.v v4, (a0)
-# CHECK-NEXT: vse.v v5, (a1)
+# CHECK-NEXT: vse64.v v4, (a0)
+# CHECK-NEXT: vse64.v v5, (a1)

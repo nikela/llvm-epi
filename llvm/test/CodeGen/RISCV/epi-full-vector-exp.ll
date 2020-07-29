@@ -48,8 +48,8 @@ define <vscale x 8 x double> @exp_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp)
-; CHECK-NEXT:    vsetvli a1, zero, e64,m8
-; CHECK-NEXT:    vle.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
+; CHECK-NEXT:    vle64.v v16, (a0)
 ; CHECK-NEXT:    call __epi_exp_nxv8f64
 ; CHECK-NEXT:    ld ra, 8(sp)
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -105,8 +105,8 @@ define <vscale x 16 x float> @exp_nxv16f32(<vscale x 16 x float> %a, <vscale x 1
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp)
-; CHECK-NEXT:    vsetvli a1, zero, e32,m8
-; CHECK-NEXT:    vle.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
+; CHECK-NEXT:    vle32.v v16, (a0)
 ; CHECK-NEXT:    call __epi_exp_nxv16f32
 ; CHECK-NEXT:    ld ra, 8(sp)
 ; CHECK-NEXT:    addi sp, sp, 16

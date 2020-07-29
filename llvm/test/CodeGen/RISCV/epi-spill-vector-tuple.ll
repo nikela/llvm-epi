@@ -17,10 +17,10 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    sub sp, sp, a3
 ; SPILL-O0-NEXT:    sd sp, -64(s0)
 ; SPILL-O0-NEXT:    # implicit-def: $v1
-; SPILL-O0-NEXT:    vsetvli a3, a2, e64,m1
-; SPILL-O0-NEXT:    vle.v v1, (a0)
+; SPILL-O0-NEXT:    vsetvli a3, a2, e64,m1,tu,mu
+; SPILL-O0-NEXT:    vle64.v v1, (a0)
 ; SPILL-O0-NEXT:    # implicit-def: $v2
-; SPILL-O0-NEXT:    vle.v v2, (a1)
+; SPILL-O0-NEXT:    vle64.v v2, (a1)
 ; SPILL-O0-NEXT:    # implicit-def: $v3_v4
 ; SPILL-O0-NEXT:    vzip2.vv v3, v1, v2
 ; SPILL-O0-NEXT:    vmv1r.v v1, v4
@@ -33,14 +33,14 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    vs1r.v v3, (a0)
 ; SPILL-O0-NEXT:    call foo
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
-; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1
+; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; SPILL-O0-NEXT:    ld a0, -64(s0)
 ; SPILL-O0-NEXT:    vl1r.v v1, (a0)
 ; SPILL-O0-NEXT:    ld a0, -48(s0)
-; SPILL-O0-NEXT:    vse.v v1, (a0)
+; SPILL-O0-NEXT:    vse64.v v1, (a0)
 ; SPILL-O0-NEXT:    ld a1, -56(s0)
 ; SPILL-O0-NEXT:    vl1r.v v1, (a1)
-; SPILL-O0-NEXT:    vse.v v1, (a0)
+; SPILL-O0-NEXT:    vse64.v v1, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -64
 ; SPILL-O0-NEXT:    ld s0, 48(sp)
 ; SPILL-O0-NEXT:    ld ra, 56(sp)
@@ -61,9 +61,9 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    sd sp, -56(s0)
 ; SPILL-O2-NEXT:    mv s2, a2
 ; SPILL-O2-NEXT:    mv s1, a0
-; SPILL-O2-NEXT:    vsetvli a0, a2, e64,m1
-; SPILL-O2-NEXT:    vle.v v1, (s1)
-; SPILL-O2-NEXT:    vle.v v2, (a1)
+; SPILL-O2-NEXT:    vsetvli a0, a2, e64,m1,tu,mu
+; SPILL-O2-NEXT:    vle64.v v1, (s1)
+; SPILL-O2-NEXT:    vle64.v v2, (a1)
 ; SPILL-O2-NEXT:    vzip2.vv v1, v1, v2
 ; SPILL-O2-NEXT:    ld a1, -56(s0)
 ; SPILL-O2-NEXT:    rdvlenb a0
@@ -71,14 +71,14 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vs1r.v v1, (a1)
 ; SPILL-O2-NEXT:    vs1r.v v2, (a0)
 ; SPILL-O2-NEXT:    call foo
-; SPILL-O2-NEXT:    vsetvli a0, s2, e64,m1
+; SPILL-O2-NEXT:    vsetvli a0, s2, e64,m1,tu,mu
 ; SPILL-O2-NEXT:    ld a1, -56(s0)
 ; SPILL-O2-NEXT:    rdvlenb a0
 ; SPILL-O2-NEXT:    add a0, a1, a0
 ; SPILL-O2-NEXT:    vl1r.v v1, (a1)
 ; SPILL-O2-NEXT:    vl1r.v v2, (a0)
-; SPILL-O2-NEXT:    vse.v v1, (s1)
-; SPILL-O2-NEXT:    vse.v v2, (s1)
+; SPILL-O2-NEXT:    vse64.v v1, (s1)
+; SPILL-O2-NEXT:    vse64.v v2, (s1)
 ; SPILL-O2-NEXT:    addi sp, s0, -64
 ; SPILL-O2-NEXT:    ld s2, 32(sp)
 ; SPILL-O2-NEXT:    ld s1, 40(sp)

@@ -5,9 +5,9 @@
 define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %indices, <vscale x 1 x i1> %mask) {
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vsll.vi v1, v17, 3
-; CHECK-NEXT:    vsxe.v v16, (a0), v1, v0.t
+; CHECK-NEXT:    vsxei64.v v16, (a0), v1, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   call void @llvm.masked.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask)
@@ -37,10 +37,10 @@ define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %in
 define void @nxv8f64(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask) {
 ; CHECK-LABEL: nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64,m8
-; CHECK-NEXT:    vle.v v8, (a1)
+; CHECK-NEXT:    vsetvli a2, zero, e64,m8,tu,mu
+; CHECK-NEXT:    vle64.v v8, (a1)
 ; CHECK-NEXT:    vsll.vi v24, v8, 3
-; CHECK-NEXT:    vsxe.v v16, (a0), v24, v0.t
+; CHECK-NEXT:    vsxei64.v v16, (a0), v24, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   call void @llvm.masked.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask)

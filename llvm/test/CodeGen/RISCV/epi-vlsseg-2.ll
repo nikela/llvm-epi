@@ -7,8 +7,8 @@ declare { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.nxv1f6
 define <vscale x 1 x double> @test_vlseg2_f64(double *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-NEXT:    vlseg2e64.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.nxv1f64(double* %a, i64 %avl)
@@ -22,9 +22,9 @@ define void @test_vsseg2_f64(<vscale x 1 x double> %first, <vscale x 1 x double>
 ; CHECK-LABEL: test_vsseg2_f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e64.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv1f64(<vscale x 1 x double> %first, <vscale x 1 x double> %second, double *%a, i64 %avl)
   ret void
@@ -36,8 +36,8 @@ declare { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.nxv2f32(
 define <vscale x 2 x float> @test_vlseg2_f32(float *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-NEXT:    vlseg2e32.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.nxv2f32(float* %a, i64 %avl)
@@ -51,9 +51,9 @@ define void @test_vsseg2_f32(<vscale x 2 x float> %first, <vscale x 2 x float> %
 ; CHECK-LABEL: test_vsseg2_f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e32.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv2f32(<vscale x 2 x float> %first, <vscale x 2 x float> %second, float *%a, i64 %avl)
   ret void
@@ -65,8 +65,8 @@ declare { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.nxv1i64(i64 
 define <vscale x 1 x i64> @test_vlseg2_i64(i64 *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-NEXT:    vlseg2e64.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.nxv1i64(i64* %a, i64 %avl)
@@ -80,9 +80,9 @@ define void @test_vsseg2_i64(<vscale x 1 x i64> %first, <vscale x 1 x i64> %seco
 ; CHECK-LABEL: test_vsseg2_i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e64.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv1i64(<vscale x 1 x i64> %first, <vscale x 1 x i64> %second, i64 *%a, i64 %avl)
   ret void
@@ -94,8 +94,8 @@ declare { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.nxv2i32(i32 
 define <vscale x 2 x i32> @test_vlseg2_i32(i32 *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-NEXT:    vlseg2e32.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.nxv2i32(i32* %a, i64 %avl)
@@ -109,9 +109,9 @@ define void @test_vsseg2_i32(<vscale x 2 x i32> %first, <vscale x 2 x i32> %seco
 ; CHECK-LABEL: test_vsseg2_i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e32.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv2i32(<vscale x 2 x i32> %first, <vscale x 2 x i32> %second, i32 *%a, i64 %avl)
   ret void
@@ -123,8 +123,8 @@ declare { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.nxv2i16(i16 
 define <vscale x 4 x i16> @test_vlseg2_i16(i16 *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e16,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e16,m1,tu,mu
+; CHECK-NEXT:    vlseg2e16.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.nxv2i16(i16* %a, i64 %avl)
@@ -138,9 +138,9 @@ define void @test_vsseg2_i16(<vscale x 4 x i16> %first, <vscale x 4 x i16> %seco
 ; CHECK-LABEL: test_vsseg2_i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e16,m1
+; CHECK-NEXT:    vsetvli a1, a1, e16,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e16.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv2i16(<vscale x 4 x i16> %first, <vscale x 4 x i16> %second, i16 *%a, i64 %avl)
   ret void
@@ -152,8 +152,8 @@ declare { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.nxv2i8(i8 *%a,
 define <vscale x 8 x i8> @test_vlseg2_i8(i8 *%a, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg2_i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e8,m1
-; CHECK-NEXT:    vlseg2e.v v16, (a0)
+; CHECK-NEXT:    vsetvli a1, a1, e8,m1,tu,mu
+; CHECK-NEXT:    vlseg2e8.v v16, (a0)
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17
 ; CHECK-NEXT:    ret
   %x = call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.nxv2i8(i8* %a, i64 %avl)
@@ -167,9 +167,9 @@ define void @test_vsseg2_i8(<vscale x 8 x i8> %first, <vscale x 8 x i8> %second,
 ; CHECK-LABEL: test_vsseg2_i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $v17 killed $v17 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsetvli a1, a1, e8,m1
+; CHECK-NEXT:    vsetvli a1, a1, e8,m1,tu,mu
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17 def $v16_v17
-; CHECK-NEXT:    vsseg2e.v v16, (a0)
+; CHECK-NEXT:    vsseg2e8.v v16, (a0)
 ; CHECK-NEXT:    ret
   call void @llvm.epi.vsseg2.nxv2i8(<vscale x 8 x i8> %first, <vscale x 8 x i8> %second, i8 *%a, i64 %avl)
   ret void
