@@ -162,17 +162,6 @@ static DecodeStatus DecodeVRRegisterClass(MCInst &Inst, uint64_t RegNo,
   return MCDisassembler::Success;
 }
 
-static DecodeStatus DecodeVRTupleRegisterClass(MCInst &Inst, uint64_t RegNo,
-                                               uint64_t Address,
-                                               const void *Decoder) {
-  if (RegNo >= 32)
-    return MCDisassembler::Fail;
-
-  Register Reg = RISCV::V0_V1 + RegNo;
-  Inst.addOperand(MCOperand::createReg(Reg));
-  return MCDisassembler::Success;
-}
-
 static DecodeStatus decodeVMaskReg(MCInst &Inst, uint64_t RegNo,
                                    uint64_t Address, const void *Decoder) {
   Register Reg = RISCV::NoRegister;

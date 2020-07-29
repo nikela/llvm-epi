@@ -157,7 +157,6 @@ class RISCVAsmParser : public MCTargetAsmParser {
   OperandMatchResultTy parsePseudoJumpSymbol(OperandVector &Operands);
   OperandMatchResultTy parseJALOffset(OperandVector &Operands);
   OperandMatchResultTy parseVTypeI(OperandVector &Operands);
-  OperandMatchResultTy parseTupleVRegister(OperandVector &Operands);
   OperandMatchResultTy parseMaskReg(OperandVector &Operands);
 
   bool parseOperand(OperandVector &Operands, StringRef Mnemonic);
@@ -1686,30 +1685,6 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
 
   Operands.push_back(RISCVOperand::createVType(
       Sew, Lmul, Fractional, TailAgnostic, MaskedoffAgnostic, S, isRV64()));
-
-  return MatchOperand_Success;
-}
-
-OperandMatchResultTy
-RISCVAsmParser::parseTupleVRegister(OperandVector &Operands) {
-  switch (getLexer().getKind()) {
-  default:
-    return MatchOperand_NoMatch;
-  case AsmToken::Identifier:
-    StringRef Name = getLexer().getTok().getIdentifier();
-    Register RegNo;
-    matchRegisterNameHelper(isRV32E(), RegNo, Name);
-
-    if (RegNo == RISCV::NoRegister)
-      return MatchOperand_NoMatch;
-    if (RegNo < RISCV::V0 || RegNo > RISCV::V31)
-      return MatchOperand_NoMatch;
-    RegNo = RISCV::V0_V1 + (RegNo - RISCV::V0);
-    SMLoc S = getLoc();
-    SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
-    getLexer().Lex();
-    Operands.push_back(RISCVOperand::createReg(RegNo, S, E, isRV64()));
-  }
 
   return MatchOperand_Success;
 }
