@@ -1280,6 +1280,8 @@ unsigned IRTranslator::getSimpleIntrinsicOpcode(Intrinsic::ID ID) {
       return TargetOpcode::G_FRINT;
     case Intrinsic::round:
       return TargetOpcode::G_INTRINSIC_ROUND;
+    case Intrinsic::roundeven:
+      return TargetOpcode::G_INTRINSIC_ROUNDEVEN;
     case Intrinsic::sin:
       return TargetOpcode::G_FSIN;
     case Intrinsic::sqrt:
@@ -1290,6 +1292,8 @@ unsigned IRTranslator::getSimpleIntrinsicOpcode(Intrinsic::ID ID) {
       return TargetOpcode::G_READCYCLECOUNTER;
     case Intrinsic::ptrmask:
       return TargetOpcode::G_PTRMASK;
+    case Intrinsic::lrint:
+      return TargetOpcode::G_INTRINSIC_LRINT;
   }
   return Intrinsic::not_intrinsic;
 }
