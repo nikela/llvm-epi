@@ -572,9 +572,9 @@ def : DocEPIBuiltin<vfmerge>
   let Operation = [{
     for element = 0 to VLMAX
        if mask[element] then
-         result[element] = a[element]
-       else
          result[element] = b[element]
+       else
+         result[element] = a[element]
   }];
 }
 
@@ -1963,9 +1963,9 @@ def : DocEPIBuiltin<vmerge>
   let Operation = [{
     for element = 0 to VLMAX
        if mask[element] then
-         result[element] = a[element]
-       else
          result[element] = b[element]
+       else
+         result[element] = a[element]
   }];
 }
 
