@@ -1613,11 +1613,11 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       break;
     case CmpInst::ICMP_UGT:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmsleu_mask : Intrinsic::epi_vmsleu;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
       break;
     case CmpInst::ICMP_UGE:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmsleu_mask : Intrinsic::epi_vmsleu;
       break;
     case CmpInst::ICMP_ULT:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
@@ -1627,11 +1627,11 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       break;
     case CmpInst::ICMP_SGT:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmsle_mask : Intrinsic::epi_vmsle;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
       break;
     case CmpInst::ICMP_SGE:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmsle_mask : Intrinsic::epi_vmsle;
       break;
     case CmpInst::ICMP_SLT:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
@@ -1659,11 +1659,11 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       break;
     case FCmpInst::FCMP_OGT:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
       break;
     case FCmpInst::FCMP_OGE:
       VOpsPerm = {2, 1};
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
+      EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
       break;
     case FCmpInst::FCMP_OLT:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
