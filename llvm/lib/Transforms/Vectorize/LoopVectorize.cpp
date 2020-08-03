@@ -618,8 +618,7 @@ protected:
 
   /// Generate a reduction loop in the loop vectorizer for when the backend
   /// prefers not to lower the call to reduction intrinsic.
-  Value *generateReductionLoop(BasicBlock *RdxBlockPH, Value *ReducedPartRdx,
-                               Value *Identity);
+  Value *generateReductionLoop(Value *ReducedPartRdx, Value *Identity);
 
   /// Clear NSW/NUW flags from reduction instructions if necessary.
   void clearReductionWrapFlags(RecurrenceDescriptor &RdxDesc);
@@ -4381,8 +4380,6 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
           createMinMaxOp(Builder, MinMaxKind, ReducedPartRdx, RdxPart);
   }
 
-  BasicBlock *RdxBlockPH = nullptr;
-
   // Create the reduction after the loop. Note that inloop reductions create the
   // target reduction in the loop using a Reduction recipe.
   if (VF.isVector() && !IsInLoopReductionPhi) {
@@ -4391,10 +4388,11 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
     // For certain backends like RISC-V it is hard to lower some reduction
     // operations like multiply effectively. In such cases we can generate a
     // reduction loop in the loop vectorizer.
-    // FIXME: Decision to generate reduction loop here must come from the TTI.
-    if (isScalable() && Op == Instruction::Mul)
-      ReducedPartRdx =
-          generateReductionLoop(RdxBlockPH, ReducedPartRdx, Identity);
+    TargetTransformInfo::ReductionFlags Flags;
+    Flags.NoNaN = NoNaN;
+    if (isScalable() &&
+        !TTI->useReductionIntrinsic(Op, ReducedPartRdx->getType(), Flags))
+      ReducedPartRdx = generateReductionLoop(ReducedPartRdx, Identity);
     else
       ReducedPartRdx =
           createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx, NoNaN);
@@ -4440,15 +4438,14 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   Phi->setIncomingValue(IncomingEdgeBlockIdx, LoopExitInst);
 }
 
-Value *InnerLoopVectorizer::generateReductionLoop(BasicBlock *RdxBlockPH,
-                                                  Value *ReducedPartRdx,
+Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
                                                   Value *Identity) {
   VectorType *RdxTy = cast<VectorType>(ReducedPartRdx->getType());
   VectorType *IdenTy = cast<VectorType>(Identity->getType());
   assert(RdxTy->getElementCount() == IdenTy->getElementCount() &&
          "Identity vector does not have same length as reduction vector");
 
-  RdxBlockPH = LoopMiddleBlock;
+  BasicBlock *RdxBlockPH = LoopMiddleBlock;
   LoopMiddleBlock->setName("reduction.loop.ph");
   LoopMiddleBlock = SplitBlock(LoopMiddleBlock, &LoopMiddleBlock->front(), DT,
                                LI, nullptr, "middle.block");

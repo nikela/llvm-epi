@@ -128,10 +128,11 @@ bool RISCVTTIImpl::useReductionIntrinsic(unsigned Opcode, Type *Ty,
   case Instruction::ICmp:
   case Instruction::FCmp:
   case Instruction::FAdd:
-  case Instruction::FMul:
   case Instruction::Add:
-  case Instruction::Mul:
     return true;
+  case Instruction::Mul:
+  case Instruction::FMul:
+    return false;
   default:
     llvm_unreachable("Unhandled reduction opcode");
   }

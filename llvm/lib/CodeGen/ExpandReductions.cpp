@@ -14,6 +14,7 @@
 #include "llvm/CodeGen/ExpandReductions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/Passes.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
@@ -81,6 +82,18 @@ bool expandReductions(Function &F, const TargetTransformInfo *TTI) {
   SmallVector<IntrinsicInst *, 4> Worklist;
   for (auto &I : instructions(F)) {
     if (auto *II = dyn_cast<IntrinsicInst>(&I)) {
+      // If the vector argument of the reduction intrinsic is a scalable vector,
+      // we cannot cereate the unrolled shuffle reduction using the
+      // getShuffleReduction() function.
+      // Reduction expansion for scalable vectors is done by generating a length
+      // agnostic reduction loop after the LoopVectorBody. This is done as part
+      // of the fixReduction() step of the loop vectorizer; Instead of
+      // generating the call to intrinsic we generate this loop block. This also
+      // ensures that the basic blocks and instructions created during loop
+      // vectorization are not modified by later passes.
+      if (isa<ScalableVectorType>(II->getArgOperand(1)->getType()))
+        continue;
+
       switch (II->getIntrinsicID()) {
       default: break;
       case Intrinsic::experimental_vector_reduce_v2_fadd:
