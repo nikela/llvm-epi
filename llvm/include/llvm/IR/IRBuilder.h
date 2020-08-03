@@ -2483,16 +2483,9 @@ public:
   /// address space before call and casted back to Ptr type after call.
   Value *CreateStripInvariantGroup(Value *Ptr);
 
-  /// Method to support Vector Splat for FixedVectors using unsigned NumElts
-  /// instead of ElementCount.
-  Value *CreateVectorSplat(unsigned NumElts, Value *V, const Twine &Name = "") {
-    return CreateVectorSplat({NumElts, false}, V, Name);
-  }
-
   /// Return a vector value that contains \arg V broadcasted to \p
   /// NumElts elements.
-  Value *CreateVectorSplat(ElementCount NumElts, Value *V,
-                           const Twine &Name = "");
+  Value *CreateVectorSplat(unsigned NumElts, Value *V, const Twine &Name = "");
 
 private:
   /// Return an integer or a vector of integer constant of given type that has
@@ -2518,6 +2511,10 @@ public:
     return ConstantAggregateZero::get(
         VectorType::get(Type::getInt1Ty(Context), NumElts));
   }
+
+  /// Return a vector value that contains \arg V broadcasted to \p
+  /// EC elements.
+  Value *CreateVectorSplat(ElementCount EC, Value *V, const Twine &Name = "");
 
   /// Return a value that has been extracted from a larger integer type.
   Value *CreateExtractInteger(const DataLayout &DL, Value *From,

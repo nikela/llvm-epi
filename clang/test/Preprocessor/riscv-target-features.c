@@ -57,9 +57,9 @@
 // RUN: -o - | FileCheck --check-prefix=CHECK-B-EXT %s
 // CHECK-B-EXT: __riscv_bitmanip 1
 
-// RUN: %clang -target riscv32-unknown-linux-gnu -menable-experimental-extensions -march=rv32iv0p8 -x c -E -dM %s \
+// RUN: %clang -target riscv32-unknown-linux-gnu -menable-experimental-extensions -march=rv32iv0p9 -x c -E -dM %s \
 // RUN: -o - | FileCheck --check-prefix=CHECK-V-EXT %s
-// RUN: %clang -target riscv64-unknown-linux-gnu -menable-experimental-extensions -march=rv64iv0p8 -x c -E -dM %s \
+// RUN: %clang -target riscv64-unknown-linux-gnu -menable-experimental-extensions -march=rv64iv0p9 -x c -E -dM %s \
 // RUN: -o - | FileCheck --check-prefix=CHECK-V-EXT %s
 // CHECK-V-EXT: __riscv_vector 1
 // CHECK-V-EXT: __riscv_vector_version {{[0-9]+$}}
