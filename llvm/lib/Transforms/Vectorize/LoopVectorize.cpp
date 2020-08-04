@@ -618,7 +618,8 @@ protected:
 
   /// Generate a reduction loop in the loop vectorizer for when the backend
   /// prefers not to lower the call to reduction intrinsic.
-  Value *generateReductionLoop(Value *ReducedPartRdx, Value *Identity);
+  Value *generateReductionLoop(Value *ReducedPartRdx, Value *Identity,
+                               unsigned Op, FastMathFlags FMF);
 
   /// Clear NSW/NUW flags from reduction instructions if necessary.
   void clearReductionWrapFlags(RecurrenceDescriptor &RdxDesc);
@@ -4392,7 +4393,8 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
     Flags.NoNaN = NoNaN;
     if (isScalable() &&
         !TTI->useReductionIntrinsic(Op, ReducedPartRdx->getType(), Flags))
-      ReducedPartRdx = generateReductionLoop(ReducedPartRdx, Identity);
+      ReducedPartRdx = generateReductionLoop(ReducedPartRdx, Identity, Op,
+                                             RdxDesc.getFastMathFlags());
     else
       ReducedPartRdx =
           createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx, NoNaN);
@@ -4439,7 +4441,8 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
 }
 
 Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
-                                                  Value *Identity) {
+                                                  Value *Identity, unsigned Op,
+                                                  FastMathFlags FMF) {
   VectorType *RdxTy = cast<VectorType>(ReducedPartRdx->getType());
   VectorType *IdenTy = cast<VectorType>(Identity->getType());
   assert(RdxTy->getElementCount() == IdenTy->getElementCount() &&
@@ -4496,12 +4499,30 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
       Intrinsic::experimental_vector_slideleftfill, {RdxTy, HalfLen->getType()},
       {CurrVec, Identity, HalfLen}, nullptr, "second.half");
 
+  // All ops in the reduction inherit fast-math-flags from the recurrence
+  // descriptor.
+  IRBuilderBase::FastMathFlagGuard FMFGuard(Builder);
+  Builder.setFastMathFlags(FMF);
+
   // Finally multiply the two half vectors to create the reduction vector that
   // will be used as the current vector for the next iteration or be the final
   // result if HalfLen is 1.
-  // FIXME: Add support for other reduction operations - FMul, Add, FAdd
-  Value *RdxVec = Builder.CreateMul(FirstHalf, SecondHalf, "reduction.vec");
+  auto BuildRedxVec = [&]() -> Value * {
+    switch (Op) {
+    case Instruction::Mul:
+    case Instruction::FMul:
+    case Instruction::Add:
+    case Instruction::FAdd:
+      return Builder.CreateBinOp((Instruction::BinaryOps)Op, FirstHalf,
+                                 SecondHalf, "reduction.vec");
+      break;
+    default:
+      llvm_unreachable(
+          "Unsupported instruction for reduction loop for scalable vectors.");
+    }
+  };
 
+  Value *RdxVec = BuildRedxVec();
   // Create new terminator for the reduction loop.
   Value *ExitCond =
       Builder.CreateICmpEQ(HalfLen, ConstantInt::get(HalfLen->getType(), 1));

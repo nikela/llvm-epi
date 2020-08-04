@@ -1027,6 +1027,11 @@ Value *llvm::createSimpleTargetReduction(
   if (ForceReductionIntrinsic ||
       TTI->useReductionIntrinsic(Opcode, Src->getType(), Flags))
     return BuildFunc();
+  // If Src is a scalable vector a reduction loop should be generated in
+  // InnerLoopVectorizer::fixReduction() instead of creating a call to
+  // createTargetReduction.
+  assert(!isa<ScalableVectorType>(Src->getType()) &&
+         "Cannot generate unrolled shuffle reduction for scalable vectors.");
   return getShuffleReduction(Builder, Src, Opcode, MinMaxKind, RedOps);
 }
 
