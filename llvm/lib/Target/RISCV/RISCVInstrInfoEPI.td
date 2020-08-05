@@ -11,14 +11,6 @@
 // Target Specific DAG nodes
 //===----------------------------------------------------------------------===//
 
-def riscv_vmv_v_x : SDNode<"RISCVISD::VMV_V_X",
-                           SDTypeProfile<1, 1, [SDTCisVec<0>, SDTCisInt<0>,
-                                                SDTCisInt<1>]>>;
-
-def riscv_vfmv_v_f : SDNode<"RISCVISD::VFMV_V_F",
-                           SDTypeProfile<1, 1, [SDTCisVec<0>, SDTCisFP<0>,
-                                                SDTCisFP<1>]>>;
-
 def riscv_vmv_x_s : SDNode<"RISCVISD::VMV_X_S",
                            SDTypeProfile<1, 1, [SDTCisInt<0>, SDTCisVec<1>,
                                                 SDTCisInt<1>]>>;
@@ -74,6 +66,9 @@ def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
                                             SDTCisVec<2>, SDTCisFP<2>]>;
 
 def vecreduce_strict_fadd : SDNode<"ISD::VECREDUCE_STRICT_FADD", SDTVecReduceFPV2>;
+
+def splat_vector : SDNode<"ISD::SPLAT_VECTOR",
+                           SDTypeProfile<1, 1, [SDTCisVec<0>]>>;
 
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
@@ -709,7 +704,7 @@ multiclass pseudo_binary_v_vv_vx {
   }
 }
 
-multiclass pseudo_binary_v_vx_vi<Operand imm_type = simm5,
+multiclass pseudo_binary_v_vx_vi<DAGOperand imm_kind = simm5,
                                  bit force_earlyclobber = 0> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
@@ -719,12 +714,12 @@ multiclass pseudo_binary_v_vx_vi<Operand imm_type = simm5,
     let VLMul = evr.VLMul in
     {
       defm _VX : pseudo_binary<evr, evr, GPR, evr.VLMul, constraints>;
-      defm _VI : pseudo_binary<evr, evr, imm_type, evr.VLMul, constraints>;
+      defm _VI : pseudo_binary<evr, evr, imm_kind, evr.VLMul, constraints>;
     }
   }
 }
 
-multiclass pseudo_binary_v_vv_vx_vi<Operand imm_type = simm5,
+multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
                                     bit force_earlyclobber = 0> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
@@ -735,12 +730,12 @@ multiclass pseudo_binary_v_vv_vx_vi<Operand imm_type = simm5,
     {
       defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints>;
       defm _VX : pseudo_binary<evr, evr, GPR, evr.VLMul, constraints>;
-      defm _VI : pseudo_binary<evr, evr, imm_type, evr.VLMul, constraints>;
+      defm _VI : pseudo_binary<evr, evr, imm_kind, evr.VLMul, constraints>;
     }
   }
 }
 
-multiclass pseudo_binary_v_wv_wx_wi<Operand imm_type = simm5> {
+multiclass pseudo_binary_v_wv_wx_wi<DAGOperand imm_kind = simm5> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegToWidePairs in
   {
@@ -751,7 +746,7 @@ multiclass pseudo_binary_v_wv_wx_wi<Operand imm_type = simm5> {
                                evr.RegClass.VLMul, constraints>;
       defm _WX : pseudo_binary<evr.RegClass, evr.WideRegClass, GPR,
                                evr.RegClass.VLMul, constraints>;
-      defm _WI : pseudo_binary<evr.RegClass, evr.WideRegClass, imm_type,
+      defm _WI : pseudo_binary<evr.RegClass, evr.WideRegClass, imm_kind,
                                evr.RegClass.VLMul, constraints>;
     }
   }
@@ -1812,7 +1807,7 @@ multiclass pat_intrinsic_binary_int_v_vx_vi<string intrinsic_name,
 
 multiclass pat_intrinsic_binary_int_v_vv_vx_vi<string intrinsic_name,
                                                string instruction_name,
-                                               Operand imm_type = simm5>
+                                               DAGOperand imm_kind = simm5>
 {
   foreach vti = AllIntegerVectors in
   {
@@ -1827,7 +1822,7 @@ multiclass pat_intrinsic_binary_int_v_vv_vx_vi<string intrinsic_name,
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VI",
                                 vti.Vector, vti.Vector, XLenVT, vti.Mask,
                                 vti.SEW, vti.RegClass.VLMul, vti.RegClass,
-                                vti.RegClass, imm_type>;
+                                vti.RegClass, imm_kind>;
   }
 }
 
@@ -1996,7 +1991,7 @@ multiclass pat_intrinsic_binary_int_w_wv_wx<string intrinsic_name,
 // This is the narrowing form.
 multiclass pat_intrinsic_binary_int_v_wv_wx_wi<string intrinsic_name,
                                                string instruction_name,
-                                               Operand imm_type = simm5>
+                                               DAGOperand imm_kind = simm5>
 {
   foreach vtiToWti = AllWideableIntVectors in
   {
@@ -2014,7 +2009,7 @@ multiclass pat_intrinsic_binary_int_v_wv_wx_wi<string intrinsic_name,
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "WI",
                                 vti.Vector, wti.Vector, XLenVT, vti.Mask,
                                 vti.SEW, vti.RegClass.VLMul, vti.RegClass,
-                                wti.RegClass, imm_type>;
+                                wti.RegClass, imm_kind>;
   }
 }
 
@@ -2336,7 +2331,7 @@ multiclass pat_intrinsic_binary_any_and_int_v_vx<string intrinsic_name,
 
 multiclass pat_intrinsic_binary_any_and_int_v_vv_vx_vi<string intrinsic_name,
                                                        string instruction_name,
-                                                       Operand imm_type = simm5>
+                                                       DAGOperand imm_kind = simm5>
 {
   foreach vti = AllVectors in
   {
@@ -2353,13 +2348,13 @@ multiclass pat_intrinsic_binary_any_and_int_v_vv_vx_vi<string intrinsic_name,
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VI",
                                 vti.Vector, vti.Vector, XLenVT, vti.Mask,
                                 vti.SEW, vti.RegClass.VLMul, vti.RegClass,
-                                vti.RegClass, imm_type>;
+                                vti.RegClass, imm_kind>;
   }
 }
 
 multiclass pat_intrinsic_binary_any_and_int_v_vx_vi<string intrinsic_name,
                                                     string instruction_name,
-                                                    Operand imm_type = simm5>
+                                                    DAGOperand imm_kind = simm5>
 {
   foreach vti = AllVectors in
   {
@@ -2370,7 +2365,7 @@ multiclass pat_intrinsic_binary_any_and_int_v_vx_vi<string intrinsic_name,
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VI",
                                 vti.Vector, vti.Vector, XLenVT, vti.Mask,
                                 vti.SEW, vti.RegClass.VLMul, vti.RegClass,
-                                vti.RegClass, imm_type>;
+                                vti.RegClass, imm_kind>;
   }
 }
 
@@ -3051,17 +3046,15 @@ foreach fvti = AllFloatVectors in {
 //===----------------------------------------------------------------------===//
 
 // FIXME: Add patterns that can select masked versions
-// FIXME: Add patterns that can select scalar versions
-multiclass pat_vop_binary<SDNode vop,
-                          string instruction_name,
-                          ValueType result_type,
-                          ValueType op_type,
-                          ValueType mask_type,
-                          int sew,
-                          int vlmul,
-                          VReg result_reg_class,
-                          VReg op_reg_class,
-                          bit swap = 0>
+multiclass pat_vop_binary_v<SDNode vop,
+                            string instruction_name,
+                            ValueType result_type,
+                            ValueType op_type,
+                            ValueType mask_type,
+                            int sew,
+                            int vlmul,
+                            VReg op_reg_class,
+                            bit swap = 0>
 {
   defvar instruction = !cast<Instruction>(instruction_name#"_VV_M"#vlmul);
   def : Pat<(result_type (vop
@@ -3077,15 +3070,15 @@ multiclass pat_vop_binary<SDNode vop,
               swap>.Value>;
 }
 
-multiclass pat_vop_binary_nomask<SDNode vop,
-                                 string instruction_name,
-                                 string kind,
-                                 ValueType result_type,
-                                 ValueType op_type,
-                                 int sew,
-                                 int vlmul,
-                                 VReg op_reg_class,
-                                 bit swap = 0>
+multiclass pat_vop_binary_v_nomask<SDNode vop,
+                                   string instruction_name,
+                                   string kind,
+                                   ValueType result_type,
+                                   ValueType op_type,
+                                   int sew,
+                                   int vlmul,
+                                   VReg op_reg_class,
+                                   bit swap = 0>
 {
   foreach instruction = [!cast<Instruction>(instruction_name#_#kind#"_M"#vlmul)] in
   def : Pat<(result_type (vop
@@ -3101,15 +3094,83 @@ multiclass pat_vop_binary_nomask<SDNode vop,
               swap>.Value>;
 }
 
-multiclass pat_vop_binary_common<SDNode vop,
-                                 string instruction_name,
-                                 list<VectorTypeInfo> vtilist>
+multiclass pat_vop_binary_xif<SDNode vop,
+                              string instruction_name,
+                              string kind,
+                              ValueType result_type,
+                              ValueType op1_type,
+                              ValueType op2_type,
+                              ValueType mask_type,
+                              int sew,
+                              int vlmul,
+                              VReg op_reg_class,
+                              DAGOperand op2_kind,
+                              bit swap = 0>
 {
-  foreach vti = vtilist in
+  defvar instruction = !cast<Instruction>(instruction_name#_#kind#"_M"#vlmul);
+  def : Pat<(result_type (vop
+                          (op1_type op_reg_class:$rs1),
+                          (op1_type (splat_vector op2_kind:$rs2)))),
+            swap_helper<
+              (instruction (result_type (IMPLICIT_DEF))),
+              (instruction op_reg_class:$rs1),
+              (instruction ToFPR64<op2_kind, (op2_type op2_kind:$rs2)>.ret),
+              (instruction (mask_type zero_reg),
+               VLMax,
+               sew),
+              swap>.Value>;
+}
+
+multiclass pat_vop_binary_int_v_vv_vx<SDNode vop,
+                                      string instruction_name>
+{
+  foreach vti = AllIntegerVectors in
   {
-    defm : pat_vop_binary<vop, instruction_name,
-                          vti.Vector, vti.Vector, vti.Mask, vti.SEW,
-                          vti.RegClass.VLMul, vti.RegClass, vti.RegClass>;
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            vti.Vector, vti.Vector, vti.Mask,
+                            vti.SEW, vti.RegClass.VLMul,
+                            vti.RegClass>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VX",
+                              vti.Vector, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, GPR>;
+  }
+}
+
+multiclass pat_vop_binary_int_v_vv_vx_vi<SDNode vop,
+                                         string instruction_name,
+                                         DAGOperand imm_kind = simm5>
+{
+  foreach vti = AllIntegerVectors in
+  {
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            vti.Vector, vti.Vector, vti.Mask,
+                            vti.SEW, vti.RegClass.VLMul,
+                            vti.RegClass>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VX",
+                              vti.Vector, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, GPR>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VI",
+                              vti.Vector, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, imm_kind>;
+  }
+}
+
+multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
+                                     string instruction_name>
+{
+  foreach fvti = AllFloatVectors in
+  {
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            fvti.Vector, fvti.Vector, fvti.Mask,
+                            fvti.SEW, fvti.RegClass.VLMul,
+                            fvti.RegClass>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VF",
+                              fvti.Vector, fvti.Vector, fvti.Scalar, fvti.Mask,
+                              fvti.SEW, fvti.RegClass.VLMul,
+                              fvti.RegClass, fvti.ScalarRegClass>;
   }
 }
 
@@ -3251,94 +3312,114 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_ternary<SDNode vop,
-                           string instruction_name,
-                           ValueType result_type,
-                           ValueType op1_type,
-                           ValueType op2_type,
-                           ValueType mask_type,
-                           int sew,
-                           int vlmul,
-                           VReg result_reg_class,
-                           VReg op1_reg_class,
-                           VReg op2_reg_class>
+multiclass pat_vop_ternary_v<SDNode vop,
+                             string instruction_name,
+                             ValueType vector_type,
+                             ValueType mask_type,
+                             int sew,
+                             int vlmul,
+                             VReg vector_reg_class>
 {
-  def : Pat<(result_type (vop
-                          (result_type result_reg_class:$rs3),
-                          (op1_type op1_reg_class:$rs1),
-                          (op2_type op2_reg_class:$rs2))),
+  def : Pat<(vector_type (vop
+                          (vector_type vector_reg_class:$rs3),
+                          (vector_type vector_reg_class:$rs1),
+                          (vector_type vector_reg_class:$rs2))),
             (!cast<Instruction>(instruction_name#"_VV_M"#vlmul)
-             result_reg_class:$rs3,
-             ToFPR64<op1_reg_class, (op1_type op1_reg_class:$rs1)>.ret,
-             op2_reg_class:$rs2,
+             vector_reg_class:$rs3,
+             vector_reg_class:$rs1,
+             vector_reg_class:$rs2,
              (mask_type zero_reg),
              VLMax,
              sew)>;
 }
 
-multiclass pat_vop_ternary_common<SDNode vop,
-                                  string instruction_name,
-                                  list<VectorTypeInfo> vtilist>
+multiclass pat_vop_ternary_xf<SDNode vop,
+                              string instruction_name,
+                              string kind,
+                              ValueType vector_type,
+                              ValueType op1_type,
+                              ValueType mask_type,
+                              int sew,
+                              int vlmul,
+                              VReg vector_reg_class,
+                              DAGOperand op1_kind>
 {
-  foreach vti = vtilist in
+  def : Pat<(vector_type (vop
+                          (vector_type vector_reg_class:$rs3),
+                          (vector_type (splat_vector op1_kind:$rs1)),
+                          (vector_type vector_reg_class:$rs2))),
+            (!cast<Instruction>(instruction_name#_#kind#"_M"#vlmul)
+             vector_reg_class:$rs3,
+             ToFPR64<op1_kind, (op1_type op1_kind:$rs1)>.ret,
+             vector_reg_class:$rs2,
+             (mask_type zero_reg),
+             VLMax,
+             sew)>;
+}
+
+multiclass pat_vop_ternary_fp_v_vv_vf<SDNode vop,
+                                      string instruction_name>
+{
+  foreach fvti = AllFloatVectors in
   {
-    defm : pat_vop_ternary<vop, instruction_name,
-                           vti.Vector, vti.Vector, vti.Vector, vti.Mask,
-                           vti.SEW, vti.RegClass.VLMul, vti.RegClass,
-                           vti.RegClass, vti.RegClass>;
+    defm : pat_vop_ternary_v<vop, instruction_name,
+                             fvti.Vector, fvti.Mask,
+                             fvti.SEW, fvti.RegClass.VLMul,
+                             fvti.RegClass>;
+    defm : pat_vop_ternary_xf<vop, instruction_name, "VF",
+                              fvti.Vector, fvti.Scalar, fvti.Mask,
+                              fvti.SEW, fvti.RegClass.VLMul,
+                              fvti.RegClass, fvti.ScalarRegClass>;
   }
 }
 
 // FIXME: Add patterns that can select masked versions
 multiclass pat_vop_unary<SDNode vop,
                          string instruction_name,
-                         ValueType result_type,
-                         ValueType op_type,
+                         ValueType vector_type,
                          ValueType mask_type,
                          int sew,
                          int vlmul,
-                         VReg result_reg_class,
-                         VReg op_reg_class>
+                         VReg vector_reg_class>
 {
-  def : Pat<(result_type (vop
-                          (op_type op_reg_class:$rs2))),
+  def : Pat<(vector_type (vop
+                          (vector_type vector_reg_class:$rs2))),
             (!cast<Instruction>(instruction_name#"_V_M"#vlmul)
-             (result_type (IMPLICIT_DEF)),
-             op_reg_class:$rs2,
+             (vector_type (IMPLICIT_DEF)),
+             vector_reg_class:$rs2,
              (mask_type zero_reg),
              VLMax,
              sew)>;
 }
 
-multiclass pat_vop_unary_common<SDNode vop,
-                                string instruction_name,
-                                list<VectorTypeInfo> vtilist>
+multiclass pat_vop_unary_fp_v_v<SDNode vop,
+                                string instruction_name>
 {
-  foreach vti = vtilist in
+  foreach vti = AllFloatVectors in
   {
     defm : pat_vop_unary<vop, instruction_name,
-                         vti.Vector, vti.Vector, vti.Mask, vti.SEW,
-                         vti.RegClass.VLMul, vti.RegClass, vti.RegClass>;
+                         vti.Vector, vti.Mask,
+                         vti.SEW, vti.RegClass.VLMul,
+                         vti.RegClass>;
   }
 }
 
 let Predicates = [HasStdExtV] in {
 
-defm "" : pat_vop_binary_common<add, "PseudoVADD", AllIntegerVectors>;
-defm "" : pat_vop_binary_common<sub, "PseudoVSUB", AllIntegerVectors>;
-defm "" : pat_vop_binary_common<mul, "PseudoVMUL", AllIntegerVectors>;
-defm "" : pat_vop_binary_common<shl, "PseudoVSLL", AllIntegerVectors>;
+defm "" : pat_vop_binary_int_v_vv_vx_vi<add, "PseudoVADD">;
+defm "" : pat_vop_binary_int_v_vv_vx_vi<shl, "PseudoVSLL", uimm5>;
+defm "" : pat_vop_binary_int_v_vv_vx_vi<and, "PseudoVAND">;
+defm "" : pat_vop_binary_int_v_vv_vx<sub, "PseudoVSUB">;
+defm "" : pat_vop_binary_int_v_vv_vx<mul, "PseudoVMUL">;
 
-defm "" : pat_vop_binary_common<and, "PseudoVAND", AllIntegerVectors>;
-
-defm "" : pat_vop_binary_common<fadd, "PseudoVFADD", AllFloatVectors>;
-defm "" : pat_vop_binary_common<fsub, "PseudoVFSUB", AllFloatVectors>;
-defm "" : pat_vop_binary_common<fmul, "PseudoVFMUL", AllFloatVectors>;
+defm "" : pat_vop_binary_fp_v_vv_vf<fadd, "PseudoVFADD">;
+defm "" : pat_vop_binary_fp_v_vv_vf<fsub, "PseudoVFSUB">;
+defm "" : pat_vop_binary_fp_v_vv_vf<fmul, "PseudoVFMUL">;
 // FIXME: Our understanding from the spec is that the following is wrong and
 // should be 'fminimum' and 'fmaximum' instead. However this issue is found in
 // the base operations in F and D so for now we keep it coherent with those.
-defm "" : pat_vop_binary_common<fminnum, "PseudoVFMIN", AllFloatVectors>;
-defm "" : pat_vop_binary_common<fmaxnum, "PseudoVFMAX", AllFloatVectors>;
+defm "" : pat_vop_binary_fp_v_vv_vf<fminnum, "PseudoVFMIN">;
+defm "" : pat_vop_binary_fp_v_vv_vf<fmaxnum, "PseudoVFMAX">;
 
 defm "" : pat_vop_binary_reduction_int<vecreduce_add, "PseudoVREDSUM">;
 defm "" : pat_vop_binary_reduction_int<vecreduce_and, "PseudoVREDAND">;
@@ -3354,15 +3435,15 @@ defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoVFREDMIN">;
 
-defm "" : pat_vop_ternary_common<fma, "PseudoVFMADD", AllFloatVectors>;
+defm "" : pat_vop_ternary_fp_v_vv_vf<fma, "PseudoVFMADD">;
 
-defm "" : pat_vop_unary_common<fsqrt, "PseudoVFSQRT", AllFloatVectors>;
+defm "" : pat_vop_unary_fp_v_v<fsqrt, "PseudoVFSQRT">;
 
 foreach fvti = AllFloatVectors in
 {
   defvar ivti = GetIntVectorTypeInfo<fvti>.Vti;
 
-  def : Pat<(fvti.Vector (riscv_vfmv_v_f fvti.ScalarRegClass:$value)),
+  def : Pat<(fvti.Vector (splat_vector fvti.ScalarRegClass:$value)),
             (!cast<Instruction>("PseudoVFMV_V_F_M"#fvti.RegClass.VLMul)
              ToFPR64<fvti.ScalarRegClass,
                      (fvti.Scalar fvti.ScalarRegClass:$value)>.ret,
@@ -3404,11 +3485,11 @@ foreach fvti = AllFloatVectors in
 
 foreach vti = AllIntegerVectors in
 {
-  def : Pat<(vti.Vector (riscv_vmv_v_x GPR:$value)),
+  def : Pat<(vti.Vector (splat_vector GPR:$value)),
             (!cast<Instruction>("PseudoVMV_V_X_M"#vti.RegClass.VLMul)
              GPR:$value,
              VLMax, vti.SEW)>;
-  def : Pat<(vti.Vector (riscv_vmv_v_x simm5:$value)),
+  def : Pat<(vti.Vector (splat_vector simm5:$value)),
             (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul)
              simm5:$value,
              VLMax, vti.SEW)>;
@@ -3421,9 +3502,9 @@ foreach vti = AllIntegerVectors in
 }
 
 foreach mti = AllMasks in {
-  def : Pat<(mti.Mask (riscv_vmv_v_x (i64 1))),
+  def : Pat<(mti.Mask (splat_vector (i64 1))),
             (!cast<Instruction>("PseudoVMSET_M"#mti.VLMul) VLMax, mti.SEW)>;
-  def : Pat<(mti.Mask (riscv_vmv_v_x (i64 0))),
+  def : Pat<(mti.Mask (splat_vector (i64 0))),
             (!cast<Instruction>("PseudoVMCLR_M"#mti.VLMul) VLMax, mti.SEW)>;
 }
 
@@ -3645,41 +3726,69 @@ foreach fvti = AllFloatVectors in {
 // Patterns. Full vector relational operations
 //===----------------------------------------------------------------------===//
 
-multiclass pat_vop_binary_relational_common<SDNode vop,
-                                            string instruction_name,
-                                            list<VectorTypeInfo> vtilist,
-                                            bit swap = 0>
+multiclass pat_vop_binary_int_m_vv<SDNode vop,
+                                   string instruction_name,
+                                   bit swap = 0>
 {
-  foreach vti = vtilist in
+  foreach vti = AllIntegerVectors in
   {
-    defm : pat_vop_binary<vop, instruction_name,
-                          vti.Mask, vti.Vector, vti.Mask, vti.SEW,
-                          vti.RegClass.VLMul, VR, vti.RegClass, swap>;
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            vti.Mask, vti.Vector, vti.Mask,
+                            vti.SEW, vti.RegClass.VLMul,
+                            vti.RegClass, swap>;
+  }
+}
+
+multiclass pat_vop_binary_int_m_vv_vx<SDNode vop,
+                                      string instruction_name,
+                                      bit swap = 0>
+{
+  foreach vti = AllIntegerVectors in
+  {
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            vti.Mask, vti.Vector, vti.Mask,
+                            vti.SEW, vti.RegClass.VLMul,
+                            vti.RegClass, swap>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VX",
+                              vti.Mask, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, GPR, swap>;
+  }
+}
+
+multiclass pat_vop_binary_int_m_vv_vx_vi<SDNode vop,
+                                         string instruction_name,
+                                         bit swap = 0>
+{
+  foreach vti = AllIntegerVectors in
+  {
+    defm : pat_vop_binary_v<vop, instruction_name,
+                            vti.Mask, vti.Vector, vti.Mask,
+                            vti.SEW, vti.RegClass.VLMul,
+                            vti.RegClass, swap>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VX",
+                              vti.Mask, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, GPR, swap>;
+    defm : pat_vop_binary_xif<vop, instruction_name, "VI",
+                              vti.Mask, vti.Vector, XLenVT, vti.Mask,
+                              vti.SEW, vti.RegClass.VLMul,
+                              vti.RegClass, simm5, swap>;
   }
 }
 
 let Predicates = [HasStdExtV] in {
 
-defm "" : pat_vop_binary_relational_common<seteq, "PseudoVMSEQ",
-                                           AllIntegerVectors>;
-defm "" : pat_vop_binary_relational_common<setne, "PseudoVMSNE",
-                                           AllIntegerVectors>;
-defm "" : pat_vop_binary_relational_common<setugt, "PseudoVMSLEU",
-                                           AllIntegerVectors, /* swapped */ 1>;
-defm "" : pat_vop_binary_relational_common<setuge, "PseudoVMSLTU",
-                                           AllIntegerVectors, /* swapped */ 1>;
-defm "" : pat_vop_binary_relational_common<setult, "PseudoVMSLTU",
-                                           AllIntegerVectors>;
-defm "" : pat_vop_binary_relational_common<setule, "PseudoVMSLEU",
-                                           AllIntegerVectors>;
-defm "" : pat_vop_binary_relational_common<setgt, "PseudoVMSLE",
-                                           AllIntegerVectors, /* swapped */ 1>;
-defm "" : pat_vop_binary_relational_common<setge, "PseudoVMSLT",
-                                           AllIntegerVectors, /* swapped */ 1>;
-defm "" : pat_vop_binary_relational_common<setlt, "PseudoVMSLT",
-                                           AllIntegerVectors>;
-defm "" : pat_vop_binary_relational_common<setle, "PseudoVMSLE",
-                                           AllIntegerVectors>;
+defm "" : pat_vop_binary_int_m_vv_vx_vi<seteq, "PseudoVMSEQ">;
+defm "" : pat_vop_binary_int_m_vv_vx_vi<setne, "PseudoVMSNE">;
+defm "" : pat_vop_binary_int_m_vv_vx_vi<setule, "PseudoVMSLEU">;
+defm "" : pat_vop_binary_int_m_vv_vx_vi<setle, "PseudoVMSLE">;
+defm "" : pat_vop_binary_int_m_vv_vx<setult, "PseudoVMSLTU">;
+defm "" : pat_vop_binary_int_m_vv_vx<setlt, "PseudoVMSLT">;
+defm "" : pat_vop_binary_int_m_vv<setugt, "PseudoVMSLEU", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setgt, "PseudoVMSLE", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setuge, "PseudoVMSLTU", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setge, "PseudoVMSLT", /* swap */ 1>;
 
 }
 
@@ -3687,21 +3796,23 @@ defm "" : pat_vop_binary_relational_common<setle, "PseudoVMSLE",
 // Patterns. Full vector mask logical operations
 //===----------------------------------------------------------------------===//
 
-multiclass pat_vop_binary_mask_logical_common<SDNode vop,
-                                              string instruction_name>
+multiclass pat_vop_binary_m_mm<SDNode vop,
+                               string instruction_name>
 {
   foreach mti = AllMasks in
   {
-    defm : pat_vop_binary_nomask<vop, instruction_name, "MM", mti.Mask,
-                                 mti.Mask, mti.SEW, mti.VLMul, VR>;
+    defm : pat_vop_binary_v_nomask<vop, instruction_name, "MM",
+                                   mti.Mask, mti.Mask,
+                                   mti.SEW, mti.VLMul,
+                                   VR>;
   }
 }
 
 let Predicates = [HasStdExtV] in {
 
-defm "" : pat_vop_binary_mask_logical_common<and, "PseudoVMAND">;
-defm "" : pat_vop_binary_mask_logical_common<xor, "PseudoVMXOR">;
-defm "" : pat_vop_binary_mask_logical_common<or, "PseudoVMOR">;
+defm "" : pat_vop_binary_m_mm<and, "PseudoVMAND">;
+defm "" : pat_vop_binary_m_mm<xor, "PseudoVMXOR">;
+defm "" : pat_vop_binary_m_mm<or, "PseudoVMOR">;
 
 }
 

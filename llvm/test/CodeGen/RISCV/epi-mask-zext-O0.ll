@@ -19,12 +19,10 @@ define <vscale x 8 x i8> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vle8.v v1, (a0)
+; CHECK-NEXT:    # implicit-def: $v2
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
-; CHECK-NEXT:    vmv.v.i v2, 1
-; CHECK-NEXT:    # implicit-def: $v3
-; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
-; CHECK-NEXT:    vand.vv v3, v1, v2
-; CHECK-NEXT:    vmv1r.v v16, v3
+; CHECK-NEXT:    vand.vi v2, v1, 1
+; CHECK-NEXT:    vmv1r.v v16, v2
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)
@@ -56,10 +54,9 @@ define <vscale x 8 x i8> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-NEXT:    # implicit-def: $v1
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vle8.v v1, (a0)
-; CHECK-NEXT:    vmv.v.i v2, 1
-; CHECK-NEXT:    # implicit-def: $v3
-; CHECK-NEXT:    vand.vv v3, v1, v2
-; CHECK-NEXT:    vmv1r.v v16, v3
+; CHECK-NEXT:    # implicit-def: $v2
+; CHECK-NEXT:    vand.vi v2, v1, 1
+; CHECK-NEXT:    vmv1r.v v16, v2
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)

@@ -142,11 +142,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setBooleanVectorContents(ZeroOrOneBooleanContent);
 
     for (auto VT : MVT::integer_scalable_vector_valuetypes()) {
-      setOperationAction(ISD::SPLAT_VECTOR, VT, Custom);
+      setOperationAction(ISD::SPLAT_VECTOR, VT, Legal);
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
     }
     for (auto VT : MVT::fp_scalable_vector_valuetypes()) {
-      setOperationAction(ISD::SPLAT_VECTOR, VT, Custom);
+      setOperationAction(ISD::SPLAT_VECTOR, VT, Legal);
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
     }
   }
@@ -645,25 +645,7 @@ SDValue RISCVTargetLowering::lowerVECTOR_SHUFFLE(SDValue Op,
   if (!ConstantValue || ConstantValue->getZExtValue() != 0)
     return SDValue();
 
-  RISCVISD::NodeType OpCode = ScalarValue.getValueType().isFloatingPoint()
-                                  ? RISCVISD::VFMV_V_F
-                                  : RISCVISD::VMV_V_X;
-
-  return DAG.getNode(OpCode, DL, VT, ScalarValue);
-}
-
-SDValue RISCVTargetLowering::lowerSPLAT_VECTOR(SDValue Op,
-                                               SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  EVT VT = Op.getValueType();
-
-  SDValue V = Op.getOperand(0);
-
-  RISCVISD::NodeType OpCode = V.getValueType().isFloatingPoint()
-                                  ? RISCVISD::VFMV_V_F
-                                  : RISCVISD::VMV_V_X;
-
-  return DAG.getNode(OpCode, DL, VT, V);
+  return DAG.getNode(ISD::SPLAT_VECTOR, DL, VT, ScalarValue);
 }
 
 SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
@@ -919,8 +901,6 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return LowerINTRINSIC_VOID(Op, DAG);
   case ISD::VECTOR_SHUFFLE:
     return lowerVECTOR_SHUFFLE(Op, DAG);
-  case ISD::SPLAT_VECTOR:
-    return lowerSPLAT_VECTOR(Op, DAG);
   case ISD::SIGN_EXTEND_INREG:
     return lowerSIGN_EXTEND_INREG(Op, DAG);
   case ISD::MGATHER:
@@ -4397,10 +4377,6 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "RISCVISD::FMV_X_ANYEXTW_RV64";
   case RISCVISD::READ_CYCLE_WIDE:
     return "RISCVISD::READ_CYCLE_WIDE";
-  case RISCVISD::VMV_V_X:
-    return "RISCVISD::VMV_V_X";
-  case RISCVISD::VFMV_V_F:
-    return "RISCVISD::VFMV_V_F";
   case RISCVISD::VMV_X_S:
     return "RISCVISD::VMV_X_S";
   case RISCVISD::EXTRACT_VECTOR_ELT:

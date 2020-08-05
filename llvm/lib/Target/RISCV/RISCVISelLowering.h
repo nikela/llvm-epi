@@ -54,8 +54,6 @@ enum NodeType : unsigned {
   READ_CYCLE_WIDE,
 
   // EPI nodes
-  VMV_V_X,
-  VFMV_V_F,
   VMV_X_S,
   EXTRACT_VECTOR_ELT,
   SIGN_EXTEND_BITS_INREG,

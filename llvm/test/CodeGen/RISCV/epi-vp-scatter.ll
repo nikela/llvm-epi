@@ -6,8 +6,7 @@ define void @nxv1i64_1(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %
 ; CHECK-LABEL: nxv1i64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmv.v.i v1, 3
-; CHECK-NEXT:    vsll.vv v1, v17, v1
+; CHECK-NEXT:    vsll.vi v1, v17, 3
 ; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-NEXT:    vsxei64.v v16, (a0), v1, v0.t
 ; CHECK-NEXT:    ret
@@ -107,58 +106,11 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 define void @nxv8f64_1(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv8f64_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp)
-; CHECK-NEXT:    sd s0, 32(sp)
-; CHECK-NEXT:    addi s0, sp, 48
-; CHECK-NEXT:    rdvlenb a3
-; CHECK-NEXT:    slli a3, a3, 3
-; CHECK-NEXT:    sub sp, sp, a3
-; CHECK-NEXT:    sd sp, -40(s0)
 ; CHECK-NEXT:    vsetvli a3, zero, e64,m8,tu,mu
 ; CHECK-NEXT:    vle64.v v8, (a1)
-; CHECK-NEXT:    ld a1, -40(s0)
-; CHECK-NEXT:    rdvlenb a3
-; CHECK-NEXT:    vs1r.v v16, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v17, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v18, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v19, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v20, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v21, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v22, (a1)
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    vs1r.v v23, (a1)
-; CHECK-NEXT:    vmv.v.i v24, 3
-; CHECK-NEXT:    vsll.vv v16, v8, v24
+; CHECK-NEXT:    vsll.vi v24, v8, 3
 ; CHECK-NEXT:    vsetvli a1, a2, e64,m8,tu,mu
-; CHECK-NEXT:    ld a1, -40(s0)
-; CHECK-NEXT:    rdvlenb a2
-; CHECK-NEXT:    vl1r.v v8, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v9, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v10, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v11, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v12, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v13, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v14, (a1)
-; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vl1r.v v15, (a1)
-; CHECK-NEXT:    vsxei64.v v8, (a0), v16, v0.t
-; CHECK-NEXT:    addi sp, s0, -48
-; CHECK-NEXT:    ld s0, 32(sp)
-; CHECK-NEXT:    ld ra, 40(sp)
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    vsxei64.v v16, (a0), v24, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
