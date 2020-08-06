@@ -593,6 +593,13 @@ protected:
   /// vectorization factor.
   using ScalarParts = SmallVector<SmallVector<Value *, 4>, 2>;
 
+  struct VPIntrinsicAndKind {
+    unsigned Intr;
+    bool IsFP;
+  };
+
+  InnerLoopVectorizer::VPIntrinsicAndKind getVPIntrInstr(unsigned Opcode);
+
   /// Set up the values of the IVs correctly when exiting the vector loop.
   void fixupIVUsers(PHINode *OrigPhi, const InductionDescriptor &II,
                     Value *CountRoundDown, Value *EndValue,
@@ -601,6 +608,10 @@ protected:
   /// Create a new induction variable inside L.
   PHINode *createInductionVariable(Loop *L, Value *Start, Value *End,
                                    Value *Step, Instruction *DL);
+
+  /// Generate call to setvl intrinsic with requested vector lenght and optional
+  /// SEW and LMUL.
+  Value *getSetVL(Value *RVL, unsigned SEW = 0, unsigned LMUL = 0);
 
   /// increment induction by EVL if using predicated vectorization.
   void fixEVLInduction(VPTransformState &State);
@@ -4443,6 +4454,9 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
 Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
                                                   Value *Identity, unsigned Op,
                                                   FastMathFlags FMF) {
+  // TODO: Generate ordered reduction loop if reassociation not allowed.
+  assert(FMF.allowReassoc() && "Reassociation transformations not allowed. "
+                               "Cannot generate log reduction loop.");
   VectorType *RdxTy = cast<VectorType>(ReducedPartRdx->getType());
   VectorType *IdenTy = cast<VectorType>(Identity->getType());
   assert(RdxTy->getElementCount() == IdenTy->getElementCount() &&
@@ -4463,9 +4477,9 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // Insert instruction to get runtime vector length in reduction preheader.
   Builder.SetInsertPoint(&*RdxBlockPH->getFirstInsertionPt());
   CallInst *Vscale = emitVscaleCall(Builder, RdxBlockPH->getModule(),
-                                    Type::getInt32Ty(RdxBlockPH->getContext()));
+                                    Type::getInt64Ty(RdxBlockPH->getContext()));
   Value *InitLen =
-      Builder.CreateMul(Builder.getInt32(VF), Vscale, "vscale.x.vf");
+      Builder.CreateMul(Builder.getInt64(VF), Vscale, "vscale.x.vf");
 
   // Insert loop in the reduction loop body.
   Builder.SetInsertPoint(&*RdxBlock->getFirstInsertionPt());
@@ -4473,8 +4487,7 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // Insert Phis for operating vector length and reduced vector.
   PHINode *CurrLen = Builder.CreatePHI(InitLen->getType(), 2, "current.len");
   CurrLen->addIncoming(InitLen, RdxBlockPH);
-  PHINode *CurrVec =
-      Builder.CreatePHI(ReducedPartRdx->getType(), 2, "current.vec");
+  PHINode *CurrVec = Builder.CreatePHI(RdxTy, 2, "current.vec");
   CurrVec->addIncoming(ReducedPartRdx, RdxBlockPH);
 
   // Compute half of vector len.
@@ -4484,17 +4497,26 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   Value *HalfLen =
       Builder.CreateAdd(HalfLenQuotient, HalfLenRemainder, "halflen");
 
-  // Create a vector with first half of the current vector.
-  Value *StepVec =
-      Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector, RdxTy,
-                              {}, nullptr, "index.vec");
-  Value *HalLenSplat =
-      Builder.CreateVectorSplat(RdxTy->getElementCount(), HalfLen, "halflen");
-  Value *HalfMask = Builder.CreateICmpULT(StepVec, HalLenSplat);
-  Value *FirstHalf =
-      Builder.CreateSelect(HalfMask, CurrVec, Identity, "first.half");
+  // If using vpred multiply, we do not need to create a merge between identiry
+  // and current vector for the second half of the elements.
+  Value *FirstHalf = CurrVec;
+  if (!preferPredicatedVectorOps()) {
+    // Create a vector with first half of the current vector.
+    Value *StepVec = Builder.CreateIntrinsic(
+        Intrinsic::experimental_vector_stepvector,
+        VectorType::get(HalfLen->getType(), RdxTy->getElementCount()), {},
+        nullptr, "index.vec");
+    Value *HalfLenSplat =
+        Builder.CreateVectorSplat(RdxTy->getElementCount(), HalfLen, "halflen");
+    Value *HalfMask = Builder.CreateICmpULT(StepVec, HalfLenSplat);
+    FirstHalf = Builder.CreateSelect(HalfMask, CurrVec, Identity, "first.half");
+  }
 
   // Create a vector with the second half of the current vector.
+  // If we are using vpred ops with EVL = HalfLen, the SecondHalf vector will
+  // contain the last HalfLenQuotient elements of the CurrVec followed by
+  // identity elements. Since HalfLenQuotient is always <= HalfLen, it is safe
+  // to use EVL = HalfLen irrespective of the number of elements in CurrVec.
   Value *SecondHalf = Builder.CreateIntrinsic(
       Intrinsic::experimental_vector_slideleftfill, {RdxTy, HalfLen->getType()},
       {CurrVec, Identity, HalfLen}, nullptr, "second.half");
@@ -4513,8 +4535,29 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
     case Instruction::FMul:
     case Instruction::Add:
     case Instruction::FAdd:
-      return Builder.CreateBinOp((Instruction::BinaryOps)Op, FirstHalf,
-                                 SecondHalf, "reduction.vec");
+      if (preferPredicatedVectorOps()) {
+        // set vector length to HalfLen.
+        Value *EVL = Builder.CreateTrunc(
+            getSetVL(HalfLen), Type::getInt32Ty(Builder.getContext()));
+        // create call to vpred intrinsic.
+        Value *PredMask = Builder.getTrueVector(RdxTy->getElementCount());
+        VPIntrinsicAndKind OpIntr = getVPIntrInstr(Op);
+        SmallVector<Value *, 6> IntrArgs;
+        IntrArgs.push_back(FirstHalf);
+        IntrArgs.push_back(SecondHalf);
+        if (OpIntr.IsFP) {
+          IntrArgs.push_back(getConstrainedFPRounding(
+              Builder.getContext(), RoundingMode::NearestTiesToEven));
+          IntrArgs.push_back(getConstrainedFPExcept(
+              Builder.getContext(), fp::ExceptionBehavior::ebIgnore));
+        }
+        IntrArgs.push_back(PredMask);
+        IntrArgs.push_back(EVL);
+        return Builder.CreateIntrinsic(OpIntr.Intr, {RdxTy}, IntrArgs, nullptr,
+                                       "reduction.vec");
+      } else
+        return Builder.CreateBinOp((Instruction::BinaryOps)Op, FirstHalf,
+                                   SecondHalf, "reduction.vec");
       break;
     default:
       llvm_unreachable(
@@ -4536,7 +4579,7 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
 
   // Reset Insertion Point.
   Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
-  return Builder.CreateExtractElement(RdxVec, Builder.getInt32(0), "reduced");
+  return Builder.CreateExtractElement(RdxVec, Builder.getInt64(0), "reduced");
 }
 
 void InnerLoopVectorizer::clearReductionWrapFlags(
@@ -4933,86 +4976,81 @@ static bool mayDivideByZero(Instruction &I) {
   return !CInt || CInt->isZero();
 }
 
+InnerLoopVectorizer::VPIntrinsicAndKind
+InnerLoopVectorizer::getVPIntrInstr(unsigned Opcode) {
+  switch (Opcode) {
+  case Instruction::Add:
+    return {Intrinsic::vp_add, false};
+  case Instruction::FAdd:
+    return {Intrinsic::vp_fadd, true};
+  case Instruction::Sub:
+    return {Intrinsic::vp_sub, false};
+  case Instruction::FSub:
+    return {Intrinsic::vp_fsub, true};
+  case Instruction::Mul:
+    return {Intrinsic::vp_mul, false};
+  case Instruction::FMul:
+    return {Intrinsic::vp_fmul, true};
+  case Instruction::SDiv:
+    return {Intrinsic::vp_sdiv, false};
+  case Instruction::UDiv:
+    return {Intrinsic::vp_udiv, false};
+  case Instruction::FDiv:
+    return {Intrinsic::vp_fdiv, true};
+  case ::Instruction::SRem:
+    return {Intrinsic::vp_srem, false};
+  case Instruction::URem:
+    return {Intrinsic::vp_urem, false};
+  case Instruction::FRem:
+    return {Intrinsic::vp_frem, true};
+  case Instruction::AShr:
+    return {Intrinsic::vp_ashr, false};
+  case Instruction::LShr:
+    return {Intrinsic::vp_lshr, false};
+  case Instruction::Shl:
+    return {Intrinsic::vp_shl, false};
+  case Instruction::Or:
+    return {Intrinsic::vp_or, false};
+  case Instruction::And:
+    return {Intrinsic::vp_and, false};
+  case Instruction::Xor:
+    return {Intrinsic::vp_xor, false};
+  case Instruction::FNeg:
+    return {Intrinsic::vp_fneg, true};
+  case Intrinsic::fma:
+    return {Intrinsic::vp_fma, true};
+  case Instruction::SExt:
+    return {Intrinsic::vp_sext, false};
+  case Instruction::ZExt:
+    return {Intrinsic::vp_zext, false};
+  case Instruction::FPExt:
+    return {Intrinsic::vp_fpext, true};
+  case Instruction::Trunc:
+    return {Intrinsic::vp_trunc, false};
+  case Instruction::FPTrunc:
+    return {Intrinsic::vp_fptrunc, true};
+  case Instruction::FPToUI:
+    return {Intrinsic::vp_fptoui, true};
+  case Instruction::FPToSI:
+    return {Intrinsic::vp_fptosi, true};
+  case Instruction::UIToFP:
+    return {Intrinsic::vp_uitofp, true};
+  case Instruction::SIToFP:
+    return {Intrinsic::vp_sitofp, true};
+  case Instruction::IntToPtr:
+    return {Intrinsic::vp_inttoptr, false};
+  case Instruction::PtrToInt:
+    return {Intrinsic::vp_ptrtoint, false};
+  case Instruction::BitCast:
+    return {Intrinsic::vp_bitcast, false};
+  }
+  return {Intrinsic::not_intrinsic, false};
+}
+
 void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
                                                      VPTransformState &State,
                                                      VPValue *BlockInMask,
                                                      VPValue *EVL) {
-  struct VPIntrinsicAndKind {
-    unsigned Intr;
-    bool IsFP;
-  };
-
-  // TODO: Add support for other instructions as they are implemented by
-  // predicated vector intrinsics.
-  auto VPIntrInstr = [](unsigned Opcode) -> VPIntrinsicAndKind {
-    switch (Opcode) {
-    case Instruction::Add:
-      return {Intrinsic::vp_add, false};
-    case Instruction::FAdd:
-      return {Intrinsic::vp_fadd, true};
-    case Instruction::Sub:
-      return {Intrinsic::vp_sub, false};
-    case Instruction::FSub:
-      return {Intrinsic::vp_fsub, true};
-    case Instruction::Mul:
-      return {Intrinsic::vp_mul, false};
-    case Instruction::FMul:
-      return {Intrinsic::vp_fmul, true};
-    case Instruction::SDiv:
-      return {Intrinsic::vp_sdiv, false};
-    case Instruction::UDiv:
-      return {Intrinsic::vp_udiv, false};
-    case Instruction::FDiv:
-      return {Intrinsic::vp_fdiv, true};
-    case ::Instruction::SRem:
-      return {Intrinsic::vp_srem, false};
-    case Instruction::URem:
-      return {Intrinsic::vp_urem, false};
-    case Instruction::FRem:
-      return {Intrinsic::vp_frem, true};
-    case Instruction::AShr:
-      return {Intrinsic::vp_ashr, false};
-    case Instruction::LShr:
-      return {Intrinsic::vp_lshr, false};
-    case Instruction::Shl:
-      return {Intrinsic::vp_shl, false};
-    case Instruction::Or:
-      return {Intrinsic::vp_or, false};
-    case Instruction::And:
-      return {Intrinsic::vp_and, false};
-    case Instruction::Xor:
-      return {Intrinsic::vp_xor, false};
-    case Instruction::FNeg:
-      return {Intrinsic::vp_fneg, true};
-    case Intrinsic::fma:
-      return {Intrinsic::vp_fma, true};
-    case Instruction::SExt:
-      return {Intrinsic::vp_sext, false};
-    case Instruction::ZExt:
-      return {Intrinsic::vp_zext, false};
-    case Instruction::FPExt:
-      return {Intrinsic::vp_fpext, true};
-    case Instruction::Trunc:
-      return {Intrinsic::vp_trunc, false};
-    case Instruction::FPTrunc:
-      return {Intrinsic::vp_fptrunc, true};
-    case Instruction::FPToUI:
-      return {Intrinsic::vp_fptoui, true};
-    case Instruction::FPToSI:
-      return {Intrinsic::vp_fptosi, true};
-    case Instruction::UIToFP:
-      return {Intrinsic::vp_uitofp, true};
-    case Instruction::SIToFP:
-      return {Intrinsic::vp_sitofp, true};
-    case Instruction::IntToPtr:
-      return {Intrinsic::vp_inttoptr, false};
-    case Instruction::PtrToInt:
-      return {Intrinsic::vp_ptrtoint, false};
-    case Instruction::BitCast:
-      return {Intrinsic::vp_bitcast, false};
-    }
-    return {Intrinsic::not_intrinsic, false};
-  };
 
   auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
     // The outermost mask can be lowered as an all ones mask when using EVL.
@@ -5043,7 +5081,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       Ops.push_back(MaskValue(Part, DestTy->getElementCount()));
       Ops.push_back(EVLValue(Part));
       Value *V =
-          Builder.CreateIntrinsic(VPIntrInstr(CI->getOpcode()).Intr,
+          Builder.CreateIntrinsic(getVPIntrInstr(CI->getOpcode()).Intr,
                                   {DestTy, SrcTy}, Ops, nullptr, "vp.cast");
       VectorLoopValueMap.setVectorValue(&I, Part, V);
       addMetadata(V, &I);
@@ -5099,7 +5137,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     return;
   }
 
-  assert(VPIntrInstr(Opcode).Intr != Intrinsic::not_intrinsic &&
+  assert(getVPIntrInstr(Opcode).Intr != Intrinsic::not_intrinsic &&
          "Opcode does not have predicated vector intrinsic support.");
 
   //===------------------- Int-to-Int cast instructions -------------------===//
@@ -5214,7 +5252,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
 
     // Add rounding mode and exception control args.
     // TODO: Add support for non-default values.
-    if (VPIntrInstr(Opcode).IsFP) {
+    if (getVPIntrInstr(Opcode).IsFP) {
       if (Opcode != Instruction::FNeg)
         Ops.push_back(getConstrainedFPRounding(
             Builder.getContext(), RoundingMode::NearestTiesToEven));
@@ -5226,7 +5264,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     Ops.push_back(MaskValue(Part, OpTy->getElementCount()));
     Ops.push_back(EVLValue(Part));
 
-    Value *V = Builder.CreateIntrinsic(VPIntrInstr(Opcode).Intr, {OpTy}, Ops,
+    Value *V = Builder.CreateIntrinsic(getVPIntrInstr(Opcode).Intr, {OpTy}, Ops,
                                        nullptr, "vp.op");
 
     if (auto *VecOp = dyn_cast<Instruction>(V))
@@ -8924,7 +8962,11 @@ Value *InnerLoopVectorizer::createEVLMask(Value *EVL) {
   return Builder.CreateICmpULT(StepVec, EVLSplat, "evl.mask");
 }
 
-Value *InnerLoopVectorizer::createEVL() {
+Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
+  assert(RVL->getType()->isIntegerTy() &&
+         "Requested vector length should be an integer.");
+  Value *RVLArg =
+      Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
   Function *IntrDecl =
       Intrinsic::getDeclaration(LoopVectorPreHeader->getModule(),
                                 Intrinsic::EPIIntrinsics::epi_vsetvl, {});
@@ -8937,13 +8979,17 @@ Value *InnerLoopVectorizer::createEVL() {
   assert(SEWArgMap.find(WidestType) != SEWArgMap.end() &&
          SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
          "Cannot set vector length: Unsupported type");
-  unsigned SEW = SEWArgMap.at(WidestType);
-  unsigned LMUL = LMULArgMap.at(WidestType / SmallestType);
+  SEW = SEW ? SEW : SEWArgMap.at(WidestType);
+  LMUL = LMUL ? LMUL : LMULArgMap.at(WidestType / SmallestType);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
   Constant *LMULArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), LMUL);
 
+  return Builder.CreateCall(IntrDecl, {RVLArg, SEWArg, LMULArg});
+}
+
+Value *InnerLoopVectorizer::createEVL() {
   // Compute TC - IV as the RVL(requested vector length). vsetvl() returns a
   // GVL(granted vector length) that is the number of lanes processed for the
   // given vector iteration. At the end of the vector iteration increment the IV
@@ -8952,9 +8998,8 @@ Value *InnerLoopVectorizer::createEVL() {
   // FIXME: The caveat with this approach is that TC
   // may wrap. This should not be a big problem for EPI (or other 64-bit)
   // architectures.
-  Value *RVLArg = Builder.CreateSub(TripCount, Induction);
-  Value *EVL = Builder.CreateCall(IntrDecl, {RVLArg, SEWArg, LMULArg});
-  return EVL;
+  Value *RVL = Builder.CreateSub(TripCount, Induction);
+  return getSetVL(RVL);
 }
 
 void VPWidenGEPRecipe::execute(VPTransformState &State) {
