@@ -9897,6 +9897,9 @@ SDNode *SelectionDAG::isConstantIntBuildVectorOrConstantInt(SDValue N) {
     if (GA->getOpcode() == ISD::GlobalAddress &&
         TLI->isOffsetFoldingLegal(GA))
       return GA;
+  if ((N.getOpcode() == ISD::SPLAT_VECTOR) &&
+      isa<ConstantSDNode>(N.getOperand(0)))
+    return N.getNode();
   return nullptr;
 }
 
