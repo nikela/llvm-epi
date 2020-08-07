@@ -3757,23 +3757,65 @@ void SelectionDAGBuilder::visitGetElementPtr(const User &I) {
       N = DAG.getSplatBuildVector(VT, dl, N);
   }
 
+  // Check if this a struct containing Scalable vectors.
+  // NOTE: We check elsewhere that structs with scalable elements are
+  // homogeneous.
+  bool ScalableStruct = false;
+  for (gep_type_iterator GTI = gep_type_begin(&I), E = gep_type_end(&I);
+       GTI != E; ++GTI) {
+    if (StructType *StTy = GTI.getStructTypeOrNull()) {
+      for (unsigned I = 0; I < StTy->getNumElements(); I++) {
+        ScalableStruct =
+            ScalableStruct || isa<ScalableVectorType>(StTy->getElementType(I));
+      }
+    }
+  }
+
   for (gep_type_iterator GTI = gep_type_begin(&I), E = gep_type_end(&I);
        GTI != E; ++GTI) {
     const Value *Idx = GTI.getOperand();
     if (StructType *StTy = GTI.getStructTypeOrNull()) {
       unsigned Field = cast<Constant>(Idx)->getUniqueInteger().getZExtValue();
       if (Field) {
-        // N = N + Offset
-        uint64_t Offset = DL->getStructLayout(StTy)->getElementOffset(Field);
+        if (!ScalableStruct) {
+          // N = N + Offset
+          uint64_t Offset = DL->getStructLayout(StTy)->getElementOffset(Field);
 
-        // In an inbounds GEP with an offset that is nonnegative even when
-        // interpreted as signed, assume there is no unsigned overflow.
-        SDNodeFlags Flags;
-        if (int64_t(Offset) >= 0 && cast<GEPOperator>(I).isInBounds())
-          Flags.setNoUnsignedWrap(true);
+          // In an inbounds GEP with an offset that is nonnegative even when
+          // interpreted as signed, assume there is no unsigned overflow.
+          SDNodeFlags Flags;
+          if (int64_t(Offset) >= 0 && cast<GEPOperator>(I).isInBounds())
+            Flags.setNoUnsignedWrap(true);
 
-        N = DAG.getNode(ISD::ADD, dl, N.getValueType(), N,
-                        DAG.getConstant(Offset, dl, N.getValueType()), Flags);
+          N = DAG.getNode(ISD::ADD, dl, N.getValueType(), N,
+                          DAG.getConstant(Offset, dl, N.getValueType()), Flags);
+        } else {
+          // Scale offsets as needed.
+          // FIXME: this is a bit naive as we assume everything is packed
+          // because alignment is right already, hence no need to add any
+          // offset.
+          for (unsigned FieldIdx = 0; FieldIdx < Field; FieldIdx++) {
+            // This could be relaxed with "tail scalable" structs.
+            assert(isa<ScalableVectorType>(StTy->getElementType(FieldIdx)) &&
+                   "Structs with mixed scalables are not supported");
+            llvm::ScalableVectorType *VecTy =
+                cast<ScalableVectorType>(StTy->getElementType(FieldIdx));
+            SDNodeFlags Flags;
+            if (cast<GEPOperator>(I).isInBounds())
+              Flags.setNoUnsignedWrap(true);
+            int64_t ElementSize =
+                VecTy->getElementType()->getScalarSizeInBits() / 8;
+            SDValue ScaledOffset = DAG.getNode(
+                ISD::MUL, dl, N.getValueType(),
+                DAG.getNode(
+                    ISD::VSCALE, dl, N.getValueType(),
+                    DAG.getConstant(VecTy->getElementCount().Min,
+                                    dl, N.getValueType())),
+                DAG.getConstant(ElementSize, dl, N.getValueType()), Flags);
+            N = DAG.getNode(ISD::ADD, dl, N.getValueType(), N, ScaledOffset,
+                            Flags);
+          }
+        }
       }
     } else {
       // IdxSize is the width of the arithmetic according to IR semantics.

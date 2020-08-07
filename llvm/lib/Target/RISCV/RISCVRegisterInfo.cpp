@@ -252,80 +252,172 @@ static Register computeVRSpillReloadInstructions(
                                           KillHandle);
 }
 
-void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
-                                            int SPAdj, unsigned FIOperandNum,
-                                            RegScavenger *RS) const {
+void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
+    MachineBasicBlock::iterator II, int SPAdj, unsigned FIOperandNum,
+    RegScavenger *RS) const {
+
   assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
 
   MachineInstr &MI = *II;
   MachineFunction &MF = *MI.getParent()->getParent();
-  MachineFrameInfo &MFI = MF.getFrameInfo();
   MachineRegisterInfo &MRI = MF.getRegInfo();
   const RISCVInstrInfo *TII = MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
 
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  assert(MFI.getStackID(FrameIndex) == TargetStackID::EPIVector &&
+         "Unexpected stack ID");
+
+  MachineOperand SlotAddr = MI.getOperand(FIOperandNum);
+  MachineBasicBlock &MBB = *MI.getParent();
+
+  // TODO: Consider using loadRegFromStackSlot but this has to be before
+  // replacing the FI above.
+  unsigned LoadHandleOpcode =
+      getRegSizeInBits(RISCV::GPRRegClass) == 32 ? RISCV::LW : RISCV::LD;
+
+  bool RemoveInstruction = false;
+  Register HandleReg = 0;
+
+  // Some cases can be folded in the instruction.
+  if (MI.getOpcode() == RISCV::ADDI &&
+      MI.getOperand(FIOperandNum + 1).getImm() == 0) {
+    HandleReg = MI.getOperand(0).getReg();
+    RemoveInstruction = true;
+  }
+
+
+  if (!HandleReg)
+    HandleReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+
+  MachineInstr *LoadHandle =
+      BuildMI(MBB, II, DL, TII->get(LoadHandleOpcode), HandleReg)
+          .add(SlotAddr)
+          .addImm(0);
+
+  // Handle vector spills here.
+  if (MI.getOpcode() == RISCV::PseudoVSPILL_M1 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M2 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M2 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M4 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M4 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M8 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M8 ||
+      // Vector tuples.
+      MI.getOpcode() == RISCV::PseudoVSPILL_2xM1 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_2xM1) {
+
+    // Make sure we spill/reload all the bits using whole register
+    // instructions.
+    MachineOperand &OpReg = MI.getOperand(0);
+    bool IsReload;
+    unsigned LMUL;
+    unsigned TupleSize = 0;
+    switch (MI.getOpcode()) {
+    default:
+      llvm_unreachable("Unexpected instruction");
+    case RISCV::PseudoVSPILL_M1:
+      IsReload = false;
+      LMUL = 1;
+      break;
+    case RISCV::PseudoVRELOAD_M1:
+      IsReload = true;
+      LMUL = 1;
+      break;
+    case RISCV::PseudoVSPILL_M2:
+      IsReload = false;
+      LMUL = 2;
+      break;
+    case RISCV::PseudoVRELOAD_M2:
+      IsReload = true;
+      LMUL = 2;
+      break;
+    case RISCV::PseudoVSPILL_M4:
+      IsReload = false;
+      LMUL = 4;
+      break;
+    case RISCV::PseudoVRELOAD_M4:
+      IsReload = true;
+      LMUL = 4;
+      break;
+    case RISCV::PseudoVSPILL_M8:
+      IsReload = false;
+      LMUL = 8;
+      break;
+    case RISCV::PseudoVRELOAD_M8:
+      IsReload = true;
+      LMUL = 8;
+      break;
+    case RISCV::PseudoVSPILL_2xM1:
+      IsReload = false;
+      LMUL = 1;
+      TupleSize = 2;
+      break;
+    case RISCV::PseudoVRELOAD_2xM1:
+      IsReload = true;
+      LMUL = 1;
+      TupleSize = 2;
+      break;
+    }
+    computeVRSpillReloadInstructions(II, OpReg.getReg(), HandleReg, LMUL,
+                                     IsReload, TupleSize,
+                                     /* KillVReg */ OpReg.isKill());
+
+    // Remove the pseudo.
+    MI.eraseFromParent();
+  } else {
+    // Use the handle as address
+    MI.getOperand(FIOperandNum)
+        .ChangeToRegister(HandleReg, false, false, /* isKill */ true);
+    if (RemoveInstruction)
+      MI.eraseFromParent();
+  }
+
+  // Now remove the FI of the handle load.
+  return eliminateFrameIndex(LoadHandle, /* SPAdj */ 0, 1, RS,
+                             /* IsHandle */ true);
+}
+
+void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
+                                            int SPAdj, unsigned FIOperandNum,
+                                            RegScavenger *RS,
+                                            bool IsHandle) const {
+  assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
+
+  MachineInstr &MI = *II;
+  MachineFunction &MF = *MI.getParent()->getParent();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const RISCVInstrInfo *TII = MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
+  DebugLoc DL = MI.getDebugLoc();
+
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+  if (!IsHandle && MFI.getStackID(FrameIndex) == TargetStackID::EPIVector
+      // FIXME: This is a quirk caused by the way we use handles. If we don't
+      // do this, we emit an incorrect load.
+      // FIXME: Stop using handles.
+      && MI.getOpcode() != RISCV::SW && MI.getOpcode() != RISCV::SD
+      && MI.getOpcode() != RISCV::LW && MI.getOpcode() != RISCV::LD) {
+    return eliminateFrameIndexEPIVector(II, SPAdj, FIOperandNum, RS);
+  }
+
   Register FrameReg;
   int Offset =
       getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg);
 
-  bool NeedsIndirectAddressing = false;
-  bool OffsetFits = false;
-  int OffsetIndex = -1;
-  // FIXME: Improve this to make it more robust.
-  switch (MI.getOpcode()) {
-  case RISCV::PseudoVLE8_V_M1:
-  case RISCV::PseudoVLE16_V_M1:
-  case RISCV::PseudoVLE32_V_M1:
-  case RISCV::PseudoVLE64_V_M1:
-  case RISCV::PseudoVLE8_V_M2:
-  case RISCV::PseudoVLE16_V_M2:
-  case RISCV::PseudoVLE32_V_M2:
-  case RISCV::PseudoVLE64_V_M2:
-  case RISCV::PseudoVLE8_V_M4:
-  case RISCV::PseudoVLE16_V_M4:
-  case RISCV::PseudoVLE32_V_M4:
-  case RISCV::PseudoVLE64_V_M4:
-  case RISCV::PseudoVLE8_V_M8:
-  case RISCV::PseudoVLE16_V_M8:
-  case RISCV::PseudoVLE32_V_M8:
-  case RISCV::PseudoVLE64_V_M8:
-  case RISCV::PseudoVSE8_V_M1:
-  case RISCV::PseudoVSE16_V_M1:
-  case RISCV::PseudoVSE32_V_M1:
-  case RISCV::PseudoVSE64_V_M1:
-  case RISCV::PseudoVSE8_V_M2:
-  case RISCV::PseudoVSE16_V_M2:
-  case RISCV::PseudoVSE32_V_M2:
-  case RISCV::PseudoVSE64_V_M2:
-  case RISCV::PseudoVSE8_V_M4:
-  case RISCV::PseudoVSE16_V_M4:
-  case RISCV::PseudoVSE32_V_M4:
-  case RISCV::PseudoVSE64_V_M4:
-  case RISCV::PseudoVSE8_V_M8:
-  case RISCV::PseudoVSE16_V_M8:
-  case RISCV::PseudoVSE32_V_M8:
-  case RISCV::PseudoVSE64_V_M8:
-    // The following are handled later in this function.
-  case RISCV::PseudoVSPILL_M1:
-  case RISCV::PseudoVRELOAD_M1:
-  case RISCV::PseudoVSPILL_M2:
-  case RISCV::PseudoVRELOAD_M2:
-  case RISCV::PseudoVSPILL_M4:
-  case RISCV::PseudoVRELOAD_M4:
-  case RISCV::PseudoVSPILL_M8:
-  case RISCV::PseudoVRELOAD_M8:
-    // Vector tuples.
-  case RISCV::PseudoVSPILL_2xM1:
-  case RISCV::PseudoVRELOAD_2xM1:
-    NeedsIndirectAddressing =
-        MFI.getStackID(FrameIndex) == TargetStackID::EPIVector;
-    break;
-  default:
-    OffsetIndex = FIOperandNum + 1;
-    Offset += MI.getOperand(OffsetIndex).getImm();
-    OffsetFits = isInt<12>(Offset);
-    break;
+  // FIXME: PseudoVSE / PseudoVLE don't have an offset operand and in some
+  // cases we don't use the EPIVector stack (e.g. a bitcast from
+  // statically-sized storage).
+  bool HasOffset = false;
+  if (FIOperandNum + 1 < MI.getNumOperands() &&
+      MI.getOperand(FIOperandNum + 1).isImm()) {
+    HasOffset = true;
+    Offset += MI.getOperand(FIOperandNum + 1).getImm();
+  } else {
+    Offset = 0;
   }
 
   if (!isInt<32>(Offset)) {
@@ -334,86 +426,9 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   }
 
   MachineBasicBlock &MBB = *MI.getParent();
-
-  if (NeedsIndirectAddressing) {
-    assert(OffsetIndex == -1 && "There must not be offset");
-    assert(MFI.getStackID(FrameIndex) == TargetStackID::EPIVector &&
-           "Unexpected stack ID");
-
-    MachineOperand SlotAddr = MI.getOperand(FIOperandNum);
-
-    // TODO: Consider using loadRegFromStackSlot but this has to be before
-    // replacing the FI above.
-    unsigned LoadHandleOpcode =
-        getRegSizeInBits(RISCV::GPRRegClass) == 32 ? RISCV::LW : RISCV::LD;
-    Register HandleReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-    MachineInstr *LoadHandle =
-        BuildMI(MBB, II, DL, TII->get(LoadHandleOpcode), HandleReg)
-            .add(SlotAddr)
-            .addImm(0);
-
-    // Handle vector spills here
-    if (MI.getOpcode() == RISCV::PseudoVSPILL_M1 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_M1 ||
-        MI.getOpcode() == RISCV::PseudoVSPILL_M2 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_M2 ||
-        MI.getOpcode() == RISCV::PseudoVSPILL_M4 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_M4 ||
-        MI.getOpcode() == RISCV::PseudoVSPILL_M8 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_M8 ||
-        // Vector tuples.
-        MI.getOpcode() == RISCV::PseudoVSPILL_2xM1 ||
-        MI.getOpcode() == RISCV::PseudoVRELOAD_2xM1) {
-
-      // Make sure we spill/reload all the bits using whole register
-      // instructions.
-      MachineOperand &OpReg = MI.getOperand(0);
-      bool IsReload;
-      unsigned LMUL;
-      unsigned TupleSize = 0;
-      switch (MI.getOpcode()) {
-      default:
-        llvm_unreachable("Unexpected instruction");
-      case RISCV::PseudoVSPILL_M1:
-        IsReload = false; LMUL = 1; break;
-      case RISCV::PseudoVRELOAD_M1:
-        IsReload = true;  LMUL = 1; break;
-      case RISCV::PseudoVSPILL_M2:
-        IsReload = false; LMUL = 2; break;
-      case RISCV::PseudoVRELOAD_M2:
-        IsReload = true;  LMUL = 2; break;
-      case RISCV::PseudoVSPILL_M4:
-        IsReload = false; LMUL = 4; break;
-      case RISCV::PseudoVRELOAD_M4:
-        IsReload = true;  LMUL = 4; break;
-      case RISCV::PseudoVSPILL_M8:
-        IsReload = false; LMUL = 8; break;
-      case RISCV::PseudoVRELOAD_M8:
-        IsReload = true;  LMUL = 8; break;
-      case RISCV::PseudoVSPILL_2xM1:
-        IsReload = false;  LMUL = 1; TupleSize = 2; break;
-      case RISCV::PseudoVRELOAD_2xM1:
-        IsReload = true;  LMUL = 1; TupleSize = 2; break;
-      }
-      computeVRSpillReloadInstructions(II, OpReg.getReg(), HandleReg, LMUL,
-                                       IsReload, TupleSize,
-                                       /* KillVReg */ OpReg.isKill());
-
-      // Remove the pseudo
-      MI.eraseFromParent();
-    } else {
-      // Use the handle as address
-      MI.getOperand(FIOperandNum)
-          .ChangeToRegister(HandleReg, false, false, /* isKill */ true);
-    }
-
-    // Now remove the FI of the handle load
-    return eliminateFrameIndex(LoadHandle, /* SPAdj */ 0, 1, RS);
-  }
-
   bool FrameRegIsKill = false;
 
-  if (!OffsetFits) {
+  if (!isInt<12>(Offset)) {
     assert(isInt<32>(Offset) && "Int32 expected");
     // The offset won't fit in an immediate, so use a scratch register instead
     // Modify Offset and FrameReg appropriately
@@ -429,9 +444,8 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   MI.getOperand(FIOperandNum)
       .ChangeToRegister(FrameReg, false, false, FrameRegIsKill);
-  if (OffsetIndex >= 0) {
-    MI.getOperand(OffsetIndex).ChangeToImmediate(Offset);
-  }
+  if (HasOffset)
+    MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 }
 
 Register RISCVRegisterInfo::getFrameRegister(const MachineFunction &MF) const {

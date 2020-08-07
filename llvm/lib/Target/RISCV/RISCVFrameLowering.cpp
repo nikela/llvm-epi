@@ -785,6 +785,17 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
             Alloca->getType()->getElementType())) {
       MFI.setStackID(FI, TargetStackID::EPIVector);
       RVFI->setHasSpilledVR();
+    } else if (const StructType *Sty = dyn_cast<const StructType>(
+                   Alloca->getType()->getElementType())) {
+      // Also check structures with scalable inside. We use them only for
+      // tuples.
+      for (const Type *ElTy : Sty->elements()) {
+        if (isa<const ScalableVectorType>(ElTy)) {
+          MFI.setStackID(FI, TargetStackID::EPIVector);
+          RVFI->setHasSpilledVR();
+          break;
+        }
+      }
     }
   }
 
