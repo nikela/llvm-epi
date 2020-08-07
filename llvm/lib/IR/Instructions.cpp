@@ -1755,9 +1755,11 @@ bool GetElementPtrInst::isInBounds() const {
 }
 
 bool GetElementPtrInst::accumulateConstantOffset(const DataLayout &DL,
-                                                 APInt &Offset) const {
+                                                 APInt &Offset,
+                                                 bool SkipScalableCheck) const {
   // Delegate to the generic GEPOperator implementation.
-  return cast<GEPOperator>(this)->accumulateConstantOffset(DL, Offset);
+  return cast<GEPOperator>(this)->accumulateConstantOffset(
+      DL, Offset, /* ExternalAnalysis */ nullptr, SkipScalableCheck);
 }
 
 //===----------------------------------------------------------------------===//

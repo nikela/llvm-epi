@@ -567,7 +567,8 @@ public:
   /// IntPtr type for the address space of the base GEP pointer.
   bool accumulateConstantOffset(
       const DataLayout &DL, APInt &Offset,
-      function_ref<bool(Value &, APInt &)> ExternalAnalysis = nullptr) const;
+      function_ref<bool(Value &, APInt &)> ExternalAnalysis = nullptr,
+      bool SkipScalableCheck = false) const;
 };
 
 class PtrToIntOperator

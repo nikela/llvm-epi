@@ -382,6 +382,29 @@ StructType *StructType::get(LLVMContext &Context, ArrayRef<Type*> ETypes,
   return ST;
 }
 
+void StructType::validateBody() const {
+  // Restrict as much as possible how scalable vectors can be used in LLVM IR
+  // struct types for now.
+  Type *ScalableVectorFieldTy = nullptr;
+  for (unsigned I = 0; I < NumContainedTys; I++) {
+    if (isa<ScalableVectorType>(ContainedTys[I])) {
+      assert((I == 0 || ScalableVectorFieldTy) &&
+             "Attempt to create a struct with scalable and "
+             "non-scalable types in it");
+      if (ScalableVectorFieldTy) {
+        // We might be able to relax this.
+        assert(ScalableVectorFieldTy == ContainedTys[I] &&
+               "Attempt to create a struct with different scalable types");
+      } else
+        ScalableVectorFieldTy = ContainedTys[I];
+    } else {
+      assert(!ScalableVectorFieldTy &&
+             "Attempt to create a struct with scalable and "
+             "non-scalable types in it");
+    }
+  }
+}
+
 void StructType::setBody(ArrayRef<Type*> Elements, bool isPacked) {
   assert(isOpaque() && "Struct body already set!");
 
@@ -397,6 +420,8 @@ void StructType::setBody(ArrayRef<Type*> Elements, bool isPacked) {
   }
 
   ContainedTys = Elements.copy(getContext().pImpl->Alloc).data();
+
+  validateBody();
 }
 
 void StructType::setName(StringRef Name) {

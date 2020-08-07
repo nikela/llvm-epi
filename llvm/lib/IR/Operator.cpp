@@ -60,7 +60,8 @@ Align GEPOperator::getMaxPreservedAlignment(const DataLayout &DL) const {
 
 bool GEPOperator::accumulateConstantOffset(
     const DataLayout &DL, APInt &Offset,
-    function_ref<bool(Value &, APInt &)> ExternalAnalysis) const {
+    function_ref<bool(Value &, APInt &)> ExternalAnalysis,
+    bool SkipScalableCheck) const {
    assert(Offset.getBitWidth() ==
               DL.getIndexSizeInBits(getPointerAddressSpace()) &&
           "The offset bit width does not match DL specification.");
@@ -89,9 +90,11 @@ bool GEPOperator::accumulateConstantOffset(
   for (gep_type_iterator GTI = gep_type_begin(this), GTE = gep_type_end(this);
        GTI != GTE; ++GTI) {
     // Scalable vectors are multiplied by a runtime constant.
-    bool ScalableType = false;
-    if (isa<ScalableVectorType>(GTI.getIndexedType()))
-      ScalableType = true;
+    // In general they lead to non-constant offsets but in some cases (such as
+    // SROA) it is beneficial to assume that their (scalable) offsets are kind
+    // of constant.
+    bool ScalableType =
+        isa<ScalableVectorType>(GTI.getIndexedType()) && !SkipScalableCheck;
 
     Value *V = GTI.getOperand();
     StructType *STy = GTI.getStructTypeOrNull();

@@ -1121,7 +1121,8 @@ public:
   /// undefined (it is *not* preserved!). The APInt passed into this routine
   /// must be at least as wide as the IntPtr type for the address space of
   /// the base GEP pointer.
-  bool accumulateConstantOffset(const DataLayout &DL, APInt &Offset) const;
+  bool accumulateConstantOffset(const DataLayout &DL, APInt &Offset,
+                                bool SkipScalableCheck = false) const;
 
   // Methods for support type inquiry through isa, cast, and dyn_cast:
   static bool classof(const Instruction *I) {

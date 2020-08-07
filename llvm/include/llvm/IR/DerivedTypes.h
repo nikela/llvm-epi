@@ -232,6 +232,8 @@ class StructType : public Type {
   /// type that has an empty name.
   void *SymbolTableEntry = nullptr;
 
+  void validateBody() const;
+
 public:
   StructType(const StructType &) = delete;
   StructType &operator=(const StructType &) = delete;

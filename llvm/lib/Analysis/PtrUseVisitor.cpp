@@ -35,7 +35,8 @@ bool detail::PtrUseVisitorBase::adjustOffsetForGEP(GetElementPtrInst &GEPI) {
     return false;
 
   APInt TmpOffset(DL.getIndexTypeSizeInBits(GEPI.getType()), 0);
-  if (GEPI.accumulateConstantOffset(DL, TmpOffset)) {
+  if (GEPI.accumulateConstantOffset(DL, TmpOffset,
+                                    /* SkipScalableCheck */ true)) {
     Offset += TmpOffset.sextOrTrunc(Offset.getBitWidth());
     return true;
   }
