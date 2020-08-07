@@ -411,13 +411,11 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   // FIXME: PseudoVSE / PseudoVLE don't have an offset operand and in some
   // cases we don't use the EPIVector stack (e.g. a bitcast from
   // statically-sized storage).
-  bool HasOffset = false;
+  bool HasOffsetOperand = false;
   if (FIOperandNum + 1 < MI.getNumOperands() &&
       MI.getOperand(FIOperandNum + 1).isImm()) {
-    HasOffset = true;
+    HasOffsetOperand = true;
     Offset += MI.getOperand(FIOperandNum + 1).getImm();
-  } else {
-    Offset = 0;
   }
 
   if (!isInt<32>(Offset)) {
@@ -428,7 +426,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   MachineBasicBlock &MBB = *MI.getParent();
   bool FrameRegIsKill = false;
 
-  if (!isInt<12>(Offset)) {
+  if (Offset && (!isInt<12>(Offset) || !HasOffsetOperand)) {
     assert(isInt<32>(Offset) && "Int32 expected");
     // The offset won't fit in an immediate, so use a scratch register instead
     // Modify Offset and FrameReg appropriately
@@ -444,7 +442,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   MI.getOperand(FIOperandNum)
       .ChangeToRegister(FrameReg, false, false, FrameRegIsKill);
-  if (HasOffset)
+  if (HasOffsetOperand)
     MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 }
 
