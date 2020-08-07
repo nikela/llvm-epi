@@ -7089,8 +7089,11 @@ private:
 } // end anonymous namespace
 
 static Optional<unsigned> getAggregateSize(Instruction *InsertInst) {
-  if (auto *IE = dyn_cast<InsertElementInst>(InsertInst))
+  if (auto *IE = dyn_cast<InsertElementInst>(InsertInst)) {
+    if (isa<ScalableVectorType>(IE->getType()))
+      return None;
     return cast<FixedVectorType>(IE->getType())->getNumElements();
+  }
 
   unsigned AggregateSize = 1;
   auto *IV = cast<InsertValueInst>(InsertInst);
