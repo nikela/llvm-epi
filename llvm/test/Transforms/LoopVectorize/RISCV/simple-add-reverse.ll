@@ -34,37 +34,37 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = sub i64 [[TMP0]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[OFFSET_IDX]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP6:%.*]] = shl i32 [[TMP5]], 3
-; CHECK-NEXT:    [[TMP7:%.*]] = sub i32 1, [[TMP6]]
-; CHECK-NEXT:    [[TMP8:%.*]] = sext i32 [[TMP7]] to i64
-; CHECK-NEXT:    [[TMP9:%.*]] = getelementptr inbounds i8, i8* [[TMP4]], i64 [[TMP8]]
-; CHECK-NEXT:    [[TMP10:%.*]] = bitcast i8* [[TMP9]] to <vscale x 8 x i8>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP10]], align 1
+; CHECK-NEXT:    [[DOTNEG:%.*]] = mul i32 [[TMP5]], -8
+; CHECK-NEXT:    [[TMP6:%.*]] = or i32 [[DOTNEG]], 1
+; CHECK-NEXT:    [[TMP7:%.*]] = sext i32 [[TMP6]] to i64
+; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i8, i8* [[TMP4]], i64 [[TMP7]]
+; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i8* [[TMP8]] to <vscale x 8 x i8>*
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP9]], align 1
 ; CHECK-NEXT:    [[REVERSE:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD]])
-; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i8, i8* [[B:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = shl i32 [[TMP12]], 3
-; CHECK-NEXT:    [[TMP14:%.*]] = sub i32 1, [[TMP13]]
-; CHECK-NEXT:    [[TMP15:%.*]] = sext i32 [[TMP14]] to i64
-; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i8, i8* [[TMP11]], i64 [[TMP15]]
-; CHECK-NEXT:    [[TMP17:%.*]] = bitcast i8* [[TMP16]] to <vscale x 8 x i8>*
-; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP17]], align 1
+; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i8, i8* [[B:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[TMP11:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-NEXT:    [[DOTNEG5:%.*]] = mul i32 [[TMP11]], -8
+; CHECK-NEXT:    [[TMP12:%.*]] = or i32 [[DOTNEG5]], 1
+; CHECK-NEXT:    [[TMP13:%.*]] = sext i32 [[TMP12]] to i64
+; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i8, i8* [[TMP10]], i64 [[TMP13]]
+; CHECK-NEXT:    [[TMP15:%.*]] = bitcast i8* [[TMP14]] to <vscale x 8 x i8>*
+; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP15]], align 1
 ; CHECK-NEXT:    [[REVERSE3:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD2]])
-; CHECK-NEXT:    [[TMP18:%.*]] = add <vscale x 8 x i8> [[REVERSE3]], [[REVERSE]]
-; CHECK-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i8, i8* [[C:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[REVERSE4:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[TMP18]])
-; CHECK-NEXT:    [[TMP20:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP21:%.*]] = shl i32 [[TMP20]], 3
-; CHECK-NEXT:    [[TMP22:%.*]] = sub i32 1, [[TMP21]]
-; CHECK-NEXT:    [[TMP23:%.*]] = sext i32 [[TMP22]] to i64
-; CHECK-NEXT:    [[TMP24:%.*]] = getelementptr inbounds i8, i8* [[TMP19]], i64 [[TMP23]]
-; CHECK-NEXT:    [[TMP25:%.*]] = bitcast i8* [[TMP24]] to <vscale x 8 x i8>*
-; CHECK-NEXT:    store <vscale x 8 x i8> [[REVERSE4]], <vscale x 8 x i8>* [[TMP25]], align 1
-; CHECK-NEXT:    [[TMP26:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = shl i64 [[TMP26]], 3
+; CHECK-NEXT:    [[TMP16:%.*]] = add <vscale x 8 x i8> [[REVERSE3]], [[REVERSE]]
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i8, i8* [[C:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[REVERSE4:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[TMP16]])
+; CHECK-NEXT:    [[TMP18:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-NEXT:    [[DOTNEG6:%.*]] = mul i32 [[TMP18]], -8
+; CHECK-NEXT:    [[TMP19:%.*]] = or i32 [[DOTNEG6]], 1
+; CHECK-NEXT:    [[TMP20:%.*]] = sext i32 [[TMP19]] to i64
+; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i8, i8* [[TMP17]], i64 [[TMP20]]
+; CHECK-NEXT:    [[TMP22:%.*]] = bitcast i8* [[TMP21]] to <vscale x 8 x i8>*
+; CHECK-NEXT:    store <vscale x 8 x i8> [[REVERSE4]], <vscale x 8 x i8>* [[TMP22]], align 1
+; CHECK-NEXT:    [[TMP23:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = shl i64 [[TMP23]], 3
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop !0
+; CHECK-NEXT:    [[TMP24:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP24]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop !0
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -78,10 +78,10 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i8, i8* [[A]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP28:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
+; CHECK-NEXT:    [[TMP25:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
 ; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i8, i8* [[B]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP29:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
-; CHECK-NEXT:    [[ADD:%.*]] = add i8 [[TMP29]], [[TMP28]]
+; CHECK-NEXT:    [[TMP26:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
+; CHECK-NEXT:    [[ADD:%.*]] = add i8 [[TMP26]], [[TMP25]]
 ; CHECK-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i8, i8* [[C]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    store i8 [[ADD]], i8* [[ARRAYIDX6]], align 1
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp sgt i64 [[INDVARS_IV]], 0
