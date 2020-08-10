@@ -1002,12 +1002,13 @@ This operation preserves the order of the floating-point addition as described.
 def : DocEPIBuiltin<vfredsum>
 {
   let Category = DocEPIFloatingPointArithmetic;
-  let Title = "Floating-point ordered sum of vector";
+  let Title = "Floating-point unordered sum of vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of a floating-point vector. The initial result of the sum is taken from the
 first element of the vector `b`.
 
-This builtin will compute the sum in any valid sequential order.
+This builtin will numerically compute the sum as described but floating point
+operations can be reassociated for efficiency reasons.
 }];
   let Instruction = "vfredsum.vs";
 
