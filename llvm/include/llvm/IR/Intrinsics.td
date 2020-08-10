@@ -1795,15 +1795,29 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
                                                 [LLVMMatchType<0>],
                                                 [IntrNoMem]>;
 
-// This intrinsic takes two vector arguments v1 and v2 and an integer number
-// num. It slides the elements of v1 to the left by num places. The num empty
-// places on the right are filled by v2[0..num-1] elements.
-// v1, v2 and return value should be of the same vector type. if num is >=
-// vector length, the return vecotor will be same as v2.
+// This intrinsic takes two vector arguments %v1 and %v2, an integer number %num,
+// and and integer %evl (Explicit Vector Length similar to VP intrinsics) such
+// that 0 <= %num <= %evl <= W, where W is the runtime vector register(group)
+// width (vscale x k). If %evl and %num do not follow this constraint, the
+// intrinsic has undefined behaviour. 
+// Semantics:
+// Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1] and
+// selects the elements in a window of size %evl, starting at index %num of the
+// concatenated vector. Elements in the result vector beyond %evl are undef.
+// This is equivalent to "sliding" the first %evl elements of %v1 to the left by
+// %num places (discarding the elements moved left of index 0), and replacing
+// the empty places on the right, indices [%evl-%num-1..%evl-1]  by first %num
+// elements of %v2.
+// Example:
+// %v1: [a b c d e f]
+// %v2: [0 1 2 3 4 5]
+// %evl: 5, %num: 2
+// transformations: %v1 -> [c d e _ _ f] -> [c d e 0 1 undef]
+// result: [c d e 0 1 undef] 
 def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
-                                                     llvm_anyint_ty],
+                                                     llvm_i32_ty, llvm_i32_ty],
                                                     [IntrNoMem]>; 
 
 //===----------------------------------------------------------------------===//

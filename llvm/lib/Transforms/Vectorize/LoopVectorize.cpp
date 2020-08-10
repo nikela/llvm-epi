@@ -4050,16 +4050,21 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
     Value *PhiPart = VectorLoopValueMap.getVectorValue(Phi, Part);
     Value *Shuffle;
     if (isScalable()) {
+      // FIXME: Add support for first order recurrence operations using VP
+      // intrinsics. We will need to keep track of the vector length used in the
+      // previous iteration to be able to correctly shift the vector from the
+      // previous iteration.
+      assert(!preferPredicatedVectorOps() &&
+             "First order recurrence operations not currently supported by "
+             "predicated vector operations.");
       Type *Int32Ty = Type::getInt32Ty(Phi->getContext());
       Module *M = OrigLoop->getHeader()->getModule();
       CallInst *Vscale = emitVscaleCall(Builder, M, Int32Ty);
       Value *Vlen = Builder.CreateMul(Vscale, ConstantInt::get(Int32Ty, VF));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(Int32Ty, 1));
-      Function *SlideLeftFill = Intrinsic::getDeclaration(
-          M, Intrinsic::experimental_vector_slideleftfill,
-          {VecPhi->getType(), Int32Ty});
-      Shuffle =
-          Builder.CreateCall(SlideLeftFill, {Incoming, PreviousPart, Shift});
+      Shuffle = Builder.CreateIntrinsic(
+          Intrinsic::experimental_vector_slideleftfill, {VecPhi->getType()},
+          {Incoming, PreviousPart, Shift, Vlen}, nullptr);
     } else {
       Shuffle = VF > 1 ? Builder.CreateShuffleVector(Incoming, PreviousPart,
                                                      ShuffleMask)
