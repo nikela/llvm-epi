@@ -342,7 +342,7 @@ let Name = "vload", IntrinsicName = "", HasVL = 0, HasMask = 0, LMUL = [1],
         Ops[0] = Builder.CreateBitCast(Ops[0],
                                        llvm::PointerType::getUnqual(MemType));
         llvm::Value *Load = Builder.CreateAlignedLoad(Ops[0], Align);
-        return Builder.CreateTrunc(Load, ResultType);
+        return Load;
     } }] in
 def vload_mask : EPIBuiltin<"m", "mPCUe", "csil">;
 
@@ -419,8 +419,7 @@ let HasMergeOperand = 0 in
     // Ops[1] = Address
     Ops[1] = Builder.CreateBitCast(Ops[1],
         llvm::PointerType::getUnqual(MemType));
-    llvm::Value *ZExt = Builder.CreateZExt(Ops[0], MemType);
-    return Builder.CreateAlignedStore(ZExt, Ops[1], Align);
+    return Builder.CreateAlignedStore(Ops[0], Ops[1], Align);
   } }] in
   def vstore_mask : EPIBuiltin<"m", "0PUem", "csil">;
 }
