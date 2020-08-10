@@ -82,20 +82,6 @@ void CodeGenTypes::addRecordTypeName(const RecordDecl *RD,
 /// a type.  For example, the scalar representation for _Bool is i1, but the
 /// memory representation is usually i8 or i32, depending on the target.
 llvm::Type *CodeGenTypes::ConvertTypeForMem(QualType T, bool ForBitField) {
-  // Don't use EPI vectors of i1 to access memory.
-  if (const VectorType *VT = dyn_cast<VectorType>(T)) {
-    if (VT->getVectorKind() == VectorType::EPIVector &&
-        VT->getElementType()->isBooleanType()) {
-      // FIXME. Assumes ELEN=64.
-      uint64_t MaskElementSize = 64 / VT->getNumElements();
-      assert(MaskElementSize > 0 && "Invalid mask size, too many elements?");
-      llvm::Type *ElementType =
-          llvm::IntegerType::get(getLLVMContext(), MaskElementSize);
-      return llvm::VectorType::get(ElementType, VT->getNumElements(),
-                                   /* Scalable */ 1);
-    }
-  }
-
   if (T->isConstantMatrixType()) {
     const Type *Ty = Context.getCanonicalType(T).getTypePtr();
     const ConstantMatrixType *MT = cast<ConstantMatrixType>(Ty);

@@ -4,12 +4,10 @@
 
 // CHECK-LABEL: @foo(
 // CHECK-NEXT:  entry:
-// CHECK-NEXT:    [[A:%.*]] = alloca <vscale x 16 x i4>, align 1
-// CHECK-NEXT:    [[B:%.*]] = alloca <vscale x 32 x i2>, align 1
-// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 16 x i4>, <vscale x 16 x i4>* [[A]], align 1
-// CHECK-NEXT:    [[TOMASK:%.*]] = trunc <vscale x 16 x i4> [[TMP0]] to <vscale x 16 x i1>
-// CHECK-NEXT:    [[TMP1:%.*]] = load <vscale x 32 x i2>, <vscale x 32 x i2>* [[B]], align 1
-// CHECK-NEXT:    [[TOMASK1:%.*]] = trunc <vscale x 32 x i2> [[TMP1]] to <vscale x 32 x i1>
+// CHECK-NEXT:    [[A:%.*]] = alloca <vscale x 16 x i1>, align 1
+// CHECK-NEXT:    [[B:%.*]] = alloca <vscale x 32 x i1>, align 1
+// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 16 x i1>, <vscale x 16 x i1>* [[A]], align 1
+// CHECK-NEXT:    [[TMP1:%.*]] = load <vscale x 32 x i1>, <vscale x 32 x i1>* [[B]], align 1
 // CHECK-NEXT:    ret void
 //
 void foo(void)
