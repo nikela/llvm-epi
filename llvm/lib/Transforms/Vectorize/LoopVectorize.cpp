@@ -4477,9 +4477,9 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // Insert instruction to get runtime vector length in reduction preheader.
   Builder.SetInsertPoint(&*RdxBlockPH->getFirstInsertionPt());
   CallInst *Vscale = emitVscaleCall(Builder, RdxBlockPH->getModule(),
-                                    Type::getInt64Ty(RdxBlockPH->getContext()));
+                                    Type::getInt32Ty(RdxBlockPH->getContext()));
   Value *InitLen =
-      Builder.CreateMul(Builder.getInt64(VF), Vscale, "vscale.x.vf");
+      Builder.CreateMul(Builder.getInt32(VF), Vscale, "vscale.x.vf");
 
   // Insert loop in the reduction loop body.
   Builder.SetInsertPoint(&*RdxBlock->getFirstInsertionPt());
@@ -4515,11 +4515,12 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // Create a vector with the second half of the current vector.
   // If we are using vpred ops with EVL = HalfLen, the SecondHalf vector will
   // contain the last HalfLenQuotient elements of the CurrVec followed by
-  // identity elements. Since HalfLenQuotient is always <= HalfLen, it is safe
-  // to use EVL = HalfLen irrespective of the number of elements in CurrVec.
+  // (HalfLen - HalfLenQuotient) identity elements.
+  // Note that CurrLen = HalfLen + HalfLenQuotient
+  Value *EVLCurr = getSetVL(CurrLen);
   Value *SecondHalf = Builder.CreateIntrinsic(
-      Intrinsic::experimental_vector_slideleftfill, {RdxTy, HalfLen->getType()},
-      {CurrVec, Identity, HalfLen}, nullptr, "second.half");
+      Intrinsic::experimental_vector_slideleftfill, RdxTy,
+      {CurrVec, Identity, HalfLen, EVLCurr}, nullptr, "second.half");
 
   // All ops in the reduction inherit fast-math-flags from the recurrence
   // descriptor.
@@ -4529,6 +4530,8 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // Finally multiply the two half vectors to create the reduction vector that
   // will be used as the current vector for the next iteration or be the final
   // result if HalfLen is 1.
+  // Since HalfLenQuotient is always <= HalfLen, it is safe to use EVL = HalfLen
+  // irrespective of the number of elements in CurrVec.
   auto BuildRedxVec = [&]() -> Value * {
     switch (Op) {
     case Instruction::Mul:
@@ -4537,8 +4540,7 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
     case Instruction::FAdd:
       if (preferPredicatedVectorOps()) {
         // set vector length to HalfLen.
-        Value *EVL = Builder.CreateTrunc(
-            getSetVL(HalfLen), Type::getInt32Ty(Builder.getContext()));
+        Value *EVLHalf = getSetVL(HalfLen);
         // create call to vpred intrinsic.
         Value *PredMask = Builder.getTrueVector(RdxTy->getElementCount());
         VPIntrinsicAndKind OpIntr = getVPIntrInstr(Op);
@@ -4552,8 +4554,8 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
               Builder.getContext(), fp::ExceptionBehavior::ebIgnore));
         }
         IntrArgs.push_back(PredMask);
-        IntrArgs.push_back(EVL);
-        return Builder.CreateIntrinsic(OpIntr.Intr, {RdxTy}, IntrArgs, nullptr,
+        IntrArgs.push_back(EVLHalf);
+        return Builder.CreateIntrinsic(OpIntr.Intr, RdxTy, IntrArgs, nullptr,
                                        "reduction.vec");
       } else
         return Builder.CreateBinOp((Instruction::BinaryOps)Op, FirstHalf,
@@ -4579,7 +4581,7 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
 
   // Reset Insertion Point.
   Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
-  return Builder.CreateExtractElement(RdxVec, Builder.getInt64(0), "reduced");
+  return Builder.CreateExtractElement(RdxVec, Builder.getInt32(0), "reduced");
 }
 
 void InnerLoopVectorizer::clearReductionWrapFlags(
@@ -8967,9 +8969,6 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
          "Requested vector length should be an integer.");
   Value *RVLArg =
       Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
-  Function *IntrDecl =
-      Intrinsic::getDeclaration(LoopVectorPreHeader->getModule(),
-                                Intrinsic::EPIIntrinsics::epi_vsetvl, {});
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = Cost->getSmallestAndWidestTypes();
   const std::map<unsigned, unsigned> SEWArgMap = {
@@ -8986,7 +8985,9 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
   Constant *LMULArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), LMUL);
 
-  return Builder.CreateCall(IntrDecl, {RVLArg, SEWArg, LMULArg});
+  Value *GVL = Builder.CreateIntrinsic(Intrinsic::EPIIntrinsics::epi_vsetvl, {},
+                                       {RVLArg, SEWArg, LMULArg});
+  return Builder.CreateZExtOrTrunc(GVL, RVL->getType());
 }
 
 Value *InnerLoopVectorizer::createEVL() {
