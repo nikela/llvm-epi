@@ -205,11 +205,10 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-O2-NEXT:    vse8.v v1, (a1)
 ; CHECK-O2-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 1 x i64>*
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
   %select = call <vscale x 1 x i1> @llvm.vp.select.nxv1i1(<vscale x 1 x i1> %m, <vscale x 1 x i1> %a, <vscale x 1 x i1> %b, i32 %n)
-  %zext_select = zext <vscale x 1 x i1> %select to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %zext_select, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %select, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -239,11 +238,10 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-O2-NEXT:    vse8.v v1, (a1)
 ; CHECK-O2-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 2 x i32>*
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
   %select = call <vscale x 2 x i1> @llvm.vp.select.nxv2i1(<vscale x 2 x i1> %m, <vscale x 2 x i1> %a, <vscale x 2 x i1> %b, i32 %n)
-  %zext_select = zext <vscale x 2 x i1> %select to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %zext_select, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %select, <vscale x 2 x i1>* %store_addr
 
   ret void
 }
@@ -257,11 +255,9 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v0
 ; CHECK-O0-NEXT:    vmand.mm v1, v1, v17
-; CHECK-O0-NEXT:    vmxor.mm v0, v16, v1
-; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m2,tu,mu
-; CHECK-O0-NEXT:    vmv.v.i v2, 0
-; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O0-NEXT:    vse64.v v4, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v1, v16, v1
+; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vse8.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
@@ -271,17 +267,14 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O2-NEXT:    vmxor.mm v1, v16, v0
 ; CHECK-O2-NEXT:    vmand.mm v1, v1, v17
-; CHECK-O2-NEXT:    vmxor.mm v0, v16, v1
-; CHECK-O2-NEXT:    vsetvli a0, zero, e64,m2,tu,mu
-; CHECK-O2-NEXT:    vmv.v.i v2, 0
-; CHECK-O2-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O2-NEXT:    vse64.v v4, (a1)
+; CHECK-O2-NEXT:    vmxor.mm v1, v16, v1
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-O2-NEXT:    vse8.v v1, (a1)
 ; CHECK-O2-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
   %select = call <vscale x 2 x i1> @llvm.vp.select.nxv2i1(<vscale x 2 x i1> %m, <vscale x 2 x i1> %a, <vscale x 2 x i1> %b, i32 %n)
-  %zext_select = zext <vscale x 2 x i1> %select to <vscale x 2 x i64>
-  store <vscale x 2 x i64> %zext_select, <vscale x 2 x i64>* %store_addr
+  store <vscale x 2 x i1> %select, <vscale x 2 x i1>* %store_addr
 
   ret void
 }

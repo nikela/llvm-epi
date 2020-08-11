@@ -49,47 +49,37 @@ define void @lmul_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 1 x i64>*
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
   %cmp_1 = icmp eq <vscale x 1 x i64> %a, %b
-  %val_1 = zext <vscale x 1 x i1> %cmp_1 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_1, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_1, <vscale x 1 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 1 x i64> %a, %b
-  %val_2 = zext <vscale x 1 x i1> %cmp_2 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_2, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_2, <vscale x 1 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 1 x i64> %a, %b
-  %val_3 = zext <vscale x 1 x i1> %cmp_3 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_3, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_3, <vscale x 1 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 1 x i64> %a, %b
-  %val_4 = zext <vscale x 1 x i1> %cmp_4 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_4, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_4, <vscale x 1 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 1 x i64> %a, %b
-  %val_5 = zext <vscale x 1 x i1> %cmp_5 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_5, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_5, <vscale x 1 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 1 x i64> %a, %b
-  %val_6 = zext <vscale x 1 x i1> %cmp_6 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_6, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_6, <vscale x 1 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 1 x i64> %a, %b
-  %val_7 = zext <vscale x 1 x i1> %cmp_7 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_7, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_7, <vscale x 1 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 1 x i64> %a, %b
-  %val_8 = zext <vscale x 1 x i1> %cmp_8 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_8, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_8, <vscale x 1 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 1 x i64> %a, %b
-  %val_9 = zext <vscale x 1 x i1> %cmp_9 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_9, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_9, <vscale x 1 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 1 x i64> %a, %b
-  %val_10 = zext <vscale x 1 x i1> %cmp_10 to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %val_10, <vscale x 1 x i64>* %store_addr
+  store <vscale x 1 x i1> %cmp_10, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -140,47 +130,37 @@ define void @lmul_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 2 x i32>*
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
   %cmp_1 = icmp eq <vscale x 2 x i64> %a, %b
-  %val_1 = zext <vscale x 2 x i1> %cmp_1 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_1, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_1, <vscale x 2 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 2 x i64> %a, %b
-  %val_2 = zext <vscale x 2 x i1> %cmp_2 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_2, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_2, <vscale x 2 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 2 x i64> %a, %b
-  %val_3 = zext <vscale x 2 x i1> %cmp_3 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_3, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_3, <vscale x 2 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 2 x i64> %a, %b
-  %val_4 = zext <vscale x 2 x i1> %cmp_4 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_4, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_4, <vscale x 2 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 2 x i64> %a, %b
-  %val_5 = zext <vscale x 2 x i1> %cmp_5 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_5, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_5, <vscale x 2 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 2 x i64> %a, %b
-  %val_6 = zext <vscale x 2 x i1> %cmp_6 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_6, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_6, <vscale x 2 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 2 x i64> %a, %b
-  %val_7 = zext <vscale x 2 x i1> %cmp_7 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_7, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_7, <vscale x 2 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 2 x i64> %a, %b
-  %val_8 = zext <vscale x 2 x i1> %cmp_8 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_8, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_8, <vscale x 2 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 2 x i64> %a, %b
-  %val_9 = zext <vscale x 2 x i1> %cmp_9 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_9, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_9, <vscale x 2 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 2 x i64> %a, %b
-  %val_10 = zext <vscale x 2 x i1> %cmp_10 to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %val_10, <vscale x 2 x i32>* %store_addr
+  store <vscale x 2 x i1> %cmp_10, <vscale x 2 x i1>* %store_addr
 
   ret void
 }
@@ -231,47 +211,37 @@ define void @lmul_4(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 4 x i16>*
+  %store_addr = bitcast i8* @scratch to <vscale x 4 x i1>*
 
   %cmp_1 = icmp eq <vscale x 4 x i64> %a, %b
-  %val_1 = zext <vscale x 4 x i1> %cmp_1 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_1, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_1, <vscale x 4 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 4 x i64> %a, %b
-  %val_2 = zext <vscale x 4 x i1> %cmp_2 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_2, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_2, <vscale x 4 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 4 x i64> %a, %b
-  %val_3 = zext <vscale x 4 x i1> %cmp_3 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_3, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_3, <vscale x 4 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 4 x i64> %a, %b
-  %val_4 = zext <vscale x 4 x i1> %cmp_4 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_4, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_4, <vscale x 4 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 4 x i64> %a, %b
-  %val_5 = zext <vscale x 4 x i1> %cmp_5 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_5, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_5, <vscale x 4 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 4 x i64> %a, %b
-  %val_6 = zext <vscale x 4 x i1> %cmp_6 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_6, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_6, <vscale x 4 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 4 x i64> %a, %b
-  %val_7 = zext <vscale x 4 x i1> %cmp_7 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_7, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_7, <vscale x 4 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 4 x i64> %a, %b
-  %val_8 = zext <vscale x 4 x i1> %cmp_8 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_8, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_8, <vscale x 4 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 4 x i64> %a, %b
-  %val_9 = zext <vscale x 4 x i1> %cmp_9 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_9, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_9, <vscale x 4 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 4 x i64> %a, %b
-  %val_10 = zext <vscale x 4 x i1> %cmp_10 to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %val_10, <vscale x 4 x i16>* %store_addr
+  store <vscale x 4 x i1> %cmp_10, <vscale x 4 x i1>* %store_addr
 
   ret void
 }
@@ -323,47 +293,37 @@ define void @lmul_8(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 8 x i8>*
+  %store_addr = bitcast i8* @scratch to <vscale x 8 x i1>*
 
   %cmp_1 = icmp eq <vscale x 8 x i64> %a, %b
-  %val_1 = zext <vscale x 8 x i1> %cmp_1 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_1, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_1, <vscale x 8 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 8 x i64> %a, %b
-  %val_2 = zext <vscale x 8 x i1> %cmp_2 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_2, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_2, <vscale x 8 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 8 x i64> %a, %b
-  %val_3 = zext <vscale x 8 x i1> %cmp_3 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_3, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_3, <vscale x 8 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 8 x i64> %a, %b
-  %val_4 = zext <vscale x 8 x i1> %cmp_4 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_4, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_4, <vscale x 8 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 8 x i64> %a, %b
-  %val_5 = zext <vscale x 8 x i1> %cmp_5 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_5, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_5, <vscale x 8 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 8 x i64> %a, %b
-  %val_6 = zext <vscale x 8 x i1> %cmp_6 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_6, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_6, <vscale x 8 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 8 x i64> %a, %b
-  %val_7 = zext <vscale x 8 x i1> %cmp_7 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_7, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_7, <vscale x 8 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 8 x i64> %a, %b
-  %val_8 = zext <vscale x 8 x i1> %cmp_8 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_8, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_8, <vscale x 8 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 8 x i64> %a, %b
-  %val_9 = zext <vscale x 8 x i1> %cmp_9 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_9, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_9, <vscale x 8 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 8 x i64> %a, %b
-  %val_10 = zext <vscale x 8 x i1> %cmp_10 to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %val_10, <vscale x 8 x i8>* %store_addr
+  store <vscale x 8 x i1> %cmp_10, <vscale x 8 x i1>* %store_addr
 
   ret void
 }
@@ -415,47 +375,37 @@ define void @lmul_8_i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 16 x i4>*
+  %store_addr = bitcast i8* @scratch to <vscale x 16 x i1>*
 
   %cmp_1 = icmp eq <vscale x 16 x i32> %a, %b
-  %val_1 = zext <vscale x 16 x i1> %cmp_1 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_1, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_1, <vscale x 16 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 16 x i32> %a, %b
-  %val_2 = zext <vscale x 16 x i1> %cmp_2 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_2, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_2, <vscale x 16 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 16 x i32> %a, %b
-  %val_3 = zext <vscale x 16 x i1> %cmp_3 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_3, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_3, <vscale x 16 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 16 x i32> %a, %b
-  %val_4 = zext <vscale x 16 x i1> %cmp_4 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_4, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_4, <vscale x 16 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 16 x i32> %a, %b
-  %val_5 = zext <vscale x 16 x i1> %cmp_5 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_5, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_5, <vscale x 16 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 16 x i32> %a, %b
-  %val_6 = zext <vscale x 16 x i1> %cmp_6 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_6, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_6, <vscale x 16 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 16 x i32> %a, %b
-  %val_7 = zext <vscale x 16 x i1> %cmp_7 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_7, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_7, <vscale x 16 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 16 x i32> %a, %b
-  %val_8 = zext <vscale x 16 x i1> %cmp_8 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_8, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_8, <vscale x 16 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 16 x i32> %a, %b
-  %val_9 = zext <vscale x 16 x i1> %cmp_9 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_9, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_9, <vscale x 16 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 16 x i32> %a, %b
-  %val_10 = zext <vscale x 16 x i1> %cmp_10 to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %val_10, <vscale x 16 x i4>* %store_addr
+  store <vscale x 16 x i1> %cmp_10, <vscale x 16 x i1>* %store_addr
 
   ret void
 }
@@ -507,48 +457,38 @@ define void @lmul_8_i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
-  %store_addr = bitcast i8* @scratch to <vscale x 32 x i2>*
+  %store_addr = bitcast i8* @scratch to <vscale x 32 x i1>*
   %store_addr_2 = bitcast i8* @scratch to <vscale x 32 x i1>*
 
   %cmp_1 = icmp eq <vscale x 32 x i16> %a, %b
-  %val_1 = zext <vscale x 32 x i1> %cmp_1 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_1, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_1, <vscale x 32 x i1>* %store_addr
 
   %cmp_2 = icmp ne <vscale x 32 x i16> %a, %b
-  %val_2 = zext <vscale x 32 x i1> %cmp_2 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_2, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_2, <vscale x 32 x i1>* %store_addr
 
   %cmp_3 = icmp ugt <vscale x 32 x i16> %a, %b
-  %val_3 = zext <vscale x 32 x i1> %cmp_3 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_3, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_3, <vscale x 32 x i1>* %store_addr
 
   %cmp_4 = icmp uge <vscale x 32 x i16> %a, %b
-  %val_4 = zext <vscale x 32 x i1> %cmp_4 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_4, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_4, <vscale x 32 x i1>* %store_addr
 
   %cmp_5 = icmp ult <vscale x 32 x i16> %a, %b
-  %val_5 = zext <vscale x 32 x i1> %cmp_5 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_5, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_5, <vscale x 32 x i1>* %store_addr
 
   %cmp_6 = icmp ule <vscale x 32 x i16> %a, %b
-  %val_6 = zext <vscale x 32 x i1> %cmp_6 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_6, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_6, <vscale x 32 x i1>* %store_addr
 
   %cmp_7 = icmp sgt <vscale x 32 x i16> %a, %b
-  %val_7 = zext <vscale x 32 x i1> %cmp_7 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_7, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_7, <vscale x 32 x i1>* %store_addr
 
   %cmp_8 = icmp sge <vscale x 32 x i16> %a, %b
-  %val_8 = zext <vscale x 32 x i1> %cmp_8 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_8, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_8, <vscale x 32 x i1>* %store_addr
 
   %cmp_9 = icmp slt <vscale x 32 x i16> %a, %b
-  %val_9 = zext <vscale x 32 x i1> %cmp_9 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_9, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_9, <vscale x 32 x i1>* %store_addr
 
   %cmp_10 = icmp sle <vscale x 32 x i16> %a, %b
-  %val_10 = zext <vscale x 32 x i1> %cmp_10 to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %val_10, <vscale x 32 x i2>* %store_addr
+  store <vscale x 32 x i1> %cmp_10, <vscale x 32 x i1>* %store_addr
 
   ret void
 }

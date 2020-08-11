@@ -368,22 +368,21 @@ defset list<FloatVectorTypeInfoToWide> AllWideableFloatVectors = {
 //def : FloatVectorTypeInfoToWide<Vtype4xf64, /* FIXME: Vtype4xf128 */ i1>;
 }
 
-class MaskTypeInfo<ValueType Mas, int Sew, int Vlmul, ValueType Ivt> {
+class MaskTypeInfo<ValueType Mas, int Sew, int Vlmul> {
   ValueType Mask = Mas;
   // {SEW, VLMul} values set a valid VType to deal with this mask type.
   int SEW = Sew; // FIXME: computed as ELEN/vscale, to be used for loading/storing partial masks
   int VLMul = Vlmul; // Convention: Minimum VLMul where this mask type appears.
-  ValueType IntegerVector = Ivt;
 }
 
 defset list<MaskTypeInfo> AllMasks = {
-  def : MaskTypeInfo<nxv1i1,  64, 1, nxv1i64>; // FIXME SEW should be ELEN/1
-  def : MaskTypeInfo<nxv2i1,  32, 1, nxv2i32>; // FIXME SEW should be ELEN/2
-  def : MaskTypeInfo<nxv4i1,  16, 1, nxv4i16>; // FIXME SEW should be ELEN/4
-  def : MaskTypeInfo<nxv8i1,  8,  1, nxv8i8>;  // FIXME SEW should be ELEN/8
-  def : MaskTypeInfo<nxv16i1, 8,  2, nxv16i4>;  // FIXME SEW should be ELEN/16, SEW < 8
-  def : MaskTypeInfo<nxv32i1, 8,  4, nxv32i2>;  // FIXME SEW should be ELEN/32, SEW < 8
-//def : MaskTypeInfo<nxv64i1, 8,  8, nxv64i1>;  // FIXME SEW should be ELEN/64, SEW < 8, undefined type
+  def : MaskTypeInfo<nxv1i1,  64, 1>; // FIXME SEW should be ELEN/1
+  def : MaskTypeInfo<nxv2i1,  32, 1>; // FIXME SEW should be ELEN/2
+  def : MaskTypeInfo<nxv4i1,  16, 1>; // FIXME SEW should be ELEN/4
+  def : MaskTypeInfo<nxv8i1,  8,  1>;  // FIXME SEW should be ELEN/8
+  def : MaskTypeInfo<nxv16i1, 8,  2>;  // FIXME SEW should be ELEN/16, SEW < 8
+  def : MaskTypeInfo<nxv32i1, 8,  4>;  // FIXME SEW should be ELEN/32, SEW < 8
+//def : MaskTypeInfo<nxv64i1, 8,  8>;  // FIXME SEW should be ELEN/64, SEW < 8, undefined type
 }
 
 class IllegalVectorTypeInfo<ValueType Vec, VectorTypeInfo LVti, ValueType Mas,
@@ -1479,20 +1478,19 @@ multiclass pat_load_store<LLVMType type,
 
 // Extra patterns for truncating loads and extending stores of mask types
 multiclass pat_load_store_mask<LLVMType type,
-                               LLVMType integer_type,
                                int eew,
                                int vlmul,
                                VReg reg_class>
 {
   // Load
   defvar load_instr_name = "PseudoVLE"#eew#"_V";
-  def : Pat<(type (trunc (integer_type (load GPR:$rs1)))),
+  def : Pat<(type (load GPR:$rs1)),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
              (type (IMPLICIT_DEF)),
              GPR:$rs1,
              (type zero_reg),
              VLMax, eew)>;
-  def : Pat<(type (trunc (integer_type (load AddrFI:$rs1)))),
+  def : Pat<(type (load AddrFI:$rs1)),
             (!cast<Instruction>(load_instr_name#"_M"#vlmul)
              (type (IMPLICIT_DEF)),
              AddrFI:$rs1,
@@ -1501,12 +1499,12 @@ multiclass pat_load_store_mask<LLVMType type,
 
   // Store
   defvar store_instr_name = "PseudoVSE"#eew#"_V";
-  def : Pat<(store (integer_type (zext type:$rs2)), GPR:$rs1),
+  def : Pat<(store type:$rs2, GPR:$rs1),
             (!cast<Instruction>(store_instr_name#"_M"#vlmul)
              reg_class:$rs2, GPR:$rs1,
              (type zero_reg),
              VLMax, eew)>;
-  def : Pat<(store (integer_type (zext type:$rs2)), AddrFI:$rs1),
+  def : Pat<(store type:$rs2, AddrFI:$rs1),
             (!cast<Instruction>(store_instr_name#"_M"#vlmul)
              reg_class:$rs2, AddrFI:$rs1,
              (type zero_reg),
@@ -1523,52 +1521,38 @@ let Predicates = [HasStdExtV] in {
   foreach mti = AllMasks in
   {
     // Mask values are stored as vectors of bytes
-    defm : pat_load_store_mask<mti.Mask, mti.IntegerVector, /* eew */ 8,
-                               /* vlmul */ 1, VR>;
+    defm : pat_load_store_mask<mti.Mask, /* eew */ 8, /* vlmul */ 1, VR>;
   }
 
-  foreach vti = NoGroupIntegerVectors in {
-    def : Pat<(vti.Vector (zext (vti.Mask VR:$rs1))),
-              (PseudoVMAND_MM_M1 VR:$rs1, VR:$rs1, VLMax, vti.SEW)>;
-    def : Pat<(vti.Vector (anyext (vti.Mask VR:$rs1))),
-              (COPY_TO_REGCLASS VR:$rs1, VR)>;
-    // We don't have to do anything here because mask vectors only use the
-    // LSB of each element.
-    def : Pat<(vti.Mask (trunc (vti.Vector VR:$rs1))),
-              (COPY_TO_REGCLASS VR:$rs1, VR)>;
-  }
-
-  foreach gvti = GroupIntegerVectors in {
-    def : Pat<(gvti.Vector (zext (gvti.Mask V0))),
-              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
-               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
-                VLMax, gvti.SEW),
+  foreach vti = AllIntegerVectors in {
+    def : Pat<(vti.Vector (zext (vti.Mask V0))),
+              (!cast<Instruction>("PseudoVMERGE_VIM_M"#vti.RegClass.VLMul)
+               (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul) 0,
+                VLMax, vti.SEW),
                1,
-               (gvti.Mask V0),
-               VLMax, gvti.SEW)>;
-    // No way to do 'anyext' to lmul>1, so we 'zext' instead.
-    def : Pat<(gvti.Vector (anyext (gvti.Mask V0))),
-              (!cast<Instruction>("PseudoVMERGE_VIM_M"#gvti.RegClass.VLMul)
-               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
-                VLMax, gvti.SEW),
+               (vti.Mask V0),
+               VLMax, vti.SEW)>;
+    // No way to do 'anyext' for masks, so we do 'zext' instead.
+    def : Pat<(vti.Vector (anyext (vti.Mask V0))),
+              (!cast<Instruction>("PseudoVMERGE_VIM_M"#vti.RegClass.VLMul)
+               (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul) 0,
+                VLMax, vti.SEW),
                1,
-               (gvti.Mask V0),
-               VLMax, gvti.SEW)>;
-    def : Pat<(gvti.Mask (trunc (gvti.Vector gvti.RegClass:$rs1))),
-              (!cast<Instruction>("PseudoVMSNE_VV_M"#gvti.RegClass.VLMul)
-               (gvti.Mask (IMPLICIT_DEF)),
-               (!cast<Instruction>("PseudoVAND_VI_M"#gvti.RegClass.VLMul)
-                (gvti.Vector (IMPLICIT_DEF)),
-                (gvti.Vector gvti.RegClass:$rs1), 1,
-                (gvti.Mask zero_reg),
-                VLMax, gvti.SEW),
-               (!cast<Instruction>("PseudoVMV_V_I_M"#gvti.RegClass.VLMul) 0,
-                VLMax, gvti.SEW),
-               (gvti.Mask zero_reg),
-               VLMax, gvti.SEW)>;
+               (vti.Mask V0),
+               VLMax, vti.SEW)>;
+    def : Pat<(vti.Mask (trunc (vti.Vector vti.RegClass:$rs1))),
+              (!cast<Instruction>("PseudoVMSNE_VV_M"#vti.RegClass.VLMul)
+               (vti.Mask (IMPLICIT_DEF)),
+               (!cast<Instruction>("PseudoVAND_VI_M"#vti.RegClass.VLMul)
+                (vti.Vector (IMPLICIT_DEF)),
+                (vti.Vector vti.RegClass:$rs1), 1,
+                (vti.Mask zero_reg),
+                VLMax, vti.SEW),
+               (!cast<Instruction>("PseudoVMV_V_I_M"#vti.RegClass.VLMul) 0,
+                VLMax, vti.SEW),
+               (vti.Mask zero_reg),
+               VLMax, vti.SEW)>;
   }
-
-  // FIXME Deal with {B,H,W} load/store (load + sext)
 }
 
 //===----------------------------------------------------------------------===//

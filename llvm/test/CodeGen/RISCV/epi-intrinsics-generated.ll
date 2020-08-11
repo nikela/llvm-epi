@@ -33923,9 +33923,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -33949,9 +33948,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -33972,9 +33970,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -33998,9 +33995,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34021,9 +34017,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34047,9 +34042,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34070,9 +34064,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34096,9 +34089,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34119,9 +34111,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34145,9 +34136,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34168,9 +34158,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34194,9 +34183,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34217,9 +34205,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34243,9 +34230,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34266,9 +34252,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -34292,9 +34277,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -34315,9 +34299,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34341,9 +34324,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34364,9 +34346,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34390,9 +34371,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34413,9 +34393,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34439,9 +34418,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34462,9 +34440,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -34488,9 +34465,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -34511,9 +34487,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -34537,9 +34512,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -34560,9 +34534,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34586,9 +34559,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34609,9 +34581,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34635,9 +34606,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34658,9 +34628,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34684,9 +34653,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34707,9 +34675,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34733,9 +34700,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34756,9 +34722,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34782,9 +34747,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34805,9 +34769,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34831,9 +34794,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -34854,9 +34816,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34880,9 +34841,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -34903,9 +34863,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34929,9 +34888,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -34952,9 +34910,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -34978,9 +34935,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -35001,9 +34957,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35027,9 +34982,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35050,9 +35004,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35076,9 +35029,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35099,9 +35051,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35125,9 +35076,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35148,9 +35098,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35174,9 +35123,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35197,9 +35145,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -35223,9 +35170,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -35246,9 +35192,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35272,9 +35217,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35295,9 +35239,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35321,9 +35264,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35344,9 +35286,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35370,9 +35311,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35388,9 +35328,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35407,9 +35346,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35425,9 +35363,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35444,9 +35381,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35462,9 +35398,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -35481,9 +35416,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -35499,9 +35433,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35518,9 +35451,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35536,9 +35468,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35555,9 +35486,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35573,9 +35503,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35592,9 +35521,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35610,9 +35538,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -35629,9 +35556,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -35647,9 +35573,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35666,9 +35591,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35684,9 +35608,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35703,9 +35626,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35721,9 +35643,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35740,9 +35661,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35758,9 +35678,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35777,9 +35696,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -35795,9 +35713,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -35814,9 +35731,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -35832,9 +35748,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35851,9 +35766,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -35869,9 +35783,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35888,9 +35801,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -35906,9 +35818,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35925,9 +35836,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35948,9 +35858,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35974,9 +35883,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -35997,9 +35905,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36023,9 +35930,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36046,9 +35952,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36072,9 +35977,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36095,9 +35999,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36121,9 +36024,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36144,9 +36046,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36170,9 +36071,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36193,9 +36093,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36219,9 +36118,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36242,9 +36140,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36268,9 +36165,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36291,9 +36187,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -36317,9 +36212,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -36340,9 +36234,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36366,9 +36259,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36389,9 +36281,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36415,9 +36306,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36438,9 +36328,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36464,9 +36353,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36487,9 +36375,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -36513,9 +36400,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -36536,9 +36422,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -36562,9 +36447,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -36585,9 +36469,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36611,9 +36494,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36634,9 +36516,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36660,9 +36541,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36683,9 +36563,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36709,9 +36588,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36732,9 +36610,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36758,9 +36635,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36781,9 +36657,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36807,9 +36682,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -36830,9 +36704,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36856,9 +36729,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -36879,9 +36751,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36905,9 +36776,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -36928,9 +36798,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36954,9 +36823,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -36977,9 +36845,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37003,9 +36870,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37026,9 +36892,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37052,9 +36917,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37075,9 +36939,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37101,9 +36964,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37124,9 +36986,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37150,9 +37011,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37173,9 +37033,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37199,9 +37058,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37222,9 +37080,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -37248,9 +37105,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -37271,9 +37127,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37297,9 +37152,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37320,9 +37174,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37346,9 +37199,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37369,9 +37221,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37395,9 +37246,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37413,9 +37263,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37432,9 +37281,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37450,9 +37298,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37469,9 +37316,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37487,9 +37333,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37506,9 +37351,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37524,9 +37368,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37543,9 +37386,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37561,9 +37403,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37580,9 +37421,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37598,9 +37438,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37617,9 +37456,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37635,9 +37473,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37654,9 +37491,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -37672,9 +37508,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37691,9 +37526,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37709,9 +37543,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37728,9 +37561,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37746,9 +37578,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37765,9 +37596,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37783,9 +37613,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37802,9 +37631,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -37820,9 +37648,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -37839,9 +37666,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -37857,9 +37683,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37876,9 +37701,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -37894,9 +37718,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37913,9 +37736,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -37931,9 +37753,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37950,9 +37771,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37973,9 +37793,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -37999,9 +37818,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38022,9 +37840,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38048,9 +37865,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38071,9 +37887,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38097,9 +37912,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38120,9 +37934,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38146,9 +37959,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38169,9 +37981,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38195,9 +38006,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38218,9 +38028,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38244,9 +38053,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38267,9 +38075,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38293,9 +38100,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38316,9 +38122,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -38342,9 +38147,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -38365,9 +38169,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38391,9 +38194,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38414,9 +38216,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38440,9 +38241,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38463,9 +38263,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38489,9 +38288,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38512,9 +38310,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -38538,9 +38335,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -38561,9 +38357,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -38587,9 +38382,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -38610,9 +38404,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38636,9 +38429,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38659,9 +38451,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38685,9 +38476,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38708,9 +38498,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38734,9 +38523,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38757,9 +38545,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38783,9 +38570,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38806,9 +38592,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38832,9 +38617,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -38855,9 +38639,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38881,9 +38664,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -38904,9 +38686,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38930,9 +38711,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -38953,9 +38733,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -38979,9 +38758,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39002,9 +38780,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39028,9 +38805,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39051,9 +38827,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39077,9 +38852,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39100,9 +38874,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39126,9 +38899,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39149,9 +38921,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39175,9 +38946,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39198,9 +38968,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39224,9 +38993,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39247,9 +39015,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -39273,9 +39040,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -39296,9 +39062,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39322,9 +39087,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39345,9 +39109,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39371,9 +39134,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39394,9 +39156,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39420,9 +39181,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39443,9 +39203,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39469,9 +39228,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39492,9 +39250,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39518,9 +39275,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39541,9 +39297,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39567,9 +39322,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39590,9 +39344,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39616,9 +39369,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39639,9 +39391,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39665,9 +39416,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39688,9 +39438,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39714,9 +39463,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39737,9 +39485,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39763,9 +39510,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -39786,9 +39532,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39812,9 +39557,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -39835,9 +39579,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39861,9 +39604,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -39884,9 +39626,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39910,9 +39651,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -39933,9 +39673,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39959,9 +39698,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -39982,9 +39720,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -40008,9 +39745,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -40031,9 +39767,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40057,9 +39792,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40080,9 +39814,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40106,9 +39839,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40129,9 +39861,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40155,9 +39886,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40178,9 +39908,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40204,9 +39933,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40227,9 +39955,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40253,9 +39980,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40276,9 +40002,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -40302,9 +40027,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -40325,9 +40049,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40351,9 +40074,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40374,9 +40096,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40400,9 +40121,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40423,9 +40143,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40449,9 +40168,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40472,9 +40190,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -40498,9 +40215,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -40521,9 +40237,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40547,9 +40262,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40570,9 +40284,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40596,9 +40309,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40619,9 +40331,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40645,9 +40356,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40668,9 +40378,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40694,9 +40403,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40717,9 +40425,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -40743,9 +40450,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -40766,9 +40472,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40792,9 +40497,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -40815,9 +40519,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40841,9 +40544,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -40864,9 +40566,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40890,9 +40591,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40913,9 +40613,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40939,9 +40638,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -40962,9 +40660,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -40988,9 +40685,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41011,9 +40707,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41037,9 +40732,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41060,9 +40754,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41086,9 +40779,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41109,9 +40801,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41135,9 +40826,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41158,9 +40848,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41184,9 +40873,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41207,9 +40895,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41233,9 +40920,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41256,9 +40942,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -41282,9 +40967,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -41305,9 +40989,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41331,9 +41014,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41354,9 +41036,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41380,9 +41061,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41403,9 +41083,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41429,9 +41108,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41452,9 +41130,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -41478,9 +41155,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -41501,9 +41177,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -41527,9 +41202,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -41550,9 +41224,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41576,9 +41249,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41599,9 +41271,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41625,9 +41296,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41648,9 +41318,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41674,9 +41343,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41697,9 +41365,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41723,9 +41390,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41746,9 +41412,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41772,9 +41437,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41795,9 +41459,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41821,9 +41484,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -41844,9 +41506,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41870,9 +41531,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -41893,9 +41553,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41919,9 +41578,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -41942,9 +41600,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41968,9 +41625,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -41991,9 +41647,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42017,9 +41672,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42040,9 +41694,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42066,9 +41719,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42089,9 +41741,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42115,9 +41766,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42138,9 +41788,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42164,9 +41813,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42187,9 +41835,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -42213,9 +41860,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -42236,9 +41882,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42262,9 +41907,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42285,9 +41929,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42311,9 +41954,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42334,9 +41976,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42360,9 +42001,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42378,9 +42018,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42397,9 +42036,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42415,9 +42053,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42434,9 +42071,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42452,9 +42088,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -42471,9 +42106,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -42489,9 +42123,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42508,9 +42141,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42526,9 +42158,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42545,9 +42176,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42563,9 +42193,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42582,9 +42211,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42600,9 +42228,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -42619,9 +42246,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -42637,9 +42263,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42656,9 +42281,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42674,9 +42298,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42693,9 +42316,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42711,9 +42333,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42730,9 +42351,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42748,9 +42368,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42767,9 +42386,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -42785,9 +42403,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -42804,9 +42421,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -42822,9 +42438,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42841,9 +42456,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -42859,9 +42473,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42878,9 +42491,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -42896,9 +42508,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42915,9 +42526,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42938,9 +42548,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42964,9 +42573,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -42987,9 +42595,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43013,9 +42620,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43036,9 +42642,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43062,9 +42667,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43085,9 +42689,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43111,9 +42714,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43134,9 +42736,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43160,9 +42761,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43183,9 +42783,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43209,9 +42808,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43232,9 +42830,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43258,9 +42855,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43281,9 +42877,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -43307,9 +42902,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -43330,9 +42924,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43356,9 +42949,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43379,9 +42971,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43405,9 +42996,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43428,9 +43018,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43454,9 +43043,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43477,9 +43065,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -43503,9 +43090,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -43526,9 +43112,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -43552,9 +43137,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -43575,9 +43159,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43601,9 +43184,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43624,9 +43206,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43650,9 +43231,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43673,9 +43253,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43699,9 +43278,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43722,9 +43300,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43748,9 +43325,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43771,9 +43347,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43797,9 +43372,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43820,9 +43394,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43846,9 +43419,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -43869,9 +43441,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43895,9 +43466,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -43918,9 +43488,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43944,9 +43513,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -43967,9 +43535,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -43993,9 +43560,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -44016,9 +43582,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44042,9 +43607,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44065,9 +43629,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44091,9 +43654,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44114,9 +43676,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44140,9 +43701,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44163,9 +43723,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44189,9 +43748,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44212,9 +43770,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -44238,9 +43795,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -44261,9 +43817,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44287,9 +43842,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44310,9 +43864,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44336,9 +43889,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44359,9 +43911,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44385,9 +43936,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44403,9 +43953,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44422,9 +43971,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44440,9 +43988,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44459,9 +44006,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44477,9 +44023,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -44496,9 +44041,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -44514,9 +44058,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44533,9 +44076,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44551,9 +44093,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44570,9 +44111,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44588,9 +44128,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44607,9 +44146,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44625,9 +44163,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -44644,9 +44181,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -44662,9 +44198,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44681,9 +44216,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44699,9 +44233,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44718,9 +44251,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44736,9 +44268,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44755,9 +44286,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44773,9 +44303,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44792,9 +44321,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -44810,9 +44338,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -44829,9 +44356,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -44847,9 +44373,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44866,9 +44391,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -44884,9 +44408,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44903,9 +44426,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -44921,9 +44443,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44940,9 +44461,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44963,9 +44483,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -44989,9 +44508,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45012,9 +44530,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45038,9 +44555,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45061,9 +44577,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45087,9 +44602,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45110,9 +44624,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45136,9 +44649,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45159,9 +44671,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45185,9 +44696,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45208,9 +44718,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45234,9 +44743,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45257,9 +44765,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45283,9 +44790,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45306,9 +44812,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -45332,9 +44837,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -45355,9 +44859,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45381,9 +44884,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45404,9 +44906,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45430,9 +44931,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45453,9 +44953,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45479,9 +44978,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45502,9 +45000,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -45528,9 +45025,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -45551,9 +45047,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -45577,9 +45072,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -45600,9 +45094,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45626,9 +45119,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45649,9 +45141,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45675,9 +45166,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45698,9 +45188,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45724,9 +45213,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45747,9 +45235,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45773,9 +45260,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45796,9 +45282,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45822,9 +45307,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -45845,9 +45329,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45871,9 +45354,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -45894,9 +45376,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45920,9 +45401,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -45943,9 +45423,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45969,9 +45448,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -45992,9 +45470,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46018,9 +45495,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46041,9 +45517,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46067,9 +45542,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46090,9 +45564,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46116,9 +45589,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46139,9 +45611,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46165,9 +45636,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46188,9 +45658,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46214,9 +45683,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46237,9 +45705,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -46263,9 +45730,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -46286,9 +45752,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46312,9 +45777,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46335,9 +45799,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46361,9 +45824,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46384,9 +45846,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46410,9 +45871,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46428,9 +45888,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46447,9 +45906,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46465,9 +45923,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46484,9 +45941,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46502,9 +45958,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46521,9 +45976,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46539,9 +45993,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46558,9 +46011,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46576,9 +46028,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46595,9 +46046,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46613,9 +46063,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46632,9 +46081,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46650,9 +46098,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46669,9 +46116,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -46687,9 +46133,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46706,9 +46151,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46724,9 +46168,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46743,9 +46186,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46761,9 +46203,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46780,9 +46221,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46798,9 +46238,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46817,9 +46256,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -46835,9 +46273,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -46854,9 +46291,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -46872,9 +46308,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46891,9 +46326,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -46909,9 +46343,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46928,9 +46361,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -46946,9 +46378,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46965,9 +46396,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -46988,9 +46418,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47014,9 +46443,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47037,9 +46465,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47063,9 +46490,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47086,9 +46512,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47112,9 +46537,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47135,9 +46559,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47161,9 +46584,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47184,9 +46606,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47210,9 +46631,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47233,9 +46653,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47259,9 +46678,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47282,9 +46700,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47308,9 +46725,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47331,9 +46747,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -47357,9 +46772,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -47380,9 +46794,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47406,9 +46819,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47429,9 +46841,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47455,9 +46866,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47478,9 +46888,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47504,9 +46913,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47527,9 +46935,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -47553,9 +46960,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -47576,9 +46982,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -47602,9 +47007,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -47625,9 +47029,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47651,9 +47054,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47674,9 +47076,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47700,9 +47101,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47723,9 +47123,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47749,9 +47148,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47772,9 +47170,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47798,9 +47195,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47821,9 +47217,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47847,9 +47242,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -47870,9 +47264,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47896,9 +47289,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -47919,9 +47311,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47945,9 +47336,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -47968,9 +47358,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -47994,9 +47383,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48017,9 +47405,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48043,9 +47430,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48066,9 +47452,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48092,9 +47477,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48115,9 +47499,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48141,9 +47524,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48164,9 +47546,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48190,9 +47571,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48213,9 +47593,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48239,9 +47618,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48262,9 +47640,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -48288,9 +47665,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -48311,9 +47687,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48337,9 +47712,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48360,9 +47734,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48386,9 +47759,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48409,9 +47781,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48435,9 +47806,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48453,9 +47823,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48472,9 +47841,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48490,9 +47858,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48509,9 +47876,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48527,9 +47893,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48546,9 +47911,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48564,9 +47928,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48583,9 +47946,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48601,9 +47963,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48620,9 +47981,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48638,9 +47998,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48657,9 +48016,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48675,9 +48033,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48694,9 +48051,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -48712,9 +48068,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48731,9 +48086,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48749,9 +48103,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48768,9 +48121,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48786,9 +48138,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48805,9 +48156,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48823,9 +48173,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48842,9 +48191,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -48860,9 +48208,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -48879,9 +48226,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -48897,9 +48243,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48916,9 +48261,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -48934,9 +48278,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48953,9 +48296,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -48971,9 +48313,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -48990,9 +48331,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -92805,9 +92145,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -92831,9 +92170,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -92854,9 +92192,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -92880,9 +92217,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -92903,9 +92239,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -92929,9 +92264,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -92952,9 +92286,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -92978,9 +92311,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -93001,9 +92333,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93027,9 +92358,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93050,9 +92380,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93076,9 +92405,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93099,9 +92427,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93125,9 +92452,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93148,9 +92474,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93174,9 +92499,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93197,9 +92521,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93223,9 +92546,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93246,9 +92568,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93272,9 +92593,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93295,9 +92615,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93321,9 +92640,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93344,9 +92662,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -93370,9 +92687,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -93393,9 +92709,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93419,9 +92734,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93442,9 +92756,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93468,9 +92781,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93491,9 +92803,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93517,9 +92828,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93540,9 +92850,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93566,9 +92875,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93589,9 +92897,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93615,9 +92922,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93638,9 +92944,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93664,9 +92969,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93687,9 +92991,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93713,9 +93016,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93736,9 +93038,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -93762,9 +93063,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -93785,9 +93085,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93811,9 +93110,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -93834,9 +93132,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93860,9 +93157,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -93883,9 +93179,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93909,9 +93204,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -93932,9 +93226,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93958,9 +93251,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -93981,9 +93273,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94007,9 +93298,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94030,9 +93320,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94056,9 +93345,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94079,9 +93367,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94105,9 +93392,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94128,9 +93414,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94154,9 +93439,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94177,9 +93461,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -94203,9 +93486,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -94226,9 +93508,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94252,9 +93533,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94275,9 +93555,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94301,9 +93580,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94324,9 +93602,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94350,9 +93627,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94373,9 +93649,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94399,9 +93674,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94422,9 +93696,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94448,9 +93721,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94471,9 +93743,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94497,9 +93768,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94520,9 +93790,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94546,9 +93815,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94569,9 +93837,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -94595,9 +93862,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -94618,9 +93884,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94644,9 +93909,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94667,9 +93931,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94693,9 +93956,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94716,9 +93978,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94742,9 +94003,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94765,9 +94025,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94791,9 +94050,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -94814,9 +94072,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94840,9 +94097,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -94863,9 +94119,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94889,9 +94144,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -94912,9 +94166,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94938,9 +94191,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -94961,9 +94213,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -94987,9 +94238,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -95010,9 +94260,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95036,9 +94285,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95059,9 +94307,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95085,9 +94332,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95108,9 +94354,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95134,9 +94379,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95157,9 +94401,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95183,9 +94426,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95206,9 +94448,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95232,9 +94473,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95255,9 +94495,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95281,9 +94520,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95304,9 +94542,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -95330,9 +94567,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -95353,9 +94589,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -95379,9 +94614,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -95402,9 +94636,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95428,9 +94661,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95451,9 +94683,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95477,9 +94708,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95500,9 +94730,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95526,9 +94755,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95549,9 +94777,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95575,9 +94802,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95598,9 +94824,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95624,9 +94849,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95647,9 +94871,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95673,9 +94896,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95696,9 +94918,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -95722,9 +94943,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -95745,9 +94965,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -95771,9 +94990,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -95794,9 +95012,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95820,9 +95037,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95843,9 +95059,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95869,9 +95084,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -95892,9 +95106,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95918,9 +95131,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -95941,9 +95153,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95967,9 +95178,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -95990,9 +95200,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96016,9 +95225,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96039,9 +95247,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96065,9 +95272,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96088,9 +95294,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96114,9 +95319,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96137,9 +95341,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96163,9 +95366,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96186,9 +95388,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96212,9 +95413,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96235,9 +95435,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96261,9 +95460,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96284,9 +95482,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96310,9 +95507,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96333,9 +95529,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96359,9 +95554,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96382,9 +95576,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96408,9 +95601,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96431,9 +95623,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96457,9 +95648,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96480,9 +95670,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96506,9 +95695,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96529,9 +95717,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96555,9 +95742,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96578,9 +95764,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96604,9 +95789,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96627,9 +95811,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96653,9 +95836,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96676,9 +95858,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96702,9 +95883,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96725,9 +95905,8 @@ entry:
     <vscale x 2 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96751,9 +95930,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96774,9 +95952,8 @@ entry:
     <vscale x 4 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96800,9 +95977,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -96823,9 +95999,8 @@ entry:
     <vscale x 8 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96849,9 +96024,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -96872,9 +96046,8 @@ entry:
     <vscale x 16 x float> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96898,9 +96071,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -96921,9 +96093,8 @@ entry:
     <vscale x 1 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96947,9 +96118,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -96970,9 +96140,8 @@ entry:
     <vscale x 2 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -96996,9 +96165,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -97019,9 +96187,8 @@ entry:
     <vscale x 4 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97045,9 +96212,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97068,9 +96234,8 @@ entry:
     <vscale x 8 x double> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -97094,9 +96259,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -97117,9 +96281,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -97143,9 +96306,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -97166,9 +96328,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97192,9 +96353,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97215,9 +96375,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -97241,9 +96400,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -97264,9 +96422,8 @@ entry:
     float undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -97290,9 +96447,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -97313,9 +96469,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -97339,9 +96494,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -97362,9 +96516,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -97388,9 +96541,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -97411,9 +96563,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97437,9 +96588,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -97460,9 +96610,8 @@ entry:
     double undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -97486,9 +96635,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -104845,9 +103993,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -104868,9 +104015,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -104891,9 +104037,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -104914,9 +104059,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -104937,9 +104081,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -104960,9 +104103,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -104983,9 +104125,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105006,9 +104147,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105029,9 +104169,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105052,9 +104191,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105075,9 +104213,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105098,9 +104235,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105121,9 +104257,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105144,9 +104279,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105167,9 +104301,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105190,9 +104323,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105213,9 +104345,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105236,9 +104367,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105259,9 +104389,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105282,9 +104411,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105305,9 +104433,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105328,9 +104455,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105351,9 +104477,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105374,9 +104499,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105397,9 +104521,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105420,9 +104543,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105443,9 +104565,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105466,9 +104587,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -105489,9 +104609,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -105512,9 +104631,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -105535,9 +104653,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -105558,9 +104675,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115474,9 +114590,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115499,9 +114614,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -115524,9 +114638,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -115549,9 +114662,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -115574,9 +114686,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115599,9 +114710,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -115624,9 +114734,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -115649,9 +114758,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -115674,9 +114782,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -115699,9 +114806,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115724,9 +114830,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -115749,9 +114854,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -115774,9 +114878,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -115799,9 +114902,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -115824,9 +114926,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115849,9 +114950,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115874,9 +114974,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -115899,9 +114998,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -115924,9 +115022,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -115949,9 +115046,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -115974,9 +115070,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -115999,9 +115094,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116024,9 +115118,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116049,9 +115142,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116074,9 +115166,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116099,9 +115190,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116124,9 +115214,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -116149,9 +115238,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116174,9 +115262,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116199,9 +115286,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116218,9 +115304,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116237,9 +115322,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116256,9 +115340,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116275,9 +115358,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116294,9 +115376,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116313,9 +115394,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116332,9 +115412,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116351,9 +115430,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116370,9 +115448,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116389,9 +115466,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116408,9 +115484,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116427,9 +115502,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -116446,9 +115520,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116465,9 +115538,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116484,9 +115556,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116507,9 +115578,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116530,9 +115600,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116553,9 +115622,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116576,9 +115644,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116599,9 +115666,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116622,9 +115688,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116645,9 +115710,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116668,9 +115732,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116691,9 +115754,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116714,9 +115776,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116737,9 +115798,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116760,9 +115820,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -116783,9 +115842,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -116806,9 +115864,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116829,9 +115886,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116852,9 +115908,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116875,9 +115930,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116898,9 +115952,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -116921,9 +115974,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -116944,9 +115996,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -116967,9 +116018,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -116990,9 +116040,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -117013,9 +116062,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -117036,9 +116084,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -117059,9 +116106,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -117082,9 +116128,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -117105,9 +116150,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -117128,9 +116172,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -117151,9 +116194,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -117174,9 +116216,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -117192,9 +116233,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -117210,9 +116250,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -117228,9 +116267,8 @@ entry:
     i8 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -117246,9 +116284,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -117264,9 +116301,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -117282,9 +116318,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -117300,9 +116335,8 @@ entry:
     i16 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -117318,9 +116352,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -117336,9 +116369,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -117354,9 +116386,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -117372,9 +116403,8 @@ entry:
     i32 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -117390,9 +116420,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -117408,9 +116437,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -117426,9 +116454,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -117444,9 +116471,8 @@ entry:
     i64 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118189,9 +117215,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118214,9 +117239,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118239,9 +117263,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -118264,9 +117287,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118289,9 +117311,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118314,9 +117335,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118339,9 +117359,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -118364,9 +117383,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -118389,9 +117407,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118414,9 +117431,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118439,9 +117455,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118464,9 +117479,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -118489,9 +117503,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -118514,9 +117527,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118539,9 +117551,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118564,9 +117575,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118589,9 +117599,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118614,9 +117623,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -118639,9 +117647,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118664,9 +117671,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118689,9 +117695,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118714,9 +117719,8 @@ entry:
     <vscale x 32 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -118739,9 +117743,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -118764,9 +117767,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118789,9 +117791,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118814,9 +117815,8 @@ entry:
     <vscale x 16 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118839,9 +117839,8 @@ entry:
     <vscale x 1 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -118864,9 +117863,8 @@ entry:
     <vscale x 2 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -118889,9 +117887,8 @@ entry:
     <vscale x 4 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -118914,9 +117911,8 @@ entry:
     <vscale x 8 x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118937,9 +117933,8 @@ entry:
     <vscale x 8 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -118960,9 +117955,8 @@ entry:
     <vscale x 16 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -118983,9 +117977,8 @@ entry:
     <vscale x 32 x i8> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -119006,9 +117999,8 @@ entry:
     <vscale x 4 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119029,9 +118021,8 @@ entry:
     <vscale x 8 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119052,9 +118043,8 @@ entry:
     <vscale x 16 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -119075,9 +118065,8 @@ entry:
     <vscale x 32 x i16> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -119098,9 +118087,8 @@ entry:
     <vscale x 2 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -119121,9 +118109,8 @@ entry:
     <vscale x 4 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119144,9 +118131,8 @@ entry:
     <vscale x 8 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119167,9 +118153,8 @@ entry:
     <vscale x 16 x i32> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -119190,9 +118175,8 @@ entry:
     <vscale x 1 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -119213,9 +118197,8 @@ entry:
     <vscale x 2 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -119236,9 +118219,8 @@ entry:
     <vscale x 4 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119259,9 +118241,8 @@ entry:
     <vscale x 8 x i64> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119282,9 +118263,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119305,9 +118285,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -119328,9 +118307,8 @@ entry:
     i8 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -119351,9 +118329,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119374,9 +118351,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119397,9 +118373,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -119420,9 +118395,8 @@ entry:
     i16 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 32 x i2>*
-  %a.zext = zext <vscale x 32 x i1> %a to <vscale x 32 x i2>
-  store <vscale x 32 x i2> %a.zext, <vscale x 32 x i2>* %p
+  %p = bitcast i8* @scratch to <vscale x 32 x i1>*
+  store <vscale x 32 x i1> %a, <vscale x 32 x i1>* %p
 
   ret void
 }
@@ -119443,9 +118417,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -119466,9 +118439,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119489,9 +118461,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }
@@ -119512,9 +118483,8 @@ entry:
     i32 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 16 x i4>*
-  %a.zext = zext <vscale x 16 x i1> %a to <vscale x 16 x i4>
-  store <vscale x 16 x i4> %a.zext, <vscale x 16 x i4>* %p
+  %p = bitcast i8* @scratch to <vscale x 16 x i1>*
+  store <vscale x 16 x i1> %a, <vscale x 16 x i1>* %p
 
   ret void
 }
@@ -119535,9 +118505,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 1 x i64>*
-  %a.zext = zext <vscale x 1 x i1> %a to <vscale x 1 x i64>
-  store <vscale x 1 x i64> %a.zext, <vscale x 1 x i64>* %p
+  %p = bitcast i8* @scratch to <vscale x 1 x i1>*
+  store <vscale x 1 x i1> %a, <vscale x 1 x i1>* %p
 
   ret void
 }
@@ -119558,9 +118527,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 2 x i32>*
-  %a.zext = zext <vscale x 2 x i1> %a to <vscale x 2 x i32>
-  store <vscale x 2 x i32> %a.zext, <vscale x 2 x i32>* %p
+  %p = bitcast i8* @scratch to <vscale x 2 x i1>*
+  store <vscale x 2 x i1> %a, <vscale x 2 x i1>* %p
 
   ret void
 }
@@ -119581,9 +118549,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 4 x i16>*
-  %a.zext = zext <vscale x 4 x i1> %a to <vscale x 4 x i16>
-  store <vscale x 4 x i16> %a.zext, <vscale x 4 x i16>* %p
+  %p = bitcast i8* @scratch to <vscale x 4 x i1>*
+  store <vscale x 4 x i1> %a, <vscale x 4 x i1>* %p
 
   ret void
 }
@@ -119604,9 +118571,8 @@ entry:
     i64 undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x 8 x i8>*
-  %a.zext = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %a.zext, <vscale x 8 x i8>* %p
+  %p = bitcast i8* @scratch to <vscale x 8 x i1>*
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %p
 
   ret void
 }

@@ -8,8 +8,14 @@
 define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_1:
 ; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vand.vi v1, v16, 1
+; CHECK-NEXT:    vmv.v.i v2, 0
+; CHECK-NEXT:    vmsne.vv v1, v1, v2
+; CHECK-NEXT:    vand.vi v3, v17, 1
+; CHECK-NEXT:    vmsne.vv v2, v3, v2
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
-; CHECK-NEXT:    vmand.mm v0, v16, v17
+; CHECK-NEXT:    vmand.mm v0, v1, v2
 ; CHECK-NEXT:    ret
 {
   %ma = trunc <vscale x 1 x i64> %a to <vscale x 1 x i1>
@@ -26,10 +32,12 @@ define <vscale x 1 x i64> @mzext_1(<vscale x 1 x i1> %ma, <vscale x 1 x i1> %mb,
 ; CHECK-LABEL: mzext_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmmv.m v1, v0
-; CHECK-NEXT:    vmmv.m v2, v16
+; CHECK-NEXT:    vmv.v.i v1, 0
+; CHECK-NEXT:    vmerge.vim v2, v1, 1, v0
+; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
-; CHECK-NEXT:    vand.vv v16, v1, v2
+; CHECK-NEXT:    vand.vv v16, v2, v1
 ; CHECK-NEXT:    ret
 {
   %a = zext <vscale x 1 x i1> %ma to <vscale x 1 x i64>

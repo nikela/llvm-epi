@@ -17,8 +17,9 @@ define <vscale x 1 x i64> @sext_i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b
 ; CHECK-LABEL: sext_i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v16, v17
-; CHECK-NEXT:    vmmv.m v16, v1
+; CHECK-NEXT:    vmsleu.vv v0, v16, v17
+; CHECK-NEXT:    vmv.v.i v1, 0
+; CHECK-NEXT:    vmerge.vim v16, v1, 1, v0
 ; CHECK-NEXT:    ret
 {
   %cmp = icmp ule <vscale x 1 x i64> %a, %b

@@ -1124,33 +1124,19 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
   MVT XLenVT = Subtarget.getXLenVT();
 
   if (VT.isScalableVector()) {
-    // FIXME ELEN=64 hardcoded.
-    unsigned MLEN = 64 / VT.getVectorMinNumElements();
+    // This sets all bits of a VR to the value of the condition bit. It sets more
+    // bits than necessary but those can be safely ignored.
+    // E.g. (nxv64i1:copy (nxv8i8:splat (i8:sext (i1:trunc (i64:CondV)))))
+    SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, MVT::i1, CondV);
+    SDValue Sext = DAG.getNode(ISD::SIGN_EXTEND, DL, MVT::i8, Trunc);
+    SDValue VecCondV = DAG.getNode(ISD::SPLAT_VECTOR, DL, MVT::nxv8i8, Sext);
 
-    if (MLEN < 8) {
-      // E.g. (nxv64i1:copy (nxv8i8:splat (i8:sext (i1:trunc (i64:CondV)))))
-      SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, MVT::i1, CondV);
-      SDValue Sext = DAG.getNode(ISD::SIGN_EXTEND, DL, MVT::i8, Trunc);
-      SDValue VecCondV = DAG.getNode(ISD::SPLAT_VECTOR, DL, MVT::nxv8i8, Sext);
-
-      SDValue RC =
-          DAG.getTargetConstant(RISCV::VRRegClass.getID(), DL, MVT::i64);
-      SDValue CastVecCondV = SDValue(
-          DAG.getMachineNode(TargetOpcode::COPY_TO_REGCLASS, DL,
-                             VT.changeVectorElementType(MVT::i1), VecCondV, RC),
-          0);
-      return DAG.getNode(ISD::VSELECT, DL, VT, {CastVecCondV, TrueV, FalseV});
-    }
-
-    // MLEN >= 8. Note this is only valid in RVV-0.8. In RVV-0.9 MLEN=1.
-    // E.g. (nxv2i1:trunc (nxv2i32:splat (i32:trunc (i64:CondV))))
-    MVT EltVT = MVT::getIntegerVT(MLEN);
-    SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, EltVT, CondV);
-    SDValue VecCondV = DAG.getNode(ISD::SPLAT_VECTOR, DL,
-                                   VT.changeVectorElementType(EltVT), Trunc);
-    SDValue TruncVecCondV = DAG.getNode(
-        ISD::TRUNCATE, DL, VT.changeVectorElementType(MVT::i1), VecCondV);
-    return DAG.getNode(ISD::VSELECT, DL, VT, {TruncVecCondV, TrueV, FalseV});
+    SDValue RC = DAG.getTargetConstant(RISCV::VRRegClass.getID(), DL, MVT::i64);
+    SDValue CastVecCondV = SDValue(
+        DAG.getMachineNode(TargetOpcode::COPY_TO_REGCLASS, DL,
+                           VT.changeVectorElementType(MVT::i1), VecCondV, RC),
+        0);
+    return DAG.getNode(ISD::VSELECT, DL, VT, {CastVecCondV, TrueV, FalseV});
   }
 
   // If the result type is XLenVT and CondV is the output of a SETCC node
@@ -3587,17 +3573,6 @@ static SDValue unpackF64OnRV32DSoftABI(SelectionDAG &DAG, SDValue Chain,
   return DAG.getNode(RISCVISD::BuildPairF64, DL, MVT::f64, Lo, Hi);
 }
 
-static EVT MaskVTToMemVT(EVT VT) {
-  assert(VT.isScalableVector() && "Must be a scalable vector");
-  assert(VT.getVectorElementType() == MVT::i1 && "Must be a mask");
-  // FIXME - Assumes ELEN=64
-  EVT MemVT =
-      MVT::getVectorVT(MVT::getIntegerVT(64 / VT.getVectorNumElements()),
-                       VT.getVectorNumElements(),
-                       /* IsScalable */ true);
-  return MemVT;
-}
-
 // FastCC has less than 1% performance improvement for some particular
 // benchmark. But theoretically, it may has benenfit for some cases.
 static bool CC_RISCV_FastCC(unsigned ValNo, MVT ValVT, MVT LocVT,
@@ -3718,16 +3693,7 @@ SDValue RISCVTargetLowering::LowerFormalArguments(
     else
       ArgValue = unpackFromMemLoc(DAG, Chain, VA, DL);
 
-    // Special case for mask vectors.
-    if (VA.getLocInfo() == CCValAssign::Indirect &&
-        VA.getValVT().isScalableVector() &&
-        VA.getValVT().getVectorElementType() == MVT::i1) {
-      EVT LocVT = MaskVTToMemVT(VA.getValVT());
-      InVals.push_back(DAG.getNode(
-          ISD::TRUNCATE, DL, VA.getValVT(),
-          DAG.getLoad(LocVT, DL, Chain, ArgValue, MachinePointerInfo())));
-      continue;
-    } else if (VA.getLocInfo() == CCValAssign::Indirect) {
+    if (VA.getLocInfo() == CCValAssign::Indirect) {
       // If the original argument was split and passed by reference (e.g. i128
       // on RV32), we need to load all parts of it here (using the same
       // address).
@@ -4020,12 +3986,6 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
         // will replace this slot from a vector type to an XLenVT.
         SDValue Ptr = DAG.getLoad(XLenVT, DL, Chain, SpillSlot,
                                   MachinePointerInfo::getFixedStack(MF, FI));
-
-        // Special case for masks.
-        if (VA.getValVT().getVectorElementType() == MVT::i1) {
-          EVT LocVT = MaskVTToMemVT(VA.getValVT());
-          ArgValue = DAG.getNode(ISD::ZERO_EXTEND, DL, LocVT, ArgValue);
-        }
 
         MemOpChains.push_back(
             DAG.getStore(Chain, DL, ArgValue, Ptr, MachinePointerInfo()));

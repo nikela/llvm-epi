@@ -1526,8 +1526,8 @@ entry:
     <vscale x ${rhs_type_scale} x ${llvm_rhs_type}> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1552,8 +1552,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1574,8 +1574,8 @@ entry:
     ${llvm_rhs_type} undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1600,8 +1600,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1617,8 +1617,8 @@ entry:
     ${llvm_rhs_type} 9,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1636,8 +1636,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1683,9 +1683,6 @@ entry:
                 subs["instruction"] = self.instruction
                 subs["value_result_type"] = result.value_type
                 subs["llvm_result_type"] = result.llvm_type
-                subs["llvm_store_type"] = result.llvm_type
-                subs["store_code"] = ""
-                subs["store_variable_version"] = ""
 
                 subs["llvm_lhs_type"] = lhs.llvm_type
                 subs["llvm_rhs_type"] = rhs.llvm_type
@@ -1749,15 +1746,6 @@ entry:
                     subs["lhs_type_scale"] = max_scale*vlmul
                     subs["rhs_type_scale"] = max_scale*vlmul
 
-                    if self.generates_mask:
-                        subs["store_variable_version"] = ".zext"
-                        subs["llvm_store_type"] = "i{}".format(64 / (max_scale * vlmul))
-                        subs["store_code"] = "\n  %a.zext = zext <vscale x {} x {}> %a to <vscale x {} x {}>"\
-                                .format(subs["result_type_scale"], \
-                                        subs["llvm_result_type"], \
-                                        subs["result_type_scale"], \
-                                        subs["llvm_store_type"])
-
                     if self.is_widening or self.is_narrowing:
                         subs["vector_value_lhs_type"] = ".nxv{}{}".format(subs["lhs_type_scale"], subs["value_lhs_type"])
 
@@ -1782,8 +1770,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1806,8 +1794,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1824,8 +1812,8 @@ entry:
     <vscale x ${lhs_type_scale} x i1> undef,
     i64 undef)
 
-  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_store_type}>*${store_code}
-  store <vscale x ${result_type_scale} x ${llvm_store_type}> %a${store_variable_version}, <vscale x ${result_type_scale} x ${llvm_store_type}>* %p
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
 
   ret void
 }
@@ -1863,9 +1851,6 @@ entry:
                 subs["instruction"] = self.instruction
                 subs["value_result_type"] = result.value_type
                 subs["llvm_result_type"] = result.llvm_type
-                subs["llvm_store_type"] = result.llvm_type
-                subs["store_code"] = ""
-                subs["store_variable_version"] = ""
 
                 subs["llvm_lhs_type"] = lhs.llvm_type
                 subs["llvm_rhs_type"] = rhs.llvm_type
@@ -1917,15 +1902,6 @@ entry:
                     subs["result_type_scale"] = max_scale*vlmul
                     subs["lhs_type_scale"] = max_scale*vlmul
                     subs["rhs_type_scale"] = max_scale*vlmul
-
-                    if self.generates_mask:
-                        subs["store_variable_version"] = ".zext"
-                        subs["llvm_store_type"] = "i{}".format(64 / (max_scale * vlmul))
-                        subs["store_code"] = "\n  %a.zext = zext <vscale x {} x {}> %a to <vscale x {} x {}>"\
-                                .format(subs["result_type_scale"], \
-                                        subs["llvm_result_type"], \
-                                        subs["result_type_scale"], \
-                                        subs["llvm_store_type"])
 
                     print template.substitute(subs)
 

@@ -2,7 +2,7 @@
 ; RUN: llc -mtriple riscv64 -mattr +m,+a,+f,+d,+experimental-v -o - \
 ; RUN:     --verify-machineinstrs -O0 %s | FileCheck %s
 
-define <vscale x 8 x i8> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone {
+define <vscale x 8 x i1> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone {
 ; CHECK-LABEL: foo_O0:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -32
@@ -19,26 +19,20 @@ define <vscale x 8 x i8> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vle8.v v1, (a0)
-; CHECK-NEXT:    # implicit-def: $v2
-; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
-; CHECK-NEXT:    vand.vi v2, v1, 1
-; CHECK-NEXT:    vmv1r.v v16, v2
+; CHECK-NEXT:    vmv1r.v v0, v1
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)
 ; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
 entry:
-  %a.addr = alloca <vscale x 8 x i8>, align 1
-  %frommask = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %frommask, <vscale x 8 x i8>* %a.addr, align 1
-  %0 = load <vscale x 8 x i8>, <vscale x 8 x i8>* %a.addr, align 1
-  %tomask = trunc <vscale x 8 x i8> %0 to <vscale x 8 x i1>
-  %1 = zext <vscale x 8 x i1> %tomask to <vscale x 8 x i8>
-  ret <vscale x 8 x i8> %1
+  %a.addr = alloca <vscale x 8 x i1>, align 1
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %a.addr, align 1
+  %0 = load <vscale x 8 x i1>, <vscale x 8 x i1>* %a.addr, align 1
+  ret <vscale x 8 x i1> %0
 }
 
-define <vscale x 8 x i8> @foo(<vscale x 8 x i1> %a) nounwind {
+define <vscale x 8 x i1> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -32
@@ -54,20 +48,15 @@ define <vscale x 8 x i8> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-NEXT:    # implicit-def: $v1
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vle8.v v1, (a0)
-; CHECK-NEXT:    # implicit-def: $v2
-; CHECK-NEXT:    vand.vi v2, v1, 1
-; CHECK-NEXT:    vmv1r.v v16, v2
+; CHECK-NEXT:    vmv1r.v v0, v1
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)
 ; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
 entry:
-  %a.addr = alloca <vscale x 8 x i8>, align 1
-  %frommask = zext <vscale x 8 x i1> %a to <vscale x 8 x i8>
-  store <vscale x 8 x i8> %frommask, <vscale x 8 x i8>* %a.addr, align 1
-  %0 = load <vscale x 8 x i8>, <vscale x 8 x i8>* %a.addr, align 1
-  %tomask = trunc <vscale x 8 x i8> %0 to <vscale x 8 x i1>
-  %1 = zext <vscale x 8 x i1> %tomask to <vscale x 8 x i8>
-  ret <vscale x 8 x i8> %1
+  %a.addr = alloca <vscale x 8 x i1>, align 1
+  store <vscale x 8 x i1> %a, <vscale x 8 x i1>* %a.addr, align 1
+  %0 = load <vscale x 8 x i1>, <vscale x 8 x i1>* %a.addr, align 1
+  ret <vscale x 8 x i1> %0
 }

@@ -38,10 +38,14 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    addi a2, zero, 2
 ; CHECK-NEXT:    vsetvli a2, a2, e64,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
-; CHECK-NEXT:    vand.vi v0, v1, 1
+; CHECK-NEXT:    vand.vi v1, v1, 1
+; CHECK-NEXT:    vsetvli a2, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vand.vi v1, v1, 1
+; CHECK-NEXT:    vmv.v.i v2, 0
+; CHECK-NEXT:    vmsne.vv v0, v1, v2
 ; CHECK-NEXT:    slli a2, a3, 3
 ; CHECK-NEXT:    sd a2, -128(s0)
-; CHECK-NEXT:    sub s9, a5, a4
+; CHECK-NEXT:    sub s10, a5, a4
 ; CHECK-NEXT:    addi a2, zero, 24
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, -136(s0)
@@ -63,14 +67,14 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, -184(s0)
 ; CHECK-NEXT:    addi a2, zero, 104
-; CHECK-NEXT:    mul t6, a3, a2
-; CHECK-NEXT:    slli s2, a3, 4
+; CHECK-NEXT:    mul s2, a3, a2
+; CHECK-NEXT:    slli s3, a3, 4
 ; CHECK-NEXT:    addi a2, zero, 48
-; CHECK-NEXT:    mul s3, a3, a2
-; CHECK-NEXT:    addi a2, zero, 80
 ; CHECK-NEXT:    mul s4, a3, a2
-; CHECK-NEXT:    addi a2, zero, 112
+; CHECK-NEXT:    addi a2, zero, 80
 ; CHECK-NEXT:    mul s5, a3, a2
+; CHECK-NEXT:    addi a2, zero, 112
+; CHECK-NEXT:    mul s6, a3, a2
 ; CHECK-NEXT:    addi a2, zero, 96
 ; CHECK-NEXT:    lui a4, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a4)
@@ -78,12 +82,13 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    fld ft1, %lo(.LCPI0_1)(a4)
 ; CHECK-NEXT:    lui a4, %hi(.LCPI0_2)
 ; CHECK-NEXT:    fld ft2, %lo(.LCPI0_2)(a4)
-; CHECK-NEXT:    mul s6, a3, a2
-; CHECK-NEXT:    slli s7, a3, 5
-; CHECK-NEXT:    slli s8, a3, 6
-; CHECK-NEXT:    ld a3, -136(s0)
+; CHECK-NEXT:    mul s7, a3, a2
+; CHECK-NEXT:    slli s8, a3, 5
+; CHECK-NEXT:    slli s9, a3, 6
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
+; CHECK-NEXT:    addi a2, zero, 2
+; CHECK-NEXT:    vsetvli a2, a2, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v1, (a1)
 ; CHECK-NEXT:    addi a2, a1, 16
 ; CHECK-NEXT:    vle64.v v6, (a2)
@@ -107,10 +112,10 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v11, v12, v16
 ; CHECK-NEXT:    vfnmsac.vv v22, v4, v11
 ; CHECK-NEXT:    vfmul.vv v19, v17, v3
-; CHECK-NEXT:    ld a4, -216(s0)
+; CHECK-NEXT:    ld a3, -216(s0)
 ; CHECK-NEXT:    rdvlenb a2
-; CHECK-NEXT:    add a2, a2, a4
-; CHECK-NEXT:    vs1r.v v1, (a4)
+; CHECK-NEXT:    add a2, a2, a3
+; CHECK-NEXT:    vs1r.v v1, (a3)
 ; CHECK-NEXT:    vs1r.v v2, (a2)
 ; CHECK-NEXT:    vfmul.vv v20, v17, v1
 ; CHECK-NEXT:    vtrn.vv v7, v7, v7
@@ -132,16 +137,16 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vmv1r.v v12, v14
 ; CHECK-NEXT:    vfnmsac.vv v12, v25, v17
 ; CHECK-NEXT:    vle64.v v16, (a0)
-; CHECK-NEXT:    add ra, a0, s8
-; CHECK-NEXT:    vle64.v v21, (ra)
+; CHECK-NEXT:    add t6, a0, s9
+; CHECK-NEXT:    vle64.v v21, (t6)
 ; CHECK-NEXT:    vfmacc.vv v14, v25, v17
 ; CHECK-NEXT:    vfmacc.vv v13, v8, v17
 ; CHECK-NEXT:    vtrn.vv v29, v5, v5
 ; CHECK-NEXT:    vfmul.vv v17, v21, v29
 ; CHECK-NEXT:    vfsgnjn.vv v21, v21, v21, v0.t
 ; CHECK-NEXT:    vtrn.vv v5, v21, v21
-; CHECK-NEXT:    add s11, a0, s7
-; CHECK-NEXT:    vle64.v v11, (s11)
+; CHECK-NEXT:    add ra, a0, s8
+; CHECK-NEXT:    vle64.v v11, (ra)
 ; CHECK-NEXT:    vtrn.vv v5, v6, v21
 ; CHECK-NEXT:    vfnmsac.vv v17, v30, v5
 ; CHECK-NEXT:    vfadd.vv v1, v16, v17
@@ -150,8 +155,8 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfmul.vv v18, v11, v7
 ; CHECK-NEXT:    vfsgnjn.vv v11, v11, v11, v0.t
 ; CHECK-NEXT:    vtrn.vv v29, v11, v11
-; CHECK-NEXT:    add t5, a0, s6
-; CHECK-NEXT:    vle64.v v6, (t5)
+; CHECK-NEXT:    add a3, a0, s7
+; CHECK-NEXT:    vle64.v v6, (a3)
 ; CHECK-NEXT:    vtrn.vv v29, v30, v11
 ; CHECK-NEXT:    vfnmsac.vv v18, v8, v29
 ; CHECK-NEXT:    vtrn.vv v7, v20, v20
@@ -159,31 +164,31 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfsgnjn.vv v6, v6, v6, v0.t
 ; CHECK-NEXT:    vtrn.vv v29, v6, v6
 ; CHECK-NEXT:    vtrn.vv v29, v30, v6
-; CHECK-NEXT:    add a7, a0, s5
-; CHECK-NEXT:    vle64.v v6, (a7)
+; CHECK-NEXT:    add t0, a0, s6
+; CHECK-NEXT:    vle64.v v6, (t0)
 ; CHECK-NEXT:    vfnmsac.vv v20, v8, v29
 ; CHECK-NEXT:    vfadd.vv v5, v18, v20
 ; CHECK-NEXT:    vtrn.vv v29, v22, v22
 ; CHECK-NEXT:    vfmul.vv v21, v6, v29
 ; CHECK-NEXT:    vfsgnjn.vv v6, v6, v6, v0.t
 ; CHECK-NEXT:    vtrn.vv v1, v6, v6
-; CHECK-NEXT:    add t0, a0, s4
-; CHECK-NEXT:    vle64.v v8, (t0)
+; CHECK-NEXT:    add t1, a0, s5
+; CHECK-NEXT:    vle64.v v8, (t1)
 ; CHECK-NEXT:    vtrn.vv v1, v2, v6
 ; CHECK-NEXT:    vfnmsac.vv v21, v30, v1
 ; CHECK-NEXT:    vtrn.vv v1, v19, v19
 ; CHECK-NEXT:    vfmul.vv v22, v8, v1
 ; CHECK-NEXT:    vfsgnjn.vv v8, v8, v8, v0.t
 ; CHECK-NEXT:    vtrn.vv v29, v8, v8
-; CHECK-NEXT:    add t2, a0, s3
-; CHECK-NEXT:    vle64.v v6, (t2)
+; CHECK-NEXT:    add t3, a0, s4
+; CHECK-NEXT:    vle64.v v6, (t3)
 ; CHECK-NEXT:    vtrn.vv v29, v30, v8
 ; CHECK-NEXT:    vfnmsac.vv v22, v2, v29
 ; CHECK-NEXT:    vtrn.vv v1, v23, v23
 ; CHECK-NEXT:    vfmul.vv v23, v6, v1
 ; CHECK-NEXT:    vfsgnjn.vv v6, v6, v6, v0.t
-; CHECK-NEXT:    add t1, a0, s2
-; CHECK-NEXT:    vle64.v v19, (t1)
+; CHECK-NEXT:    add t2, a0, s3
+; CHECK-NEXT:    vle64.v v19, (t2)
 ; CHECK-NEXT:    vtrn.vv v29, v6, v6
 ; CHECK-NEXT:    vtrn.vv v29, v30, v6
 ; CHECK-NEXT:    vfnmsac.vv v23, v2, v29
@@ -191,17 +196,17 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfsgnjn.vv v19, v19, v19, v0.t
 ; CHECK-NEXT:    vtrn.vv v1, v19, v19
 ; CHECK-NEXT:    vtrn.vv v1, v2, v19
-; CHECK-NEXT:    ld a2, -128(s0)
-; CHECK-NEXT:    add s10, a0, a2
-; CHECK-NEXT:    vle64.v v15, (s10)
+; CHECK-NEXT:    ld a4, -128(s0)
+; CHECK-NEXT:    add s11, a0, a4
+; CHECK-NEXT:    vle64.v v15, (s11)
 ; CHECK-NEXT:    vfnmsac.vv v8, v25, v1
 ; CHECK-NEXT:    vfadd.vv v7, v21, v23
 ; CHECK-NEXT:    vfadd.vv v19, v8, v22
 ; CHECK-NEXT:    vfmul.vv v11, v15, v3
 ; CHECK-NEXT:    vfsgnjn.vv v15, v15, v15, v0.t
 ; CHECK-NEXT:    vtrn.vv v1, v15, v15
-; CHECK-NEXT:    add s1, a0, t6
-; CHECK-NEXT:    vle64.v v24, (s1)
+; CHECK-NEXT:    add a7, a0, s2
+; CHECK-NEXT:    vle64.v v24, (a7)
 ; CHECK-NEXT:    vtrn.vv v1, v2, v15
 ; CHECK-NEXT:    vfnmsac.vv v11, v4, v1
 ; CHECK-NEXT:    vtrn.vv v1, v13, v13
@@ -239,8 +244,8 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfsgnjn.vv v1, v1, v1, v0.t
 ; CHECK-NEXT:    vtrn.vv v26, v1, v1
 ; CHECK-NEXT:    ld a2, -160(s0)
-; CHECK-NEXT:    add t3, a0, a2
-; CHECK-NEXT:    vle64.v v28, (t3)
+; CHECK-NEXT:    add t4, a0, a2
+; CHECK-NEXT:    vle64.v v28, (t4)
 ; CHECK-NEXT:    vtrn.vv v26, v27, v1
 ; CHECK-NEXT:    vfnmsac.vv v25, v10, v26
 ; CHECK-NEXT:    vtrn.vv v9, v14, v14
@@ -248,26 +253,26 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfsgnjn.vv v28, v28, v28, v0.t
 ; CHECK-NEXT:    vtrn.vv v26, v28, v28
 ; CHECK-NEXT:    ld a2, -152(s0)
-; CHECK-NEXT:    add a2, a2, a0
-; CHECK-NEXT:    vle64.v v1, (a2)
+; CHECK-NEXT:    add s1, a0, a2
+; CHECK-NEXT:    vle64.v v1, (s1)
 ; CHECK-NEXT:    vtrn.vv v26, v27, v28
 ; CHECK-NEXT:    vfnmsac.vv v14, v10, v26
 ; CHECK-NEXT:    vtrn.vv v9, v12, v12
 ; CHECK-NEXT:    vfmul.vv v12, v1, v9
 ; CHECK-NEXT:    vfsgnjn.vv v1, v1, v1, v0.t
-; CHECK-NEXT:    add t4, a0, a3
-; CHECK-NEXT:    vle64.v v26, (t4)
+; CHECK-NEXT:    ld a2, -136(s0)
+; CHECK-NEXT:    add t5, a0, a2
+; CHECK-NEXT:    vle64.v v26, (t5)
 ; CHECK-NEXT:    vtrn.vv v27, v1, v1
 ; CHECK-NEXT:    vtrn.vv v27, v28, v1
 ; CHECK-NEXT:    vfnmsac.vv v12, v10, v27
 ; CHECK-NEXT:    sd a1, -112(s0)
-; CHECK-NEXT:    sd a4, -120(s0)
-; CHECK-NEXT:    ld a4, -216(s0)
-; CHECK-NEXT:    rdvlenb a1
-; CHECK-NEXT:    add a1, a1, a4
-; CHECK-NEXT:    vl1r.v v3, (a4)
-; CHECK-NEXT:    ld a4, -120(s0)
-; CHECK-NEXT:    vl1r.v v4, (a1)
+; CHECK-NEXT:    ld a1, -216(s0)
+; CHECK-NEXT:    rdvlenb a2
+; CHECK-NEXT:    add a2, a2, a1
+; CHECK-NEXT:    vl1r.v v3, (a1)
+; CHECK-NEXT:    ld a1, -112(s0)
+; CHECK-NEXT:    vl1r.v v4, (a2)
 ; CHECK-NEXT:    vfmul.vv v9, v26, v3
 ; CHECK-NEXT:    vfsgnjn.vv v26, v26, v26, v0.t
 ; CHECK-NEXT:    vtrn.vv v27, v26, v26
@@ -276,9 +281,8 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfadd.vv v10, v25, v12
 ; CHECK-NEXT:    vfadd.vv v26, v9, v14
 ; CHECK-NEXT:    vfsub.vv v1, v10, v26
-; CHECK-NEXT:    ld a1, -208(s0)
-; CHECK-NEXT:    vl1r.v v3, (a1)
-; CHECK-NEXT:    ld a1, -112(s0)
+; CHECK-NEXT:    ld a2, -208(s0)
+; CHECK-NEXT:    vl1r.v v3, (a2)
 ; CHECK-NEXT:    vfsub.vv v27, v3, v5
 ; CHECK-NEXT:    vmv1r.v v4, v5
 ; CHECK-NEXT:    vfadd.vv v28, v2, v1
@@ -292,18 +296,18 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v5, v2, v2
 ; CHECK-NEXT:    vtrn.vv v5, v6, v2
 ; CHECK-NEXT:    vfsub.vv v2, v29, v5
-; CHECK-NEXT:    vse64.v v2, (t2)
+; CHECK-NEXT:    vse64.v v2, (t3)
 ; CHECK-NEXT:    vfmacc.vf v27, ft1, v28
 ; CHECK-NEXT:    vfmacc.vf v30, ft1, v1
 ; CHECK-NEXT:    vfsgnjn.vv v30, v30, v30, v0.t
 ; CHECK-NEXT:    vtrn.vv v1, v30, v30
 ; CHECK-NEXT:    vtrn.vv v1, v2, v30
 ; CHECK-NEXT:    vfadd.vv v28, v27, v1
-; CHECK-NEXT:    vse64.v v28, (t1)
+; CHECK-NEXT:    vse64.v v28, (t2)
 ; CHECK-NEXT:    vfadd.vv v5, v29, v5
-; CHECK-NEXT:    vse64.v v5, (t0)
+; CHECK-NEXT:    vse64.v v5, (t1)
 ; CHECK-NEXT:    vfsub.vv v1, v27, v1
-; CHECK-NEXT:    vse64.v v1, (a7)
+; CHECK-NEXT:    vse64.v v1, (t0)
 ; CHECK-NEXT:    vfsub.vv v1, v16, v17
 ; CHECK-NEXT:    vfsub.vv v2, v18, v20
 ; CHECK-NEXT:    vfsub.vv v5, v8, v22
@@ -341,32 +345,32 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v13, v8, v8
 ; CHECK-NEXT:    vtrn.vv v8, v14, v8
 ; CHECK-NEXT:    vfsub.vv v22, v6, v8
-; CHECK-NEXT:    vse64.v v22, (s1)
+; CHECK-NEXT:    vse64.v v22, (a7)
 ; CHECK-NEXT:    vfadd.vv v22, v23, v11
-; CHECK-NEXT:    vse64.v v22, (t3)
+; CHECK-NEXT:    vse64.v v22, (t4)
 ; CHECK-NEXT:    vfadd.vv v6, v6, v8
-; CHECK-NEXT:    vse64.v v6, (t4)
+; CHECK-NEXT:    vse64.v v6, (t5)
 ; CHECK-NEXT:    vfadd.vv v6, v3, v4
 ; CHECK-NEXT:    vfadd.vv v7, v19, v7
 ; CHECK-NEXT:    vfadd.vv v19, v6, v7
-; CHECK-NEXT:    ld a6, -200(s0)
-; CHECK-NEXT:    vl1r.v v3, (a6)
+; CHECK-NEXT:    ld a2, -200(s0)
+; CHECK-NEXT:    vl1r.v v3, (a2)
 ; CHECK-NEXT:    vfadd.vv v3, v3, v31
 ; CHECK-NEXT:    vfadd.vv v4, v10, v26
 ; CHECK-NEXT:    vfadd.vv v22, v3, v4
 ; CHECK-NEXT:    vfsub.vv v23, v19, v22
-; CHECK-NEXT:    vse64.v v23, (ra)
+; CHECK-NEXT:    vse64.v v23, (t6)
 ; CHECK-NEXT:    vfsub.vv v6, v6, v7
 ; CHECK-NEXT:    vfsub.vv v3, v4, v3
 ; CHECK-NEXT:    vfsgnjn.vv v3, v3, v3, v0.t
 ; CHECK-NEXT:    vtrn.vv v7, v3, v3
 ; CHECK-NEXT:    vtrn.vv v3, v8, v3
 ; CHECK-NEXT:    vfadd.vv v7, v6, v3
-; CHECK-NEXT:    vse64.v v7, (s11)
+; CHECK-NEXT:    vse64.v v7, (ra)
 ; CHECK-NEXT:    vfadd.vv v7, v19, v22
 ; CHECK-NEXT:    vse64.v v7, (a0)
 ; CHECK-NEXT:    vfsub.vv v3, v6, v3
-; CHECK-NEXT:    vse64.v v3, (t5)
+; CHECK-NEXT:    vse64.v v3, (a3)
 ; CHECK-NEXT:    vfmacc.vf v1, ft1, v16
 ; CHECK-NEXT:    vfadd.vv v3, v18, v21
 ; CHECK-NEXT:    vmv1r.v v4, v1
@@ -388,14 +392,14 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfadd.vv v5, v1, v2
 ; CHECK-NEXT:    vse64.v v5, (a5)
 ; CHECK-NEXT:    vfadd.vv v4, v4, v6
-; CHECK-NEXT:    vse64.v v4, (a2)
+; CHECK-NEXT:    vse64.v v4, (s1)
 ; CHECK-NEXT:    vfsub.vv v1, v1, v2
-; CHECK-NEXT:    vse64.v v1, (s10)
-; CHECK-NEXT:    addi s9, s9, -1
+; CHECK-NEXT:    vse64.v v1, (s11)
+; CHECK-NEXT:    addi s10, s10, -1
 ; CHECK-NEXT:    ld a2, -144(s0)
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    addi a1, a1, 64
-; CHECK-NEXT:    bnez s9, .LBB0_2
+; CHECK-NEXT:    bnez s10, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.end
 ; CHECK-NEXT:    addi sp, s0, -224
 ; CHECK-NEXT:    ld s11, 120(sp)
