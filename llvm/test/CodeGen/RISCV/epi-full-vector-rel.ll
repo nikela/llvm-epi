@@ -17,11 +17,11 @@ define void @lmul_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v17, v16
+; CHECK-NEXT:    vmsltu.vv v1, v17, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v17, v16
+; CHECK-NEXT:    vmsleu.vv v1, v17, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
@@ -33,11 +33,11 @@ define void @lmul_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v17, v16
+; CHECK-NEXT:    vmslt.vv v1, v17, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v17, v16
+; CHECK-NEXT:    vmsle.vv v1, v17, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
@@ -108,11 +108,11 @@ define void @lmul_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v18, v16
+; CHECK-NEXT:    vmsltu.vv v1, v18, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v18, v16
+; CHECK-NEXT:    vmsleu.vv v1, v18, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
@@ -124,11 +124,11 @@ define void @lmul_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v18, v16
+; CHECK-NEXT:    vmslt.vv v1, v18, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v18, v16
+; CHECK-NEXT:    vmsle.vv v1, v18, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
@@ -199,11 +199,11 @@ define void @lmul_4(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v20, v16
+; CHECK-NEXT:    vmsltu.vv v1, v20, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v20, v16
+; CHECK-NEXT:    vmsleu.vv v1, v20, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
@@ -215,11 +215,11 @@ define void @lmul_4(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v20, v16
+; CHECK-NEXT:    vmslt.vv v1, v20, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v20, v16
+; CHECK-NEXT:    vmsle.vv v1, v20, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
@@ -291,11 +291,11 @@ define void @lmul_8(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v8, v16
+; CHECK-NEXT:    vmsltu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v8, v16
+; CHECK-NEXT:    vmsleu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
@@ -307,11 +307,11 @@ define void @lmul_8(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v8, v16
+; CHECK-NEXT:    vmslt.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v8, v16
+; CHECK-NEXT:    vmsle.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
@@ -383,11 +383,11 @@ define void @lmul_8_i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v8, v16
+; CHECK-NEXT:    vmsltu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v8, v16
+; CHECK-NEXT:    vmsleu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
@@ -399,11 +399,11 @@ define void @lmul_8_i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v8, v16
+; CHECK-NEXT:    vmslt.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v8, v16
+; CHECK-NEXT:    vmsle.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
@@ -475,11 +475,11 @@ define void @lmul_8_i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
-; CHECK-NEXT:    vmsleu.vv v1, v8, v16
+; CHECK-NEXT:    vmsltu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
-; CHECK-NEXT:    vmsltu.vv v1, v8, v16
+; CHECK-NEXT:    vmsleu.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
@@ -491,11 +491,11 @@ define void @lmul_8_i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) nounwind
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
-; CHECK-NEXT:    vmsle.vv v1, v8, v16
+; CHECK-NEXT:    vmslt.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
-; CHECK-NEXT:    vmslt.vv v1, v8, v16
+; CHECK-NEXT:    vmsle.vv v1, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu

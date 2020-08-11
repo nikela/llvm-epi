@@ -3773,10 +3773,10 @@ defm "" : pat_vop_binary_int_m_vv_vx_vi<setule, "PseudoVMSLEU">;
 defm "" : pat_vop_binary_int_m_vv_vx_vi<setle, "PseudoVMSLE">;
 defm "" : pat_vop_binary_int_m_vv_vx<setult, "PseudoVMSLTU">;
 defm "" : pat_vop_binary_int_m_vv_vx<setlt, "PseudoVMSLT">;
-defm "" : pat_vop_binary_int_m_vv<setugt, "PseudoVMSLEU", /* swap */ 1>;
-defm "" : pat_vop_binary_int_m_vv<setgt, "PseudoVMSLE", /* swap */ 1>;
-defm "" : pat_vop_binary_int_m_vv<setuge, "PseudoVMSLTU", /* swap */ 1>;
-defm "" : pat_vop_binary_int_m_vv<setge, "PseudoVMSLT", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setugt, "PseudoVMSLTU", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setgt, "PseudoVMSLT", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setuge, "PseudoVMSLEU", /* swap */ 1>;
+defm "" : pat_vop_binary_int_m_vv<setge, "PseudoVMSLE", /* swap */ 1>;
 
 }
 
