@@ -2467,7 +2467,7 @@ unsigned ASTContext::getPreferredTypeAlign(const Type *T) const {
     return ABIAlign;
 
   if (const auto *RT = T->getAs<RecordType>()) {
-    if (TI.AlignIsRequired)
+    if (TI.AlignIsRequired || RT->getDecl()->isInvalidDecl())
       return ABIAlign;
 
     unsigned PreferredAlign = static_cast<unsigned>(
@@ -11264,8 +11264,7 @@ void ASTContext::getFunctionFeatureMap(llvm::StringMap<bool> &FeatureMap,
     std::vector<std::string> Features(FeaturesTmp.begin(), FeaturesTmp.end());
     Target->initFeatureMap(FeatureMap, getDiagnostics(), TargetCPU, Features);
   } else {
-    Target->initFeatureMap(FeatureMap, getDiagnostics(), TargetCPU,
-                           Target->getTargetOpts().Features);
+    FeatureMap = Target->getTargetOpts().FeatureMap;
   }
 }
 
