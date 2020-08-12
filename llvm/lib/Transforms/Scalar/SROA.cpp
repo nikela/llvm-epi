@@ -1545,6 +1545,8 @@ static Value *getNaturalGEPWithOffset(IRBuilderTy &IRB, const DataLayout &DL,
   Type *ElementTy = Ty->getElementType();
   if (!ElementTy->isSized())
     return nullptr; // We can't GEP through an unsized element.
+  if (isa<ScalableVectorType>(ElementTy))
+    return nullptr;
   APInt ElementSize(Offset.getBitWidth(),
                     DL.getTypeAllocSize(ElementTy).getKnownMinSize());
   if (ElementSize == 0)
