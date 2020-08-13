@@ -171,16 +171,20 @@ ClangdServer::ClangdServer(const GlobalCompilationDatabase &CDB,
   if (Opts.StaticIndex)
     AddIndex(Opts.StaticIndex);
   if (Opts.BackgroundIndex) {
+    BackgroundIndex::Options BGOpts;
+    BGOpts.ThreadPoolSize = std::max(Opts.AsyncThreadsCount, 1u);
+    BGOpts.OnProgress = [Callbacks](BackgroundQueue::Stats S) {
+      if (Callbacks)
+        Callbacks->onBackgroundIndexProgress(S);
+    };
+    BGOpts.ContextProvider = [this](PathRef P) {
+      return createProcessingContext(P);
+    };
     BackgroundIdx = std::make_unique<BackgroundIndex>(
-        Context::current().clone(), TFS, CDB,
+        TFS, CDB,
         BackgroundIndexStorage::createDiskBackedStorageFactory(
             [&CDB](llvm::StringRef File) { return CDB.getProjectInfo(File); }),
-        std::max(Opts.AsyncThreadsCount, 1u),
-        [Callbacks](BackgroundQueue::Stats S) {
-          if (Callbacks)
-            Callbacks->onBackgroundIndexProgress(S);
-        },
-        [this](PathRef P) { return createProcessingContext(P); });
+        std::move(BGOpts));
     AddIndex(BackgroundIdx.get());
   }
   if (DynamicIdx)
@@ -523,26 +527,6 @@ void ClangdServer::applyTweak(PathRef File, Range Sel, StringRef TweakID,
     return CB(std::move(*Effect));
   };
   WorkScheduler.runWithAST("ApplyTweak", File, std::move(Action));
-}
-
-void ClangdServer::dumpAST(PathRef File,
-                           llvm::unique_function<void(std::string)> Callback) {
-  auto Action = [Callback = std::move(Callback)](
-                    llvm::Expected<InputsAndAST> InpAST) mutable {
-    if (!InpAST) {
-      llvm::consumeError(InpAST.takeError());
-      return Callback("<no-ast>");
-    }
-    std::string Result;
-
-    llvm::raw_string_ostream ResultOS(Result);
-    clangd::dumpAST(InpAST->AST, ResultOS);
-    ResultOS.flush();
-
-    Callback(Result);
-  };
-
-  WorkScheduler.runWithAST("DumpAST", File, std::move(Action));
 }
 
 void ClangdServer::locateSymbolAt(PathRef File, Position Pos,
