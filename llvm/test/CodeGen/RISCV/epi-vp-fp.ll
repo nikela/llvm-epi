@@ -55,7 +55,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    vmv1r.v v17, v1
-; CHECK-O0-NEXT:    vfmacc.vv v17, v2, v3, v0.t
+; CHECK-O0-NEXT:    vfmadd.vv v17, v2, v3, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v2
@@ -105,7 +105,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O2-NEXT:    vfmul.vv v7, v1, v2, v0.t
 ; CHECK-O2-NEXT:    vfdiv.vv v16, v1, v2, v0.t
 ; CHECK-O2-NEXT:    vmv1r.v v17, v1
-; CHECK-O2-NEXT:    vfmacc.vv v17, v2, v3, v0.t
+; CHECK-O2-NEXT:    vfmadd.vv v17, v2, v3, v0.t
 ; CHECK-O2-NEXT:    vfsgnjn.vv v1, v1, v1, v0.t
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v2, v4, v0.t
 ; CHECK-O2-NEXT:    vse64.v v5, (a0), v0.t
@@ -168,7 +168,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O0-NEXT:    # implicit-def: $v16
 ; CHECK-O0-NEXT:    vfdiv.vv v16, v1, v2
 ; CHECK-O0-NEXT:    vmv1r.v v17, v1
-; CHECK-O0-NEXT:    vfmacc.vv v17, v2, v3
+; CHECK-O0-NEXT:    vfmadd.vv v17, v2, v3
 ; CHECK-O0-NEXT:    # implicit-def: $v2
 ; CHECK-O0-NEXT:    vfsgnjn.vv v2, v1, v1
 ; CHECK-O0-NEXT:    # implicit-def: $v1
@@ -196,7 +196,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O2-NEXT:    vfmul.vv v7, v1, v2
 ; CHECK-O2-NEXT:    vfdiv.vv v16, v1, v2
 ; CHECK-O2-NEXT:    vfsgnjn.vv v17, v1, v1
-; CHECK-O2-NEXT:    vfmacc.vv v1, v2, v3
+; CHECK-O2-NEXT:    vfmadd.vv v1, v2, v3
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v2, v4
 ; CHECK-O2-NEXT:    vse32.v v5, (a0)
 ; CHECK-O2-NEXT:    vse32.v v6, (a0)
@@ -286,7 +286,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    vmv2r.v v10, v2
-; CHECK-O0-NEXT:    vfmacc.vv v10, v4, v6, v0.t
+; CHECK-O0-NEXT:    vfmadd.vv v10, v4, v6, v0.t
 ; CHECK-O0-NEXT:    ld a0, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v4m2
@@ -336,7 +336,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O2-NEXT:    vfmul.vv v22, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vfdiv.vv v8, v2, v4, v0.t
 ; CHECK-O2-NEXT:    vmv2r.v v10, v2
-; CHECK-O2-NEXT:    vfmacc.vv v10, v4, v6, v0.t
+; CHECK-O2-NEXT:    vfmadd.vv v10, v4, v6, v0.t
 ; CHECK-O2-NEXT:    vfsgnjn.vv v4, v2, v2, v0.t
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v2, v16, v0.t
 ; CHECK-O2-NEXT:    vse64.v v18, (a0), v0.t

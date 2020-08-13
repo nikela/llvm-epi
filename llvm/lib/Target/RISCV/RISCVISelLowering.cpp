@@ -1391,7 +1391,32 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
            C->getZExtValue() == 1;
   };
 
+  // Many instructions allow commuting the second operand with the first one.
+  // This is beneficial when we can use a scalar in the second operand as way
+  // to fold a vector splat.
+  auto GetCanonicalCommutativePerm = [&](SmallVector<unsigned, 3> VOpsPerm) {
+    if (VOpsPerm.size() < 2)
+      return VOpsPerm;
+
+    SDValue Operand0 = Op.getOperand(VOpsPerm[0]);
+    SDValue Operand1 = Op.getOperand(VOpsPerm[1]);
+
+    if (Operand0.getOpcode() == ISD::SPLAT_VECTOR &&
+        Operand1.getOpcode() != ISD::SPLAT_VECTOR) {
+      SmallVector<unsigned, 3> CanonicalVOpsPerm = {VOpsPerm[1], VOpsPerm[0]};
+
+      for (unsigned i = 2; i < VOpsPerm.size(); ++i) {
+        CanonicalVOpsPerm.push_back(VOpsPerm[i]);
+      }
+
+      return CanonicalVOpsPerm;
+    }
+
+    return VOpsPerm;
+  };
+
   SmallVector<unsigned, 3> VOpsPerm;
+  unsigned ScalarOpNo = 0;
   unsigned MaskOpNo;
   unsigned EVLOpNo;
   bool IsMasked;
@@ -1402,7 +1427,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   default:
     llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_add:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1410,13 +1436,15 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_sub:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     EPIIntNo = IsMasked ? Intrinsic::epi_vsub_mask : Intrinsic::epi_vsub;
     break;
   case Intrinsic::vp_mul:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1424,6 +1452,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_sdiv:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1431,6 +1460,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_srem:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1438,6 +1468,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_udiv:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1445,13 +1476,15 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_urem:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     EPIIntNo = IsMasked ? Intrinsic::epi_vremu_mask : Intrinsic::epi_vremu;
     break;
   case Intrinsic::vp_and:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1463,7 +1496,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
     break;
   case Intrinsic::vp_or:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1475,7 +1509,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo = IsMasked ? Intrinsic::epi_vor_mask : Intrinsic::epi_vor;
     break;
   case Intrinsic::vp_xor:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1488,6 +1523,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_ashr:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1495,6 +1531,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_lshr:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1502,6 +1539,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_shl:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1509,6 +1547,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_fadd:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1516,13 +1555,15 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_fsub:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     EPIIntNo = IsMasked ? Intrinsic::epi_vfsub_mask : Intrinsic::epi_vfsub;
     break;
   case Intrinsic::vp_fmul:
-    VOpsPerm = {1, 2};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2});
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1530,6 +1571,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   case Intrinsic::vp_fdiv:
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 3;
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1540,11 +1582,12 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     report_fatal_error("Unimplemented intrinsic vp_frem");
     break;
   case Intrinsic::vp_fma:
-    VOpsPerm = {1, 2, 3};
+    VOpsPerm = GetCanonicalCommutativePerm({1, 2, 3});
+    ScalarOpNo = 2;
     MaskOpNo = 4;
     EVLOpNo = 5;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-    EPIIntNo = IsMasked ? Intrinsic::epi_vfmacc_mask : Intrinsic::epi_vfmacc;
+    EPIIntNo = IsMasked ? Intrinsic::epi_vfmadd_mask : Intrinsic::epi_vfmadd;
     break;
   case Intrinsic::vp_fneg:
     VOpsPerm = {1, 1};
@@ -1565,6 +1608,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   }
   case Intrinsic::vp_icmp: {
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 4;
     EVLOpNo = 5;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1572,17 +1616,21 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     unsigned Cmp = cast<ConstantSDNode>(Op.getOperand(3))->getZExtValue();
     switch (Cmp) {
     case CmpInst::ICMP_EQ:
+      VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmseq_mask : Intrinsic::epi_vmseq;
       break;
     case CmpInst::ICMP_NE:
+      VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
       break;
     case CmpInst::ICMP_UGT:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
       break;
     case CmpInst::ICMP_UGE:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsleu_mask : Intrinsic::epi_vmsleu;
       break;
     case CmpInst::ICMP_ULT:
@@ -1593,10 +1641,12 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       break;
     case CmpInst::ICMP_SGT:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
       break;
     case CmpInst::ICMP_SGE:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsle_mask : Intrinsic::epi_vmsle;
       break;
     case CmpInst::ICMP_SLT:
@@ -1610,6 +1660,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   }
   case Intrinsic::vp_fcmp: {
     VOpsPerm = {1, 2};
+    ScalarOpNo = 2;
     MaskOpNo = 4;
     EVLOpNo = 5;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
@@ -1621,14 +1672,17 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       report_fatal_error("Unimplemented case FCMP_FALSE for intrinsic vp_fcmp");
       break;
     case FCmpInst::FCMP_OEQ:
+      VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfeq_mask : Intrinsic::epi_vmfeq;
       break;
     case FCmpInst::FCMP_OGT:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
       break;
     case FCmpInst::FCMP_OGE:
       VOpsPerm = {2, 1};
+      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
       break;
     case FCmpInst::FCMP_OLT:
@@ -1663,6 +1717,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
                                   Op.getOperand(2), Op.getOperand(EVLOpNo),
                                   Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_UNE:
+      VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
       break;
     case FCmpInst::FCMP_UNO:
@@ -1676,7 +1731,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     break;
   }
   case Intrinsic::vp_select: {
-    VOpsPerm = {2, 3, 1};
+    VOpsPerm = {3, 2, 1};
+    ScalarOpNo = 2;
     MaskOpNo = -1;
     EVLOpNo = 4;
     IsMasked = false;
@@ -1690,6 +1746,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       break;
     }
 
+    // llvm.vp.select applied to mask types.
     // vp.select computes a masked merge from two values. This can be naively
     // computed doing: (a & mask) | (b & ~mask)
     // However, the bithack described in
@@ -1730,14 +1787,26 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
 
   std::vector<SDValue> Operands;
   Operands.reserve(2 + VOpsPerm.size() + IsMasked * 2);
+
   Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
+
   if (IsMasked && IntNo != Intrinsic::vp_fma)
     Operands.push_back(
         DAG.getNode(ISD::UNDEF, DL, Op.getValueType())); // Merge.
-  for (auto VOp : VOpsPerm)
-    Operands.push_back(Op.getOperand(VOp));
+
+  for (auto VOpI = VOpsPerm.begin(), VOpE = VOpsPerm.end(), VOpStart = VOpI;
+       VOpI != VOpE; VOpI++) {
+    SDValue Operand = Op.getOperand(*VOpI);
+    // +1 because we skip the IntrinsicID
+    unsigned OpIdx = (VOpI - VOpStart) + 1;
+    if ((OpIdx == ScalarOpNo) && (Operand.getOpcode() == ISD::SPLAT_VECTOR))
+      Operand = Operand.getOperand(0);
+    Operands.push_back(Operand);
+  }
+
   if (IsMasked)
     Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
+
   assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
          "Unexpected operand");
   Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,

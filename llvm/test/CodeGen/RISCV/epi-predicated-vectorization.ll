@@ -22,9 +22,8 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    vle64.v v1, (a7)
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vmset.m v2
-; CHECK-NEXT:    vfmv.v.f v3, ft0
 ; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
-; CHECK-NEXT:    vmflt.vv v1, v1, v3
+; CHECK-NEXT:    vmflt.vf v1, v1, ft0
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vmand.mm v1, v1, v2
 ; CHECK-NEXT:    add t3, a2, t0
