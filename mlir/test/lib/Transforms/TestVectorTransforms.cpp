@@ -133,9 +133,7 @@ struct TestVectorTransferFullPartialSplitPatterns
       const TestVectorTransferFullPartialSplitPatterns &pass) {}
 
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<AffineDialect>();
-    registry.insert<linalg::LinalgDialect>();
-    registry.insert<scf::SCFDialect>();
+    registry.insert<AffineDialect, linalg::LinalgDialect, scf::SCFDialect>();
   }
 
   Option<bool> useLinalgOps{

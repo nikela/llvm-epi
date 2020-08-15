@@ -228,7 +228,8 @@ class DialectRegistry {
       std::map<std::string, std::pair<TypeID, DialectAllocatorFunction>>;
 
 public:
-  template <typename ConcreteDialect> void insert() {
+  template <typename ConcreteDialect>
+  void insert() {
     insert(TypeID::get<ConcreteDialect>(),
            ConcreteDialect::getDialectNamespace(),
            static_cast<DialectAllocatorFunction>(([](MLIRContext *ctx) {
@@ -236,6 +237,13 @@ public:
              // takes ownership of it.
              return ctx->getOrLoadDialect<ConcreteDialect>();
            })));
+  }
+
+  template <typename ConcreteDialect, typename OtherDialect,
+            typename... MoreDialects>
+  void insert() {
+    insert<ConcreteDialect>();
+    insert<OtherDialect, MoreDialects...>();
   }
 
   /// Add a new dialect constructor to the registry.
@@ -247,15 +255,15 @@ public:
   // Register all dialects available in the current registry with the registry
   // in the provided context.
   void appendTo(DialectRegistry &destination) {
-    for (const auto &name_and_registration_it : registry)
-      destination.insert(name_and_registration_it.second.first,
-                         name_and_registration_it.first,
-                         name_and_registration_it.second.second);
+    for (const auto &nameAndRegistrationIt : registry)
+      destination.insert(nameAndRegistrationIt.second.first,
+                         nameAndRegistrationIt.first,
+                         nameAndRegistrationIt.second.second);
   }
   // Load all dialects available in the registry in the provided context.
   void loadAll(MLIRContext *context) {
-    for (const auto &name_and_registration_it : registry)
-      name_and_registration_it.second.second(context);
+    for (const auto &nameAndRegistrationIt : registry)
+      nameAndRegistrationIt.second.second(context);
   }
 
   MapTy::const_iterator begin() const { return registry.begin(); }
@@ -273,9 +281,7 @@ DialectRegistry &getGlobalDialectRegistry();
 /// specified MLIRContext. This won't load the dialects in the context,
 /// but only make them available for lazy loading by name.
 /// Note: This method is not thread-safe.
-inline void registerAllDialects(MLIRContext *context) {
-  getGlobalDialectRegistry().appendTo(context->getDialectRegistry());
-}
+void registerAllDialects(MLIRContext *context);
 
 /// Register and return the dialect with the given namespace in the provided
 /// context. Returns nullptr is there is no constructor registered for this

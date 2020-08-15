@@ -257,8 +257,7 @@ namespace {
 struct ToyToAffineLoweringPass
     : public PassWrapper<ToyToAffineLoweringPass, FunctionPass> {
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<AffineDialect>();
-    registry.insert<StandardOpsDialect>();
+    registry.insert<AffineDialect, StandardOpsDialect>();
   }
   void runOnFunction() final;
 };

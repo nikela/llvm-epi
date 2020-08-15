@@ -30,8 +30,7 @@ class TestGpuMemoryPromotionPass
     : public PassWrapper<TestGpuMemoryPromotionPass,
                          OperationPass<gpu::GPUFuncOp>> {
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<StandardOpsDialect>();
-    registry.insert<scf::SCFDialect>();
+    registry.insert<StandardOpsDialect, scf::SCFDialect>();
   }
 
   void runOnOperation() override {

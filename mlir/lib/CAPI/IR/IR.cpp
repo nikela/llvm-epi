@@ -13,6 +13,7 @@
 #include "mlir/IR/Module.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Types.h"
+#include "mlir/InitAllDialects.h"
 #include "mlir/Parser.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -90,14 +91,14 @@ private:
 /* ========================================================================== */
 
 MlirContext mlirContextCreate() {
-  auto *context = new MLIRContext(false);
+  auto *context = new MLIRContext(/*loadAllDialects=*/false);
   return wrap(context);
 }
 
 void mlirContextDestroy(MlirContext context) { delete unwrap(context); }
 
 void mlirContextLoadAllDialects(MlirContext context) {
-  unwrap(context)->loadAllGloballyRegisteredDialects();
+  getGlobalDialectRegistry().loadAll(unwrap(context));
 }
 
 /* ========================================================================== */

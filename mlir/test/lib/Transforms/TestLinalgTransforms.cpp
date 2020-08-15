@@ -32,11 +32,13 @@ struct TestLinalgTransforms
   TestLinalgTransforms(const TestLinalgTransforms &pass) {}
 
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<AffineDialect>();
-    registry.insert<scf::SCFDialect>();
-    registry.insert<StandardOpsDialect>();
-    registry.insert<vector::VectorDialect>();
-    registry.insert<gpu::GPUDialect>();
+    // clang-format off
+    registry.insert<AffineDialect,
+                    scf::SCFDialect,
+                    StandardOpsDialect,
+                    vector::VectorDialect,
+                    gpu::GPUDialect>();
+    // clang-format on
   }
 
   void runOnFunction() override;

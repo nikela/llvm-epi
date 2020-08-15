@@ -59,18 +59,33 @@ public:
 
   /// Get a registered IR dialect for the given derived dialect type. The
   /// derived type must provide a static 'getDialectNamespace' method.
-  template <typename T> T *getLoadedDialect() {
+  template <typename T>
+  T *getLoadedDialect() {
     return static_cast<T *>(getLoadedDialect(T::getDialectNamespace()));
   }
 
   /// Get (or create) a dialect for the given derived dialect type. The derived
   /// type must provide a static 'getDialectNamespace' method.
-  template <typename T> T *getOrLoadDialect() {
+  template <typename T>
+  T *getOrLoadDialect() {
     return static_cast<T *>(
         getOrLoadDialect(T::getDialectNamespace(), TypeID::get<T>(), [this]() {
           std::unique_ptr<T> dialect(new T(this));
           return dialect;
         }));
+  }
+
+  /// Load a dialect in the context.
+  template <typename Dialect>
+  void loadDialect() {
+    getOrLoadDialect<Dialect>();
+  }
+
+  /// Load a list dialects in the context.
+  template <typename Dialect, typename OtherDialect, typename... MoreDialects>
+  void loadDialect() {
+    getOrLoadDialect<Dialect>();
+    loadDialect<OtherDialect, MoreDialects...>();
   }
 
   /// Deprecated: load all globally registered dialects into this context.
