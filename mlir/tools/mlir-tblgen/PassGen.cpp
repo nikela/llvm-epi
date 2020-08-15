@@ -108,10 +108,10 @@ static void emitPassDecl(const Pass &pass, raw_ostream &os) {
   StringRef defName = pass.getDef()->getName();
   std::string dependentDialectRegistrations;
   {
-    llvm::raw_string_ostream dialects_os(dependentDialectRegistrations);
+    llvm::raw_string_ostream dialectsOs(dependentDialectRegistrations);
     for (StringRef dependentDialect : pass.getDependentDialects())
-      dialects_os << llvm::formatv(dialectRegistrationTemplate,
-                                   dependentDialect);
+      dialectsOs << llvm::formatv(dialectRegistrationTemplate,
+                                  dependentDialect);
   }
   os << llvm::formatv(passDeclBegin, defName, pass.getBaseClass(),
                       pass.getArgument(), dependentDialectRegistrations);

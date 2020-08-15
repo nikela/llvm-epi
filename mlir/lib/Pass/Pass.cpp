@@ -744,9 +744,9 @@ LogicalResult PassManager::run(ModuleOp module) {
   getImpl().coalesceAdjacentAdaptorPasses();
 
   // Register all dialects for the current pipeline.
-  DialectRegistry dependent_dialects;
-  getDependentDialects(dependent_dialects);
-  dependent_dialects.loadAll(module.getContext());
+  DialectRegistry dependentDialects;
+  getDependentDialects(dependentDialects);
+  dependentDialects.loadAll(module.getContext());
 
   // Construct an analysis manager for the pipeline.
   ModuleAnalysisManager am(module, instrumentor.get());

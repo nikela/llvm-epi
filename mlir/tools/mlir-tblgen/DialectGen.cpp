@@ -148,10 +148,10 @@ static void emitDialectDecl(Dialect &dialect,
   /// Build the list of dependent dialects
   std::string dependentDialectRegistrations;
   {
-    llvm::raw_string_ostream dialects_os(dependentDialectRegistrations);
+    llvm::raw_string_ostream dialectsOs(dependentDialectRegistrations);
     for (StringRef dependentDialect : dialect.getDependentDialects())
-      dialects_os << llvm::formatv(dialectRegistrationTemplate,
-                                   dependentDialect);
+      dialectsOs << llvm::formatv(dialectRegistrationTemplate,
+                                  dependentDialect);
   }
   // Emit the start of the decl.
   std::string cppName = dialect.getCppClassName();

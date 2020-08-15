@@ -451,12 +451,12 @@ DialectRegistry &MLIRContext::getDialectRegistry() {
 std::vector<Dialect *> MLIRContext::getLoadedDialects() {
   std::vector<Dialect *> result;
   result.reserve(impl->loadedDialects.size());
-  for (auto &dialect : impl->loadedDialects) {
+  for (auto &dialect : impl->loadedDialects)
     result.push_back(dialect.second.get());
-  }
-  llvm::sort(result, [](Dialect *lhs, Dialect *rhs) {
-    return lhs->getNamespace() < rhs->getNamespace();
-  });
+  llvm::array_pod_sort(result.begin(), result.end(),
+                       [](Dialect *const *lhs, Dialect *const *rhs) -> int {
+                         return (*lhs)->getNamespace() < (*rhs)->getNamespace();
+                       });
   return result;
 }
 std::vector<StringRef> MLIRContext::getAvailableDialects() {

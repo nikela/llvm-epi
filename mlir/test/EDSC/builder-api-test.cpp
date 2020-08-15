@@ -37,15 +37,17 @@ using namespace mlir::edsc::intrinsics;
 
 static MLIRContext &globalContext() {
   static thread_local MLIRContext context(/*loadAllDialects=*/false);
-  static thread_local bool init_once = [&]() {
-    context.getOrLoadDialect<AffineDialect>();
-    context.getOrLoadDialect<scf::SCFDialect>();
-    context.getOrLoadDialect<linalg::LinalgDialect>();
-    context.getOrLoadDialect<StandardOpsDialect>();
-    context.getOrLoadDialect<vector::VectorDialect>();
+  static thread_local bool initOnce = [&]() {
+    // clang-format off
+    context.loadDialect<AffineDialect,
+                        scf::SCFDialect,
+                        linalg::LinalgDialect,
+                        StandardOpsDialect,
+                        vector::VectorDialect>();
+    // clang-format on
     return true;
   }();
-  (void)init_once;
+  (void)initOnce;
   context.allowUnregisteredDialects();
   return context;
 }

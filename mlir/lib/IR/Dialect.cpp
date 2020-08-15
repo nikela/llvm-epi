@@ -30,8 +30,12 @@ DialectAsmParser::~DialectAsmParser() {}
 static llvm::ManagedStatic<DialectRegistry> dialectRegistry;
 DialectRegistry &mlir::getGlobalDialectRegistry() { return *dialectRegistry; }
 
+void mlir::registerAllDialects(MLIRContext *context) {
+  dialectRegistry->appendTo(context->getDialectRegistry());
+}
+
 Dialect *DialectRegistry::loadByName(StringRef name, MLIRContext *context) {
-  auto it = registry.find(std::string(name));
+  auto it = registry.find(name.str());
   if (it == registry.end())
     return nullptr;
   return it->second.second(context);

@@ -59,10 +59,10 @@ public:
   virtual StringRef getName() const = 0;
 
   /// Register dependent dialects for the current pass.
-  /// A pass is expected to register the dialects it will create operations for,
-  /// other than dialect that exists in the input. For example, a pass that
-  /// converts from Linalg to Affine would register the Affine dialect but does
-  /// not need to register Linalg.
+  /// A pass is expected to register the dialects it will create entities for
+  /// (Operations, Types, Attributes), other than dialect that exists in the
+  /// input. For example, a pass that converts from Linalg to Affine would
+  /// register the Affine dialect but does not need to register Linalg.
   virtual void getDependentDialects(DialectRegistry &registry) const {}
 
   /// Returns the command line argument used when registering this pass. Return
