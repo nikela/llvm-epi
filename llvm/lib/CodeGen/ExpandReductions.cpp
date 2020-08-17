@@ -124,7 +124,7 @@ bool expandReductions(Function &F, const TargetTransformInfo *TTI) {
       Value *Acc = II->getArgOperand(0);
       Value *Vec = II->getArgOperand(1);
       // If the vector argument of the reduction intrinsic is a scalable vector,
-      // we cannot cereate the unrolled shuffle reduction.
+      // we cannot create the unrolled shuffle reduction.
       if (isa<ScalableVectorType>(Vec->getType()))
         continue;
 
@@ -165,7 +165,7 @@ bool expandReductions(Function &F, const TargetTransformInfo *TTI) {
       //        semantics.
       Value *Vec = II->getArgOperand(0);
       // If the vector argument of the reduction intrinsic is a scalable vector,
-      // we cannot cereate the unrolled shuffle reduction.
+      // we cannot create the unrolled shuffle reduction.
       if (isa<ScalableVectorType>(Vec->getType()))
         continue;
 

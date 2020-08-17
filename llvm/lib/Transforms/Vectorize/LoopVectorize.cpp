@@ -4497,7 +4497,7 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   Value *HalfLen =
       Builder.CreateAdd(HalfLenQuotient, HalfLenRemainder, "halflen");
 
-  // If using vpred multiply, we do not need to create a merge between identiry
+  // If using vpred multiply, we do not need to create a merge between identity
   // and current vector for the second half of the elements.
   Value *FirstHalf = CurrVec;
   if (!preferPredicatedVectorOps()) {
