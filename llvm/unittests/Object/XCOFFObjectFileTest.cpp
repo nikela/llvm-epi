@@ -143,7 +143,7 @@ TEST(XCOFFObjectFileTest, XCOFFTracebackTableAPIControlledStorageInfoDisp) {
 
   SmallVector<uint32_t, 8> Disp = TT.getControlledStorageInfoDisp().getValue();
 
-  ASSERT_EQ(Disp.size(), 2);
+  ASSERT_EQ(Disp.size(), 2UL);
   EXPECT_EQ(Disp[0], 0x05050000u);
   EXPECT_EQ(Disp[1], 0x06060000u);
 }
@@ -167,7 +167,7 @@ TEST(XCOFFObjectFileTest, XCOFFTracebackTableTruncatedAtMandatory) {
       TTOrErr.takeError(),
       FailedWithMessage(
           "unexpected end of data at offset 0x6 while reading [0x0, 0x8)"));
-  EXPECT_EQ(Size, 0);
+  EXPECT_EQ(Size, 0UL);
 }
 
 TEST(XCOFFObjectFileTest, XCOFFTracebackTableTruncatedAtParmsType) {
