@@ -11286,6 +11286,50 @@ static bool matchShuffleAsVTRUNC(MVT &SrcVT, MVT &DstVT, MVT VT,
   return false;
 }
 
+// Helper to create TRUNCATE/VTRUNC nodes, optionally with zero/undef upper
+// element padding to the final DstVT.
+static SDValue getAVX512TruncNode(const SDLoc &DL, MVT DstVT, SDValue Src,
+                                  const X86Subtarget &Subtarget,
+                                  SelectionDAG &DAG, bool ZeroUppers) {
+  MVT SrcVT = Src.getSimpleValueType();
+  MVT DstSVT = DstVT.getScalarType();
+  unsigned NumDstElts = DstVT.getVectorNumElements();
+  unsigned NumSrcElts = SrcVT.getVectorNumElements();
+  unsigned DstEltSizeInBits = DstVT.getScalarSizeInBits();
+
+  // Perform a direct ISD::TRUNCATE if possible.
+  if (NumSrcElts == NumDstElts)
+    return DAG.getNode(ISD::TRUNCATE, DL, DstVT, Src);
+
+  if (NumSrcElts > NumDstElts) {
+    MVT TruncVT = MVT::getVectorVT(DstSVT, NumSrcElts);
+    SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, TruncVT, Src);
+    return extractSubVector(Trunc, 0, DAG, DL, DstVT.getSizeInBits());
+  }
+
+  if ((NumSrcElts * DstEltSizeInBits) >= 128) {
+    MVT TruncVT = MVT::getVectorVT(DstSVT, NumSrcElts);
+    SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, TruncVT, Src);
+    return widenSubVector(Trunc, ZeroUppers, Subtarget, DAG, DL,
+                          DstVT.getSizeInBits());
+  }
+
+  // Non-VLX targets must truncate from a 512-bit type, so we need to
+  // widen, truncate and then possibly extract the original subvector.
+  if (!Subtarget.hasVLX() && !SrcVT.is512BitVector()) {
+    SDValue NewSrc = widenSubVector(Src, ZeroUppers, Subtarget, DAG, DL, 512);
+    return getAVX512TruncNode(DL, DstVT, NewSrc, Subtarget, DAG, ZeroUppers);
+  }
+
+  // Fallback to a X86ISD::VTRUNC, padding if necessary.
+  MVT TruncVT = MVT::getVectorVT(DstSVT, 128 / DstEltSizeInBits);
+  SDValue Trunc = DAG.getNode(X86ISD::VTRUNC, DL, TruncVT, Src);
+  if (DstVT != TruncVT)
+    Trunc = widenSubVector(Trunc, ZeroUppers, Subtarget, DAG, DL,
+                           DstVT.getSizeInBits());
+  return Trunc;
+}
+
 static bool matchShuffleAsVPMOV(ArrayRef<int> Mask, bool SwappedOps,
                                 int Delta) {
   int Size = (int)Mask.size();
@@ -11382,13 +11426,14 @@ static SDValue lowerShuffleAsVTRUNC(const SDLoc &DL, MVT VT, SDValue V1,
                                     const APInt &Zeroable,
                                     const X86Subtarget &Subtarget,
                                     SelectionDAG &DAG) {
-  assert((VT == MVT::v16i8 || VT == MVT::v8i16) && "Unexpected VTRUNC type");
+  assert((VT.is128BitVector() || VT.is256BitVector()) &&
+         "Unexpected VTRUNC type");
   if (!Subtarget.hasAVX512())
     return SDValue();
 
   unsigned NumElts = VT.getVectorNumElements();
   unsigned EltSizeInBits = VT.getScalarSizeInBits();
-  unsigned MaxScale = 64 / VT.getScalarSizeInBits();
+  unsigned MaxScale = 64 / EltSizeInBits;
   for (unsigned Scale = 2; Scale <= MaxScale; Scale += Scale) {
     // TODO: Support non-BWI VPMOVWB truncations?
     unsigned SrcEltBits = EltSizeInBits * Scale;
@@ -11408,36 +11453,18 @@ static SDValue lowerShuffleAsVTRUNC(const SDLoc &DL, MVT VT, SDValue V1,
     if (UpperElts > 0 &&
         !Zeroable.extractBits(UpperElts, NumSrcElts).isAllOnesValue())
       continue;
+    bool UndefUppers =
+        UpperElts > 0 && isUndefInRange(Mask, NumSrcElts, UpperElts);
 
     // As we're using both sources then we need to concat them together
-    // and truncate from the 256-bit src.
+    // and truncate from the double-sized src.
     MVT ConcatVT = MVT::getVectorVT(VT.getScalarType(), NumElts * 2);
     SDValue Src = DAG.getNode(ISD::CONCAT_VECTORS, DL, ConcatVT, V1, V2);
 
     MVT SrcSVT = MVT::getIntegerVT(SrcEltBits);
-    MVT SrcVT = MVT::getVectorVT(SrcSVT, 256 / SrcEltBits);
+    MVT SrcVT = MVT::getVectorVT(SrcSVT, NumSrcElts);
     Src = DAG.getBitcast(SrcVT, Src);
-
-    if (SrcVT.getVectorNumElements() == NumElts)
-      return DAG.getNode(ISD::TRUNCATE, DL, VT, Src);
-
-    if (!Subtarget.hasVLX()) {
-      // Non-VLX targets must truncate from a 512-bit type, so we need to
-      // widen, truncate and then possibly extract the original 128-bit
-      // vector.
-      bool UndefUppers = isUndefInRange(Mask, NumSrcElts, UpperElts);
-      Src = widenSubVector(Src, !UndefUppers, Subtarget, DAG, DL, 512);
-      unsigned NumWideSrcElts = Src.getValueType().getVectorNumElements();
-      if (NumWideSrcElts >= NumElts) {
-        // Widening means we can now use a regular TRUNCATE.
-        MVT WideVT = MVT::getVectorVT(VT.getScalarType(), NumWideSrcElts);
-        SDValue WideRes = DAG.getNode(ISD::TRUNCATE, DL, WideVT, Src);
-        if (!WideVT.is128BitVector())
-          WideRes = extract128BitVector(WideRes, 0, DAG, DL);
-        return WideRes;
-      }
-    }
-    return DAG.getNode(X86ISD::VTRUNC, DL, VT, Src);
+    return getAVX512TruncNode(DL, VT, Src, Subtarget, DAG, !UndefUppers);
   }
 
   return SDValue();
@@ -14942,17 +14969,35 @@ static SDValue lowerV8I16Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                               Mask, Subtarget, DAG);
 }
 
+// Lowers unary/binary shuffle as VPERMV/VPERMV3, for non-VLX targets,
+// sub-512-bit shuffles are padded to 512-bits for the shuffle and then
+// the active subvector is extracted.
 static SDValue lowerShuffleWithPERMV(const SDLoc &DL, MVT VT,
-                                     ArrayRef<int> Mask, SDValue V1,
-                                     SDValue V2, SelectionDAG &DAG) {
+                                     ArrayRef<int> Mask, SDValue V1, SDValue V2,
+                                     const X86Subtarget &Subtarget,
+                                     SelectionDAG &DAG) {
   MVT MaskEltVT = MVT::getIntegerVT(VT.getScalarSizeInBits());
   MVT MaskVecVT = MVT::getVectorVT(MaskEltVT, VT.getVectorNumElements());
-
   SDValue MaskNode = getConstVector(Mask, MaskVecVT, DAG, DL, true);
-  if (V2.isUndef())
-    return DAG.getNode(X86ISD::VPERMV, DL, VT, MaskNode, V1);
 
-  return DAG.getNode(X86ISD::VPERMV3, DL, VT, V1, MaskNode, V2);
+  MVT ShuffleVT = VT;
+  if (!VT.is512BitVector() && !Subtarget.hasVLX()) {
+    V1 = widenSubVector(V1, false, Subtarget, DAG, DL, 512);
+    V2 = widenSubVector(V2, false, Subtarget, DAG, DL, 512);
+    MaskNode = widenSubVector(MaskNode, false, Subtarget, DAG, DL, 512);
+    ShuffleVT = V1.getSimpleValueType();
+  }
+
+  SDValue Result;
+  if (V2.isUndef())
+    Result = DAG.getNode(X86ISD::VPERMV, DL, ShuffleVT, MaskNode, V1);
+  else
+    Result = DAG.getNode(X86ISD::VPERMV3, DL, ShuffleVT, V1, MaskNode, V2);
+
+  if (VT != ShuffleVT)
+    Result = extractSubVector(Result, 0, DAG, DL, VT.getSizeInBits());
+
+  return Result;
 }
 
 /// Generic lowering of v16i8 shuffles.
@@ -15181,9 +15226,10 @@ static SDValue lowerV16I8Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
               DL, MVT::v16i8, V1, V2, Mask, Subtarget, DAG))
         return Unpack;
 
-      // If we have VBMI we can use one VPERM instead of multiple PSHUFBs.
-      if (Subtarget.hasVBMI() && Subtarget.hasVLX())
-        return lowerShuffleWithPERMV(DL, MVT::v16i8, Mask, V1, V2, DAG);
+      // AVX512VBMI can lower to VPERMB (non-VLX will pad to v64i8).
+      if (Subtarget.hasVBMI())
+        return lowerShuffleWithPERMV(DL, MVT::v16i8, Mask, V1, V2, Subtarget,
+                                     DAG);
 
       // If we have XOP we can use one VPPERM instead of multiple PSHUFBs.
       if (Subtarget.hasXOP()) {
@@ -16880,6 +16926,11 @@ static SDValue lowerV16I16Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                        Subtarget))
     return V;
 
+  // Try to use lower using a truncation.
+  if (SDValue V = lowerShuffleAsVTRUNC(DL, MVT::v16i16, V1, V2, Mask, Zeroable,
+                                       Subtarget, DAG))
+    return V;
+
   // Try to use shift instructions.
   if (SDValue Shift = lowerShuffleAsShift(DL, MVT::v16i16, V1, V2, Mask,
                                           Zeroable, Subtarget, DAG))
@@ -16932,9 +16983,9 @@ static SDValue lowerV16I16Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                               Zeroable, Subtarget, DAG))
     return PSHUFB;
 
-  // AVX512BWVL can lower to VPERMW.
-  if (Subtarget.hasBWI() && Subtarget.hasVLX())
-    return lowerShuffleWithPERMV(DL, MVT::v16i16, Mask, V1, V2, DAG);
+  // AVX512BW can lower to VPERMW (non-VLX will pad to v32i16).
+  if (Subtarget.hasBWI())
+    return lowerShuffleWithPERMV(DL, MVT::v16i16, Mask, V1, V2, Subtarget, DAG);
 
   // Try to simplify this by merging 128-bit lanes to enable a lane-based
   // shuffle.
@@ -16990,6 +17041,11 @@ static SDValue lowerV32I8Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                        Subtarget))
     return V;
 
+  // Try to use lower using a truncation.
+  if (SDValue V = lowerShuffleAsVTRUNC(DL, MVT::v32i8, V1, V2, Mask, Zeroable,
+                                       Subtarget, DAG))
+    return V;
+
   // Try to use shift instructions.
   if (SDValue Shift = lowerShuffleAsShift(DL, MVT::v32i8, V1, V2, Mask,
                                           Zeroable, Subtarget, DAG))
@@ -17032,9 +17088,9 @@ static SDValue lowerV32I8Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                               Zeroable, Subtarget, DAG))
     return PSHUFB;
 
-  // AVX512VBMIVL can lower to VPERMB.
-  if (Subtarget.hasVBMI() && Subtarget.hasVLX())
-    return lowerShuffleWithPERMV(DL, MVT::v32i8, Mask, V1, V2, DAG);
+  // AVX512VBMI can lower to VPERMB (non-VLX will pad to v64i8).
+  if (Subtarget.hasVBMI())
+    return lowerShuffleWithPERMV(DL, MVT::v32i8, Mask, V1, V2, Subtarget, DAG);
 
   // Try to simplify this by merging 128-bit lanes to enable a lane-based
   // shuffle.
@@ -17288,7 +17344,7 @@ static SDValue lowerV8F64Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                           Zeroable, Subtarget, DAG))
     return Blend;
 
-  return lowerShuffleWithPERMV(DL, MVT::v8f64, Mask, V1, V2, DAG);
+  return lowerShuffleWithPERMV(DL, MVT::v8f64, Mask, V1, V2, Subtarget, DAG);
 }
 
 /// Handle lowering of 16-lane 32-bit floating point shuffles.
@@ -17347,7 +17403,7 @@ static SDValue lowerV16F32Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                              V1, V2, DAG, Subtarget))
     return V;
 
-  return lowerShuffleWithPERMV(DL, MVT::v16f32, Mask, V1, V2, DAG);
+  return lowerShuffleWithPERMV(DL, MVT::v16f32, Mask, V1, V2, Subtarget, DAG);
 }
 
 /// Handle lowering of 8-lane 64-bit integer shuffles.
@@ -17410,7 +17466,7 @@ static SDValue lowerV8I64Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                           Zeroable, Subtarget, DAG))
     return Blend;
 
-  return lowerShuffleWithPERMV(DL, MVT::v8i64, Mask, V1, V2, DAG);
+  return lowerShuffleWithPERMV(DL, MVT::v8i64, Mask, V1, V2, Subtarget, DAG);
 }
 
 /// Handle lowering of 16-lane 32-bit integer shuffles.
@@ -17487,7 +17543,7 @@ static SDValue lowerV16I32Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                           Zeroable, Subtarget, DAG))
     return Blend;
 
-  return lowerShuffleWithPERMV(DL, MVT::v16i32, Mask, V1, V2, DAG);
+  return lowerShuffleWithPERMV(DL, MVT::v16i32, Mask, V1, V2, Subtarget, DAG);
 }
 
 /// Handle lowering of 32-lane 16-bit integer shuffles.
@@ -17550,7 +17606,7 @@ static SDValue lowerV32I16Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
                                               Zeroable, Subtarget, DAG))
     return PSHUFB;
 
-  return lowerShuffleWithPERMV(DL, MVT::v32i16, Mask, V1, V2, DAG);
+  return lowerShuffleWithPERMV(DL, MVT::v32i16, Mask, V1, V2, Subtarget, DAG);
 }
 
 /// Handle lowering of 64-lane 8-bit integer shuffles.
@@ -17606,7 +17662,7 @@ static SDValue lowerV64I8Shuffle(const SDLoc &DL, ArrayRef<int> Mask,
 
   // VBMI can use VPERMV/VPERMV3 byte shuffles.
   if (Subtarget.hasVBMI())
-    return lowerShuffleWithPERMV(DL, MVT::v64i8, Mask, V1, V2, DAG);
+    return lowerShuffleWithPERMV(DL, MVT::v64i8, Mask, V1, V2, Subtarget, DAG);
 
   // Try to create an in-lane repeating shuffle mask and then shuffle the
   // results into the target lanes.
