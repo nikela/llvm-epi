@@ -1827,7 +1827,7 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // %evl: 5, %num: 2
 // transformations: %v1 -> [c d e _ _ f] -> [c d e 0 1 undef]
 // result: [c d e 0 1 undef] 
-def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
+def int_experimental_vector_vp_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
                                                      llvm_i32_ty, llvm_i32_ty],
