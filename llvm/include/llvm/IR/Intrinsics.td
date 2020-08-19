@@ -1814,12 +1814,12 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // width (vscale x k). If %evl and %num do not follow this constraint, the
 // intrinsic has undefined behaviour. 
 // Semantics:
-// Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1] and
-// selects the elements in a window of size %evl, starting at index %num of the
-// concatenated vector. Elements in the result vector beyond %evl are undef.
+// Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1]
+// and selects the elements in a window of size %evl, starting at index %num of
+// the concatenated vector. Elements in the result vector beyond %evl are undef.
 // This is equivalent to "sliding" the first %evl elements of %v1 to the left by
 // %num places (discarding the elements moved left of index 0), and replacing
-// the empty places on the right, indices [%evl-%num-1..%evl-1]  by first %num
+// the empty places on the right, indices [%evl-%num-1..%evl-1] by first %num
 // elements of %v2.
 // Example:
 // %v1: [a b c d e f]
@@ -1831,6 +1831,15 @@ def int_experimental_vector_vp_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
                                                      llvm_i32_ty, llvm_i32_ty],
+                                                    [IntrNoMem]>; 
+
+// This is the non-predicated version of the above slideleftfill intrinsic that
+// has the same semantics assuming %evl = W. This is needed for
+// non-predicated/whole register operation on scalable vectors.
+def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
+                                                    [LLVMMatchType<0>,
+                                                     LLVMMatchType<0>,
+                                                     llvm_i32_ty],
                                                     [IntrNoMem]>; 
 
 //===----------------------------------------------------------------------===//

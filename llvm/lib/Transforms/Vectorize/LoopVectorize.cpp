@@ -4132,8 +4132,8 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
           Vscale, ConstantInt::get(Int32Ty, VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(Int32Ty, 1));
       Shuffle = Builder.CreateIntrinsic(
-          Intrinsic::experimental_vector_vp_slideleftfill, {VecPhi->getType()},
-          {Incoming, PreviousPart, Shift, Vlen}, nullptr);
+          Intrinsic::experimental_vector_slideleftfill, {VecPhi->getType()},
+          {Incoming, PreviousPart, Shift}, nullptr);
     } else {
       Shuffle =
           VF.getKnownMinValue() > 1
@@ -4518,9 +4518,14 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // (HalfLen - HalfLenQuotient) identity elements.
   // Note that CurrLen = HalfLen + HalfLenQuotient
   Value *EVLCurr = getSetVL(CurrLen);
-  Value *SecondHalf = Builder.CreateIntrinsic(
-      Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
-      {CurrVec, Identity, HalfLen, EVLCurr}, nullptr, "second.half");
+  Value *SecondHalf =
+      preferPredicatedVectorOps()
+          ? Builder.CreateIntrinsic(
+                Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
+                {CurrVec, Identity, HalfLen, EVLCurr}, nullptr, "second.half")
+          : Builder.CreateIntrinsic(
+                Intrinsic::experimental_vector_slideleftfill, RdxTy,
+                {CurrVec, Identity, HalfLen}, nullptr, "second.half");
 
   // All ops in the reduction inherit fast-math-flags from the recurrence
   // descriptor.
