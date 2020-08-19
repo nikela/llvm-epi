@@ -11297,6 +11297,9 @@ static SDValue getAVX512TruncNode(const SDLoc &DL, MVT DstVT, SDValue Src,
   unsigned NumSrcElts = SrcVT.getVectorNumElements();
   unsigned DstEltSizeInBits = DstVT.getScalarSizeInBits();
 
+  if (!DAG.getTargetLoweringInfo().isTypeLegal(SrcVT))
+    return SDValue();
+
   // Perform a direct ISD::TRUNCATE if possible.
   if (NumSrcElts == NumDstElts)
     return DAG.getNode(ISD::TRUNCATE, DL, DstVT, Src);
@@ -33856,6 +33859,9 @@ void X86TargetLowering::computeKnownBitsForTargetNode(const SDValue Op,
     }
     break;
   }
+  case X86ISD::VTRUNC:
+  case X86ISD::VTRUNCS:
+  case X86ISD::VTRUNCUS:
   case X86ISD::CVTSI2P:
   case X86ISD::CVTUI2P:
   case X86ISD::CVTP2SI:
@@ -33872,7 +33878,7 @@ void X86TargetLowering::computeKnownBitsForTargetNode(const SDValue Op,
   case X86ISD::VMFPROUND:
   case X86ISD::CVTPS2PH:
   case X86ISD::MCVTPS2PH: {
-    // Conversions - upper elements are known zero.
+    // Truncations/Conversions - upper elements are known zero.
     EVT SrcVT = Op.getOperand(0).getValueType();
     if (SrcVT.isVector()) {
       unsigned NumSrcElts = SrcVT.getVectorNumElements();
@@ -44623,6 +44629,36 @@ static SDValue combineStore(SDNode *N, SelectionDAG &DAG,
     return EmitTruncSStore(IsSigned, St->getChain(),
                            dl, StoredVal.getOperand(0), St->getBasePtr(),
                            VT, St->getMemOperand(), DAG);
+  }
+
+  // Try to fold a extract_element(VTRUNC) pattern into a truncating store.
+  if (!St->isTruncatingStore() && StoredVal.hasOneUse()) {
+    auto IsExtractedElement = [](SDValue V) {
+      if (V.getOpcode() == ISD::TRUNCATE && V.getOperand(0).hasOneUse())
+        V = V.getOperand(0);
+      unsigned Opc = V.getOpcode();
+      if (Opc == ISD::EXTRACT_VECTOR_ELT || Opc == X86ISD::PEXTRW) {
+        if (V.getOperand(0).hasOneUse() && isNullConstant(V.getOperand(1)))
+          return V.getOperand(0);
+      }
+      return SDValue();
+    };
+    if (SDValue Extract = IsExtractedElement(StoredVal)) {
+      SDValue Trunc = peekThroughOneUseBitcasts(Extract.getOperand(0));
+      if (Trunc.getOpcode() == X86ISD::VTRUNC) {
+        SDValue Src = Trunc.getOperand(0);
+        MVT DstVT = Trunc.getSimpleValueType();
+        MVT SrcVT = Src.getSimpleValueType();
+        unsigned NumSrcElts = SrcVT.getVectorNumElements();
+        unsigned NumTruncBits = DstVT.getScalarSizeInBits() * NumSrcElts;
+        MVT TruncVT = MVT::getVectorVT(DstVT.getScalarType(), NumSrcElts);
+        if (NumTruncBits == VT.getSizeInBits() &&
+            TLI.isTruncStoreLegal(SrcVT, TruncVT)) {
+          return DAG.getTruncStore(St->getChain(), dl, Src, St->getBasePtr(),
+                                   TruncVT, St->getMemOperand());
+        }
+      }
+    }
   }
 
   // Optimize trunc store (of multiple scalars) to shuffle and store.
