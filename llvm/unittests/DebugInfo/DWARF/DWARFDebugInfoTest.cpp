@@ -1374,10 +1374,11 @@ TEST(DWARFDebugInfo, TestChildIteratorsOnInvalidDie) {
 
 TEST(DWARFDebugInfo, TestEmptyChildren) {
   const char *yamldata = "debug_abbrev:\n"
-                         "  - Code:            0x00000001\n"
-                         "    Tag:             DW_TAG_compile_unit\n"
-                         "    Children:        DW_CHILDREN_yes\n"
-                         "    Attributes:\n"
+                         "  - Table:\n"
+                         "      - Code:            0x00000001\n"
+                         "        Tag:             DW_TAG_compile_unit\n"
+                         "        Children:        DW_CHILDREN_yes\n"
+                         "        Attributes:\n"
                          "debug_info:\n"
                          "  - Version:         4\n"
                          "    AbbrOffset:      0\n"
@@ -1899,20 +1900,21 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidCURef) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_type
-            Form:            DW_FORM_ref4
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_type
+                Form:            DW_FORM_ref4
     debug_info:
       - Length:          22
         Version:         4
@@ -1947,20 +1949,21 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddr) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_type
-            Form:            DW_FORM_ref_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_type
+                Form:            DW_FORM_ref_addr
     debug_info:
       - Length:          22
         Version:         4
@@ -1993,14 +1996,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRanges) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_ranges
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_ranges
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2030,14 +2034,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRnglists) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_ranges
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_ranges
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          17
         Version:         5
@@ -2067,14 +2072,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStmtList) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2103,12 +2109,13 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStrp) {
     debug_str:
       - ''
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
     debug_info:
       - Length:          12
         Version:         4
@@ -2136,20 +2143,21 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddrBetween) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_type
-            Form:            DW_FORM_ref_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_type
+                Form:            DW_FORM_ref_addr
     debug_info:
       - Length:          22
         Version:         4
@@ -2183,14 +2191,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineSequence) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2251,14 +2260,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineFileIndex) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2321,14 +2331,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineTablePorlogueDirIndex) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2392,14 +2403,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyDuplicateFileWarning) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2468,14 +2480,15 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
       - /tmp/main.c
       - /tmp/foo.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_stmt_list
-            Form:            DW_FORM_sec_offset
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_stmt_list
+                Form:            DW_FORM_sec_offset
     debug_info:
       - Length:          16
         Version:         4
@@ -2583,24 +2596,25 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCURangesIncomplete) {
       - ''
       - /tmp/main.c
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          46
         Version:         4
@@ -2636,30 +2650,31 @@ TEST(DWARFDebugInfo, TestDwarfVerifyLexicalBlockRanges) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-      - Code:            0x00000003
-        Tag:             DW_TAG_lexical_block
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+          - Code:            0x00000003
+            Tag:             DW_TAG_lexical_block
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          52
         Version:         4
@@ -2701,22 +2716,23 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingFunctionRanges) {
       - main
       - foo
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          55
         Version:         4
@@ -2755,34 +2771,35 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingLexicalBlockRanges) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-      - Code:            0x00000003
-        Tag:             DW_TAG_lexical_block
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+          - Code:            0x00000003
+            Tag:             DW_TAG_lexical_block
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          85
         Version:         4
@@ -2828,22 +2845,23 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidDIERange) {
       - /tmp/main.c
       - main
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          34
         Version:         4
@@ -2880,26 +2898,27 @@ TEST(DWARFDebugInfo, TestDwarfVerifyElidedDoesntFail) {
       - main
       - elided
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_no
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_no
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          71
         Version:         4
@@ -2942,26 +2961,27 @@ TEST(DWARFDebugInfo, TestDwarfVerifyNestedFunctions) {
       - main
       - nested
     debug_abbrev:
-      - Code:            0x00000001
-        Tag:             DW_TAG_compile_unit
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-      - Code:            0x00000002
-        Tag:             DW_TAG_subprogram
-        Children:        DW_CHILDREN_yes
-        Attributes:
-          - Attribute:       DW_AT_name
-            Form:            DW_FORM_strp
-          - Attribute:       DW_AT_low_pc
-            Form:            DW_FORM_addr
-          - Attribute:       DW_AT_high_pc
-            Form:            DW_FORM_addr
+      - Table:
+          - Code:            0x00000001
+            Tag:             DW_TAG_compile_unit
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+          - Code:            0x00000002
+            Tag:             DW_TAG_subprogram
+            Children:        DW_CHILDREN_yes
+            Attributes:
+              - Attribute:       DW_AT_name
+                Form:            DW_FORM_strp
+              - Attribute:       DW_AT_low_pc
+                Form:            DW_FORM_addr
+              - Attribute:       DW_AT_high_pc
+                Form:            DW_FORM_addr
     debug_info:
       - Length:          73
         Version:         4
