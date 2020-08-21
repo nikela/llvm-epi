@@ -1,5 +1,5 @@
 // RUN: rm -rf %t
-// RUN: %clang_cc1 -fmodules -triple x86_64-pc-windows-msvc-unknown -I%S\Inputs\inherit-attribute -fmodules-cache-path=%t \
+// RUN: %clang_cc1 -fmodules -triple x86_64-pc-windows-msvc -I%S/Inputs/inherit-attribute -fmodules-cache-path=%t \
 // RUN: -fimplicit-module-maps -fmodules-local-submodule-visibility %s -ast-dump-all \
 // RUN: | FileCheck %s
 
