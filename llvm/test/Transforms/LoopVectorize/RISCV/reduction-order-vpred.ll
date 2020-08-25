@@ -23,8 +23,8 @@ define internal i64 @foo(i32* %t0) !prof !1 {
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 2 x i32> [ [[TMP0]], [[VECTOR_PH]] ], [ [[VP_OP10:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI3:%.*]] = phi <vscale x 2 x i32> [ [[TMP1]], [[VECTOR_PH]] ], [ [[VP_OP:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 2 x i32> [ [[TMP0]], [[VECTOR_PH]] ], [ [[TMP8:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[VEC_PHI3:%.*]] = phi <vscale x 2 x i32> [ [[TMP1]], [[VECTOR_PH]] ], [ [[TMP9:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> undef, i64 [[INDEX]], i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> undef, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[STEPVEC_BASE:%.*]] = call <vscale x 2 x i64> @llvm.experimental.vector.stepvector.nxv2i64()
@@ -36,14 +36,18 @@ define internal i64 @foo(i32* %t0) !prof !1 {
 ; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i1> undef, i1 true, i32 0
 ; CHECK-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i1> [[DOTSPLATINSERT]], <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
-; CHECK-NEXT:    [[VP_OP]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[BROADCAST_SPLAT5]], <vscale x 2 x i32> [[VEC_PHI3]], <vscale x 2 x i1> [[DOTSPLAT]], i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[BROADCAST_SPLAT5]], <vscale x 2 x i32> [[VEC_PHI3]], <vscale x 2 x i1> [[DOTSPLAT]], i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP7:%.*]] = trunc i64 [[TMP5]] to i32
-; CHECK-NEXT:    [[VP_OP10]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VEC_PHI]], <vscale x 2 x i32> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> [[DOTSPLAT]], i32 [[TMP7]])
-; CHECK-NEXT:    [[TMP8:%.*]] = select <vscale x 2 x i1> [[TMP3]], <vscale x 2 x i32> [[VP_OP10]], <vscale x 2 x i32> [[VEC_PHI]]
-; CHECK-NEXT:    [[TMP9:%.*]] = select <vscale x 2 x i1> [[TMP3]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VEC_PHI3]]
+; CHECK-NEXT:    [[VP_OP10:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VEC_PHI]], <vscale x 2 x i32> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> [[DOTSPLAT]], i32 [[TMP7]])
+; CHECK-NEXT:    [[EVL_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> undef, i64 [[TMP5]], i32 0
+; CHECK-NEXT:    [[EVL_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[EVL_SPLATINSERT]], <vscale x 2 x i64> undef, <vscale x 2 x i32> zeroinitializer
+; CHECK-NEXT:    [[STEP_VEC:%.*]] = call <vscale x 2 x i64> @llvm.experimental.vector.stepvector.nxv2i64()
+; CHECK-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 2 x i64> [[STEP_VEC]], [[EVL_SPLAT]]
+; CHECK-NEXT:    [[TMP8]] = select <vscale x 2 x i1> [[EVL_MASK]], <vscale x 2 x i32> [[VP_OP10]], <vscale x 2 x i32> [[VEC_PHI]]
+; CHECK-NEXT:    [[TMP9]] = select <vscale x 2 x i1> [[EVL_MASK]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VEC_PHI3]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP5]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], undef
-; CHECK-NEXT:    br i1 [[TMP10]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof !1, !llvm.loop !2
+; CHECK-NEXT:    br i1 [[TMP10]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof !1, [[LOOP2:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[TMP11:%.*]] = call i32 @llvm.experimental.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP9]])
 ; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.experimental.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP8]])
@@ -65,7 +69,7 @@ define internal i64 @foo(i32* %t0) !prof !1 {
 ; CHECK-NEXT:    [[T28]] = add i32 [[T22]], 5
 ; CHECK-NEXT:    [[T29]] = add nuw nsw i64 [[T21]], 1
 ; CHECK-NEXT:    [[T30:%.*]] = icmp eq i64 [[T29]], undef
-; CHECK-NEXT:    br i1 [[T30]], label [[T17]], label [[T20]], !prof !4, !llvm.loop !5
+; CHECK-NEXT:    br i1 [[T30]], label [[T17]], label [[T20]], !prof !4, [[LOOP5:!llvm.loop !.*]]
 ; CHECK:       t31:
 ; CHECK-NEXT:    ret i64 undef
 ;

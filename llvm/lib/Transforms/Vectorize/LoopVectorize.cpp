@@ -4300,6 +4300,23 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
         VecRdxPhi->setIncomingValueForBlock(
             LI->getLoopFor(LoopVectorBody)->getLoopLatch(), Sel);
       }
+
+      // If using preferPredicatedVectorOps, replace incoming value of the
+      // reduction phi node for vector.body with the above select instruction.
+      if (preferPredicatedVectorOps()) {
+        Value *VecRdxPhi = getOrCreateVectorValue(Phi, Part);
+        BasicBlock *VectorBodyLatch =
+            LI->getLoopFor(LoopVectorBody)->getLoopLatch();
+        Value *CurrIncoming =
+            cast<PHINode>(VecRdxPhi)->getIncomingValueForBlock(VectorBodyLatch);
+        // By definition of LoopVal above, it is not guaranteed to be the
+        // LoopExitInst. Replace only if it is.
+        if (CurrIncoming == VecLoopExitInst) {
+          cast<PHINode>(VecRdxPhi)->setIncomingValueForBlock(
+              VectorBodyLatch,
+              VectorLoopValueMap.getVectorValue(LoopExitInst, Part));
+        }
+      }
     }
   }
 
@@ -8777,11 +8794,10 @@ void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
 }
 
 Value *InnerLoopVectorizer::createEVLMask(Value *EVL) {
-  Value *EVLSplat =
-      Builder.CreateVectorSplat({VF, isScalable()}, EVL, "evl.splat");
+  Value *EVLSplat = Builder.CreateVectorSplat({VF, isScalable()}, EVL, "evl");
   Value *StepVec =
       Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector,
-                              EVLSplat->getType(), {}, nullptr, "step");
+                              EVLSplat->getType(), {}, nullptr, "step.vec");
   return Builder.CreateICmpULT(StepVec, EVLSplat, "evl.mask");
 }
 
