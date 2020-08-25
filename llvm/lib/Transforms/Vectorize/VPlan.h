@@ -635,6 +635,7 @@ public:
     VPWidenCallSC,
     VPWidenCanonicalIVSC,
     VPWidenEVLSC,
+    VPWidenEVLMaskSC,
     VPWidenGEPSC,
     VPWidenIntOrFpInductionSC,
     VPWidenMemoryInstructionSC,
@@ -1414,6 +1415,44 @@ public:
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *V) {
     return V->getVPRecipeID() == VPRecipeBase::VPWidenEVLSC;
+  }
+
+  /// Generate the instructions to compute EVL.
+  void execute(VPTransformState &State) override;
+
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+};
+
+/// A recipe to generate Explicit Vector Length (EVL) Mask. EVL mask represents
+/// vector comparison of StepVector < EVL. It generates a mask for each
+/// iteration with values from index 0..(EVL-1) as true and index EVL..(W-1) as
+/// false (W is the width of the register group). This is required for
+/// reductions where we need to select the result from a previous iteration for
+/// lanes beyond EVL. Normally we could use the existing block mask for this
+/// if it is guaranteed that the EVL for all non-tail iterations is equal to W,
+/// however architectures like RISC-V do not guarantee that, hence the need for
+/// per iteration mask.
+class VPWidenEVLMaskRecipe : public VPRecipeBase {
+  /// A VPValue representing the EVLMask.
+  VPValue EVLMask;
+  VPValue *EVL;
+
+public:
+  VPWidenEVLMaskRecipe(VPValue *EVL)
+      : VPRecipeBase(VPWidenEVLMaskSC), EVL(EVL) {}
+  ~VPWidenEVLMaskRecipe() override = default;
+
+  /// Return the VPValue representing EVL.
+  const VPValue *getEVLMask() const { return &EVLMask; }
+  VPValue *getEVLMask() { return &EVLMask; }
+
+  VPValue *getEVL() { return EVL; }
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPRecipeBase *V) {
+    return V->getVPRecipeID() == VPRecipeBase::VPWidenEVLMaskSC;
   }
 
   /// Generate the instructions to compute EVL.

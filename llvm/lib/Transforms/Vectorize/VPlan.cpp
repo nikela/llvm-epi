@@ -946,6 +946,13 @@ void VPWidenEVLRecipe::print(raw_ostream &O, const Twine &Indent,
   O << " = GENERATE-EXPLICIT-VECTOR-LENGTH";
 }
 
+void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
+                                 VPSlotTracker &SlotTracker) const {
+  O << "\"EMIT ";
+  getEVLMask()->printAsOperand(O, SlotTracker);
+  O << " = GENERATE-ULT-STEPVECTOR-EVL-MASK";
+}
+
 void VPPredicatedWidenMemoryInstructionRecipe::print(
     raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
   O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
@@ -1064,6 +1071,8 @@ void VPSlotTracker::assignSlots(const VPBasicBlock *VPBB) {
       assignSlot(VPIV->getVPValue());
     else if (const auto *VPEVL = dyn_cast<VPWidenEVLRecipe>(&Recipe))
       assignSlot(VPEVL->getEVL());
+    else if (const auto *VPEVLMask = dyn_cast<VPWidenEVLMaskRecipe>(&Recipe))
+      assignSlot(VPEVLMask->getEVLMask());
   }
 }
 

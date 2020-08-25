@@ -11,6 +11,7 @@
 
 #include "LoopVectorizationPlanner.h"
 #include "VPlan.h"
+#include "VPlanValue.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
@@ -40,6 +41,8 @@ class VPRecipeBuilder {
   VPBuilder &Builder;
 
   VPValue *EVL = nullptr;
+
+  VPValue *EVLMask = nullptr;
 
   /// When we if-convert we need to create edge masks. We have to cache values
   /// so that we don't end up with exponential recursion/IR. Note that
@@ -141,6 +144,10 @@ public:
   /// A helper function that computes the EVL for the Instruction I. By default
   /// it sets the EVL to whole vector register length.
   VPValue *getOrCreateEVL(VPlanPtr &Plan);
+
+  /// A helper function to compute runtime EVL mask per vector iteration by
+  /// current EVL and step vector.
+  VPValue *getOrCreateEVLMask(VPlanPtr &Plan);
 
   /// A helper function that validates if the memory instruction can be widened
   /// and sets the widening decision.

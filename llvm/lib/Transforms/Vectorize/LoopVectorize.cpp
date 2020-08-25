@@ -575,6 +575,9 @@ public:
   /// Generate instructions to compute EVL.
   Value *createEVL();
 
+  /// Generate instructions to compute EVL mask.
+  Value *createEVLMask(Value *EVL);
+
   /// Hold EVL VPValue.
   void setEVL(VPValue *VPEVL) { EVL = VPEVL; }
 
@@ -862,7 +865,7 @@ protected:
   Value *VectorTripCount = nullptr;
 
   /// EVL of the widened loop using vector predication (vsetvl())
-  VPValue *EVL;
+  VPValue *EVL = nullptr;
 
   /// The legality analysis.
   LoopVectorizationLegality *Legal;
@@ -8000,11 +8003,21 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
 
 VPValue *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
   if (!EVL) {
-    auto EVLRecipe = new VPWidenEVLRecipe();
+    auto *EVLRecipe = new VPWidenEVLRecipe();
     Builder.getInsertBlock()->appendRecipe(EVLRecipe);
     EVL = EVLRecipe->getEVL();
   }
   return EVL;
+}
+
+VPValue *VPRecipeBuilder::getOrCreateEVLMask(VPlanPtr &Plan) {
+  if (!EVLMask) {
+    assert(EVL && "Cannot create EVL Mask with null EVL value");
+    auto *EVLMaskRecipe = new VPWidenEVLMaskRecipe(EVL);
+    Builder.getInsertBlock()->appendRecipe(EVLMaskRecipe);
+    EVLMask = EVLMaskRecipe->getEVLMask();
+  }
+  return EVLMask;
 }
 
 bool VPRecipeBuilder::validateWidenMemory(Instruction *I, VFRange &Range) {
@@ -8590,7 +8603,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   // and the live-out instruction of each reduction, at the end of the latch.
   if (CM.foldTailByMasking() && !Legal->getReductionVars().empty()) {
     Builder.setInsertPoint(VPBB);
-    auto *Cond = RecipeBuilder.createBlockInMask(OrigLoop->getHeader(), Plan);
+    auto *Cond =
+        Legal->preferPredicatedVectorOps()
+            ? RecipeBuilder.getOrCreateEVLMask(Plan)
+            : RecipeBuilder.createBlockInMask(OrigLoop->getHeader(), Plan);
     for (auto &Reduction : Legal->getReductionVars()) {
       assert(!CM.isInLoopReduction(Reduction.first) &&
              "Didn't expect inloop tail folded reduction yet!");
@@ -8752,6 +8768,21 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
   for (unsigned Part = 0; Part < State.UF; Part++)
     State.set(getEVL(), State.ILV->createEVL(), Part);
   State.ILV->setEVL(getEVL());
+}
+
+void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
+  Value *EVL = State.get(getEVL(), 0);
+  for (unsigned Part = 0; Part < State.UF; Part++)
+    State.set(getEVLMask(), State.ILV->createEVLMask(EVL), Part);
+}
+
+Value *InnerLoopVectorizer::createEVLMask(Value *EVL) {
+  Value *EVLSplat =
+      Builder.CreateVectorSplat({VF, isScalable()}, EVL, "evl.splat");
+  Value *StepVec =
+      Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector,
+                              EVLSplat->getType(), {}, nullptr, "step");
+  return Builder.CreateICmpULT(StepVec, EVLSplat, "evl.mask");
 }
 
 Value *InnerLoopVectorizer::createEVL() {
