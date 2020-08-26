@@ -2210,9 +2210,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineSequence) {
               - Value:           0x0000000000000001
               - Value:           0x0000000000000000
     debug_line:
-      - Length:          68
-        Version:         2
-        PrologueLength:  34
+      - Version:         2
         MinInstLength:   1
         DefaultIsStmt:   1
         LineBase:        251
@@ -2279,9 +2277,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineFileIndex) {
               - Value:           0x0000000000000001
               - Value:           0x0000000000000000
     debug_line:
-      - Length:          61
-        Version:         2
-        PrologueLength:  34
+      - Version:         2
         MinInstLength:   1
         DefaultIsStmt:   1
         LineBase:        251
@@ -2350,9 +2346,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineTablePorlogueDirIndex) {
               - Value:           0x0000000000000001
               - Value:           0x0000000000000000
     debug_line:
-      - Length:          61
-        Version:         2
-        PrologueLength:  34
+      - Version:         2
         MinInstLength:   1
         DefaultIsStmt:   1
         LineBase:        251
@@ -2422,9 +2416,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyDuplicateFileWarning) {
               - Value:           0x0000000000000001
               - Value:           0x0000000000000000
     debug_line:
-      - Length:          71
-        Version:         2
-        PrologueLength:  44
+      - Version:         2
         MinInstLength:   1
         DefaultIsStmt:   1
         LineBase:        251
@@ -2509,9 +2501,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
               - Value:           0x000000000000000D
               - Value:           0x0000000000000000
     debug_line:
-      - Length:          60
-        Version:         2
-        PrologueLength:  34
+      - Version:         2
         MinInstLength:   1
         DefaultIsStmt:   1
         LineBase:        251
