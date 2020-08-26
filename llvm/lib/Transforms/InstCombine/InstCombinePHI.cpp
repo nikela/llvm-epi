@@ -348,7 +348,9 @@ InstCombinerImpl::foldPHIArgExtractValueInstructionIntoPHI(PHINode &PN) {
   // and all have a single use.
   for (unsigned i = 1; i != PN.getNumIncomingValues(); ++i) {
     auto *I = dyn_cast<ExtractValueInst>(PN.getIncomingValue(i));
-    if (!I || !I->hasOneUse() || I->getIndices() != FirstEVI->getIndices())
+    if (!I || !I->hasOneUse() || I->getIndices() != FirstEVI->getIndices() ||
+        I->getAggregateOperand()->getType() !=
+            FirstEVI->getAggregateOperand()->getType())
       return nullptr;
   }
 
