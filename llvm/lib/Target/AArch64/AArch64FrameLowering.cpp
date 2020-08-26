@@ -1024,10 +1024,6 @@ static bool needsWinCFI(const MachineFunction &MF) {
          F.needsUnwindTableEntry();
 }
 
-static bool isTargetDarwin(const MachineFunction &MF) {
-  return MF.getSubtarget<AArch64Subtarget>().isTargetDarwin();
-}
-
 static bool isTargetWindows(const MachineFunction &MF) {
   return MF.getSubtarget<AArch64Subtarget>().isTargetWindows();
 }
@@ -1185,26 +1181,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
   // For funclets the FP belongs to the containing function.
   if (!IsFunclet && HasFP) {
     // Only set up FP if we actually need to.
-    int64_t FPOffset;
-
-    // The frame pointer needs to point to the location of the frame record
-    // (x28 and x29) within the callee saved register space.
-    if (isTargetDarwin(MF)) {
-      // On Darwin, these are located at the top of the CSR space.
-      FPOffset = (AFI->getCalleeSavedStackSize() - 16);
-    } else {
-      // On other systems, these are located in the middle of the CSR space,
-      // after the other GPRs and before the FPRs.
-      assert(MFI.isCalleeSavedInfoValid() && "CalleeSavedInfo not calculated");
-      if (MFI.getCalleeSavedInfo().empty()) {
-        FPOffset = 0;
-      } else {
-        FPOffset = AFI->getCalleeSavedStackSize(MFI, [](unsigned Reg) {
-          return AArch64::FPR64RegClass.contains(Reg) ||
-                 AArch64::FPR128RegClass.contains(Reg);
-        });
-      }
-    }
+    int64_t FPOffset = AFI->getCalleeSaveBaseToFrameRecordOffset();
 
     if (CombineSPBump)
       FPOffset += AFI->getLocalStackSize();
@@ -1428,11 +1405,6 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
   }
 
   if (needsFrameMoves) {
-    const DataLayout &TD = MF.getDataLayout();
-    const int StackGrowth = isTargetDarwin(MF)
-                                ? (2 * -TD.getPointerSize(0))
-                                : -AFI->getCalleeSavedStackSize();
-    Register FramePtr = RegInfo->getFrameRegister(MF);
     // An example of the prologue:
     //
     //     .globl __foo
@@ -1500,10 +1472,15 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
     //     .cfi_offset w28, -32
 
     if (HasFP) {
+      const int OffsetToFirstCalleeSaveFromFP =
+          AFI->getCalleeSaveBaseToFrameRecordOffset() -
+          AFI->getCalleeSavedStackSize();
+      Register FramePtr = RegInfo->getFrameRegister(MF);
+
       // Define the current CFA rule to use the provided FP.
       unsigned Reg = RegInfo->getDwarfRegNum(FramePtr, true);
       unsigned CFIIndex = MF.addFrameInst(
-          MCCFIInstruction::cfiDefCfa(nullptr, Reg, FixedObject - StackGrowth));
+          MCCFIInstruction::cfiDefCfa(nullptr, Reg, FixedObject - OffsetToFirstCalleeSaveFromFP));
       BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::CFI_INSTRUCTION))
           .addCFIIndex(CFIIndex)
           .setMIFlags(MachineInstr::FrameSetup);
@@ -1794,10 +1771,8 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
   // non-post-indexed loads for the restores if we aren't actually going to
   // be able to save any instructions.
   if (!IsFunclet && (MFI.hasVarSizedObjects() || AFI->isStackRealigned())) {
-    int64_t OffsetToFrameRecord =
-        isTargetDarwin(MF) ? (-(int64_t)AFI->getCalleeSavedStackSize() + 16) : 0;
     emitFrameOffset(MBB, LastPopI, DL, AArch64::SP, AArch64::FP,
-                    {OffsetToFrameRecord, MVT::i8},
+                    {-AFI->getCalleeSaveBaseToFrameRecordOffset(), MVT::i8},
                     TII, MachineInstr::FrameDestroy, false, NeedsWinCFI);
   } else if (NumBytes)
     emitFrameOffset(MBB, LastPopI, DL, AArch64::SP, AArch64::SP,
@@ -1858,19 +1833,11 @@ static StackOffset getFPOffset(const MachineFunction &MF, int64_t ObjectOffset) 
   const auto &Subtarget = MF.getSubtarget<AArch64Subtarget>();
   bool IsWin64 =
       Subtarget.isCallingConvWin64(MF.getFunction().getCallingConv());
-
   unsigned FixedObject =
       getFixedObjectSize(MF, AFI, IsWin64, /*IsFunclet=*/false);
-
-  // Compensate for the position of the frame record within the callee-saved
-  // register space.  On Darwin, this is a fixed offset.  On other systems,
-  // this is determined by the number of callee-saved GPRs, excluding FPRs.
-  unsigned FPAdjust =
-      isTargetDarwin(MF)
-          ? 16
-          : AFI->getCalleeSavedStackSize(MF.getFrameInfo(), [](unsigned Reg) {
-              return AArch64::GPR64RegClass.contains(Reg);
-            });
+  int64_t CalleeSaveSize = AFI->getCalleeSavedStackSize(MF.getFrameInfo());
+  int64_t FPAdjust =
+      CalleeSaveSize - AFI->getCalleeSaveBaseToFrameRecordOffset();
   return {ObjectOffset + FixedObject + FPAdjust, MVT::i8};
 }
 
@@ -2257,6 +2224,14 @@ static void computeCalleeSaveRegisterPairs(
     assert(((!RPI.isScalable() && RPI.Offset >= -64 && RPI.Offset <= 63) ||
             (RPI.isScalable() && RPI.Offset >= -256 && RPI.Offset <= 255)) &&
            "Offset out of bounds for LDP/STP immediate");
+
+    // Save the offset to frame record so that the FP register can point to the
+    // innermost frame record (spilled FP and LR registers).
+    if (NeedsFrameRecord && ((!IsWindows && RPI.Reg1 == AArch64::LR &&
+                              RPI.Reg2 == AArch64::FP) ||
+                             (IsWindows && RPI.Reg1 == AArch64::FP &&
+                              RPI.Reg2 == AArch64::LR)))
+      AFI->setCalleeSaveBaseToFrameRecordOffset(Offset);
 
     RegPairs.push_back(RPI);
     if (RPI.isPaired())
