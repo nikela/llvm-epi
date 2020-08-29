@@ -1380,7 +1380,6 @@ TEST(DWARFDebugInfo, TestEmptyChildren) {
                          "        Children:        DW_CHILDREN_yes\n"
                          "debug_info:\n"
                          "  - Version:         4\n"
-                         "    AbbrOffset:      0\n"
                          "    AddrSize:        8\n"
                          "    Entries:\n"
                          "      - AbbrCode:        0x00000001\n"
@@ -1917,7 +1916,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidCURef) {
     debug_info:
       - Length:          22
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -1966,7 +1964,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddr) {
     debug_info:
       - Length:          22
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2007,7 +2004,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRanges) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2046,7 +2042,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRnglists) {
       - Length:          17
         Version:         5
         UnitType:        DW_UT_compile
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2083,7 +2078,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStmtList) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2118,7 +2112,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStrp) {
     debug_info:
       - Length:          12
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2160,7 +2153,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddrBetween) {
     debug_info:
       - Length:          22
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2202,7 +2194,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineSequence) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2269,7 +2260,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineFileIndex) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2338,7 +2328,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineTablePorlogueDirIndex) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2408,7 +2397,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyDuplicateFileWarning) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2483,7 +2471,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
     debug_info:
       - Length:          16
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2493,7 +2480,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
       - Length:          16
         Version:         4
         AbbrevTableID:   0
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2608,7 +2594,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCURangesIncomplete) {
     debug_info:
       - Length:          46
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2668,7 +2653,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyLexicalBlockRanges) {
     debug_info:
       - Length:          52
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2726,7 +2710,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingFunctionRanges) {
     debug_info:
       - Length:          55
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2793,7 +2776,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingLexicalBlockRanges) {
     debug_info:
       - Length:          85
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2855,7 +2837,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidDIERange) {
     debug_info:
       - Length:          34
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2912,7 +2893,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyElidedDoesntFail) {
     debug_info:
       - Length:          71
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2975,7 +2955,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyNestedFunctions) {
     debug_info:
       - Length:          73
         Version:         4
-        AbbrOffset:      0
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
