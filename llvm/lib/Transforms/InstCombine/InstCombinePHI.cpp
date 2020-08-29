@@ -1408,7 +1408,7 @@ Instruction *InstCombinerImpl::visitPHINode(PHINode &PN) {
   // by other passes. Other passes shouldn't depend on this for correctness
   // however.
   PHINode *FirstPN = cast<PHINode>(PN.getParent()->begin());
-  if (&PN != FirstPN) {
+  if (&PN != FirstPN)
     for (unsigned i = 0, e = FirstPN->getNumIncomingValues(); i != e; ++i) {
       BasicBlock *BBA = PN.getIncomingBlock(i);
       BasicBlock *BBB = FirstPN->getIncomingBlock(i);
@@ -1427,21 +1427,30 @@ Instruction *InstCombinerImpl::visitPHINode(PHINode &PN) {
       }
     }
 
-    // Is there an identical PHI node before this one in this basic block?
-    for (PHINode &Src : PN.getParent()->phis()) {
-      // Once we've reached the PHI node we've been asked about, stop looking.
-      if (&Src == &PN)
-        break;
-      // Note that even though we've just canonicalized this PHI, due to the
-      // worklist visitation order, there are no guarantess that *every* PHI
-      // has been canonicalized, so we can't just compare operands ranges.
-      if (!PN.isIdenticalToWhenDefined(&Src))
-        continue;
-      // Just use that PHI instead then.
-      ++NumPHICSEs;
-      replaceInstUsesWith(PN, &Src);
-      return &PN;
-    }
+  // Is there an identical PHI node in this basic block?
+  for (PHINode &IdenticalPN : PN.getParent()->phis()) {
+    // Ignore the PHI node itself.
+    if (&IdenticalPN == &PN)
+      continue;
+    // Note that even though we've just canonicalized this PHI, due to the
+    // worklist visitation order, there are no guarantess that *every* PHI
+    // has been canonicalized, so we can't just compare operands ranges.
+    if (!PN.isIdenticalToWhenDefined(&IdenticalPN))
+      continue;
+    // Just use that PHI instead then.
+    ++NumPHICSEs;
+    // Note that we can't necessarily just replace the PN with IdenticalPN,
+    // because IdenticalPN might be *after* PN, and PN might have uses
+    // in PHI nodes inbetween the two.
+    // So we need to pick the earliest PHI node as being the canonical one.
+    Instruction *OldPN = &PN;
+    Instruction *NewPN = &IdenticalPN;
+    if (!NewPN->comesBefore(OldPN))
+      std::swap(OldPN, NewPN);
+    replaceInstUsesWith(*OldPN, NewPN);
+    // Also, just to be extra safe, make sure the non-canonical PHI goes away.
+    eraseInstFromFunction(*OldPN);
+    return nullptr; // Signal that thange happened.
   }
 
   // If this is an integer PHI and we know that it has an illegal type, see if
