@@ -1383,9 +1383,7 @@ TEST(DWARFDebugInfo, TestEmptyChildren) {
                          "    AddrSize:        8\n"
                          "    Entries:\n"
                          "      - AbbrCode:        0x00000001\n"
-                         "        Values:\n"
-                         "      - AbbrCode:        0x00000000\n"
-                         "        Values:\n";
+                         "      - AbbrCode:        0x00000000\n";
 
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -1914,8 +1912,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidCURef) {
               - Attribute:       DW_AT_type
                 Form:            DW_FORM_ref4
     debug_info:
-      - Length:          22
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -1926,7 +1923,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidCURef) {
               - Value:           0x000000000000000D
               - Value:           0x0000000000001234
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -1962,8 +1958,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddr) {
               - Attribute:       DW_AT_type
                 Form:            DW_FORM_ref_addr
     debug_info:
-      - Length:          22
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -1974,7 +1969,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddr) {
               - Value:           0x000000000000000D
               - Value:           0x0000000000001234
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2002,15 +1996,13 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRanges) {
               - Attribute:       DW_AT_ranges
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
             Values:
               - Value:           0x0000000000000001
               - Value:           0x0000000000001000
-
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2039,8 +2031,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRnglists) {
               - Attribute:       DW_AT_ranges
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          17
-        Version:         5
+      - Version:         5
         UnitType:        DW_UT_compile
         AddrSize:        8
         Entries:
@@ -2048,7 +2039,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRnglists) {
             Values:
               - Value:           0x0000000000000001
               - Value:           0x0000000000001000
-
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2076,15 +2066,13 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStmtList) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
             Values:
               - Value:           0x0000000000000001
               - Value:           0x0000000000001000
-
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2110,8 +2098,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidStrp) {
               - Attribute:       DW_AT_name
                 Form:            DW_FORM_strp
     debug_info:
-      - Length:          12
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2151,8 +2138,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddrBetween) {
               - Attribute:       DW_AT_type
                 Form:            DW_FORM_ref_addr
     debug_info:
-      - Length:          22
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2163,7 +2149,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidRefAddrBetween) {
               - Value:           0x000000000000000D
               - Value:           0x0000000000000011
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(StringRef(yamldata));
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2192,8 +2177,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineSequence) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2258,8 +2242,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineFileIndex) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2326,8 +2309,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidLineTablePorlogueDirIndex) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2395,8 +2377,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyDuplicateFileWarning) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2469,8 +2450,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCUDontShareLineTable) {
               - Attribute:       DW_AT_stmt_list
                 Form:            DW_FORM_sec_offset
     debug_info:
-      - Length:          16
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2592,8 +2572,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCURangesIncomplete) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          46
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2606,7 +2585,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyCURangesIncomplete) {
               - Value:           0x0000000000001000
               - Value:           0x0000000000002000
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2651,8 +2629,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyLexicalBlockRanges) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          52
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2668,9 +2645,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyLexicalBlockRanges) {
               - Value:           0x0000000000001000
               - Value:           0x0000000000002001
           - AbbrCode:        0x00000000
-            Values:
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2708,8 +2683,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingFunctionRanges) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          55
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2726,7 +2700,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingFunctionRanges) {
               - Value:           0x0000000000001FFF
               - Value:           0x0000000000002000
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2774,8 +2747,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingLexicalBlockRanges) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          85
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2797,9 +2769,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyOverlappingLexicalBlockRanges) {
               - Value:           0x00000000000012FF
               - Value:           0x0000000000001300
           - AbbrCode:        0x00000000
-            Values:
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2835,8 +2805,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidDIERange) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          34
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2848,7 +2817,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyInvalidDIERange) {
               - Value:           0x0000000000001000
               - Value:           0x0000000000000900
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2891,8 +2859,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyElidedDoesntFail) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          71
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2911,7 +2878,6 @@ TEST(DWARFDebugInfo, TestDwarfVerifyElidedDoesntFail) {
               - Value:           0x0000000000002000
               - Value:           0x0000000000002000
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
@@ -2953,8 +2919,7 @@ TEST(DWARFDebugInfo, TestDwarfVerifyNestedFunctions) {
               - Attribute:       DW_AT_high_pc
                 Form:            DW_FORM_addr
     debug_info:
-      - Length:          73
-        Version:         4
+      - Version:         4
         AddrSize:        8
         Entries:
           - AbbrCode:        0x00000001
@@ -2973,11 +2938,8 @@ TEST(DWARFDebugInfo, TestDwarfVerifyNestedFunctions) {
               - Value:           0x0000000000001500
               - Value:           0x0000000000002000
           - AbbrCode:        0x00000000
-            Values:
           - AbbrCode:        0x00000000
-            Values:
           - AbbrCode:        0x00000000
-            Values:
   )";
   auto ErrOrSections = DWARFYAML::emitDebugSections(yamldata);
   ASSERT_TRUE((bool)ErrOrSections);
