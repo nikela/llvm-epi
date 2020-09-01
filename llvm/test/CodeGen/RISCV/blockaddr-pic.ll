@@ -8,7 +8,6 @@ define signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-NOPIC-LABEL: foo:
 ; RV32-NOPIC:       # %bb.0: # %entry
 ; RV32-NOPIC-NEXT:    addi sp, sp, -16
-; RV32-NOPIC-NEXT:    sw ra, 12(sp)
 ; RV32-NOPIC-NEXT:    lui a1, %hi(.Ltmp0)
 ; RV32-NOPIC-NEXT:    addi a1, a1, %lo(.Ltmp0)
 ; RV32-NOPIC-NEXT:    addi a2, zero, 101
@@ -20,45 +19,41 @@ define signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-NOPIC-NEXT:  .Ltmp0: # Block address taken
 ; RV32-NOPIC-NEXT:  .LBB0_2: # %return
 ; RV32-NOPIC-NEXT:    addi a0, zero, 4
-; RV32-NOPIC-NEXT:    j .LBB0_4
+; RV32-NOPIC-NEXT:    addi sp, sp, 16
+; RV32-NOPIC-NEXT:    ret
 ; RV32-NOPIC-NEXT:  .LBB0_3: # %return.clone
 ; RV32-NOPIC-NEXT:    addi a0, zero, 3
-; RV32-NOPIC-NEXT:  .LBB0_4: # %.split
-; RV32-NOPIC-NEXT:    lw ra, 12(sp)
 ; RV32-NOPIC-NEXT:    addi sp, sp, 16
 ; RV32-NOPIC-NEXT:    ret
 ;
 ; RV64-NOPIC-LABEL: foo:
 ; RV64-NOPIC:       # %bb.0: # %entry
 ; RV64-NOPIC-NEXT:    addi sp, sp, -16
-; RV64-NOPIC-NEXT:    sd ra, 8(sp)
 ; RV64-NOPIC-NEXT:    lui a1, %hi(.Ltmp0)
 ; RV64-NOPIC-NEXT:    addi a1, a1, %lo(.Ltmp0)
 ; RV64-NOPIC-NEXT:    addi a2, zero, 101
-; RV64-NOPIC-NEXT:    sd a1, 0(sp)
+; RV64-NOPIC-NEXT:    sd a1, 8(sp)
 ; RV64-NOPIC-NEXT:    blt a0, a2, .LBB0_3
 ; RV64-NOPIC-NEXT:  # %bb.1: # %if.then
-; RV64-NOPIC-NEXT:    ld a0, 0(sp)
+; RV64-NOPIC-NEXT:    ld a0, 8(sp)
 ; RV64-NOPIC-NEXT:    jr a0
 ; RV64-NOPIC-NEXT:  .Ltmp0: # Block address taken
 ; RV64-NOPIC-NEXT:  .LBB0_2: # %return
 ; RV64-NOPIC-NEXT:    addi a0, zero, 4
-; RV64-NOPIC-NEXT:    j .LBB0_4
+; RV64-NOPIC-NEXT:    addi sp, sp, 16
+; RV64-NOPIC-NEXT:    ret
 ; RV64-NOPIC-NEXT:  .LBB0_3: # %return.clone
 ; RV64-NOPIC-NEXT:    addi a0, zero, 3
-; RV64-NOPIC-NEXT:  .LBB0_4: # %.split
-; RV64-NOPIC-NEXT:    ld ra, 8(sp)
 ; RV64-NOPIC-NEXT:    addi sp, sp, 16
 ; RV64-NOPIC-NEXT:    ret
 ;
 ; RV32-PIC-LABEL: foo:
 ; RV32-PIC:       # %bb.0: # %entry
 ; RV32-PIC-NEXT:    addi sp, sp, -16
-; RV32-PIC-NEXT:    sw ra, 12(sp)
-; RV32-PIC-NEXT:  .LBB0_5: # %entry
+; RV32-PIC-NEXT:  .LBB0_4: # %entry
 ; RV32-PIC-NEXT:    # Label of block must be emitted
 ; RV32-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_5)
+; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_4)
 ; RV32-PIC-NEXT:    addi a2, zero, 101
 ; RV32-PIC-NEXT:    sw a1, 8(sp)
 ; RV32-PIC-NEXT:    blt a0, a2, .LBB0_3
@@ -68,36 +63,33 @@ define signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-PIC-NEXT:  .Ltmp0: # Block address taken
 ; RV32-PIC-NEXT:  .LBB0_2: # %return
 ; RV32-PIC-NEXT:    addi a0, zero, 4
-; RV32-PIC-NEXT:    j .LBB0_4
+; RV32-PIC-NEXT:    addi sp, sp, 16
+; RV32-PIC-NEXT:    ret
 ; RV32-PIC-NEXT:  .LBB0_3: # %return.clone
 ; RV32-PIC-NEXT:    addi a0, zero, 3
-; RV32-PIC-NEXT:  .LBB0_4: # %.split
-; RV32-PIC-NEXT:    lw ra, 12(sp)
 ; RV32-PIC-NEXT:    addi sp, sp, 16
 ; RV32-PIC-NEXT:    ret
 ;
 ; RV64-PIC-LABEL: foo:
 ; RV64-PIC:       # %bb.0: # %entry
 ; RV64-PIC-NEXT:    addi sp, sp, -16
-; RV64-PIC-NEXT:    sd ra, 8(sp)
-; RV64-PIC-NEXT:  .LBB0_5: # %entry
+; RV64-PIC-NEXT:  .LBB0_4: # %entry
 ; RV64-PIC-NEXT:    # Label of block must be emitted
 ; RV64-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_5)
+; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_4)
 ; RV64-PIC-NEXT:    addi a2, zero, 101
-; RV64-PIC-NEXT:    sd a1, 0(sp)
+; RV64-PIC-NEXT:    sd a1, 8(sp)
 ; RV64-PIC-NEXT:    blt a0, a2, .LBB0_3
 ; RV64-PIC-NEXT:  # %bb.1: # %if.then
-; RV64-PIC-NEXT:    ld a0, 0(sp)
+; RV64-PIC-NEXT:    ld a0, 8(sp)
 ; RV64-PIC-NEXT:    jr a0
 ; RV64-PIC-NEXT:  .Ltmp0: # Block address taken
 ; RV64-PIC-NEXT:  .LBB0_2: # %return
 ; RV64-PIC-NEXT:    addi a0, zero, 4
-; RV64-PIC-NEXT:    j .LBB0_4
+; RV64-PIC-NEXT:    addi sp, sp, 16
+; RV64-PIC-NEXT:    ret
 ; RV64-PIC-NEXT:  .LBB0_3: # %return.clone
 ; RV64-PIC-NEXT:    addi a0, zero, 3
-; RV64-PIC-NEXT:  .LBB0_4: # %.split
-; RV64-PIC-NEXT:    ld ra, 8(sp)
 ; RV64-PIC-NEXT:    addi sp, sp, 16
 ; RV64-PIC-NEXT:    ret
 
