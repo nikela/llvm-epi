@@ -214,8 +214,9 @@ RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
       auto *VecTy = dyn_cast<VectorType>(A->getType());
       if (VecTy) {
         // If A is a vector operand, VF should correspond to A.
-        assert(MinNumElts ==
-                   cast<ScalableVectorType>(VecTy)->getElementCount().Min &&
+        assert(MinNumElts == cast<ScalableVectorType>(VecTy)
+                                 ->getElementCount()
+                                 .getKnownMinValue() &&
                "Vector argument does not match VF");
       } else
         VecTy = ScalableVectorType::get(A->getType(), MinNumElts);
@@ -231,10 +232,10 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
                                                 bool Insert, bool Extract) {
   // FIXME: a bitfield is not a reasonable abstraction for talking about
   // which elements are needed from a scalable vector.
-  // For scalable vectors DemenadedElts currently represent ElementCount.Min
-  // number of elements.
+  // For scalable vectors DemenadedElts currently represent
+  // ElementCount.getKnownMinValue() number of elements.
 
-  unsigned NumELts = InTy->getElementCount().Min;
+  unsigned NumELts = InTy->getElementCount().getKnownMinValue();
   assert(DemandedElts.getBitWidth() == NumELts && "Vector size mismatch");
 
   unsigned MinCost = 0;
@@ -260,7 +261,8 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy, bool Insert,
   // vscale = 1. Once the cost model is changed to represent scalability, we
   // would need a different ADT capable of representing scalable number of
   // elements.
-  APInt MinDemandedElts = APInt::getAllOnesValue(InTy->getElementCount().Min);
+  APInt MinDemandedElts =
+      APInt::getAllOnesValue(InTy->getElementCount().getKnownMinValue());
   return getScalarizationOverhead(InTy, MinDemandedElts, Insert, Extract);
 }
 
@@ -270,7 +272,8 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
 
   Cost += getScalarizationOverhead(InTy, true, false);
   if (!Args.empty())
-    Cost += getOperandsScalarizationOverhead(Args, InTy->getElementCount().Min);
+    Cost += getOperandsScalarizationOverhead(
+        Args, InTy->getElementCount().getKnownMinValue());
   else
     // When no information on arguments is provided, we add the cost
     // associated with one argument as a heuristic.

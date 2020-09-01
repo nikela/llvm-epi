@@ -226,7 +226,7 @@ bool LiteralElement::isValidLiteral(StringRef value) {
   // If there is only one character, this must either be punctuation or a
   // single character bare identifier.
   if (value.size() == 1)
-    return isalpha(front) || StringRef("_:,=<>()[]").contains(front);
+    return isalpha(front) || StringRef("_:,=<>()[]{}?").contains(front);
 
   // Check the punctuation that are larger than a single character.
   if (value == "->")
@@ -356,8 +356,8 @@ struct OperationFormat {
 //===----------------------------------------------------------------------===//
 // Parser Gen
 
-/// Returns if we can format the given attribute as an EnumAttr in the parser
-/// format.
+/// Returns true if we can format the given attribute as an EnumAttr in the
+/// parser format.
 static bool canFormatEnumAttr(const NamedAttribute *attr) {
   const EnumAttr *enumAttr = dyn_cast<EnumAttr>(&attr->attr);
   if (!enumAttr)
@@ -583,10 +583,13 @@ static void genLiteralParser(StringRef value, OpMethodBody &body) {
               .Case("=", "Equal()")
               .Case("<", "Less()")
               .Case(">", "Greater()")
+              .Case("{", "LBrace()")
+              .Case("}", "RBrace()")
               .Case("(", "LParen()")
               .Case(")", "RParen()")
               .Case("[", "LSquare()")
-              .Case("]", "RSquare()");
+              .Case("]", "RSquare()")
+              .Case("?", "Question()");
 }
 
 /// Generate the storage code required for parsing the given element.

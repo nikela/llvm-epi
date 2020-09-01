@@ -48,9 +48,11 @@ let TargetPrefix = "ppc" in {  // All intrinsics start with "llvm.ppc.".
   def int_ppc_eieio : Intrinsic<[],[],[]>;
 
   // Get content from current FPSCR register
-  def int_ppc_readflm : Intrinsic<[llvm_double_ty], [], [IntrNoMem]>;
+  def int_ppc_readflm : GCCBuiltin<"__builtin_readflm">,
+                        Intrinsic<[llvm_double_ty], [], [IntrNoMem]>;
   // Set FPSCR register, and return previous content
-  def int_ppc_setflm : Intrinsic<[llvm_double_ty], [llvm_double_ty], []>;
+  def int_ppc_setflm : GCCBuiltin<"__builtin_setflm">,
+                       Intrinsic<[llvm_double_ty], [llvm_double_ty], []>;
 
   // Intrinsics for [double]word extended forms of divide instructions
   def int_ppc_divwe : GCCBuiltin<"__builtin_divwe">,
@@ -947,6 +949,18 @@ def int_ppc_altivec_vrldmi :
       PowerPC_Vec_Intrinsic<"vrldmi", [llvm_v2i64_ty],
                             [llvm_v2i64_ty, llvm_v2i64_ty, llvm_v2i64_ty],
                             [IntrNoMem]>;
+
+// Vector Divide Extended Intrinsics.
+def int_ppc_altivec_vdivesw : PowerPC_Vec_WWW_Intrinsic<"vdivesw">;
+def int_ppc_altivec_vdiveuw : PowerPC_Vec_WWW_Intrinsic<"vdiveuw">;
+def int_ppc_altivec_vdivesd : PowerPC_Vec_DDD_Intrinsic<"vdivesd">;
+def int_ppc_altivec_vdiveud : PowerPC_Vec_DDD_Intrinsic<"vdiveud">;
+
+// Vector Multiply High Intrinsics.
+def int_ppc_altivec_vmulhsw : PowerPC_Vec_WWW_Intrinsic<"vmulhsw">;
+def int_ppc_altivec_vmulhuw : PowerPC_Vec_WWW_Intrinsic<"vmulhuw">;
+def int_ppc_altivec_vmulhsd : PowerPC_Vec_DDD_Intrinsic<"vmulhsd">;
+def int_ppc_altivec_vmulhud : PowerPC_Vec_DDD_Intrinsic<"vmulhud">;
 
 //===----------------------------------------------------------------------===//
 // PowerPC VSX Intrinsic Definitions.

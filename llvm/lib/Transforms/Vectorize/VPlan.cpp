@@ -306,7 +306,9 @@ void VPRegionBlock::execute(VPTransformState *State) {
 
   for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part) {
     State->Instance->Part = Part;
-    for (unsigned Lane = 0, VF = State->VF; Lane < VF; ++Lane) {
+    assert(!State->VF.isScalable() && "VF is assumed to be non scalable.");
+    for (unsigned Lane = 0, VF = State->VF.getKnownMinValue(); Lane < VF;
+         ++Lane) {
       State->Instance->Lane = Lane;
       // Visit the VPBlocks connected to \p this, starting from it.
       for (VPBlockBase *Block : RPOT) {
@@ -389,14 +391,14 @@ void VPInstruction::generateInstruction(VPTransformState &State,
   case VPInstruction::ActiveLaneMask: {
     // Get first lane of vector induction variable.
     Value *VIVElem0 = State.get(getOperand(0), {Part, 0});
-    // Get first lane of backedge-taken-count.
-    Value *ScalarBTC = State.get(getOperand(1), {Part, 0});
+    // Get the original loop tripcount.
+    Value *ScalarTC = State.TripCount;
 
     auto *Int1Ty = Type::getInt1Ty(Builder.getContext());
-    auto *PredTy = FixedVectorType::get(Int1Ty, State.VF);
+    auto *PredTy = FixedVectorType::get(Int1Ty, State.VF.getKnownMinValue());
     Instruction *Call = Builder.CreateIntrinsic(
-        Intrinsic::get_active_lane_mask, {PredTy, ScalarBTC->getType()},
-        {VIVElem0, ScalarBTC}, nullptr, "active.lane.mask");
+        Intrinsic::get_active_lane_mask, {PredTy, ScalarTC->getType()},
+        {VIVElem0, ScalarTC}, nullptr, "active.lane.mask");
     State.set(this, Call, Part);
     break;
   }
@@ -477,10 +479,9 @@ void VPlan::execute(VPTransformState *State) {
     IRBuilder<> Builder(State->CFG.PrevBB->getTerminator());
     auto *TCMO = Builder.CreateSub(TC, ConstantInt::get(TC->getType(), 1),
                                    "trip.count.minus.1");
-    auto VF = State->VF;
-    Value *VTCMO = VF == 1 && !State->IsScalable
+    Value *VTCMO = State->VF.isScalar()
                        ? TCMO
-                       : Builder.CreateVectorSplat({VF, State->IsScalable},
+                       : Builder.CreateVectorSplat(State->VF,
                                                    TCMO, "broadcast");
     for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part)
       State->set(BackedgeTakenCount, VTCMO, Part);
@@ -883,14 +884,14 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.CanonicalIV;
   Type *STy = CanonicalIV->getType();
   IRBuilder<> Builder(State.CFG.PrevBB->getTerminator());
-  auto VF = State.VF;
-  Value *VStart = VF == 1 && !State.IsScalable
-                      ? CanonicalIV
-                      : Builder.CreateVectorSplat({VF, State.IsScalable},
-                                                  CanonicalIV, "broadcast");
+  Value *VStart =
+      State.VF.isScalar()
+          ? CanonicalIV
+          : Builder.CreateVectorSplat(State.VF, CanonicalIV, "broadcast");
   for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part) {
     Value *VStep = nullptr;
-    if (!State.IsScalable) {
+    if (!State.VF.isScalable()) {
+      auto VF = State.VF.getKnownMinValue();
       SmallVector<Constant *, 8> Indices;
       for (unsigned Lane = 0; Lane < VF; ++Lane)
         Indices.push_back(ConstantInt::get(STy, Part * VF + Lane));
@@ -908,7 +909,7 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
       // loop vectorizer would have already bailed out.
       VStep = Builder.CreateIntrinsic(
           Intrinsic::experimental_vector_stepvector,
-          VectorType::get(STy, {State.VF, State.IsScalable}), {}, nullptr,
+          VectorType::get(STy, State.VF), {}, nullptr,
           "stepvector");
 
       if (!State.PreferPredicatedVectorOps) {
@@ -916,10 +917,10 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
             Intrinsic::vscale, Type::getInt32Ty(Builder.getContext()), {},
             nullptr, "vscale");
         // Actual VF is vscale x VF, so generate a splat of (Part * vscale * VF)
-        Value *VFxVscale =
-            Builder.CreateMul(ConstantInt::get(STy, Part * State.VF), Vscale);
+        Value *VFxVscale = Builder.CreateMul(
+            ConstantInt::get(STy, Part * State.VF.getKnownMinValue()), Vscale);
         Value *SplatVFxVscale =
-            Builder.CreateVectorSplat({State.VF, State.IsScalable}, VFxVscale);
+            Builder.CreateVectorSplat(State.VF, VFxVscale);
         // Finally add to step vector, equivalent to Part * VF + Lane.
         VStep = Builder.CreateAdd(VStep, SplatVFxVscale);
       }

@@ -340,17 +340,17 @@ Instruction *InstCombinerImpl::visitExtractElementInst(ExtractElementInst &EI) {
   auto *IndexC = dyn_cast<ConstantInt>(Index);
   if (IndexC) {
     ElementCount EC = EI.getVectorOperandType()->getElementCount();
-    unsigned NumElts = EC.Min;
+    unsigned NumElts = EC.getKnownMinValue();
 
     // InstSimplify should handle cases where the index is invalid.
     // For fixed-length vector, it's invalid to extract out-of-range element.
-    if (!EC.Scalable && IndexC->getValue().uge(NumElts))
+    if (!EC.isScalable() && IndexC->getValue().uge(NumElts))
       return nullptr;
 
     // This instruction only demands the single element from the input vector.
     // Skip for scalable type, the number of elements is unknown at
     // compile-time.
-    if (!EC.Scalable && NumElts != 1) {
+    if (!EC.isScalable() && NumElts != 1) {
       // If the input vector has a single use, simplify it based on this use
       // property.
       if (SrcVec->hasOneUse()) {
@@ -975,10 +975,7 @@ Instruction *InstCombinerImpl::foldAggregateConstructionIntoAggregateReuse(
     PHI->addIncoming(SourceAggregates[Pred], Pred);
 
   ++NumAggregateReconstructionsSimplified;
-  OrigIVI.replaceAllUsesWith(PHI);
-
-  // Just signal that the fold happened, we've already inserted instructions.
-  return &OrigIVI;
+  return replaceInstUsesWith(OrigIVI, PHI);
 }
 
 /// Try to find redundant insertvalue instructions, like the following ones:

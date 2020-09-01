@@ -58,8 +58,9 @@ llvm::TypeSize LLVMType::getPrimitiveSizeInBits() {
         llvm::ElementCount elementCount = t.getElementCount();
         assert(!elementSize.isScalable() &&
                "vector type should have fixed-width elements");
-        return llvm::TypeSize(elementSize.getFixedSize() * elementCount.Min,
-                              elementCount.Scalable);
+        return llvm::TypeSize(elementSize.getFixedSize() *
+                                  elementCount.getKnownMinValue(),
+                              elementCount.isScalable());
       })
       .Default([](LLVMType ty) {
         assert((ty.isa<LLVMVoidType, LLVMLabelType, LLVMMetadataType,
@@ -483,7 +484,7 @@ LLVMType LLVMVectorType::getElementType() {
 
 llvm::ElementCount LLVMVectorType::getElementCount() {
   // Both derived classes share the implementation type.
-  return llvm::ElementCount(
+  return llvm::ElementCount::get(
       static_cast<detail::LLVMTypeAndSizeStorage *>(impl)->numElements,
       isa<LLVMScalableVectorType>());
 }

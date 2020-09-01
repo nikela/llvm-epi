@@ -428,16 +428,16 @@ public:
   unsigned getNumElements() const {
     ElementCount EC = getElementCount();
 #ifdef STRICT_FIXED_SIZE_VECTORS
-    assert(!EC.Scalable &&
+    assert(!EC.isScalable() &&
            "Request for fixed number of elements from scalable vector");
-    return EC.Min;
+    return EC.getKnownMinValue();
 #else
-    if (EC.Scalable)
+    if (EC.isScalable())
       WithColor::warning()
           << "The code that requested the fixed number of elements has made "
              "the assumption that this vector is not scalable. This assumption "
              "was not correct, and this may lead to broken code\n";
-    return EC.Min;
+    return EC.getKnownMinValue();
 #endif
   }
 
@@ -448,7 +448,8 @@ public:
 
   static VectorType *get(Type *ElementType, unsigned NumElements,
                          bool Scalable) {
-    return VectorType::get(ElementType, {NumElements, Scalable});
+    return VectorType::get(ElementType,
+                           ElementCount::get(NumElements, Scalable));
   }
 
   static VectorType *get(Type *ElementType, const VectorType *Other) {
@@ -513,8 +514,8 @@ public:
   /// input type and the same element type.
   static VectorType *getHalfElementsVectorType(VectorType *VTy) {
     auto EltCnt = VTy->getElementCount();
-    assert ((EltCnt.Min & 1) == 0 &&
-            "Cannot halve vector with odd number of elements.");
+    assert(EltCnt.isKnownEven() &&
+           "Cannot halve vector with odd number of elements.");
     return VectorType::get(VTy->getElementType(), EltCnt/2);
   }
 
@@ -522,7 +523,8 @@ public:
   /// input type and the same element type.
   static VectorType *getDoubleElementsVectorType(VectorType *VTy) {
     auto EltCnt = VTy->getElementCount();
-    assert((EltCnt.Min * 2ull) <= UINT_MAX && "Too many elements in vector");
+    assert((EltCnt.getKnownMinValue() * 2ull) <= UINT_MAX &&
+           "Too many elements in vector");
     return VectorType::get(VTy->getElementType(), EltCnt * 2);
   }
 
@@ -642,7 +644,7 @@ public:
 };
 
 inline ElementCount VectorType::getElementCount() const {
-  return ElementCount(ElementQuantity, isa<ScalableVectorType>(this));
+  return ElementCount::get(ElementQuantity, isa<ScalableVectorType>(this));
 }
 
 /// Class to represent pointers.

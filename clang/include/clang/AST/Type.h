@@ -1675,7 +1675,7 @@ protected:
 
     /// The kind of vector, either a generic vector type or some
     /// target-specific vector type such as for AltiVec or Neon.
-    unsigned VecKind : 3;
+    unsigned VecKind : 4;
     /// The number of elements in the vector.
     uint32_t NumElements;
   };
@@ -1886,13 +1886,15 @@ public:
   bool isSizelessType() const;
   bool isSizelessBuiltinType() const;
 
-  /// Determines if this is a vector-length-specific type (VLST), i.e. a
-  /// sizeless type with the 'arm_sve_vector_bits' attribute applied.
-  bool isVLST() const;
   /// Determines if this is a sizeless type supported by the
   /// 'arm_sve_vector_bits' type attribute, which can be applied to a single
   /// SVE vector or predicate, excluding tuple types such as svint32x4_t.
   bool isVLSTBuiltinType() const;
+
+  /// Returns the representative type for the element of an SVE builtin type.
+  /// This is used to represent fixed-length SVE vectors created with the
+  /// 'arm_sve_vector_bits' type attribute as VectorType.
+  QualType getSveEltType(const ASTContext &Ctx) const;
 
   /// Types are partitioned into 3 broad categories (C99 6.2.5p1):
   /// object types, function types, and incomplete types.
@@ -3221,8 +3223,14 @@ public:
     /// is ARM Neon polynomial vector
     NeonPolyVector,
 
+    /// is AArch64 SVE fixed-length data vector
+    SveFixedLengthDataVector,
+
+    /// is AArch64 SVE fixed-length predicate vector
+    SveFixedLengthPredicateVector,
+
     /// is EPI unsized vector
-    EPIVector,
+    EPIVector
   };
 
 protected:

@@ -178,21 +178,22 @@ public:
 struct VectorizationFactor {
 private:
   // Vector width with best cost
-  unsigned Width;
+  ElementCount Width;
   // Cost of the loop with that width
   unsigned Cost;
 
   // Width 0 means no vectorization, cost 0 means uncomputed cost.
-  VectorizationFactor() : Width(0), Cost(0) {}
+  VectorizationFactor() : Width(ElementCount::getFixed(0)), Cost(0) {}
 
 public:
-  VectorizationFactor(unsigned Width, unsigned Cost)
+  VectorizationFactor(ElementCount Width, unsigned Cost)
       : Width(Width), Cost(Cost) {
-    assert(Width > 0 && "Width cannot be zero");
+    assert(Width.getKnownMinValue() > 0 && "Width cannot be zero");
   }
 
-  unsigned getWidth() const {
-    assert(Width > 0 && "Cannot get width of invalid vectorization factor");
+  ElementCount getWidth() const {
+    assert(Width.getKnownMinValue() > 0 &&
+           "Cannot get width of invalid vectorization factor");
     return Width;
   }
   unsigned getCost() const { return Cost; }
@@ -251,7 +252,10 @@ class LoopVectorizationPlanner {
   /// A builder used to construct the current plan.
   VPBuilder Builder;
 
-  unsigned BestVF = 0;
+  /// The best number of elements of the vector types used in the
+  /// transformed loop. BestVF = None means that vectorization is
+  /// disabled.
+  Optional<ElementCount> BestVF = None;
   unsigned BestUF = 0;
 
 public:
@@ -266,14 +270,14 @@ public:
 
   /// Plan how to best vectorize, return the best VF and its cost, or None if
   /// vectorization and interleaving should be avoided up front.
-  Optional<VectorizationFactor> plan(unsigned UserVF, unsigned UserIC);
+  Optional<VectorizationFactor> plan(ElementCount UserVF, unsigned UserIC);
 
   /// Use the VPlan-native path to plan how to best vectorize, return the best
   /// VF and its cost.
-  VectorizationFactor planInVPlanNativePath(unsigned UserVF);
+  VectorizationFactor planInVPlanNativePath(ElementCount UserVF);
 
   /// Finalize the best decision and dispose of all other VPlans.
-  void setBestPlan(unsigned VF, unsigned UF);
+  void setBestPlan(ElementCount VF, unsigned UF);
 
   /// Generate the IR code for the body of the vectorized loop according to the
   /// best selected VPlan.
@@ -288,7 +292,7 @@ public:
   /// \p Predicate on Range.Start, possibly decreasing Range.End such that the
   /// returned value holds for the entire \p Range.
   static bool
-  getDecisionAndClampRange(const std::function<bool(unsigned)> &Predicate,
+  getDecisionAndClampRange(const std::function<bool(ElementCount)> &Predicate,
                            VFRange &Range);
 
 protected:
@@ -300,7 +304,7 @@ protected:
   /// Build VPlans for power-of-2 VF's between \p MinVF and \p MaxVF inclusive,
   /// according to the information gathered by Legal when it checked if it is
   /// legal to vectorize the loop.
-  void buildVPlans(unsigned MinVF, unsigned MaxVF);
+  void buildVPlans(ElementCount MinVF, ElementCount MaxVF);
 
 private:
   /// Build a VPlan according to the information gathered by Legal. \return a
@@ -318,7 +322,7 @@ private:
   /// Build VPlans for power-of-2 VF's between \p MinVF and \p MaxVF inclusive,
   /// according to the information gathered by Legal when it checked if it is
   /// legal to vectorize the loop. This method creates VPlans using VPRecipes.
-  void buildVPlansWithVPRecipes(unsigned MinVF, unsigned MaxVF);
+  void buildVPlansWithVPRecipes(ElementCount MinVF, ElementCount MaxVF);
 
   /// Adjust the recipes for any inloop reductions. The chain of instructions
   /// leading from the loop exit instr to the phi need to be converted to

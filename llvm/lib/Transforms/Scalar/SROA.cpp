@@ -268,6 +268,11 @@ public:
   /// Access the dead users for this alloca.
   ArrayRef<Instruction *> getDeadUsers() const { return DeadUsers; }
 
+  /// Access Uses that should be dropped if the alloca is promotable.
+  ArrayRef<Use *> getDeadUsesIfPromotable() const {
+    return DeadUseIfPromotable;
+  }
+
   /// Access the dead operands referring to this alloca.
   ///
   /// These are operands which have cannot actually be used to refer to the
@@ -321,6 +326,9 @@ private:
   /// all these instructions can simply be removed and replaced with undef as
   /// they come from outside of the allocated space.
   SmallVector<Instruction *, 8> DeadUsers;
+
+  /// Uses which will become dead if can promote the alloca.
+  SmallVector<Use *, 8> DeadUseIfPromotable;
 
   /// Operands which will become dead if we rewrite the alloca.
   ///
@@ -927,8 +935,10 @@ private:
   // FIXME: What about debug intrinsics? This matches old behavior, but
   // doesn't make sense.
   void visitIntrinsicInst(IntrinsicInst &II) {
-    if (II.isDroppable())
+    if (II.isDroppable()) {
+      AS.DeadUseIfPromotable.push_back(U);
       return;
+    }
 
     if (!IsOffsetKnown)
       return PI.setAborted(&II);
@@ -1480,7 +1490,7 @@ static Value *getNaturalGEPRecursively(IRBuilderTy &IRB, const DataLayout &DL,
     }
     APInt ElementSize(Offset.getBitWidth(), ElementSizeInBits / 8);
     APInt NumSkippedElements = Offset.sdiv(ElementSize);
-    if (NumSkippedElements.ugt(VecTy->getElementCount().Min))
+    if (NumSkippedElements.ugt(VecTy->getElementCount().getKnownMinValue()))
       return nullptr;
     Offset -= NumSkippedElements * ElementSize;
     Indices.push_back(IRB.getInt(NumSkippedElements));
@@ -1811,13 +1821,13 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
       std::max(S.beginOffset(), P.beginOffset()) - P.beginOffset();
   uint64_t BeginIndex = BeginOffset / ElementSize;
   if (BeginIndex * ElementSize != BeginOffset ||
-      BeginIndex >= Ty->getElementCount().Min)
+      BeginIndex >= Ty->getElementCount().getKnownMinValue())
     return false;
   uint64_t EndOffset =
       std::min(S.endOffset(), P.endOffset()) - P.beginOffset();
   uint64_t EndIndex = EndOffset / ElementSize;
   if (EndIndex * ElementSize != EndOffset ||
-      EndIndex > Ty->getElementCount().Min)
+      EndIndex > Ty->getElementCount().getKnownMinValue())
     return false;
 
   assert(EndIndex > BeginIndex && "Empty vector!");
@@ -1946,7 +1956,8 @@ static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL) {
              "All non-integer types eliminated!");
       assert(LHSTy->getElementType()->isIntegerTy() &&
              "All non-integer types eliminated!");
-      return RHSTy->getElementCount().Min < LHSTy->getElementCount().Min;
+      return RHSTy->getElementCount().getKnownMinValue() <
+             LHSTy->getElementCount().getKnownMinValue();
     };
     llvm::sort(CandidateTys, RankVectorTypes);
     CandidateTys.erase(
@@ -2191,9 +2202,10 @@ static Value *extractVector(IRBuilderTy &IRB, Value *V, unsigned BeginIndex,
                             unsigned EndIndex, const Twine &Name) {
   auto *VecTy = cast<VectorType>(V->getType());
   unsigned NumElements = EndIndex - BeginIndex;
-  assert(NumElements <= VecTy->getElementCount().Min && "Too many elements!");
+  assert(NumElements <= VecTy->getElementCount().getKnownMinValue() &&
+         "Too many elements!");
 
-  if (NumElements == VecTy->getElementCount().Min)
+  if (NumElements == VecTy->getElementCount().getKnownMinValue())
     return V;
 
   if (NumElements == 1) {
@@ -2227,7 +2239,8 @@ static Value *insertVector(IRBuilderTy &IRB, Value *Old, Value *V,
     return V;
   }
 
-  assert(Ty->getElementCount().Min <= VecTy->getElementCount().Min &&
+  assert(Ty->getElementCount().getKnownMinValue() <=
+             VecTy->getElementCount().getKnownMinValue() &&
          "Too many elements!");
   if (Ty->getElementCount() == VecTy->getElementCount()) {
     assert(V->getType() == VecTy && "Vector type mismatch");
@@ -4355,6 +4368,13 @@ AllocaInst *SROA::rewritePartition(AllocaInst &AI, AllocaSlices &AS,
     }
 
   if (Promotable) {
+    for (Use *U : AS.getDeadUsesIfPromotable()) {
+      auto *OldInst = dyn_cast<Instruction>(U->get());
+      Value::dropDroppableUse(*U);
+      if (OldInst)
+        if (isInstructionTriviallyDead(OldInst))
+          DeadInsts.insert(OldInst);
+    }
     if (PHIUsers.empty() && SelectUsers.empty()) {
       // Promote the alloca.
       PromotableAllocas.push_back(NewAI);

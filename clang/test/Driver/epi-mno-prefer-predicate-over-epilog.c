@@ -12,8 +12,8 @@
 // RUN:     -### 2>&1 | FileCheck --check-prefix=RV64-EPI-DISABLE %s
 
 // RV32-NOT: "-prefer-predicate-over-epilog
-// RV32-EPI-DEFAULT: "-mllvm" "-prefer-predicate-over-epilog=true"
-// RV32-EPI-DISABLE: "-mllvm" "-prefer-predicate-over-epilog=false"
+// RV32-EPI-DEFAULT: "-mllvm" "--prefer-predicate-over-epilogue=predicate-dont-vectorize"
+// RV32-EPI-DISABLE: "-mllvm" "--prefer-predicate-over-epilogue=scalar-epilogue"
 // RV64-NOT: "-prefer-predicate-over-epilog
-// RV64-EPI-DEFAULT: "-mllvm" "-prefer-predicate-over-epilog=true"
-// RV64-EPI-DISABLE: "-mllvm" "-prefer-predicate-over-epilog=false"
+// RV64-EPI-DEFAULT: "-mllvm" "--prefer-predicate-over-epilogue=predicate-dont-vectorize"
+// RV64-EPI-DISABLE: "-mllvm" "--prefer-predicate-over-epilogue=scalar-epilogue"

@@ -50,7 +50,7 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // would be fixed once the cost model has support for scalable vectors.
     MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0);
 
-    for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
+    for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
       MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
     }
     return MinCost;
@@ -70,7 +70,7 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // FIXME: For scalable vectors for now we compute the MinCost based on Min
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
-    for (int i = 0, e = VTy->getElementCount().Min; i < e; ++i) {
+    for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
       MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
       MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i);
     }
@@ -84,7 +84,7 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     assert(VTy && SubVTy && "Can only extract subvectors from vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
-    unsigned NumSubElts = SubVTy->getElementCount().Min;
+    unsigned NumSubElts = SubVTy->getElementCount().getKnownMinValue();
     unsigned MinCost = 0;
     // Subvector extraction cost is equal to the cost of extracting element
     // from the source type plus the cost of inserting them into the result
@@ -107,7 +107,7 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     assert(VTy && SubVTy && "Can only insert subvectors into vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
-    unsigned NumSubElts = SubVTy->getElementCount().Min;
+    unsigned NumSubElts = SubVTy->getElementCount().getKnownMinValue();
     unsigned MinCost = 0;
     // Subvector insertion cost is equal to the cost of extracting element
     // from the source type plus the cost of inserting them into the result
