@@ -758,9 +758,7 @@ namespace {
     /// is legal or custom before legalizing operations, and whether is
     /// legal (but not custom) after legalization.
     bool hasOperation(unsigned Opcode, EVT VT) {
-      if (LegalOperations)
-        return TLI.isOperationLegal(Opcode, VT);
-      return TLI.isOperationLegalOrCustom(Opcode, VT);
+      return TLI.isOperationLegalOrCustom(Opcode, VT, LegalOperations);
     }
 
   public:
@@ -19201,7 +19199,8 @@ static SDValue getSubVectorSrc(SDValue V, SDValue Index, EVT SubVT) {
 }
 
 static SDValue narrowInsertExtractVectorBinOp(SDNode *Extract,
-                                              SelectionDAG &DAG) {
+                                              SelectionDAG &DAG,
+                                              bool LegalOperations) {
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   SDValue BinOp = Extract->getOperand(0);
   unsigned BinOpcode = BinOp.getOpcode();
@@ -19215,7 +19214,7 @@ static SDValue narrowInsertExtractVectorBinOp(SDNode *Extract,
 
   SDValue Index = Extract->getOperand(1);
   EVT SubVT = Extract->getValueType(0);
-  if (!TLI.isOperationLegalOrCustom(BinOpcode, SubVT))
+  if (!TLI.isOperationLegalOrCustom(BinOpcode, SubVT, LegalOperations))
     return SDValue();
 
   SDValue Sub0 = getSubVectorSrc(Bop0, Index, SubVT);
@@ -19236,11 +19235,12 @@ static SDValue narrowInsertExtractVectorBinOp(SDNode *Extract,
 
 /// If we are extracting a subvector produced by a wide binary operator try
 /// to use a narrow binary operator and/or avoid concatenation and extraction.
-static SDValue narrowExtractedVectorBinOp(SDNode *Extract, SelectionDAG &DAG) {
+static SDValue narrowExtractedVectorBinOp(SDNode *Extract, SelectionDAG &DAG,
+                                          bool LegalOperations) {
   // TODO: Refactor with the caller (visitEXTRACT_SUBVECTOR), so we can share
   // some of these bailouts with other transforms.
 
-  if (SDValue V = narrowInsertExtractVectorBinOp(Extract, DAG))
+  if (SDValue V = narrowInsertExtractVectorBinOp(Extract, DAG, LegalOperations))
     return V;
 
   // The extract index must be a constant, so we can map it to a concat operand.
@@ -19589,7 +19589,7 @@ SDValue DAGCombiner::visitEXTRACT_SUBVECTOR(SDNode *N) {
         N->getOperand(1));
   }
 
-  if (SDValue NarrowBOp = narrowExtractedVectorBinOp(N, DAG))
+  if (SDValue NarrowBOp = narrowExtractedVectorBinOp(N, DAG, LegalOperations))
     return NarrowBOp;
 
   if (SimplifyDemandedVectorElts(SDValue(N, 0)))
@@ -20958,7 +20958,8 @@ SDValue DAGCombiner::SimplifyVBinOp(SDNode *N) {
     SDValue Z = LHS.getOperand(2);
     EVT NarrowVT = X.getValueType();
     if (NarrowVT == Y.getValueType() &&
-        TLI.isOperationLegalOrCustomOrPromote(Opcode, NarrowVT)) {
+        TLI.isOperationLegalOrCustomOrPromote(Opcode, NarrowVT,
+                                              LegalOperations)) {
       // (binop undef, undef) may not return undef, so compute that result.
       SDLoc DL(N);
       SDValue VecC =
