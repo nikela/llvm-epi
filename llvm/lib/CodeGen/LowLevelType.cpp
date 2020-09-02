@@ -20,7 +20,7 @@ using namespace llvm;
 LLT llvm::getLLTForType(Type &Ty, const DataLayout &DL) {
   if (auto VTy = dyn_cast<VectorType>(&Ty)) {
     auto NumElements = isa<FixedVectorType>(VTy)
-                           ? VTy->getNumElements()
+                           ? cast<FixedVectorType>(VTy)->getNumElements()
                            : cast<ScalableVectorType>(VTy)->getMinNumElements();
     bool Scalable = isa<ScalableVectorType>(VTy);
     LLT ScalarTy = getLLTForType(*VTy->getElementType(), DL);

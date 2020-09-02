@@ -2193,9 +2193,9 @@ static bool collectInsertionElements(Value *V, unsigned Shift,
 /// Into two insertelements that do "buildvector{%inc, %inc5}".
 static Value *optimizeIntegerToVectorInsertions(BitCastInst &CI,
                                                 InstCombinerImpl &IC) {
-  auto *DestVecTy = cast<VectorType>(CI.getType());
-  if (isa<ScalableVectorType>(DestVecTy))
+  if (isa<ScalableVectorType>(CI.getType()))
     return nullptr;
+  auto *DestVecTy = cast<FixedVectorType>(CI.getType());
 
   Value *IntInput = CI.getOperand(0);
 
