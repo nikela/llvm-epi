@@ -131,7 +131,6 @@ public:
   IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI,
                           ElementCount Factor)
       : IntrinsicCostAttributes(Id, CI, Factor.getKnownMinValue()) {
-    assert(!Factor.isScalable());
   }
 
   IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI,

@@ -3700,7 +3700,6 @@ static void cse(BasicBlock *BB) {
 unsigned LoopVectorizationCostModel::getVectorCallCost(CallInst *CI,
                                                        ElementCount VF,
                                                        bool &NeedToScalarize) {
-  assert(!VF.isScalable() && "scalable vectors not yet supported.");
   Function *F = CI->getCalledFunction();
   Type *ScalarRetTy = CI->getType();
   SmallVector<Type *, 4> Tys, ScalarTys;
@@ -5253,7 +5252,6 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPUser &ArgOperands,
       // Use vector version of the intrinsic.
       Type *TysForDecl[] = {CI->getType()};
       if (VF.isVector()) {
-        assert(!VF.isScalable() && "VF is assumed to be non scalable.");
         TysForDecl[0] = VectorType::get(CI->getType()->getScalarType(), VF);
       }
       VectorF = Intrinsic::getDeclaration(M, ID, TysForDecl);
