@@ -1428,9 +1428,12 @@ AliasResult BasicAAResult::aliasGEP(
                isa<StructType>(cast<PointerType>(Ty)->getElementType());
       };
 
-      auto GEPIndexesField = [](const GEPOperator *GEP) {
+      auto GEPIndexesScalableVectorField = [](const GEPOperator *GEP) {
         if (!GEP->isInBounds() || GEP->getNumIndices() != 2 ||
             !GEP->hasAllConstantIndices())
+          return false;
+
+        if (!isa<ScalableVectorType>(GEP->getResultElementType()))
           return false;
 
         // This is unlikely but just in case.
@@ -1451,7 +1454,7 @@ AliasResult BasicAAResult::aliasGEP(
 
       // FIXME: This is perhaps too specific.
       if (UnderlyingV1 == V2 && IsPointerToStruct(UnderlyingV1->getType()) &&
-          GEPIndexesField(GEP1))
+          GEPIndexesScalableVectorField(GEP1))
         return NoAlias;
 
       return MayAlias;
