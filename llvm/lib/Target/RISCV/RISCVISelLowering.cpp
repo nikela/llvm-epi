@@ -1623,36 +1623,62 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
       break;
-    case CmpInst::ICMP_UGT:
-      VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
+    case CmpInst::ICMP_UGT: {
+      SDValue RHS = Op.getOperand(2);
+      if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        EPIIntNo =
+            IsMasked ? Intrinsic::epi_vmsgtu_mask : Intrinsic::epi_vmsgtu_mask;
+      } else {
+        VOpsPerm = {2, 1};
+        EPIIntNo =
+            IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
+      }
       break;
+    }
     case CmpInst::ICMP_UGE:
+      // Note: The ISA does not provide vmsgeu.vx to fold a scalar.
       VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsleu_mask : Intrinsic::epi_vmsleu;
       break;
-    case CmpInst::ICMP_ULT:
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
+    case CmpInst::ICMP_ULT: {
+      SDValue LHS = Op.getOperand(1);
+      if (LHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        VOpsPerm = {2, 1};
+        EPIIntNo =
+            IsMasked ? Intrinsic::epi_vmsgtu_mask : Intrinsic::epi_vmsgtu;
+      } else {
+        EPIIntNo =
+            IsMasked ? Intrinsic::epi_vmsltu_mask : Intrinsic::epi_vmsltu;
+      }
       break;
+    }
     case CmpInst::ICMP_ULE:
+      // Note: The ISA does not provide vmsgeu.vx so we can't flip the operands
+      // to fold a scalar.
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsleu_mask : Intrinsic::epi_vmsleu;
       break;
-    case CmpInst::ICMP_SGT:
-      VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
+    case CmpInst::ICMP_SGT: {
+      SDValue RHS = Op.getOperand(2);
+      if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        EPIIntNo =
+            IsMasked ? Intrinsic::epi_vmsgt_mask : Intrinsic::epi_vmsgt_mask;
+      } else {
+        VOpsPerm = {2, 1};
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
+      }
       break;
+    }
     case CmpInst::ICMP_SGE:
+      // Note: The ISA does not provide vmsge.vx to fold a scalar.
       VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsle_mask : Intrinsic::epi_vmsle;
       break;
     case CmpInst::ICMP_SLT:
       EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
       break;
     case CmpInst::ICMP_SLE:
+      // Note: The ISA does not provide vmsge.vx so we can't flip the operands
+      // to fold a scalar.
       EPIIntNo = IsMasked ? Intrinsic::epi_vmsle_mask : Intrinsic::epi_vmsle;
       break;
     }
@@ -1675,22 +1701,46 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfeq_mask : Intrinsic::epi_vmfeq;
       break;
-    case FCmpInst::FCMP_OGT:
-      VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
+    case FCmpInst::FCMP_OGT: {
+      SDValue RHS = Op.getOperand(2);
+      if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfgt_mask : Intrinsic::epi_vmfgt;
+      } else {
+        VOpsPerm = {2, 1};
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
+      }
       break;
-    case FCmpInst::FCMP_OGE:
-      VOpsPerm = {2, 1};
-      ScalarOpNo = 1;
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
+    }
+    case FCmpInst::FCMP_OGE: {
+      SDValue RHS = Op.getOperand(2);
+      if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfge_mask : Intrinsic::epi_vmfge;
+      } else {
+        VOpsPerm = {2, 1};
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
+      }
       break;
-    case FCmpInst::FCMP_OLT:
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
+    }
+    case FCmpInst::FCMP_OLT: {
+      SDValue LHS = Op.getOperand(1);
+      if (LHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        VOpsPerm = {2, 1};
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfgt_mask : Intrinsic::epi_vmfgt;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmflt_mask : Intrinsic::epi_vmflt;
+      }
       break;
-    case FCmpInst::FCMP_OLE:
-      EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
+    }
+    case FCmpInst::FCMP_OLE: {
+      SDValue LHS = Op.getOperand(1);
+      if (LHS.getOpcode() == ISD::SPLAT_VECTOR) {
+        VOpsPerm = {2, 1};
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfge_mask : Intrinsic::epi_vmfge;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vmfle_mask : Intrinsic::epi_vmfle;
+      }
       break;
+    }
     case FCmpInst::FCMP_ONE:
       report_fatal_error("Unimplemented case FCMP_ONE for intrinsic vp_fcmp");
       break;
@@ -1700,6 +1750,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     case FCmpInst::FCMP_UEQ:
       report_fatal_error("Unimplemented case FCMP_UEQ for intrinsic vp_fcmp");
       break;
+      // FIXME: Fold scalar operands also in unordered comparisons.
     case FCmpInst::FCMP_UGT:
       return LowerVPUnorderedFCmp(Intrinsic::epi_vmfgt_mask, Op.getOperand(1),
                                   Op.getOperand(2), Op.getOperand(EVLOpNo),
