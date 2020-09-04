@@ -8794,7 +8794,7 @@ void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
 }
 
 Value *InnerLoopVectorizer::createEVLMask(Value *EVL) {
-  Value *EVLSplat = Builder.CreateVectorSplat({VF, isScalable()}, EVL, "evl");
+  Value *EVLSplat = Builder.CreateVectorSplat(VF, EVL, "evl");
   Value *StepVec =
       Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector,
                               EVLSplat->getType(), {}, nullptr, "step.vec");
