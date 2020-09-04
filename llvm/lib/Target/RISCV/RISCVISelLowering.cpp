@@ -1489,6 +1489,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     if (IsLogical) {
+      ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmand;
       if (IsMasked)
         report_fatal_error("Unimplemented masked logical AND operation");
@@ -1502,6 +1503,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     if (IsLogical) {
+      ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmor;
       if (IsMasked)
         report_fatal_error("Unimplemented masked logical OR operation");
@@ -1515,6 +1517,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     EVLOpNo = 4;
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     if (IsLogical) {
+      ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmxor;
       if (IsMasked)
         report_fatal_error("Unimplemented masked logical XOR operation");
