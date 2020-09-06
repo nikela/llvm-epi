@@ -72,14 +72,14 @@ static const uptr kAllocBegMagic = 0xCC6E96B9;
 
 struct ChunkHeader {
   // 1-st 8 bytes.
-  u32 chunk_state       : 8;  // Must be first.
-  u32 alloc_tid         : 24;
+  u32 chunk_state : 8;  // Must be first.
+  u32 alloc_tid : 24;
 
-  u32 free_tid          : 24;
-  u32 from_memalign     : 1;
-  u32 alloc_type        : 2;
-  u32 rz_log            : 3;
-  u32 lsan_tag          : 2;
+  u32 free_tid : 24;
+  u32 from_memalign : 1;
+  u32 alloc_type : 2;
+  u32 rz_log : 3;
+  u32 lsan_tag : 2;
   // 2-nd 8 bytes
   // This field is used for small sizes. For large sizes it is equal to
   // SizeClassMap::kMaxSize and the actual size is stored in the
@@ -101,14 +101,15 @@ static const uptr kChunkHeader2Size = sizeof(ChunkBase) - kChunkHeaderSize;
 COMPILER_CHECK(kChunkHeaderSize == 16);
 COMPILER_CHECK(kChunkHeader2Size <= 16);
 
-// Every chunk of memory allocated by this allocator can be in one of 3 states:
-// CHUNK_AVAILABLE: the chunk is in the free list and ready to be allocated.
-// CHUNK_ALLOCATED: the chunk is allocated and not yet freed.
-// CHUNK_QUARANTINE: the chunk was freed and put into quarantine zone.
 enum {
-  CHUNK_AVAILABLE  = 0,  // 0 is the default value even if we didn't set it.
-  CHUNK_ALLOCATED  = 2,
-  CHUNK_QUARANTINE = 3
+  // Either just allocated by underlying allocator, but AsanChunk is not yet
+  // ready, or almost returned to undelying allocator and AsanChunk is already
+  // meaningless.
+  CHUNK_INVALID = 0,
+  // The chunk is allocated and not yet freed.
+  CHUNK_ALLOCATED = 2,
+  // The chunk was freed and put into quarantine zone.
+  CHUNK_QUARANTINE = 3,
 };
 
 struct AsanChunk: ChunkBase {
@@ -117,7 +118,7 @@ struct AsanChunk: ChunkBase {
     if (user_requested_size != SizeClassMap::kMaxSize)
       return user_requested_size;
     return *reinterpret_cast<uptr *>(
-               get_allocator().GetMetaData(AllocBeg(locked_version)));
+        get_allocator().GetMetaData(AllocBeg(locked_version)));
   }
   void *AllocBeg(bool locked_version = false) {
     if (from_memalign) {
@@ -141,7 +142,7 @@ struct QuarantineCallback {
 
   void Recycle(AsanChunk *m) {
     CHECK_EQ(m->chunk_state, CHUNK_QUARANTINE);
-    atomic_store((atomic_uint8_t*)m, CHUNK_AVAILABLE, memory_order_relaxed);
+    atomic_store((atomic_uint8_t *)m, CHUNK_INVALID, memory_order_relaxed);
     CHECK_NE(m->alloc_tid, kInvalidTid);
     CHECK_NE(m->free_tid, kInvalidTid);
     PoisonShadow(m->Beg(),
@@ -507,7 +508,7 @@ struct Allocator {
     m->free_tid = kInvalidTid;
     m->from_memalign = user_beg != beg_plus_redzone;
     if (alloc_beg != chunk_beg) {
-      CHECK_LE(alloc_beg+ 2 * sizeof(uptr), chunk_beg);
+      CHECK_LE(alloc_beg + 2 * sizeof(uptr), chunk_beg);
       reinterpret_cast<uptr *>(alloc_beg)[0] = kAllocBegMagic;
       reinterpret_cast<uptr *>(alloc_beg)[1] = chunk_beg;
     }
@@ -721,7 +722,8 @@ struct Allocator {
 
   // Assumes alloc_beg == allocator.GetBlockBegin(alloc_beg).
   AsanChunk *GetAsanChunk(void *alloc_beg) {
-    if (!alloc_beg) return nullptr;
+    if (!alloc_beg)
+      return nullptr;
     if (!allocator.FromPrimary(alloc_beg)) {
       uptr *meta = reinterpret_cast<uptr *>(allocator.GetMetaData(alloc_beg));
       AsanChunk *m = reinterpret_cast<AsanChunk *>(meta[1]);
@@ -737,11 +739,13 @@ struct Allocator {
   }
 
   AsanChunk *GetAsanChunkDebug(void *alloc_beg) {
-    if (!alloc_beg) return nullptr;
+    if (!alloc_beg)
+      return nullptr;
     if (!allocator.FromPrimary(alloc_beg)) {
       uptr *meta = reinterpret_cast<uptr *>(allocator.GetMetaData(alloc_beg));
       AsanChunk *m = reinterpret_cast<AsanChunk *>(meta[1]);
-      Printf("GetAsanChunkDebug1 alloc_beg %p meta %p m %p\n", alloc_beg, meta, m);
+      Printf("GetAsanChunkDebug1 alloc_beg %p meta %p m %p\n", alloc_beg, meta,
+             m);
       return m;
     }
     uptr *alloc_magic = reinterpret_cast<uptr *>(alloc_beg);
@@ -753,7 +757,6 @@ struct Allocator {
       return reinterpret_cast<AsanChunk *>(alloc_magic[1]);
     return reinterpret_cast<AsanChunk *>(alloc_beg);
   }
-
 
   AsanChunk *GetAsanChunkByAddr(uptr p) {
     void *alloc_beg = allocator.GetBlockBegin(reinterpret_cast<void *>(p));
@@ -770,7 +773,8 @@ struct Allocator {
   AsanChunk *GetAsanChunkByAddrFastLockedDebug(uptr p) {
     void *alloc_beg =
         allocator.GetBlockBeginFastLockedDebug(reinterpret_cast<void *>(p));
-    Printf("GetAsanChunkByAddrFastLockedDebug p %p alloc_beg %p\n", p, alloc_beg);
+    Printf("GetAsanChunkByAddrFastLockedDebug p %p alloc_beg %p\n", p,
+           alloc_beg);
     return GetAsanChunkDebug(alloc_beg);
   }
 
@@ -843,7 +847,7 @@ static AsanAllocator &get_allocator() {
 }
 
 bool AsanChunkView::IsValid() const {
-  return chunk_ && chunk_->chunk_state != CHUNK_AVAILABLE;
+  return chunk_ && chunk_->chunk_state != CHUNK_INVALID;
 }
 bool AsanChunkView::IsAllocated() const {
   return chunk_ && chunk_->chunk_state == CHUNK_ALLOCATED;
@@ -1035,7 +1039,7 @@ void AsanSoftRssLimitExceededCallback(bool limit_exceeded) {
   instance.SetRssLimitExceeded(limit_exceeded);
 }
 
-} // namespace __asan
+}  // namespace __asan
 
 // --- Implementation of LSan-specific functions --- {{{1
 namespace __lsan {
@@ -1072,7 +1076,8 @@ extern "C" SANITIZER_WEAK_ATTRIBUTE const char *__lsan_current_stage;
 
 void GetUserBeginDebug(uptr chunk) {
   Printf("GetUserBeginDebug1 chunk %p\n", chunk);
-  __asan::AsanChunk *m = __asan::instance.GetAsanChunkByAddrFastLockedDebug(chunk);
+  __asan::AsanChunk *m =
+      __asan::instance.GetAsanChunkByAddrFastLockedDebug(chunk);
   Printf("GetUserBeginDebug2 m     %p\n", m);
 }
 

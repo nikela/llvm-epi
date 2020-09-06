@@ -631,6 +631,9 @@ HexagonTargetLowering::createHvxPrefixPred(SDValue PredV, const SDLoc &dl,
     if (!ZeroFill)
       return S;
     // Fill the bytes beyond BlockLen with 0s.
+    // V6_pred_scalar2 cannot fill the entire predicate, so it only works
+    // when BlockLen < HwLen.
+    assert(BlockLen < HwLen && "vsetq(v1) prerequisite");
     MVT BoolTy = MVT::getVectorVT(MVT::i1, HwLen);
     SDValue Q = getInstr(Hexagon::V6_pred_scalar2, dl, BoolTy,
                          {DAG.getConstant(BlockLen, dl, MVT::i32)}, DAG);
@@ -1094,6 +1097,7 @@ HexagonTargetLowering::insertHvxSubvectorPred(SDValue VecV, SDValue SubV,
   // ByteVec is the target vector VecV rotated in such a way that the
   // subvector should be inserted at index 0. Generate a predicate mask
   // and use vmux to do the insertion.
+  assert(BlockLen < HwLen && "vsetq(v1) prerequisite");
   MVT BoolTy = MVT::getVectorVT(MVT::i1, HwLen);
   SDValue Q = getInstr(Hexagon::V6_pred_scalar2, dl, BoolTy,
                        {DAG.getConstant(BlockLen, dl, MVT::i32)}, DAG);
@@ -1704,18 +1708,19 @@ SDValue
 HexagonTargetLowering::LowerHvxMaskedOp(SDValue Op, SelectionDAG &DAG) const {
   const SDLoc &dl(Op);
   unsigned HwLen = Subtarget.getVectorLength();
+  MachineFunction &MF = DAG.getMachineFunction();
   auto *MaskN = cast<MaskedLoadStoreSDNode>(Op.getNode());
   SDValue Mask = MaskN->getMask();
   SDValue Chain = MaskN->getChain();
   SDValue Base = MaskN->getBasePtr();
-  auto *MemOp = MaskN->getMemOperand();
+  auto *MemOp = MF.getMachineMemOperand(MaskN->getMemOperand(), 0, HwLen);
 
   unsigned Opc = Op->getOpcode();
   assert(Opc == ISD::MLOAD || Opc == ISD::MSTORE);
 
   if (Opc == ISD::MLOAD) {
     MVT ValTy = ty(Op);
-    SDValue Load = DAG.getLoad(ValTy, dl, Chain, Base, MaskN->getMemOperand());
+    SDValue Load = DAG.getLoad(ValTy, dl, Chain, Base, MemOp);
     SDValue Thru = cast<MaskedLoadSDNode>(MaskN)->getPassThru();
     if (isUndef(Thru))
       return Load;
@@ -1905,6 +1910,7 @@ HexagonTargetLowering::WidenHvxStore(SDValue Op, SelectionDAG &DAG) const {
   }
   assert(ty(Value).getVectorNumElements() == HwLen);  // Paranoia
 
+  assert(ValueLen < HwLen && "vsetq(v1) prerequisite");
   MVT BoolTy = MVT::getVectorVT(MVT::i1, HwLen);
   SDValue StoreQ = getInstr(Hexagon::V6_pred_scalar2, dl, BoolTy,
                             {DAG.getConstant(ValueLen, dl, MVT::i32)}, DAG);
@@ -1917,16 +1923,32 @@ HexagonTargetLowering::WidenHvxStore(SDValue Op, SelectionDAG &DAG) const {
 SDValue
 HexagonTargetLowering::WidenHvxTruncate(SDValue Op, SelectionDAG &DAG) const {
   const SDLoc &dl(Op);
-  MVT ResTy = ty(Op);
   unsigned HwWidth = 8*Subtarget.getVectorLength();
-  unsigned ResWidth = ResTy.getSizeInBits();
-  assert(HwWidth % ResWidth == 0);
 
-  unsigned WideNumElem = ResTy.getVectorNumElements() * (HwWidth / ResWidth);
-  MVT WideTy = MVT::getVectorVT(ResTy.getVectorElementType(), WideNumElem);
-  SDValue WideOp = DAG.getNode(HexagonISD::VPACKL, dl, WideTy,
-                               Op.getOperand(0));
-  return WideOp;
+  auto getFactor = [HwWidth](MVT Ty) {
+    unsigned Width = Ty.getSizeInBits();
+    assert(HwWidth % Width == 0);
+    return HwWidth / Width;
+  };
+
+  auto getWideTy = [getFactor](MVT Ty) {
+    unsigned WideLen = Ty.getVectorNumElements() * getFactor(Ty);
+    return MVT::getVectorVT(Ty.getVectorElementType(), WideLen);
+  };
+
+  SDValue Op0 = Op.getOperand(0);
+  MVT ResTy = ty(Op);
+  MVT OpTy = ty(Op0);
+  if (Subtarget.isHVXVectorType(OpTy))
+    return DAG.getNode(HexagonISD::VPACKL, dl, getWideTy(ResTy), Op0);
+
+  MVT WideOpTy = getWideTy(OpTy);
+  SmallVector<SDValue, 4> Concats = {Op0};
+  for (int i = 0, e = getFactor(OpTy) - 1; i != e; ++i)
+    Concats.push_back(DAG.getUNDEF(OpTy));
+
+  SDValue Cat = DAG.getNode(ISD::CONCAT_VECTORS, dl, WideOpTy, Concats);
+  return DAG.getNode(HexagonISD::VPACKL, dl, getWideTy(ResTy), Cat);
 }
 
 SDValue
