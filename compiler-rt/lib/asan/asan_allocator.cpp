@@ -71,13 +71,11 @@ static AsanAllocator &get_allocator();
 static const uptr kAllocBegMagic = 0xCC6E96B9;
 
 struct ChunkHeader {
-  atomic_uint32_t chunk_state;
-  u32 alloc_tid : 24;
-  u32 from_memalign : 1;
-  u32 alloc_type : 2;
-  u32 rz_log : 3;
-  u32 lsan_tag : 2;
-  // 2-nd 8 bytes
+  atomic_uint8_t chunk_state;
+  u8 from_memalign : 1;
+  u8 alloc_type : 2;
+  u8 rz_log : 3;
+  u8 lsan_tag : 2;
   // This field is used for small sizes. For large sizes it is equal to
   // SizeClassMap::kMaxSize and the actual size is stored in the
   // SecondaryAllocator's metadata.
@@ -85,6 +83,7 @@ struct ChunkHeader {
   // align < 8 -> 0
   // else      -> log2(min(align, 512)) - 2
   u32 user_requested_alignment_log : 3;
+  u32 alloc_tid;
   atomic_uint32_t alloc_context_id;
 };
 
@@ -139,7 +138,7 @@ struct QuarantineCallback {
   }
 
   void Recycle(AsanChunk *m) {
-    u32 old_chunk_state = CHUNK_QUARANTINE;
+    u8 old_chunk_state = CHUNK_QUARANTINE;
     if (!atomic_compare_exchange_strong(&m->chunk_state, &old_chunk_state,
                                         CHUNK_INVALID, memory_order_acquire)) {
       CHECK_EQ(old_chunk_state, CHUNK_QUARANTINE);
@@ -387,9 +386,8 @@ struct Allocator {
                          AsanChunk *right_chunk) {
     // Prefer an allocated chunk over freed chunk and freed chunk
     // over available chunk.
-    u32 left_state =
-        atomic_load(&left_chunk->chunk_state, memory_order_relaxed);
-    u32 right_state =
+    u8 left_state = atomic_load(&left_chunk->chunk_state, memory_order_relaxed);
+    u8 right_state =
         atomic_load(&right_chunk->chunk_state, memory_order_relaxed);
     if (left_state != right_state) {
       if (left_state == CHUNK_ALLOCATED)
@@ -577,7 +575,7 @@ struct Allocator {
   // available and quarantined chunks. Return true on success, false otherwise.
   bool AtomicallySetQuarantineFlagIfAllocated(AsanChunk *m, void *ptr,
                                               BufferedStackTrace *stack) {
-    u32 old_chunk_state = CHUNK_ALLOCATED;
+    u8 old_chunk_state = CHUNK_ALLOCATED;
     // Flip the chunk_state atomically to avoid race on double-free.
     if (!atomic_compare_exchange_strong(&m->chunk_state, &old_chunk_state,
                                         CHUNK_QUARANTINE,
@@ -689,7 +687,7 @@ struct Allocator {
 
     void *new_ptr = Allocate(new_size, 8, stack, FROM_MALLOC, true);
     if (new_ptr) {
-      u32 chunk_state = atomic_load(&m->chunk_state, memory_order_acquire);
+      u8 chunk_state = atomic_load(&m->chunk_state, memory_order_acquire);
       if (chunk_state != CHUNK_ALLOCATED)
         ReportInvalidFree(old_ptr, chunk_state, stack);
       CHECK_NE(REAL(memcpy), nullptr);
@@ -716,8 +714,7 @@ struct Allocator {
     return ptr;
   }
 
-  void ReportInvalidFree(void *ptr, u32 chunk_state,
-                         BufferedStackTrace *stack) {
+  void ReportInvalidFree(void *ptr, u8 chunk_state, BufferedStackTrace *stack) {
     if (chunk_state == CHUNK_QUARANTINE)
       ReportDoubleFree((uptr)ptr, stack);
     else
