@@ -202,6 +202,13 @@ bool EPIFoldBroadcast::foldBroadcasts(Function &F) {
       NewOps = {CBUser->getArgOperand(0), CBUser->getArgOperand(1), FI.Scalar,
                 CBUser->getArgOperand(3), CBUser->getArgOperand(4)};
       break;
+    case RISCVEPIIntrinsicsTable::EPICIDBinaryMaskIn:
+      LLVM_DEBUG(dbgs() << "Binary intrinsic with mask input (without merge)\n");
+      NewIntrinsicTypes = {FTy->getReturnType(), ScalarTy,
+                           FTy->getParamType(2)};
+      NewOps = {CBUser->getArgOperand(0), FI.Scalar, CBUser->getArgOperand(2),
+                CBUser->getArgOperand(3)};
+      break;
     case RISCVEPIIntrinsicsTable::EPICIDTernary:
       LLVM_DEBUG(dbgs() << "Ternary intrinsic\n");
       NewIntrinsicTypes = {FTy->getReturnType(), ScalarTy};

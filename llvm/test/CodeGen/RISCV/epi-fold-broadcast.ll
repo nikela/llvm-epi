@@ -99,3 +99,39 @@ entry:
 declare <vscale x 1 x i64> @llvm.epi.vmv.v.x.nxv1i64.i64(i64, i64)
 
 declare <vscale x 1 x i64> @llvm.epi.vsll.nxv1i64.nxv1i64(<vscale x 1 x i64>, <vscale x 1 x i64>, i64)
+
+define dso_local <vscale x 1 x i64> @test_vmerge(<vscale x 1 x i64> %va, i64 %b, <vscale x 1 x i1> %m, i64 %gvl)
+; NOFOLD-LABEL: @test_vmerge(
+; NOFOLD-NEXT:    [[VB:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vmv.v.x.nxv1i64.i64(i64 [[B:%.*]], i64 [[GVL:%.*]])
+; NOFOLD-NEXT:    [[X:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vmerge.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[VA:%.*]], <vscale x 1 x i64> [[VB]], <vscale x 1 x i1> [[M:%.*]], i64 [[GVL]])
+; NOFOLD-NEXT:    ret <vscale x 1 x i64> [[X]]
+;
+; FOLD-LABEL: @test_vmerge(
+; FOLD-NEXT:    [[TMP1:%.*]] = call <vscale x 1 x i64> @llvm.epi.vmerge.nxv1i64.i64.nxv1i1(<vscale x 1 x i64> [[VA:%.*]], i64 [[B:%.*]], <vscale x 1 x i1> [[M:%.*]], i64 [[GVL:%.*]])
+; FOLD-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
+;
+{
+  %vb = tail call <vscale x 1 x i64> @llvm.epi.vmv.v.x.nxv1i64.i64(i64 %b, i64 %gvl)
+  %x = tail call <vscale x 1 x i64> @llvm.epi.vmerge.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> %va, <vscale x 1 x i64> %vb, <vscale x 1 x i1> %m, i64 %gvl)
+  ret <vscale x 1 x i64> %x
+}
+
+declare <vscale x 1 x i64> @llvm.epi.vmerge.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> %va, <vscale x 1 x i64> %vb, <vscale x 1 x i1> %m, i64 %gvl)
+
+define dso_local <vscale x 1 x double> @test_vfmerge(<vscale x 1 x double> %va, double %b, <vscale x 1 x i1> %m, i64 %gvl)
+; NOFOLD-LABEL: @test_vfmerge(
+; NOFOLD-NEXT:    [[VB:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vfmv.v.f.nxv1f64.f64(double [[B:%.*]], i64 [[GVL:%.*]])
+; NOFOLD-NEXT:    [[X:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vfmerge.nxv1f64.nxv1f64.nxv1i1(<vscale x 1 x double> [[VA:%.*]], <vscale x 1 x double> [[VB]], <vscale x 1 x i1> [[M:%.*]], i64 [[GVL]])
+; NOFOLD-NEXT:    ret <vscale x 1 x double> [[X]]
+;
+; FOLD-LABEL: @test_vfmerge(
+; FOLD-NEXT:    [[TMP1:%.*]] = call <vscale x 1 x double> @llvm.epi.vfmerge.nxv1f64.f64.nxv1i1(<vscale x 1 x double> [[VA:%.*]], double [[B:%.*]], <vscale x 1 x i1> [[M:%.*]], i64 [[GVL:%.*]])
+; FOLD-NEXT:    ret <vscale x 1 x double> [[TMP1]]
+;
+{
+  %vb = tail call <vscale x 1 x double> @llvm.epi.vfmv.v.f.nxv1f64.f64(double %b, i64 %gvl)
+  %x = tail call <vscale x 1 x double> @llvm.epi.vfmerge.nxv1f64.nxv1f64.nxv1i1(<vscale x 1 x double> %va, <vscale x 1 x double> %vb, <vscale x 1 x i1> %m, i64 %gvl)
+  ret <vscale x 1 x double> %x
+}
+
+declare <vscale x 1 x double> @llvm.epi.vfmerge.nxv1f64.nxv1f64.nxv1i1(<vscale x 1 x double> %va, <vscale x 1 x double> %vb, <vscale x 1 x i1> %m, i64 %gvl)
