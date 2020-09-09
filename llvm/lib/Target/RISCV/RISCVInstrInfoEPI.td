@@ -770,7 +770,7 @@ multiclass pseudo_binary_m_vvm_vxm {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
-    defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
+    defvar constraints = "@earlyclobber $rd";
     let VLMul = evr.VLMul in
     {
       // These instructions generate a mask register so their result is a VR.
@@ -784,7 +784,7 @@ multiclass pseudo_binary_m_vvm_vxm_vim {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
-    defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
+    defvar constraints = "@earlyclobber $rd";
     let VLMul = evr.VLMul in
     {
       // These instructions generate a mask register so their result is a VR.
@@ -842,10 +842,11 @@ multiclass pseudo_binary_m_vv_vx_nomask {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
+    defvar constraints = "@earlyclobber $rd";
     let VLMul = evr.VLMul in
     {
-      defm _VV : pseudo_binary_nomask<VR, evr, evr, evr.VLMul>;
-      defm _VX : pseudo_binary_nomask<VR, evr, GPR, evr.VLMul>;
+      defm _VV : pseudo_binary_nomask<VR, evr, evr, evr.VLMul, constraints>;
+      defm _VX : pseudo_binary_nomask<VR, evr, GPR, evr.VLMul, constraints>;
     }
   }
 }
@@ -881,11 +882,12 @@ multiclass pseudo_binary_m_vv_vx_vi_nomask {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
+    defvar constraints = "@earlyclobber $rd";
     let VLMul = evr.VLMul in
     {
-      defm _VV : pseudo_binary_nomask<VR, evr, evr, evr.VLMul>;
-      defm _VX : pseudo_binary_nomask<VR, evr, GPR, evr.VLMul>;
-      defm _VI : pseudo_binary_nomask<VR, evr, simm5, evr.VLMul>;
+      defm _VV : pseudo_binary_nomask<VR, evr, evr, evr.VLMul, constraints>;
+      defm _VX : pseudo_binary_nomask<VR, evr, GPR, evr.VLMul, constraints>;
+      defm _VI : pseudo_binary_nomask<VR, evr, simm5, evr.VLMul, constraints>;
     }
   }
 }
