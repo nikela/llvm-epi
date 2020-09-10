@@ -7389,7 +7389,6 @@ unsigned LoopVectorizationCostModel::getInstructionCost(Instruction *I,
                    Op2VK, TargetTransformInfo::OP_None, Op2VP, Operands, I);
   }
   case Instruction::FNeg: {
-    assert(!VF.isScalable() && "VF is assumed to be non scalable.");
     unsigned N = isScalarAfterVectorization(I, VF) ? VF.getKnownMinValue() : 1;
     return N * TTI.getArithmeticInstrCost(
                    I->getOpcode(), VectorTy, CostKind,
@@ -8922,7 +8921,6 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
     if (AlsoPack && State.VF.isVector()) {
       // If we're constructing lane 0, initialize to start from undef.
       if (State.Instance->Lane == 0) {
-        assert(!State.VF.isScalable() && "VF is assumed to be non scalable.");
         Value *Undef =
             UndefValue::get(VectorType::get(Ingredient->getType(), State.VF));
         State.ValueMap.setVectorValue(Ingredient, State.Instance->Part, Undef);

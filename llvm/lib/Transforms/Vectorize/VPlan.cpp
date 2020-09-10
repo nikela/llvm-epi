@@ -306,7 +306,6 @@ void VPRegionBlock::execute(VPTransformState *State) {
 
   for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part) {
     State->Instance->Part = Part;
-    assert(!State->VF.isScalable() && "VF is assumed to be non scalable.");
     for (unsigned Lane = 0, VF = State->VF.getKnownMinValue(); Lane < VF;
          ++Lane) {
       State->Instance->Lane = Lane;
