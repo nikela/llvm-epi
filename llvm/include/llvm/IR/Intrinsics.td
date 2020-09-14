@@ -1276,13 +1276,13 @@ def int_ptrmask: Intrinsic<[llvm_anyptr_ty], [LLVMMatchType<0>, llvm_anyint_ty],
 // The following Memory Intrinsics and Integer Comparison Intrinsic are copied
 // from the main Vector Predication proposal at revision id D57504, diff id
 // 246280, authored by Simon Moll.  Once these land in the reviewed subpatch,
-// they will be merged in normally and replace the code below. 
+// they will be merged in normally and replace the code below.
 // The definitions in D57504 do not contain alignment argument (alignment is
 // handled via VPBuilder).
 
 // Be very careful while using these - Mask and VectorLength properties are
 // commented out because adding them will necessiate changes in other files that
-// will require significant effort to undo. 
+// will require significant effort to undo.
 
 // Memory Intrinsics
 def int_vp_store : Intrinsic<[],
@@ -1390,7 +1390,7 @@ def int_vp_fma : Intrinsic<[ llvm_anyvector_ty ],
 
 // Comparison
 // TODO add signalling fcmp
-// The last argument is the comparison predicate 
+// The last argument is the comparison predicate
 def int_vp_icmp : Intrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
                             [ llvm_anyvector_ty,
                               LLVMMatchType<0>,
@@ -1459,7 +1459,7 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]
                                   llvm_metadata_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                   llvm_i32_ty ]>;
-   
+
   def int_vp_fptoui : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
                                   llvm_metadata_ty,
@@ -1472,7 +1472,7 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]
                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                  llvm_i32_ty ]>;
 }
-                                
+
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ] in {
   def int_vp_sitofp : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
@@ -1480,7 +1480,7 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ]
                                   llvm_metadata_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                   llvm_i32_ty ]>;
-   
+
   def int_vp_uitofp : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
                                   llvm_metadata_ty,
@@ -1802,7 +1802,7 @@ def int_experimental_vector_stepvector : Intrinsic<[llvm_anyvector_ty],
 //===---------- Intrinsics to modify scalable vectors ---------------------===//
 // TODO: These intrinsics are placeholder until a decision is reached on
 // shufflevector for scalable vectors. They will be replaced eventually. Use
-// them with caution. 
+// them with caution.
 
 def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
                                                 [LLVMMatchType<0>],
@@ -1812,7 +1812,7 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // and and integer %evl (Explicit Vector Length similar to VP intrinsics) such
 // that 0 <= %num <= %evl <= W, where W is the runtime vector register(group)
 // width (vscale x k). If %evl and %num do not follow this constraint, the
-// intrinsic has undefined behaviour. 
+// intrinsic has undefined behaviour.
 // Semantics:
 // Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1]
 // and selects the elements in a window of size %evl, starting at index %num of
@@ -1826,12 +1826,12 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // %v2: [0 1 2 3 4 5]
 // %evl: 5, %num: 2
 // transformations: %v1 -> [c d e _ _ f] -> [c d e 0 1 undef]
-// result: [c d e 0 1 undef] 
+// result: [c d e 0 1 undef]
 def int_experimental_vector_vp_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
                                                      llvm_i32_ty, llvm_i32_ty],
-                                                    [IntrNoMem]>; 
+                                                    [IntrNoMem]>;
 
 // This is the non-predicated version of the above slideleftfill intrinsic that
 // has the same semantics assuming %evl = W. This is needed for
@@ -1840,7 +1840,7 @@ def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
                                                      llvm_i32_ty],
-                                                    [IntrNoMem]>; 
+                                                    [IntrNoMem]>;
 
 //===----------------------------------------------------------------------===//
 // Target-specific intrinsics

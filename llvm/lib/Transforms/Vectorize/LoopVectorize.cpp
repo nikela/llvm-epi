@@ -4402,7 +4402,7 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
     // reduction loop in the loop vectorizer.
     TargetTransformInfo::ReductionFlags Flags;
     Flags.NoNaN = NoNaN;
-    if (isScalable() &&
+    if (VF.isScalable() &&
         !TTI->useReductionIntrinsic(Op, ReducedPartRdx->getType(), Flags))
       ReducedPartRdx = generateReductionLoop(ReducedPartRdx, Identity, Op,
                                              RdxDesc.getFastMathFlags());
@@ -4478,8 +4478,8 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   Builder.SetInsertPoint(&*RdxBlockPH->getFirstInsertionPt());
   CallInst *Vscale = emitVscaleCall(Builder, RdxBlockPH->getModule(),
                                     Type::getInt32Ty(RdxBlockPH->getContext()));
-  Value *InitLen =
-      Builder.CreateMul(Builder.getInt32(VF), Vscale, "vscale.x.vf");
+  Value *InitLen = Builder.CreateMul(Builder.getInt32(VF.getKnownMinValue()),
+                                     Vscale, "vscale.x.vf");
 
   // Insert loop in the reduction loop body.
   Builder.SetInsertPoint(&*RdxBlock->getFirstInsertionPt());
@@ -4517,12 +4517,12 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // contain the last HalfLenQuotient elements of the CurrVec followed by
   // (HalfLen - HalfLenQuotient) identity elements.
   // Note that CurrLen = HalfLen + HalfLenQuotient
-  Value *EVLCurr = getSetVL(CurrLen);
   Value *SecondHalf =
       preferPredicatedVectorOps()
           ? Builder.CreateIntrinsic(
                 Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
-                {CurrVec, Identity, HalfLen, EVLCurr}, nullptr, "second.half")
+                {CurrVec, Identity, HalfLen, getSetVL(CurrLen)}, nullptr,
+                "second.half")
           : Builder.CreateIntrinsic(
                 Intrinsic::experimental_vector_slideleftfill, RdxTy,
                 {CurrVec, Identity, HalfLen}, nullptr, "second.half");
