@@ -662,6 +662,11 @@ public:
     return false;
   }
 
+  bool preferInLoopReduction(unsigned Opcode, Type *Ty,
+                             TTI::ReductionFlags Flags) const {
+    return false;
+  }
+
   bool preferPredicatedReductionSelect(unsigned Opcode, Type *Ty,
                                        TTI::ReductionFlags Flags) const {
     return false;
