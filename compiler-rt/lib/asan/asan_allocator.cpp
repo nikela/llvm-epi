@@ -162,9 +162,6 @@ class AsanChunk : public ChunkBase {
     }
     return reinterpret_cast<void*>(Beg() - RZLog2Size(rz_log));
   }
-  bool AddrIsInside(uptr addr, bool locked_version = false) {
-    return (addr >= Beg()) && (addr < Beg() + UsedSize(locked_version));
-  }
 };
 
 struct QuarantineCallback {
@@ -1111,19 +1108,17 @@ void GetAllocatorGlobalRange(uptr *begin, uptr *end) {
   *end = *begin + sizeof(__asan::get_allocator());
 }
 
-uptr PointsIntoChunk(void* p) {
+uptr PointsIntoChunk(void *p) {
   uptr addr = reinterpret_cast<uptr>(p);
   __asan::AsanChunk *m = __asan::instance.GetAsanChunkByAddrFastLocked(addr);
   if (!m || atomic_load(&m->chunk_state, memory_order_acquire) !=
                 __asan::CHUNK_ALLOCATED)
     return 0;
-  uptr chunk = m->Beg();
-  if (m->AddrIsInside(addr, /*locked_version=*/true))
-    return chunk;
-  if (IsSpecialCaseOfOperatorNew0(chunk, m->UsedSize(/*locked_version*/ true),
-                                  addr))
-    return chunk;
-  return 0;
+  // AsanChunk presence means that we point into some block from underlying
+  // allocators. Don't check whether p points into user memory, since until
+  // the return from AsanAllocator::Allocator we may have no such
+  // pointer anywhere. But we must already have a pointer to GetBlockBegin().
+  return m->Beg();
 }
 
 uptr GetUserBegin(uptr chunk) {
@@ -1174,16 +1169,14 @@ void ForEachChunk(ForEachChunkCallback callback, void *arg) {
 IgnoreObjectResult IgnoreObjectLocked(const void *p) {
   uptr addr = reinterpret_cast<uptr>(p);
   __asan::AsanChunk *m = __asan::instance.GetAsanChunkByAddr(addr);
-  if (!m) return kIgnoreObjectInvalid;
-  if ((atomic_load(&m->chunk_state, memory_order_acquire) ==
-       __asan::CHUNK_ALLOCATED) &&
-      m->AddrIsInside(addr)) {
-    if (m->lsan_tag == kIgnored)
-      return kIgnoreObjectAlreadyIgnored;
-    m->lsan_tag = __lsan::kIgnored;
-    return kIgnoreObjectSuccess;
+  if (!m || (atomic_load(&m->chunk_state, memory_order_acquire) !=
+             __asan::CHUNK_ALLOCATED)) {
+    return kIgnoreObjectInvalid;
   }
-  return kIgnoreObjectInvalid;
+  if (m->lsan_tag == kIgnored)
+    return kIgnoreObjectAlreadyIgnored;
+  m->lsan_tag = __lsan::kIgnored;
+  return kIgnoreObjectSuccess;
 }
 }  // namespace __lsan
 
