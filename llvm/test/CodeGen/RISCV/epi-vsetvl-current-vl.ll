@@ -14,21 +14,21 @@ declare float @llvm.epi.vfmv.f.s.f32.nxv2f32(<vscale x 2 x float>)
 define double @test_change_vtype_only_1(<vscale x 1 x double> %a, <vscale x 2 x float> %b) nounwind {
 ; CHECK-O0-LABEL: test_change_vtype_only_1:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1
+; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vfmv.f.s ft0, v16
-; CHECK-O0-NEXT:    vsetvli zero, zero, e32,m1
+; CHECK-O0-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vfmv.f.s ft1, v17
 ; CHECK-O0-NEXT:    # kill: def $f1_f killed $f1_f killed $f1_d
-; CHECK-O0-NEXT:    fcvt.d.s ft1, ft1
-; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
+; CHECK-O0-NEXT:    fcvt.d.s ft2, ft1
+; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft2
 ; CHECK-O0-NEXT:    fmv.x.d a0, ft0
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_change_vtype_only_1:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli zero, zero, e64,m1
+; CHECK-O2-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
 ; CHECK-O2-NEXT:    vfmv.f.s ft0, v16
-; CHECK-O2-NEXT:    vsetvli zero, zero, e32,m1
+; CHECK-O2-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
 ; CHECK-O2-NEXT:    vfmv.f.s ft1, v17
 ; CHECK-O2-NEXT:    fcvt.d.s ft1, ft1
 ; CHECK-O2-NEXT:    fadd.d ft0, ft0, ft1
@@ -44,7 +44,7 @@ define double @test_change_vtype_only_1(<vscale x 1 x double> %a, <vscale x 2 x 
 define double @test_change_vtype_only_2(<vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-O0-LABEL: test_change_vtype_only_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1
+; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vfmv.f.s ft0, v16
 ; CHECK-O0-NEXT:    vfmv.f.s ft1, v17
 ; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
@@ -53,7 +53,7 @@ define double @test_change_vtype_only_2(<vscale x 1 x double> %a, <vscale x 1 x 
 ;
 ; CHECK-O2-LABEL: test_change_vtype_only_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli zero, zero, e64,m1
+; CHECK-O2-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
 ; CHECK-O2-NEXT:    vfmv.f.s ft0, v16
 ; CHECK-O2-NEXT:    vfmv.f.s ft1, v17
 ; CHECK-O2-NEXT:    fadd.d ft0, ft0, ft1

@@ -389,22 +389,22 @@ define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1,
 ; CHECK-O0-NEXT:    vmsne.vv v1, v6, v2
 ; CHECK-O0-NEXT:    # implicit-def: $v6m2
 ; CHECK-O0-NEXT:    vand.vi v6, v4, 1
-; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v6, v2
+; CHECK-O0-NEXT:    # implicit-def: $v16
+; CHECK-O0-NEXT:    vmsne.vv v16, v6, v2
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v1, v4
-; CHECK-O0-NEXT:    vmor.mm v5, v1, v4
-; CHECK-O0-NEXT:    vmxor.mm v1, v1, v4
+; CHECK-O0-NEXT:    vmand.mm v0, v1, v16
+; CHECK-O0-NEXT:    vmor.mm v17, v1, v16
+; CHECK-O0-NEXT:    vmxor.mm v1, v1, v16
 ; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v6, v2, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v5
 ; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
+; CHECK-O0-NEXT:    vmv1r.v v0, v17
+; CHECK-O0-NEXT:    vmerge.vim v6, v2, 1, v0
 ; CHECK-O0-NEXT:    vmv1r.v v0, v1
-; CHECK-O0-NEXT:    vmerge.vim v16, v2, 1, v0
+; CHECK-O0-NEXT:    vmerge.vim v18, v2, 1, v0
 ; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vse8.v v6, (a3)
 ; CHECK-O0-NEXT:    vse8.v v4, (a3)
-; CHECK-O0-NEXT:    vse8.v v16, (a3)
+; CHECK-O0-NEXT:    vse8.v v6, (a3)
+; CHECK-O0-NEXT:    vse8.v v18, (a3)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_5:
