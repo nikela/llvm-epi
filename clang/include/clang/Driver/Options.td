@@ -669,6 +669,9 @@ defm hip_new_launch_api : OptInFFlag<"hip-new-launch-api",
   "Use", "Don't use", " new kernel launching API for HIP">;
 defm gpu_allow_device_init : OptInFFlag<"gpu-allow-device-init",
   "Allow", "Don't allow", " device side init function in HIP">;
+defm gpu_defer_diag : OptInFFlag<"gpu-defer-diag",
+  "Defer", "Don't defer", " host/device related diagnostic messages"
+  " for CUDA/HIP">;
 def gpu_max_threads_per_block_EQ : Joined<["--"], "gpu-max-threads-per-block=">,
   Flags<[CC1Option]>,
   HelpText<"Default max threads per block for kernel launch bounds for HIP">;
@@ -2390,6 +2393,9 @@ def mfix_cortex_a53_835769 : Flag<["-"], "mfix-cortex-a53-835769">,
 def mno_fix_cortex_a53_835769 : Flag<["-"], "mno-fix-cortex-a53-835769">,
   Group<m_aarch64_Features_Group>,
   HelpText<"Don't workaround Cortex-A53 erratum 835769 (AArch64 only)">;
+def mmark_bti_property : Flag<["-"], "mmark-bti-property">,
+  Group<m_aarch64_Features_Group>,
+  HelpText<"Add .note.gnu.property with BTI to assembly files (AArch64 only)">;
 foreach i = {1-31} in
   def ffixed_x#i : Flag<["-"], "ffixed-x"#i>, Group<m_Group>,
     HelpText<"Reserve the x"#i#" register (AArch64/RISC-V only)">;

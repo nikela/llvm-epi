@@ -1409,8 +1409,7 @@ static bool matchIntrinsicType(
       auto *ReferenceType = dyn_cast<VectorType>(ArgTys[RefArgNumber]);
       auto *ThisArgVecTy = dyn_cast<VectorType>(Ty);
       if (!ThisArgVecTy || !ReferenceType ||
-          (cast<VectorType>(ReferenceType)->getElementCount() !=
-           cast<VectorType>(ThisArgVecTy)->getElementCount()))
+          (ReferenceType->getElementCount() != ThisArgVecTy->getElementCount()))
         return true;
       PointerType *ThisArgEltTy =
           dyn_cast<PointerType>(ThisArgVecTy->getElementType());

@@ -6802,22 +6802,14 @@ public:
     return true;
   }
 
-  /// Attempt to vectorize the tree found by
-  /// matchAssociativeReduction.
+  /// Attempt to vectorize the tree found by matchAssociativeReduction.
   bool tryToReduce(BoUpSLP &V, TargetTransformInfo *TTI) {
-    if (ReducedVals.empty())
-      return false;
-
-    // If there is a sufficient number of reduction values, reduce
-    // to a nearby power-of-2. Can safely generate oversized
+    // If there are a sufficient number of reduction values, reduce
+    // to a nearby power-of-2. We can safely generate oversized
     // vectors and rely on the backend to split them to legal sizes.
     unsigned NumReducedVals = ReducedVals.size();
     if (NumReducedVals < 4)
       return false;
-
-    unsigned ReduxWidth = PowerOf2Floor(NumReducedVals);
-
-    Value *VectorizedTree = nullptr;
 
     // FIXME: Fast-math-flags should be set based on the instructions in the
     //        reduction (not all of 'fast' are required).
@@ -6827,9 +6819,9 @@ public:
     Builder.setFastMathFlags(Unsafe);
 
     BoUpSLP::ExtraValueToDebugLocsMap ExternallyUsedValues;
-    // The same extra argument may be used several time, so log each attempt
+    // The same extra argument may be used several times, so log each attempt
     // to use it.
-    for (auto &Pair : ExtraArgs) {
+    for (std::pair<Instruction *, Value *> &Pair : ExtraArgs) {
       assert(Pair.first && "DebugLoc must be set.");
       ExternallyUsedValues[Pair.second].push_back(Pair.first);
     }
@@ -6852,9 +6844,39 @@ public:
     for (ReductionOpsType &RdxOp : ReductionOps)
       IgnoreList.append(RdxOp.begin(), RdxOp.end());
 
+    unsigned ReduxWidth = PowerOf2Floor(NumReducedVals);
+    if (NumReducedVals > ReduxWidth) {
+      // In the loop below, we are building a tree based on a window of
+      // 'ReduxWidth' values.
+      // If the operands of those values have common traits (compare predicate,
+      // constant operand, etc), then we want to group those together to
+      // minimize the cost of the reduction.
+
+      // TODO: This should be extended to count common operands for
+      //       compares and binops.
+
+      // Step 1: Count the number of times each compare predicate occurs.
+      SmallDenseMap<unsigned, unsigned> PredCountMap;
+      for (Value *RdxVal : ReducedVals) {
+        CmpInst::Predicate Pred;
+        if (match(RdxVal, m_Cmp(Pred, m_Value(), m_Value())))
+          ++PredCountMap[Pred];
+      }
+      // Step 2: Sort the values so the most common predicates come first.
+      stable_sort(ReducedVals, [&PredCountMap](Value *A, Value *B) {
+        CmpInst::Predicate PredA, PredB;
+        if (match(A, m_Cmp(PredA, m_Value(), m_Value())) &&
+            match(B, m_Cmp(PredB, m_Value(), m_Value()))) {
+          return PredCountMap[PredA] > PredCountMap[PredB];
+        }
+        return false;
+      });
+    }
+
+    Value *VectorizedTree = nullptr;
     unsigned i = 0;
     while (i < NumReducedVals - ReduxWidth + 1 && ReduxWidth > 2) {
-      auto VL = makeArrayRef(&ReducedVals[i], ReduxWidth);
+      ArrayRef<Value *> VL = makeArrayRef(&ReducedVals[i], ReduxWidth);
       V.buildTree(VL, ExternallyUsedValues, IgnoreList);
       Optional<ArrayRef<unsigned>> Order = V.bestOrder();
       // TODO: Handle orders of size less than number of elements in the vector.
@@ -6877,25 +6899,25 @@ public:
       int ReductionCost = getReductionCost(TTI, ReducedVals[i], ReduxWidth);
       int Cost = TreeCost + ReductionCost;
       if (Cost >= -SLPCostThreshold) {
-          V.getORE()->emit([&]() {
-              return OptimizationRemarkMissed(
-                         SV_NAME, "HorSLPNotBeneficial", cast<Instruction>(VL[0]))
-                     << "Vectorizing horizontal reduction is possible"
-                     << "but not beneficial with cost "
-                     << ore::NV("Cost", Cost) << " and threshold "
-                     << ore::NV("Threshold", -SLPCostThreshold);
-          });
-          break;
+        V.getORE()->emit([&]() {
+          return OptimizationRemarkMissed(SV_NAME, "HorSLPNotBeneficial",
+                                          cast<Instruction>(VL[0]))
+                 << "Vectorizing horizontal reduction is possible"
+                 << "but not beneficial with cost " << ore::NV("Cost", Cost)
+                 << " and threshold "
+                 << ore::NV("Threshold", -SLPCostThreshold);
+        });
+        break;
       }
 
       LLVM_DEBUG(dbgs() << "SLP: Vectorizing horizontal reduction at cost:"
                         << Cost << ". (HorRdx)\n");
       V.getORE()->emit([&]() {
-          return OptimizationRemark(
-                     SV_NAME, "VectorizedHorizontalReduction", cast<Instruction>(VL[0]))
-          << "Vectorized horizontal reduction with cost "
-          << ore::NV("Cost", Cost) << " and with tree size "
-          << ore::NV("TreeSize", V.getTreeSize());
+        return OptimizationRemark(SV_NAME, "VectorizedHorizontalReduction",
+                                  cast<Instruction>(VL[0]))
+               << "Vectorized horizontal reduction with cost "
+               << ore::NV("Cost", Cost) << " and with tree size "
+               << ore::NV("TreeSize", V.getTreeSize());
       });
 
       // Vectorize a tree.
@@ -6912,15 +6934,19 @@ public:
 
       Value *ReducedSubTree =
           emitReduction(VectorizedRoot, Builder, ReduxWidth, TTI);
-      if (VectorizedTree) {
+
+      if (!VectorizedTree) {
+        // Initialize the final value in the reduction.
+        VectorizedTree = ReducedSubTree;
+      } else {
+        // Update the final value in the reduction.
         Builder.SetCurrentDebugLocation(Loc);
         OperationData VectReductionData(ReductionData.getOpcode(),
                                         VectorizedTree, ReducedSubTree,
                                         ReductionData.getKind());
         VectorizedTree =
             VectReductionData.createOp(Builder, "op.rdx", ReductionOps);
-      } else
-        VectorizedTree = ReducedSubTree;
+      }
       i += ReduxWidth;
       ReduxWidth = PowerOf2Floor(NumReducedVals - i);
     }
