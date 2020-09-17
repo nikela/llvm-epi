@@ -3767,6 +3767,48 @@ defm "" : pat_vop_binary_int_m_vv<setge, "PseudoVMSLE", /* swap */ 1>;
 }
 
 //===----------------------------------------------------------------------===//
+// Patterns. Full vector conversions
+//===----------------------------------------------------------------------===//
+
+foreach vtiToWti = AllWideableIntVectors in
+{
+  defvar vti = vtiToWti.Vti;
+  defvar wti = vtiToWti.Wti;
+
+  // sext (SEW->2*SEW)
+  def : Pat<(wti.Vector (sext (vti.Vector vti.RegClass:$rs1))),
+             (!cast<Instruction>("PseudoVWADD_VX_M" # vti.RegClass.VLMul)
+               (wti.Vector (IMPLICIT_DEF)),
+               (vti.Vector $rs1),
+               X0,
+               (vti.Mask zero_reg),
+               X0,
+               vti.SEW)>;
+
+  // zext (SEW->2*SEW)
+  def : Pat<(wti.Vector (zext (vti.Vector vti.RegClass:$rs1))),
+             (!cast<Instruction>("PseudoVWADDU_VX_M" # vti.RegClass.VLMul)
+               (wti.Vector (IMPLICIT_DEF)),
+               (vti.Vector $rs1),
+               X0,
+               (vti.Mask zero_reg),
+               X0,
+               vti.SEW)>;
+
+  // trunc (2*SEW->SEW)
+  def : Pat<(vti.Vector (trunc (wti.Vector wti.RegClass:$rs1))),
+             (!cast<Instruction>("PseudoVNSRL_WI_M" # vti.RegClass.VLMul)
+               (vti.Vector (IMPLICIT_DEF)),
+               (wti.Vector $rs1),
+               0,
+               (vti.Mask zero_reg),
+               X0,
+               vti.SEW)>;
+
+  // FIXME: Missing remaining conversions.
+}
+
+//===----------------------------------------------------------------------===//
 // Patterns. Full vector mask logical operations
 //===----------------------------------------------------------------------===//
 
