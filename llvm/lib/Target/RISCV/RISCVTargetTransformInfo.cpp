@@ -284,3 +284,36 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
 
   return Cost;
 }
+
+unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
+                                        TTI::CastContextHint CCH,
+                                        TTI::TargetCostKind CostKind,
+                                        const Instruction *I) {
+  if (!isa<ScalableVectorType>(Dst) || !isa<ScalableVectorType>(Src))
+    return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
+
+  unsigned LegalizationFactor = 1;
+  if (!isTypeLegal(Dst))
+    LegalizationFactor *= 2;
+  if (!isTypeLegal(Src))
+    LegalizationFactor *= 2;
+
+  // Truncating a mask is cheap (vmsne.vi)
+  if (Dst->getScalarSizeInBits() == 1)
+    return 1;
+
+  // Extending to a mask should be cheap (vmv.v with mask)
+  if (Src->getScalarSizeInBits() == 1)
+    return 1;
+
+  int BitRatio =
+      std::max(Dst->getScalarSizeInBits(), Src->getScalarSizeInBits()) /
+      std::min(Dst->getScalarSizeInBits(), Src->getScalarSizeInBits());
+
+  // This case can be done with a single instruction.
+  if (BitRatio <= 2)
+    return 1;
+
+  // This costs log2(BitRatio) because we need to do several conversions.
+  return Log2_32(BitRatio);
+}

@@ -360,6 +360,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::MGATHER, VT, Custom);
       setOperationAction(ISD::MSCATTER, VT, Custom);
       setOperationAction(ISD::SELECT, VT, Custom);
+      setOperationAction(ISD::SIGN_EXTEND, VT, Custom);
+      setOperationAction(ISD::ZERO_EXTEND, VT, Custom);
+      setOperationAction(ISD::TRUNCATE, VT, Custom);
     }
 
     // Register libcalls for fp EXP functions.
@@ -648,6 +651,68 @@ SDValue RISCVTargetLowering::lowerVECTOR_SHUFFLE(SDValue Op,
   return DAG.getNode(ISD::SPLAT_VECTOR, DL, VT, ScalarValue);
 }
 
+SDValue RISCVTargetLowering::lowerExtend(SDValue Op, SelectionDAG &DAG,
+                                         int Opcode) const {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+
+  SDValue Src = Op.getOperand(0);
+  EVT SrcVT = Src.getValueType();
+
+  // Skip masks.
+  if (SrcVT.getVectorElementType() == MVT::i1)
+    return Op;
+
+  EVT ResultVT = SrcVT;
+  SDValue Result = Src;
+  do {
+    ResultVT = ResultVT.widenIntegerVectorElementType(*DAG.getContext());
+    Result = DAG.getNode(Opcode, DL, ResultVT, Result);
+  } while (ResultVT != VT);
+
+  return Result;
+}
+
+SDValue RISCVTargetLowering::lowerSIGN_EXTEND(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  return lowerExtend(Op, DAG, RISCVISD::SIGN_EXTEND_VECTOR);
+}
+
+SDValue RISCVTargetLowering::lowerZERO_EXTEND(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  return lowerExtend(Op, DAG, RISCVISD::ZERO_EXTEND_VECTOR);
+}
+
+SDValue RISCVTargetLowering::lowerTRUNCATE(SDValue Op,
+                                           SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+
+  SDValue Src = Op.getOperand(0);
+  EVT SrcVT = Src.getValueType();
+
+  // Skip masks.
+  if (VT.getVectorElementType() == MVT::i1)
+    return Op;
+
+  auto HalfIntegerVectorElementType = [&DAG](EVT PrevVT) {
+    EVT EltVT = PrevVT.getVectorElementType();
+    assert(EltVT.getSizeInBits() % 2 == 0 && "Invalid bit size");
+    EltVT = EVT::getIntegerVT(*DAG.getContext(), EltVT.getSizeInBits() / 2);
+    return EVT::getVectorVT(*DAG.getContext(), EltVT,
+                            PrevVT.getVectorElementCount());
+  };
+
+  EVT ResultVT = SrcVT;
+  SDValue Result = Src;
+  do {
+    ResultVT = HalfIntegerVectorElementType(ResultVT);
+    Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR, DL, ResultVT, Result);
+  } while (ResultVT != VT);
+
+  return Result;
+}
+
 SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
                                                     SelectionDAG &DAG) const {
   SDLoc DL(Op);
@@ -901,6 +966,12 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return LowerINTRINSIC_VOID(Op, DAG);
   case ISD::VECTOR_SHUFFLE:
     return lowerVECTOR_SHUFFLE(Op, DAG);
+  case ISD::SIGN_EXTEND:
+    return lowerSIGN_EXTEND(Op, DAG);
+  case ISD::ZERO_EXTEND:
+    return lowerZERO_EXTEND(Op, DAG);
+  case ISD::TRUNCATE:
+    return lowerTRUNCATE(Op, DAG);
   case ISD::SIGN_EXTEND_INREG:
     return lowerSIGN_EXTEND_INREG(Op, DAG);
   case ISD::MGATHER:
@@ -4464,6 +4535,12 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "RISCVISD::VMV_X_S";
   case RISCVISD::EXTRACT_VECTOR_ELT:
     return "RISCVISD::EXTRACT_VECTOR_ELT";
+  case RISCVISD::SIGN_EXTEND_VECTOR:
+    return "RISCVISD::SIGN_EXTEND_VECTOR";
+  case RISCVISD::ZERO_EXTEND_VECTOR:
+    return "RISCVISD::ZERO_EXTEND_VECTOR";
+  case RISCVISD::TRUNCATE_VECTOR:
+    return "RISCVISD::TRUNCATE_VECTOR";
   case RISCVISD::SIGN_EXTEND_BITS_INREG:
     return "RISCVISD::SIGN_EXTEND_BITS_INREG";
   case RISCVISD::VLSEG2:

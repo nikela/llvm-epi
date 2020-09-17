@@ -20,6 +20,18 @@ def riscv_extract_vector_elt : SDNode<"RISCVISD::EXTRACT_VECTOR_ELT",
                                        [SDTCisInt<0>, SDTCisVec<1>,
                                        SDTCisInt<1>, SDTCisPtrTy<2>]>>;
 
+def riscv_sign_extend_vector : SDNode<"RISCVISD::SIGN_EXTEND_VECTOR",
+                                      SDTypeProfile<1, 1,
+                                       [SDTCisVec<0>, SDTCisVec<1>]>>;
+
+def riscv_zero_extend_vector : SDNode<"RISCVISD::ZERO_EXTEND_VECTOR",
+                                      SDTypeProfile<1, 1,
+                                       [SDTCisVec<0>, SDTCisVec<1>]>>;
+
+def riscv_trunc_vector : SDNode<"RISCVISD::TRUNCATE_VECTOR",
+                                SDTypeProfile<1, 1,
+                                 [SDTCisVec<0>, SDTCisVec<1>]>>;
+
 def riscv_sign_extend_inreg : SDNode<"RISCVISD::SIGN_EXTEND_BITS_INREG",
                                      SDTypeProfile<1, 2,
                                       [SDTCisSameAs<0, 1>,
@@ -3776,7 +3788,7 @@ foreach vtiToWti = AllWideableIntVectors in
   defvar wti = vtiToWti.Wti;
 
   // sext (SEW->2*SEW)
-  def : Pat<(wti.Vector (sext (vti.Vector vti.RegClass:$rs1))),
+  def : Pat<(wti.Vector (riscv_sign_extend_vector (vti.Vector vti.RegClass:$rs1))),
              (!cast<Instruction>("PseudoVWADD_VX_M" # vti.RegClass.VLMul)
                (wti.Vector (IMPLICIT_DEF)),
                (vti.Vector $rs1),
@@ -3786,7 +3798,7 @@ foreach vtiToWti = AllWideableIntVectors in
                vti.SEW)>;
 
   // zext (SEW->2*SEW)
-  def : Pat<(wti.Vector (zext (vti.Vector vti.RegClass:$rs1))),
+  def : Pat<(wti.Vector (riscv_zero_extend_vector (vti.Vector vti.RegClass:$rs1))),
              (!cast<Instruction>("PseudoVWADDU_VX_M" # vti.RegClass.VLMul)
                (wti.Vector (IMPLICIT_DEF)),
                (vti.Vector $rs1),
@@ -3796,7 +3808,7 @@ foreach vtiToWti = AllWideableIntVectors in
                vti.SEW)>;
 
   // trunc (2*SEW->SEW)
-  def : Pat<(vti.Vector (trunc (wti.Vector wti.RegClass:$rs1))),
+  def : Pat<(vti.Vector (riscv_trunc_vector (wti.Vector wti.RegClass:$rs1))),
              (!cast<Instruction>("PseudoVNSRL_WI_M" # vti.RegClass.VLMul)
                (vti.Vector (IMPLICIT_DEF)),
                (wti.Vector $rs1),

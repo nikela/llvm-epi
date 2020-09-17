@@ -155,6 +155,10 @@ public:
                                     bool Extract);
   unsigned getScalarizationOverhead(VectorType *InTy,
                                     ArrayRef<const Value *> Args);
+  unsigned getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
+                            TTI::CastContextHint CCH,
+                            TTI::TargetCostKind CostKind,
+                            const Instruction *I = nullptr);
 };
 
 } // end namespace llvm

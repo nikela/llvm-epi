@@ -56,6 +56,9 @@ enum NodeType : unsigned {
   // EPI nodes
   VMV_X_S,
   EXTRACT_VECTOR_ELT,
+  SIGN_EXTEND_VECTOR,
+  ZERO_EXTEND_VECTOR,
+  TRUNCATE_VECTOR,
   SIGN_EXTEND_BITS_INREG,
   VLSEG2,
   VSSEG2,
@@ -254,6 +257,10 @@ private:
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerExtend(SDValue Op, SelectionDAG &DAG, int Opcode) const;
+  SDValue lowerSIGN_EXTEND(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerZERO_EXTEND(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSIGN_EXTEND_INREG(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
