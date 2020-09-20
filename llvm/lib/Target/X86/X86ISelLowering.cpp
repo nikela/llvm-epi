@@ -6184,6 +6184,22 @@ static SDValue getOnesVector(EVT VT, SelectionDAG &DAG, const SDLoc &dl) {
   return DAG.getBitcast(VT, Vec);
 }
 
+// Convert *_EXTEND_VECTOR_INREG to *_EXTEND opcode.
+static unsigned getOpcode_EXTEND(unsigned Opcode) {
+  switch (Opcode) {
+  case ISD::ANY_EXTEND:
+  case ISD::ANY_EXTEND_VECTOR_INREG:
+    return ISD::ANY_EXTEND;
+  case ISD::ZERO_EXTEND:
+  case ISD::ZERO_EXTEND_VECTOR_INREG:
+    return ISD::ZERO_EXTEND;
+  case ISD::SIGN_EXTEND:
+  case ISD::SIGN_EXTEND_VECTOR_INREG:
+    return ISD::SIGN_EXTEND;
+  }
+  llvm_unreachable("Unknown opcode");
+}
+
 // Convert *_EXTEND to *_EXTEND_VECTOR_INREG opcode.
 static unsigned getOpcode_EXTEND_VECTOR_INREG(unsigned Opcode) {
   switch (Opcode) {
@@ -46769,9 +46785,13 @@ static SDValue combineSext(SDNode *N, SelectionDAG &DAG,
   if (SDValue V = combineToExtendBoolVectorInReg(N, DAG, DCI, Subtarget))
     return V;
 
-  if (VT.isVector())
+  if (VT.isVector()) {
     if (SDValue R = PromoteMaskArithmetic(N, DAG, Subtarget))
       return R;
+
+    if (N0.getOpcode() == ISD::SIGN_EXTEND_VECTOR_INREG)
+      return DAG.getNode(N0.getOpcode(), DL, VT, N0.getOperand(0));
+  }
 
   if (SDValue NewAdd = promoteExtBeforeAdd(N, DAG, Subtarget))
     return NewAdd;
@@ -49254,6 +49274,7 @@ static SDValue combineEXTEND_VECTOR_INREG(SDNode *N, SelectionDAG &DAG,
   EVT VT = N->getValueType(0);
   SDValue In = N->getOperand(0);
   unsigned Opcode = N->getOpcode();
+  unsigned InOpcode = In.getOpcode();
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
 
   // Try to merge vector loads and extend_inreg to an extload.
@@ -49279,8 +49300,17 @@ static SDValue combineEXTEND_VECTOR_INREG(SDNode *N, SelectionDAG &DAG,
   }
 
   // Fold EXTEND_VECTOR_INREG(EXTEND_VECTOR_INREG(X)) -> EXTEND_VECTOR_INREG(X).
-  if (Opcode == In.getOpcode())
+  if (Opcode == InOpcode)
     return DAG.getNode(Opcode, SDLoc(N), VT, In.getOperand(0));
+
+  // Fold EXTEND_VECTOR_INREG(EXTRACT_SUBVECTOR(EXTEND(X),0))
+  // -> EXTEND_VECTOR_INREG(X).
+  // TODO: Handle non-zero subvector indices.
+  if (InOpcode == ISD::EXTRACT_SUBVECTOR && In.getConstantOperandVal(1) == 0 &&
+      In.getOperand(0).getOpcode() == getOpcode_EXTEND(Opcode) &&
+      In.getOperand(0).getOperand(0).getValueSizeInBits() ==
+          In.getValueSizeInBits())
+    return DAG.getNode(Opcode, SDLoc(N), VT, In.getOperand(0).getOperand(0));
 
   // Attempt to combine as a shuffle.
   // TODO: General ZERO_EXTEND_VECTOR_INREG support.
