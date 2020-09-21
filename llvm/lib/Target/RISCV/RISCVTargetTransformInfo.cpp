@@ -320,3 +320,14 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
   // This costs log2(BitRatio) because we need to do several conversions.
   return LegalizationFactor * Log2_32(BitRatio);
 }
+
+unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
+  if (!Vector)
+    return ST->is64Bit() ? 64 : 32;
+
+  // Largest vector register type will be `vscale * 8 * 64` bits for LMUL = 8
+  // (largest LMUL value). Since vscale is unknown at compile time, the largest
+  // possible register (register-group to be precise) bit width will be at least
+  // `64 * 8`.
+  return ST->hasStdExtV() ? 64 * 8 : 0;
+}
