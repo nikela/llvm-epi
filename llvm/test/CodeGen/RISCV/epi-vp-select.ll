@@ -9,14 +9,13 @@
 define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v1, v17, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vse64.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vse64.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int:
@@ -39,14 +38,13 @@ define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <v
 define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v1, v17, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vse32.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vse32.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int_2:
@@ -69,14 +67,13 @@ define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, 
 define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m2,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v2, v18, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-O0-NEXT:    vse64.v v2, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m2,tu,mu
+; CHECK-O0-NEXT:    vse64.v v2, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int_3:
@@ -99,14 +96,13 @@ define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, 
 define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v1, v17, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vse64.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vse64.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp:
@@ -129,14 +125,13 @@ define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %
 define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v1, v17, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vse32.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vse32.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp_2:
@@ -159,14 +154,13 @@ define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %
 define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m2,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v2, v18, v16, v0
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
-; CHECK-O0-NEXT:    vse64.v v2, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m2,tu,mu
+; CHECK-O0-NEXT:    vse64.v v2, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp_3:
@@ -189,16 +183,15 @@ define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double>
 define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v0
 ; CHECK-O0-NEXT:    vmand.mm v1, v1, v17
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v1
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vse8.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vse8.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask:
@@ -223,16 +216,15 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v0
 ; CHECK-O0-NEXT:    vmand.mm v1, v1, v17
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v1
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vse8.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vse8.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_2:
@@ -257,16 +249,15 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
-; CHECK-O0-NEXT:    lui a0, %hi(scratch)
-; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
+; CHECK-O0-NEXT:    lui a1, %hi(scratch)
+; CHECK-O0-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v0
 ; CHECK-O0-NEXT:    vmand.mm v1, v1, v17
 ; CHECK-O0-NEXT:    vmxor.mm v1, v16, v1
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vse8.v v1, (a0)
+; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vse8.v v1, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
