@@ -15,11 +15,10 @@ define <vscale x 8 x i1> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vse8.v v0, (a0)
-; CHECK-NEXT:    # implicit-def: $v1
+; CHECK-NEXT:    # implicit-def: $v0
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vle8.v v1, (a0)
-; CHECK-NEXT:    vmv1r.v v0, v1
+; CHECK-NEXT:    vle8.v v0, (a0)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)
@@ -45,10 +44,9 @@ define <vscale x 8 x i1> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
 ; CHECK-NEXT:    vse8.v v0, (a0)
-; CHECK-NEXT:    # implicit-def: $v1
+; CHECK-NEXT:    # implicit-def: $v0
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vle8.v v1, (a0)
-; CHECK-NEXT:    vmv1r.v v0, v1
+; CHECK-NEXT:    vle8.v v0, (a0)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp)
 ; CHECK-NEXT:    ld ra, 24(sp)
