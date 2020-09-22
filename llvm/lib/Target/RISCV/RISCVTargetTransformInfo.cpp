@@ -294,17 +294,17 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
 
   unsigned LegalizationFactor = 1;
   if (!isTypeLegal(Dst))
-    LegalizationFactor *= 2;
+    LegalizationFactor = 2;
   if (!isTypeLegal(Src))
     LegalizationFactor *= 2;
 
   // Truncating a mask is cheap (vmsne.vi)
   if (Dst->getScalarSizeInBits() == 1)
-    return 1;
+    return LegalizationFactor;
 
   // Extending to a mask should be cheap (vmv.v with mask)
   if (Src->getScalarSizeInBits() == 1)
-    return 1;
+    return LegalizationFactor;
 
   int BitRatio =
       std::max(Dst->getScalarSizeInBits(), Src->getScalarSizeInBits()) /
@@ -312,8 +312,8 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
 
   // This case can be done with a single instruction.
   if (BitRatio <= 2)
-    return 1;
+    return LegalizationFactor;
 
   // This costs log2(BitRatio) because we need to do several conversions.
-  return Log2_32(BitRatio);
+  return LegalizationFactor * Log2_32(BitRatio);
 }
