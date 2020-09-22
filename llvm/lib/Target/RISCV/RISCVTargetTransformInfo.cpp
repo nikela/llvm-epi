@@ -329,5 +329,5 @@ unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
   // (largest LMUL value). Since vscale is unknown at compile time, the largest
   // possible register (register-group to be precise) bit width will be at least
   // `64 * 8`.
-  return ST->hasStdExtV() ? 64 * 8 : 0;
+  return ST->hasStdExtV() ? getMaxElementWidth() * 8 : 0;
 }

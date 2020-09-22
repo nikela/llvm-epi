@@ -6128,43 +6128,22 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
   return None;
 }
 
-Optional<ElementCount>
-LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
-  // For scalable vectors, where vector register width is not fixed, vector
-  // width is represented as `<vscale x k x simpleType>`, where k is a power of
-  // 2 and is known at the compile time (k can range from 1 to 8 for current
-  // RISC-V vector specification). vscale is not known at compile time (vscale =
-  // VLEN / (k * ELEN)). simpleType is a scalr type like f64, f32, etc.
-  //
-  // For mixed width operations we can either use n registers for both wide and
-  // narrow types, in which case the narrow type will waste half the register,
-  // or we can use n*w registers for the wider type and n registers for the
-  // narrow type, where wider type is wider by a factor of w. In the current
-  // implementation we take the latter approach because of the backend
-  // limitations.
-  //
-  // We make the following assumptions:
-  // 1. Assuming f64 to be the largest type we would need, we use
-  // <vscale x 1 x f64> as our base type.
-  // 2. If the only involved scalar type is f64, we use MaxVectorSize to be
-  // vscale x 1. (Eventually we will add support for higher values of k. That
-  // would need further analysis to optimize for register pressure.)
-  // 2a. If the only involved scalar type is f32, we use MaxVectorSize of
-  // vscale x 2. Similar for other narrower types.
-  // 3. For mixed width, we will use the full register for the narrower type
-  // and register grouping for the wider type.
+Optional<unsigned> LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-  unsigned TargetWidestType = TTI.getMaxElementWidth();
-  if (SmallestType > WidestType)
-    SmallestType = WidestType;
-  unsigned MaxScaleFactor = TargetWidestType / SmallestType;
-  if (!MaxScaleFactor || MaxScaleFactor > 8)
+  unsigned WidestRegister = TTI.getRegisterBitWidth(true);
+  unsigned MaxVectorSize = PowerOf2Floor(WidestRegister / WidestType);
+
+  LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
+                    << " / " << WidestType << " bits.\n");
+  LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
+                    << WidestRegister << " bits.\n");
+
+  if (!MaxVectorSize)
     return None;
-  if (Legal->getMaxSafeRegisterWidth() < 256 * 8 * 8)
-    return None;
-  return Optional<ElementCount>(ElementCount::getScalable(MaxScaleFactor));
+
+  return MaxVectorSize;
 }
 
 ElementCount
@@ -6178,6 +6157,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   // It is computed by MaxVF * sizeOf(type) * 8, where type is taken from
   // the memory accesses that is most restrictive (involved in the smallest
   // dependence distance).
+  // FIXME: For scalable vectors for now we assume MaxSafeRegisterWidth = -1U
   unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
 
   WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);

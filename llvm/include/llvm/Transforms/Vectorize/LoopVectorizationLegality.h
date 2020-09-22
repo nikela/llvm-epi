@@ -299,6 +299,10 @@ public:
   unsigned getMaxSafeDepDistBytes() { return LAI->getMaxSafeDepDistBytes(); }
 
   uint64_t getMaxSafeRegisterWidth() const {
+
+    if (TTI->useScalableVectorType())
+      return -1U;
+
     return LAI->getDepChecker().getMaxSafeRegisterWidth();
   }
 
