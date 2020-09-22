@@ -6157,7 +6157,8 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   // It is computed by MaxVF * sizeOf(type) * 8, where type is taken from
   // the memory accesses that is most restrictive (involved in the smallest
   // dependence distance).
-  // FIXME: For scalable vectors for now we assume MaxSafeRegisterWidth = -1U
+  // FIXME: For scalable vectors for now we assume MaxSafeRegisterWidth = -1U.
+  // See definition of Legal->getMaxSafeRegisterWidth().
   unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
 
   WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
@@ -9002,7 +9003,9 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
          SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
          "Cannot set vector length: Unsupported type");
   SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  LMUL = LMUL ? LMUL : LMULArgMap.at(WidestType / SmallestType);
+  unsigned LMULVal =
+      (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
+  LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
   Constant *LMULArg =
