@@ -809,8 +809,9 @@ public:
   /// Return the expected cost of materialization for the given integer
   /// immediate of the specified type for a given instruction. The cost can be
   /// zero if the immediate can be folded into the specified instruction.
-  int getIntImmCostInst(unsigned Opc, unsigned Idx, const APInt &Imm,
-                        Type *Ty, TargetCostKind CostKind) const;
+  int getIntImmCostInst(unsigned Opc, unsigned Idx, const APInt &Imm, Type *Ty,
+                        TargetCostKind CostKind,
+                        Instruction *Inst = nullptr) const;
   int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
                           Type *Ty, TargetCostKind CostKind) const;
 
@@ -1470,7 +1471,8 @@ public:
   virtual int getIntImmCost(const APInt &Imm, Type *Ty,
                             TargetCostKind CostKind) = 0;
   virtual int getIntImmCostInst(unsigned Opc, unsigned Idx, const APInt &Imm,
-                                Type *Ty, TargetCostKind CostKind) = 0;
+                                Type *Ty, TargetCostKind CostKind,
+                                Instruction *Inst = nullptr) = 0;
   virtual int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
                                   const APInt &Imm, Type *Ty,
                                   TargetCostKind CostKind) = 0;
@@ -1862,9 +1864,10 @@ public:
                     TargetCostKind CostKind) override {
     return Impl.getIntImmCost(Imm, Ty, CostKind);
   }
-  int getIntImmCostInst(unsigned Opc, unsigned Idx, const APInt &Imm,
-                        Type *Ty, TargetCostKind CostKind) override {
-    return Impl.getIntImmCostInst(Opc, Idx, Imm, Ty, CostKind);
+  int getIntImmCostInst(unsigned Opc, unsigned Idx, const APInt &Imm, Type *Ty,
+                        TargetCostKind CostKind,
+                        Instruction *Inst = nullptr) override {
+    return Impl.getIntImmCostInst(Opc, Idx, Imm, Ty, CostKind, Inst);
   }
   int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
                           Type *Ty, TargetCostKind CostKind) override {
