@@ -298,6 +298,9 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
   if (!isTypeLegal(Src))
     LegalizationFactor *= 2;
 
+  EVT DstVT = getTLI()->getValueType(DL, Dst);
+  EVT SrcVT = getTLI()->getValueType(DL, Src);
+
   // Truncating a mask is cheap (vmsne.vi)
   if (Dst->getScalarSizeInBits() == 1)
     return LegalizationFactor;
@@ -307,8 +310,8 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
     return LegalizationFactor;
 
   int BitRatio =
-      std::max(Dst->getScalarSizeInBits(), Src->getScalarSizeInBits()) /
-      std::min(Dst->getScalarSizeInBits(), Src->getScalarSizeInBits());
+      std::max(DstVT.getScalarSizeInBits(), SrcVT.getScalarSizeInBits()) /
+      std::min(DstVT.getScalarSizeInBits(), SrcVT.getScalarSizeInBits());
 
   // This case can be done with a single instruction.
   if (BitRatio <= 2)
