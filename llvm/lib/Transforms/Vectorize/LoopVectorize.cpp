@@ -193,7 +193,7 @@ namespace PreferPredicateTy {
     PredicateElseScalarEpilogue,
     PredicateOrDontVectorize
   };
-}
+} // namespace PreferPredicateTy
 
 static cl::opt<PreferPredicateTy::Option> PreferPredicateOverEpilogue(
     "prefer-predicate-over-epilogue",
@@ -1732,7 +1732,7 @@ public:
 // representation for pragma 'omp simd' is introduced.
 static bool isExplicitVecOuterLoop(Loop *OuterLp,
                                    OptimizationRemarkEmitter *ORE) {
-  assert(!OuterLp->empty() && "This is not an outer loop");
+  assert(!OuterLp->isInnermost() && "This is not an outer loop");
   LoopVectorizeHints Hints(OuterLp, true /*DisableInterleaving*/, *ORE);
 
   // Only outer loops with an explicit vectorization hint are supported.
@@ -1765,7 +1765,7 @@ static void collectSupportedLoops(Loop &L, LoopInfo *LI,
   // now, only collect outer loops that have explicit vectorization hints. If we
   // are stress testing the VPlan H-CFG construction, we collect the outermost
   // loop of every loop nest.
-  if (L.empty() || VPlanBuildStressTest ||
+  if (L.isInnermost() || VPlanBuildStressTest ||
       (EnableVPlanNativePath && isExplicitVecOuterLoop(&L, ORE))) {
     LoopBlocksRPO RPOT(&L);
     RPOT.perform(LI);
@@ -7809,7 +7809,7 @@ LoopVectorizationPlanner::planInVPlanNativePath(ElementCount UserVF) {
   // transformations before even evaluating whether vectorization is profitable.
   // Since we cannot modify the incoming IR, we need to build VPlan upfront in
   // the vectorization pipeline.
-  if (!OrigLoop->empty()) {
+  if (!OrigLoop->isInnermost()) {
     // If the user doesn't provide a vectorization factor, determine a
     // reasonable one.
     if (UserVF.isZero()) {
@@ -7847,7 +7847,7 @@ LoopVectorizationPlanner::planInVPlanNativePath(ElementCount UserVF) {
 Optional<VectorizationFactor>
 LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
   assert(!UserVF.isScalable() && "scalable vectorization not yet handled");
-  assert(OrigLoop->empty() && "Inner loop expected.");
+  assert(OrigLoop->isInnermost() && "Inner loop expected.");
   Optional<unsigned> MaybeMaxVF =
       CM.computeMaxVF(UserVF.getKnownMinValue(), UserIC);
   if (!MaybeMaxVF) // Cases that should not to be vectorized nor interleaved.
@@ -8562,7 +8562,7 @@ VPRecipeBase *VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
 
 void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
                                                         ElementCount MaxVF) {
-  assert(OrigLoop->empty() && "Inner loop expected.");
+  assert(OrigLoop->isInnermost() && "Inner loop expected.");
 
   // Collect conditions feeding internal conditional branches; they need to be
   // represented in VPlan for it to model masking.
@@ -8818,7 +8818,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlan(VFRange &Range) {
   // transformations before even evaluating whether vectorization is profitable.
   // Since we cannot modify the incoming IR, we need to build VPlan upfront in
   // the vectorization pipeline.
-  assert(!OrigLoop->empty());
+  assert(!OrigLoop->isInnermost());
   assert(EnableVPlanNativePath && "VPlan-native path is not enabled.");
 
   // Create new empty VPlan
@@ -9293,7 +9293,7 @@ LoopVectorizePass::LoopVectorizePass(LoopVectorizeOptions Opts)
                               !EnableLoopVectorization) {}
 
 bool LoopVectorizePass::processLoop(Loop *L) {
-  assert((EnableVPlanNativePath || L->empty()) &&
+  assert((EnableVPlanNativePath || L->isInnermost()) &&
          "VPlan-native path is not enabled. Only process inner loops.");
 
 #ifndef NDEBUG
@@ -9355,11 +9355,11 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   // even evaluating whether vectorization is profitable. Since we cannot modify
   // the incoming IR, we need to build VPlan upfront in the vectorization
   // pipeline.
-  if (!L->empty())
+  if (!L->isInnermost())
     return processLoopInVPlanNativePath(L, PSE, LI, DT, &LVL, TTI, TLI, DB, AC,
                                         ORE, BFI, PSI, Hints);
 
-  assert(L->empty() && "Inner loop expected.");
+  assert(L->isInnermost() && "Inner loop expected.");
 
   // Check the loop for a trip count threshold: vectorize loops with a tiny trip
   // count by optimizing for size, to minimize overheads.
