@@ -1499,7 +1499,7 @@ private:
 
   /// \return An upper bound for the vectorization factor when using scalable
   /// vectors.
-  Optional<unsigned> computeFeasibleScalableMaxVF();
+  Optional<ElementCount> computeFeasibleScalableMaxVF();
 
   /// \return An upper bound for the vectorization factor, a power-of-2 larger
   /// than zero. One is returned if vectorization should best be avoided due
@@ -6009,15 +6009,18 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
   case CM_ScalarEpilogueAllowed: {
     if (UserVF) return UserVF;
 
-    ElementCount MaxVF = TTI.useScalableVectorType()
-                             ? computeFeasibleScalableMaxVF()
-                             : computeFeasibleMaxVF(TC);
-    if (MaxVF.isZero())
+    Optional<ElementCount> MaxVF = TTI.useScalableVectorType()
+                                       ? computeFeasibleScalableMaxVF()
+                                       : computeFeasibleMaxVF(TC);
+    if (!MaxVF) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
-    return MaxVF.getKnownMinValue();
+      return None;
+    }
+
+    return MaxVF->getKnownMinValue();
   }
   case CM_ScalarEpilogueNotNeededUsePredicate:
     LLVM_DEBUG(
@@ -6056,17 +6059,18 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
 
   unsigned MaxVF = UserVF;
   if (!MaxVF) {
-    ElementCount FeasibleMaxVF = TTI.useScalableVectorType()
-                                     ? computeFeasibleScalableMaxVF()
-                                     : computeFeasibleMaxVF(TC);
-    if (FeasibleMaxVF.isZero()) {
+    Optional<ElementCount> FeasibleMaxVF = TTI.useScalableVectorType()
+                                               ? computeFeasibleScalableMaxVF()
+                                               : computeFeasibleMaxVF(TC);
+    if (!FeasibleMaxVF) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
       return None;
     }
-    MaxVF = FeasibleMaxVF.getKnownMinValue();
+
+    MaxVF = FeasibleMaxVF->getKnownMinValue();
   }
 
   assert((UserVF || isPowerOf2_32(MaxVF)) && "MaxVF must be a power of 2");
@@ -6116,7 +6120,8 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
   return None;
 }
 
-Optional<unsigned> LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
+Optional<ElementCount>
+LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
   // For scalable vectors, where vector register width is not fixed, vector
   // width is represented as `<vscale x k x simpleType>`, where k is a power of
   // 2 and is known at the compile time (k can range from 1 to 8 for current
@@ -6151,7 +6156,7 @@ Optional<unsigned> LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
     return None;
   if (Legal->getMaxSafeRegisterWidth() < 256 * 8 * 8)
     return None;
-  return MaxScaleFactor;
+  return ElementCount::getScalable(MaxScaleFactor);
 }
 
 ElementCount
