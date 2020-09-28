@@ -1504,7 +1504,7 @@ private:
   /// \return An upper bound for the vectorization factor, a power-of-2 larger
   /// than zero. One is returned if vectorization should best be avoided due
   /// to cost.
-  unsigned computeFeasibleMaxVF(unsigned ConstTripCount);
+  ElementCount computeFeasibleMaxVF(unsigned ConstTripCount);
 
   /// The vectorization cost is a combination of the cost itself and a boolean
   /// indicating whether any of the contributing operations will actually
@@ -6009,15 +6009,15 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
   case CM_ScalarEpilogueAllowed: {
     if (UserVF) return UserVF;
 
-    Optional<unsigned> MaxVF = TTI.useScalableVectorType()
-                                   ? computeFeasibleScalableMaxVF()
-                                   : computeFeasibleMaxVF(TC);
-    if (!MaxVF)
+    ElementCount MaxVF = TTI.useScalableVectorType()
+                             ? computeFeasibleScalableMaxVF()
+                             : computeFeasibleMaxVF(TC);
+    if (MaxVF.isZero())
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
-    return MaxVF;
+    return MaxVF.getKnownMinValue();
   }
   case CM_ScalarEpilogueNotNeededUsePredicate:
     LLVM_DEBUG(
@@ -6056,17 +6056,17 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
 
   unsigned MaxVF = UserVF;
   if (!MaxVF) {
-    Optional<unsigned> FeasibleMaxVF = TTI.useScalableVectorType()
-                                           ? computeFeasibleScalableMaxVF()
-                                           : computeFeasibleMaxVF(TC);
-    if (!FeasibleMaxVF) {
+    ElementCount FeasibleMaxVF = TTI.useScalableVectorType()
+                                     ? computeFeasibleScalableMaxVF()
+                                     : computeFeasibleMaxVF(TC);
+    if (FeasibleMaxVF.isZero()) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
       return None;
     }
-    MaxVF = FeasibleMaxVF.getValue();
+    MaxVF = FeasibleMaxVF.getKnownMinValue();
   }
 
   assert((UserVF || isPowerOf2_32(MaxVF)) && "MaxVF must be a power of 2");
@@ -6154,7 +6154,7 @@ Optional<unsigned> LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
   return MaxScaleFactor;
 }
 
-unsigned
+ElementCount
 LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
@@ -6183,7 +6183,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   if (MaxVectorSize == 0) {
     LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
     MaxVectorSize = 1;
-    return MaxVectorSize;
+    return ElementCount::getFixed(MaxVectorSize);
   } else if (ConstTripCount && ConstTripCount < MaxVectorSize &&
              isPowerOf2_32(ConstTripCount)) {
     // We need to clamp the VF to be the ConstTripCount. There is no point in
@@ -6191,10 +6191,10 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
     LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
                       << ConstTripCount << "\n");
     MaxVectorSize = ConstTripCount;
-    return MaxVectorSize;
+    return ElementCount::getFixed(MaxVectorSize);
   }
 
-  unsigned MaxVF = MaxVectorSize;
+  ElementCount MaxVF = ElementCount::getFixed(MaxVectorSize);
   if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
@@ -6217,15 +6217,16 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
           Selected = false;
       }
       if (Selected) {
-        MaxVF = VFs[i].getKnownMinValue();
+        MaxVF = VFs[i];
         break;
       }
     }
+    // FIXME: Update TTI to use ElementCount for methods that return VF values.
     if (unsigned MinVF = TTI.getMinimumVF(SmallestType)) {
-      if (MaxVF < MinVF) {
+      if (MaxVF.getKnownMinValue() < MinVF) {
         LLVM_DEBUG(dbgs() << "LV: Overriding calculated MaxVF(" << MaxVF
                           << ") with target's minimum: " << MinVF << '\n');
-        MaxVF = MinVF;
+        MaxVF = ElementCount::getFixed(MinVF);
       }
     }
   }
