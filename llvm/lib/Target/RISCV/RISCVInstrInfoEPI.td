@@ -268,7 +268,7 @@ defset list<VectorTypeInfo> AllVectors = {
     defset list<GroupVectorTypeInfo> GroupIntegerVectors = {
       def Vtype16xi8  : GroupVectorTypeInfo<nxv16i8,  nxv8i8,  nxv16i1, 8,  VRM2>;
       def Vtype32xi8  : GroupVectorTypeInfo<nxv32i8,  nxv8i8,  nxv32i1, 8,  VRM4>;
-//    def Vtype64xi8  : GroupVectorTypeInfo<nxv64i8,  nxv8i8,  nxv64i1, 8,  VRM8>; // FIXME undefined type
+      def Vtype64xi8  : GroupVectorTypeInfo<nxv64i8,  nxv8i8,  nxv64i1, 8,  VRM8>;
 
       def Vtype8xi16  : GroupVectorTypeInfo<nxv8i16,  nxv4i16, nxv8i1,  16, VRM2>;
       def Vtype16xi16 : GroupVectorTypeInfo<nxv16i16, nxv4i16, nxv16i1, 16, VRM4>;
@@ -394,7 +394,7 @@ defset list<MaskTypeInfo> AllMasks = {
   def : MaskTypeInfo<nxv8i1,  8,  1>;  // FIXME SEW should be ELEN/8
   def : MaskTypeInfo<nxv16i1, 8,  2>;  // FIXME SEW should be ELEN/16, SEW < 8
   def : MaskTypeInfo<nxv32i1, 8,  4>;  // FIXME SEW should be ELEN/32, SEW < 8
-//def : MaskTypeInfo<nxv64i1, 8,  8>;  // FIXME SEW should be ELEN/64, SEW < 8, undefined type
+  def : MaskTypeInfo<nxv64i1, 8,  8>;  // FIXME SEW should be ELEN/64, SEW < 8
 }
 
 class IllegalVectorTypeInfo<ValueType Vec, VectorTypeInfo LVti, ValueType Mas,

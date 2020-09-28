@@ -356,7 +356,7 @@ def VRM4 : VReg<[nxv32i8, nxv16i16, nxv8i32, nxv4i64, nxv8f32, nxv4f64],
                      V0M4), 4>;
 
 
-def VRM8 : VReg<[nxv32i16, nxv16i32, nxv8i64, nxv16f32, nxv8f64], // FIXME nxv64i8 does not exist yet
+def VRM8 : VReg<[nxv64i8, nxv32i16, nxv16i32, nxv8i64, nxv16f32, nxv8f64],
                 (add V16M8, V8M8, V24M8, V0M8), 8>;
 
 } // list<VReg> AllVRegs
