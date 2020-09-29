@@ -1120,7 +1120,7 @@ public:
 
   /// \return An upper bound for the vectorization factor, or None if
   /// vectorization and interleaving should be avoided up front.
-  Optional<unsigned> computeMaxVF(unsigned UserVF, unsigned UserIC);
+  Optional<ElementCount> computeMaxVF(ElementCount UserVF, unsigned UserIC);
 
   /// \return True if runtime checks are required for vectorization, and false
   /// otherwise.
@@ -5983,8 +5983,8 @@ bool LoopVectorizationCostModel::runtimeChecksRequired() {
   return false;
 }
 
-Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
-                                                            unsigned UserIC) {
+Optional<ElementCount>
+LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
   if (Legal->getRuntimePointerChecking()->Need && TTI.hasBranchDivergence()) {
     // TODO: It may by useful to do since it's still likely to be dynamically
     // uniform if the target can skip.
@@ -6007,20 +6007,19 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
 
   switch (ScalarEpilogueStatus) {
   case CM_ScalarEpilogueAllowed: {
-    if (UserVF) return UserVF;
+    if (UserVF.isNonZero())
+      return UserVF;
 
     Optional<ElementCount> MaxVF = TTI.useScalableVectorType()
                                        ? computeFeasibleScalableMaxVF()
                                        : computeFeasibleMaxVF(TC);
-    if (!MaxVF) {
+    if (!MaxVF)
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
           "UnsupportedScalableVectorType", ORE, TheLoop);
-      return None;
-    }
 
-    return MaxVF->getKnownMinValue();
+    return MaxVF;
   }
   case CM_ScalarEpilogueNotNeededUsePredicate:
     LLVM_DEBUG(
@@ -6057,8 +6056,8 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
     InterleaveInfo.invalidateGroupsRequiringScalarEpilogue();
   }
 
-  unsigned MaxVF = UserVF;
-  if (!MaxVF) {
+  ElementCount MaxVF = UserVF;
+  if (MaxVF.isZero()) {
     Optional<ElementCount> FeasibleMaxVF = TTI.useScalableVectorType()
                                                ? computeFeasibleScalableMaxVF()
                                                : computeFeasibleMaxVF(TC);
@@ -6070,12 +6069,15 @@ Optional<unsigned> LoopVectorizationCostModel::computeMaxVF(unsigned UserVF,
       return None;
     }
 
-    MaxVF = FeasibleMaxVF->getKnownMinValue();
+    MaxVF = FeasibleMaxVF.getValue();
   }
 
-  assert((UserVF || isPowerOf2_32(MaxVF)) && "MaxVF must be a power of 2");
-  unsigned MaxVFtimesIC = UserIC ? MaxVF * UserIC : MaxVF;
-  if (TC > 0 && TC % MaxVFtimesIC == 0) {
+  assert((UserVF.isNonZero() || isPowerOf2_32(MaxVF.getKnownMinValue())) &&
+         "MaxVF must be a power of 2");
+  unsigned MaxVFKnownMinValue = MaxVF.getKnownMinValue();
+  unsigned MaxVFtimesIC =
+      UserIC ? MaxVFKnownMinValue * UserIC : MaxVFKnownMinValue;
+  if (!MaxVF.isScalable() && TC > 0 && TC % MaxVFtimesIC == 0) {
     // Accept MaxVF if we do not have a tail.
     LLVM_DEBUG(dbgs() << "LV: No tail will remain for any chosen VF.\n");
     return MaxVF;
@@ -7854,8 +7856,7 @@ Optional<VectorizationFactor>
 LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
   assert(!UserVF.isScalable() && "scalable vectorization not yet handled");
   assert(OrigLoop->isInnermost() && "Inner loop expected.");
-  Optional<unsigned> MaybeMaxVF =
-      CM.computeMaxVF(UserVF.getKnownMinValue(), UserIC);
+  Optional<ElementCount> MaybeMaxVF = CM.computeMaxVF(UserVF, UserIC);
   if (!MaybeMaxVF) // Cases that should not to be vectorized nor interleaved.
     return None;
 
@@ -7886,23 +7887,23 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
     return {{UserVF, 0}};
   }
 
+  ElementCount MaxVF = MaybeMaxVF.getValue();
+  assert(MaxVF.isNonZero() && "MaxVF is zero.");
+
   // Most of the VF selection code for fixed length vectors does not make
   // sense for scalable vectors. So as a starting point we assume that if we
   // are using scalable vectors we are going to vectorize based on the
   // computed MaxVF (max K factor).
-  if (TTI->useScalableVectorType()) {
-    assert(MaybeMaxVF.getValue() != 0 && "MaxVF is zero.");
-    ElementCount VF = ElementCount::getScalable(MaybeMaxVF.getValue());
-    CM.collectUniformsAndScalars(VF);
-    CM.collectInstsToScalarize(VF);
-    buildVPlansWithVPRecipes(VF, VF);
+  if (MaxVF.isScalable()) {
+    CM.collectUniformsAndScalars(MaxVF);
+    CM.collectInstsToScalarize(MaxVF);
+    buildVPlansWithVPRecipes(MaxVF, MaxVF);
     LLVM_DEBUG(printPlans(dbgs()));
-    return CM.selectScalableVectorizationFactor(VF);
+    return CM.selectScalableVectorizationFactor(MaxVF);
   }
 
-  unsigned MaxVF = MaybeMaxVF.getValue();
-  assert(MaxVF != 0 && "MaxVF is zero.");
-  for (unsigned VF = 1; VF <= MaxVF; VF *= 2) {
+  // Handle fixed vector factor
+  for (unsigned VF = 1; VF <= MaxVF.getFixedValue(); VF *= 2) {
     // Collect Uniform and Scalar instructions after vectorization with VF.
     CM.collectUniformsAndScalars(ElementCount::getFixed(VF));
 
@@ -7914,16 +7915,15 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
 
   CM.collectInLoopReductions();
 
-  buildVPlansWithVPRecipes(ElementCount::getFixed(1),
-                           ElementCount::getFixed(MaxVF));
+  buildVPlansWithVPRecipes(ElementCount::getFixed(1), MaxVF);
   LLVM_DEBUG(printPlans(dbgs()));
-  if (MaxVF == 1)
+  if (MaxVF.isScalar())
     // Do not return VectorizationFactor::Disabled() here, since that means a
     // width=0. For fixed vectors we want width=1, cost=0 here.
-    return VectorizationFactor(ElementCount::getFixed(1), 0);
+    return VectorizationFactor(MaxVF, 0);
 
   // Select the optimal vectorization factor.
-  return CM.selectVectorizationFactor(MaxVF);
+  return CM.selectVectorizationFactor(MaxVF.getFixedValue());
 }
 
 void LoopVectorizationPlanner::setBestPlan(ElementCount VF, unsigned UF) {
