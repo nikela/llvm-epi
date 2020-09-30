@@ -8,13 +8,12 @@
 define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vand.vi v1, v16, 1
 ; CHECK-NEXT:    vmv.v.i v2, 0
 ; CHECK-NEXT:    vmsne.vv v1, v1, v2
 ; CHECK-NEXT:    vand.vi v3, v17, 1
 ; CHECK-NEXT:    vmsne.vv v2, v3, v2
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vmand.mm v0, v1, v2
 ; CHECK-NEXT:    ret
 {
@@ -31,12 +30,11 @@ declare <vscale x 1 x i1> @llvm.epi.vmand.nxv1i1.nxv1i1(<vscale x 1 x i1> %a, <v
 define <vscale x 1 x i64> @mzext_1(<vscale x 1 x i1> %ma, <vscale x 1 x i1> %mb, i64 %gvl) nounwind
 ; CHECK-LABEL: mzext_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vmv.v.i v1, 0
 ; CHECK-NEXT:    vmerge.vim v2, v1, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vand.vv v16, v2, v1
 ; CHECK-NEXT:    ret
 {
@@ -53,13 +51,12 @@ declare <vscale x 1 x i64> @llvm.epi.vand.nxv1i64.nxv1i64(<vscale x 1 x i64> %a,
 define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,tu,mu
 ; CHECK-NEXT:    vand.vi v2, v16, 1
 ; CHECK-NEXT:    vmv.v.i v4, 0
 ; CHECK-NEXT:    vmsne.vv v1, v2, v4
 ; CHECK-NEXT:    vand.vi v2, v18, 1
 ; CHECK-NEXT:    vmsne.vv v6, v2, v4
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
 ; CHECK-NEXT:    vmand.mm v0, v1, v6
 ; CHECK-NEXT:    ret
 {
@@ -76,12 +73,11 @@ declare <vscale x 2 x i1> @llvm.epi.vmand.nxv2i1.nxv2i1(<vscale x 2 x i1> %a, <v
 define <vscale x 2 x i64> @mzext_2(<vscale x 2 x i1> %ma, <vscale x 2 x i1> %mb, i64 %gvl) nounwind
 ; CHECK-LABEL: mzext_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64,m2,tu,mu
 ; CHECK-NEXT:    vmv.v.i v2, 0
 ; CHECK-NEXT:    vmerge.vim v4, v2, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    vmerge.vim v6, v2, 1, v0
-; CHECK-NEXT:    vsetvli a0, a0, e64,m2,tu,mu
 ; CHECK-NEXT:    vand.vv v16, v4, v6
 ; CHECK-NEXT:    ret
 {

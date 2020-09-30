@@ -76,10 +76,9 @@ define <vscale x 1 x double> @max_registers(
 define <vscale x 1 x double> @too_many_registers_1(
 ; CHECK-LABEL: too_many_registers_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v1, (a2)
 ; CHECK-NEXT:    vle64.v v2, (a1)
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
 ; CHECK-NEXT:    vfadd.vv v16, v2, v1
 ; CHECK-NEXT:    ret
                                  i64 %gvl,
@@ -104,10 +103,9 @@ define <vscale x 1 x double> @too_many_registers_1(
 define <vscale x 1 x double> @too_many_registers_2(
 ; CHECK-LABEL: too_many_registers_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v1, (a1)
 ; CHECK-NEXT:    vle64.v v2, (a0)
-; CHECK-NEXT:    vsetvli a0, a2, e64,m1,tu,mu
 ; CHECK-NEXT:    vfadd.vv v16, v2, v1
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v0,
@@ -134,10 +132,9 @@ define <vscale x 1 x double> @too_many_registers_3(
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    ld a0, 8(sp)
 ; CHECK-NEXT:    ld a1, 0(sp)
-; CHECK-NEXT:    vsetvli a2, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a7, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v1, (a0)
 ; CHECK-NEXT:    vle64.v v2, (a1)
-; CHECK-NEXT:    vsetvli a0, a7, e64,m1,tu,mu
 ; CHECK-NEXT:    vfadd.vv v16, v2, v1
 ; CHECK-NEXT:    ret
                                  i64 %i0,

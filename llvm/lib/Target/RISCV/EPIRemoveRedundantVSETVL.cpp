@@ -20,6 +20,9 @@
 //   for the later 'vsetvli' instruction is actually defined by the prior
 //   'vsetvli' (i.e. it is a granted vector length (GVL)).
 //
+// - If we detect a VLMAX definition that is only consumed by a non-VLMAX uses,
+//   use, if possible, the AVL at the point of use.
+//
 // Currently, this phase requires SSA form, and the analysis is limited within
 // a basic block.
 //
@@ -45,6 +48,11 @@ static cl::opt<bool>
     DisableRemoveVSETVL("no-epi-remove-redundant-vsetvl", cl::init(false),
                         cl::Hidden,
                         cl::desc("Disable removing redundant vsetvl"));
+
+static cl::opt<bool>
+    DisableVLBackPropagation("epi-disable-vl-backpropagation", cl::init(false),
+                        cl::Hidden,
+                        cl::desc("Disable VL backpropagation"));
 
 namespace {
 
@@ -109,12 +117,20 @@ struct VSETVLInfo {
     return (SEW / VLMul) > (other.SEW / other.VLMul);
   }
 
+  bool hasMoreRestrictiveOrEqualVType(const VSETVLInfo &other) const {
+    return (SEW / VLMul) >= (other.SEW / other.VLMul);
+  }
+
   bool computesSameGVL(const VSETVLInfo &other) const {
     return AVLReg == other.AVLReg && (SEW / VLMul) == (other.SEW / other.VLMul);
   }
 
   bool operator==(const VSETVLInfo &other) const {
     return AVLReg == other.AVLReg && SEW == other.SEW && VLMul == other.VLMul;
+  }
+
+  bool operator!=(const VSETVLInfo &other) const {
+    return !(*this == other);
   }
 };
 
@@ -399,6 +415,208 @@ bool forwardCompatibleGVL(MachineBasicBlock &MBB,
   return IsMBBModified;
 }
 
+// FIXME: Adapted from GlobalISel/CombinerHelper.cpp.
+bool isPredecessor(const MachineInstr &DefMI, const MachineInstr &UseMI) {
+  assert(!DefMI.isDebugInstr() && !UseMI.isDebugInstr() &&
+         "shouldn't consider debug uses");
+  assert(DefMI.getParent() == UseMI.getParent());
+  if (&DefMI == &UseMI)
+    return false;
+
+  // Loop through the basic block until we find one of the instructions.
+  MachineBasicBlock::const_iterator I = DefMI.getParent()->begin();
+  for (; &*I != &DefMI && &*I != &UseMI; ++I)
+    ;
+  return &*I == &DefMI;
+}
+
+// FIXME: remove some of the repetition here.
+bool backpropagateVLMax(MachineBasicBlock &MBB, MachineRegisterInfo &MRI,
+                        const RISCVInstrInfo *TII) {
+  MachineInstr *CurrentVL = nullptr;
+  // Maps each instruction to its defining PseudoVSETVLI (if any).
+  llvm::DenseMap<MachineInstr *, MachineInstr *> RegionVL;
+  for (MachineBasicBlock::instr_iterator II = MBB.instr_begin(),
+                                         IIEnd = MBB.instr_end();
+       II != IIEnd;) {
+    MachineInstr &MI(*II++);
+
+    if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
+      // This should not change VL so let's assume we cant't tell much about it.
+      if (MI.getOperand(0).getReg() == RISCV::X0 &&
+          MI.getOperand(1).getReg() == RISCV::X0)
+        CurrentVL = nullptr;
+      else
+        CurrentVL = &MI;
+      continue;
+    }
+
+    // Check if the current intruction defines VL (e.g. 'vsetvl', (but not
+    // 'vsetvli')). If it does, we should not remove a subsequent 'vsetvli',
+    // even when its vtype matches the reference 'vsetvli's. To force this
+    // we clear 'CurrentVL'.
+    for (auto const &Def : MI.defs()) {
+      assert(Def.isReg());
+      if (Def.getReg() == RISCV::VL) {
+        CurrentVL = nullptr;
+      }
+    }
+
+    // Implicit defs are not included in MachineInstruction::defs()
+    for (auto const &ImplOp : MI.implicit_operands()) {
+      if (ImplOp.isReg() && (ImplOp.getReg() == RISCV::VL) && ImplOp.isDef()) {
+        CurrentVL = nullptr;
+      }
+    }
+
+    // VL may be changed within functions, we can't reuse defs through calls
+    if (MI.isCall()) {
+      CurrentVL = nullptr;
+    }
+
+    RegionVL.insert(std::make_pair(&MI, CurrentVL));
+  }
+
+  auto DefinesVector =
+      [&MRI](const MachineInstr &MI) -> llvm::Optional<Register> {
+    for (auto const &DefOp : MI.defs()) {
+      if (!DefOp.isReg())
+        continue;
+      Register Def = DefOp.getReg();
+      if (!Register::isVirtualRegister(Def))
+        continue;
+      const TargetRegisterClass *RC = MRI.getRegClass(Def);
+      if (!RC->hasSuperClassEq(&RISCV::VRRegClass) &&
+          !RC->hasSuperClassEq(&RISCV::VRM2RegClass) &&
+          !RC->hasSuperClassEq(&RISCV::VRM4RegClass) &&
+          !RC->hasSuperClassEq(&RISCV::VRM8RegClass))
+        continue;
+      return Def;
+    }
+    return NoneType();
+  };
+
+  bool Changed = false;
+  for (MachineBasicBlock::reverse_instr_iterator II = MBB.instr_rbegin(),
+                                                 IIEnd = MBB.instr_rend();
+       II != IIEnd;) {
+    MachineInstr &MI(*II++);
+
+    LLVM_DEBUG(dbgs() << "(1) Looking at: "; MI.dump(););
+
+    llvm::Optional<Register> Def = DefinesVector(MI);
+    if (!Def.hasValue())
+      continue;
+
+    LLVM_DEBUG(dbgs() << "(2) Looking at: "; MI.dump(););
+
+    CurrentVL = RegionVL[&MI];
+    if (!CurrentVL)
+      continue;
+
+    LLVM_DEBUG(dbgs() << "(3) Looking at: "; MI.dump(););
+
+    // Check that we are using VLMAX.
+    VSETVLInfo CurrentVLInfo(*CurrentVL);
+    if (CurrentVLInfo.AVLReg != RISCV::X0) {
+      continue;
+    }
+    LLVM_DEBUG(dbgs() << "(3.1) Looking at: "; MI.dump(););
+
+    // Check for every use they are all the same
+    MachineInstr *RefUseMIVL = nullptr;
+    for (auto &UseMI : MRI.use_nodbg_instructions(*Def)) {
+      MachineInstr *UseMIVL = RegionVL[&UseMI];
+      if (!UseMIVL) {
+        RefUseMIVL = nullptr;
+        break;
+      }
+
+      LLVM_DEBUG(dbgs() << "(4) Looking at: "; MI.dump();
+                 dbgs() << "    Used by: "; UseMI.dump());
+
+      VSETVLInfo UseMIVLInfo(*UseMIVL);
+      if (UseMIVLInfo.AVLReg == RISCV::X0) {
+        RefUseMIVL = nullptr;
+        break;
+      }
+
+      LLVM_DEBUG(dbgs() << "(5) Looking at: "; MI.dump();
+                 dbgs() << "    Used by: "; UseMI.dump());
+
+      // If the VL of the use computes less or equal number of VL we can use
+      // this.
+      if (!UseMIVLInfo.hasMoreRestrictiveOrEqualVType(CurrentVLInfo)) {
+        RefUseMIVL = nullptr;
+        break;
+      }
+
+      LLVM_DEBUG(dbgs() << "(6) Looking at: "; MI.dump();
+                 dbgs() << "    Used by: "; UseMI.dump());
+
+      // Ok, so far we know that this vector is used in an instruction that is
+      // not under a X0 and will definitely use less elements (or the same) as
+      // its AVLReg.
+
+      // Now check AVLReg is actually defined before this instruction.
+      MachineInstr *DefAVL = MRI.getUniqueVRegDef(UseMIVLInfo.AVLReg);
+      assert(DefAVL && "Definition for AVL not found?");
+      LLVM_DEBUG(dbgs() << "(7) Looking at: "; MI.dump();
+                 dbgs() << "    Used by: "; UseMI.dump();
+                 dbgs() << "    AVL constrained: "; DefAVL->dump());
+      // Think a way to overcome this.
+      if (!isPredecessor(*DefAVL, MI)) {
+        LLVM_DEBUG(dbgs() << "(7.1) Not a predecessor\n");
+        RefUseMIVL = nullptr;
+        break;
+      }
+
+      if (!RefUseMIVL) {
+        RefUseMIVL = UseMIVL;
+      } else {
+        // Check it matches the current one.
+        if (VSETVLInfo(*RefUseMIVL) != UseMIVLInfo) {
+          LLVM_DEBUG(dbgs() << "(7.2) Does not match current VL predecessor\n");
+          RefUseMIVL = nullptr;
+          break;
+        }
+      }
+    }
+
+    if (!RefUseMIVL) {
+      LLVM_DEBUG(dbgs() << "(7.3) Giving up\n");
+      continue;
+    }
+
+    LLVM_DEBUG(dbgs() << "(8) Constraining: "; MI.dump(););
+
+    // When we run this pass, CurrentVL is the instruction preceding the current
+    // one so we can remove it. If we can't, then things will still be correct
+    // but will look a bit off.
+    if (&*II == CurrentVL) {
+      LLVM_DEBUG(dbgs() << "(8.1) Removing Useless VSETVLI: "; MI.dump(););
+      II++;
+      CurrentVL->eraseFromParent();
+    }
+
+    LLVM_DEBUG(dbgs() << "(8.2) Adding new VSETVLI "; MI.dump(););
+    // All is good, so it should be possible to introduce a VSETVLI right here
+    // using AVLReg.
+    BuildMI(*MI.getParent(), &MI, MI.getDebugLoc(),
+            TII->get(RISCV::PseudoVSETVLI))
+        .addReg(RISCV::X0, RegState::Define | RegState::Dead)
+        .add(RefUseMIVL->getOperand(1))
+        .add(RefUseMIVL->getOperand(2));
+
+    // Now update RegionVL to reflect the new change so it can be used by
+    // earlier instructions.
+    RegionVL[&MI] = RefUseMIVL;
+    Changed = true;
+  }
+
+  return Changed;
+}
+
 bool removeDuplicateVSETVLI(MachineBasicBlock &MBB) {
   bool IsMBBModified = false;
 
@@ -497,7 +715,9 @@ bool EPIRemoveRedundantVSETVL::runOnMachineFunction(MachineFunction &F) {
       dbgs() << "********** Begin remove redundant VSETVLI phase on function '"
              << F.getName() << "' **********\n\n");
 
-  const MachineRegisterInfo &MRI = F.getRegInfo();
+  const RISCVInstrInfo *TII =
+      static_cast<const RISCVInstrInfo *>(F.getSubtarget().getInstrInfo());
+  MachineRegisterInfo &MRI = F.getRegInfo();
   assert(MRI.isSSA());
   assert(MRI.tracksLiveness());
 
@@ -516,13 +736,25 @@ bool EPIRemoveRedundantVSETVL::runOnMachineFunction(MachineFunction &F) {
                  MBB.dump(); dbgs() << "\n");
     }
 
+    bool BackPropagateVLMax = false;
+    if (!DisableVLBackPropagation) {
+      LLVM_DEBUG(dbgs() << "-- Before backpropagation\n";);
+      BackPropagateVLMax = backpropagateVLMax(MBB, MRI, TII);
+      LLVM_DEBUG(dbgs() << "-- After backpropagation\n\n";);
+      if (BackPropagateVLMax) {
+        LLVM_DEBUG(dbgs() << "--- BB dump after backpropagateVLMax ---";
+                   MBB.dump(); dbgs() << "\n");
+      }
+    }
+
     bool RemovedDuplicates = removeDuplicateVSETVLI(MBB);
     if (RemovedDuplicates) {
       LLVM_DEBUG(dbgs() << "--- BB dump after removeDuplicateVSETVLI ---";
                  MBB.dump(); dbgs() << "\n");
     }
 
-    IsFunctionModified |= ForwardedAVL || ForwardedGVL || RemovedDuplicates;
+    IsFunctionModified |=
+        ForwardedAVL || ForwardedGVL || BackPropagateVLMax || RemovedDuplicates;
   }
 
   LiveVariables LV;
