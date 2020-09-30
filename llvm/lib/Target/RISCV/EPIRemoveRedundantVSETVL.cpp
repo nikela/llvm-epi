@@ -73,8 +73,6 @@ private:
 
 char EPIRemoveRedundantVSETVL::ID = 0;
 
-namespace {
-
 // This class holds information related to the operands of a VSETVLI
 // instruction. It provides mechanisms to compare such instructions.
 struct VSETVLInfo {
@@ -490,8 +488,6 @@ bool removeDuplicateVSETVLI(MachineBasicBlock &MBB) {
 
   return IsMBBModified;
 }
-
-} // namespace
 
 bool EPIRemoveRedundantVSETVL::runOnMachineFunction(MachineFunction &F) {
   if (skipFunction(F.getFunction()) || DisableRemoveVSETVL)
