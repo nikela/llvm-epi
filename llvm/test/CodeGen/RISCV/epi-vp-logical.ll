@@ -9,38 +9,58 @@
 define void @test_vp_logical(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vle64.v v1, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle64.v v2, (a1)
+; CHECK-O0-NEXT:    vle64.v v1, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vand.vi v3, v1, 1
-; CHECK-O0-NEXT:    vmv.v.i v1, 0
+; CHECK-O0-NEXT:    vle64.v v3, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v3, v1
-; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vand.vi v3, v2, 1
+; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v1, 1
+; CHECK-O0-NEXT:    vmv.v.i v1, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vmsne.vv v2, v3, v1
-; CHECK-O0-NEXT:    vsetvli a0, a2, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v4, v2
-; CHECK-O0-NEXT:    vmor.mm v3, v4, v2
-; CHECK-O0-NEXT:    vmxor.mm v2, v4, v2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v4, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v3
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v1
+; CHECK-O0-NEXT:    # implicit-def: $v4
+; CHECK-O0-NEXT:    vand.vi v4, v3, 1
+; CHECK-O0-NEXT:    # implicit-def: $v3
+; CHECK-O0-NEXT:    vmsne.vv v3, v4, v1
+; CHECK-O0-NEXT:    vsetvli a1, a2, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vmand.mm v0, v2, v3
+; CHECK-O0-NEXT:    vmor.mm v4, v2, v3
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v4, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v2, v2, v3
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v2, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vim v3, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v2, v1, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    vmerge.vim v1, v1, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e64,m1,tu,mu
-; CHECK-O0-NEXT:    vse64.v v4, (a3)
-; CHECK-O0-NEXT:    vse64.v v3, (a3)
-; CHECK-O0-NEXT:    vse64.v v1, (a3)
+; CHECK-O0-NEXT:    vsetvli a1, a2, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vse64.v v3, (a0)
+; CHECK-O0-NEXT:    vse64.v v2, (a0)
+; CHECK-O0-NEXT:    vse64.v v1, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical:
@@ -100,38 +120,58 @@ define void @test_vp_logical(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, i
 define void @test_vp_logical_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vle32.v v1, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle32.v v2, (a1)
+; CHECK-O0-NEXT:    vle32.v v1, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vand.vi v3, v1, 1
-; CHECK-O0-NEXT:    vmv.v.i v1, 0
+; CHECK-O0-NEXT:    vle32.v v3, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v3, v1
-; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vand.vi v3, v2, 1
+; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v1, 1
+; CHECK-O0-NEXT:    vmv.v.i v1, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vmsne.vv v2, v3, v1
-; CHECK-O0-NEXT:    vsetvli a0, a2, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v4, v2
-; CHECK-O0-NEXT:    vmor.mm v3, v4, v2
-; CHECK-O0-NEXT:    vmxor.mm v2, v4, v2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v4, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v3
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v1
+; CHECK-O0-NEXT:    # implicit-def: $v4
+; CHECK-O0-NEXT:    vand.vi v4, v3, 1
+; CHECK-O0-NEXT:    # implicit-def: $v3
+; CHECK-O0-NEXT:    vmsne.vv v3, v4, v1
+; CHECK-O0-NEXT:    vsetvli a1, a2, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vmand.mm v0, v2, v3
+; CHECK-O0-NEXT:    vmor.mm v4, v2, v3
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v4, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v2, v2, v3
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v2, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vim v3, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v2, v1, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    vmerge.vim v1, v1, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e32,m1,tu,mu
-; CHECK-O0-NEXT:    vse32.v v4, (a3)
-; CHECK-O0-NEXT:    vse32.v v3, (a3)
-; CHECK-O0-NEXT:    vse32.v v1, (a3)
+; CHECK-O0-NEXT:    vsetvli a1, a2, e32,m1,tu,mu
+; CHECK-O0-NEXT:    vse32.v v3, (a0)
+; CHECK-O0-NEXT:    vse32.v v2, (a0)
+; CHECK-O0-NEXT:    vse32.v v1, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_2:
@@ -191,38 +231,58 @@ define void @test_vp_logical_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1,
 define void @test_vp_logical_3(<vscale x 4 x i16>* %a0, <vscale x 4 x i16>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e16,m1,tu,mu
-; CHECK-O0-NEXT:    vle16.v v1, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle16.v v2, (a1)
+; CHECK-O0-NEXT:    vle16.v v1, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
-; CHECK-O0-NEXT:    vand.vi v3, v1, 1
-; CHECK-O0-NEXT:    vmv.v.i v1, 0
+; CHECK-O0-NEXT:    vle16.v v3, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v3, v1
-; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vand.vi v3, v2, 1
+; CHECK-O0-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v1, 1
+; CHECK-O0-NEXT:    vmv.v.i v1, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vmsne.vv v2, v3, v1
-; CHECK-O0-NEXT:    vsetvli a0, a2, e16,m1,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v4, v2
-; CHECK-O0-NEXT:    vmor.mm v3, v4, v2
-; CHECK-O0-NEXT:    vmxor.mm v2, v4, v2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v4, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v3
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v1
+; CHECK-O0-NEXT:    # implicit-def: $v4
+; CHECK-O0-NEXT:    vand.vi v4, v3, 1
+; CHECK-O0-NEXT:    # implicit-def: $v3
+; CHECK-O0-NEXT:    vmsne.vv v3, v4, v1
+; CHECK-O0-NEXT:    vsetvli a1, a2, e16,m1,tu,mu
+; CHECK-O0-NEXT:    vmand.mm v0, v2, v3
+; CHECK-O0-NEXT:    vmor.mm v4, v2, v3
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v4, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v2, v2, v3
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v2, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vim v3, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v2, v1, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    vmerge.vim v1, v1, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e16,m1,tu,mu
-; CHECK-O0-NEXT:    vse16.v v4, (a3)
-; CHECK-O0-NEXT:    vse16.v v3, (a3)
-; CHECK-O0-NEXT:    vse16.v v1, (a3)
+; CHECK-O0-NEXT:    vsetvli a1, a2, e16,m1,tu,mu
+; CHECK-O0-NEXT:    vse16.v v3, (a0)
+; CHECK-O0-NEXT:    vse16.v v2, (a0)
+; CHECK-O0-NEXT:    vse16.v v1, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_3:
@@ -282,38 +342,58 @@ define void @test_vp_logical_3(<vscale x 4 x i16>* %a0, <vscale x 4 x i16>* %a1,
 define void @test_vp_logical_4(<vscale x 8 x i8>* %a0, <vscale x 8 x i8>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical_4:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vle8.v v1, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vle8.v v2, (a1)
+; CHECK-O0-NEXT:    vle8.v v1, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vand.vi v3, v1, 1
-; CHECK-O0-NEXT:    vmv.v.i v1, 0
+; CHECK-O0-NEXT:    vle8.v v3, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v3, v1
-; CHECK-O0-NEXT:    # implicit-def: $v3
-; CHECK-O0-NEXT:    vand.vi v3, v2, 1
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v1, 1
+; CHECK-O0-NEXT:    vmv.v.i v1, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vmsne.vv v2, v3, v1
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v4, v2
-; CHECK-O0-NEXT:    vmor.mm v3, v4, v2
-; CHECK-O0-NEXT:    vmxor.mm v2, v4, v2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v4, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v3
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v1
+; CHECK-O0-NEXT:    # implicit-def: $v4
+; CHECK-O0-NEXT:    vand.vi v4, v3, 1
+; CHECK-O0-NEXT:    # implicit-def: $v3
+; CHECK-O0-NEXT:    vmsne.vv v3, v4, v1
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vmand.mm v0, v2, v3
+; CHECK-O0-NEXT:    vmor.mm v4, v2, v3
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v4, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v2, v2, v3
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v2, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
 ; CHECK-O0-NEXT:    vmerge.vim v3, v1, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v2, v1, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    vmerge.vim v1, v1, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m1,tu,mu
-; CHECK-O0-NEXT:    vse8.v v4, (a3)
-; CHECK-O0-NEXT:    vse8.v v3, (a3)
-; CHECK-O0-NEXT:    vse8.v v1, (a3)
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m1,tu,mu
+; CHECK-O0-NEXT:    vse8.v v3, (a0)
+; CHECK-O0-NEXT:    vse8.v v2, (a0)
+; CHECK-O0-NEXT:    vse8.v v1, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_4:
@@ -373,38 +453,58 @@ define void @test_vp_logical_4(<vscale x 8 x i8>* %a0, <vscale x 8 x i8>* %a1, i
 define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical_5:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
-; CHECK-O0-NEXT:    # implicit-def: $v2m2
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v6m2
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vle8.v v2, (a0)
+; CHECK-O0-NEXT:    vle8.v v6, (a3)
+; CHECK-O0-NEXT:    # implicit-def: $v2m2
+; CHECK-O0-NEXT:    vle8.v v2, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v4m2
-; CHECK-O0-NEXT:    vle8.v v4, (a1)
-; CHECK-O0-NEXT:    # implicit-def: $v6m2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vand.vi v6, v2, 1
-; CHECK-O0-NEXT:    vmv.v.i v2, 0
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v6, 1
+; CHECK-O0-NEXT:    vmv.v.i v16, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v1
-; CHECK-O0-NEXT:    vmsne.vv v1, v6, v2
-; CHECK-O0-NEXT:    # implicit-def: $v6m2
-; CHECK-O0-NEXT:    vand.vi v6, v4, 1
-; CHECK-O0-NEXT:    # implicit-def: $v4
-; CHECK-O0-NEXT:    vmsne.vv v4, v6, v2
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vmand.mm v0, v1, v4
-; CHECK-O0-NEXT:    vmor.mm v5, v1, v4
-; CHECK-O0-NEXT:    vmxor.mm v1, v1, v4
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v6, v2, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v5
-; CHECK-O0-NEXT:    vmerge.vim v4, v2, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v1
-; CHECK-O0-NEXT:    vmerge.vim v16, v2, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m2,tu,mu
-; CHECK-O0-NEXT:    vse8.v v6, (a3)
-; CHECK-O0-NEXT:    vse8.v v4, (a3)
-; CHECK-O0-NEXT:    vse8.v v16, (a3)
+; CHECK-O0-NEXT:    vmsne.vv v1, v4, v16
+; CHECK-O0-NEXT:    # implicit-def: $v4m2
+; CHECK-O0-NEXT:    vand.vi v4, v2, 1
+; CHECK-O0-NEXT:    # implicit-def: $v2
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v16
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m2,tu,mu
+; CHECK-O0-NEXT:    vmand.mm v0, v1, v2
+; CHECK-O0-NEXT:    vmor.mm v3, v1, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v3, (a1)
+; CHECK-O0-NEXT:    vmxor.mm v1, v1, v2
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v1, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-O0-NEXT:    vmerge.vim v6, v16, 1, v0
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v4, v16, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v2, v16, 1, v0
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m2,tu,mu
+; CHECK-O0-NEXT:    vse8.v v6, (a0)
+; CHECK-O0-NEXT:    vse8.v v4, (a0)
+; CHECK-O0-NEXT:    vse8.v v2, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_5:
@@ -464,38 +564,58 @@ define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1,
 define void @test_vp_logical_6(<vscale x 32 x i8>* %a0, <vscale x 32 x i8>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_logical_6:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    # kill: def $x13 killed $x12
-; CHECK-O0-NEXT:    lui a3, %hi(scratch)
-; CHECK-O0-NEXT:    addi a3, a3, %lo(scratch)
-; CHECK-O0-NEXT:    # implicit-def: $v4m4
+; CHECK-O0-NEXT:    addi sp, sp, -48
+; CHECK-O0-NEXT:    sd ra, 40(sp)
+; CHECK-O0-NEXT:    sd s0, 32(sp)
+; CHECK-O0-NEXT:    addi s0, sp, 48
+; CHECK-O0-NEXT:    rdvlenb a3
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -40(s0)
+; CHECK-O0-NEXT:    sub sp, sp, a3
+; CHECK-O0-NEXT:    sd sp, -48(s0)
+; CHECK-O0-NEXT:    mv a3, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    # implicit-def: $v20m4
 ; CHECK-O0-NEXT:    vsetvli a4, a2, e8,m4,tu,mu
-; CHECK-O0-NEXT:    vle8.v v4, (a0)
+; CHECK-O0-NEXT:    vle8.v v20, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v16m4
 ; CHECK-O0-NEXT:    vle8.v v16, (a1)
-; CHECK-O0-NEXT:    # implicit-def: $v20m4
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m4,tu,mu
-; CHECK-O0-NEXT:    vand.vi v20, v4, 1
-; CHECK-O0-NEXT:    vmv.v.i v4, 0
+; CHECK-O0-NEXT:    # implicit-def: $v4m4
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-O0-NEXT:    vand.vi v4, v20, 1
+; CHECK-O0-NEXT:    vmv.v.i v8, 0
 ; CHECK-O0-NEXT:    # implicit-def: $v1
-; CHECK-O0-NEXT:    vmsne.vv v1, v20, v4
-; CHECK-O0-NEXT:    # implicit-def: $v20m4
-; CHECK-O0-NEXT:    vand.vi v20, v16, 1
+; CHECK-O0-NEXT:    vmsne.vv v1, v4, v8
+; CHECK-O0-NEXT:    # implicit-def: $v4m4
+; CHECK-O0-NEXT:    vand.vi v4, v16, 1
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vmsne.vv v2, v20, v4
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m4,tu,mu
+; CHECK-O0-NEXT:    vmsne.vv v2, v4, v8
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m4,tu,mu
 ; CHECK-O0-NEXT:    vmand.mm v0, v1, v2
 ; CHECK-O0-NEXT:    vmor.mm v3, v1, v2
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vs1r.v v3, (a1)
 ; CHECK-O0-NEXT:    vmxor.mm v1, v1, v2
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m4,tu,mu
-; CHECK-O0-NEXT:    vmerge.vim v16, v4, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v3
-; CHECK-O0-NEXT:    vmerge.vim v20, v4, 1, v0
-; CHECK-O0-NEXT:    vmv1r.v v0, v1
-; CHECK-O0-NEXT:    vmerge.vim v8, v4, 1, v0
-; CHECK-O0-NEXT:    vsetvli a0, a2, e8,m4,tu,mu
-; CHECK-O0-NEXT:    vse8.v v16, (a3)
-; CHECK-O0-NEXT:    vse8.v v20, (a3)
-; CHECK-O0-NEXT:    vse8.v v8, (a3)
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vs1r.v v1, (a1)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-O0-NEXT:    vmerge.vim v20, v8, 1, v0
+; CHECK-O0-NEXT:    ld a1, -48(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v16, v8, 1, v0
+; CHECK-O0-NEXT:    ld a1, -40(s0)
+; CHECK-O0-NEXT:    vl1r.v v0, (a1)
+; CHECK-O0-NEXT:    vmerge.vim v4, v8, 1, v0
+; CHECK-O0-NEXT:    vsetvli a1, a2, e8,m4,tu,mu
+; CHECK-O0-NEXT:    vse8.v v20, (a0)
+; CHECK-O0-NEXT:    vse8.v v16, (a0)
+; CHECK-O0-NEXT:    vse8.v v4, (a0)
+; CHECK-O0-NEXT:    addi sp, s0, -48
+; CHECK-O0-NEXT:    ld s0, 32(sp)
+; CHECK-O0-NEXT:    ld ra, 40(sp)
+; CHECK-O0-NEXT:    addi sp, sp, 48
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_6:

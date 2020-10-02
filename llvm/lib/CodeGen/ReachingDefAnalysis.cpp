@@ -635,6 +635,9 @@ void ReachingDefAnalysis::collectKilledOperands(MachineInstr *MI,
                                                 InstSet &Dead) const {
   Dead.insert(MI);
   auto IsDead = [this, &Dead](MachineInstr *Def, int PhysReg) {
+    if (mayHaveSideEffects(*Def))
+      return false;
+
     unsigned LiveDefs = 0;
     for (auto &MO : Def->operands()) {
       if (!isValidRegDef(MO))
@@ -675,7 +678,7 @@ bool ReachingDefAnalysis::isSafeToDefRegAt(MachineInstr *MI, int PhysReg,
   if (isRegUsedAfter(MI, PhysReg)) {
     if (auto *Def = getReachingLocalMIDef(MI, PhysReg)) {
       SmallPtrSet<MachineInstr*, 2> Uses;
-      getReachingLocalUses(Def, PhysReg, Uses);
+      getGlobalUses(Def, PhysReg, Uses);
       for (auto *Use : Uses)
         if (!Ignore.count(Use))
           return false;
