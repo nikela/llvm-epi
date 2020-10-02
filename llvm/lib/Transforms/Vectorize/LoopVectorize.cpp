@@ -1502,14 +1502,10 @@ public:
 private:
   unsigned NumPredStores = 0;
 
-  /// \return An upper bound for the vectorization factor when using scalable
-  /// vectors.
-  Optional<ElementCount> computeFeasibleScalableMaxVF();
-
   /// \return An upper bound for the vectorization factor, a power-of-2 larger
   /// than zero. One is returned if vectorization should best be avoided due
   /// to cost.
-  ElementCount computeFeasibleMaxVF(unsigned ConstTripCount);
+  Optional<ElementCount> computeFeasibleMaxVF(unsigned ConstTripCount);
 
   /// The vectorization cost is a combination of the cost itself and a boolean
   /// indicating whether any of the contributing operations will actually
@@ -6016,9 +6012,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
     if (UserVF.isNonZero())
       return UserVF;
 
-    Optional<ElementCount> MaxVF = TTI.useScalableVectorType()
-                                       ? computeFeasibleScalableMaxVF()
-                                       : computeFeasibleMaxVF(TC);
+    Optional<ElementCount> MaxVF = computeFeasibleMaxVF(TC);
     if (!MaxVF)
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6064,9 +6058,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
   ElementCount MaxVF = UserVF;
   if (MaxVF.isZero()) {
-    Optional<ElementCount> FeasibleMaxVF = TTI.useScalableVectorType()
-                                               ? computeFeasibleScalableMaxVF()
-                                               : computeFeasibleMaxVF(TC);
+    Optional<ElementCount> FeasibleMaxVF = computeFeasibleMaxVF(TC);
     if (!FeasibleMaxVF) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6128,25 +6120,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
   return None;
 }
 
-Optional<unsigned> LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
-  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
-  unsigned SmallestType, WidestType;
-  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-  unsigned WidestRegister = TTI.getRegisterBitWidth(true);
-  unsigned MaxVectorSize = PowerOf2Floor(WidestRegister / WidestType);
-
-  LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
-                    << " / " << WidestType << " bits.\n");
-  LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
-                    << WidestRegister << " bits.\n");
-
-  if (!MaxVectorSize)
-    return None;
-
-  return MaxVectorSize;
-}
-
-ElementCount
+Optional<ElementCount>
 LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
@@ -6165,37 +6139,47 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
 
   // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
   // Note that both WidestRegister and WidestType may not be a powers of 2.
-  unsigned MaxVectorSize = PowerOf2Floor(WidestRegister / WidestType);
+  ElementCount MaxVectorSize = ElementCount::get(
+      PowerOf2Floor(WidestRegister / WidestType), TTI.useScalableVectorType());
+  unsigned MaxVFKnownMin = MaxVectorSize.getKnownMinValue();
 
   LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
                     << " / " << WidestType << " bits.\n");
   LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
                     << WidestRegister << " bits.\n");
 
-  assert(MaxVectorSize <= 256 && "Did not expect to pack so many elements"
+  if (MaxVectorSize.isScalable()) {
+    // TODO: Adjust scalable VF for register usage and bandwidth maximization.
+    // FIXME: Remove optional return and use VF.Min=0.
+    if (!MaxVFKnownMin)
+      return None;
+    return MaxVectorSize;
+  }
+
+  assert(MaxVFKnownMin <= 256 && "Did not expect to pack so many elements"
                                  " into one vector!");
-  if (MaxVectorSize == 0) {
+  if (MaxVFKnownMin == 0) {
     LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
-    MaxVectorSize = 1;
-    return ElementCount::getFixed(MaxVectorSize);
-  } else if (ConstTripCount && ConstTripCount < MaxVectorSize &&
+    MaxVFKnownMin = 1;
+    return ElementCount::getFixed(MaxVFKnownMin);
+  } else if (ConstTripCount && ConstTripCount < MaxVFKnownMin &&
              isPowerOf2_32(ConstTripCount)) {
     // We need to clamp the VF to be the ConstTripCount. There is no point in
     // choosing a higher viable VF as done in the loop below.
     LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
                       << ConstTripCount << "\n");
-    MaxVectorSize = ConstTripCount;
-    return ElementCount::getFixed(MaxVectorSize);
+    MaxVFKnownMin = ConstTripCount;
+    return ElementCount::getFixed(MaxVFKnownMin);
   }
 
-  ElementCount MaxVF = ElementCount::getFixed(MaxVectorSize);
+  ElementCount MaxVF = MaxVectorSize;
   if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
     // (i.e. MaxVectorSize).
     SmallVector<ElementCount, 8> VFs;
     unsigned NewMaxVectorSize = WidestRegister / SmallestType;
-    for (unsigned VS = MaxVectorSize * 2; VS <= NewMaxVectorSize; VS *= 2)
+    for (unsigned VS = MaxVFKnownMin * 2; VS <= NewMaxVectorSize; VS *= 2)
       VFs.push_back(ElementCount::getFixed(VS));
 
     // For each VF calculate its register usage.

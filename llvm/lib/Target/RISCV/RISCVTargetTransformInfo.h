@@ -159,8 +159,8 @@ public:
                             TTI::CastContextHint CCH,
                             TTI::TargetCostKind CostKind,
                             const Instruction *I = nullptr);
-};
   unsigned getRegisterBitWidth(bool Vector) const;
+};
 
 } // end namespace llvm
 
