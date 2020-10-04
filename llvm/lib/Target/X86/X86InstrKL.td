@@ -17,18 +17,18 @@
 // Key Locker instructions
 
 let SchedRW = [WriteSystem], Predicates = [HasKL] in {
-  let Uses = [XMM0, EAX] in {
+  let Uses = [XMM0, EAX], Defs = [EFLAGS] in {
     def LOADIWKEY : I<0xDC, MRMSrcReg, (outs), (ins VR128:$src1, VR128:$src2),
                       "loadiwkey\t{$src2, $src1|$src1, $src2}",
                       [(int_x86_loadiwkey EAX, XMM0, VR128:$src1, VR128:$src2)]>, T8XS;
   }
 
-  let Uses = [XMM0], Defs = [XMM0, XMM1, XMM2, XMM4, XMM5, XMM6] in {
+  let Uses = [XMM0], Defs = [XMM0, XMM1, XMM2, XMM4, XMM5, XMM6, EFLAGS] in {
     def ENCODEKEY128 : I<0xFA, MRMSrcReg, (outs GR32:$dst), (ins GR32:$src),
                          "encodekey128\t{$src, $dst|$dst, $src}", []>, T8XS;
   }
 
-  let Uses = [XMM0, XMM1], Defs = [XMM0, XMM1, XMM2, XMM3, XMM4, XMM5, XMM6] in {
+  let Uses = [XMM0, XMM1], Defs = [XMM0, XMM1, XMM2, XMM3, XMM4, XMM5, XMM6, EFLAGS] in {
     def ENCODEKEY256 : I<0xFB, MRMSrcReg, (outs GR32:$dst), (ins GR32:$src),
                          "encodekey256\t{$src, $dst|$dst, $src}", []>, T8XS;
   }
@@ -60,7 +60,8 @@ let SchedRW = [WriteSystem], Predicates = [HasKL] in {
 
 let SchedRW = [WriteSystem], Predicates = [HasWIDEKL] in {
   let Uses = [XMM0, XMM1, XMM2, XMM3, XMM4, XMM5, XMM6, XMM7],
-      Defs = [EFLAGS, XMM0, XMM1, XMM2, XMM3, XMM4, XMM5, XMM6, XMM7] in {
+      Defs = [EFLAGS, XMM0, XMM1, XMM2, XMM3, XMM4, XMM5, XMM6, XMM7],
+      mayLoad = 1 in {
     def AESENCWIDE128KL : I<0xD8, MRM0m, (outs), (ins opaquemem:$src),
                             "aesencwide128kl\t$src", []>, T8XS;
     def AESDECWIDE128KL : I<0xD8, MRM1m, (outs), (ins opaquemem:$src),
