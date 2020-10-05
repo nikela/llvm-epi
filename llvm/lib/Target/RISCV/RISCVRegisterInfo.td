@@ -338,8 +338,6 @@ def VR : VReg<[nxv8i8, nxv4i16, nxv2i32, nxv1i64, nxv2f32, nxv1f64,
                    (sequence "V%u", 8, 15),
                    (sequence "V%u", 24, 31),
                    V0), 1>;
-
-
 def VRM2 : VReg<[nxv16i8, nxv8i16, nxv4i32, nxv2i64, nxv4f32, nxv2f64],
                 (add (sequence "V%uM2", 2, 7, 2),
                      (sequence "V%uM2", 16, 23, 2),
@@ -360,6 +358,13 @@ def VRM8 : VReg<[nxv64i8, nxv32i16, nxv16i32, nxv8i64, nxv16f32, nxv8f64],
                 (add V16M8, V8M8, V24M8, V0M8), 8>;
 
 } // list<VReg> AllVRegs
+
+def VRNoV0 : VReg<[nxv8i8, nxv4i16, nxv2i32, nxv1i64, nxv2f32, nxv1f64,
+                   nxv1i1, nxv2i1, nxv4i1, nxv8i1, nxv16i1, nxv32i1, nxv64i1],
+                  (add (sequence "V%u", 1, 7),
+                       (sequence "V%u", 16, 23),
+                       (sequence "V%u", 8, 15),
+                       (sequence "V%u", 24, 31)), 1>;
 
 def VMaskVT : RegisterTypes<[nxv1i1, nxv2i1, nxv4i1, nxv8i1, nxv16i1, nxv32i1,
                              nxv64i1]>;
