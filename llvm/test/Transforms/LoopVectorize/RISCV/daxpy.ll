@@ -17,7 +17,7 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP0]], 1
+; CHECK-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP0]], 8
 ; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE]]
 ; CHECK-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_MEMCHECK:%.*]]
 ; CHECK:       vector.memcheck:
@@ -32,32 +32,32 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK-NEXT:    br i1 [[MEMCHECK_CONFLICT]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE6:%.*]] = mul i64 1, [[TMP1]]
+; CHECK-NEXT:    [[STEP_VSCALE6:%.*]] = mul i64 8, [[TMP1]]
 ; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE6]]
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x double> undef, double [[A:%.*]], i32 0
-; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 1 x double> [[BROADCAST_SPLATINSERT]], <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x double> undef, double [[A:%.*]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 8 x double> [[BROADCAST_SPLATINSERT]], <vscale x 8 x double> undef, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP2:%.*]] = add i64 [[INDEX]], 0
 ; CHECK-NEXT:    [[TMP3:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[TMP2]]
 ; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds double, double* [[TMP3]], i32 0
-; CHECK-NEXT:    [[TMP5:%.*]] = bitcast double* [[TMP4]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP5]], align 8, !tbaa !2, !alias.scope !6
-; CHECK-NEXT:    [[TMP6:%.*]] = fmul <vscale x 1 x double> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP5:%.*]] = bitcast double* [[TMP4]] to <vscale x 8 x double>*
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x double>, <vscale x 8 x double>* [[TMP5]], align 8, [[TBAA2:!tbaa !.*]], !alias.scope !6
+; CHECK-NEXT:    [[TMP6:%.*]] = fmul <vscale x 8 x double> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[TMP2]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, double* [[TMP7]], i32 0
-; CHECK-NEXT:    [[TMP9:%.*]] = bitcast double* [[TMP8]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD7:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP9]], align 8, !tbaa !2, !alias.scope !9, !noalias !6
-; CHECK-NEXT:    [[TMP10:%.*]] = fadd <vscale x 1 x double> [[WIDE_LOAD7]], [[TMP6]]
-; CHECK-NEXT:    [[TMP11:%.*]] = bitcast double* [[TMP8]] to <vscale x 1 x double>*
-; CHECK-NEXT:    store <vscale x 1 x double> [[TMP10]], <vscale x 1 x double>* [[TMP11]], align 8, !tbaa !2, !alias.scope !9, !noalias !6
+; CHECK-NEXT:    [[TMP9:%.*]] = bitcast double* [[TMP8]] to <vscale x 8 x double>*
+; CHECK-NEXT:    [[WIDE_LOAD7:%.*]] = load <vscale x 8 x double>, <vscale x 8 x double>* [[TMP9]], align 8, [[TBAA2]], !alias.scope !9, !noalias !6
+; CHECK-NEXT:    [[TMP10:%.*]] = fadd <vscale x 8 x double> [[WIDE_LOAD7]], [[TMP6]]
+; CHECK-NEXT:    [[TMP11:%.*]] = bitcast double* [[TMP8]] to <vscale x 8 x double>*
+; CHECK-NEXT:    store <vscale x 8 x double> [[TMP10]], <vscale x 8 x double>* [[TMP11]], align 8, [[TBAA2]], !alias.scope !9, !noalias !6
 ; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP12]], 1
+; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP12]], 8
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop !11
+; CHECK-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP11:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -67,15 +67,15 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP14:%.*]] = load double, double* [[ARRAYIDX]], align 8, !tbaa !2
+; CHECK-NEXT:    [[TMP14:%.*]] = load double, double* [[ARRAYIDX]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[MUL:%.*]] = fmul double [[TMP14]], [[A]]
 ; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP15:%.*]] = load double, double* [[ARRAYIDX2]], align 8, !tbaa !2
+; CHECK-NEXT:    [[TMP15:%.*]] = load double, double* [[ARRAYIDX2]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP15]], [[MUL]]
-; CHECK-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8, !tbaa !2
+; CHECK-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop !13
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], [[LOOP13:!llvm.loop !.*]]
 ; CHECK:       for.end.loopexit:
 ; CHECK-NEXT:    br label [[FOR_END]]
 ; CHECK:       for.end:

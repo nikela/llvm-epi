@@ -19,28 +19,28 @@ define dso_local void @foo(i32 signext %N, i32* noalias nocapture %c, i32* noali
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[FOR_BODY_PREHEADER]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP0:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP1:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
-; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP1]], i64 2, i64 0)
-; CHECK-NEXT:    [[TMP3:%.*]] = bitcast i32* [[TMP0]] to <vscale x 2 x i32>*
+; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP1]], i64 2, i64 3)
+; CHECK-NEXT:    [[TMP3:%.*]] = bitcast i32* [[TMP0]] to <vscale x 16 x i32>*
 ; CHECK-NEXT:    [[TMP4:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* [[TMP3]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP4]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 16 x i32> @llvm.vp.load.nxv16i32.p0nxv16i32(<vscale x 16 x i32>* [[TMP3]], i32 4, <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP4]])
 ; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, i32* [[B:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i32* [[TMP5]] to <vscale x 2 x i32>*
+; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i32* [[TMP5]] to <vscale x 16 x i32>*
 ; CHECK-NEXT:    [[TMP7:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP_LOAD5:%.*]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* [[TMP6]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP7]])
+; CHECK-NEXT:    [[VP_OP_LOAD5:%.*]] = call <vscale x 16 x i32> @llvm.vp.load.nxv16i32.p0nxv16i32(<vscale x 16 x i32>* [[TMP6]], i32 4, <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP7]])
 ; CHECK-NEXT:    [[TMP8:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> [[VP_OP_LOAD5]], i8 40, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
+; CHECK-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 16 x i1> @llvm.vp.icmp.nxv16i32(<vscale x 16 x i32> [[VP_OP_LOAD]], <vscale x 16 x i32> [[VP_OP_LOAD5]], i8 40, <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP8]])
 ; CHECK-NEXT:    [[TMP9:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD5]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP9]])
+; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 16 x i32> @llvm.vp.add.nxv16i32(<vscale x 16 x i32> [[VP_OP_LOAD5]], <vscale x 16 x i32> [[VP_OP_LOAD]], <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP9]])
 ; CHECK-NEXT:    [[TMP10:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP12:%.*]] = call <vscale x 2 x i32> @llvm.vp.mul.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD5]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
-; CHECK-NEXT:    [[TMP11:%.*]] = select <vscale x 2 x i1> [[VP_OP_ICMP]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VP_OP12]]
+; CHECK-NEXT:    [[VP_OP12:%.*]] = call <vscale x 16 x i32> @llvm.vp.mul.nxv16i32(<vscale x 16 x i32> [[VP_OP_LOAD5]], <vscale x 16 x i32> [[VP_OP_LOAD]], <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP10]])
+; CHECK-NEXT:    [[TMP11:%.*]] = select <vscale x 16 x i1> [[VP_OP_ICMP]], <vscale x 16 x i32> [[VP_OP]], <vscale x 16 x i32> [[VP_OP12]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i32, i32* [[C:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP13:%.*]] = bitcast i32* [[TMP12]] to <vscale x 2 x i32>*
+; CHECK-NEXT:    [[TMP13:%.*]] = bitcast i32* [[TMP12]] to <vscale x 16 x i32>*
 ; CHECK-NEXT:    [[TMP14:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0nxv2i32(<vscale x 2 x i32> [[TMP11]], <vscale x 2 x i32>* [[TMP13]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; CHECK-NEXT:    call void @llvm.vp.store.nxv16i32.p0nxv16i32(<vscale x 16 x i32> [[TMP11]], <vscale x 16 x i32>* [[TMP13]], i32 4, <vscale x 16 x i1> shufflevector (<vscale x 16 x i1> insertelement (<vscale x 16 x i1> undef, i1 true, i32 0), <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer), i32 [[TMP14]])
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP2]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[TMP15]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop !0
+; CHECK-NEXT:    br i1 [[TMP15]], label [[FOR_END]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
 ;
