@@ -1,7 +1,5 @@
 # RUN: llvm-mc %s -filetype obj -triple i386-pc-linux -o %t.o
-# RUN: not llvm-dwarfdump -v -debug-info -debug-line -debug-addr -debug-rnglists -debug-ranges %t.o | FileCheck --implicit-check-not=DW_TAG --implicit-check-not=DW_AT %s
-
-# FIXME: Remove the 'not' once the rnglist are lazily/correctly parsed (see comment below)
+# RUN: llvm-dwarfdump -v -debug-info -debug-line -debug-addr -debug-rnglists -debug-ranges %t.o | FileCheck --implicit-check-not=DW_TAG --implicit-check-not=DW_AT %s
 
 # Test that llvm - dwarfdump strips addresses relating to dead code(using the
 # DWARFv6 - proposed tombstone constant & nearest equivalent for debug_ranges)
@@ -24,6 +22,7 @@
 # CHECK-NEXT:    [0x00000042, 0x00000048)
 # CHECK-NEXT:    [0x00000042, 0x00000048)
 # CHECK-NEXT:    [0x00000042, 0x00000048)
+# CHECK-NEXT:    [0x00000042, 0x00000042)
 # CHECK-NEXT:    [0x00000042, 0x00000048)
 # CHECK-NEXT:    [0x00000042, 0x00000048))
 # CHECK:       DW_TAG_subprogram
@@ -44,16 +43,14 @@
 # CHECK:     DW_TAG_compile_unit
 # CHECK:       DW_AT_addr_base
 
-# FIXME: Lazily parse rnglists rather than expecting to be able to parse an
-#        entire rnglists contribution (since there's no way to know where such a
-#        contribution starts) - rather than assuming one starts at 0.
 
-# CHECK:       DW_AT_ranges [DW_FORM_sec_offset] (0x00000057)
-#     [0x0000000000000042, 0x0000000000000048)
-#     [0x0000000000000042, 0x0000000000000048)
-#     [0x0000000000000042, 0x0000000000000048)
-#     [0x0000000000000042, 0x0000000000000048)
-#     [0x0000000000000042, 0x0000000000000048))
+# CHECK:       DW_AT_ranges
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000048)
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000048)
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000048)
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000042)
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000048)
+# CHECK-NEXT:    [0x0000000000000042, 0x0000000000000048))
 # CHECK:       DW_TAG_subprogram
 # CHECK:         DW_AT_low_pc [DW_FORM_addrx]     (indexed (00000000) address = 0xffffffffffffffff (dead code))
 # CHECK:         DW_AT_high_pc [DW_FORM_data4]   (0x00000006)
@@ -127,6 +124,8 @@
 # CHECK-NEXT: [DW_RLE_startx_length]:  0x00000001, 0x00000006
 # CHECK-NEXT: [DW_RLE_start_end    ]: [0xffffffff, 0xffffffff)
 # CHECK-NEXT: [DW_RLE_start_end    ]: [0x00000042, 0x00000048)
+# CHECK-NEXT: [DW_RLE_startx_endx  ]:  0x00000000, 0x00000000
+# CHECK-NEXT: [DW_RLE_startx_endx  ]:  0x00000001, 0x00000001
 # CHECK-NEXT: [DW_RLE_base_address ]:  0x00000040
 # CHECK-NEXT: [DW_RLE_offset_pair  ]:  0x00000002, 0x00000008 => [0x00000042, 0x00000048)
 # CHECK-NEXT: [DW_RLE_base_address ]:  0xffffffff
@@ -146,6 +145,8 @@
 # CHECK-NEXT: [DW_RLE_startx_length]:  0x0000000000000001, 0x0000000000000006
 # CHECK-NEXT: [DW_RLE_start_end    ]: [0xffffffffffffffff, 0xffffffffffffffff)
 # CHECK-NEXT: [DW_RLE_start_end    ]: [0x0000000000000042, 0x0000000000000048)
+# CHECK-NEXT: [DW_RLE_startx_endx  ]:  0x0000000000000000, 0x0000000000000000
+# CHECK-NEXT: [DW_RLE_startx_endx  ]:  0x0000000000000001, 0x0000000000000001
 # CHECK-NEXT: [DW_RLE_base_address ]:  0x0000000000000040
 # CHECK-NEXT: [DW_RLE_offset_pair  ]:  0x0000000000000002, 0x0000000000000008 => [0x0000000000000042, 0x0000000000000048)
 # CHECK-NEXT: [DW_RLE_base_address ]:  0xffffffffffffffff
@@ -304,13 +305,12 @@
 	.byte	6                               # DW_RLE_start_end
 	.long	0x42                            #   start address
 	.long   0x48                            #   length
-# FIXME: RLE_startx_endx unsupported by llvm-dwarfdump
-#	.byte	2                               # DW_RLE_startx_endx
-#	.uleb128 0                              #   start address
-#	.uleb128 0                              #   length
-#	.byte	2                               # DW_RLE_startx_endx
-#	.uleb128 1                              #   start address
-#	.uleb128 1                              #   length
+	.byte	2                               # DW_RLE_startx_endx
+	.uleb128 0                              #   start index
+	.uleb128 0                              #   end index
+	.byte	2                               # DW_RLE_startx_endx
+	.uleb128 1                              #   start index
+	.uleb128 1                              #   end index
 	.byte	5                               # DW_RLE_base_address
 	.long	0x40                            #   address
 	.byte	4                               # DW_RLE_offset_pair
@@ -358,13 +358,12 @@
 	.byte	6                               # DW_RLE_start_end
 	.quad	0x42                            #   start address
 	.quad   0x48                            #   length
-# FIXME: RLE_startx_endx unsupported by llvm-dwarfdump
-#	.byte	2                               # DW_RLE_startx_endx
-#	.uleb128 0                              #   start address
-#	.uleb128 0                              #   length
-#	.byte	2                               # DW_RLE_startx_endx
-#	.uleb128 1                              #   start address
-#	.uleb128 1                              #   length
+	.byte	2                               # DW_RLE_startx_endx
+	.uleb128 0                              #   start index
+	.uleb128 0                              #   end index
+	.byte	2                               # DW_RLE_startx_endx
+	.uleb128 1                              #   start index
+	.uleb128 1                              #   end index
 	.byte	5                               # DW_RLE_base_address
 	.quad	0x40                            #   address
 	.byte	4                               # DW_RLE_offset_pair
