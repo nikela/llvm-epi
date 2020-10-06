@@ -23,6 +23,7 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/Type.h"
+#include "llvm/Support/TypeSize.h"
 
 namespace llvm {
 
@@ -349,6 +350,31 @@ public:
   unsigned getMaxElementWidth() const { return 64; }
 
   unsigned getMinVectorRegisterBitWidth() { return 128; }
+
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist = -1U) const {
+    unsigned WidestRegister = std::min(getRegisterBitWidth(true), SafeDepDist);
+    return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / WidestRegister);
+  }
+
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U) const {
+    unsigned WidestRegister =
+        std::min(getRegisterBitWidth(true), MaxSafeRegisterWidth);
+    bool IsScalable = useScalableVectorType();
+
+    unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
+    ElementCount LowerBoundVF =
+        ElementCount::get(LowerBoundVFKnownMin, IsScalable);
+
+    unsigned UpperBoundVFKnownMin =
+        PowerOf2Floor(WidestRegister / SmallestType);
+    ElementCount UpperBoundVF =
+        ElementCount::get(UpperBoundVFKnownMin, IsScalable);
+
+    return {LowerBoundVF, UpperBoundVF};
+  }
 
   bool shouldMaximizeVectorBandwidth(bool OptSize) const { return false; }
 

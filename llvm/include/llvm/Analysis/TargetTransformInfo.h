@@ -27,6 +27,7 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/AtomicOrdering.h"
 #include "llvm/Support/DataTypes.h"
+#include "llvm/Support/TypeSize.h"
 #include <functional>
 
 namespace llvm {
@@ -924,6 +925,13 @@ public:
   /// \return The width of the smallest vector register type.
   unsigned getMinVectorRegisterBitWidth() const;
 
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist = -1U) const;
+
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U) const;
+
   /// \return True if the vectorization factor should be chosen to
   /// make the vector of the smallest element type match the size of a
   /// vector register. For wider element types, this could result in
@@ -1498,6 +1506,12 @@ public:
   virtual unsigned getRegisterBitWidth(bool Vector) const = 0;
   virtual unsigned getMaxElementWidth() const = 0;
   virtual unsigned getMinVectorRegisterBitWidth() = 0;
+  virtual unsigned getVectorRegisterUsage(unsigned VFKnownMin,
+                                          unsigned ElementTypeSize,
+                                          unsigned SafeDepDist = -1U) const = 0;
+  virtual std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U) const = 0;
   virtual bool shouldMaximizeVectorBandwidth(bool OptSize) const = 0;
   virtual unsigned getMinimumVF(unsigned ElemWidth) const = 0;
   virtual bool shouldConsiderAddressTypePromotion(
@@ -1910,6 +1924,17 @@ public:
   }
   unsigned getMinVectorRegisterBitWidth() override {
     return Impl.getMinVectorRegisterBitWidth();
+  }
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist = -1U) const override {
+    return Impl.getVectorRegisterUsage(VFKnownMin, ElementTypeSize,
+                                       SafeDepDist);
+  }
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U) const override {
+    return Impl.getFeasibleMaxVFRange(SmallestType, WidestType,
+                                      MaxSafeRegisterWidth);
   }
   bool shouldMaximizeVectorBandwidth(bool OptSize) const override {
     return Impl.shouldMaximizeVectorBandwidth(OptSize);

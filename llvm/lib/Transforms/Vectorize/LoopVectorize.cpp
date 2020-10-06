@@ -6135,52 +6135,60 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   // See definition of Legal->getMaxSafeRegisterWidth().
   unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
 
-  WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
+  ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
+  ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
+  std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
+      TTI.getFeasibleMaxVFRange(SmallestType, WidestType, MaxSafeRegisterWidth);
 
-  // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
-  // Note that both WidestRegister and WidestType may not be a powers of 2.
-  ElementCount MaxVectorSize = ElementCount::get(
-      PowerOf2Floor(WidestRegister / WidestType), TTI.useScalableVectorType());
-  unsigned MaxVFKnownMin = MaxVectorSize.getKnownMinValue();
+  unsigned MaxVFKnownMinLowerBound = FeasibleMaxVFLowerBound.getKnownMinValue();
+  bool MaxVFIsScalableLowerBound = FeasibleMaxVFLowerBound.isScalable();
 
   LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
                     << " / " << WidestType << " bits.\n");
   LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
                     << WidestRegister << " bits.\n");
 
-  if (MaxVectorSize.isScalable()) {
+  assert((MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 64) ||
+         (!MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 256) &&
+             "Did not expect to pack so many elements into one vector!");
+
+  if (MaxVFIsScalableLowerBound) {
     // TODO: Adjust scalable VF for register usage and bandwidth maximization.
     // FIXME: Remove optional return and use VF.Min=0.
-    if (!MaxVFKnownMin)
+    if (!MaxVFKnownMinLowerBound) {
+      LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
       return None;
-    return MaxVectorSize;
+    }
+  } else {
+    if (MaxVFKnownMinLowerBound == 0) {
+      LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
+      MaxVFKnownMinLowerBound = 1;
+      return static_cast<ElementCount>(
+          ElementCount::getFixed(MaxVFKnownMinLowerBound));
+    } else if (ConstTripCount && ConstTripCount < MaxVFKnownMinLowerBound &&
+               isPowerOf2_32(ConstTripCount)) {
+      // We need to clamp the VF to be the ConstTripCount. There is no point in
+      // choosing a higher viable VF as done in the loop below.
+      LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
+                        << ConstTripCount << "\n");
+      MaxVFKnownMinLowerBound = ConstTripCount;
+      return static_cast<ElementCount>(
+          ElementCount::getFixed(MaxVFKnownMinLowerBound));
+    }
   }
 
-  assert(MaxVFKnownMin <= 256 && "Did not expect to pack so many elements"
-                                 " into one vector!");
-  if (MaxVFKnownMin == 0) {
-    LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
-    MaxVFKnownMin = 1;
-    return ElementCount::getFixed(MaxVFKnownMin);
-  } else if (ConstTripCount && ConstTripCount < MaxVFKnownMin &&
-             isPowerOf2_32(ConstTripCount)) {
-    // We need to clamp the VF to be the ConstTripCount. There is no point in
-    // choosing a higher viable VF as done in the loop below.
-    LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
-                      << ConstTripCount << "\n");
-    MaxVFKnownMin = ConstTripCount;
-    return ElementCount::getFixed(MaxVFKnownMin);
-  }
-
-  ElementCount MaxVF = MaxVectorSize;
+  ElementCount MaxVF = FeasibleMaxVFLowerBound;
   if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
     // (i.e. MaxVectorSize).
     SmallVector<ElementCount, 8> VFs;
-    unsigned NewMaxVectorSize = WidestRegister / SmallestType;
-    for (unsigned VS = MaxVFKnownMin * 2; VS <= NewMaxVectorSize; VS *= 2)
-      VFs.push_back(ElementCount::getFixed(VS));
+    unsigned MaxVFKnownMinUpperBound =
+        FeasibleMaxVFUpperBound.getKnownMinValue();
+
+    for (unsigned VS = MaxVFKnownMinLowerBound * 2;
+         VS <= MaxVFKnownMinUpperBound; VS *= 2)
+      VFs.push_back(ElementCount::get(VS, TTI.useScalableVectorType()));
 
     // For each VF calculate its register usage.
     auto RUs = calculateRegisterUsage(VFs);
@@ -6200,11 +6208,12 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
       }
     }
     // FIXME: Update TTI to use ElementCount for methods that return VF values.
-    if (unsigned MinVF = TTI.getMinimumVF(SmallestType)) {
-      if (MaxVF.getKnownMinValue() < MinVF) {
+    if (unsigned MinVFKnownMinValue = TTI.getMinimumVF(SmallestType)) {
+      if (MaxVF.getKnownMinValue() < MinVFKnownMinValue) {
         LLVM_DEBUG(dbgs() << "LV: Overriding calculated MaxVF(" << MaxVF
-                          << ") with target's minimum: " << MinVF << '\n');
-        MaxVF = ElementCount::getFixed(MinVF);
+                          << ") with target's minimum: " << MinVFKnownMinValue
+                          << '\n');
+        MaxVF = ElementCount::get(MinVFKnownMinValue, MaxVF.isScalable());
       }
     }
   }
@@ -6626,9 +6635,9 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   unsigned MaxSafeDepDist = -1U;
   if (Legal->getMaxSafeDepDistBytes() != -1U)
     MaxSafeDepDist = Legal->getMaxSafeDepDistBytes() * 8;
-  unsigned WidestRegister =
-      std::min(TTI.getRegisterBitWidth(true), MaxSafeDepDist);
   const DataLayout &DL = TheFunction->getParent()->getDataLayout();
+  // FIXME: This is wrong. Register grouping is not necessary if using scalable
+  // vector type. We need another TTI method to indicate it.
 
   SmallVector<RegisterUsage, 8> RUs(VFs.size());
   SmallVector<SmallMapVector<unsigned, unsigned, 4>, 8> MaxUsages(VFs.size());
@@ -6636,12 +6645,12 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   LLVM_DEBUG(dbgs() << "LV(REG): Calculating max register usage:\n");
 
   // A lambda that gets the register usage for the given type and VF.
-  auto GetRegUsage = [&DL, WidestRegister](Type *Ty, ElementCount VF) {
+  auto GetRegUsage = [&DL, MaxSafeDepDist, this](Type *Ty, ElementCount VF) {
     if (Ty->isTokenTy())
       return 0U;
     unsigned TypeSize = DL.getTypeSizeInBits(Ty->getScalarType());
-    return std::max<unsigned>(1, VF.getKnownMinValue() * TypeSize /
-                                     WidestRegister);
+    return TTI.getVectorRegisterUsage(VF.getKnownMinValue(), TypeSize,
+                                      MaxSafeDepDist);
   };
 
   for (unsigned int i = 0, s = IdxToInstr.size(); i < s; ++i) {

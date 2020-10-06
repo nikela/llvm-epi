@@ -30,11 +30,11 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK-NEXT:    [[STEPVEC_BASE:%.*]] = call <vscale x 16 x i64> @llvm.experimental.vector.stepvector.nxv16i64()
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 16 x i64> [[BROADCAST_SPLAT2]], [[STEPVEC_BASE]]
 ; CHECK-NEXT:    [[TMP1:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[TMP2:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP1]]
-; CHECK-NEXT:    [[TMP3:%.*]] = icmp ule <vscale x 16 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ule <vscale x 16 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP3:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP1]]
 ; CHECK-NEXT:    [[TMP4:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 3)
-; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i32, i32* [[TMP2]], i32 0
+; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i32, i32* [[TMP3]], i32 0
 ; CHECK-NEXT:    [[TMP7:%.*]] = bitcast i32* [[TMP6]] to <vscale x 16 x i32>*
 ; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 16 x i1> undef, i1 true, i32 0
 ; CHECK-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 16 x i1> [[DOTSPLATINSERT]], <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer

@@ -160,6 +160,14 @@ public:
                             TTI::TargetCostKind CostKind,
                             const Instruction *I = nullptr);
   unsigned getRegisterBitWidth(bool Vector) const;
+  bool shouldMaximizeVectorBandwidth(bool OptSize) const;
+  unsigned getMinVectorRegisterBitWidth() const;
+  unsigned getMinimumVF(unsigned ElemWidth) const;
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist) const;
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U) const;
 };
 
 } // end namespace llvm

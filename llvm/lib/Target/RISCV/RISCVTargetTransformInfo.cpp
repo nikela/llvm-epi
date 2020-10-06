@@ -13,6 +13,7 @@
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/Support/Casting.h"
+#include <algorithm>
 using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
@@ -98,10 +99,12 @@ int RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
 }
 
 unsigned RISCVTTIImpl::getNumberOfRegisters(unsigned ClassID) const {
-  if (ClassID == 1 && ST->hasStdExtV()) {
+  if (ClassID == 1 && ST->hasStdExtV())
     return 32;
-  }
-  return 0;
+  else if (ClassID == 0)
+    return 32;
+  else
+    return 0;
 }
 
 unsigned RISCVTTIImpl::getMaxElementWidth() const {
@@ -329,5 +332,60 @@ unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
   // (largest LMUL value). Since vscale is unknown at compile time, the largest
   // possible register (register-group to be precise) bit width will be at least
   // `64 * 8`.
-  return ST->hasStdExtV() ? getMaxElementWidth() * 8 : 0;
+  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * 8 : 0;
+}
+
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
+  return (ST->hasStdExtV() && true);
+}
+
+unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
+  // Actual min vector register bitwidth is <vscale x ELEN>.
+  // getMaxElementWidth() simply return ELEN.
+  return getMaxElementWidth();
+}
+
+unsigned RISCVTTIImpl::getMinimumVF(unsigned ElemWidth) const {
+  return ST->hasStdExtV()
+             ? std::max<unsigned>(1, getMinVectorRegisterBitWidth() / ElemWidth)
+             : 0;
+}
+
+unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
+                                              unsigned ElementTypeSize,
+                                              unsigned SafeDepDist) const {
+
+  // FIXME: For the time being we assume dependency distance is always safe.
+  // Once we have dependency distance computations for scalable vectors, we need
+  // to figure out its relationship with register group usage;
+  unsigned RegisterWidth = getMinVectorRegisterBitWidth();
+  return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / RegisterWidth);
+}
+
+std::pair<ElementCount, ElementCount>
+RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                                    unsigned MaxSafeRegisterWidth) const {
+  // check for SEW <= ELEN in the base ISA
+  assert(WidestType <= getMaxElementWidth() &&
+         "Vector element type larger than the maximum supported type.");
+  // Smallest SEW supported = 8. For 1 bit wide Type, clip to 8 bit to get a
+  // valid range of VFs.
+  SmallestType = std::max<unsigned>(8, SmallestType);
+  WidestType = std::max<unsigned>(8, WidestType);
+  unsigned WidestRegister =
+      std::min(getRegisterBitWidth(true), MaxSafeRegisterWidth);
+  unsigned SmallestRegister =
+      std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
+  bool IsScalable = useScalableVectorType();
+
+  unsigned LowerBoundVFKnownMin =
+      PowerOf2Floor(SmallestRegister / SmallestType);
+  ElementCount LowerBoundVF =
+      ElementCount::get(LowerBoundVFKnownMin, IsScalable);
+
+  unsigned UpperBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
+  ElementCount UpperBoundVF =
+      ElementCount::get(UpperBoundVFKnownMin, IsScalable);
+
+  return {LowerBoundVF, UpperBoundVF};
 }

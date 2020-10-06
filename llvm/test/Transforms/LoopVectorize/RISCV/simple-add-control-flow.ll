@@ -30,11 +30,11 @@ define dso_local void @vec_add(i32 signext %N, double* noalias nocapture %c, dou
 ; CHECK-NEXT:    [[STEPVEC_BASE:%.*]] = call <vscale x 8 x i64> @llvm.experimental.vector.stepvector.nxv8i64()
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> [[BROADCAST_SPLAT2]], [[STEPVEC_BASE]]
 ; CHECK-NEXT:    [[TMP0:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[TMP1:%.*]] = getelementptr inbounds double, double* [[C:%.*]], i64 [[TMP0]]
-; CHECK-NEXT:    [[TMP2:%.*]] = icmp ule <vscale x 8 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP1:%.*]] = icmp ule <vscale x 8 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP2:%.*]] = getelementptr inbounds double, double* [[C:%.*]], i64 [[TMP0]]
 ; CHECK-NEXT:    [[TMP3:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 3, i64 3)
-; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[TMP1]], i32 0
+; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[TMP2]], i32 0
 ; CHECK-NEXT:    [[TMP6:%.*]] = bitcast double* [[TMP5]] to <vscale x 8 x double>*
 ; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 8 x i1> undef, i1 true, i32 0
 ; CHECK-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 8 x i1> [[DOTSPLATINSERT]], <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -54,7 +54,7 @@ define dso_local void @vec_add(i32 signext %N, double* noalias nocapture %c, dou
 ; CHECK-NEXT:    [[TMP17:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[VP_OP_LOAD12:%.*]] = call <vscale x 8 x double> @llvm.vp.load.nxv8f64.p0nxv8f64(<vscale x 8 x double>* [[TMP16]], i32 8, <vscale x 8 x i1> [[DOTSPLAT]], i32 [[TMP17]])
 ; CHECK-NEXT:    [[TMP18:%.*]] = xor <vscale x 8 x i1> [[TMP9]], [[DOTSPLAT]]
-; CHECK-NEXT:    [[TMP19:%.*]] = and <vscale x 8 x i1> [[TMP18]], [[TMP2]]
+; CHECK-NEXT:    [[TMP19:%.*]] = and <vscale x 8 x i1> [[TMP18]], [[TMP1]]
 ; CHECK-NEXT:    [[TMP20:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 8 x double> @llvm.vp.fmul.nxv8f64(<vscale x 8 x double> [[VP_OP_LOAD9]], <vscale x 8 x double> [[VP_OP_LOAD12]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 8 x i1> [[TMP19]], i32 [[TMP20]])
 ; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, double* [[D:%.*]], i64 [[TMP0]]
@@ -62,7 +62,7 @@ define dso_local void @vec_add(i32 signext %N, double* noalias nocapture %c, dou
 ; CHECK-NEXT:    [[TMP23:%.*]] = bitcast double* [[TMP22]] to <vscale x 8 x double>*
 ; CHECK-NEXT:    [[TMP24:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    call void @llvm.vp.store.nxv8f64.p0nxv8f64(<vscale x 8 x double> [[VP_OP]], <vscale x 8 x double>* [[TMP23]], i32 8, <vscale x 8 x i1> [[TMP19]], i32 [[TMP24]])
-; CHECK-NEXT:    [[TMP25:%.*]] = and <vscale x 8 x i1> [[TMP9]], [[TMP2]]
+; CHECK-NEXT:    [[TMP25:%.*]] = and <vscale x 8 x i1> [[TMP9]], [[TMP1]]
 ; CHECK-NEXT:    [[TMP26:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[VP_OP15:%.*]] = call <vscale x 8 x double> @llvm.vp.fadd.nxv8f64(<vscale x 8 x double> [[VP_OP_LOAD9]], <vscale x 8 x double> [[VP_OP_LOAD12]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 8 x i1> [[TMP25]], i32 [[TMP26]])
 ; CHECK-NEXT:    [[TMP27:%.*]] = bitcast double* [[TMP5]] to <vscale x 8 x double>*
