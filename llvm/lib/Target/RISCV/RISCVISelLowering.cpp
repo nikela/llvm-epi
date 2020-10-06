@@ -5171,3 +5171,35 @@ RISCVTargetLowering::getRegisterByName(const char *RegName, LLT VT,
                              StringRef(RegName) + "\"."));
   return Reg;
 }
+
+bool RISCVTargetLowering::shouldSinkOperands(
+    Instruction *I, SmallVectorImpl<Use *> &Ops) const {
+  if (!isa<ScalableVectorType>(I->getType()))
+    return false;
+
+  // Sinking broadcasts is always beneficial because it avoids keeping
+  // vector registers alive and often they can be folded into the operand.
+  for (unsigned OpI = 0, E = I->getNumOperands(); OpI < E; OpI++) {
+    Use &U = I->getOperandUse(OpI);
+    if (auto *SI = dyn_cast<ShuffleVectorInst>(&U)) {
+      if (SI->isZeroEltSplat()) {
+        Ops.push_back(&SI->getOperandUse(0));
+        Ops.push_back(&U);
+      }
+    } else if (auto *II = dyn_cast<IntrinsicInst>(&U)) {
+      switch (II->getIntrinsicID()) {
+      case Intrinsic::epi_vmv_v_x:
+      case Intrinsic::epi_vfmv_v_f: {
+        Ops.push_back(&U);
+        break;
+      }
+      default:
+        break;
+      }
+    }
+    if (!Ops.empty())
+      return true;
+  }
+
+  return false;
+}

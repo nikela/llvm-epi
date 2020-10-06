@@ -227,6 +227,9 @@ public:
                                           Value *NewVal, Value *Mask,
                                           AtomicOrdering Ord) const override;
 
+  bool shouldSinkOperands(Instruction *I,
+                          SmallVectorImpl<Use *> &Ops) const override;
+
 private:
   void analyzeInputArgs(MachineFunction &MF, CCState &CCInfo,
                         const SmallVectorImpl<ISD::InputArg> &Ins,
