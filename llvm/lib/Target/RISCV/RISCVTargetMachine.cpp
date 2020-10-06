@@ -47,6 +47,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   initializeGlobalISel(*PR);
   initializeRISCVExpandPseudoPass(*PR);
   initializeEPIFoldBroadcastPass(*PR);
+  initializeEPIFMAContractionPass(*PR);
   initializeEPIRemoveRedundantVSETVLPass(*PR);
   initializeEPIRemoveRedundantVSETVLGlobalPass(*PR);
 }
@@ -173,6 +174,7 @@ void RISCVPassConfig::addIRPasses() {
   }
 
   addPass(createEPIFoldBroadcastPass());
+  addPass(createEPIFMAContractionPass());
 
   TargetPassConfig::addIRPasses();
 }
