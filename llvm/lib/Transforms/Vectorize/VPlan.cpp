@@ -104,6 +104,8 @@ VPUser *VPRecipeBase::toVPUser() {
     return U;
   if (auto *U = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
     return U;
+  if (auto *U = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
+    return U;
   return nullptr;
 }
 

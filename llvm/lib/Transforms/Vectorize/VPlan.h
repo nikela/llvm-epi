@@ -1310,7 +1310,8 @@ public:
              VPSlotTracker &SlotTracker) const override;
 };
 
-class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase {
+class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
+                                                 public VPUser {
   Instruction &Instr;
   VPUser User;
   VPUser PredInfo;
