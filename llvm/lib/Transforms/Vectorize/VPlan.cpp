@@ -102,6 +102,8 @@ VPUser *VPRecipeBase::toVPUser() {
     return U;
   if (auto *U = dyn_cast<VPBranchOnMaskRecipe>(this))
     return U;
+  if (auto *U = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
+    return U;
   return nullptr;
 }
 
