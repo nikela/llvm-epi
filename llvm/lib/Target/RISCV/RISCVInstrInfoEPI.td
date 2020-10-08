@@ -77,7 +77,7 @@ def vecreduce_fmin : SDNode<"ISD::VECREDUCE_FMIN", SDTVecReduceFP>;
 def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
                                             SDTCisVec<2>, SDTCisFP<2>]>;
 
-def vecreduce_strict_fadd : SDNode<"ISD::VECREDUCE_STRICT_FADD", SDTVecReduceFPV2>;
+def vecreduce_strict_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
 
 def splat_vector : SDNode<"ISD::SPLAT_VECTOR",
                            SDTypeProfile<1, 1, [SDTCisVec<0>]>>;

@@ -399,7 +399,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     // Vector fp reductions.
     for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
-      setOperationAction(ISD::VECREDUCE_STRICT_FADD, VT, Legal);
+      setOperationAction(ISD::VECREDUCE_SEQ_FADD, VT, Legal);
       setOperationAction(ISD::VECREDUCE_FADD, VT, Legal);
       setOperationAction(ISD::VECREDUCE_FMUL, VT, Legal);
       setOperationAction(ISD::VECREDUCE_FMAX, VT, Legal);
