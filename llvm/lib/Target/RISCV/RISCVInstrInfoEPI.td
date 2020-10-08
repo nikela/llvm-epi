@@ -77,7 +77,7 @@ def vecreduce_fmin : SDNode<"ISD::VECREDUCE_FMIN", SDTVecReduceFP>;
 def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
                                             SDTCisVec<2>, SDTCisFP<2>]>;
 
-def vecreduce_strict_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
+def vecreduce_seq_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
 
 def splat_vector : SDNode<"ISD::SPLAT_VECTOR",
                            SDTypeProfile<1, 1, [SDTCisVec<0>]>>;
@@ -3416,7 +3416,7 @@ defm "" : pat_vop_binary_reduction_int<vecreduce_smin, "PseudoVREDMIN">;
 defm "" : pat_vop_binary_reduction_int<vecreduce_umax, "PseudoVREDMAXU">;
 defm "" : pat_vop_binary_reduction_int<vecreduce_umin, "PseudoVREDMINU">;
 
-defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_strict_fadd, "PseudoVFREDOSUM">;
+defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_seq_fadd, "PseudoVFREDOSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoVFREDMIN">;

@@ -55,9 +55,9 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[TMP13]] = fadd fast <vscale x 1 x double> [[TMP12]], [[VEC_PHI]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop !0
+; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP15:%.*]] = call fast double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv1f64(double 0.000000e+00, <vscale x 1 x double> [[TMP13]])
+; CHECK-NEXT:    [[TMP15:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double 0.000000e+00, <vscale x 1 x double> [[TMP13]])
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END]], label [[FOR_BODY7_PREHEADER5]]
 ; CHECK:       for.body7.preheader5:
@@ -77,7 +77,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[ADD13]] = fadd fast double [[MUL]], [[SUM_034]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT1:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
-; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], !llvm.loop !2
+; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], [[LOOP2:!llvm.loop !.*]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
 ; CHECK-NEXT:    [[ARRAYIDX15:%.*]] = getelementptr inbounds double, double* [[Y:%.*]], i64 [[INDVARS_IV39]]

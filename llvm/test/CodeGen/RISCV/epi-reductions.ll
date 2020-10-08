@@ -31,17 +31,17 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    addw a0, a0, a1
 ; CHECK-NEXT:    ret
-  %add = call i32 @llvm.experimental.vector.reduce.add.nxv2i32(<vscale x 2 x i32> %a)
-  %smax = call i32 @llvm.experimental.vector.reduce.smax.nxv2i32(<vscale x 2 x i32> %a)
-  %smin = call i32 @llvm.experimental.vector.reduce.smin.nxv2i32(<vscale x 2 x i32> %a)
-  %umax = call i32 @llvm.experimental.vector.reduce.umax.nxv2i32(<vscale x 2 x i32> %a)
-  %umin = call i32 @llvm.experimental.vector.reduce.umin.nxv2i32(<vscale x 2 x i32> %a)
-  %and = call i32 @llvm.experimental.vector.reduce.and.nxv2i32(<vscale x 2 x i32> %a)
-  %or = call i32 @llvm.experimental.vector.reduce.or.nxv2i32(<vscale x 2 x i32> %a)
-  %xor = call i32 @llvm.experimental.vector.reduce.xor.nxv2i32(<vscale x 2 x i32> %a)
+  %add = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> %a)
+  %smax = call i32 @llvm.vector.reduce.smax.nxv2i32(<vscale x 2 x i32> %a)
+  %smin = call i32 @llvm.vector.reduce.smin.nxv2i32(<vscale x 2 x i32> %a)
+  %umax = call i32 @llvm.vector.reduce.umax.nxv2i32(<vscale x 2 x i32> %a)
+  %umin = call i32 @llvm.vector.reduce.umin.nxv2i32(<vscale x 2 x i32> %a)
+  %and = call i32 @llvm.vector.reduce.and.nxv2i32(<vscale x 2 x i32> %a)
+  %or = call i32 @llvm.vector.reduce.or.nxv2i32(<vscale x 2 x i32> %a)
+  %xor = call i32 @llvm.vector.reduce.xor.nxv2i32(<vscale x 2 x i32> %a)
 
   ; FIXME reduce.mul SDNode needs to be expanded
-  ;%mul = call i32 @llvm.experimental.vector.reduce.mul.nxv2i32(<vscale x 2 x i32> %a)
+  ;%mul = call i32 @llvm.vector.reduce.mul.nxv2i32(<vscale x 2 x i32> %a)
 
   %accum1 = add i32 %add, %smax
   %accum2 = add i32 %accum1, %smin
@@ -83,17 +83,17 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    ret
-  %add = call i64 @llvm.experimental.vector.reduce.add.nxv1i64(<vscale x 1 x i64> %a)
-  %smax = call i64 @llvm.experimental.vector.reduce.smax.nxv1i64(<vscale x 1 x i64> %a)
-  %smin = call i64 @llvm.experimental.vector.reduce.smin.nxv1i64(<vscale x 1 x i64> %a)
-  %umax = call i64 @llvm.experimental.vector.reduce.umax.nxv1i64(<vscale x 1 x i64> %a)
-  %umin = call i64 @llvm.experimental.vector.reduce.umin.nxv1i64(<vscale x 1 x i64> %a)
-  %and = call i64 @llvm.experimental.vector.reduce.and.nxv1i64(<vscale x 1 x i64> %a)
-  %or = call i64 @llvm.experimental.vector.reduce.or.nxv1i64(<vscale x 1 x i64> %a)
-  %xor = call i64 @llvm.experimental.vector.reduce.xor.nxv1i64(<vscale x 1 x i64> %a)
+  %add = call i64 @llvm.vector.reduce.add.nxv1i64(<vscale x 1 x i64> %a)
+  %smax = call i64 @llvm.vector.reduce.smax.nxv1i64(<vscale x 1 x i64> %a)
+  %smin = call i64 @llvm.vector.reduce.smin.nxv1i64(<vscale x 1 x i64> %a)
+  %umax = call i64 @llvm.vector.reduce.umax.nxv1i64(<vscale x 1 x i64> %a)
+  %umin = call i64 @llvm.vector.reduce.umin.nxv1i64(<vscale x 1 x i64> %a)
+  %and = call i64 @llvm.vector.reduce.and.nxv1i64(<vscale x 1 x i64> %a)
+  %or = call i64 @llvm.vector.reduce.or.nxv1i64(<vscale x 1 x i64> %a)
+  %xor = call i64 @llvm.vector.reduce.xor.nxv1i64(<vscale x 1 x i64> %a)
 
   ; FIXME reduce.mul SDNode needs to be expanded
-  ;%mul = call i64 @llvm.experimental.vector.reduce.mul.nxv1i64(<vscale x 1 x i64> %a)
+  ;%mul = call i64 @llvm.vector.reduce.mul.nxv1i64(<vscale x 1 x i64> %a)
 
   %accum1 = add i64 %add, %smax
   %accum2 = add i64 %accum1, %smin
@@ -151,17 +151,17 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    ret
-  %add = call i64 @llvm.experimental.vector.reduce.add.nxv2i64(<vscale x 2 x i64> %a)
-  %smax = call i64 @llvm.experimental.vector.reduce.smax.nxv2i64(<vscale x 2 x i64> %a)
-  %smin = call i64 @llvm.experimental.vector.reduce.smin.nxv2i64(<vscale x 2 x i64> %a)
-  %umax = call i64 @llvm.experimental.vector.reduce.umax.nxv2i64(<vscale x 2 x i64> %a)
-  %umin = call i64 @llvm.experimental.vector.reduce.umin.nxv2i64(<vscale x 2 x i64> %a)
-  %and = call i64 @llvm.experimental.vector.reduce.and.nxv2i64(<vscale x 2 x i64> %a)
-  %or = call i64 @llvm.experimental.vector.reduce.or.nxv2i64(<vscale x 2 x i64> %a)
-  %xor = call i64 @llvm.experimental.vector.reduce.xor.nxv2i64(<vscale x 2 x i64> %a)
+  %add = call i64 @llvm.vector.reduce.add.nxv2i64(<vscale x 2 x i64> %a)
+  %smax = call i64 @llvm.vector.reduce.smax.nxv2i64(<vscale x 2 x i64> %a)
+  %smin = call i64 @llvm.vector.reduce.smin.nxv2i64(<vscale x 2 x i64> %a)
+  %umax = call i64 @llvm.vector.reduce.umax.nxv2i64(<vscale x 2 x i64> %a)
+  %umin = call i64 @llvm.vector.reduce.umin.nxv2i64(<vscale x 2 x i64> %a)
+  %and = call i64 @llvm.vector.reduce.and.nxv2i64(<vscale x 2 x i64> %a)
+  %or = call i64 @llvm.vector.reduce.or.nxv2i64(<vscale x 2 x i64> %a)
+  %xor = call i64 @llvm.vector.reduce.xor.nxv2i64(<vscale x 2 x i64> %a)
 
   ; FIXME reduce.mul SDNode needs to be expanded
-  ;%mul = call i64 @llvm.experimental.vector.reduce.mul.nxv2i64(<vscale x 2 x i64> %a)
+  ;%mul = call i64 @llvm.vector.reduce.mul.nxv2i64(<vscale x 2 x i64> %a)
 
   %accum1 = add i64 %add, %smax
   %accum2 = add i64 %accum1, %smin
@@ -197,13 +197,13 @@ define float @red_nxv2f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-NEXT:    fadd.s ft0, ft0, ft3
 ; CHECK-NEXT:    fmv.x.w a0, ft0
 ; CHECK-NEXT:    ret
-  %fadd = call float @llvm.experimental.vector.reduce.v2.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a)
-  %unord_fadd = call reassoc float @llvm.experimental.vector.reduce.v2.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a) ; unordered reduction
-  %fmax = call float @llvm.experimental.vector.reduce.fmax.nxv2f32(<vscale x 2 x float> %a)
-  %fmin = call float @llvm.experimental.vector.reduce.fmin.nxv2f32(<vscale x 2 x float> %a)
+  %fadd = call float @llvm.vector.reduce.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a)
+  %unord_fadd = call reassoc float @llvm.vector.reduce.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a) ; unordered reduction
+  %fmax = call float @llvm.vector.reduce.fmax.nxv2f32(<vscale x 2 x float> %a)
+  %fmin = call float @llvm.vector.reduce.fmin.nxv2f32(<vscale x 2 x float> %a)
 
   ; FIXME reduce.fmul SDNode needs to be expanded
-  ;%fmul = call float @llvm.experimental.vector.reduce.v2.fmul.f32.nxv2f32(float 1.0, <vscale x 2 x float> %a)
+  ;%fmul = call float @llvm.vector.reduce.fmul.f32.nxv2f32(float 1.0, <vscale x 2 x float> %a)
 
   %accum1 = fadd float %fadd, %unord_fadd
   %accum2 = fadd float %accum1, %fmax
@@ -235,13 +235,13 @@ define double @red_nxv1f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft3
 ; CHECK-NEXT:    fmv.x.d a0, ft0
 ; CHECK-NEXT:    ret
-  %fadd = call double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a)
-  %unord_fadd = call reassoc double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a) ; unordered reduction
-  %fmax = call double @llvm.experimental.vector.reduce.fmax.nxv1f64(<vscale x 1 x double> %a)
-  %fmin = call double @llvm.experimental.vector.reduce.fmin.nxv1f64(<vscale x 1 x double> %a)
+  %fadd = call double @llvm.vector.reduce.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a)
+  %unord_fadd = call reassoc double @llvm.vector.reduce.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a) ; unordered reduction
+  %fmax = call double @llvm.vector.reduce.fmax.nxv1f64(<vscale x 1 x double> %a)
+  %fmin = call double @llvm.vector.reduce.fmin.nxv1f64(<vscale x 1 x double> %a)
 
   ; FIXME reduce.fmul SDNode needs to be expanded
-  ;%fmul = call double @llvm.experimental.vector.reduce.v2.fmul.f64.nxv1f64(double 1.0, <vscale x 1 x double> %a)
+  ;%fmul = call double @llvm.vector.reduce.fmul.f64.nxv1f64(double 1.0, <vscale x 1 x double> %a)
 
   %accum1 = fadd double %fadd, %unord_fadd
   %accum2 = fadd double %accum1, %fmax
@@ -281,13 +281,13 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft3
 ; CHECK-NEXT:    fmv.x.d a0, ft0
 ; CHECK-NEXT:    ret
-  %fadd = call double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a)
-  %unord_fadd = call reassoc double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a) ; unordered reduction
-  %fmax = call double @llvm.experimental.vector.reduce.fmax.nxv2f64(<vscale x 2 x double> %a)
-  %fmin = call double @llvm.experimental.vector.reduce.fmin.nxv2f64(<vscale x 2 x double> %a)
+  %fadd = call double @llvm.vector.reduce.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a)
+  %unord_fadd = call reassoc double @llvm.vector.reduce.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a) ; unordered reduction
+  %fmax = call double @llvm.vector.reduce.fmax.nxv2f64(<vscale x 2 x double> %a)
+  %fmin = call double @llvm.vector.reduce.fmin.nxv2f64(<vscale x 2 x double> %a)
 
   ; FIXME reduce.fmul SDNode needs to be expanded
-  ;%fmul = call double @llvm.experimental.vector.reduce.v2.fmul.f64.nxv2f64(double 1.0, <vscale x 2 x double> %a)
+  ;%fmul = call double @llvm.vector.reduce.fmul.f64.nxv2f64(double 1.0, <vscale x 2 x double> %a)
 
   %accum1 = fadd double %fadd, %unord_fadd
   %accum2 = fadd double %accum1, %fmax
@@ -296,47 +296,47 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
   ret double %accum3
 }
 
-declare i32 @llvm.experimental.vector.reduce.add.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.smax.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.smin.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.umax.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.umin.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.and.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.or.nxv2i32(<vscale x 2 x i32>)
-declare i32 @llvm.experimental.vector.reduce.xor.nxv2i32(<vscale x 2 x i32>)
-;declare i32 @llvm.experimental.vector.reduce.mul.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.smax.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.smin.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.umax.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.umin.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.and.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.or.nxv2i32(<vscale x 2 x i32>)
+declare i32 @llvm.vector.reduce.xor.nxv2i32(<vscale x 2 x i32>)
+;declare i32 @llvm.vector.reduce.mul.nxv2i32(<vscale x 2 x i32>)
 
-declare i64 @llvm.experimental.vector.reduce.add.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.smax.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.smin.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.umax.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.umin.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.and.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.or.nxv1i64(<vscale x 1 x i64>)
-declare i64 @llvm.experimental.vector.reduce.xor.nxv1i64(<vscale x 1 x i64>)
-;declare i64 @llvm.experimental.vector.reduce.mul.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.add.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.smax.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.smin.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.umax.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.umin.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.and.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.or.nxv1i64(<vscale x 1 x i64>)
+declare i64 @llvm.vector.reduce.xor.nxv1i64(<vscale x 1 x i64>)
+;declare i64 @llvm.vector.reduce.mul.nxv1i64(<vscale x 1 x i64>)
 
-declare i64 @llvm.experimental.vector.reduce.add.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.smax.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.smin.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.umax.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.umin.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.and.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.or.nxv2i64(<vscale x 2 x i64>)
-declare i64 @llvm.experimental.vector.reduce.xor.nxv2i64(<vscale x 2 x i64>)
-;declare i64 @llvm.experimental.vector.reduce.mul.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.add.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.smax.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.smin.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.umax.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.umin.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.and.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.or.nxv2i64(<vscale x 2 x i64>)
+declare i64 @llvm.vector.reduce.xor.nxv2i64(<vscale x 2 x i64>)
+;declare i64 @llvm.vector.reduce.mul.nxv2i64(<vscale x 2 x i64>)
 
-declare float @llvm.experimental.vector.reduce.v2.fadd.f32.nxv2f32(float, <vscale x 2 x float>)
-declare float @llvm.experimental.vector.reduce.fmax.nxv2f32(<vscale x 2 x float>)
-declare float @llvm.experimental.vector.reduce.fmin.nxv2f32(<vscale x 2 x float>)
-;declare float @llvm.experimental.vector.reduce.v2.fmul.f32.nxv2f32(float, <vscale x 2 x float>)
+declare float @llvm.vector.reduce.fadd.f32.nxv2f32(float, <vscale x 2 x float>)
+declare float @llvm.vector.reduce.fmax.nxv2f32(<vscale x 2 x float>)
+declare float @llvm.vector.reduce.fmin.nxv2f32(<vscale x 2 x float>)
+;declare float @llvm.vector.reduce.fmul.f32.nxv2f32(float, <vscale x 2 x float>)
 
-declare double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv1f64(double, <vscale x 1 x double>)
-declare double @llvm.experimental.vector.reduce.fmax.nxv1f64(<vscale x 1 x double>)
-declare double @llvm.experimental.vector.reduce.fmin.nxv1f64(<vscale x 1 x double>)
-;declare double @llvm.experimental.vector.reduce.v2.fmul.f64.nxv1f64(double, <vscale x 1 x double>)
+declare double @llvm.vector.reduce.fadd.f64.nxv1f64(double, <vscale x 1 x double>)
+declare double @llvm.vector.reduce.fmax.nxv1f64(<vscale x 1 x double>)
+declare double @llvm.vector.reduce.fmin.nxv1f64(<vscale x 1 x double>)
+;declare double @llvm.vector.reduce.fmul.f64.nxv1f64(double, <vscale x 1 x double>)
 
-declare double @llvm.experimental.vector.reduce.v2.fadd.f64.nxv2f64(double, <vscale x 2 x double>)
-declare double @llvm.experimental.vector.reduce.fmax.nxv2f64(<vscale x 2 x double>)
-declare double @llvm.experimental.vector.reduce.fmin.nxv2f64(<vscale x 2 x double>)
-;declare double @llvm.experimental.vector.reduce.v2.fmul.f64.nxv2f64(double, <vscale x 2 x double>)
+declare double @llvm.vector.reduce.fadd.f64.nxv2f64(double, <vscale x 2 x double>)
+declare double @llvm.vector.reduce.fmax.nxv2f64(<vscale x 2 x double>)
+declare double @llvm.vector.reduce.fmin.nxv2f64(<vscale x 2 x double>)
+;declare double @llvm.vector.reduce.fmul.f64.nxv2f64(double, <vscale x 2 x double>)
