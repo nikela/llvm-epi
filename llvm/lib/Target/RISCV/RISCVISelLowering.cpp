@@ -1451,16 +1451,189 @@ static SDValue LowerVPUnorderedFCmp(unsigned EPIIntNo, const SDValue &Op1,
   return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, VT, OrNotOperands);
 }
 
-static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
+static bool IsSplatOfOne(const SDValue &MaskOp) {
+  ConstantSDNode *C;
+  return MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+         (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+         C->getZExtValue() == 1;
+}
+
+static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   SDLoc DL(Op);
 
-  auto IsSplatOfOne = [](const SDValue &MaskOp) {
-    ConstantSDNode *C;
-    return MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
-           (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
-           C->getZExtValue() == 1;
-  };
+  EVT DstType = Op.getValueType();
+  uint64_t DstTypeSize = DstType.getScalarSizeInBits();
+  SDValue SrcOp = Op.getOperand(1);
+  EVT SrcType = SrcOp.getValueType();
+  uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
+
+  assert(isPowerOf2_64(DstTypeSize) && isPowerOf2_64(SrcTypeSize) &&
+         "Types must be powers of two");
+  int Ratio =
+      std::max(DstTypeSize, SrcTypeSize) / std::min(DstTypeSize, SrcTypeSize);
+
+  unsigned MaskOpNo;
+  unsigned EVLOpNo;
+  bool IsMasked;
+  unsigned EPIIntNo;
+
+  if (Ratio == 1) {
+    switch (IntNo) {
+    default:
+      llvm_unreachable("Unexpected intrinsic");
+      break;
+    case Intrinsic::vp_sitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfcvt_f_x_mask : Intrinsic::epi_vfcvt_f_x;
+      break;
+    case Intrinsic::vp_uitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfcvt_f_xu_mask : Intrinsic::epi_vfcvt_f_xu;
+      break;
+    case Intrinsic::vp_fptosi:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfcvt_x_f_mask : Intrinsic::epi_vfcvt_x_f;
+      break;
+    case Intrinsic::vp_fptoui:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfcvt_xu_f_mask : Intrinsic::epi_vfcvt_xu_f;
+      break;
+    }
+  } else if (Ratio == 2 && DstTypeSize > SrcTypeSize) {
+    switch (IntNo) {
+    default:
+      llvm_unreachable("Unexpected intrinsic");
+      break;
+    case Intrinsic::vp_sitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfwcvt_f_x_mask : Intrinsic::epi_vfwcvt_f_x;
+      break;
+    case Intrinsic::vp_uitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_xu_mask
+                          : Intrinsic::epi_vfwcvt_f_xu;
+      break;
+    case Intrinsic::vp_fpext:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_f_mask
+                          : Intrinsic::epi_vfwcvt_f_f;
+      break;
+    case Intrinsic::vp_fptosi:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfwcvt_x_f_mask : Intrinsic::epi_vfwcvt_x_f;
+      break;
+    case Intrinsic::vp_fptoui:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfwcvt_xu_f_mask : Intrinsic::epi_vfwcvt_xu_f;
+      break;
+    }
+  } else if (Ratio == 2 && DstTypeSize < SrcTypeSize) {
+    switch (IntNo) {
+    default:
+      llvm_unreachable("Unexpected intrinsic");
+      break;
+    case Intrinsic::vp_sitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfncvt_f_x_mask : Intrinsic::epi_vfncvt_f_x;
+      break;
+    case Intrinsic::vp_uitofp:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_xu_mask
+                          : Intrinsic::epi_vfncvt_f_xu;
+      break;
+    case Intrinsic::vp_fptrunc:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_f_mask
+                          : Intrinsic::epi_vfncvt_f_f;
+      break;
+    case Intrinsic::vp_fptosi:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfncvt_x_f_mask : Intrinsic::epi_vfncvt_x_f;
+      break;
+    case Intrinsic::vp_fptoui:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo =
+          IsMasked ? Intrinsic::epi_vfncvt_xu_f_mask : Intrinsic::epi_vfncvt_xu_f;
+      break;
+    }
+  }
+
+  // Straightforward cases.
+  if (Ratio == 1 || Ratio == 2) {
+    std::vector<SDValue> Operands;
+    Operands.reserve(3 + IsMasked * 2);
+
+    Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
+
+    if (IsMasked)
+      Operands.push_back(
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType())); // Merge.
+
+    Operands.push_back(SrcOp);
+
+    if (IsMasked)
+      Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
+
+    assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+           "Unexpected operand");
+    Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                   Op.getOperand(EVLOpNo))); // EVL.
+
+    SDValue Result = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                       Operands);
+
+    if (Ratio == 1 || Ratio == 2)
+      return Result;
+  }
+
+  // Ideas to implement this? Use a narrowing/widening operation and then
+  // the required number of truncations/extensions.
+  report_fatal_error("FP conversions not mappable to "
+                     "widenings/narrowings not implemented yet");
+  return SDValue();
+}
+
+static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
+  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+  SDLoc DL(Op);
 
   // Many instructions allow commuting the second operand with the first one.
   // This is beneficial when we can use a scalar in the second operand as way
@@ -1671,15 +1844,6 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     EPIIntNo =
         IsMasked ? Intrinsic::epi_vfsgnjn_mask : Intrinsic::epi_vfsgnjn;
     break;
-  case Intrinsic::vp_sitofp: {
-    VOpsPerm = {1};
-    MaskOpNo = 2;
-    EVLOpNo = 3;
-    IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-    EPIIntNo =
-        IsMasked ? Intrinsic::epi_vfcvt_f_x_mask : Intrinsic::epi_vfcvt_f_x;
-    break;
-  }
   case Intrinsic::vp_icmp: {
     VOpsPerm = {1, 2};
     ScalarOpNo = 2;
@@ -2032,9 +2196,15 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
   case Intrinsic::vp_icmp:
   case Intrinsic::vp_fcmp:
   case Intrinsic::vp_select:
-  case Intrinsic::vp_sitofp:
   case Intrinsic::vp_bitcast:
     return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
+  case Intrinsic::vp_sitofp:
+  case Intrinsic::vp_uitofp:
+  case Intrinsic::vp_fptosi:
+  case Intrinsic::vp_fptoui:
+  case Intrinsic::vp_fpext:
+  case Intrinsic::vp_fptrunc:
+    return LowerVPIntrinsicConversion(Op, DAG);
   }
 }
 
