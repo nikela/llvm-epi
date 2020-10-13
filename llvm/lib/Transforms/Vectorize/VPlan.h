@@ -287,10 +287,6 @@ struct VPTransformState {
     // delegates the call to ILV below.
     if (Data.PerPartOutput.count(Def)) {
       auto *VecPart = Data.PerPartOutput[Def][Instance.Part];
-      if (!VecPart->getType()->isVectorTy()) {
-        assert(Instance.Lane == 0 && "cannot get lane > 0 for scalar");
-        return VecPart;
-      }
       // TODO: Cache created scalar values.
       return Builder.CreateExtractElement(VecPart,
                                           Builder.getInt32(Instance.Lane));
@@ -307,7 +303,6 @@ struct VPTransformState {
     }
     Data.PerPartOutput[Def][Part] = V;
   }
-  void set(VPValue *Def, Value *IRDef, Value *V, unsigned Part);
 
   /// Hold state information used when constructing the CFG of the output IR,
   /// traversing the VPBasicBlocks and generating corresponding IR BasicBlocks.
@@ -698,20 +693,6 @@ public:
   /// Returns a pointer to a VPValue, if the recipe inherits from VPValue or
   /// nullptr otherwise.
   VPValue *toVPValue();
-  const VPValue *toVPValue() const;
-
-  /// Returns the underlying instruction, if the recipe is a VPValue or nullptr
-  /// otherwise.
-  Instruction *getUnderlyingInstr() {
-    if (auto *VPV = toVPValue())
-      return cast_or_null<Instruction>(VPV->getUnderlyingValue());
-    return nullptr;
-  }
-  const Instruction *getUnderlyingInstr() const {
-    if (auto *VPV = toVPValue())
-      return cast_or_null<Instruction>(VPV->getUnderlyingValue());
-    return nullptr;
-  }
 };
 
 inline bool VPUser::classof(const VPRecipeBase *Recipe) {
@@ -724,7 +705,9 @@ inline bool VPUser::classof(const VPRecipeBase *Recipe) {
          Recipe->getVPRecipeID() == VPRecipeBase::VPInterleaveSC ||
          Recipe->getVPRecipeID() == VPRecipeBase::VPReplicateSC ||
          Recipe->getVPRecipeID() == VPRecipeBase::VPBranchOnMaskSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenMemoryInstructionSC;
+         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenMemoryInstructionSC ||
+         Recipe->getVPRecipeID() ==
+             VPRecipeBase::VPPredicatedWidenMemoryInstructionSC;
 }
 
 /// This is a concrete Recipe that models a single VPlan-level instruction.
@@ -753,6 +736,10 @@ private:
   void generateInstruction(VPTransformState &State, unsigned Part);
 
 protected:
+  Instruction *getUnderlyingInstr() {
+    return cast_or_null<Instruction>(getUnderlyingValue());
+  }
+
   void setUnderlyingInstr(Instruction *I) { setUnderlyingValue(I); }
 
 public:
@@ -1269,9 +1256,8 @@ public:
 /// - For store: Address, stored value, optional mask
 /// TODO: We currently execute only per-part unless a specific instance is
 /// provided.
-class VPWidenMemoryInstructionRecipe : public VPRecipeBase,
-                                       public VPValue,
-                                       public VPUser {
+class VPWidenMemoryInstructionRecipe : public VPRecipeBase, public VPUser {
+  Instruction &Instr;
 
   void setMask(VPValue *Mask) {
     if (!Mask)
@@ -1280,22 +1266,20 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase,
   }
 
   bool isMasked() const {
-    return (isa<LoadInst>(getUnderlyingInstr()) && getNumOperands() == 2) ||
-           (isa<StoreInst>(getUnderlyingInstr()) && getNumOperands() == 3);
+    return (isa<LoadInst>(Instr) && getNumOperands() == 2) ||
+           (isa<StoreInst>(Instr) && getNumOperands() == 3);
   }
 
 public:
   VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask)
-      : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Load), VPUser({Addr}) {
+      : VPRecipeBase(VPWidenMemoryInstructionSC), VPUser({Addr}), Instr(Load) {
     setMask(Mask);
   }
 
   VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
                                  VPValue *StoredValue, VPValue *Mask)
-      : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue}) {
+      : VPRecipeBase(VPWidenMemoryInstructionSC), VPUser({Addr, StoredValue}),
+        Instr(Store) {
     setMask(Mask);
   }
 
@@ -1318,7 +1302,7 @@ public:
 
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
-    assert(isa<StoreInst>(getUnderlyingInstr()) &&
+    assert(isa<StoreInst>(Instr) &&
            "Stored value only available for store instructions");
     return getOperand(1); // Stored value is the 2nd, mandatory operand.
   }
@@ -1332,8 +1316,8 @@ public:
 };
 
 class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
-                                                 public VPValue,
                                                  public VPUser {
+  Instruction &Instr;
   VPUser PredInfo;
 
   void setMask(VPValue *Mask) {
@@ -1345,9 +1329,8 @@ class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, VPValue *EVL)
-      : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Load), VPUser({Addr}),
-        PredInfo({EVL}) {
+      : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC), VPUser({Addr}),
+        Instr(Load), PredInfo({EVL}) {
     setMask(Mask);
   }
 
@@ -1355,8 +1338,7 @@ public:
                                            VPValue *StoredValue, VPValue *Mask,
                                            VPValue *EVL)
       : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue}), PredInfo({EVL}) {
+        VPUser({Addr, StoredValue}), Instr(Store), PredInfo({EVL}) {
     setMask(Mask);
   }
 
@@ -1381,7 +1363,7 @@ public:
 
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
-    assert(isa<StoreInst>(getUnderlyingInstr()) &&
+    assert(isa<StoreInst>(Instr) &&
            "Stored value only available for store instructions");
     return getOperand(1); // Stored value is the 2nd, mandatory operand.
   }
@@ -1816,10 +1798,6 @@ class VPlan {
   /// VPlan.
   Value2VPValueTy Value2VPValue;
 
-  /// Contains all VPValues that been allocated by addVPValue directly and need
-  /// to be free when the plan's destructor is called.
-  SmallVector<VPValue *, 16> VPValuesToFree;
-
   /// Holds the VPLoopInfo analysis for this VPlan.
   VPLoopInfo VPLInfo;
 
@@ -1835,8 +1813,8 @@ public:
   ~VPlan() {
     if (Entry)
       VPBlockBase::deleteCFG(Entry);
-    for (VPValue *VPV : VPValuesToFree)
-      delete VPV;
+    for (auto &MapEntry : Value2VPValue)
+      delete MapEntry.second;
     if (BackedgeTakenCount)
       delete BackedgeTakenCount;
     if (TripCount)
@@ -1895,24 +1873,7 @@ public:
   void addVPValue(Value *V) {
     assert(V && "Trying to add a null Value to VPlan");
     assert(!Value2VPValue.count(V) && "Value already exists in VPlan");
-    VPValue *VPV = new VPValue(V);
-    Value2VPValue[V] = VPV;
-    VPValuesToFree.push_back(VPV);
-  }
-
-  void addVPValue(Value *V, VPValue *VPV) {
-    assert(V && "Trying to add a null Value to VPlan");
-    assert(!Value2VPValue.count(V) && "Value already exists in VPlan");
-    Value2VPValue[V] = VPV;
-  }
-
-  void addOrReplaceVPValue(Value *V, VPValue *VPV) {
-    assert(V && "Trying to add a null Value to VPlan");
-    auto I = Value2VPValue.find(V);
-    if (I == Value2VPValue.end())
-      Value2VPValue[V] = VPV;
-    else
-      I->second = VPV;
+    Value2VPValue[V] = new VPValue(V);
   }
 
   VPValue *getVPValue(Value *V) {
@@ -1927,8 +1888,6 @@ public:
       addVPValue(V);
     return getVPValue(V);
   }
-
-  void removeVPValueFor(Value *V) { Value2VPValue.erase(V); }
 
   /// Return the VPLoopInfo analysis for this VPlan.
   VPLoopInfo &getVPLoopInfo() { return VPLInfo; }
@@ -2011,9 +1970,9 @@ private:
 };
 
 struct VPlanIngredient {
-  const Value *V;
+  Value *V;
 
-  VPlanIngredient(const Value *V) : V(V) {}
+  VPlanIngredient(Value *V) : V(V) {}
 };
 
 inline raw_ostream &operator<<(raw_ostream &OS, const VPlanIngredient &I) {

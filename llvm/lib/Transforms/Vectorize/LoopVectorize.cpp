@@ -540,10 +540,6 @@ public:
   /// value into a vector.
   Value *getOrCreateVectorValue(Value *V, unsigned Part);
 
-  void setVectorValue(Value *Scalar, unsigned Part, Value *Vector) {
-    VectorLoopValueMap.setVectorValue(Scalar, Part, Vector);
-  }
-
   /// Return a value in the new loop corresponding to \p V from the original
   /// loop at unroll and vector indices \p Instance. If the value has been
   /// vectorized but not scalarized, the necessary extractelement instruction
@@ -566,8 +562,8 @@ public:
   /// non-null or generate predicated intrinsic call if preferred. Use \p State
   /// to translate given VPValues to IR values in the vectorized loop.
   void vectorizeMemoryInstruction(Instruction *Instr, VPTransformState &State,
-                                  VPValue *Def, VPValue *Addr,
-                                  VPValue *StoredValue, VPValue *BlockInMask,
+                                  VPValue *Addr, VPValue *StoredValue,
+                                  VPValue *BlockInMask,
                                   VPValue *EVL);
 
   /// Set the debug location in the builder using the debug location in
@@ -2639,7 +2635,7 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
 }
 
 void InnerLoopVectorizer::vectorizeMemoryInstruction(
-    Instruction *Instr, VPTransformState &State, VPValue *Def, VPValue *Addr,
+    Instruction *Instr, VPTransformState &State, VPValue *Addr,
     VPValue *StoredValue, VPValue *BlockInMask, VPValue *EVL) {
   // Attempt to issue a wide load.
   LoadInst *LI = dyn_cast<LoadInst>(Instr);
@@ -2873,8 +2869,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
       if (Reverse)
         NewLI = reverseVector(NewLI);
     }
-
-    State.set(Def, Instr, NewLI, Part);
+    VectorLoopValueMap.setVectorValue(Instr, Part, NewLI);
   }
 }
 
@@ -8739,16 +8734,6 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
       if (auto Recipe =
               RecipeBuilder.tryToCreateWidenRecipe(Instr, Range, Plan)) {
-        // Check if the recipe can be converted to a VPValue. We need the extra
-        // down-casting step until VPRecipeBase inherits from VPValue.
-        VPValue *MaybeVPValue = Recipe->toVPValue();
-        if (!Instr->getType()->isVoidTy() && MaybeVPValue) {
-          if (NeedDef.contains(Instr))
-            Plan->addOrReplaceVPValue(Instr, MaybeVPValue);
-          else
-            Plan->addVPValue(Instr, MaybeVPValue);
-        }
-
         RecipeBuilder.setRecipe(Instr, Recipe);
         VPBB->appendRecipe(Recipe);
         continue;
@@ -8798,14 +8783,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
     for (unsigned i = 0; i < IG->getFactor(); ++i)
       if (Instruction *Member = IG->getMember(i)) {
-        VPValue *NewVPV = nullptr;
-        if (!Member->getType()->isVoidTy()) {
-          NewVPV = new VPValue(Member);
-          Plan->getVPValue(Member)->replaceAllUsesWith(NewVPV);
-        }
         RecipeBuilder.getRecipe(Member)->eraseFromParent();
-        if (NewVPV)
-          Plan->addVPValue(Member, NewVPV);
       }
   }
 
@@ -9215,20 +9193,15 @@ void VPPredInstPHIRecipe::execute(VPTransformState &State) {
 }
 
 void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
-  Instruction *Instr = getUnderlyingInstr();
   VPValue *StoredValue = isa<StoreInst>(Instr) ? getStoredValue() : nullptr;
-  State.ILV->vectorizeMemoryInstruction(
-      Instr, State, StoredValue ? nullptr : this, getAddr(), StoredValue,
-      getMask(), /*EVL=*/nullptr);
+  State.ILV->vectorizeMemoryInstruction(&Instr, State, getAddr(), StoredValue,
+                                        getMask(), /*EVL=*/nullptr);
 }
 
-void VPPredicatedWidenMemoryInstructionRecipe::execute(
-    VPTransformState &State) {
-  Instruction *Instr = getUnderlyingInstr();
+void VPPredicatedWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
   VPValue *StoredValue = isa<StoreInst>(Instr) ? getStoredValue() : nullptr;
-  State.ILV->vectorizeMemoryInstruction(
-      Instr, State, StoredValue ? nullptr : this, getAddr(), StoredValue,
-      getMask(), getEVL());
+  State.ILV->vectorizeMemoryInstruction(&Instr, State, getAddr(), StoredValue,
+                                        getMask(), getEVL());
 }
 
 // Determine how to lower the scalar epilogue, which depends on 1) optimising
@@ -9272,12 +9245,6 @@ static ScalarEpilogueLowering getScalarEpilogueLowering(
     return CM_ScalarEpilogueNotNeededUsePredicate;
 
   return CM_ScalarEpilogueAllowed;
-}
-
-void VPTransformState::set(VPValue *Def, Value *IRDef, Value *V,
-                           unsigned Part) {
-  set(Def, V, Part);
-  ILV->setVectorValue(IRDef, Part, V);
 }
 
 // Process the loop in the VPlan-native vectorization path. This path builds

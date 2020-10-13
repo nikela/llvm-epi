@@ -109,26 +109,6 @@ VPUser *VPRecipeBase::toVPUser() {
   return nullptr;
 }
 
-VPValue *VPRecipeBase::toVPValue() {
-  if (auto *V = dyn_cast<VPInstruction>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
-    return V;
-  return nullptr;
-}
-
-const VPValue *VPRecipeBase::toVPValue() const {
-  if (auto *V = dyn_cast<VPInstruction>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
-    return V;
-  return nullptr;
-}
-
 // Get the top-most entry block of \p Start. This is the entry block of the
 // containing VPlan. This function is templated to support both const and non-const blocks
 template <typename T> static T *getPlanEntry(T *Start) {
@@ -432,15 +412,14 @@ void VPRecipeBase::removeFromParent() {
   Parent = nullptr;
 }
 
+VPValue *VPRecipeBase::toVPValue() {
+  if (auto *V = dyn_cast<VPInstruction>(this))
+    return V;
+  return nullptr;
+}
+
 iplist<VPRecipeBase>::iterator VPRecipeBase::eraseFromParent() {
   assert(getParent() && "Recipe not in any VPBasicBlock");
-  // If the recipe is a VPValue and has been added to the containing VPlan,
-  // remove the mapping.
-  if (Value *UV = getUnderlyingInstr())
-    if (!UV->getType()->isVoidTy())
-      if (auto *Plan = getParent()->getPlan())
-        Plan->removeVPValueFor(UV);
-
   return getParent()->getRecipeList().erase(getIterator());
 }
 
@@ -968,8 +947,7 @@ void VPPredInstPHIRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPWidenMemoryInstructionRecipe::print(raw_ostream &O, const Twine &Indent,
                                            VPSlotTracker &SlotTracker) const {
-  O << "\"WIDEN "
-    << Instruction::getOpcodeName(getUnderlyingInstr()->getOpcode()) << " ";
+  O << "\"WIDEN " << Instruction::getOpcodeName(Instr.getOpcode()) << " ";
 
   bool First = true;
   for (VPValue *Op : operands()) {
@@ -1055,7 +1033,7 @@ void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPPredicatedWidenMemoryInstructionRecipe::print(
     raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
-  O << "\"PREDICATED-WIDEN " << VPlanIngredient(getUnderlyingInstr());
+  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
   O << ", ";
   getAddr()->printAsOperand(O, SlotTracker);
   O << ", ";
