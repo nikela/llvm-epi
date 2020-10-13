@@ -23,19 +23,19 @@ define dso_local void @simple_add(i32 signext %N, i8* noalias nocapture %isA, i6
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> undef, i64 [[INDEX]], i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 8 x i64> undef, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> [[BROADCAST_SPLAT2]], [[STEPVEC_BASE]]
-; CHECK-NEXT:    [[TMP0:%.*]] = getelementptr inbounds i64, i64* [[B:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP1:%.*]] = icmp ule <vscale x 8 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP0:%.*]] = icmp ule <vscale x 8 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
+; CHECK-NEXT:    [[TMP1:%.*]] = getelementptr inbounds i64, i64* [[B:%.*]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP2]], i64 3, i64 3)
-; CHECK-NEXT:    [[TMP4:%.*]] = bitcast i64* [[TMP0]] to <vscale x 8 x i64>*
+; CHECK-NEXT:    [[TMP4:%.*]] = bitcast i64* [[TMP1]] to <vscale x 8 x i64>*
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP3]] to i32
 ; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i64> @llvm.vp.load.nxv8i64.p0nxv8i64(<vscale x 8 x i64>* [[TMP4]], i32 8, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> undef, i1 true, i32 0), <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i8, i8* [[ISA:%.*]], <vscale x 8 x i64> [[VP_OP_LOAD]]
 ; CHECK-NEXT:    [[TMP7:%.*]] = trunc i64 [[TMP3]] to i32
-; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8i8.nxv8p0i8(<vscale x 8 x i8> shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> undef, i8 0, i32 0), <vscale x 8 x i8> undef, <vscale x 8 x i32> zeroinitializer), <vscale x 8 x i8*> [[TMP6]], i32 1, <vscale x 8 x i1> [[TMP1]], i32 [[TMP7]])
+; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8i8.nxv8p0i8(<vscale x 8 x i8> shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> undef, i8 0, i32 0), <vscale x 8 x i8> undef, <vscale x 8 x i32> zeroinitializer), <vscale x 8 x i8*> [[TMP6]], i32 1, <vscale x 8 x i1> [[TMP0]], i32 [[TMP7]])
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP3]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[TMP8]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], !llvm.loop !0
+; CHECK-NEXT:    br i1 [[TMP8]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       for.cond.cleanup:
 ; CHECK-NEXT:    ret void
 ;

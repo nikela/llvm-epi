@@ -79,9 +79,6 @@ def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
 
 def vecreduce_seq_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
 
-def splat_vector : SDNode<"ISD::SPLAT_VECTOR",
-                           SDTypeProfile<1, 1, [SDTCisVec<0>]>>;
-
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
 //===----------------------------------------------------------------------===//

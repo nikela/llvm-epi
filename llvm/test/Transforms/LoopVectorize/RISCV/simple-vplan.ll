@@ -11,8 +11,8 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK:       N0 [label =
 ; CHECK-NEXT:    "for.body:\n" +
 ; CHECK-NEXT:      "WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next\l" +
-; CHECK-NEXT:      "CLONE %arrayidx = getelementptr %a, %indvars.iv\l" +
 ; CHECK-NEXT:      "EMIT vp<%1> = icmp ule ir<%indvars.iv> vp<%0>\l" +
+; CHECK-NEXT:      "CLONE %arrayidx = getelementptr %a, %indvars.iv\l" +
 ; CHECK-NEXT:      "EMIT vp<%2> = GENERATE-EXPLICIT-VECTOR-LENGTH\l" +
 ; CHECK-NEXT:      "PREDICATED-WIDEN %0 = load %arrayidx, ir<%arrayidx>, ALL-ONES-MASK, vp<%2>\l" +
 ; CHECK-NEXT:      "CLONE %arrayidx2 = getelementptr %b, %indvars.iv\l" +
