@@ -1,110 +1,67 @@
-# The LLVM Compiler Infrastructure
+# EPI Project - LLVM-based compiler
 
-This directory and its sub-directories contain source code for LLVM,
-a toolkit for the construction of highly optimized compilers,
-optimizers, and run-time environments.
+This is a publicly accessible version of the [EPI project](https://www.european-processor-initiative.eu/) LLVM-based compiler developed at the Barcelona Supercomputing Center.
 
-The README briefly describes how to get started with building LLVM.
-For more information on how to contribute to the LLVM project, please
-take a look at the
-[Contributing to LLVM](https://llvm.org/docs/Contributing.html) guide.
+The main goal of this development is to foster a co-design cycle in the development of the [RISC-V Vector Extension (RVV)](https://github.com/riscv/riscv-v-spec).
 
-## Getting Started with the LLVM System
+## Intrinsics
 
-Taken from https://llvm.org/docs/GettingStarted.html.
+This compiler implements a set of EPI-specific intrinsics of relatively low-level nature for initial exploration of the RVV extension. Reference is found at  https://repo.hca.bsc.es/gitlab/rferrer/epi-builtins-ref .
 
-### Overview
+**Note**: these intrinsics are not the ones that proposed for RISC-V Vector Extension (find those at https://github.com/riscv/rvv-intrinsic-doc). It is planned to replace the EPI-specific intrinsics ones with those from the proposal in the future.
 
-Welcome to the LLVM project!
+### Limitations
 
-The LLVM project has multiple components. The core of the project is
-itself called "LLVM". This contains all of the tools, libraries, and header
-files needed to process intermediate representations and converts it into
-object files.  Tools include an assembler, disassembler, bitcode analyzer, and
-bitcode optimizer.  It also contains basic regression tests.
+- Not all the instructions of RVV are currently accessible using the EPI-intrinsics and there is a bit of HPC bias to them.
 
-C-like languages use the [Clang](http://clang.llvm.org/) front end.  This
-component compiles C, C++, Objective-C, and Objective-C++ code into LLVM bitcode
--- and from there into object files, using LLVM.
+## Vectorization
 
-Other components include:
-the [libc++ C++ standard library](https://libcxx.llvm.org),
-the [LLD linker](https://lld.llvm.org), and more.
+At the same time we are interested in pushing forward LLVM's vectorization capabilities in order to enable (semi) automatic vectorization for RVV. We are extending the `LoopVectorizer`.
 
-### Getting the Source Code and Building LLVM
+LLVM has good support for SIMD-style vectorization. But currently falls short in making the most of existing features such as predication/masking (RVV, Arm SVE, Intel AVX-512, NEC SX-Aurora), vector length-agnostic vectorization (RVV and Arm SVE) and vector length-based strip-mining (RVV, NEC SX-Aurora).
 
-The LLVM Getting Started documentation may be out of date.  The [Clang
-Getting Started](http://clang.llvm.org/get_started.html) page might have more
-accurate information.
+We extended [Simon Moll's LLVM Vector Predication](http://www.llvm.org/docs/Proposals/VectorPredication.html) proposal which has proved useful for vectorization in RVV.
 
-This is an example work-flow and configuration to get and build the LLVM source:
+### Main approach
 
-1. Checkout LLVM (including related sub-projects like Clang):
+We use vector-length agnostic vectorization (similar to what SVE will do).
 
-     * ``git clone https://github.com/llvm/llvm-project.git``
+There are three main ways to vectorize a loop in RVV
 
-     * Or, on windows, ``git clone --config core.autocrlf=false
-    https://github.com/llvm/llvm-project.git``
+1. Strip-mine to the whole register size followed by a scalar epilog.
+   - This is what the `LoopVectorizer` can do now so it is relatively straightforward and does not need special LLVM IR
+   - The downside is that it gives up many features of RVV.
+2. Fold the epilog loop into the vector body.
+   - This is done by setting the vector length in each iteration. This induces a predicate/mask over all the vector instructions of the loop (any other predicates/masks in the vector body are needed for control flow).
+   - Needs special IR, here we use [LLVM Vector Predication intrinsics](http://www.llvm.org/docs/Proposals/VectorPredication.html).
+   - We extended the [Vectorization Plan](http://www.llvm.org/docs/Proposals/VectorizationPlan.html) with new recipes that are vector-length aware
+3. An intermediate approach in which the whole register size is used in the vector body followed by a vectorized (using set vector length) is possible.
+   - We have not implemented this approach
 
-2. Configure and build LLVM and Clang:
+(From the point of view of our research the approach 2 above is the most interesting to us. This is not necessarily what upstream or other RVV vendors may actually prefer).
 
-     * ``cd llvm-project``
+### Limitations
 
-     * ``mkdir build``
+- This is in very active development, so things may break or be incomplete.
+- Our current cost model is a bit naive because RVV brings some challenges to the current way, see below.
+- Scalable (aka vector-length agnostic) vectorization is work in progress in the LLVM community in special to enable Arm SVE.
+- We tried to make the loop vectorizer as target independent as possible. However there is a single EPI intrinsic used to set the vector length (which could be easily moved as a hook to the backend). Also there may be some underlying bias towards what works best in RVV.
 
-     * ``cd build``
+### Cost model
 
-     * ``cmake -G <generator> [options] ../llvm``
+We're in the process of improving our cost model. RVV comes with some interesting differences respect to traditional SIMD which are currently embedded in LLVM's Cost Model.
 
-        Some common build system generators are:
+- Most ISAs have the same number of registers regardless of their length. For instance there is the same number of registers in SSE, AVX-2 and AVX-512 even if they have different lengths.
+  - An interesting case Arm Advanced SIMD (NEON) where there are 32 registers of 64-bit and 16 registers of 128 bit, however the compiler in the vectorizer chooses to not to model the 64-bit registers at all (after all the 128-bit ones are longer and targeting them by default is the sensible thing to do)
+- RVV has 32 vector registers that can be grouped in vector groups of size 2, 4 or 8. There are 16 groups of size 2, 8 groups of size 4 and 4 groups of size 8. Vector groups can be operated as longer vectors (2x, 4x or 8x the length of a vector register). In fact it makes sense to expose them in LLVM as "super" registers. However this means that now we don't have the same number of "registers" depending on the length
+  - A loop that uses very few registers (think of a SAXPY) may use very few vector registers (say 3) so a using vector groups of size 8 is ideal if we want the largest vectorization factor (= the ratio of the number of iterations of the vector loop and the number of iterations of the scalar loop) along with the smallest code size (no different instructions are needed to operate in the different groups).
+  - A loop that uses many more registers may benefit from using smaller vector groups so we can control the register pressure to the vector groups/registers.
+  - If we were to use the existing strategy of `LoopVectorizer`, we would report to the vectorizer that we have only 4 registers (groups of 8 are the longest ones) which doesn't seem obvious to us how it could enable the scenario shown above.
 
-        * ``Ninja`` --- for generating [Ninja](https://ninja-build.org)
-          build files. Most llvm developers use Ninja.
-        * ``Unix Makefiles`` --- for generating make-compatible parallel makefiles.
-        * ``Visual Studio`` --- for generating Visual Studio projects and
-          solutions.
-        * ``Xcode`` --- for generating Xcode projects.
+Currently the policy for RVV is kind of hard-coded in the vectorizer and remains future work to be able to integrate it better with the existing one.
 
-        Some Common options:
+# Acknowledgements
 
-        * ``-DLLVM_ENABLE_PROJECTS='...'`` --- semicolon-separated list of the LLVM
-          sub-projects you'd like to additionally build. Can include any of: clang,
-          clang-tools-extra, libcxx, libcxxabi, libunwind, lldb, compiler-rt, lld,
-          polly, or debuginfo-tests.
+This work has been done as part of the European Processor Initiative project.
 
-          For example, to build LLVM, Clang, libcxx, and libcxxabi, use
-          ``-DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi"``.
-
-        * ``-DCMAKE_INSTALL_PREFIX=directory`` --- Specify for *directory* the full
-          path name of where you want the LLVM tools and libraries to be installed
-          (default ``/usr/local``).
-
-        * ``-DCMAKE_BUILD_TYPE=type`` --- Valid options for *type* are Debug,
-          Release, RelWithDebInfo, and MinSizeRel. Default is Debug.
-
-        * ``-DLLVM_ENABLE_ASSERTIONS=On`` --- Compile with assertion checks enabled
-          (default is Yes for Debug builds, No for all other build types).
-
-      * ``cmake --build . [-- [options] <target>]`` or your build system specified above
-        directly.
-
-        * The default target (i.e. ``ninja`` or ``make``) will build all of LLVM.
-
-        * The ``check-all`` target (i.e. ``ninja check-all``) will run the
-          regression tests to ensure everything is in working order.
-
-        * CMake will generate targets for each tool and library, and most
-          LLVM sub-projects generate their own ``check-<project>`` target.
-
-        * Running a serial build will be **slow**.  To improve speed, try running a
-          parallel build.  That's done by default in Ninja; for ``make``, use the option
-          ``-j NNN``, where ``NNN`` is the number of parallel jobs, e.g. the number of
-          CPUs you have.
-
-      * For more information see [CMake](https://llvm.org/docs/CMake.html)
-
-Consult the
-[Getting Started with LLVM](https://llvm.org/docs/GettingStarted.html#getting-started-with-llvm)
-page for detailed information on configuring and compiling LLVM. You can visit
-[Directory Layout](https://llvm.org/docs/GettingStarted.html#directory-layout)
-to learn about the layout of the source code tree.
+The European Processor Initiative (EPI) (FPA: 800928) has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement EPI-SGA1: 826647
