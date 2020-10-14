@@ -1311,7 +1311,7 @@ public:
       unsigned ScalarizationCost = ScalarizationCostPassed;
       unsigned ScalarCalls = 1;
       Type *ScalarRetTy = RetTy;
-      if (auto *RetVTy = dyn_cast<VectorType>(RetTy)) {
+      if (auto *RetVTy = dyn_cast<FixedVectorType>(RetTy)) {
         if (!SkipScalarizationCost)
           ScalarizationCost = getScalarizationOverhead(RetVTy, true, false);
         ScalarCalls = std::max(ScalarCalls,
@@ -1321,7 +1321,7 @@ public:
       SmallVector<Type *, 4> ScalarTys;
       for (unsigned i = 0, ie = Tys.size(); i != ie; ++i) {
         Type *Ty = Tys[i];
-        if (auto *VTy = dyn_cast<VectorType>(Ty)) {
+        if (auto *VTy = dyn_cast<FixedVectorType>(Ty)) {
           if (!SkipScalarizationCost)
             ScalarizationCost += getScalarizationOverhead(VTy, false, true);
           ScalarCalls = std::max(ScalarCalls,
