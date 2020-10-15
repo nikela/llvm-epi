@@ -1336,20 +1336,22 @@ public:
 class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
                                                  public VPValue,
                                                  public VPUser {
-  VPUser PredInfo;
-
   void setMask(VPValue *Mask) {
     if (!Mask)
       return;
-    PredInfo.addOperand(Mask);
+    addOperand(Mask);
+  }
+
+  bool isMasked() const {
+    return (isa<LoadInst>(getUnderlyingInstr()) && getNumOperands() == 3) ||
+           (isa<StoreInst>(getUnderlyingInstr()) && getNumOperands() == 4);
   }
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, VPValue *EVL)
       : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Load), VPUser({Addr}),
-        PredInfo({EVL}) {
+        VPValue(VPValue::VPMemoryInstructionSC, &Load), VPUser({Addr, EVL}) {
     setMask(Mask);
   }
 
@@ -1358,7 +1360,7 @@ public:
                                            VPValue *EVL)
       : VPRecipeBase(VPWidenMemoryInstructionSC),
         VPValue(VPValue::VPMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue}), PredInfo({EVL}) {
+        VPUser({Addr, StoredValue, EVL}) {
     setMask(Mask);
   }
 
@@ -1375,11 +1377,14 @@ public:
 
   /// Return the mask used by this recipe.
   VPValue *getMask() const {
-    return PredInfo.getNumOperands() == 2 ? PredInfo.getOperand(1) : nullptr;
+    return isMasked() ? getOperand(getNumOperands() - 1) : nullptr;
   }
 
   /// Return the EVL used by this recipe.
-  VPValue *getEVL() const { return PredInfo.getOperand(0); }
+  VPValue *getEVL() const {
+    return isMasked() ? getOperand(getNumOperands() - 2)
+                      : getOperand(getNumOperands() - 1);
+  }
 
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
