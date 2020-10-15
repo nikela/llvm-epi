@@ -130,7 +130,6 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
       X = cast<IntrinsicInst>(I->getOperand(FirstOp))->getOperand(0);
       Z = I->getOperand(SecondOp);
       IsSub = false;
-      return true;
     } else if (match(I->getOperand(FirstOp),
                      m_Intrinsic<Intrinsic::vp_fmul>(
                          m_Value(Y),
@@ -138,7 +137,6 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
       // (- z (* y (-x))) -> FMA(X, Y, Z)
       Z = I->getOperand(SecondOp);
       IsSub = false;
-      return true;
     } else if (match(I->getOperand(FirstOp),
                      m_Intrinsic<Intrinsic::vp_fmul>(
                          m_Intrinsic<Intrinsic::vp_fneg>(m_Value(X)),
@@ -146,7 +144,6 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
       // (- z (* (-x) y)) -> FMA(X, Y, Z)
       Z = I->getOperand(SecondOp);
       IsSub = false;
-      return true;
     } else if (match(I->getOperand(FirstOp),
                      m_Intrinsic<Intrinsic::vp_fmul>(m_Value(X), m_Value(Y)))) {
       // (- z (* x y)) -> FMA(-X, Y, Z)
@@ -156,7 +153,8 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
           {X, I->getOperand(3), I->getOperand(4), I->getOperand(5)}, nullptr,
           "vp.fneg");
       IsSub = false;
-      return true;
+    } else {
+      return false;
     }
 
     return true;
