@@ -673,8 +673,6 @@ bool removeDuplicateVSETVLI(MachineBasicBlock &MBB) {
     if (GVLOp.isDead() && VSETVLInfo(MI) == VSETVLInfo(*RefInstr)) {
       LLVM_DEBUG(dbgs() << "Remove duplicate VSETVLI instruction:\n"; MI.dump();
                  dbgs() << "in favour of:\n"; RefInstr->dump(); dbgs() << "\n");
-      MI.eraseFromParent();
-
       MachineOperand &RefInstrImplVLOp = RefInstr->getOperand(3);
       MachineOperand &RefInstrImplVTypeOp = RefInstr->getOperand(4);
 
@@ -697,6 +695,7 @@ bool removeDuplicateVSETVLI(MachineBasicBlock &MBB) {
 
       IsMBBModified = true;
 
+      MI.eraseFromParent();
       // MI has been removed, do not update RefInstr.
       continue;
     }
