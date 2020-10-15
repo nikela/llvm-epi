@@ -138,7 +138,7 @@ public:
   // False if LTO shouldn't inline whatever this symbol points to. If a symbol
   // is overwritten after LTO, LTO shouldn't inline the symbol because it
   // doesn't know the final contents of the symbol.
-  uint8_t canInline : 1;
+  unsigned canInline : 1;
 
 protected:
   // Symbol name length. Assume symbol lengths fit in a 32-bit integer.
