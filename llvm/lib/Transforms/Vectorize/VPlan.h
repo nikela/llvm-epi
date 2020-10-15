@@ -851,22 +851,28 @@ public:
              VPSlotTracker &SlotTracker) const override;
 };
 
-class VPPredicatedWidenRecipe : public VPRecipeBase {
+class VPPredicatedWidenRecipe : public VPRecipeBase, public VPUser {
 private:
-  Instruction &Instr;
-  VPUser PredInfo;
+  Instruction &Ingredient;
+  bool Masked = false;
 
   void setMask(VPValue *Mask) {
     if (!Mask)
       return;
-    PredInfo.addOperand(Mask);
+    Masked = true;
+    addOperand(Mask);
   }
 
 public:
-  VPPredicatedWidenRecipe(Instruction &Instr, VPValue *Mask, VPValue *EVL)
-      : VPRecipeBase(VPPredicatedWidenSC), Instr(Instr), PredInfo({EVL}) {
+  template <typename IterT>
+  VPPredicatedWidenRecipe(Instruction &I, iterator_range<IterT> Operands,
+                          VPValue *Mask, VPValue *EVL)
+      : VPRecipeBase(VPPredicatedWidenSC), VPUser(Operands), Ingredient(I) {
+    addOperand(EVL);
     setMask(Mask);
   }
+
+  ~VPPredicatedWidenRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *V) {
@@ -875,11 +881,14 @@ public:
 
   /// Return the mask used by this recipe.
   VPValue *getMask() const {
-    return PredInfo.getNumOperands() == 2 ? PredInfo.getOperand(1) : nullptr;
+    return Masked ? getOperand(getNumOperands() - 1) : nullptr;
   }
 
   /// Return the explicit vector length used by this recipe.
-  VPValue *getEVL() const { return PredInfo.getOperand(0); }
+  VPValue *getEVL() const {
+    return Masked ? getOperand(getNumOperands() - 2)
+                  : getOperand(getNumOperands() - 1);
+  }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -1351,7 +1360,8 @@ public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, VPValue *EVL)
       : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Load), VPUser({Addr, EVL}) {
+        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Load),
+        VPUser({Addr, EVL}) {
     setMask(Mask);
   }
 
@@ -1359,7 +1369,7 @@ public:
                                            VPValue *StoredValue, VPValue *Mask,
                                            VPValue *EVL)
       : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPMemoryInstructionSC, &Store),
+        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Store),
         VPUser({Addr, StoredValue, EVL}) {
     setMask(Mask);
   }
@@ -1432,17 +1442,17 @@ public:
 
 /// A recipe to generate Explicit Vector Length (EVL) value to be used with
 /// VPred intrinsics.
-class VPWidenEVLRecipe : public VPRecipeBase {
-  /// A VPValue representing the EVL.
-  VPValue EVL;
+class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
 
 public:
-  VPWidenEVLRecipe() : VPRecipeBase(VPWidenEVLSC) {}
+  VPWidenEVLRecipe()
+      : VPRecipeBase(VPRecipeBase::VPWidenEVLSC),
+        VPValue(VPValue::VPWidenEVLSC) {}
   ~VPWidenEVLRecipe() override = default;
 
   /// Return the VPValue representing EVL.
-  const VPValue *getEVL() const { return &EVL; }
-  VPValue *getEVL() { return &EVL; }
+  const VPValue *getEVL() const { return this; }
+  VPValue *getEVL() { return this; }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *V) {
@@ -1466,21 +1476,20 @@ public:
 /// if it is guaranteed that the EVL for all non-tail iterations is equal to W,
 /// however architectures like RISC-V do not guarantee that, hence the need for
 /// per iteration mask.
-class VPWidenEVLMaskRecipe : public VPRecipeBase {
-  /// A VPValue representing the EVLMask.
-  VPValue EVLMask;
-  VPValue *EVL;
-
+class VPWidenEVLMaskRecipe : public VPRecipeBase,
+                             public VPValue,
+                             public VPUser {
 public:
   VPWidenEVLMaskRecipe(VPValue *EVL)
-      : VPRecipeBase(VPWidenEVLMaskSC), EVL(EVL) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenEVLMaskSC),
+        VPValue(VPValue::VPWidenEVLMaskSC), VPUser({EVL}) {}
   ~VPWidenEVLMaskRecipe() override = default;
 
   /// Return the VPValue representing EVL.
-  const VPValue *getEVLMask() const { return &EVLMask; }
-  VPValue *getEVLMask() { return &EVLMask; }
+  const VPValue *getEVLMask() const { return this; }
+  VPValue *getEVLMask() { return this; }
 
-  VPValue *getEVL() { return EVL; }
+  VPValue *getEVL() { return getOperand(0); }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *V) {

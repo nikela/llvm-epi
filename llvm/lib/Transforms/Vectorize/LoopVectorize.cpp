@@ -8466,7 +8466,8 @@ VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
     return nullptr;
 
   VPValue *Mask = createBlockInMask(I->getParent(), Plan);
-  return new VPPredicatedWidenRecipe(*I, Mask, getOrCreateEVL(Plan));
+  return new VPPredicatedWidenRecipe(*I, Plan->mapToVPValues(I->operands()),
+                                     Mask, getOrCreateEVL(Plan));
 }
 
 VPBasicBlock *VPRecipeBuilder::handleReplication(
@@ -8983,7 +8984,7 @@ void VPWidenRecipe::execute(VPTransformState &State) {
 }
 
 void VPPredicatedWidenRecipe::execute(VPTransformState &State) {
-  State.ILV->widenPredicatedInstruction(Instr, State, getMask(), getEVL());
+  State.ILV->widenPredicatedInstruction(Ingredient, State, getMask(), getEVL());
 }
 
 void VPWidenEVLRecipe::execute(VPTransformState &State) {
