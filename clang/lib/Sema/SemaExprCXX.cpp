@@ -6552,12 +6552,16 @@ QualType Sema::FindCompositePointerType(SourceLocation Loc,
       // FIXME: In C, we merge __strong and none to __strong at the top level.
       if (Q1.getObjCGCAttr() == Q2.getObjCGCAttr())
         Quals.setObjCGCAttr(Q1.getObjCGCAttr());
+      else if (T1->isVoidPointerType() || T2->isVoidPointerType())
+        assert(Steps.size() == 1);
       else
         return QualType();
 
       // Mismatched lifetime qualifiers never compatibly include each other.
       if (Q1.getObjCLifetime() == Q2.getObjCLifetime())
         Quals.setObjCLifetime(Q1.getObjCLifetime());
+      else if (T1->isVoidPointerType() || T2->isVoidPointerType())
+        assert(Steps.size() == 1);
       else
         return QualType();
 
@@ -7249,8 +7253,8 @@ ExprResult Sema::ActOnStartCXXMemberReference(Scope *S, Expr *Base,
   return Base;
 }
 
-static bool CheckArrow(Sema& S, QualType& ObjectType, Expr *&Base,
-                   tok::TokenKind& OpKind, SourceLocation OpLoc) {
+static bool CheckArrow(Sema &S, QualType &ObjectType, Expr *&Base,
+                       tok::TokenKind &OpKind, SourceLocation OpLoc) {
   if (Base->hasPlaceholderType()) {
     ExprResult result = S.CheckPlaceholderExpr(Base);
     if (result.isInvalid()) return true;
@@ -7265,6 +7269,18 @@ static bool CheckArrow(Sema& S, QualType& ObjectType, Expr *&Base,
   // Note that this is rather different from the normal handling for the
   // arrow operator.
   if (OpKind == tok::arrow) {
+    // The operator requires a prvalue, so perform lvalue conversions.
+    // Only do this if we might plausibly end with a pointer, as otherwise
+    // this was likely to be intended to be a '.'.
+    if (ObjectType->isPointerType() || ObjectType->isArrayType() ||
+        ObjectType->isFunctionType()) {
+      ExprResult BaseResult = S.DefaultFunctionArrayLvalueConversion(Base);
+      if (BaseResult.isInvalid())
+        return true;
+      Base = BaseResult.get();
+      ObjectType = Base->getType();
+    }
+
     if (const PointerType *Ptr = ObjectType->getAs<PointerType>()) {
       ObjectType = Ptr->getPointeeType();
     } else if (!Base->isTypeDependent()) {

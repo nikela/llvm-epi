@@ -106,6 +106,36 @@ VPUser *VPRecipeBase::toVPUser() {
     return U;
   if (auto *U = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
     return U;
+  if (auto *U = dyn_cast<VPWidenEVLMaskRecipe>(this))
+    return U;
+  return nullptr;
+}
+
+VPValue *VPRecipeBase::toVPValue() {
+  if (auto *V = dyn_cast<VPInstruction>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
+    return V;
+  return nullptr;
+}
+
+const VPValue *VPRecipeBase::toVPValue() const {
+  if (auto *V = dyn_cast<VPInstruction>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
+    return V;
+  if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
+    return V;
   return nullptr;
 }
 
@@ -410,12 +440,6 @@ void VPRecipeBase::removeFromParent() {
   assert(getParent() && "Recipe not in any VPBasicBlock");
   getParent()->getRecipeList().remove(getIterator());
   Parent = nullptr;
-}
-
-VPValue *VPRecipeBase::toVPValue() {
-  if (auto *V = dyn_cast<VPInstruction>(this))
-    return V;
-  return nullptr;
 }
 
 iplist<VPRecipeBase>::iterator VPRecipeBase::eraseFromParent() {
@@ -861,7 +885,7 @@ static bool isOuterMask(VPValue *V) {
 
 void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                                     VPSlotTracker &SlotTracker) const {
-  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
+  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Ingredient);
   O << ", ";
   VPValue *Mask = getMask();
   if (isOuterMask(Mask))
@@ -947,7 +971,8 @@ void VPPredInstPHIRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPWidenMemoryInstructionRecipe::print(raw_ostream &O, const Twine &Indent,
                                            VPSlotTracker &SlotTracker) const {
-  O << "\"WIDEN " << Instruction::getOpcodeName(Instr.getOpcode()) << " ";
+  O << "\"WIDEN "
+    << Instruction::getOpcodeName(getUnderlyingInstr()->getOpcode()) << " ";
 
   bool First = true;
   for (VPValue *Op : operands()) {
@@ -1033,7 +1058,7 @@ void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPPredicatedWidenMemoryInstructionRecipe::print(
     raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
-  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Instr);
+  O << "\"PREDICATED-WIDEN " << VPlanIngredient(getUnderlyingInstr());
   O << ", ";
   getAddr()->printAsOperand(O, SlotTracker);
   O << ", ";
@@ -1156,9 +1181,9 @@ void VPSlotTracker::assignSlots(const VPBasicBlock *VPBB) {
     else if (const auto *VPIV = dyn_cast<VPWidenCanonicalIVRecipe>(&Recipe))
       assignSlot(VPIV->getVPValue());
     else if (const auto *VPEVL = dyn_cast<VPWidenEVLRecipe>(&Recipe))
-      assignSlot(VPEVL->getEVL());
+      assignSlot(VPEVL);
     else if (const auto *VPEVLMask = dyn_cast<VPWidenEVLMaskRecipe>(&Recipe))
-      assignSlot(VPEVLMask->getEVLMask());
+      assignSlot(VPEVLMask);
   }
 }
 

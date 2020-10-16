@@ -13931,25 +13931,15 @@ Value *CodeGenFunction::EmitX86BuiltinExpr(unsigned BuiltinID,
   }
   case X86::BI__shiftleft128:
   case X86::BI__shiftright128: {
-    // FIXME: Once fshl/fshr no longer add an unneeded and and cmov, do this:
-    // llvm::Function *F = CGM.getIntrinsic(
-    //   BuiltinID == X86::BI__shiftleft128 ? Intrinsic::fshl : Intrinsic::fshr,
-    //   Int64Ty);
-    // Ops[2] = Builder.CreateZExt(Ops[2], Int64Ty);
-    // return Builder.CreateCall(F, Ops);
-    llvm::Type *Int128Ty = Builder.getInt128Ty();
-    Value *HighPart128 =
-        Builder.CreateShl(Builder.CreateZExt(Ops[1], Int128Ty), 64);
-    Value *LowPart128 = Builder.CreateZExt(Ops[0], Int128Ty);
-    Value *Val = Builder.CreateOr(HighPart128, LowPart128);
-    Value *Amt = Builder.CreateAnd(Builder.CreateZExt(Ops[2], Int128Ty),
-                                   llvm::ConstantInt::get(Int128Ty, 0x3f));
-    Value *Res;
-    if (BuiltinID == X86::BI__shiftleft128)
-      Res = Builder.CreateLShr(Builder.CreateShl(Val, Amt), 64);
-    else
-      Res = Builder.CreateLShr(Val, Amt);
-    return Builder.CreateTrunc(Res, Int64Ty);
+    llvm::Function *F = CGM.getIntrinsic(
+        BuiltinID == X86::BI__shiftleft128 ? Intrinsic::fshl : Intrinsic::fshr,
+        Int64Ty);
+    // Flip low/high ops and zero-extend amount to matching type.
+    // shiftleft128(Low, High, Amt) -> fshl(High, Low, Amt)
+    // shiftright128(Low, High, Amt) -> fshr(High, Low, Amt)
+    std::swap(Ops[0], Ops[1]);
+    Ops[2] = Builder.CreateZExt(Ops[2], Int64Ty);
+    return Builder.CreateCall(F, Ops);
   }
   case X86::BI_ReadWriteBarrier:
   case X86::BI_ReadBarrier:
@@ -16757,6 +16747,52 @@ Value *CodeGenFunction::EmitWebAssemblyBuiltinExpr(unsigned BuiltinID,
     Value *Ptr = EmitScalarExpr(E->getArg(0));
     Function *Callee = CGM.getIntrinsic(Intrinsic::wasm_load64_zero);
     return Builder.CreateCall(Callee, {Ptr});
+  }
+  case WebAssembly::BI__builtin_wasm_load8_lane:
+  case WebAssembly::BI__builtin_wasm_load16_lane:
+  case WebAssembly::BI__builtin_wasm_load32_lane:
+  case WebAssembly::BI__builtin_wasm_load64_lane:
+  case WebAssembly::BI__builtin_wasm_store8_lane:
+  case WebAssembly::BI__builtin_wasm_store16_lane:
+  case WebAssembly::BI__builtin_wasm_store32_lane:
+  case WebAssembly::BI__builtin_wasm_store64_lane: {
+    Value *Ptr = EmitScalarExpr(E->getArg(0));
+    Value *Vec = EmitScalarExpr(E->getArg(1));
+    Optional<llvm::APSInt> LaneIdxConst =
+        E->getArg(2)->getIntegerConstantExpr(getContext());
+    assert(LaneIdxConst && "Constant arg isn't actually constant?");
+    Value *LaneIdx = llvm::ConstantInt::get(getLLVMContext(), *LaneIdxConst);
+    unsigned IntNo;
+    switch (BuiltinID) {
+    case WebAssembly::BI__builtin_wasm_load8_lane:
+      IntNo = Intrinsic::wasm_load8_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_load16_lane:
+      IntNo = Intrinsic::wasm_load16_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_load32_lane:
+      IntNo = Intrinsic::wasm_load32_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_load64_lane:
+      IntNo = Intrinsic::wasm_load64_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_store8_lane:
+      IntNo = Intrinsic::wasm_store8_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_store16_lane:
+      IntNo = Intrinsic::wasm_store16_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_store32_lane:
+      IntNo = Intrinsic::wasm_store32_lane;
+      break;
+    case WebAssembly::BI__builtin_wasm_store64_lane:
+      IntNo = Intrinsic::wasm_store64_lane;
+      break;
+    default:
+      llvm_unreachable("unexpected builtin ID");
+    }
+    Function *Callee = CGM.getIntrinsic(IntNo);
+    return Builder.CreateCall(Callee, {Ptr, Vec, LaneIdx});
   }
   case WebAssembly::BI__builtin_wasm_shuffle_v8x16: {
     Value *Ops[18];
