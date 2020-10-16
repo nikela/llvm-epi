@@ -1371,10 +1371,6 @@ def fno_experimental_relative_cxx_abi_vtables : Flag<["-"], "fno-experimental-re
   Group<f_Group>, Flags<[CC1Option]>,
   HelpText<"Do not use the experimental C++ class ABI for classes with virtual tables">;
 
-def fcxx_abi_EQ : Joined<["-"], "fc++-abi=">,
-                  Group<f_clang_Group>, Flags<[CC1Option]>,
-                  HelpText<"C++ ABI to use. This will override the target C++ ABI.">;
-
 def flat__namespace : Flag<["-"], "flat_namespace">;
 def flax_vector_conversions_EQ : Joined<["-"], "flax-vector-conversions=">, Group<f_Group>,
   HelpText<"Enable implicit vector bit-casts">, Values<"none,integer,all">, Flags<[CC1Option]>;
@@ -3792,6 +3788,10 @@ def fdump_vtable_layouts : Flag<["-"], "fdump-vtable-layouts">,
   HelpText<"Dump the layouts of all vtables that will be emitted in a translation unit">;
 def fmerge_functions : Flag<["-"], "fmerge-functions">,
   HelpText<"Permit merging of identical functions when optimizing.">;
+def fsplit_cold_code : Flag<["-"], "fsplit-cold-code">,
+  HelpText<"Permit splitting of cold code when optimizing (off by default).">;
+def fno_split_cold_code : Flag<["-"], "fno-split-cold-code">,
+  HelpText<"Disable splitting of cold code when optimizing.">;
 def femit_coverage_notes : Flag<["-"], "femit-coverage-notes">,
   HelpText<"Emit a gcov coverage notes file when compiling.">;
 def femit_coverage_data: Flag<["-"], "femit-coverage-data">,
