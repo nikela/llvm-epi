@@ -564,9 +564,13 @@ bool backpropagateVLMax(MachineBasicBlock &MBB, MachineRegisterInfo &MRI,
       LLVM_DEBUG(dbgs() << "(7) Looking at: "; MI.dump();
                  dbgs() << "    Used by: "; UseMI.dump();
                  dbgs() << "    AVL constrained: "; DefAVL->dump());
-      // Think a way to overcome this.
+      if (DefAVL->getParent() != MI.getParent()) {
+        LLVM_DEBUG(dbgs() << "(7.1) Not in the same basic block\n");
+        RefUseMIVL = nullptr;
+        break;
+      }
       if (!isPredecessor(*DefAVL, MI)) {
-        LLVM_DEBUG(dbgs() << "(7.1) Not a predecessor\n");
+        LLVM_DEBUG(dbgs() << "(7.2) Not a predecessor\n");
         RefUseMIVL = nullptr;
         break;
       }
@@ -576,7 +580,7 @@ bool backpropagateVLMax(MachineBasicBlock &MBB, MachineRegisterInfo &MRI,
       } else {
         // Check it matches the current one.
         if (VSETVLInfo(*RefUseMIVL) != UseMIVLInfo) {
-          LLVM_DEBUG(dbgs() << "(7.2) Does not match current VL predecessor\n");
+          LLVM_DEBUG(dbgs() << "(7.3) Does not match current VL predecessor\n");
           RefUseMIVL = nullptr;
           break;
         }
@@ -584,7 +588,7 @@ bool backpropagateVLMax(MachineBasicBlock &MBB, MachineRegisterInfo &MRI,
     }
 
     if (!RefUseMIVL) {
-      LLVM_DEBUG(dbgs() << "(7.3) Giving up\n");
+      LLVM_DEBUG(dbgs() << "(7.4) Giving up\n");
       continue;
     }
 
