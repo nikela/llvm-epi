@@ -1135,11 +1135,7 @@ public:
   /// This method checks every power of two up to MaxVF. If UserVF is not ZERO
   /// then this vectorization factor will be selected if vectorization is
   /// possible.
-  VectorizationFactor selectVectorizationFactor(unsigned MaxVF);
-
-  /// \return The vectorization factor for scalable vectors after processing the
-  /// types.
-  VectorizationFactor selectScalableVectorizationFactor(ElementCount MaxVF);
+  VectorizationFactor selectVectorizationFactor(ElementCount MaxVF);
 
   /// Setup cost-based decisions for user vectorization factor.
   void selectUserVectorizationFactor(ElementCount UserVF) {
@@ -6221,26 +6217,37 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
 }
 
 VectorizationFactor
-LoopVectorizationCostModel::selectVectorizationFactor(unsigned MaxVF) {
-  float Cost = expectedCost(ElementCount::getFixed(1)).first;
+LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
+  // Compute cost of scalar loop or no vectorization. This would be the same for
+  // scalable and fixed vectors.
+  ElementCount Width = ElementCount::getFixed(1);
+  float Cost = expectedCost(Width).first;
   const float ScalarCost = Cost;
-  unsigned Width = 1;
   LLVM_DEBUG(dbgs() << "LV: Scalar loop costs: " << (int)ScalarCost << ".\n");
 
   bool ForceVectorization = Hints->getForce() == LoopVectorizeHints::FK_Enabled;
-  if (ForceVectorization && (MaxVF > 1 || TTI.useScalableVectorType())) {
+  if ((ForceVectorization || MaxVF.isScalable()) && MaxVF.isVector()) {
     // Ignore scalar width, because the user explicitly wants vectorization.
-    // Initialize cost to max so that VF = 2 is, at least, chosen during cost
-    // evaluation.
+    // Initialize cost to max so that VF = 2 for fixed vectors and VF = 1 x
+    // vscale for scalable vectors is, at least, chosen during cost evaluation.
     Cost = std::numeric_limits<float>::max();
   }
 
-  for (unsigned i = 2; i <= MaxVF; i *= 2) {
+  // FIXME: Move MinVF to TTI. A target may have a different MinVF than the
+  // default 2 (1 scalable) based on legal types or other factors.
+  unsigned MinVFKnownValue = MaxVF.isScalable() ? 1 : 2;
+  ElementCount MinVF = ElementCount::get(MinVFKnownValue, MaxVF.isScalable());
+  for (ElementCount i = MinVF; ElementCount::isKnownLE(i, MaxVF); i *= 2) {
     // Notice that the vector loop needs to be executed less times, so
     // we need to divide the cost of the vector loops by the width of
     // the vector elements.
-    VectorizationCostTy C = expectedCost(ElementCount::getFixed(i));
-    float VectorCost = C.first / (float)i;
+    // TODO: Note that for scalable vectors, VectorCost is actually VectorCost /
+    // vscale. While this is fine for comparing costs of different scalable VFs,
+    // comparison to the scalar loop cost is flawed. For now, for scalable
+    // vectors we assume that vectorization is always more profitable than
+    // scalar loop.
+    VectorizationCostTy C = expectedCost(i);
+    float VectorCost = C.first / (float)i.getKnownMinValue();
     LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i
                       << " costs: " << (int)VectorCost << ".\n");
     if (!C.second && !ForceVectorization) {
@@ -6260,43 +6267,18 @@ LoopVectorizationCostModel::selectVectorizationFactor(unsigned MaxVF) {
         "There are conditional stores.",
         "store that is conditionally executed prevents vectorization",
         "ConditionalStore", ORE, TheLoop);
-    Width = 1;
+    Width = ElementCount::getFixed(1);
     Cost = ScalarCost;
   }
 
-  LLVM_DEBUG(if (ForceVectorization && Width > 1 && Cost >= ScalarCost) dbgs()
-             << "LV: Vectorization seems to be not beneficial, "
-             << "but was forced by a user.\n");
+  if (!Width.isScalable())
+    LLVM_DEBUG(if (ForceVectorization && Width.getFixedValue() > 1 &&
+                   Cost >= ScalarCost) dbgs()
+               << "LV: Vectorization seems to be not beneficial, "
+               << "but was forced by a user.\n");
   LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << Width << ".\n");
-  VectorizationFactor Factor = {ElementCount::getFixed(Width),
-                                (unsigned)(Width * Cost)};
-  return Factor;
-}
-
-VectorizationFactor
-LoopVectorizationCostModel::selectScalableVectorizationFactor(ElementCount VF) {
-  // bool ForceVectorization = Hints->getForce() ==
-  // LoopVectorizeHints::FK_Enabled; assert(!ForceVectorization &&
-  //        "We do not support Forced Vectorization for scalable vectors");
-
-  // Notice that the vector loop needs to be executed less times, so
-  // we need to divide the cost of the vector loops by the width of
-  // the vector elements.
-  VectorizationCostTy C = expectedCost(VF);
-  float Cost = C.first / (float)VF.getKnownMinValue();
-  LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << VF.getKnownMinValue()
-                    << " costs: " << (int)Cost << ".\n");
-
-  if (!EnableCondStoresVectorization && NumPredStores) {
-    reportVectorizationFailure(
-        "There are conditional stores.",
-        "store that is conditionally executed prevents vectorization",
-        "ConditionalStore", ORE, TheLoop);
-    assert(false && "Not supported for scalable vectors");
-  }
-
-  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << VF.getKnownMinValue() << ".\n");
-  VectorizationFactor Factor = {VF, (unsigned)(VF.getKnownMinValue() * Cost)};
+  VectorizationFactor Factor = {Width,
+                                (unsigned)(Width.getKnownMinValue() * Cost)};
   return Factor;
 }
 
@@ -6925,6 +6907,8 @@ int LoopVectorizationCostModel::computePredInstDiscount(
 
 LoopVectorizationCostModel::VectorizationCostTy
 LoopVectorizationCostModel::expectedCost(ElementCount VF) {
+  // FIXME: Port Cost to be of PolySize. For scalable vectors, true cost of
+  // vectorization is dependent on vscale.
   VectorizationCostTy Cost;
 
   // For each block.
@@ -6962,6 +6946,38 @@ LoopVectorizationCostModel::expectedCost(ElementCount VF) {
 
     Cost.first += BlockCost.first;
     Cost.second |= BlockCost.second;
+  }
+
+  // If tail folding is enabled, the cost model does not explicitly considers
+  // the cost of inserting the mask instruction and the additional select
+  // instruction for reductions. The mask is based on the induction variable
+  // which is not taken into consideration when computing FeasibleMaxVF
+  // (getSmallestAndWidestTypes is based on the original scalar loop and does
+  // not consider induction PHI. The induction variable of the vector loop might
+  // actually be different from the scalar loop's induction PHI). This allows
+  // for a FeasibleMaxVF value to be considered which might result in an illegal
+  // type to be used in the mask or select instructions based on the induction
+  // PHI for a given target. For eg. a loop with 32-bit values might result in a
+  // FeasibleMaxVF of 16, however the induction variable based on the 64-bit
+  // trip count would be splat into a <vscale x 16 x i64> vector type to be used
+  // for creating the mask, however, <vscale x 16 x i64> might be an illegal
+  // type for the given target (eg. RISC-V).
+  // FIXME: For now we add a rather inelegant hack after the cost computation to
+  // check if there tail folding is enabled and computing the cost of mask based
+  // on the induction variable type, expecting the TTI to result in an
+  // "infinitely" high cost if the type is illegal. We also just enable for the
+  // case when we are using VP instructions to avoid breaking existing tests.
+  if (Legal->preferPredicatedVectorOps() && foldTailByMasking()) {
+    // Add cost of generating a compare instruction to build mask.
+    Type *VectorTy = ToVectorTy(Legal->getWidestInductionType(), VF);
+    unsigned MaskCost =
+        TTI.getCmpSelInstrCost(Instruction::ICmp, VectorTy, nullptr,
+                               TTI::TCK_RecipThroughput, nullptr);
+    bool TypeNotScalarized =
+        VF.isVector() && VectorTy->isVectorTy() &&
+        TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue();
+    Cost.first += MaskCost;
+    Cost.second |= TypeNotScalarized;
   }
 
   return Cost;
@@ -7873,32 +7889,23 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
   ElementCount MaxVF = MaybeMaxVF.getValue();
   assert(MaxVF.isNonZero() && "MaxVF is zero.");
 
-  // Most of the VF selection code for fixed length vectors does not make
-  // sense for scalable vectors. So as a starting point we assume that if we
-  // are using scalable vectors we are going to vectorize based on the
-  // computed MaxVF (max K factor).
-  if (MaxVF.isScalable()) {
-    CM.collectUniformsAndScalars(MaxVF);
-    CM.collectInstsToScalarize(MaxVF);
-    buildVPlansWithVPRecipes(MaxVF, MaxVF);
-    LLVM_DEBUG(printPlans(dbgs()));
-    return CM.selectScalableVectorizationFactor(MaxVF);
-  }
-
-  // Handle fixed vector factor
-  for (unsigned VF = 1; VF <= MaxVF.getFixedValue(); VF *= 2) {
+  ElementCount VF = ElementCount::get(1, MaxVF.isScalable());
+  for (; ElementCount::isKnownLE(VF, MaxVF); VF *= 2) {
     // Collect Uniform and Scalar instructions after vectorization with VF.
-    CM.collectUniformsAndScalars(ElementCount::getFixed(VF));
+    CM.collectUniformsAndScalars(VF);
 
     // Collect the instructions (and their associated costs) that will be more
     // profitable to scalarize.
-    if (VF > 1)
-      CM.collectInstsToScalarize(ElementCount::getFixed(VF));
+    if (VF.isVector())
+      CM.collectInstsToScalarize(VF);
   }
 
-  CM.collectInLoopReductions();
+  // FIXME: Disabling for scalable vectors for now. Need to see if and how we
+  // can use it with scalable (and predicated) vectors.
+  if (!VF.isScalable())
+    CM.collectInLoopReductions();
 
-  buildVPlansWithVPRecipes(ElementCount::getFixed(1), MaxVF);
+  buildVPlansWithVPRecipes(ElementCount::get(1, MaxVF.isScalable()), MaxVF);
   LLVM_DEBUG(printPlans(dbgs()));
   if (MaxVF.isScalar())
     // Do not return VectorizationFactor::Disabled() here, since that means a
@@ -7906,7 +7913,7 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
     return VectorizationFactor(MaxVF, 0);
 
   // Select the optimal vectorization factor.
-  return CM.selectVectorizationFactor(MaxVF.getFixedValue());
+  return CM.selectVectorizationFactor(MaxVF);
 }
 
 void LoopVectorizationPlanner::setBestPlan(ElementCount VF, unsigned UF) {

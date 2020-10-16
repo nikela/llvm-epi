@@ -40,8 +40,8 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[TMP6:%.*]] = extractelement <vscale x 8 x i64> [[VEC_IND]], i32 0
 ; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds [1024 x i64], [1024 x i64]* [[A]], i64 0, i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i64, i64* [[TMP7]], i32 0
-; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i64* [[TMP8]] to <vscale x 1 x i64>*
-; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP5]], <vscale x 1 x i64>* [[TMP9]], align 8, [[TBAA2:!tbaa !.*]]
+; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i64* [[TMP8]] to <vscale x 8 x i64>*
+; CHECK-NEXT:    store <vscale x 8 x i64> [[TMP5]], <vscale x 8 x i64>* [[TMP9]], align 8, [[TBAA2:!tbaa !.*]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP10]], 8
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]

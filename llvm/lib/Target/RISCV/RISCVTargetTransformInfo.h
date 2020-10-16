@@ -168,6 +168,9 @@ public:
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U) const;
+  int getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
+                         TTI::TargetCostKind CostKind,
+                         const Instruction *I = nullptr);
 };
 
 } // end namespace llvm

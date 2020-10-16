@@ -61,14 +61,14 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[TMP11:%.*]] = extractelement <vscale x 8 x i64> [[VEC_IND]], i32 0
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[A]], i64 0, i64 [[TMP11]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds double, double* [[TMP12]], i32 0
-; CHECK-NEXT:    [[TMP14:%.*]] = bitcast double* [[TMP13]] to <vscale x 1 x double>*
-; CHECK-NEXT:    store <vscale x 1 x double> [[TMP10]], <vscale x 1 x double>* [[TMP14]], align 8, [[TBAA2:!tbaa !.*]]
-; CHECK-NEXT:    [[TMP15:%.*]] = sub <vscale x 1 x i32> [[BROADCAST_SPLAT]], [[VEC_IND18]]
-; CHECK-NEXT:    [[TMP16:%.*]] = sitofp <vscale x 1 x i32> [[TMP15]] to <vscale x 1 x double>
+; CHECK-NEXT:    [[TMP14:%.*]] = bitcast double* [[TMP13]] to <vscale x 8 x double>*
+; CHECK-NEXT:    store <vscale x 8 x double> [[TMP10]], <vscale x 8 x double>* [[TMP14]], align 8, [[TBAA2:!tbaa !.*]]
+; CHECK-NEXT:    [[TMP15:%.*]] = sub <vscale x 8 x i32> [[BROADCAST_SPLAT]], [[VEC_IND18]]
+; CHECK-NEXT:    [[TMP16:%.*]] = sitofp <vscale x 8 x i32> [[TMP15]] to <vscale x 8 x double>
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[TMP11]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = getelementptr inbounds double, double* [[TMP17]], i32 0
-; CHECK-NEXT:    [[TMP19:%.*]] = bitcast double* [[TMP18]] to <vscale x 1 x double>*
-; CHECK-NEXT:    store <vscale x 1 x double> [[TMP16]], <vscale x 1 x double>* [[TMP19]], align 8, [[TBAA2]]
+; CHECK-NEXT:    [[TMP19:%.*]] = bitcast double* [[TMP18]] to <vscale x 8 x double>*
+; CHECK-NEXT:    store <vscale x 8 x double> [[TMP16]], <vscale x 8 x double>* [[TMP19]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[TMP20:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP20]], 8
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]

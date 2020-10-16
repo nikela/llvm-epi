@@ -100,9 +100,14 @@ int RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
 
 unsigned RISCVTTIImpl::getNumberOfRegisters(unsigned ClassID) const {
   if (ClassID == 1 && ST->hasStdExtV())
-    return 32;
+    // Although there are 32 vector registers, v0 is special in that it is the
+    // only register that can be used to hold a mask. We conservatively return
+    // 31 as the number of usable vector registers.
+    return 31;
   else if (ClassID == 0)
-    return 32;
+    // Similarly for scalar registers, x0(zero), x1(ra) and x2(sp) are special
+    // and we return 29 usable registers.
+    return 29;
   else
     return 0;
 }
@@ -388,4 +393,21 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
       ElementCount::get(UpperBoundVFKnownMin, IsScalable);
 
   return {LowerBoundVF, UpperBoundVF};
+}
+
+int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
+                                     TTI::TargetCostKind CostKind,
+                                     const Instruction *I) {
+  int HighCost = -1U >> 1;
+
+  // FIXME: FOr the time being we only consider the case when the ValTy or
+  // CondTy is illegal and return an artificially high cost. For other cases we
+  // default to the base implementation.
+  if (ValTy && ValTy->isVectorTy() && !isTypeLegal(ValTy))
+    return HighCost;
+
+  if (CondTy && CondTy->isVectorTy() && !isTypeLegal(CondTy))
+    return HighCost;
+
+  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, CostKind, I);
 }
