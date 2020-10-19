@@ -7909,7 +7909,7 @@ bool TargetLowering::expandMULO(SDNode *Node, SDValue &Result,
     if (isSigned) {
       // The high part is obtained by SRA'ing all but one of the bits of low
       // part.
-      unsigned LoSize = VT.getSizeInBits();
+      unsigned LoSize = VT.getFixedSizeInBits();
       HiLHS =
           DAG.getNode(ISD::SRA, dl, VT, LHS,
                       DAG.getConstant(LoSize - 1, dl,
@@ -7968,7 +7968,7 @@ bool TargetLowering::expandMULO(SDNode *Node, SDValue &Result,
 
   // Truncate the result if SetCC returns a larger type than needed.
   EVT RType = Node->getValueType(1);
-  if (RType.getSizeInBits() < Overflow.getValueSizeInBits())
+  if (RType.bitsLT(Overflow.getValueType()))
     Overflow = DAG.getNode(ISD::TRUNCATE, dl, RType, Overflow);
 
   assert(RType.getSizeInBits() == Overflow.getValueSizeInBits() &&
