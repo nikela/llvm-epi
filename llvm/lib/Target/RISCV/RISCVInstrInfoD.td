@@ -222,8 +222,8 @@ def : InstAlias<"fgt.d $rd, $rs, $rt",
 def : InstAlias<"fge.d $rd, $rs, $rt",
                 (FLE_D GPR:$rd, FPR64:$rt, FPR64:$rs), 0>;
 
-def PseudoFLD  : PseudoFloatLoad<"fld", FPR64>;
-def PseudoFSD  : PseudoStore<"fsd", FPR64>;
+def PseudoFLD  : PseudoFloatLoad<"fld", FPR64>, Sched<[]>;
+def PseudoFSD  : PseudoStore<"fsd", FPR64>, Sched<[]>;
 } // Predicates = [HasStdExtD]
 
 //===----------------------------------------------------------------------===//
@@ -316,7 +316,7 @@ def : Pat<(setuo FPR64:$rs1, FPR64:$rs2),
 def : Pat<(setuo FPR64:$rs1, FPR64:$rs1),
           (SLTIU (FEQ_D $rs1, $rs1), 1)>;
 
-def Select_FPR64_Using_CC_GPR : SelectCC_rrirr<FPR64, GPR>;
+def Select_FPR64_Using_CC_GPR : SelectCC_rrirr<FPR64, GPR>, Sched<[]>;
 
 /// Loads
 
@@ -332,13 +332,15 @@ defm : StPat<store, FSD, FPR64>;
 let usesCustomInserter = 1 in
 def BuildPairF64Pseudo
     : Pseudo<(outs FPR64:$dst), (ins GPR:$src1, GPR:$src2),
-             [(set FPR64:$dst, (RISCVBuildPairF64 GPR:$src1, GPR:$src2))]>;
+             [(set FPR64:$dst, (RISCVBuildPairF64 GPR:$src1, GPR:$src2))]>,
+      Sched<[]>;
 
 // Moves an FPR to two GPRs.
 let usesCustomInserter = 1 in
 def SplitF64Pseudo
     : Pseudo<(outs GPR:$dst1, GPR:$dst2), (ins FPR64:$src),
-             [(set GPR:$dst1, GPR:$dst2, (RISCVSplitF64 FPR64:$src))]>;
+             [(set GPR:$dst1, GPR:$dst2, (RISCVSplitF64 FPR64:$src))]>,
+      Sched<[]>;
 
 } // Predicates = [HasStdExtD]
 

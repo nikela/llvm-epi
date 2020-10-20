@@ -636,22 +636,22 @@ def : InstAlias<"nop",           (ADDI      X0,      X0,       0)>;
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, Size = 32,
     isCodeGenOnly = 0, isAsmParserOnly = 1 in
 def PseudoLI : Pseudo<(outs GPR:$rd), (ins ixlenimm_li:$imm), [],
-                      "li", "$rd, $imm">;
+                      "li", "$rd, $imm">, Sched<[]>;
 
-def PseudoLB  : PseudoLoad<"lb">;
-def PseudoLBU : PseudoLoad<"lbu">;
-def PseudoLH  : PseudoLoad<"lh">;
-def PseudoLHU : PseudoLoad<"lhu">;
-def PseudoLW  : PseudoLoad<"lw">;
+def PseudoLB  : PseudoLoad<"lb">, Sched<[]>;
+def PseudoLBU : PseudoLoad<"lbu">, Sched<[]>;
+def PseudoLH  : PseudoLoad<"lh">, Sched<[]>;
+def PseudoLHU : PseudoLoad<"lhu">, Sched<[]>;
+def PseudoLW  : PseudoLoad<"lw">, Sched<[]>;
 
-def PseudoSB  : PseudoStore<"sb">;
-def PseudoSH  : PseudoStore<"sh">;
-def PseudoSW  : PseudoStore<"sw">;
+def PseudoSB  : PseudoStore<"sb">, Sched<[]>;
+def PseudoSH  : PseudoStore<"sh">, Sched<[]>;
+def PseudoSW  : PseudoStore<"sw">, Sched<[]>;
 
 let Predicates = [IsRV64] in {
-def PseudoLWU : PseudoLoad<"lwu">;
-def PseudoLD  : PseudoLoad<"ld">;
-def PseudoSD  : PseudoStore<"sd">;
+def PseudoLWU : PseudoLoad<"lwu">, Sched<[]>;
+def PseudoLD  : PseudoLoad<"ld">, Sched<[]>;
+def PseudoSD  : PseudoStore<"sd">, Sched<[]>;
 } // Predicates = [IsRV64]
 
 def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
@@ -892,7 +892,7 @@ def : PatGprGpr<shiftop<sra>, SRA>;
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 0 in
 def PseudoAddTPRel : Pseudo<(outs GPR:$rd),
                             (ins GPR:$rs1, GPR:$rs2, tprel_add_symbol:$src), [],
-                            "add", "$rd, $rs1, $rs2, $src">;
+                            "add", "$rd, $rs1, $rs2, $src">, Sched<[]>;
 
 /// FrameIndex calculations
 
@@ -933,7 +933,7 @@ class SelectCC_rrirr<RegisterClass valty, RegisterClass cmpty>
              [(set valty:$dst, (riscv_selectcc cmpty:$lhs, cmpty:$rhs,
               (XLenVT imm:$imm), valty:$truev, valty:$falsev))]>;
 
-def Select_GPR_Using_CC_GPR : SelectCC_rrirr<GPR, GPR>;
+def Select_GPR_Using_CC_GPR : SelectCC_rrirr<GPR, GPR>, Sched<[]>;
 
 /// Branches and jumps
 
@@ -967,11 +967,13 @@ def : Pat<(brcond GPR:$cond, bb:$imm12), (BNE GPR:$cond, X0, bb:$imm12)>;
 
 let isBarrier = 1, isBranch = 1, isTerminator = 1 in
 def PseudoBR : Pseudo<(outs), (ins simm21_lsb0_jal:$imm20), [(br bb:$imm20)]>,
-               PseudoInstExpansion<(JAL X0, simm21_lsb0_jal:$imm20)>;
+               PseudoInstExpansion<(JAL X0, simm21_lsb0_jal:$imm20)>,
+               Sched<[]>;
 
 let isBarrier = 1, isBranch = 1, isIndirectBranch = 1, isTerminator = 1 in
 def PseudoBRIND : Pseudo<(outs), (ins GPR:$rs1, simm12:$imm12), []>,
-                  PseudoInstExpansion<(JALR X0, GPR:$rs1, simm12:$imm12)>;
+                  PseudoInstExpansion<(JALR X0, GPR:$rs1, simm12:$imm12)>,
+                  Sched<[]>;
 
 def : Pat<(brind GPR:$rs1), (PseudoBRIND GPR:$rs1, 0)>;
 def : Pat<(brind (add GPR:$rs1, simm12:$imm12)),
@@ -984,7 +986,8 @@ def : Pat<(brind (add GPR:$rs1, simm12:$imm12)),
 // Define isCodeGenOnly = 0 to support parsing assembly "call" instruction.
 let isCall = 1, isBarrier = 1, isCodeGenOnly = 0, hasSideEffects = 0,
     mayStore = 0, mayLoad = 0 in
-def PseudoCALLReg : Pseudo<(outs GPR:$rd), (ins call_symbol:$func), []> {
+def PseudoCALLReg : Pseudo<(outs GPR:$rd), (ins call_symbol:$func), []>,
+                    Sched<[]> {
   let AsmString = "call\t$rd, $func";
 }
 
@@ -995,7 +998,7 @@ def PseudoCALLReg : Pseudo<(outs GPR:$rd), (ins call_symbol:$func), []> {
 // Define AsmString to print "call" when compile with -S flag.
 // Define isCodeGenOnly = 0 to support parsing assembly "call" instruction.
 let isCall = 1, Defs = [X1], isCodeGenOnly = 0 in
-def PseudoCALL : Pseudo<(outs), (ins call_symbol:$func), []> {
+def PseudoCALL : Pseudo<(outs), (ins call_symbol:$func), []>, Sched<[]> {
   let AsmString = "call\t$func";
 }
 
@@ -1009,25 +1012,27 @@ def : Pat<(riscv_mret_flag), (MRET X0, X0)>;
 let isCall = 1, Defs = [X1] in
 def PseudoCALLIndirect : Pseudo<(outs), (ins GPR:$rs1),
                                 [(riscv_call GPR:$rs1)]>,
-                         PseudoInstExpansion<(JALR X1, GPR:$rs1, 0)>;
+                         PseudoInstExpansion<(JALR X1, GPR:$rs1, 0)>,
+                         Sched<[]>;
 
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(riscv_ret_flag)]>,
-                PseudoInstExpansion<(JALR X0, X1, 0)>;
+                PseudoInstExpansion<(JALR X0, X1, 0)>, Sched<[]>;
 
 // PseudoTAIL is a pseudo instruction similar to PseudoCALL and will eventually
 // expand to auipc and jalr while encoding.
 // Define AsmString to print "tail" when compile with -S flag.
 let isCall = 1, isTerminator = 1, isReturn = 1, isBarrier = 1, Uses = [X2],
     isCodeGenOnly = 0 in
-def PseudoTAIL : Pseudo<(outs), (ins call_symbol:$dst), []> {
+def PseudoTAIL : Pseudo<(outs), (ins call_symbol:$dst), []>, Sched<[]> {
   let AsmString = "tail\t$dst";
 }
 
 let isCall = 1, isTerminator = 1, isReturn = 1, isBarrier = 1, Uses = [X2] in
 def PseudoTAILIndirect : Pseudo<(outs), (ins GPRTC:$rs1),
                                 [(riscv_tail GPRTC:$rs1)]>,
-                         PseudoInstExpansion<(JALR X0, GPR:$rs1, 0)>;
+                         PseudoInstExpansion<(JALR X0, GPR:$rs1, 0)>,
+                         Sched<[]>;
 
 def : Pat<(riscv_tail (iPTR tglobaladdr:$dst)),
           (PseudoTAIL texternalsym:$dst)>;
@@ -1036,29 +1041,34 @@ def : Pat<(riscv_tail (iPTR texternalsym:$dst)),
 
 let isCall = 0, isBarrier = 1, isBranch = 1, isTerminator = 1,
     isCodeGenOnly = 0, hasSideEffects = 0, mayStore = 0, mayLoad = 0 in
-def PseudoJump : Pseudo<(outs GPR:$rd), (ins pseudo_jump_symbol:$target), []> {
+def PseudoJump : Pseudo<(outs GPR:$rd), (ins pseudo_jump_symbol:$target), []>,
+                 Sched<[]> {
   let AsmString = "jump\t$target, $rd";
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 0,
     isAsmParserOnly = 1 in
 def PseudoLLA : Pseudo<(outs GPR:$dst), (ins bare_symbol:$src), [],
-                       "lla", "$dst, $src">;
+                       "lla", "$dst, $src">,
+                Sched<[]>;
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0, isCodeGenOnly = 0,
     isAsmParserOnly = 1 in
 def PseudoLA : Pseudo<(outs GPR:$dst), (ins bare_symbol:$src), [],
-                      "la", "$dst, $src">;
+                      "la", "$dst, $src">,
+               Sched<[]>;
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0, isCodeGenOnly = 0,
     isAsmParserOnly = 1 in
 def PseudoLA_TLS_IE : Pseudo<(outs GPR:$dst), (ins bare_symbol:$src), [],
-                             "la.tls.ie", "$dst, $src">;
+                             "la.tls.ie", "$dst, $src">,
+                      Sched<[]>;
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0, isCodeGenOnly = 0,
     isAsmParserOnly = 1 in
 def PseudoLA_TLS_GD : Pseudo<(outs GPR:$dst), (ins bare_symbol:$src), [],
-                             "la.tls.gd", "$dst, $src">;
+                             "la.tls.gd", "$dst, $src">,
+                      Sched<[]>;
 
 /// Loads
 
@@ -1123,9 +1133,11 @@ def : Pat<(atomic_fence (XLenVT 7), (timm)), (FENCE 0b11, 0b11)>;
 // Pessimistically assume the stack pointer will be clobbered
 let Defs = [X2], Uses = [X2] in {
 def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
-                              [(callseq_start timm:$amt1, timm:$amt2)]>;
+                              [(callseq_start timm:$amt1, timm:$amt2)]>,
+                       Sched<[]>;
 def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
-                              [(callseq_end timm:$amt1, timm:$amt2)]>;
+                              [(callseq_end timm:$amt1, timm:$amt2)]>,
+                       Sched<[]>;
 } // Defs = [X2], Uses = [X2]
 
 /// RV64 patterns

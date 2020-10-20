@@ -182,7 +182,8 @@ def : Pat<(atomic_load_sub_32_seq_cst GPR:$addr, GPR:$incr),
 /// Pseudo AMOs
 
 class PseudoAMO : Pseudo<(outs GPR:$res, GPR:$scratch),
-                         (ins GPR:$addr, GPR:$incr, ixlenimm:$ordering), []> {
+                         (ins GPR:$addr, GPR:$incr, ixlenimm:$ordering), []>,
+                  Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch";
   let mayLoad = 1;
   let mayStore = 1;
@@ -205,7 +206,8 @@ def : Pat<(atomic_load_nand_32_seq_cst GPR:$addr, GPR:$incr),
 
 class PseudoMaskedAMO
     : Pseudo<(outs GPR:$res, GPR:$scratch),
-             (ins GPR:$addr, GPR:$incr, GPR:$mask, ixlenimm:$ordering), []> {
+             (ins GPR:$addr, GPR:$incr, GPR:$mask, ixlenimm:$ordering), []>,
+      Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch";
   let mayLoad = 1;
   let mayStore = 1;
@@ -215,7 +217,8 @@ class PseudoMaskedAMO
 class PseudoMaskedAMOMinMax
     : Pseudo<(outs GPR:$res, GPR:$scratch1, GPR:$scratch2),
              (ins GPR:$addr, GPR:$incr, GPR:$mask, ixlenimm:$sextshamt,
-              ixlenimm:$ordering), []> {
+              ixlenimm:$ordering), []>,
+      Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch1,"
                     "@earlyclobber $scratch2";
   let mayLoad = 1;
@@ -225,7 +228,8 @@ class PseudoMaskedAMOMinMax
 
 class PseudoMaskedAMOUMinUMax
     : Pseudo<(outs GPR:$res, GPR:$scratch1, GPR:$scratch2),
-             (ins GPR:$addr, GPR:$incr, GPR:$mask, ixlenimm:$ordering), []> {
+             (ins GPR:$addr, GPR:$incr, GPR:$mask, ixlenimm:$ordering), []>,
+      Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch1,"
                     "@earlyclobber $scratch2";
   let mayLoad = 1;
@@ -272,7 +276,8 @@ def : PseudoMaskedAMOPat<int_riscv_masked_atomicrmw_umin_i32,
 
 class PseudoCmpXchg
     : Pseudo<(outs GPR:$res, GPR:$scratch),
-             (ins GPR:$addr, GPR:$cmpval, GPR:$newval, ixlenimm:$ordering), []> {
+             (ins GPR:$addr, GPR:$cmpval, GPR:$newval, ixlenimm:$ordering), []>,
+      Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch";
   let mayLoad = 1;
   let mayStore = 1;
@@ -300,7 +305,8 @@ defm : PseudoCmpXchgPat<"atomic_cmp_swap_32", PseudoCmpXchg32>;
 def PseudoMaskedCmpXchg32
     : Pseudo<(outs GPR:$res, GPR:$scratch),
              (ins GPR:$addr, GPR:$cmpval, GPR:$newval, GPR:$mask,
-              ixlenimm:$ordering), []> {
+              ixlenimm:$ordering), []>,
+      Sched<[]> {
   let Constraints = "@earlyclobber $res,@earlyclobber $scratch";
   let mayLoad = 1;
   let mayStore = 1;
