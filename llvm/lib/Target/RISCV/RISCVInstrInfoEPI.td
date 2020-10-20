@@ -608,7 +608,8 @@ multiclass pseudo_binary<VReg result_reg_class,
                          VReg op1_reg_class,
                          DAGOperand op2_kind,
                          int vlmul,
-                         string constraints> {
+                         string constraints,
+                         list<SchedReadWrite> sched = []> {
   let Constraints = Join<[constraints, "$rd = $merge"], ",">.ret,
       Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
       BaseInstr = !cast<Instruction>(!subst("Pseudo", "", NAME)) in
@@ -617,7 +618,8 @@ multiclass pseudo_binary<VReg result_reg_class,
                                  op1_reg_class:$rs2, op2_kind:$rs1,
                                  VMaskOp:$vm, GPR:$vl, ixlenimm:$sew),
                             []>,
-                     EPIPseudo;
+                     EPIPseudo,
+                     Sched<sched>;
 }
 
 // Special case for masking that does not have a merge operand nor a mask.
@@ -716,7 +718,10 @@ multiclass pseudo_binary_v_vx_vi<DAGOperand imm_kind = simm5,
 }
 
 multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
-                                    bit force_earlyclobber = 0> {
+                                    bit force_earlyclobber = 0,
+                                    list<SchedReadWrite> sched_vv = [WriteVPUIALU, ReadVPUIALU, ReadVPUIALU],
+                                    list<SchedReadWrite> sched_vx = [WriteVPUIALU, ReadVPUIALU, ReadVPUScalarIALU],
+                                    list<SchedReadWrite> sched_vi = [WriteVPUIALU, ReadVPUIALU]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
@@ -724,9 +729,9 @@ multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
                              "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints>;
-      defm _VX : pseudo_binary<evr, evr, GPR, evr.VLMul, constraints>;
-      defm _VI : pseudo_binary<evr, evr, imm_kind, evr.VLMul, constraints>;
+      defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints, sched_vv>;
+      defm _VX : pseudo_binary<evr, evr, GPR, evr.VLMul, constraints, sched_vx>;
+      defm _VI : pseudo_binary<evr, evr, imm_kind, evr.VLMul, constraints, sched_vi>;
     }
   }
 }
@@ -925,15 +930,16 @@ multiclass pseudo_binary_v_vfm {
   }
 }
 
-multiclass pseudo_binary_v_vv_vf {
+multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU],
+                                 list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUScalarFALU]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
     defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints>;
-      defm _VF : pseudo_binary<evr, evr, FPR64, evr.VLMul, constraints>;
+      defm _VV : pseudo_binary<evr, evr, evr, evr.VLMul, constraints, sched_vv>;
+      defm _VF : pseudo_binary<evr, evr, FPR64, evr.VLMul, constraints, sched_vf>;
     }
   }
 }
@@ -997,7 +1003,8 @@ multiclass pseudo_ternary<VReg result_reg_class,
                           VReg op1_reg_class,
                           RegisterClass op2_reg_class,
                           int vlmul,
-                          string constraints> {
+                          string constraints,
+                          list<SchedReadWrite> sched = []> {
   let Constraints = Join<["$rd = $rs3", constraints], ",">.ret,
       Uses = [VL, VTYPE],
       VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
@@ -1007,7 +1014,8 @@ multiclass pseudo_ternary<VReg result_reg_class,
                                       op2_reg_class:$rs2, VMaskOp:$vm,
                                       GPR:$vl, ixlenimm:$sew),
                                  []>,
-                          EPIPseudo;
+                          EPIPseudo,
+                          Sched<sched>;
 }
 
 multiclass pseudo_ternary_v_vv_vx {
@@ -1023,15 +1031,16 @@ multiclass pseudo_ternary_v_vv_vx {
   }
 }
 
-multiclass pseudo_ternary_v_vv_vf {
+multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUFALU],
+                                  list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUScalarFALU]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach evr = AllVRegs in
   {
     defvar constraints = !if(!gt(evr.VLMul, 1), "@earlyclobber $rd", "");
     let VLMul = evr.VLMul in
     {
-      defm _VV : pseudo_ternary<evr, evr, evr, evr.VLMul, constraints>;
-      defm _VF : pseudo_ternary<evr, FPR64, evr, evr.VLMul, constraints>;
+      defm _VV : pseudo_ternary<evr, evr, evr, evr.VLMul, constraints, sched_vv>;
+      defm _VF : pseudo_ternary<evr, FPR64, evr, evr.VLMul, constraints, sched_vf>;
     }
   }
 }
@@ -1297,7 +1306,8 @@ foreach eew = AllEEW in
                    (ins evr:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                     ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPULoad, ReadMemBase]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
         BaseInstr = !cast<Instruction>("VLSE"#eew#"_V") in
@@ -1306,7 +1316,8 @@ foreach eew = AllEEW in
                    (ins evr:$merge, GPR:$rs1, GPR:$rs2, VMaskOp:$mask,
                     GPR:$vl, ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPULoadStrided, ReadMemBase]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
         BaseInstr = !cast<Instruction>("VLXEI"#eew#"_V") in
@@ -1315,7 +1326,8 @@ foreach eew = AllEEW in
                    (ins evr:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
                     GPR:$vl, ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPULoadIndexed, ReadMemBase]>;
   }
 
   let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
@@ -1331,7 +1343,8 @@ foreach eew = AllEEW in
                    (ins evr:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPUStore, ReadVPUStoreData, ReadMemBase]>;
 
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
@@ -1342,7 +1355,8 @@ foreach eew = AllEEW in
                    (ins evr:$rd, GPR:$rs1, GPR:$rs2, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPUStoreStrided, ReadVPUStoreData, ReadMemBase]>;
 
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
@@ -1353,7 +1367,8 @@ foreach eew = AllEEW in
                    (ins evr:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
                    []>,
-            EPIPseudo;
+            EPIPseudo,
+            Sched<[WriteVPUStoreIndexed, ReadVPUStoreData, ReadMemBase]>;
   }
 }
 

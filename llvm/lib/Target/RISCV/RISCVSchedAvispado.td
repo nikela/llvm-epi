@@ -16,7 +16,11 @@ def AvispadoModel : SchedMachineModel {
   let IssueWidth = 1;        // 1 micro-op is dispatched per cycle.
   let LoadLatency = 3;
   let MispredictPenalty = 3;
-  let UnsupportedFeatures = [HasStdExtV, HasStdExtZvamo, HasStdExtZvlsseg];
+  let UnsupportedFeatures = [HasStdExtZvamo, HasStdExtZvlsseg];
+
+  // We should be able to remove this when all the instructions
+  // have scheduling information.
+  let CompleteModel = 0;
 }
 
 //===----------------------------------------------------------------------===//
@@ -34,6 +38,7 @@ def AvispadoUnitB          : ProcResource<1>; // Branch
 def AvispadoUnitFPALU      : ProcResource<1>; // FP ALU
 }
 
+// FIXME: This was taken from Rocket so perhaps doesn't make sense for Avispado.
 let BufferSize = 1 in {
 def AvispadoUnitIDiv       : ProcResource<1>; // Int Division
 def AvispadoUnitFPDivSqrt  : ProcResource<1>; // FP Divide/Sqrt
@@ -230,4 +235,55 @@ def : ReadAdvance<ReadFMovF64ToI64, 0>;
 def : ReadAdvance<ReadFMovI64ToF64, 0>;
 def : ReadAdvance<ReadFClass32, 0>;
 def : ReadAdvance<ReadFClass64, 0>;
+
+}
+
+// V-extension in Avispado
+def AvispadoVSETVL          : ProcResource<1>; // Vector configuration
+def AvispadoVPUIALU         : ProcResource<1>; // Integer VPU ALU
+def AvispadoVPUFALU         : ProcResource<1>; // FP VPU ALU
+def AvispadoVPUMem          : ProcResource<1>; // VPU Load/Store
+
+let SchedModel = AvispadoModel in {
+
+let Latency = 1 in
+{
+  def : WriteRes<WriteVL, [AvispadoVSETVL]>;
+  def : WriteRes<WriteVTYPE, [AvispadoVSETVL]>;
+}
+
+let Latency = 20, ResourceCycles = [20] in
+{
+  def : WriteRes<WriteVPULoad, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPULoadStrided, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPULoadIndexed, [AvispadoVPUMem]>;
+
+  def : WriteRes<WriteVPUStore, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPUStoreStrided, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPUStoreIndexed, [AvispadoVPUMem]>;
+
+  def : WriteRes<WriteVPUScalarIALU, [AvispadoVPUIALU]>;
+  def : WriteRes<WriteVPUScalarFALU, [AvispadoVPUFALU]>;
+}
+
+def : WriteRes<WriteVPUIALU, [AvispadoVPUIALU]> {
+  let Latency = 30;
+  let ResourceCycles = [30];
+}
+
+def : WriteRes<WriteVPUFALU, [AvispadoVPUFALU]> {
+  let Latency = 50;
+  let ResourceCycles = [50];
+}
+
+// By-passes and advanced (if any)
+def : ReadAdvance<ReadVL, 0>;
+def : ReadAdvance<ReadVTYPE, 0>;
+def : ReadAdvance<ReadVPUScalarIALU, 0>;
+def : ReadAdvance<ReadVPUScalarFALU, 0>;
+def : ReadAdvance<ReadVPUIALU, 0>;
+def : ReadAdvance<ReadVPUFALU, 0>;
+def : ReadAdvance<ReadVPUMem, 0>;
+def : ReadAdvance<ReadVPUStoreData,       0>;
+
 }
