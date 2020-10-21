@@ -121,22 +121,14 @@ const char *ContentCache::getInvalidBOM(StringRef BufStr) {
 llvm::Optional<llvm::MemoryBufferRef>
 ContentCache::getBufferOrNone(DiagnosticsEngine &Diag, FileManager &FM,
                               SourceLocation Loc) const {
-  if (auto *B = getBufferPointer(Diag, FM, Loc))
-    return B->getMemBufferRef();
-  return None;
-}
-
-const llvm::MemoryBuffer *
-ContentCache::getBufferPointer(DiagnosticsEngine &Diag, FileManager &FM,
-                               SourceLocation Loc) const {
   // Lazily create the Buffer for ContentCaches that wrap files.  If we already
   // computed it, just return what we have.
-  if (isBufferInvalid())
-    return nullptr;
+  if (IsBufferInvalid)
+    return None;
   if (auto *B = Buffer.getPointer())
-    return B;
+    return B->getMemBufferRef();
   if (!ContentsEntry)
-    return nullptr;
+    return None;
 
   // Check that the file's size fits in an 'unsigned' (with room for a
   // past-the-end value). This is deeply regrettable, but various parts of
@@ -152,8 +144,8 @@ ContentCache::getBufferPointer(DiagnosticsEngine &Diag, FileManager &FM,
       Diag.Report(Loc, diag::err_file_too_large)
         << ContentsEntry->getName();
 
-    Buffer.setInt(Buffer.getInt() | InvalidFlag);
-    return nullptr;
+    IsBufferInvalid = true;
+    return None;
   }
 
   auto BufferOrError = FM.getBufferForFile(ContentsEntry, IsFileVolatile);
@@ -172,8 +164,8 @@ ContentCache::getBufferPointer(DiagnosticsEngine &Diag, FileManager &FM,
       Diag.Report(Loc, diag::err_cannot_open_file)
           << ContentsEntry->getName() << BufferOrError.getError().message();
 
-    Buffer.setInt(Buffer.getInt() | InvalidFlag);
-    return nullptr;
+    IsBufferInvalid = true;
+    return None;
   }
 
   Buffer.setPointer(BufferOrError->release());
@@ -188,8 +180,8 @@ ContentCache::getBufferPointer(DiagnosticsEngine &Diag, FileManager &FM,
       Diag.Report(Loc, diag::err_file_modified)
         << ContentsEntry->getName();
 
-    Buffer.setInt(Buffer.getInt() | InvalidFlag);
-    return nullptr;
+    IsBufferInvalid = true;
+    return None;
   }
 
   // If the buffer is valid, check to see if it has a UTF Byte Order Mark
@@ -201,11 +193,11 @@ ContentCache::getBufferPointer(DiagnosticsEngine &Diag, FileManager &FM,
   if (InvalidBOM) {
     Diag.Report(Loc, diag::err_unsupported_bom)
       << InvalidBOM << ContentsEntry->getName();
-    Buffer.setInt(Buffer.getInt() | InvalidFlag);
-    return nullptr;
+    IsBufferInvalid = true;
+    return None;
   }
 
-  return Buffer.getPointer();
+  return Buffer.getPointer()->getMemBufferRef();
 }
 
 unsigned LineTableInfo::getLineTableFilenameID(StringRef Name) {
@@ -701,14 +693,11 @@ SourceManager::createExpansionLocImpl(const ExpansionInfo &Info,
   return SourceLocation::getMacroLoc(NextLocalOffset - (TokLength + 1));
 }
 
-const llvm::MemoryBuffer *
-SourceManager::getMemoryBufferForFile(const FileEntry *File, bool *Invalid) {
+llvm::Optional<llvm::MemoryBufferRef>
+SourceManager::getMemoryBufferForFileOrNone(const FileEntry *File) {
   const SrcMgr::ContentCache *IR = getOrCreateContentCache(File);
   assert(IR && "getOrCreateContentCache() cannot return NULL");
-  auto *B = IR->getBufferPointer(Diag, getFileManager(), SourceLocation());
-  if (Invalid)
-    *Invalid = !B;
-  return B ? B : getFakeBufferForRecovery();
+  return IR->getBufferOrNone(Diag, getFileManager(), SourceLocation());
 }
 
 void SourceManager::overrideFileContents(const FileEntry *SourceFile,
