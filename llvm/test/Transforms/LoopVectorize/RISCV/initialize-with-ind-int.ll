@@ -13,9 +13,9 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[A:%.*]] = alloca [1024 x double], align 8
 ; CHECK-NEXT:    [[B:%.*]] = alloca [1024 x double], align 8
 ; CHECK-NEXT:    [[TMP0:%.*]] = bitcast [1024 x double]* [[A]] to i8*
-; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull [[TMP0]]) #3
+; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull [[TMP0]]) [[ATTR4:#.*]]
 ; CHECK-NEXT:    [[TMP1:%.*]] = bitcast [1024 x double]* [[B]] to i8*
-; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull [[TMP1]]) #3
+; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull [[TMP1]]) [[ATTR4]]
 ; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP2]], 1
 ; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 1024, [[STEP_VSCALE]]
@@ -62,13 +62,13 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[A]], i64 0, i64 [[TMP11]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds double, double* [[TMP12]], i32 0
 ; CHECK-NEXT:    [[TMP14:%.*]] = bitcast double* [[TMP13]] to <vscale x 1 x double>*
-; CHECK-NEXT:    store <vscale x 1 x double> [[TMP10]], <vscale x 1 x double>* [[TMP14]], align 8, !tbaa !2
+; CHECK-NEXT:    store <vscale x 1 x double> [[TMP10]], <vscale x 1 x double>* [[TMP14]], align 8, [[TBAA2:!tbaa !.*]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = sub <vscale x 1 x i32> [[BROADCAST_SPLAT]], [[VEC_IND18]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = sitofp <vscale x 1 x i32> [[TMP15]] to <vscale x 1 x double>
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[TMP11]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = getelementptr inbounds double, double* [[TMP17]], i32 0
 ; CHECK-NEXT:    [[TMP19:%.*]] = bitcast double* [[TMP18]] to <vscale x 1 x double>*
-; CHECK-NEXT:    store <vscale x 1 x double> [[TMP16]], <vscale x 1 x double>* [[TMP19]], align 8, !tbaa !2
+; CHECK-NEXT:    store <vscale x 1 x double> [[TMP16]], <vscale x 1 x double>* [[TMP19]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[TMP20:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP20]], 1
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
@@ -76,7 +76,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[VEC_IND_NEXT11]] = add <vscale x 1 x i32> [[VEC_IND10]], [[DOTSPLAT9]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT19]] = add <vscale x 1 x i32> [[VEC_IND18]], [[DOTSPLAT17]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP21]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop !6
+; CHECK-NEXT:    br i1 [[TMP21]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP:%.*]], label [[SCALAR_PH]]
@@ -86,28 +86,28 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK:       for.cond.cleanup:
 ; CHECK-NEXT:    [[IDXPROM4:%.*]] = sext i32 [[ARGC:%.*]] to i64
 ; CHECK-NEXT:    [[ARRAYIDX5:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[A]], i64 0, i64 [[IDXPROM4]]
-; CHECK-NEXT:    [[TMP22:%.*]] = load double, double* [[ARRAYIDX5]], align 8, !tbaa !2
+; CHECK-NEXT:    [[TMP22:%.*]] = load double, double* [[ARRAYIDX5]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[IDXPROM4]]
-; CHECK-NEXT:    [[TMP23:%.*]] = load double, double* [[ARRAYIDX7]], align 8, !tbaa !2
+; CHECK-NEXT:    [[TMP23:%.*]] = load double, double* [[ARRAYIDX7]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP22]], [[TMP23]]
 ; CHECK-NEXT:    [[CONV8:%.*]] = fptosi double [[ADD]] to i32
-; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP1]]) #3
-; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP0]]) #3
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP1]]) [[ATTR4]]
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP0]]) [[ATTR4]]
 ; CHECK-NEXT:    ret i32 [[CONV8]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP24:%.*]] = trunc i64 [[INDVARS_IV]] to i32
 ; CHECK-NEXT:    [[CONV:%.*]] = sitofp i32 [[TMP24]] to double
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[A]], i64 0, i64 [[INDVARS_IV]]
-; CHECK-NEXT:    store double [[CONV]], double* [[ARRAYIDX]], align 8, !tbaa !2
+; CHECK-NEXT:    store double [[CONV]], double* [[ARRAYIDX]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[TMP25:%.*]] = trunc i64 [[INDVARS_IV]] to i32
 ; CHECK-NEXT:    [[TMP26:%.*]] = sub i32 1024, [[TMP25]]
 ; CHECK-NEXT:    [[CONV1:%.*]] = sitofp i32 [[TMP26]] to double
 ; CHECK-NEXT:    [[ARRAYIDX3:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[INDVARS_IV]]
-; CHECK-NEXT:    store double [[CONV1]], double* [[ARRAYIDX3]], align 8, !tbaa !2
+; CHECK-NEXT:    store double [[CONV1]], double* [[ARRAYIDX3]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 1024
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop !8
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], [[LOOP8:!llvm.loop !.*]]
 ;
 entry:
   %a = alloca [1024 x double], align 8
