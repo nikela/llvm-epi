@@ -1548,6 +1548,20 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfwcvt_xu_f_mask : Intrinsic::epi_vfwcvt_xu_f;
       break;
+    case Intrinsic::vp_sext:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vwadd_mask
+                          : Intrinsic::epi_vwadd;
+      break;
+    case Intrinsic::vp_zext:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vwaddu_mask
+                          : Intrinsic::epi_vwaddu;
+      break;
     }
   } else if (Ratio == 2 && DstTypeSize < SrcTypeSize) {
     switch (IntNo) {
@@ -1589,6 +1603,13 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfncvt_xu_f_mask : Intrinsic::epi_vfncvt_xu_f;
       break;
+    case Intrinsic::vp_trunc:
+      MaskOpNo = 2;
+      EVLOpNo = 3;
+      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      EPIIntNo = IsMasked ? Intrinsic::epi_vnsrl_mask
+                          : Intrinsic::epi_vnsrl;
+      break;
     }
   }
 
@@ -1605,6 +1626,12 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
 
     Operands.push_back(SrcOp);
 
+    // Special case because there is no unary narrowing instruction.
+    if (IntNo == Intrinsic::vp_trunc || IntNo == Intrinsic::vp_zext ||
+        IntNo == Intrinsic::vp_sext) {
+      Operands.push_back(DAG.getTargetConstant(0, DL, MVT::i64));
+    }
+
     if (IsMasked)
       Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
 
@@ -1616,8 +1643,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     SDValue Result = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
                        Operands);
 
-    if (Ratio == 1 || Ratio == 2)
-      return Result;
+    return Result;
   }
 
   // Ideas to implement this? Use a narrowing/widening operation and then
@@ -2200,6 +2226,9 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
   case Intrinsic::vp_fptoui:
   case Intrinsic::vp_fpext:
   case Intrinsic::vp_fptrunc:
+  case Intrinsic::vp_trunc:
+  case Intrinsic::vp_zext:
+  case Intrinsic::vp_sext:
     return LowerVPIntrinsicConversion(Op, DAG);
   }
 }
