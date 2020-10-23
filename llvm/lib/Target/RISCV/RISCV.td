@@ -219,6 +219,8 @@ include "RISCVRegisterBanks.td"
 include "RISCVSchedRocket.td"
 include "RISCVSchedBullet.td"
 
+include "RISCVSchedAvispado.td"
+
 //===----------------------------------------------------------------------===//
 // RISC-V processors supported.
 //===----------------------------------------------------------------------===//
@@ -249,6 +251,13 @@ def : ProcessorModel<"sifive-e76", BulletModel, [FeatureStdExtM,
                                                  FeatureStdExtC]>;
 
 def : ProcessorModel<"sifive-u74", BulletModel, [Feature64Bit,
+                                                 FeatureStdExtM,
+                                                 FeatureStdExtA,
+                                                 FeatureStdExtF,
+                                                 FeatureStdExtD,
+                                                 FeatureStdExtC]>;
+
+def : ProcessorModel<"avispado", AvispadoModel, [Feature64Bit,
                                                  FeatureStdExtM,
                                                  FeatureStdExtA,
                                                  FeatureStdExtF,

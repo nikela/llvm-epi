@@ -361,10 +361,11 @@ public:
       return !VD->needsDestruction(getContext()) && InitDecl->evaluateValue();
 
     // Otherwise, we need a thread wrapper unless we know that every
-    // translation unit will emit the value as a constant. We rely on
-    // ICE-ness not varying between translation units, which isn't actually
+    // translation unit will emit the value as a constant. We rely on the
+    // variable being constant-initialized in every translation unit if it's
+    // constant-initialized in any translation unit, which isn't actually
     // guaranteed by the standard but is necessary for sanity.
-    return InitDecl->isInitKnownICE() && InitDecl->isInitICE();
+    return InitDecl->hasConstantInitialization();
   }
 
   bool usesThreadWrapperFunction(const VarDecl *VD) const override {
@@ -542,7 +543,7 @@ private:
 }
 
 CodeGen::CGCXXABI *CodeGen::CreateItaniumCXXABI(CodeGenModule &CGM) {
-  switch (CGM.getContext().getCXXABIKind()) {
+  switch (CGM.getTarget().getCXXABI().getKind()) {
   // For IR-generation purposes, there's no significant difference
   // between the ARM and iOS ABIs.
   case TargetCXXABI::GenericARM:

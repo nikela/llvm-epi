@@ -521,6 +521,14 @@ static void initTargetOptions(DiagnosticsEngine &Diags,
   Options.UniqueSectionNames = CodeGenOpts.UniqueSectionNames;
   Options.UniqueBasicBlockSectionNames =
       CodeGenOpts.UniqueBasicBlockSectionNames;
+  Options.StackProtectorGuard =
+      llvm::StringSwitch<llvm::StackProtectorGuards>(CodeGenOpts
+          .StackProtectorGuard)
+          .Case("tls", llvm::StackProtectorGuards::TLS)
+          .Case("global", llvm::StackProtectorGuards::Global)
+          .Default(llvm::StackProtectorGuards::None);
+  Options.StackProtectorGuardOffset = CodeGenOpts.StackProtectorGuardOffset;
+  Options.StackProtectorGuardReg = CodeGenOpts.StackProtectorGuardReg;
   Options.TLSSize = CodeGenOpts.TLSSize;
   Options.EmulatedTLS = CodeGenOpts.EmulatedTLS;
   Options.ExplicitEmulatedTLS = CodeGenOpts.ExplicitEmulatedTLS;
@@ -558,8 +566,6 @@ static void initTargetOptions(DiagnosticsEngine &Diags,
 
 static Optional<GCOVOptions> getGCOVOptions(const CodeGenOptions &CodeGenOpts,
                                             const LangOptions &LangOpts) {
-  if (CodeGenOpts.DisableGCov)
-    return None;
   if (!CodeGenOpts.EmitGcovArcs && !CodeGenOpts.EmitGcovNotes)
     return None;
   // Not using 'GCOVOptions::getDefault' allows us to avoid exiting if

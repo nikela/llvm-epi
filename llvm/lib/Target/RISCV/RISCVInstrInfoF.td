@@ -278,8 +278,8 @@ def : InstAlias<"fsflagsi $imm",      (CSRRWI      X0, FFLAGS.Encoding, uimm5:$i
 def : MnemonicAlias<"fmv.s.x", "fmv.w.x">;
 def : MnemonicAlias<"fmv.x.s", "fmv.x.w">;
 
-def PseudoFLW  : PseudoFloatLoad<"flw", FPR32>;
-def PseudoFSW  : PseudoStore<"fsw", FPR32>;
+def PseudoFLW  : PseudoFloatLoad<"flw", FPR32>, Sched<[]>;
+def PseudoFSW  : PseudoStore<"fsw", FPR32>, Sched<[]>;
 } // Predicates = [HasStdExtF]
 
 //===----------------------------------------------------------------------===//
@@ -376,7 +376,7 @@ def : Pat<(setuo FPR32:$rs1, FPR32:$rs2),
 def : Pat<(setuo FPR32:$rs1, FPR32:$rs1),
           (SLTIU (FEQ_S $rs1, $rs1), 1)>;
 
-def Select_FPR32_Using_CC_GPR : SelectCC_rrirr<FPR32, GPR>;
+def Select_FPR32_Using_CC_GPR : SelectCC_rrirr<FPR32, GPR>, Sched<[]>;
 
 /// Loads
 

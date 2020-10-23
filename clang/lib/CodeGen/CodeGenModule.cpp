@@ -75,14 +75,19 @@ static llvm::cl::opt<bool> LimitedCoverage(
 static const char AnnotationSection[] = "llvm.metadata";
 
 static CGCXXABI *createCXXABI(CodeGenModule &CGM) {
-  switch (CGM.getContext().getCXXABIKind()) {
-#define ITANIUM_CXXABI(Name, Str) case TargetCXXABI::Name:
-#define CXXABI(Name, Str)
-#include "clang/Basic/TargetCXXABI.def"
+  switch (CGM.getTarget().getCXXABI().getKind()) {
+  case TargetCXXABI::Fuchsia:
+  case TargetCXXABI::GenericAArch64:
+  case TargetCXXABI::GenericARM:
+  case TargetCXXABI::iOS:
+  case TargetCXXABI::iOS64:
+  case TargetCXXABI::WatchOS:
+  case TargetCXXABI::GenericMIPS:
+  case TargetCXXABI::GenericItanium:
+  case TargetCXXABI::WebAssembly:
+  case TargetCXXABI::XL:
     return CreateItaniumCXXABI(CGM);
-#define MICROSOFT_CXXABI(Name, Str) case TargetCXXABI::Name:
-#define CXXABI(Name, Str)
-#include "clang/Basic/TargetCXXABI.def"
+  case TargetCXXABI::Microsoft:
     return CreateMicrosoftCXXABI(CGM);
   }
 
@@ -2535,6 +2540,12 @@ ConstantAddress CodeGenModule::GetAddrOfMSGuidDecl(const MSGuidDecl *GD) {
         GV, Ty->getPointerTo(GV->getAddressSpace()));
   }
   return ConstantAddress(Addr, Alignment);
+}
+
+ConstantAddress CodeGenModule::GetAddrOfTemplateParamObject(
+    const TemplateParamObjectDecl *TPO) {
+  ErrorUnsupported(TPO, "template parameter object");
+  return ConstantAddress::invalid();
 }
 
 ConstantAddress CodeGenModule::GetWeakRefReference(const ValueDecl *VD) {

@@ -215,6 +215,7 @@ def err_drv_dllexport_inlines_and_fallback : Error<
 
 def err_drv_invalid_value : Error<"invalid value '%1' in '%0'">;
 def err_drv_invalid_int_value : Error<"invalid integral value '%1' in '%0'">;
+def err_drv_invalid_value_with_suggestion : Error<"invalid value '%1' in '%0','%2'">;
 def err_drv_invalid_remap_file : Error<
     "invalid option '%0' not of the form <from-file>;<to-file>">;
 def err_drv_invalid_gcc_output_type : Error<
@@ -526,6 +527,4 @@ def err_drv_invalid_object_mode : Error<"OBJECT_MODE setting %0 is not recognize
 
 def err_drv_invalid_sve_vector_bits : Error<
   "'-msve-vector-bits' is not supported without SVE enabled">;
-
-def err_invalid_cxx_abi : Error<"invalid C++ ABI name '%0'">;
 }
