@@ -581,12 +581,42 @@ multiclass epi_load {
 
 defm int_epi_vload : epi_load;
 
-multiclass epi_vlseg2 {
-  def ""              : Intrinsic<[ llvm_anyvector_ty, LLVMMatchType<0> ],
+foreach i = 2 ... 8 in {
+  def int_epi_vlseg#i : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
                                   [ LLVMPointerToElt<0>, llvm_i64_ty ],
                                   [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
+  def int_epi_vlseg#i#_strided : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
+                                  [ LLVMPointerToElt<0>,
+                                    llvm_i64_ty, llvm_i64_ty ],
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
+  def int_epi_vlseg#i#_indexed : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
+                                  [ LLVMPointerToElt<0>,
+                                    llvm_anyvector_ty, llvm_i64_ty ],
+                                  [ NoCapture<ArgIndex<0>>, IntrReadMem ]>;
+  def int_epi_vlseg#i#_mask : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
+                                  !listconcat(!listsplat(LLVMMatchType<0>, i),
+                                   [ LLVMPointerToElt<0>,
+                                     llvm_anyvector_ty, llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrReadMem ]>;
+  def int_epi_vlseg#i#_strided_mask : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
+                                  !listconcat(!listsplat(LLVMMatchType<0>, i),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_i64_ty, llvm_anyvector_ty,
+                                    llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrReadMem ]>;
+  def int_epi_vlseg#i#_indexed_mask : Intrinsic<!listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1))),
+                                  !listconcat(!listsplat(LLVMMatchType<0>, i),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_anyvector_ty, llvm_anyvector_ty,
+                                    llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrReadMem ]>;
 }
-defm int_epi_vlseg2 : epi_vlseg2;
 
 // Stores
 multiclass epi_store {
@@ -626,13 +656,45 @@ multiclass epi_store {
 
 defm int_epi_vstore : epi_store;
 
-multiclass epi_vsseg2 {
-  def ""              : Intrinsic<[],
-                                  [ llvm_anyvector_ty, LLVMMatchType<0>,
-                                    LLVMPointerToElt<0>, llvm_i64_ty ],
-                                  [ NoCapture<ArgIndex<2>>, IntrWriteMem ]>;
+foreach i = 2 ... 8 in {
+  def int_epi_vsseg#i : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>, llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
+  def int_epi_vsseg#i#_strided : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_i64_ty, llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
+  def int_epi_vsseg#i#_indexed : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_anyvector_ty, llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
+  def int_epi_vsseg#i#_mask : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_anyvector_ty, llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
+  def int_epi_vsseg#i#_strided_mask : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_i64_ty, llvm_anyvector_ty,
+                                    llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
+  def int_epi_vsseg#i#_indexed_mask : Intrinsic<[],
+                                  !listconcat([ llvm_anyvector_ty ],
+                                    !listsplat(LLVMMatchType<0>, !add(i, -1)),
+                                    [ LLVMPointerToElt<0>,
+                                    llvm_anyvector_ty, llvm_anyvector_ty,
+                                    llvm_i64_ty ]),
+                                  [ NoCapture<ArgIndex<i>>, IntrWriteMem ]>;
 }
-defm int_epi_vsseg2 : epi_vsseg2;
 
 // EPI Extensions
 

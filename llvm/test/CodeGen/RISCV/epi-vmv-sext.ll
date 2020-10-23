@@ -31,7 +31,7 @@ define signext i32 @sext_i32(<vscale x 2 x i32> %a)
   ret i32 %res
 }
 
-declare i16 @llvm.epi.vmv.x.s.nxv2i16(<vscale x 4 x i16>)
+declare i16 @llvm.epi.vmv.x.s.nxv4i16(<vscale x 4 x i16>)
 
 define signext i16 @sext_i16(<vscale x 4 x i16> %a)
 ; CHECK-LABEL: sext_i16:
@@ -40,11 +40,11 @@ define signext i16 @sext_i16(<vscale x 4 x i16> %a)
 ; CHECK-NEXT:    vmv.x.s a0, v16
 ; CHECK-NEXT:    ret
 {
-  %res = call i16 @llvm.epi.vmv.x.s.nxv2i16(<vscale x 4 x i16> %a)
+  %res = call i16 @llvm.epi.vmv.x.s.nxv4i16(<vscale x 4 x i16> %a)
   ret i16 %res
 }
 
-declare i8 @llvm.epi.vmv.x.s.nxv2i8(<vscale x 8 x i8>)
+declare i8 @llvm.epi.vmv.x.s.nxv8i8(<vscale x 8 x i8>)
 
 define signext i8 @sext_i8(<vscale x 8 x i8> %a)
 ; CHECK-LABEL: sext_i8:
@@ -53,6 +53,6 @@ define signext i8 @sext_i8(<vscale x 8 x i8> %a)
 ; CHECK-NEXT:    vmv.x.s a0, v16
 ; CHECK-NEXT:    ret
 {
-  %res = call i8 @llvm.epi.vmv.x.s.nxv2i8(<vscale x 8 x i8> %a)
+  %res = call i8 @llvm.epi.vmv.x.s.nxv8i8(<vscale x 8 x i8> %a)
   ret i8 %res
 }

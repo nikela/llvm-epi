@@ -9232,12 +9232,26 @@ __epi_4xi64 test_vload_unsigned_4xi64_mask(__epi_4xi64 arg_0, const unsigned lon
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
 //
 __epi_8xi8x2 test_vlseg2_8xi8x2(const signed char*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_8xi8x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
+//
+__epi_8xi8x2 test_vlseg2_8xi8x2_mask(__epi_8xi8x2 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vlseg2_4xi16x2(
@@ -9246,12 +9260,26 @@ __epi_8xi8x2 test_vlseg2_8xi8x2(const signed char*  arg_0, unsigned long int arg
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
 //
 __epi_4xi16x2 test_vlseg2_4xi16x2(const signed short int*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_4xi16x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
+//
+__epi_4xi16x2 test_vlseg2_4xi16x2_mask(__epi_4xi16x2 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vlseg2_2xi32x2(
@@ -9260,12 +9288,26 @@ __epi_4xi16x2 test_vlseg2_4xi16x2(const signed short int*  arg_0, unsigned long 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
 //
 __epi_2xi32x2 test_vlseg2_2xi32x2(const signed int*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_2xi32x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
+//
+__epi_2xi32x2 test_vlseg2_2xi32x2_mask(__epi_2xi32x2 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vlseg2_1xi64x2(
@@ -9274,12 +9316,26 @@ __epi_2xi32x2 test_vlseg2_2xi32x2(const signed int*  arg_0, unsigned long int ar
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
 //
 __epi_1xi64x2 test_vlseg2_1xi64x2(const signed long int*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_1xi64x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
+//
+__epi_1xi64x2 test_vlseg2_1xi64x2_mask(__epi_1xi64x2 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vlseg2_2xf32x2(
@@ -9288,12 +9344,26 @@ __epi_1xi64x2 test_vlseg2_1xi64x2(const signed long int*  arg_0, unsigned long i
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
 //
 __epi_2xf32x2 test_vlseg2_2xf32x2(const float*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_2xf32x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
+//
+__epi_2xf32x2 test_vlseg2_2xf32x2_mask(__epi_2xf32x2 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vlseg2_1xf64x2(
@@ -9302,12 +9372,4898 @@ __epi_2xf32x2 test_vlseg2_2xf32x2(const float*  arg_0, unsigned long int arg_1)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
 //
 __epi_1xf64x2 test_vlseg2_1xf64x2(const double*  arg_0, unsigned long int arg_1)
 {
     return __builtin_epi_vlseg2_1xf64x2(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
+//
+__epi_1xf64x2 test_vlseg2_1xf64x2_mask(__epi_1xf64x2 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg2_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
+//
+__epi_8xi8x2 test_vlseg2_indexed_8xi8x2(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_8xi8x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
+//
+__epi_8xi8x2 test_vlseg2_indexed_8xi8x2_mask(__epi_8xi8x2 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
+//
+__epi_4xi16x2 test_vlseg2_indexed_4xi16x2(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_4xi16x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
+//
+__epi_4xi16x2 test_vlseg2_indexed_4xi16x2_mask(__epi_4xi16x2 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
+//
+__epi_2xi32x2 test_vlseg2_indexed_2xi32x2(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_2xi32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
+//
+__epi_2xi32x2 test_vlseg2_indexed_2xi32x2_mask(__epi_2xi32x2 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
+//
+__epi_1xi64x2 test_vlseg2_indexed_1xi64x2(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_1xi64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
+//
+__epi_1xi64x2 test_vlseg2_indexed_1xi64x2_mask(__epi_1xi64x2 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
+//
+__epi_2xf32x2 test_vlseg2_indexed_2xf32x2(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_2xf32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
+//
+__epi_2xf32x2 test_vlseg2_indexed_2xf32x2_mask(__epi_2xf32x2 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
+//
+__epi_1xf64x2 test_vlseg2_indexed_1xf64x2(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_indexed_1xf64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_indexed_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
+//
+__epi_1xf64x2 test_vlseg2_indexed_1xf64x2_mask(__epi_1xf64x2 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_indexed_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
+//
+__epi_8xi8x2 test_vlseg2_strided_8xi8x2(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_8xi8x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg2.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
+//
+__epi_8xi8x2 test_vlseg2_strided_8xi8x2_mask(__epi_8xi8x2 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
+//
+__epi_4xi16x2 test_vlseg2_strided_4xi16x2(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_4xi16x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg2.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
+//
+__epi_4xi16x2 test_vlseg2_strided_4xi16x2_mask(__epi_4xi16x2 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
+//
+__epi_2xi32x2 test_vlseg2_strided_2xi32x2(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_2xi32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg2.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
+//
+__epi_2xi32x2 test_vlseg2_strided_2xi32x2_mask(__epi_2xi32x2 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
+//
+__epi_1xi64x2 test_vlseg2_strided_1xi64x2(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_1xi64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg2.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
+//
+__epi_1xi64x2 test_vlseg2_strided_1xi64x2_mask(__epi_1xi64x2 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
+//
+__epi_2xf32x2 test_vlseg2_strided_2xf32x2(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_2xf32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg2.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
+//
+__epi_2xf32x2 test_vlseg2_strided_2xf32x2_mask(__epi_2xf32x2 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
+//
+__epi_1xf64x2 test_vlseg2_strided_1xf64x2(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg2_strided_1xf64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg2_strided_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg2.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
+//
+__epi_1xf64x2 test_vlseg2_strided_1xf64x2_mask(__epi_1xf64x2 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg2_strided_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_8xi8x3(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_8xi8x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_8xi8x3_mask(__epi_8xi8x3 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_4xi16x3(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_4xi16x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_4xi16x3_mask(__epi_4xi16x3 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_2xi32x3(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_2xi32x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_2xi32x3_mask(__epi_2xi32x3 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_1xi64x3(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_1xi64x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_1xi64x3_mask(__epi_1xi64x3 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_2xf32x3(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_2xf32x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_2xf32x3_mask(__epi_2xf32x3 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_1xf64x3(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg3_1xf64x3(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_1xf64x3_mask(__epi_1xf64x3 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg3_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_indexed_8xi8x3(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_8xi8x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_indexed_8xi8x3_mask(__epi_8xi8x3 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_indexed_4xi16x3(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_4xi16x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_indexed_4xi16x3_mask(__epi_4xi16x3 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_indexed_2xi32x3(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_2xi32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_indexed_2xi32x3_mask(__epi_2xi32x3 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_indexed_1xi64x3(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_1xi64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_indexed_1xi64x3_mask(__epi_1xi64x3 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_indexed_2xf32x3(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_2xf32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_indexed_2xf32x3_mask(__epi_2xf32x3 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_indexed_1xf64x3(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_indexed_1xf64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_indexed_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_indexed_1xf64x3_mask(__epi_1xf64x3 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_indexed_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_strided_8xi8x3(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_8xi8x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg3.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X3]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X3]] [[TMP6]]
+//
+__epi_8xi8x3 test_vlseg3_strided_8xi8x3_mask(__epi_8xi8x3 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_strided_4xi16x3(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_4xi16x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg3.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X3]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X3]] [[TMP6]]
+//
+__epi_4xi16x3 test_vlseg3_strided_4xi16x3_mask(__epi_4xi16x3 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_strided_2xi32x3(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_2xi32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg3.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X3]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X3]] [[TMP6]]
+//
+__epi_2xi32x3 test_vlseg3_strided_2xi32x3_mask(__epi_2xi32x3 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_strided_1xi64x3(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_1xi64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg3.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X3]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X3]] [[TMP6]]
+//
+__epi_1xi64x3 test_vlseg3_strided_1xi64x3_mask(__epi_1xi64x3 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_strided_2xf32x3(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_2xf32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg3.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X3]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X3]] [[TMP6]]
+//
+__epi_2xf32x3 test_vlseg3_strided_2xf32x3_mask(__epi_2xf32x3 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_strided_1xf64x3(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg3_strided_1xf64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg3_strided_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg3.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X3]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X3]] [[TMP6]]
+//
+__epi_1xf64x3 test_vlseg3_strided_1xf64x3_mask(__epi_1xf64x3 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg3_strided_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_8xi8x4(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_8xi8x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_8xi8x4_mask(__epi_8xi8x4 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_4xi16x4(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_4xi16x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_4xi16x4_mask(__epi_4xi16x4 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_2xi32x4(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_2xi32x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_2xi32x4_mask(__epi_2xi32x4 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_1xi64x4(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_1xi64x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_1xi64x4_mask(__epi_1xi64x4 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_2xf32x4(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_2xf32x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_2xf32x4_mask(__epi_2xf32x4 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_1xf64x4(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg4_1xf64x4(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_1xf64x4_mask(__epi_1xf64x4 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg4_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_indexed_8xi8x4(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_8xi8x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_indexed_8xi8x4_mask(__epi_8xi8x4 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_indexed_4xi16x4(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_4xi16x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_indexed_4xi16x4_mask(__epi_4xi16x4 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_indexed_2xi32x4(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_2xi32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_indexed_2xi32x4_mask(__epi_2xi32x4 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_indexed_1xi64x4(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_1xi64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_indexed_1xi64x4_mask(__epi_1xi64x4 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_indexed_2xf32x4(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_2xf32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_indexed_2xf32x4_mask(__epi_2xf32x4 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_indexed_1xf64x4(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_indexed_1xf64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_indexed_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_indexed_1xf64x4_mask(__epi_1xf64x4 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_indexed_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_strided_8xi8x4(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_8xi8x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg4.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X4]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X4]] [[TMP8]]
+//
+__epi_8xi8x4 test_vlseg4_strided_8xi8x4_mask(__epi_8xi8x4 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_strided_4xi16x4(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_4xi16x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg4.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X4]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X4]] [[TMP8]]
+//
+__epi_4xi16x4 test_vlseg4_strided_4xi16x4_mask(__epi_4xi16x4 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_strided_2xi32x4(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_2xi32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg4.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X4]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X4]] [[TMP8]]
+//
+__epi_2xi32x4 test_vlseg4_strided_2xi32x4_mask(__epi_2xi32x4 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_strided_1xi64x4(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_1xi64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg4.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X4]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X4]] [[TMP8]]
+//
+__epi_1xi64x4 test_vlseg4_strided_1xi64x4_mask(__epi_1xi64x4 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_strided_2xf32x4(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_2xf32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg4.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X4]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X4]] [[TMP8]]
+//
+__epi_2xf32x4 test_vlseg4_strided_2xf32x4_mask(__epi_2xf32x4 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_strided_1xf64x4(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg4_strided_1xf64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg4_strided_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg4.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X4]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X4]] [[TMP8]]
+//
+__epi_1xf64x4 test_vlseg4_strided_1xf64x4_mask(__epi_1xf64x4 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg4_strided_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_8xi8x5(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_8xi8x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_8xi8x5_mask(__epi_8xi8x5 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_4xi16x5(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_4xi16x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_4xi16x5_mask(__epi_4xi16x5 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_2xi32x5(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_2xi32x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_2xi32x5_mask(__epi_2xi32x5 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_1xi64x5(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_1xi64x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_1xi64x5_mask(__epi_1xi64x5 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_2xf32x5(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_2xf32x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_2xf32x5_mask(__epi_2xf32x5 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_1xf64x5(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg5_1xf64x5(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_1xf64x5_mask(__epi_1xf64x5 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg5_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_indexed_8xi8x5(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_8xi8x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_indexed_8xi8x5_mask(__epi_8xi8x5 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_indexed_4xi16x5(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_4xi16x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_indexed_4xi16x5_mask(__epi_4xi16x5 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_indexed_2xi32x5(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_2xi32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_indexed_2xi32x5_mask(__epi_2xi32x5 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_indexed_1xi64x5(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_1xi64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_indexed_1xi64x5_mask(__epi_1xi64x5 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_indexed_2xf32x5(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_2xf32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_indexed_2xf32x5_mask(__epi_2xf32x5 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_indexed_1xf64x5(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_indexed_1xf64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_indexed_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_indexed_1xf64x5_mask(__epi_1xf64x5 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_indexed_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_strided_8xi8x5(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_8xi8x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg5.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X5]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X5]] [[TMP10]]
+//
+__epi_8xi8x5 test_vlseg5_strided_8xi8x5_mask(__epi_8xi8x5 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_strided_4xi16x5(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_4xi16x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg5.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X5]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X5]] [[TMP10]]
+//
+__epi_4xi16x5 test_vlseg5_strided_4xi16x5_mask(__epi_4xi16x5 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_strided_2xi32x5(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_2xi32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg5.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X5]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X5]] [[TMP10]]
+//
+__epi_2xi32x5 test_vlseg5_strided_2xi32x5_mask(__epi_2xi32x5 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_strided_1xi64x5(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_1xi64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg5.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X5]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X5]] [[TMP10]]
+//
+__epi_1xi64x5 test_vlseg5_strided_1xi64x5_mask(__epi_1xi64x5 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_strided_2xf32x5(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_2xf32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg5.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X5]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X5]] [[TMP10]]
+//
+__epi_2xf32x5 test_vlseg5_strided_2xf32x5_mask(__epi_2xf32x5 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_strided_1xf64x5(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg5_strided_1xf64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg5_strided_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg5.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X5]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X5]] [[TMP10]]
+//
+__epi_1xf64x5 test_vlseg5_strided_1xf64x5_mask(__epi_1xf64x5 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg5_strided_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_8xi8x6(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_8xi8x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_8xi8x6_mask(__epi_8xi8x6 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_4xi16x6(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_4xi16x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_4xi16x6_mask(__epi_4xi16x6 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_2xi32x6(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_2xi32x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_2xi32x6_mask(__epi_2xi32x6 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_1xi64x6(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_1xi64x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_1xi64x6_mask(__epi_1xi64x6 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_2xf32x6(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_2xf32x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_2xf32x6_mask(__epi_2xf32x6 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_1xf64x6(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg6_1xf64x6(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_1xf64x6_mask(__epi_1xf64x6 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg6_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_indexed_8xi8x6(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_8xi8x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_indexed_8xi8x6_mask(__epi_8xi8x6 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_indexed_4xi16x6(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_4xi16x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_indexed_4xi16x6_mask(__epi_4xi16x6 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_indexed_2xi32x6(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_2xi32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_indexed_2xi32x6_mask(__epi_2xi32x6 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_indexed_1xi64x6(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_1xi64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_indexed_1xi64x6_mask(__epi_1xi64x6 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_indexed_2xf32x6(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_2xf32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_indexed_2xf32x6_mask(__epi_2xf32x6 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_indexed_1xf64x6(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_indexed_1xf64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_indexed_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_indexed_1xf64x6_mask(__epi_1xf64x6 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_indexed_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_strided_8xi8x6(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_8xi8x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg6.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X6]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X6]] [[TMP12]]
+//
+__epi_8xi8x6 test_vlseg6_strided_8xi8x6_mask(__epi_8xi8x6 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_strided_4xi16x6(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_4xi16x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg6.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X6]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X6]] [[TMP12]]
+//
+__epi_4xi16x6 test_vlseg6_strided_4xi16x6_mask(__epi_4xi16x6 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_strided_2xi32x6(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_2xi32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg6.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X6]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X6]] [[TMP12]]
+//
+__epi_2xi32x6 test_vlseg6_strided_2xi32x6_mask(__epi_2xi32x6 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_strided_1xi64x6(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_1xi64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg6.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X6]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X6]] [[TMP12]]
+//
+__epi_1xi64x6 test_vlseg6_strided_1xi64x6_mask(__epi_1xi64x6 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_strided_2xf32x6(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_2xf32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg6.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X6]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X6]] [[TMP12]]
+//
+__epi_2xf32x6 test_vlseg6_strided_2xf32x6_mask(__epi_2xf32x6 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_strided_1xf64x6(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg6_strided_1xf64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg6_strided_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg6.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X6]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X6]] [[TMP12]]
+//
+__epi_1xf64x6 test_vlseg6_strided_1xf64x6_mask(__epi_1xf64x6 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg6_strided_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_8xi8x7(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_8xi8x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_8xi8x7_mask(__epi_8xi8x7 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_4xi16x7(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_4xi16x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_4xi16x7_mask(__epi_4xi16x7 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_2xi32x7(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_2xi32x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_2xi32x7_mask(__epi_2xi32x7 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_1xi64x7(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_1xi64x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_1xi64x7_mask(__epi_1xi64x7 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_2xf32x7(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_2xf32x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_2xf32x7_mask(__epi_2xf32x7 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_1xf64x7(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg7_1xf64x7(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_1xf64x7_mask(__epi_1xf64x7 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg7_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_indexed_8xi8x7(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_8xi8x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_indexed_8xi8x7_mask(__epi_8xi8x7 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_indexed_4xi16x7(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_4xi16x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_indexed_4xi16x7_mask(__epi_4xi16x7 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_indexed_2xi32x7(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_2xi32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_indexed_2xi32x7_mask(__epi_2xi32x7 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_indexed_1xi64x7(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_1xi64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_indexed_1xi64x7_mask(__epi_1xi64x7 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_indexed_2xf32x7(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_2xf32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_indexed_2xf32x7_mask(__epi_2xf32x7 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_indexed_1xf64x7(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_indexed_1xf64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_indexed_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_indexed_1xf64x7_mask(__epi_1xf64x7 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_indexed_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_strided_8xi8x7(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_8xi8x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg7.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X7]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X7]] [[TMP14]]
+//
+__epi_8xi8x7 test_vlseg7_strided_8xi8x7_mask(__epi_8xi8x7 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_strided_4xi16x7(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_4xi16x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg7.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X7]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X7]] [[TMP14]]
+//
+__epi_4xi16x7 test_vlseg7_strided_4xi16x7_mask(__epi_4xi16x7 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_strided_2xi32x7(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_2xi32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg7.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X7]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X7]] [[TMP14]]
+//
+__epi_2xi32x7 test_vlseg7_strided_2xi32x7_mask(__epi_2xi32x7 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_strided_1xi64x7(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_1xi64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg7.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X7]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X7]] [[TMP14]]
+//
+__epi_1xi64x7 test_vlseg7_strided_1xi64x7_mask(__epi_1xi64x7 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_strided_2xf32x7(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_2xf32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg7.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X7]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X7]] [[TMP14]]
+//
+__epi_2xf32x7 test_vlseg7_strided_2xf32x7_mask(__epi_2xf32x7 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_strided_1xf64x7(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg7_strided_1xf64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg7_strided_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg7.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X7]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X7]] [[TMP14]]
+//
+__epi_1xf64x7 test_vlseg7_strided_1xf64x7_mask(__epi_1xf64x7 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg7_strided_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_8xi8x8(const signed char*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_8xi8x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE7:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_8xi8x8_mask(__epi_8xi8x8 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_4xi16x8(const signed short int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_4xi16x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE7:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_4xi16x8_mask(__epi_4xi16x8 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_2xi32x8(const signed int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_2xi32x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE7:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_2xi32x8_mask(__epi_2xi32x8 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_1xi64x8(const signed long int*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_1xi64x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE7:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_1xi64x8_mask(__epi_1xi64x8 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_2xf32x8(const float*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_2xf32x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], <vscale x 2 x float> [[ARG_0_COERCE7:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_2xf32x8_mask(__epi_2xf32x8 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_1xf64x8(const double*  arg_0, unsigned long int arg_1)
+{
+    return __builtin_epi_vlseg8_1xf64x8(arg_0, arg_1);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], <vscale x 1 x double> [[ARG_0_COERCE7:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_1xf64x8_mask(__epi_1xf64x8 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vlseg8_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.indexed.nxv8i8.nxv8i8(i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_indexed_8xi8x8(const signed char*  arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_8xi8x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE7:%.*]], i8* [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_indexed_8xi8x8_mask(__epi_8xi8x8 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.indexed.nxv4i16.nxv4i16(i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_indexed_4xi16x8(const signed short int*  arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_4xi16x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE7:%.*]], i16* [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_indexed_4xi16x8_mask(__epi_4xi16x8 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.indexed.nxv2i32.nxv2i32(i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_indexed_2xi32x8(const signed int*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_2xi32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE7:%.*]], i32* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_indexed_2xi32x8_mask(__epi_2xi32x8 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.indexed.nxv1i64.nxv1i64(i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_indexed_1xi64x8(const signed long int*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_1xi64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE7:%.*]], i64* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_indexed_1xi64x8_mask(__epi_1xi64x8 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.indexed.nxv2f32.nxv2i32(float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_indexed_2xf32x8(const float*  arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_2xf32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], <vscale x 2 x float> [[ARG_0_COERCE7:%.*]], float* [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_indexed_2xf32x8_mask(__epi_2xf32x8 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.indexed.nxv1f64.nxv1i64(double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_indexed_1xf64x8(const double*  arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_indexed_1xf64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_indexed_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], <vscale x 1 x double> [[ARG_0_COERCE7:%.*]], double* [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_indexed_1xf64x8_mask(__epi_1xf64x8 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_indexed_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.strided.nxv8i8(i8* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_strided_8xi8x8(const signed char*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_8xi8x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } @llvm.epi.vlseg8.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_0_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_0_COERCE7:%.*]], i8* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP4]], <vscale x 8 x i8> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP6]], <vscale x 8 x i8> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP8]], <vscale x 8 x i8> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP10]], <vscale x 8 x i8> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP12]], <vscale x 8 x i8> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_8XI8X8]] [[TMP14]], <vscale x 8 x i8> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X8]] [[TMP16]]
+//
+__epi_8xi8x8 test_vlseg8_strided_8xi8x8_mask(__epi_8xi8x8 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.strided.nxv4i16(i16* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_strided_4xi16x8(const signed short int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_4xi16x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } @llvm.epi.vlseg8.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_0_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_0_COERCE7:%.*]], i16* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP4]], <vscale x 4 x i16> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP6]], <vscale x 4 x i16> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP8]], <vscale x 4 x i16> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP10]], <vscale x 4 x i16> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP12]], <vscale x 4 x i16> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_4XI16X8]] [[TMP14]], <vscale x 4 x i16> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X8]] [[TMP16]]
+//
+__epi_4xi16x8 test_vlseg8_strided_4xi16x8_mask(__epi_4xi16x8 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.strided.nxv2i32(i32* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_strided_2xi32x8(const signed int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_2xi32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vlseg8.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_0_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_0_COERCE7:%.*]], i32* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP4]], <vscale x 2 x i32> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP6]], <vscale x 2 x i32> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP8]], <vscale x 2 x i32> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP10]], <vscale x 2 x i32> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP12]], <vscale x 2 x i32> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XI32X8]] [[TMP14]], <vscale x 2 x i32> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X8]] [[TMP16]]
+//
+__epi_2xi32x8 test_vlseg8_strided_2xi32x8_mask(__epi_2xi32x8 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.strided.nxv1i64(i64* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_strided_1xi64x8(const signed long int*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_1xi64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vlseg8.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_0_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_0_COERCE7:%.*]], i64* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP4]], <vscale x 1 x i64> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP6]], <vscale x 1 x i64> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP8]], <vscale x 1 x i64> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP10]], <vscale x 1 x i64> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP12]], <vscale x 1 x i64> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XI64X8]] [[TMP14]], <vscale x 1 x i64> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X8]] [[TMP16]]
+//
+__epi_1xi64x8 test_vlseg8_strided_1xi64x8_mask(__epi_1xi64x8 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.strided.nxv2f32(float* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_strided_2xf32x8(const float*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_2xf32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } @llvm.epi.vlseg8.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_0_COERCE0:%.*]], <vscale x 2 x float> [[ARG_0_COERCE1:%.*]], <vscale x 2 x float> [[ARG_0_COERCE2:%.*]], <vscale x 2 x float> [[ARG_0_COERCE3:%.*]], <vscale x 2 x float> [[ARG_0_COERCE4:%.*]], <vscale x 2 x float> [[ARG_0_COERCE5:%.*]], <vscale x 2 x float> [[ARG_0_COERCE6:%.*]], <vscale x 2 x float> [[ARG_0_COERCE7:%.*]], float* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP4]], <vscale x 2 x float> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP6]], <vscale x 2 x float> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP8]], <vscale x 2 x float> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP10]], <vscale x 2 x float> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP12]], <vscale x 2 x float> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_2XF32X8]] [[TMP14]], <vscale x 2 x float> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X8]] [[TMP16]]
+//
+__epi_2xf32x8 test_vlseg8_strided_2xf32x8_mask(__epi_2xf32x8 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.strided.nxv1f64(double* [[ARG_0:%.*]], i64 [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_strided_1xf64x8(const double*  arg_0, signed long int arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vlseg8_strided_1xf64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vlseg8_strided_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vlseg8.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_0_COERCE0:%.*]], <vscale x 1 x double> [[ARG_0_COERCE1:%.*]], <vscale x 1 x double> [[ARG_0_COERCE2:%.*]], <vscale x 1 x double> [[ARG_0_COERCE3:%.*]], <vscale x 1 x double> [[ARG_0_COERCE4:%.*]], <vscale x 1 x double> [[ARG_0_COERCE5:%.*]], <vscale x 1 x double> [[ARG_0_COERCE6:%.*]], <vscale x 1 x double> [[ARG_0_COERCE7:%.*]], double* [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 2
+// CHECK-O2-NEXT:    [[TMP6:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP4]], <vscale x 1 x double> [[TMP5]], 2
+// CHECK-O2-NEXT:    [[TMP7:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 3
+// CHECK-O2-NEXT:    [[TMP8:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP6]], <vscale x 1 x double> [[TMP7]], 3
+// CHECK-O2-NEXT:    [[TMP9:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 4
+// CHECK-O2-NEXT:    [[TMP10:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP8]], <vscale x 1 x double> [[TMP9]], 4
+// CHECK-O2-NEXT:    [[TMP11:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 5
+// CHECK-O2-NEXT:    [[TMP12:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP10]], <vscale x 1 x double> [[TMP11]], 5
+// CHECK-O2-NEXT:    [[TMP13:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 6
+// CHECK-O2-NEXT:    [[TMP14:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP12]], <vscale x 1 x double> [[TMP13]], 6
+// CHECK-O2-NEXT:    [[TMP15:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 7
+// CHECK-O2-NEXT:    [[TMP16:%.*]] = insertvalue [[STRUCT___EPI_1XF64X8]] [[TMP14]], <vscale x 1 x double> [[TMP15]], 7
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X8]] [[TMP16]]
+//
+__epi_1xf64x8 test_vlseg8_strided_1xf64x8_mask(__epi_1xf64x8 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vlseg8_strided_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
 // CHECK-O2-LABEL: @test_vmacc_8xi8(
@@ -23555,9 +28511,19 @@ __epi_4xi64 test_vsrl_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_8xi8x2(const signed char*  arg_0, __epi_8xi8x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_8xi8x2(signed char*  arg_0, __epi_8xi8x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_8xi8x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_8xi8x2_mask(signed char*  arg_0, __epi_8xi8x2 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vsseg2_4xi16x2(
@@ -23565,9 +28531,19 @@ void test_vsseg2_8xi8x2(const signed char*  arg_0, __epi_8xi8x2 arg_1, unsigned 
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_4xi16x2(const signed short int*  arg_0, __epi_4xi16x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_4xi16x2(signed short int*  arg_0, __epi_4xi16x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_4xi16x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_4xi16x2_mask(signed short int*  arg_0, __epi_4xi16x2 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vsseg2_2xi32x2(
@@ -23575,9 +28551,19 @@ void test_vsseg2_4xi16x2(const signed short int*  arg_0, __epi_4xi16x2 arg_1, un
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_2xi32x2(const signed int*  arg_0, __epi_2xi32x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_2xi32x2(signed int*  arg_0, __epi_2xi32x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_2xi32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_2xi32x2_mask(signed int*  arg_0, __epi_2xi32x2 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vsseg2_1xi64x2(
@@ -23585,9 +28571,19 @@ void test_vsseg2_2xi32x2(const signed int*  arg_0, __epi_2xi32x2 arg_1, unsigned
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_1xi64x2(const signed long int*  arg_0, __epi_1xi64x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_1xi64x2(signed long int*  arg_0, __epi_1xi64x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_1xi64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_1xi64x2_mask(signed long int*  arg_0, __epi_1xi64x2 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vsseg2_2xf32x2(
@@ -23595,9 +28591,19 @@ void test_vsseg2_1xi64x2(const signed long int*  arg_0, __epi_1xi64x2 arg_1, uns
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_2xf32x2(const float*  arg_0, __epi_2xf32x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_2xf32x2(float*  arg_0, __epi_2xf32x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_2xf32x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_2xf32x2_mask(float*  arg_0, __epi_2xf32x2 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3);
 }
 
 // CHECK-O2-LABEL: @test_vsseg2_1xf64x2(
@@ -23605,9 +28611,2419 @@ void test_vsseg2_2xf32x2(const float*  arg_0, __epi_2xf32x2 arg_1, unsigned long
 // CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret void
 //
-void test_vsseg2_1xf64x2(const double*  arg_0, __epi_1xf64x2 arg_1, unsigned long int arg_2)
+void test_vsseg2_1xf64x2(double*  arg_0, __epi_1xf64x2 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vsseg2_1xf64x2(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_1xf64x2_mask(double*  arg_0, __epi_1xf64x2 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_8xi8x2(signed char*  arg_0, __epi_8xi8x2 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_8xi8x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_8xi8x2_mask(signed char*  arg_0, __epi_8xi8x2 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_4xi16x2(signed short int*  arg_0, __epi_4xi16x2 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_4xi16x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_4xi16x2_mask(signed short int*  arg_0, __epi_4xi16x2 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_2xi32x2(signed int*  arg_0, __epi_2xi32x2 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_2xi32x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_2xi32x2_mask(signed int*  arg_0, __epi_2xi32x2 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_1xi64x2(signed long int*  arg_0, __epi_1xi64x2 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_1xi64x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_1xi64x2_mask(signed long int*  arg_0, __epi_1xi64x2 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_2xf32x2(float*  arg_0, __epi_2xf32x2 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_2xf32x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_2xf32x2_mask(float*  arg_0, __epi_2xf32x2 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_1xf64x2(double*  arg_0, __epi_1xf64x2 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_indexed_1xf64x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_indexed_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_indexed_1xf64x2_mask(double*  arg_0, __epi_1xf64x2 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_indexed_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_8xi8x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_8xi8x2(signed char*  arg_0, __epi_8xi8x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_8xi8x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_8xi8x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_8xi8x2_mask(signed char*  arg_0, __epi_8xi8x2 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_8xi8x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_4xi16x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_4xi16x2(signed short int*  arg_0, __epi_4xi16x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_4xi16x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_4xi16x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_4xi16x2_mask(signed short int*  arg_0, __epi_4xi16x2 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_4xi16x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_2xi32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_2xi32x2(signed int*  arg_0, __epi_2xi32x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_2xi32x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_2xi32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_2xi32x2_mask(signed int*  arg_0, __epi_2xi32x2 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_2xi32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_1xi64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_1xi64x2(signed long int*  arg_0, __epi_1xi64x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_1xi64x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_1xi64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_1xi64x2_mask(signed long int*  arg_0, __epi_1xi64x2 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_1xi64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_2xf32x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_2xf32x2(float*  arg_0, __epi_2xf32x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_2xf32x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_2xf32x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_2xf32x2_mask(float*  arg_0, __epi_2xf32x2 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_2xf32x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_1xf64x2(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_1xf64x2(double*  arg_0, __epi_1xf64x2 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg2_strided_1xf64x2(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg2_strided_1xf64x2_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg2.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg2_strided_1xf64x2_mask(double*  arg_0, __epi_1xf64x2 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg2_strided_1xf64x2_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_8xi8x3(signed char*  arg_0, __epi_8xi8x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_8xi8x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_8xi8x3_mask(signed char*  arg_0, __epi_8xi8x3 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_4xi16x3(signed short int*  arg_0, __epi_4xi16x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_4xi16x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_4xi16x3_mask(signed short int*  arg_0, __epi_4xi16x3 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_2xi32x3(signed int*  arg_0, __epi_2xi32x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_2xi32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_2xi32x3_mask(signed int*  arg_0, __epi_2xi32x3 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_1xi64x3(signed long int*  arg_0, __epi_1xi64x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_1xi64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_1xi64x3_mask(signed long int*  arg_0, __epi_1xi64x3 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_2xf32x3(float*  arg_0, __epi_2xf32x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_2xf32x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_2xf32x3_mask(float*  arg_0, __epi_2xf32x3 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_1xf64x3(double*  arg_0, __epi_1xf64x3 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg3_1xf64x3(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_1xf64x3_mask(double*  arg_0, __epi_1xf64x3 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_8xi8x3(signed char*  arg_0, __epi_8xi8x3 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_8xi8x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_8xi8x3_mask(signed char*  arg_0, __epi_8xi8x3 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_4xi16x3(signed short int*  arg_0, __epi_4xi16x3 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_4xi16x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_4xi16x3_mask(signed short int*  arg_0, __epi_4xi16x3 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_2xi32x3(signed int*  arg_0, __epi_2xi32x3 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_2xi32x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_2xi32x3_mask(signed int*  arg_0, __epi_2xi32x3 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_1xi64x3(signed long int*  arg_0, __epi_1xi64x3 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_1xi64x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_1xi64x3_mask(signed long int*  arg_0, __epi_1xi64x3 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_2xf32x3(float*  arg_0, __epi_2xf32x3 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_2xf32x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_2xf32x3_mask(float*  arg_0, __epi_2xf32x3 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_1xf64x3(double*  arg_0, __epi_1xf64x3 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_indexed_1xf64x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_indexed_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_indexed_1xf64x3_mask(double*  arg_0, __epi_1xf64x3 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_indexed_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_8xi8x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_8xi8x3(signed char*  arg_0, __epi_8xi8x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_8xi8x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_8xi8x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_8xi8x3_mask(signed char*  arg_0, __epi_8xi8x3 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_8xi8x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_4xi16x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_4xi16x3(signed short int*  arg_0, __epi_4xi16x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_4xi16x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_4xi16x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_4xi16x3_mask(signed short int*  arg_0, __epi_4xi16x3 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_4xi16x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_2xi32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_2xi32x3(signed int*  arg_0, __epi_2xi32x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_2xi32x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_2xi32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_2xi32x3_mask(signed int*  arg_0, __epi_2xi32x3 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_2xi32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_1xi64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_1xi64x3(signed long int*  arg_0, __epi_1xi64x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_1xi64x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_1xi64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_1xi64x3_mask(signed long int*  arg_0, __epi_1xi64x3 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_1xi64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_2xf32x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_2xf32x3(float*  arg_0, __epi_2xf32x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_2xf32x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_2xf32x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_2xf32x3_mask(float*  arg_0, __epi_2xf32x3 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_2xf32x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_1xf64x3(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_1xf64x3(double*  arg_0, __epi_1xf64x3 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg3_strided_1xf64x3(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg3_strided_1xf64x3_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg3.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg3_strided_1xf64x3_mask(double*  arg_0, __epi_1xf64x3 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg3_strided_1xf64x3_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_8xi8x4(signed char*  arg_0, __epi_8xi8x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_8xi8x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_8xi8x4_mask(signed char*  arg_0, __epi_8xi8x4 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_4xi16x4(signed short int*  arg_0, __epi_4xi16x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_4xi16x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_4xi16x4_mask(signed short int*  arg_0, __epi_4xi16x4 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_2xi32x4(signed int*  arg_0, __epi_2xi32x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_2xi32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_2xi32x4_mask(signed int*  arg_0, __epi_2xi32x4 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_1xi64x4(signed long int*  arg_0, __epi_1xi64x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_1xi64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_1xi64x4_mask(signed long int*  arg_0, __epi_1xi64x4 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_2xf32x4(float*  arg_0, __epi_2xf32x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_2xf32x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_2xf32x4_mask(float*  arg_0, __epi_2xf32x4 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_1xf64x4(double*  arg_0, __epi_1xf64x4 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg4_1xf64x4(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_1xf64x4_mask(double*  arg_0, __epi_1xf64x4 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_8xi8x4(signed char*  arg_0, __epi_8xi8x4 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_8xi8x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_8xi8x4_mask(signed char*  arg_0, __epi_8xi8x4 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_4xi16x4(signed short int*  arg_0, __epi_4xi16x4 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_4xi16x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_4xi16x4_mask(signed short int*  arg_0, __epi_4xi16x4 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_2xi32x4(signed int*  arg_0, __epi_2xi32x4 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_2xi32x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_2xi32x4_mask(signed int*  arg_0, __epi_2xi32x4 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_1xi64x4(signed long int*  arg_0, __epi_1xi64x4 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_1xi64x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_1xi64x4_mask(signed long int*  arg_0, __epi_1xi64x4 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_2xf32x4(float*  arg_0, __epi_2xf32x4 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_2xf32x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_2xf32x4_mask(float*  arg_0, __epi_2xf32x4 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_1xf64x4(double*  arg_0, __epi_1xf64x4 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_indexed_1xf64x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_indexed_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_indexed_1xf64x4_mask(double*  arg_0, __epi_1xf64x4 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_indexed_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_8xi8x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_8xi8x4(signed char*  arg_0, __epi_8xi8x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_8xi8x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_8xi8x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_8xi8x4_mask(signed char*  arg_0, __epi_8xi8x4 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_8xi8x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_4xi16x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_4xi16x4(signed short int*  arg_0, __epi_4xi16x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_4xi16x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_4xi16x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_4xi16x4_mask(signed short int*  arg_0, __epi_4xi16x4 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_4xi16x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_2xi32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_2xi32x4(signed int*  arg_0, __epi_2xi32x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_2xi32x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_2xi32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_2xi32x4_mask(signed int*  arg_0, __epi_2xi32x4 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_2xi32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_1xi64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_1xi64x4(signed long int*  arg_0, __epi_1xi64x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_1xi64x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_1xi64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_1xi64x4_mask(signed long int*  arg_0, __epi_1xi64x4 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_1xi64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_2xf32x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_2xf32x4(float*  arg_0, __epi_2xf32x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_2xf32x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_2xf32x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_2xf32x4_mask(float*  arg_0, __epi_2xf32x4 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_2xf32x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_1xf64x4(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_1xf64x4(double*  arg_0, __epi_1xf64x4 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg4_strided_1xf64x4(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg4_strided_1xf64x4_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg4.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg4_strided_1xf64x4_mask(double*  arg_0, __epi_1xf64x4 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg4_strided_1xf64x4_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_8xi8x5(signed char*  arg_0, __epi_8xi8x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_8xi8x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_8xi8x5_mask(signed char*  arg_0, __epi_8xi8x5 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_4xi16x5(signed short int*  arg_0, __epi_4xi16x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_4xi16x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_4xi16x5_mask(signed short int*  arg_0, __epi_4xi16x5 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_2xi32x5(signed int*  arg_0, __epi_2xi32x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_2xi32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_2xi32x5_mask(signed int*  arg_0, __epi_2xi32x5 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_1xi64x5(signed long int*  arg_0, __epi_1xi64x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_1xi64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_1xi64x5_mask(signed long int*  arg_0, __epi_1xi64x5 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_2xf32x5(float*  arg_0, __epi_2xf32x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_2xf32x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_2xf32x5_mask(float*  arg_0, __epi_2xf32x5 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_1xf64x5(double*  arg_0, __epi_1xf64x5 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg5_1xf64x5(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_1xf64x5_mask(double*  arg_0, __epi_1xf64x5 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_8xi8x5(signed char*  arg_0, __epi_8xi8x5 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_8xi8x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_8xi8x5_mask(signed char*  arg_0, __epi_8xi8x5 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_4xi16x5(signed short int*  arg_0, __epi_4xi16x5 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_4xi16x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_4xi16x5_mask(signed short int*  arg_0, __epi_4xi16x5 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_2xi32x5(signed int*  arg_0, __epi_2xi32x5 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_2xi32x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_2xi32x5_mask(signed int*  arg_0, __epi_2xi32x5 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_1xi64x5(signed long int*  arg_0, __epi_1xi64x5 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_1xi64x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_1xi64x5_mask(signed long int*  arg_0, __epi_1xi64x5 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_2xf32x5(float*  arg_0, __epi_2xf32x5 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_2xf32x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_2xf32x5_mask(float*  arg_0, __epi_2xf32x5 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_1xf64x5(double*  arg_0, __epi_1xf64x5 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_indexed_1xf64x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_indexed_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_indexed_1xf64x5_mask(double*  arg_0, __epi_1xf64x5 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_indexed_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_8xi8x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_8xi8x5(signed char*  arg_0, __epi_8xi8x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_8xi8x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_8xi8x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_8xi8x5_mask(signed char*  arg_0, __epi_8xi8x5 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_8xi8x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_4xi16x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_4xi16x5(signed short int*  arg_0, __epi_4xi16x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_4xi16x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_4xi16x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_4xi16x5_mask(signed short int*  arg_0, __epi_4xi16x5 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_4xi16x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_2xi32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_2xi32x5(signed int*  arg_0, __epi_2xi32x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_2xi32x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_2xi32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_2xi32x5_mask(signed int*  arg_0, __epi_2xi32x5 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_2xi32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_1xi64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_1xi64x5(signed long int*  arg_0, __epi_1xi64x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_1xi64x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_1xi64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_1xi64x5_mask(signed long int*  arg_0, __epi_1xi64x5 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_1xi64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_2xf32x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_2xf32x5(float*  arg_0, __epi_2xf32x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_2xf32x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_2xf32x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_2xf32x5_mask(float*  arg_0, __epi_2xf32x5 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_2xf32x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_1xf64x5(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_1xf64x5(double*  arg_0, __epi_1xf64x5 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg5_strided_1xf64x5(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg5_strided_1xf64x5_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg5.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg5_strided_1xf64x5_mask(double*  arg_0, __epi_1xf64x5 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg5_strided_1xf64x5_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_8xi8x6(signed char*  arg_0, __epi_8xi8x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_8xi8x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_8xi8x6_mask(signed char*  arg_0, __epi_8xi8x6 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_4xi16x6(signed short int*  arg_0, __epi_4xi16x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_4xi16x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_4xi16x6_mask(signed short int*  arg_0, __epi_4xi16x6 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_2xi32x6(signed int*  arg_0, __epi_2xi32x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_2xi32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_2xi32x6_mask(signed int*  arg_0, __epi_2xi32x6 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_1xi64x6(signed long int*  arg_0, __epi_1xi64x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_1xi64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_1xi64x6_mask(signed long int*  arg_0, __epi_1xi64x6 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_2xf32x6(float*  arg_0, __epi_2xf32x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_2xf32x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_2xf32x6_mask(float*  arg_0, __epi_2xf32x6 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_1xf64x6(double*  arg_0, __epi_1xf64x6 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg6_1xf64x6(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_1xf64x6_mask(double*  arg_0, __epi_1xf64x6 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_8xi8x6(signed char*  arg_0, __epi_8xi8x6 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_8xi8x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_8xi8x6_mask(signed char*  arg_0, __epi_8xi8x6 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_4xi16x6(signed short int*  arg_0, __epi_4xi16x6 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_4xi16x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_4xi16x6_mask(signed short int*  arg_0, __epi_4xi16x6 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_2xi32x6(signed int*  arg_0, __epi_2xi32x6 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_2xi32x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_2xi32x6_mask(signed int*  arg_0, __epi_2xi32x6 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_1xi64x6(signed long int*  arg_0, __epi_1xi64x6 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_1xi64x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_1xi64x6_mask(signed long int*  arg_0, __epi_1xi64x6 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_2xf32x6(float*  arg_0, __epi_2xf32x6 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_2xf32x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_2xf32x6_mask(float*  arg_0, __epi_2xf32x6 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_1xf64x6(double*  arg_0, __epi_1xf64x6 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_indexed_1xf64x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_indexed_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_indexed_1xf64x6_mask(double*  arg_0, __epi_1xf64x6 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_indexed_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_8xi8x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_8xi8x6(signed char*  arg_0, __epi_8xi8x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_8xi8x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_8xi8x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_8xi8x6_mask(signed char*  arg_0, __epi_8xi8x6 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_8xi8x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_4xi16x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_4xi16x6(signed short int*  arg_0, __epi_4xi16x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_4xi16x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_4xi16x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_4xi16x6_mask(signed short int*  arg_0, __epi_4xi16x6 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_4xi16x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_2xi32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_2xi32x6(signed int*  arg_0, __epi_2xi32x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_2xi32x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_2xi32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_2xi32x6_mask(signed int*  arg_0, __epi_2xi32x6 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_2xi32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_1xi64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_1xi64x6(signed long int*  arg_0, __epi_1xi64x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_1xi64x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_1xi64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_1xi64x6_mask(signed long int*  arg_0, __epi_1xi64x6 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_1xi64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_2xf32x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_2xf32x6(float*  arg_0, __epi_2xf32x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_2xf32x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_2xf32x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_2xf32x6_mask(float*  arg_0, __epi_2xf32x6 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_2xf32x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_1xf64x6(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_1xf64x6(double*  arg_0, __epi_1xf64x6 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg6_strided_1xf64x6(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg6_strided_1xf64x6_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg6.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg6_strided_1xf64x6_mask(double*  arg_0, __epi_1xf64x6 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg6_strided_1xf64x6_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_8xi8x7(signed char*  arg_0, __epi_8xi8x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_8xi8x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_8xi8x7_mask(signed char*  arg_0, __epi_8xi8x7 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_4xi16x7(signed short int*  arg_0, __epi_4xi16x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_4xi16x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_4xi16x7_mask(signed short int*  arg_0, __epi_4xi16x7 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_2xi32x7(signed int*  arg_0, __epi_2xi32x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_2xi32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_2xi32x7_mask(signed int*  arg_0, __epi_2xi32x7 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_1xi64x7(signed long int*  arg_0, __epi_1xi64x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_1xi64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_1xi64x7_mask(signed long int*  arg_0, __epi_1xi64x7 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_2xf32x7(float*  arg_0, __epi_2xf32x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_2xf32x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_2xf32x7_mask(float*  arg_0, __epi_2xf32x7 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_1xf64x7(double*  arg_0, __epi_1xf64x7 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg7_1xf64x7(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_1xf64x7_mask(double*  arg_0, __epi_1xf64x7 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_8xi8x7(signed char*  arg_0, __epi_8xi8x7 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_8xi8x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_8xi8x7_mask(signed char*  arg_0, __epi_8xi8x7 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_4xi16x7(signed short int*  arg_0, __epi_4xi16x7 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_4xi16x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_4xi16x7_mask(signed short int*  arg_0, __epi_4xi16x7 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_2xi32x7(signed int*  arg_0, __epi_2xi32x7 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_2xi32x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_2xi32x7_mask(signed int*  arg_0, __epi_2xi32x7 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_1xi64x7(signed long int*  arg_0, __epi_1xi64x7 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_1xi64x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_1xi64x7_mask(signed long int*  arg_0, __epi_1xi64x7 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_2xf32x7(float*  arg_0, __epi_2xf32x7 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_2xf32x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_2xf32x7_mask(float*  arg_0, __epi_2xf32x7 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_1xf64x7(double*  arg_0, __epi_1xf64x7 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_indexed_1xf64x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_indexed_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_indexed_1xf64x7_mask(double*  arg_0, __epi_1xf64x7 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_indexed_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_8xi8x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_8xi8x7(signed char*  arg_0, __epi_8xi8x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_8xi8x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_8xi8x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_8xi8x7_mask(signed char*  arg_0, __epi_8xi8x7 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_8xi8x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_4xi16x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_4xi16x7(signed short int*  arg_0, __epi_4xi16x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_4xi16x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_4xi16x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_4xi16x7_mask(signed short int*  arg_0, __epi_4xi16x7 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_4xi16x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_2xi32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_2xi32x7(signed int*  arg_0, __epi_2xi32x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_2xi32x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_2xi32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_2xi32x7_mask(signed int*  arg_0, __epi_2xi32x7 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_2xi32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_1xi64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_1xi64x7(signed long int*  arg_0, __epi_1xi64x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_1xi64x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_1xi64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_1xi64x7_mask(signed long int*  arg_0, __epi_1xi64x7 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_1xi64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_2xf32x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_2xf32x7(float*  arg_0, __epi_2xf32x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_2xf32x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_2xf32x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_2xf32x7_mask(float*  arg_0, __epi_2xf32x7 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_2xf32x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_1xf64x7(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_1xf64x7(double*  arg_0, __epi_1xf64x7 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg7_strided_1xf64x7(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg7_strided_1xf64x7_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg7.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg7_strided_1xf64x7_mask(double*  arg_0, __epi_1xf64x7 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg7_strided_1xf64x7_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_8xi8x8(signed char*  arg_0, __epi_8xi8x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_8xi8x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_8xi8x8_mask(signed char*  arg_0, __epi_8xi8x8 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_4xi16x8(signed short int*  arg_0, __epi_4xi16x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_4xi16x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_4xi16x8_mask(signed short int*  arg_0, __epi_4xi16x8 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_2xi32x8(signed int*  arg_0, __epi_2xi32x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_2xi32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_2xi32x8_mask(signed int*  arg_0, __epi_2xi32x8 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_1xi64x8(signed long int*  arg_0, __epi_1xi64x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_1xi64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_1xi64x8_mask(signed long int*  arg_0, __epi_1xi64x8 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_2xf32x8(float*  arg_0, __epi_2xf32x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_2xf32x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_2xf32x8_mask(float*  arg_0, __epi_2xf32x8 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_1xf64x8(double*  arg_0, __epi_1xf64x8 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vsseg8_1xf64x8(arg_0, arg_1, arg_2);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_1xf64x8_mask(double*  arg_0, __epi_1xf64x8 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv8i8.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_8xi8x8(signed char*  arg_0, __epi_8xi8x8 arg_1, __epi_8xi8 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_8xi8x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv8i8.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_8xi8x8_mask(signed char*  arg_0, __epi_8xi8x8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv4i16.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_4xi16x8(signed short int*  arg_0, __epi_4xi16x8 arg_1, __epi_4xi16 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_4xi16x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv4i16.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_4xi16x8_mask(signed short int*  arg_0, __epi_4xi16x8 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv2i32.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_2xi32x8(signed int*  arg_0, __epi_2xi32x8 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_2xi32x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv2i32.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_2xi32x8_mask(signed int*  arg_0, __epi_2xi32x8 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv1i64.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_1xi64x8(signed long int*  arg_0, __epi_1xi64x8 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_1xi64x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv1i64.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_1xi64x8_mask(signed long int*  arg_0, __epi_1xi64x8 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv2f32.nxv2i32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_2xf32x8(float*  arg_0, __epi_2xf32x8 arg_1, __epi_2xi32 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_2xf32x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv2f32.nxv2i32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_2xf32x8_mask(float*  arg_0, __epi_2xf32x8 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.nxv1f64.nxv1i64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_1xf64x8(double*  arg_0, __epi_1xf64x8 arg_1, __epi_1xi64 arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_indexed_1xf64x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_indexed_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.indexed.mask.nxv1f64.nxv1i64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_indexed_1xf64x8_mask(double*  arg_0, __epi_1xf64x8 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_indexed_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_8xi8x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv8i8(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_8xi8x8(signed char*  arg_0, __epi_8xi8x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_8xi8x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_8xi8x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv8i8.nxv8i1(<vscale x 8 x i8> [[ARG_1_COERCE0:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE1:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE2:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE3:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE4:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE5:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE6:%.*]], <vscale x 8 x i8> [[ARG_1_COERCE7:%.*]], i8* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_8xi8x8_mask(signed char*  arg_0, __epi_8xi8x8 arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_8xi8x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_4xi16x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv4i16(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_4xi16x8(signed short int*  arg_0, __epi_4xi16x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_4xi16x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_4xi16x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv4i16.nxv4i1(<vscale x 4 x i16> [[ARG_1_COERCE0:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE1:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE2:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE3:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE4:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE5:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE6:%.*]], <vscale x 4 x i16> [[ARG_1_COERCE7:%.*]], i16* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_4xi16x8_mask(signed short int*  arg_0, __epi_4xi16x8 arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_4xi16x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_2xi32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv2i32(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_2xi32x8(signed int*  arg_0, __epi_2xi32x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_2xi32x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_2xi32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv2i32.nxv2i1(<vscale x 2 x i32> [[ARG_1_COERCE0:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE1:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE2:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE3:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE4:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE5:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE6:%.*]], <vscale x 2 x i32> [[ARG_1_COERCE7:%.*]], i32* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_2xi32x8_mask(signed int*  arg_0, __epi_2xi32x8 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_2xi32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_1xi64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv1i64(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_1xi64x8(signed long int*  arg_0, __epi_1xi64x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_1xi64x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_1xi64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv1i64.nxv1i1(<vscale x 1 x i64> [[ARG_1_COERCE0:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE1:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE2:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE3:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE4:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE5:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE6:%.*]], <vscale x 1 x i64> [[ARG_1_COERCE7:%.*]], i64* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_1xi64x8_mask(signed long int*  arg_0, __epi_1xi64x8 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_1xi64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_2xf32x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv2f32(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_2xf32x8(float*  arg_0, __epi_2xf32x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_2xf32x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_2xf32x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv2f32.nxv2i1(<vscale x 2 x float> [[ARG_1_COERCE0:%.*]], <vscale x 2 x float> [[ARG_1_COERCE1:%.*]], <vscale x 2 x float> [[ARG_1_COERCE2:%.*]], <vscale x 2 x float> [[ARG_1_COERCE3:%.*]], <vscale x 2 x float> [[ARG_1_COERCE4:%.*]], <vscale x 2 x float> [[ARG_1_COERCE5:%.*]], <vscale x 2 x float> [[ARG_1_COERCE6:%.*]], <vscale x 2 x float> [[ARG_1_COERCE7:%.*]], float* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_2xf32x8_mask(float*  arg_0, __epi_2xf32x8 arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_2xf32x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_1xf64x8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.nxv1f64(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_1xf64x8(double*  arg_0, __epi_1xf64x8 arg_1, signed long int arg_2, unsigned long int arg_3)
+{
+    return __builtin_epi_vsseg8_strided_1xf64x8(arg_0, arg_1, arg_2, arg_3);
+}
+
+// CHECK-O2-LABEL: @test_vsseg8_strided_1xf64x8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vsseg8.strided.mask.nxv1f64.nxv1i1(<vscale x 1 x double> [[ARG_1_COERCE0:%.*]], <vscale x 1 x double> [[ARG_1_COERCE1:%.*]], <vscale x 1 x double> [[ARG_1_COERCE2:%.*]], <vscale x 1 x double> [[ARG_1_COERCE3:%.*]], <vscale x 1 x double> [[ARG_1_COERCE4:%.*]], <vscale x 1 x double> [[ARG_1_COERCE5:%.*]], <vscale x 1 x double> [[ARG_1_COERCE6:%.*]], <vscale x 1 x double> [[ARG_1_COERCE7:%.*]], double* [[ARG_0:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret void
+//
+void test_vsseg8_strided_1xf64x8_mask(double*  arg_0, __epi_1xf64x8 arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vsseg8_strided_1xf64x8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
 // CHECK-O2-LABEL: @test_vssra_8xi8(
@@ -26840,8 +34256,8 @@ __epi_4xi64 test_vsub_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
 //
 __epi_8xi8x2 test_vtrn_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -26854,8 +34270,8 @@ __epi_8xi8x2 test_vtrn_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
 //
 __epi_4xi16x2 test_vtrn_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -26868,8 +34284,8 @@ __epi_4xi16x2 test_vtrn_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned l
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
 //
 __epi_2xi32x2 test_vtrn_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -26882,8 +34298,8 @@ __epi_2xi32x2 test_vtrn_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned l
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
 //
 __epi_1xi64x2 test_vtrn_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -26896,8 +34312,8 @@ __epi_1xi64x2 test_vtrn_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned l
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
 //
 __epi_1xf64x2 test_vtrn_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -26910,8 +34326,8 @@ __epi_1xf64x2 test_vtrn_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned l
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
 //
 __epi_2xf32x2 test_vtrn_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {
@@ -26924,8 +34340,8 @@ __epi_2xf32x2 test_vtrn_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned l
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
 //
 __epi_8xi8x2 test_vunzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -26938,8 +34354,8 @@ __epi_8xi8x2 test_vunzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned lo
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
 //
 __epi_4xi16x2 test_vunzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -26952,8 +34368,8 @@ __epi_4xi16x2 test_vunzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigne
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
 //
 __epi_2xi32x2 test_vunzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -26966,8 +34382,8 @@ __epi_2xi32x2 test_vunzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigne
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
 //
 __epi_1xi64x2 test_vunzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -26980,8 +34396,8 @@ __epi_1xi64x2 test_vunzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigne
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
 //
 __epi_1xf64x2 test_vunzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -26994,8 +34410,8 @@ __epi_1xf64x2 test_vunzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigne
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
 //
 __epi_2xf32x2 test_vunzip2_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {
@@ -30668,8 +38084,8 @@ __epi_4xi64 test_vxor_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2:%.*]] undef, <vscale x 8 x i8> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 8 x i8>, <vscale x 8 x i8> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] %2, <vscale x 8 x i8> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_8XI8X2]] [[TMP2]], <vscale x 8 x i8> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_8XI8X2]] [[TMP4]]
 //
 __epi_8xi8x2 test_vzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
@@ -30682,8 +38098,8 @@ __epi_8xi8x2 test_vzip2_8xi8x2(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2:%.*]] undef, <vscale x 4 x i16> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 4 x i16>, <vscale x 4 x i16> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] %2, <vscale x 4 x i16> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_4XI16X2]] [[TMP2]], <vscale x 4 x i16> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_4XI16X2]] [[TMP4]]
 //
 __epi_4xi16x2 test_vzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2)
 {
@@ -30696,8 +38112,8 @@ __epi_4xi16x2 test_vzip2_4xi16x2(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2:%.*]] undef, <vscale x 2 x i32> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] %2, <vscale x 2 x i32> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XI32X2]] [[TMP2]], <vscale x 2 x i32> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XI32X2]] [[TMP4]]
 //
 __epi_2xi32x2 test_vzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2)
 {
@@ -30710,8 +38126,8 @@ __epi_2xi32x2 test_vzip2_2xi32x2(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2:%.*]] undef, <vscale x 1 x i64> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] %2, <vscale x 1 x i64> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XI64X2]] [[TMP2]], <vscale x 1 x i64> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XI64X2]] [[TMP4]]
 //
 __epi_1xi64x2 test_vzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2)
 {
@@ -30724,8 +38140,8 @@ __epi_1xi64x2 test_vzip2_1xi64x2(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2:%.*]] undef, <vscale x 1 x double> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] %2, <vscale x 1 x double> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_1XF64X2]] [[TMP2]], <vscale x 1 x double> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_1XF64X2]] [[TMP4]]
 //
 __epi_1xf64x2 test_vzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
 {
@@ -30738,8 +38154,8 @@ __epi_1xf64x2 test_vzip2_1xf64x2(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned 
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 0
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2:%.*]] undef, <vscale x 2 x float> [[TMP1]], 0
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x float>, <vscale x 2 x float> } [[TMP0]], 1
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] %2, <vscale x 2 x float> [[TMP3]], 1
-// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] %4
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = insertvalue [[STRUCT___EPI_2XF32X2]] [[TMP2]], <vscale x 2 x float> [[TMP3]], 1
+// CHECK-O2-NEXT:    ret [[STRUCT___EPI_2XF32X2]] [[TMP4]]
 //
 __epi_2xf32x2 test_vzip2_2xf32x2(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
 {
