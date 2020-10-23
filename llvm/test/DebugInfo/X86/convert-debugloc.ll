@@ -1,24 +1,29 @@
 ; RUN: %llc_dwarf -dwarf-version=4 -filetype=obj -O0 < %s | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=NOCONV "--implicit-check-not={{DW_TAG|NULL}}"
 
-; Test lldb default: OP_convert is unsupported in general
+; Test lldb default: OP_convert is unsupported when using MachO
 ; RUN: llc -mtriple=x86_64-apple-darwin -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=lldb | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=CONV "--implicit-check-not={{DW_TAG|NULL}}"
 ; RUN: llc -mtriple=x86_64-pc-linux-gnu -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=lldb | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=NOCONV "--implicit-check-not={{DW_TAG|NULL}}"
 
 ; Test gdb default: OP_convert is only disabled in split DWARF
-; RUN: llc -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb  | llvm-dwarfdump - \
+; RUN: %llc_dwarf -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb  | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=CONV "--implicit-check-not={{DW_TAG|NULL}}"
-; RUN: llc -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb   -split-dwarf-file=baz.dwo | llvm-dwarfdump - \
+; RUN: llc -mtriple=x86_64-pc-linux-gnu  -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb   -split-dwarf-file=baz.dwo | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=NOCONV --check-prefix=SPLIT "--implicit-check-not={{DW_TAG|NULL}}"
 
 ; Test the ability to override the platform default in either direction
-; RUN: llc -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb  -dwarf-op-convert=Disable | llvm-dwarfdump - \
+; RUN: %llc_dwarf -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=gdb  -dwarf-op-convert=Disable | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=NOCONV "--implicit-check-not={{DW_TAG|NULL}}"
-; RUN: llc -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=lldb -dwarf-op-convert=Enable | llvm-dwarfdump - \
+; RUN: llc -mtriple=x86_64-pc-linux-gnu -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=lldb -dwarf-op-convert=Enable | llvm-dwarfdump - \
 ; RUN:   | FileCheck %s --check-prefix=CONV "--implicit-check-not={{DW_TAG|NULL}}"
 
+; Test DW_OP_convert + Split DWARF
+; RUN: llc -mtriple=x86_64-pc-linux-gnu -dwarf-version=5 -filetype=obj -O0 < %s -debugger-tune=lldb -dwarf-op-convert=Enable -split-dwarf-file=baz.dwo | llvm-dwarfdump - \
+; RUN:   | FileCheck %s --check-prefix=CONV --check-prefix=SPLITCONV --check-prefix=SPLIT "--implicit-check-not={{DW_TAG|NULL}}"
+
+; SPLITCONV: Compile Unit:{{.*}} DWO_id = 0xe91d8d1d7f9782c0
 ; SPLIT: DW_TAG_skeleton_unit
 
 ; CONV: DW_TAG_compile_unit
