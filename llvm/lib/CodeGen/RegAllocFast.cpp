@@ -204,6 +204,11 @@ namespace {
           MachineFunctionProperties::Property::NoVRegs);
     }
 
+    MachineFunctionProperties getClearedProperties() const override {
+      return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::IsSSA);
+    }
+
   private:
     bool runOnMachineFunction(MachineFunction &MF) override;
 
