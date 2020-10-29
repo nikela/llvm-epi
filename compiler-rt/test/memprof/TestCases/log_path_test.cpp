@@ -19,11 +19,12 @@
 // RUN:   not %run %t 2>&1 | FileCheck %s --check-prefix=CHECK-LONG --dump-input=always
 
 // Specifying the log name via the __memprof_profile_filename variable.
-// TODO: Temporarily disabled due to llvm-avr-linux bot failure
-// %clangxx_memprof  %s -o %t -DPROFILE_NAME_VAR="%t.log2"
-// rm -f %t.log2.*
-// %run %t
-// FileCheck %s --check-prefix=CHECK-GOOD --dump-input=always < %t.log2.*
+// RUN: %clangxx_memprof  %s -o %t -DPROFILE_NAME_VAR="%t.log2"
+// RUN: ls -l %T | FileCheck %s --dump-input=always
+// RUN: rm -f %t.log2.*
+// RUN: ls -l %T | FileCheck %s --dump-input=always
+// RUN: %run %t
+// RUN: FileCheck %s --check-prefix=CHECK-GOOD --dump-input=always < %t.log2.*
 
 #ifdef PROFILE_NAME_VAR
 #define xstr(s) str(s)
@@ -42,3 +43,4 @@ int main(int argc, char **argv) {
 // CHECK-GOOD: Memory allocation stack id
 // CHECK-INVALID: ERROR: Can't open file: /dev/null/INVALID
 // CHECK-LONG: ERROR: Path is too long: 01234
+// CHECK: log_path_test
