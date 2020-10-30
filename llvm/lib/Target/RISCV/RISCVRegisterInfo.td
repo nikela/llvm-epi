@@ -48,6 +48,32 @@ def sub_vrm4    : SubRegIndex<128, -1>;
 def sub_vrm4_hi : SubRegIndex<128, -1>;
 def sub_vrm8    : SubRegIndex<256, -1>;
 def sub_vrm8_hi : SubRegIndex<256, -1>;
+
+
+// Tablegen does not allow nested loops to depend on earlier foreach
+// so we need to enumerate all the cases here.
+foreach subreg = 0 ... 1 in {
+  def "vtuple2_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 2 in {
+  def "vtuple3_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 3 in {
+  def "vtuple4_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 4 in {
+  def "vtuple5_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 5 in {
+  def "vtuple6_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 6 in {
+  def "vtuple7_"#subreg : SubRegIndex<0, -1>;
+}
+foreach subreg = 0 ... 7 in {
+  def "vtuple8_"#subreg : SubRegIndex<0, -1>;
+}
+
 } // Namespace = "RISCV"
 
 // Integer registers
@@ -381,15 +407,24 @@ def VMV0 : RegisterClass<"RISCV", VMaskVT.types, 64, (add V0)> {
   let AllowsNoRegister = 1;
 }
 
-// This defines pairs (V1, V2), ..., (V30, V31), (V0, V1)
-def vtfirst : SubRegIndex<0, -1>;
-def vtsecond : SubRegIndex<0, -1>;
-def VSeqPairs : RegisterTuples<[vtfirst, vtsecond],
-        [(add (sequence "V%u", 1, 30), V0),
-         (add (sequence "V%u", 2, 31), V1)]>;
-
-def VRTuple : VReg<[untyped], (add VSeqPairs), 1>
+class Iota<int N>
 {
-  // SpillSize is the same as VRM2.
-  let Size = 128;
+  list<int> Value = !if(!eq(N, 0),
+                        []<int>,
+                        !listconcat(Iota<!add(N, -1)>.Value, [!add(N, -1)]));
+}
+
+foreach tsize = 2 ... 8 in {
+  defvar iota = Iota<tsize>.Value;
+
+  def VRM1#T#tsize#Regs : RegisterTuples<
+        !foreach(i, iota, !cast<SubRegIndex>("vtuple"#tsize#"_"#i)),
+        !foreach(i, iota,
+           (add (sequence "V%u", !add(i, 1), !add(32, !add(!mul(-1, tsize), i))),
+                !cast<Register>("V"#i)))>;
+  def VRM1#T#tsize : VReg<[untyped],
+        (add !cast<RegisterTuples>("VRM1T"#tsize#"Regs")), 1>
+  {
+    let Size = !mul(64, tsize);
+  }
 }

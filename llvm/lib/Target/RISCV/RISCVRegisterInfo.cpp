@@ -176,8 +176,8 @@ static Register computeVRSpillReloadInstructions(
       return HandleReg;
     } else {
       assert(TupleSize == 2 && "Unexpected tuple size");
-      Register VRegFirst = RI.getSubReg(VReg, RISCV::vtfirst);
-      Register VRegSecond = RI.getSubReg(VReg, RISCV::vtsecond);
+      Register VRegFirst = RI.getSubReg(VReg, RISCV::vtuple2_0);
+      Register VRegSecond = RI.getSubReg(VReg, RISCV::vtuple2_1);
 
       // Compute the second handle already so we can kill the first handle
       // when spilling the first register.
@@ -307,8 +307,20 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
       MI.getOpcode() == RISCV::PseudoVSPILL_M8 ||
       MI.getOpcode() == RISCV::PseudoVRELOAD_M8 ||
       // Vector tuples.
-      MI.getOpcode() == RISCV::PseudoVSPILL_2xM1 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_2xM1) {
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T2 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T2 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T3 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T3 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T4 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T4 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T5 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T5 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T6 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T6 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T7 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T7 ||
+      MI.getOpcode() == RISCV::PseudoVSPILL_M1T8 ||
+      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T8) {
 
     // Make sure we spill/reload all the bits using whole register
     // instructions.
@@ -351,16 +363,24 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
       IsReload = true;
       LMUL = 8;
       break;
-    case RISCV::PseudoVSPILL_2xM1:
-      IsReload = false;
-      LMUL = 1;
-      TupleSize = 2;
-      break;
-    case RISCV::PseudoVRELOAD_2xM1:
-      IsReload = true;
-      LMUL = 1;
-      TupleSize = 2;
-      break;
+#define TUPLE_SPILL_RELOAD(N)                                                  \
+  case RISCV::PseudoVSPILL_M1T##N:                                             \
+    IsReload = false;                                                          \
+    LMUL = 1;                                                                  \
+    TupleSize = N;                                                             \
+    break;                                                                     \
+  case RISCV::PseudoVRELOAD_M1T##N:                                            \
+    IsReload = true;                                                           \
+    LMUL = 1;                                                                  \
+    TupleSize = N;                                                             \
+    break;
+      TUPLE_SPILL_RELOAD(2)
+      TUPLE_SPILL_RELOAD(3)
+      TUPLE_SPILL_RELOAD(4)
+      TUPLE_SPILL_RELOAD(5)
+      TUPLE_SPILL_RELOAD(6)
+      TUPLE_SPILL_RELOAD(7)
+      TUPLE_SPILL_RELOAD(8)
     }
     computeVRSpillReloadInstructions(II, OpReg.getReg(), HandleReg, LMUL,
                                      IsReload, TupleSize,

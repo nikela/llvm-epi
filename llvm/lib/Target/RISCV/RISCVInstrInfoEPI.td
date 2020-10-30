@@ -38,15 +38,37 @@ def riscv_sign_extend_inreg : SDNode<"RISCVISD::SIGN_EXTEND_BITS_INREG",
                                       SDTCisVec<0>, SDTCisInt<0>,
                                       SDTCisInt<2>]>>;
 
-def riscv_vlseg2 : SDNode<"RISCVISD::VLSEG2",
+foreach tsize = 2 ... 8 in {
+
+def riscv_vlseg#tsize : SDNode<"RISCVISD::VLSEG" # tsize,
                           SDTypeProfile<1, 3, [SDTCisPtrTy<1>, SDTCisInt<2>,
                                                SDTCisInt<3>]>,
                           [SDNPHasChain, SDNPMayLoad]>;
-
-def riscv_vsseg2 : SDNode<"RISCVISD::VSSEG2",
+def riscv_vsseg#tsize : SDNode<"RISCVISD::VSSEG" # tsize,
                           SDTypeProfile<0, 4, [SDTCisPtrTy<1>, SDTCisInt<2>,
                                                SDTCisInt<3>]>,
                           [SDNPHasChain, SDNPMayStore]>;
+
+def riscv_vlsseg#tsize : SDNode<"RISCVISD::VLSSEG" # tsize,
+                          SDTypeProfile<1, 4, [SDTCisPtrTy<1>, SDTCisInt<2>,
+                                               SDTCisInt<3>, SDTCisInt<4>]>,
+                          [SDNPHasChain, SDNPMayLoad]>;
+def riscv_vssseg#tsize : SDNode<"RISCVISD::VSSSEG" # tsize,
+                          SDTypeProfile<0, 5, [SDTCisPtrTy<1>, SDTCisInt<2>,
+                                               SDTCisInt<3>, SDTCisInt<4>]>,
+                          [SDNPHasChain, SDNPMayStore]>;
+
+def riscv_vlxseg#tsize : SDNode<"RISCVISD::VLXSEG" # tsize,
+                          SDTypeProfile<1, 4, [SDTCisPtrTy<1>, SDTCisVec<2>,
+                                               SDTCisInt<3>, SDTCisInt<4>]>,
+                          [SDNPHasChain, SDNPMayLoad]>;
+def riscv_vsxseg#tsize : SDNode<"RISCVISD::VSXSEG" # tsize,
+                          SDTypeProfile<0, 5, [SDTCisPtrTy<1>, SDTCisVec<2>,
+                                               SDTCisInt<3>, SDTCisInt<4>]>,
+                          [SDNPHasChain, SDNPMayStore]>;
+
+} // tsize
+
 
 def riscv_vzip2 : SDNode<"RISCVISD::VZIP2",
                          SDTypeProfile<1, 3, [SDTCisSameAs<1, 2>,
@@ -186,13 +208,19 @@ defm "" : pseudo_spill_reload<VRM4, 4>;
 defm "" : pseudo_spill_reload<VRM8, 8>;
 
 // Tuples.
+foreach tsize = 2 ... 8 in {
+
+defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+
 let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
     Uses = [VL, VTYPE] in
-def PseudoVSPILL_2xM1 : Pseudo<(outs), (ins VRTuple:$rs1, GPR:$rs2), []>;
+def PseudoVSPILL_M1T#tsize : Pseudo<(outs), (ins TupleRegClass:$rs1, GPR:$rs2), []>;
 
 let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
     Uses = [VL, VTYPE] in
-def PseudoVRELOAD_2xM1 : Pseudo<(outs VRTuple:$rs1), (ins GPR:$rs2), []>;
+def PseudoVRELOAD_M1T#tsize : Pseudo<(outs TupleRegClass:$rs1), (ins GPR:$rs2), []>;
+
+} // tsize
 
 }
 
@@ -1398,17 +1426,40 @@ let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
 
 // FIXME: Generalize for LMUL>1
 
+foreach tsize = 2 ... 8 in {
+
+foreach evr = [VR] in
 foreach eew = AllEEW in
 {
+  defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+
   let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
       usesCustomInserter = 1, VLMul = 1 in
   {
     let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
-        BaseInstr = !cast<Instruction>("VLSEG2E"#eew#"_V") in
-      def PseudoVLSEG2E#eew#_V_M1
-          : Pseudo<(outs VRTuple:$rd),
-                   (ins VRTuple:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
+        BaseInstr = !cast<Instruction>("VLSEG"#tsize#"E"#eew#"_V") in
+      def PseudoVLSEG#tsize#E#eew#_V_M1
+          : Pseudo<(outs TupleRegClass:$rd),
+                   (ins TupleRegClass:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                     ixlenimm:$sew),
+                   []>,
+            EPIPseudo;
+
+    let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        BaseInstr = !cast<Instruction>("VLSSEG"#tsize#"E"#eew#"_V") in
+      def PseudoVLSSEG#tsize#E#eew#_V_M1
+          : Pseudo<(outs TupleRegClass:$rd),
+                   (ins TupleRegClass:$merge, GPR:$rs1, GPR:$rs2, VMaskOp:$mask,
+                    GPR:$vl, ixlenimm:$sew),
+                   []>,
+            EPIPseudo;
+
+    let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        BaseInstr = !cast<Instruction>("VLXSEG"#tsize#"EI"#eew#"_V") in
+      def PseudoVLXSEG#tsize#EI#eew#_V_M1
+          : Pseudo<(outs TupleRegClass:$rd),
+                   (ins TupleRegClass:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
+                    GPR:$vl, ixlenimm:$sew),
                    []>,
             EPIPseudo;
   }
@@ -1418,17 +1469,39 @@ foreach eew = AllEEW in
   {
     let Uses = [VL, VTYPE],
         VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
-        BaseInstr = !cast<Instruction>("VSSEG2E"#eew#"_V") in
-      def PseudoVSSEG2E#eew#_V_M1
+        BaseInstr = !cast<Instruction>("VSSEG"#tsize#"E"#eew#"_V") in
+      def PseudoVSSEG#tsize#E#eew#_V_M1
           : Pseudo<(outs),
-                   (ins VRTuple:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
+                   (ins TupleRegClass:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$vl,
                         ixlenimm:$sew),
+                   []>,
+            EPIPseudo;
+
+    let Uses = [VL, VTYPE],
+        VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        BaseInstr = !cast<Instruction>("VSSSEG"#tsize#"E"#eew#"_V") in
+      def PseudoVSSSEG#tsize#E#eew#_V_M1
+          : Pseudo<(outs),
+                   (ins TupleRegClass:$rd, GPR:$rs1, GPR:$rs2, VMaskOp:$mask,
+                        GPR:$vl, ixlenimm:$sew),
+                   []>,
+            EPIPseudo;
+
+    let Uses = [VL, VTYPE],
+        VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        BaseInstr = !cast<Instruction>("VSXSEG"#tsize#"EI"#eew#"_V") in
+      def PseudoVSXSEG#tsize#EI#eew#_V_M1
+          : Pseudo<(outs),
+                   (ins TupleRegClass:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
+                        GPR:$vl, ixlenimm:$sew),
                    []>,
             EPIPseudo;
   }
 }
 
-}
+} // tsize
+
+} // [HasStdExtV, HasStdExtZvlsseg]
 
 //===----------------------------------------------------------------------===//
 // Patterns. Essential
@@ -4004,37 +4077,78 @@ defm "" : pat_store;
 
 }
 
-let Predicates = [HasStdExtV] in {
-
-let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
-def PseudoImplicitVRTuple : Pseudo<(outs VRTuple:$rd), (ins), []>;
-
-}
-
 let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
 
+foreach tsize = 2 ... 8 in {
+
+defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
+def PseudoImplicitVRM1T#tsize : Pseudo<(outs TupleRegClass:$rd), (ins), []>;
+
 foreach vti = NoGroupVectors in {
-  def : Pat<(riscv_vlseg2 GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
-            (!cast<Instruction>("PseudoVLSEG2E"#vti.SEW#"_V_M1")
-             (PseudoImplicitVRTuple),
+  defvar ivti = GetIntVectorTypeInfo<vti>.Vti;
+
+  def : Pat<(!cast<SDNode>("riscv_vlseg"#tsize) GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVLSEG"#tsize#"E"#vti.SEW#"_V_M1")
+             (!cast<Instruction>("PseudoImplicitVRM1T"#tsize)),
              $rs1,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
              vti.SEW)>;
 
-  def : Pat<(riscv_vsseg2 VRTuple:$rs3, GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
-            (!cast<Instruction>("PseudoVSSEG2E"#vti.SEW#"_V_M1")
+  def : Pat<(!cast<SDNode>("riscv_vsseg"#tsize) TupleRegClass:$rs3, GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVSSEG"#tsize#"E"#vti.SEW#"_V_M1")
              $rs3, $rs1,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+  def : Pat<(!cast<SDNode>("riscv_vlsseg"#tsize) GPR:$rs1, GPR:$rs2, GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVLSSEG"#tsize#"E"#vti.SEW#"_V_M1")
+             (!cast<Instruction>("PseudoImplicitVRM1T"#tsize)),
+             $rs1, $rs2,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+  def : Pat<(!cast<SDNode>("riscv_vssseg"#tsize) TupleRegClass:$rs3, GPR:$rs1, GPR:$rs2, GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVSSSEG"#tsize#"E"#vti.SEW#"_V_M1")
+             $rs3, $rs1, $rs2,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+  def : Pat<(!cast<SDNode>("riscv_vlxseg"#tsize) GPR:$rs1,
+               (ivti.Vector vti.RegClass:$rs2), GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVLXSEG"#tsize#"EI"#vti.SEW#"_V_M1")
+             (!cast<Instruction>("PseudoImplicitVRM1T"#tsize)),
+             $rs1, $rs2,
+             (nxv1i1 zero_reg),
+             (NoX0 GPR:$vl),
+             vti.SEW)>;
+
+  def : Pat<(!cast<SDNode>("riscv_vsxseg"#tsize) TupleRegClass:$rs3, GPR:$rs1,
+               (ivti.Vector vti.RegClass:$rs2), GPR:$vl, (XLenVT vti.SEW)),
+            (!cast<Instruction>("PseudoVSXSEG"#tsize#"EI"#vti.SEW#"_V_M1")
+             $rs3, $rs1, $rs2,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
              vti.SEW)>;
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
-def PseudoVBuildTuple2 : Pseudo<(outs VRTuple:$rd),
-                                (ins VR:$rs1, VR:$rs2), []>;
 
-}
+def PseudoVBuildVRM1T#tsize :
+     Pseudo<(outs TupleRegClass:$rd),
+               !dag(ins,
+                 !foreach(i, Iota<tsize>.Value, VR),
+                 !foreach(i, Iota<tsize>.Value, "rs"#i)),
+               []>;
+
+} // tsize
+
+} // [HasStdExtV, HasStdExtZvlsseg]
 
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
@@ -4044,9 +4158,9 @@ let Predicates = [HasStdExtV] in {
 let VLMul = 1, hasSideEffects = 0, mayLoad = 0, mayStore = 0,
     usesCustomInserter = 1 in {
 
-defm PseudoVZIP2_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
-defm PseudoVUNZIP2_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
-defm PseudoVTRN_VV : pseudo_binary<VRTuple, VR, VR, /* LMUL */ 1, "">;
+defm PseudoVZIP2_VV : pseudo_binary<VRM1T2, VR, VR, /* LMUL */ 1, "">;
+defm PseudoVUNZIP2_VV : pseudo_binary<VRM1T2, VR, VR, /* LMUL */ 1, "">;
+defm PseudoVTRN_VV : pseudo_binary<VRM1T2, VR, VR, /* LMUL */ 1, "">;
 
 }
 
@@ -4055,19 +4169,19 @@ foreach vti = NoGroupVectors in {
     def : Pat<(riscv_vzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                            (i64 GPR:$vl)),
               (PseudoVZIP2_VV_M1
-               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRM1T2), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vunzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                              (i64 GPR:$vl)),
               (PseudoVUNZIP2_VV_M1
-               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRM1T2), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vtrn (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                           (i64 GPR:$vl)),
               (PseudoVTRN_VV_M1
-               (PseudoImplicitVRTuple), vti.RegClass:$rs1, vti.RegClass:$rs2,
+               (PseudoImplicitVRM1T2), vti.RegClass:$rs1, vti.RegClass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 }
 

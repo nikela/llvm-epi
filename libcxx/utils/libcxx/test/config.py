@@ -266,6 +266,21 @@ class Configuration(object):
             self.config.available_features.add('libcxx_gdb')
             self.cxx.libcxx_gdb = libcxx_gdb
 
+        target_triple = getattr(self.config, 'target_triple', None)
+        if target_triple:
+            if re.match(r'^x86_64.*-apple', target_triple):
+                self.config.available_features.add('x86_64-apple')
+            if re.match(r'^x86_64.*-linux', target_triple):
+                self.config.available_features.add('x86_64-linux')
+            if re.match(r'^i.86.*', target_triple):
+                self.config.available_features.add('target-x86')
+            elif re.match(r'^x86_64.*', target_triple):
+                self.config.available_features.add('target-x86_64')
+            elif re.match(r'^aarch64.*', target_triple):
+                self.config.available_features.add('target-aarch64')
+            elif re.match(r'^arm.*', target_triple):
+                self.config.available_features.add('target-arm')
+
     def configure_compile_flags(self):
         self.configure_default_compile_flags()
         # Configure extra flags
@@ -331,6 +346,7 @@ class Configuration(object):
 
     def configure_compile_flags_header_includes(self):
         support_path = os.path.join(self.libcxx_src_root, 'test', 'support')
+        self.configure_config_site_header()
         if self.cxx_stdlib_under_test != 'libstdc++' and \
            not self.target_info.is_windows():
             self.cxx.compile_flags += [
@@ -347,18 +363,32 @@ class Configuration(object):
                                          'set_windows_crt_report_mode.h')
             ]
         cxx_headers = self.get_lit_conf('cxx_headers')
-        if cxx_headers is None and self.cxx_stdlib_under_test != 'libc++':
+        if cxx_headers == '' or (cxx_headers is None
+                                 and self.cxx_stdlib_under_test != 'libc++'):
             self.lit_config.note('using the system cxx headers')
             return
         self.cxx.compile_flags += ['-nostdinc++']
+        if cxx_headers is None:
+            cxx_headers = os.path.join(self.libcxx_src_root, 'include')
         if not os.path.isdir(cxx_headers):
-            self.lit_config.fatal("cxx_headers='{}' is not a directory.".format(cxx_headers))
+            self.lit_config.fatal("cxx_headers='%s' is not a directory."
+                                  % cxx_headers)
         self.cxx.compile_flags += ['-I' + cxx_headers]
         if self.libcxx_obj_root is not None:
             cxxabi_headers = os.path.join(self.libcxx_obj_root, 'include',
                                           'c++build')
             if os.path.isdir(cxxabi_headers):
                 self.cxx.compile_flags += ['-I' + cxxabi_headers]
+
+    def configure_config_site_header(self):
+        # Check for a possible __config_site in the build directory. We
+        # use this if it exists.
+        if self.libcxx_obj_root is None:
+            return
+        config_site_header = os.path.join(self.libcxx_obj_root, '__config_site')
+        if not os.path.isfile(config_site_header):
+            return
+        self.cxx.compile_flags += ['-include', config_site_header]
 
     def configure_link_flags(self):
         # Configure library path

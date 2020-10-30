@@ -425,48 +425,300 @@ let HasMergeOperand = 0 in
 }
 
 /* Segmented load/stores */
-// TODO: add remaining kinds of loads and stores
-// TODO: only for nf=2
-// TODO: only for LMUL=1
-// TODO: add masked version
-let HasMask = 0, LMUL = [1] in {
+let LMUL = [1] in {
 let ManualCodegen = [{
 {
 IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0] };
 
 llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
 llvm::Value *CallValue = Builder.CreateCall(F, Ops, "");
-llvm::Value *V = Builder.CreateInsertValue(
-     llvm::UndefValue::get(ResultType),
-     Builder.CreateExtractValue(CallValue, {0}),
-     {0});
-V = Builder.CreateInsertValue(
-     V,
-     Builder.CreateExtractValue(CallValue, {1}),
-     {1});
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
 if (ReturnValue.isNull())
   return V;
 else
   return Builder.CreateStore(V, ReturnValue.getValue());
 }
-}] in
+}], ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0],
+                   Ops[2]->getType() };
+
+// The merge argument needs unpacking.
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[0]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[0], {I}));
+}
+FlatOps.append(Ops.begin() + 1, Ops.end());
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, FlatOps, "");
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}] in {
 def vlseg2 : EPIBuiltin<"TTv", "TTvPCe", "csilfd">;
+def vlseg3 : EPIBuiltin<"TTTv", "TTTvPCe", "csilfd">;
+def vlseg4 : EPIBuiltin<"TTTTv", "TTTTvPCe", "csilfd">;
+def vlseg5 : EPIBuiltin<"TTTTTv", "TTTTTvPCe", "csilfd">;
+def vlseg6 : EPIBuiltin<"TTTTTTv", "TTTTTTvPCe", "csilfd">;
+def vlseg7 : EPIBuiltin<"TTTTTTTv", "TTTTTTTvPCe", "csilfd">;
+def vlseg8 : EPIBuiltin<"TTTTTTTTv", "TTTTTTTTvPCe", "csilfd">;
+}
+
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0] };
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, Ops, "");
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}], ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0],
+                   Ops[3]->getType() };
+
+// The merge argument needs unpacking.
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[0]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[0], {I}));
+}
+FlatOps.append(Ops.begin() + 1, Ops.end());
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, FlatOps, "");
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}] in {
+def vlseg2_strided : EPIBuiltin<"TTv", "TTvPCes", "csilfd">;
+def vlseg3_strided : EPIBuiltin<"TTTv", "TTTvPCes", "csilfd">;
+def vlseg4_strided : EPIBuiltin<"TTTTv", "TTTTvPCes", "csilfd">;
+def vlseg5_strided : EPIBuiltin<"TTTTTv", "TTTTTvPCes", "csilfd">;
+def vlseg6_strided : EPIBuiltin<"TTTTTTv", "TTTTTTvPCes", "csilfd">;
+def vlseg7_strided : EPIBuiltin<"TTTTTTTv", "TTTTTTTvPCes", "csilfd">;
+def vlseg8_strided : EPIBuiltin<"TTTTTTTTv", "TTTTTTTTvPCes", "csilfd">;
+}
+
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0],
+                   Ops[1]->getType() };
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, Ops, "");
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}], ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(ResultType)->elements()[0],
+                   Ops[2]->getType(), Ops[3]->getType() };
+
+// The merge argument needs unpacking.
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[0]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[0], {I}));
+}
+FlatOps.append(Ops.begin() + 1, Ops.end());
+
+llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
+llvm::Value *CallValue = Builder.CreateCall(F, FlatOps, "");
+llvm::Value *V = llvm::UndefValue::get(ResultType);
+for (unsigned I = 0, E = cast<StructType>(ResultType)->getNumElements();
+     I != E; I++) {
+  V = Builder.CreateInsertValue(V,
+       Builder.CreateExtractValue(CallValue, {I}),
+       {I});
+}
+if (ReturnValue.isNull())
+  return V;
+else
+  return Builder.CreateStore(V, ReturnValue.getValue());
+}
+}] in {
+def vlseg2_indexed : EPIBuiltin<"TTv", "TTvPCeIv", "csilfd">;
+def vlseg3_indexed : EPIBuiltin<"TTTv", "TTTvPCeIv", "csilfd">;
+def vlseg4_indexed : EPIBuiltin<"TTTTv", "TTTTvPCeIv", "csilfd">;
+def vlseg5_indexed : EPIBuiltin<"TTTTTv", "TTTTTvPCeIv", "csilfd">;
+def vlseg6_indexed : EPIBuiltin<"TTTTTTv", "TTTTTTvPCeIv", "csilfd">;
+def vlseg7_indexed : EPIBuiltin<"TTTTTTTv", "TTTTTTTvPCeIv", "csilfd">;
+def vlseg8_indexed : EPIBuiltin<"TTTTTTTTv", "TTTTTTTTvPCeIv", "csilfd">;
+}
+
+let HasMergeOperand = 0 in
+{
 
 let ManualCodegen = [{
 {
 IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0] };
 
 llvm::SmallVector<Value*, 4> FlatOps;
-FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {0}));
-FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {1}));
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
+}
 FlatOps.push_back(Ops[0]);
-FlatOps.push_back(Ops[2]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
 
 std::swap(Ops, FlatOps);
 }
-}] in
-def vsseg2 : EPIBuiltin<"TTv", "0PCeTTv", "csilfd">;
+}],
+ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0],
+                   Ops[2]->getType() };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
 }
+FlatOps.push_back(Ops[0]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
+
+std::swap(Ops, FlatOps);
+}
+}] in {
+def vsseg2 : EPIBuiltin<"TTv", "0PeTTv", "csilfd">;
+def vsseg3 : EPIBuiltin<"TTTv", "0PeTTTv", "csilfd">;
+def vsseg4 : EPIBuiltin<"TTTTv", "0PeTTTTv", "csilfd">;
+def vsseg5 : EPIBuiltin<"TTTTTv", "0PeTTTTTv", "csilfd">;
+def vsseg6 : EPIBuiltin<"TTTTTTv", "0PeTTTTTTv", "csilfd">;
+def vsseg7 : EPIBuiltin<"TTTTTTTv", "0PeTTTTTTTv", "csilfd">;
+def vsseg8 : EPIBuiltin<"TTTTTTTTv", "0PeTTTTTTTTv", "csilfd">;
+}
+
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0] };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
+}
+FlatOps.push_back(Ops[0]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
+
+std::swap(Ops, FlatOps);
+}
+}],
+ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0],
+                   Ops[3]->getType() };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
+}
+FlatOps.push_back(Ops[0]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
+
+std::swap(Ops, FlatOps);
+}
+}] in {
+def vsseg2_strided : EPIBuiltin<"TTv", "0PeTTvs", "csilfd">;
+def vsseg3_strided : EPIBuiltin<"TTTv", "0PeTTTvs", "csilfd">;
+def vsseg4_strided : EPIBuiltin<"TTTTv", "0PeTTTTvs", "csilfd">;
+def vsseg5_strided : EPIBuiltin<"TTTTTv", "0PeTTTTTvs", "csilfd">;
+def vsseg6_strided : EPIBuiltin<"TTTTTTv", "0PeTTTTTTvs", "csilfd">;
+def vsseg7_strided : EPIBuiltin<"TTTTTTTv", "0PeTTTTTTTvs", "csilfd">;
+def vsseg8_strided : EPIBuiltin<"TTTTTTTTv", "0PeTTTTTTTTvs", "csilfd">;
+}
+
+let ManualCodegen = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0],
+                   Ops[2]->getType() };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
+}
+FlatOps.push_back(Ops[0]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
+
+std::swap(Ops, FlatOps);
+}
+}],
+ManualCodegenMask = [{
+{
+IntrinsicTypes = { cast<StructType>(Ops[1]->getType())->elements()[0],
+                   Ops[2]->getType(), Ops[3]->getType() };
+
+llvm::SmallVector<Value*, 4> FlatOps;
+for (unsigned I = 0, E = cast<StructType>(Ops[1]->getType())->getNumElements();
+     I != E; I++) {
+  FlatOps.push_back(Builder.CreateExtractValue(Ops[1], {I}));
+}
+FlatOps.push_back(Ops[0]);
+FlatOps.append(Ops.begin() + 2, Ops.end());
+
+std::swap(Ops, FlatOps);
+}
+}] in {
+def vsseg2_indexed : EPIBuiltin<"TTv", "0PeTTvIv", "csilfd">;
+def vsseg3_indexed : EPIBuiltin<"TTTv", "0PeTTTvIv", "csilfd">;
+def vsseg4_indexed : EPIBuiltin<"TTTTv", "0PeTTTTvIv", "csilfd">;
+def vsseg5_indexed : EPIBuiltin<"TTTTTv", "0PeTTTTTvIv", "csilfd">;
+def vsseg6_indexed : EPIBuiltin<"TTTTTTv", "0PeTTTTTTvIv", "csilfd">;
+def vsseg7_indexed : EPIBuiltin<"TTTTTTTv", "0PeTTTTTTTvIv", "csilfd">;
+def vsseg8_indexed : EPIBuiltin<"TTTTTTTTv", "0PeTTTTTTTTvIv", "csilfd">;
+}
+
+} // HasMergeOperand = 0
+
+} // segmented loads/stores
 
 def vadd : EPIBinBuiltin<"v", "vvv", "csil">;
 def vsub : EPIBinBuiltin<"v", "vvv", "csil">;

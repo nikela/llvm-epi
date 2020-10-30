@@ -2184,11 +2184,11 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
     SDValue TupleNode =
         DAG.getNode(TupleOpcode, DL, MVT::Untyped, Op->getOperand(1),
                     Op->getOperand(2), Op->getOperand(3));
-    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtfirst, DL, MVT::i32);
+    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtuple2_0, DL, MVT::i32);
     MachineSDNode *FirstNode = DAG.getMachineNode(
         TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
 
-    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtsecond, DL, MVT::i32);
+    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtuple2_1, DL, MVT::i32);
     MachineSDNode *SecondNode = DAG.getMachineNode(
         TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
 
@@ -2333,6 +2333,44 @@ static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
   Offsets = Addresses;
 }
 
+static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
+                          const RISCVSubtarget &Subtarget, unsigned OpCode,
+                          const ArrayRef<unsigned> SubRegisters) {
+  SDLoc DL(Op);
+  SDVTList VTList = Op->getVTList();
+  SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
+  EVT VT = VTList.VTs[0];
+
+  int64_t LMUL;
+  int64_t SEWBits;
+  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+
+  MVT XLenVT = Subtarget.getXLenVT();
+  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+
+  SmallVector<SDValue, 4> Operands;
+  for (unsigned I = 0, E = Op->getNumOperands(); I != E; I++) {
+    // Skip Intrinsic ID
+    if (I == 1)
+      continue;
+    Operands.push_back(Op->getOperand(I));
+  }
+  Operands.push_back(SEW);
+
+  SDValue TupleNode = DAG.getNode(OpCode, DL, VTs, Operands);
+
+  SmallVector<SDValue, 4> ExtractedOps;
+  for (unsigned SubReg : SubRegisters) {
+    SDValue SubRegIdx = DAG.getTargetConstant(SubReg, DL, MVT::i32);
+    MachineSDNode *SubRegNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegIdx);
+    ExtractedOps.push_back(SDValue(SubRegNode, 0));
+  }
+
+  ExtractedOps.push_back(SDValue(TupleNode.getNode(), 1));
+  return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
+}
+
 SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                     SelectionDAG &DAG) const {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
@@ -2402,38 +2440,128 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
 
     return Result;
   }
-  case Intrinsic::epi_vlseg2: {
-    SDVTList VTList = Op->getVTList();
-    SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
-    EVT VT = VTList.VTs[0];
-
-    int64_t LMUL;
-    int64_t SEWBits;
-    std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
-
-    MVT XLenVT = Subtarget.getXLenVT();
-    SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
-
-    SDValue TupleNode =
-        DAG.getNode(RISCVISD::VLSEG2, DL, VTs,
-                    {/* Chain */ Op->getOperand(0), Op->getOperand(2),
-                     Op->getOperand(3), SEW});
-
-    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtfirst, DL, MVT::i32);
-    MachineSDNode *FirstNode = DAG.getMachineNode(
-        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
-
-    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtsecond, DL, MVT::i32);
-    MachineSDNode *SecondNode = DAG.getMachineNode(
-        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
-
-    SDValue ExtractedOps[] = {SDValue(FirstNode, 0), SDValue(SecondNode, 0),
-                              SDValue(TupleNode.getNode(), 1)};
-    return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
-  }
+  case Intrinsic::epi_vlseg2:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG2,
+                      {RISCV::vtuple2_0, RISCV::vtuple2_1});
+  case Intrinsic::epi_vlseg3:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG3,
+                      {RISCV::vtuple3_0, RISCV::vtuple3_1, RISCV::vtuple3_2});
+  case Intrinsic::epi_vlseg4:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG4,
+                      {RISCV::vtuple4_0, RISCV::vtuple4_1, RISCV::vtuple4_2,
+                       RISCV::vtuple4_3});
+  case Intrinsic::epi_vlseg5:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG5,
+                      {RISCV::vtuple5_0, RISCV::vtuple5_1, RISCV::vtuple5_2,
+                       RISCV::vtuple5_3, RISCV::vtuple5_4});
+  case Intrinsic::epi_vlseg6:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG6,
+                      {RISCV::vtuple6_0, RISCV::vtuple6_1, RISCV::vtuple6_2,
+                       RISCV::vtuple6_3, RISCV::vtuple6_4, RISCV::vtuple6_5});
+  case Intrinsic::epi_vlseg7:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG7,
+                      {RISCV::vtuple7_0, RISCV::vtuple7_1, RISCV::vtuple7_2,
+                       RISCV::vtuple7_3, RISCV::vtuple7_4, RISCV::vtuple7_5,
+                       RISCV::vtuple7_6});
+  case Intrinsic::epi_vlseg8:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG8,
+                      {RISCV::vtuple8_0, RISCV::vtuple8_1, RISCV::vtuple8_2,
+                       RISCV::vtuple8_3, RISCV::vtuple8_4, RISCV::vtuple8_5,
+                       RISCV::vtuple8_6, RISCV::vtuple8_7});
+  case Intrinsic::epi_vlseg2_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG2,
+                      {RISCV::vtuple2_0, RISCV::vtuple2_1});
+  case Intrinsic::epi_vlseg3_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG3,
+                      {RISCV::vtuple3_0, RISCV::vtuple3_1, RISCV::vtuple3_2});
+  case Intrinsic::epi_vlseg4_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG4,
+                      {RISCV::vtuple4_0, RISCV::vtuple4_1, RISCV::vtuple4_2,
+                       RISCV::vtuple4_3});
+  case Intrinsic::epi_vlseg5_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG5,
+                      {RISCV::vtuple5_0, RISCV::vtuple5_1, RISCV::vtuple5_2,
+                       RISCV::vtuple5_3, RISCV::vtuple5_4});
+  case Intrinsic::epi_vlseg6_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG6,
+                      {RISCV::vtuple6_0, RISCV::vtuple6_1, RISCV::vtuple6_2,
+                       RISCV::vtuple6_3, RISCV::vtuple6_4, RISCV::vtuple6_5});
+  case Intrinsic::epi_vlseg7_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG7,
+                      {RISCV::vtuple7_0, RISCV::vtuple7_1, RISCV::vtuple7_2,
+                       RISCV::vtuple7_3, RISCV::vtuple7_4, RISCV::vtuple7_5,
+                       RISCV::vtuple7_6});
+  case Intrinsic::epi_vlseg8_strided:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSSEG8,
+                      {RISCV::vtuple8_0, RISCV::vtuple8_1, RISCV::vtuple8_2,
+                       RISCV::vtuple8_3, RISCV::vtuple8_4, RISCV::vtuple8_5,
+                       RISCV::vtuple8_6, RISCV::vtuple8_7});
+  case Intrinsic::epi_vlseg2_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG2,
+                      {RISCV::vtuple2_0, RISCV::vtuple2_1});
+  case Intrinsic::epi_vlseg3_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG3,
+                      {RISCV::vtuple3_0, RISCV::vtuple3_1, RISCV::vtuple3_2});
+  case Intrinsic::epi_vlseg4_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG4,
+                      {RISCV::vtuple4_0, RISCV::vtuple4_1, RISCV::vtuple4_2,
+                       RISCV::vtuple4_3});
+  case Intrinsic::epi_vlseg5_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG5,
+                      {RISCV::vtuple5_0, RISCV::vtuple5_1, RISCV::vtuple5_2,
+                       RISCV::vtuple5_3, RISCV::vtuple5_4});
+  case Intrinsic::epi_vlseg6_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG6,
+                      {RISCV::vtuple6_0, RISCV::vtuple6_1, RISCV::vtuple6_2,
+                       RISCV::vtuple6_3, RISCV::vtuple6_4, RISCV::vtuple6_5});
+  case Intrinsic::epi_vlseg7_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG7,
+                      {RISCV::vtuple7_0, RISCV::vtuple7_1, RISCV::vtuple7_2,
+                       RISCV::vtuple7_3, RISCV::vtuple7_4, RISCV::vtuple7_5,
+                       RISCV::vtuple7_6});
+  case Intrinsic::epi_vlseg8_indexed:
+    return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLXSEG8,
+                      {RISCV::vtuple8_0, RISCV::vtuple8_1, RISCV::vtuple8_2,
+                       RISCV::vtuple8_3, RISCV::vtuple8_4, RISCV::vtuple8_5,
+                       RISCV::vtuple8_6, RISCV::vtuple8_7});
   }
 
   return SDValue();
+}
+
+static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
+                          const RISCVSubtarget &Subtarget, unsigned TupleSize,
+                          unsigned Opcode, unsigned BuildOpcode) {
+  SDLoc DL(Op);
+  EVT VT = Op->getOperand(2).getValueType();
+  int64_t LMUL;
+  int64_t SEWBits;
+  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+
+  MVT XLenVT = Subtarget.getXLenVT();
+  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+
+  // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
+  // so we use a pseudo instruction that we will expand later into proper
+  // INSERT_SUBREGs using the right register class.
+  SmallVector<SDValue, 4> TupleOperands;
+  for (unsigned I = 0; I < TupleSize; I++) {
+    TupleOperands.push_back(Op->getOperand(2 + I));
+  }
+
+  MachineSDNode *Tuple =
+      DAG.getMachineNode(BuildOpcode, DL, MVT::Untyped, TupleOperands);
+
+  SmallVector<SDValue, 4> Operands;
+  Operands.push_back(/* Chain */ Op->getOperand(0));
+  Operands.push_back(SDValue(Tuple, 0));
+  for (unsigned I = 2 + TupleSize, E = Op.getNumOperands(); I != E; I++) {
+    Operands.push_back(Op->getOperand(I));
+  }
+  Operands.push_back(SEW);
+
+  SDVTList VTs = DAG.getVTList(MVT::Other);
+  return DAG.getNode(Opcode, DL, VTs, Operands);
 }
 
 SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
@@ -2480,27 +2608,69 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
     break;
   }
-  case Intrinsic::epi_vsseg2: {
-    EVT VT = Op->getOperand(2).getValueType();
-    int64_t LMUL;
-    int64_t SEWBits;
-    std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
-
-    MVT XLenVT = Subtarget.getXLenVT();
-    SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
-
-    // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
-    // so we use a pseudo instruction that we will expand later into proper
-    // INSERT_SUBREGs using the right register class.
-    MachineSDNode *Tuple =
-        DAG.getMachineNode(RISCV::PseudoVBuildTuple2, DL, MVT::Untyped,
-                           {Op->getOperand(2), Op->getOperand(3)});
-
-    SDVTList VTs = DAG.getVTList(MVT::Other);
-    return DAG.getNode(RISCVISD::VSSEG2, DL, VTs,
-                       {/* Chain */ Op->getOperand(0), SDValue(Tuple, 0),
-                        Op->getOperand(4), Op->getOperand(5), SEW});
-  }
+  case Intrinsic::epi_vsseg2:
+    return lowerVSSEG(Op, DAG, Subtarget, 2, RISCVISD::VSSEG2,
+                      RISCV::PseudoVBuildVRM1T2);
+  case Intrinsic::epi_vsseg3:
+    return lowerVSSEG(Op, DAG, Subtarget, 3, RISCVISD::VSSEG3,
+                      RISCV::PseudoVBuildVRM1T3);
+  case Intrinsic::epi_vsseg4:
+    return lowerVSSEG(Op, DAG, Subtarget, 4, RISCVISD::VSSEG4,
+                      RISCV::PseudoVBuildVRM1T4);
+  case Intrinsic::epi_vsseg5:
+    return lowerVSSEG(Op, DAG, Subtarget, 5, RISCVISD::VSSEG5,
+                      RISCV::PseudoVBuildVRM1T5);
+  case Intrinsic::epi_vsseg6:
+    return lowerVSSEG(Op, DAG, Subtarget, 6, RISCVISD::VSSEG6,
+                      RISCV::PseudoVBuildVRM1T6);
+  case Intrinsic::epi_vsseg7:
+    return lowerVSSEG(Op, DAG, Subtarget, 7, RISCVISD::VSSEG7,
+                      RISCV::PseudoVBuildVRM1T7);
+  case Intrinsic::epi_vsseg8:
+    return lowerVSSEG(Op, DAG, Subtarget, 8, RISCVISD::VSSEG8,
+                      RISCV::PseudoVBuildVRM1T8);
+  case Intrinsic::epi_vsseg2_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 2, RISCVISD::VSSSEG2,
+                      RISCV::PseudoVBuildVRM1T2);
+  case Intrinsic::epi_vsseg3_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 3, RISCVISD::VSSSEG3,
+                      RISCV::PseudoVBuildVRM1T3);
+  case Intrinsic::epi_vsseg4_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 4, RISCVISD::VSSSEG4,
+                      RISCV::PseudoVBuildVRM1T4);
+  case Intrinsic::epi_vsseg5_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 5, RISCVISD::VSSSEG5,
+                      RISCV::PseudoVBuildVRM1T5);
+  case Intrinsic::epi_vsseg6_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 6, RISCVISD::VSSSEG6,
+                      RISCV::PseudoVBuildVRM1T6);
+  case Intrinsic::epi_vsseg7_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 7, RISCVISD::VSSSEG7,
+                      RISCV::PseudoVBuildVRM1T7);
+  case Intrinsic::epi_vsseg8_strided:
+    return lowerVSSEG(Op, DAG, Subtarget, 8, RISCVISD::VSSSEG8,
+                      RISCV::PseudoVBuildVRM1T8);
+  case Intrinsic::epi_vsseg2_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 2, RISCVISD::VSXSEG2,
+                      RISCV::PseudoVBuildVRM1T2);
+  case Intrinsic::epi_vsseg3_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 3, RISCVISD::VSXSEG3,
+                      RISCV::PseudoVBuildVRM1T3);
+  case Intrinsic::epi_vsseg4_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 4, RISCVISD::VSXSEG4,
+                      RISCV::PseudoVBuildVRM1T4);
+  case Intrinsic::epi_vsseg5_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 5, RISCVISD::VSXSEG5,
+                      RISCV::PseudoVBuildVRM1T5);
+  case Intrinsic::epi_vsseg6_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 6, RISCVISD::VSXSEG6,
+                      RISCV::PseudoVBuildVRM1T6);
+  case Intrinsic::epi_vsseg7_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 7, RISCVISD::VSXSEG7,
+                      RISCV::PseudoVBuildVRM1T7);
+  case Intrinsic::epi_vsseg8_indexed:
+    return lowerVSSEG(Op, DAG, Subtarget, 8, RISCVISD::VSXSEG8,
+                      RISCV::PseudoVBuildVRM1T8);
   case Intrinsic::vp_scatter: {
     SDValue Data = Op.getOperand(2);
     EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
@@ -3346,7 +3516,7 @@ static MachineBasicBlock *emitComputeVMCLR(MachineInstr &MI,
   return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4, VLMul);
 }
 
-static MachineBasicBlock *emitImplicitVRTuple(MachineInstr &MI,
+static MachineBasicBlock *emitImplicitVRM1Tuple(MachineInstr &MI,
                                               MachineBasicBlock *BB) {
   MachineFunction &MF = *BB->getParent();
   DebugLoc DL = MI.getDebugLoc();
@@ -3360,28 +3530,29 @@ static MachineBasicBlock *emitImplicitVRTuple(MachineInstr &MI,
   return BB;
 }
 
-static MachineBasicBlock *emitVBuildTuple2(MachineInstr &MI,
-                                           MachineBasicBlock *BB) {
+static MachineBasicBlock *
+emitVBuildVRM1Tuple(MachineInstr &MI, MachineBasicBlock *BB,
+                    const ArrayRef<unsigned> SubRegisters,
+                    const TargetRegisterClass *RC) {
   MachineFunction &MF = *BB->getParent();
   MachineRegisterInfo &MRI = MF.getRegInfo();
 
   DebugLoc DL = MI.getDebugLoc();
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
-  Register ScratchReg = MRI.createVirtualRegister(&RISCV::VRTupleRegClass);
-  BuildMI(*BB, MI, DL, TII.get(RISCV::IMPLICIT_DEF), ScratchReg);
-
-  Register ScratchReg2 = MRI.createVirtualRegister(&RISCV::VRTupleRegClass);
-  BuildMI(*BB, MI, DL, TII.get(RISCV::INSERT_SUBREG), ScratchReg2)
-      .addReg(ScratchReg)
-      .addReg(MI.getOperand(1).getReg())
-      .addImm(RISCV::vtfirst);
-
+  assert(SubRegisters.size() > 1);
   Register DestReg = MI.getOperand(0).getReg();
-  BuildMI(*BB, MI, DL, TII.get(RISCV::INSERT_SUBREG), DestReg)
-      .addReg(ScratchReg2)
-      .addReg(MI.getOperand(2).getReg())
-      .addImm(RISCV::vtsecond);
+
+  Register TmpSrc = MRI.createVirtualRegister(RC);
+  BuildMI(*BB, MI, DL, TII.get(RISCV::IMPLICIT_DEF), TmpSrc);
+  for (unsigned I = 0, E = SubRegisters.size(); I != E; I++) {
+    Register TmpDest = I == E - 1 ? DestReg : MRI.createVirtualRegister(RC);
+    BuildMI(*BB, MI, DL, TII.get(RISCV::INSERT_SUBREG), TmpDest)
+        .addReg(TmpSrc)
+        .addReg(MI.getOperand(I + 1).getReg())
+        .addImm(SubRegisters[I]);
+    TmpSrc = TmpDest;
+  }
 
   // The pseudo instruction is gone now.
   MI.eraseFromParent();
@@ -3418,10 +3589,51 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   case RISCV::PseudoVMCLR_M4:
   case RISCV::PseudoVMCLR_M8:
     return emitComputeVMCLR(MI, BB);
-  case RISCV::PseudoImplicitVRTuple:
-    return emitImplicitVRTuple(MI, BB);
-  case RISCV::PseudoVBuildTuple2:
-    return emitVBuildTuple2(MI, BB);
+  case RISCV::PseudoImplicitVRM1T2:
+  case RISCV::PseudoImplicitVRM1T3:
+  case RISCV::PseudoImplicitVRM1T4:
+  case RISCV::PseudoImplicitVRM1T5:
+  case RISCV::PseudoImplicitVRM1T6:
+  case RISCV::PseudoImplicitVRM1T7:
+  case RISCV::PseudoImplicitVRM1T8:
+    return emitImplicitVRM1Tuple(MI, BB);
+  case RISCV::PseudoVBuildVRM1T2:
+    return emitVBuildVRM1Tuple(MI, BB, {RISCV::vtuple2_0, RISCV::vtuple2_1},
+                               &RISCV::VRM1T2RegClass);
+  case RISCV::PseudoVBuildVRM1T3:
+    return emitVBuildVRM1Tuple(
+        MI, BB, {RISCV::vtuple3_0, RISCV::vtuple3_1, RISCV::vtuple3_2},
+        &RISCV::VRM1T3RegClass);
+  case RISCV::PseudoVBuildVRM1T4:
+    return emitVBuildVRM1Tuple(MI, BB,
+                               {RISCV::vtuple4_0, RISCV::vtuple4_1,
+                                RISCV::vtuple4_2, RISCV::vtuple4_3},
+                               &RISCV::VRM1T4RegClass);
+  case RISCV::PseudoVBuildVRM1T5:
+    return emitVBuildVRM1Tuple(MI, BB,
+                               {RISCV::vtuple5_0, RISCV::vtuple5_1,
+                                RISCV::vtuple5_2, RISCV::vtuple5_3,
+                                RISCV::vtuple5_4},
+                               &RISCV::VRM1T5RegClass);
+  case RISCV::PseudoVBuildVRM1T6:
+    return emitVBuildVRM1Tuple(MI, BB,
+                               {RISCV::vtuple6_0, RISCV::vtuple6_1,
+                                RISCV::vtuple6_2, RISCV::vtuple6_3,
+                                RISCV::vtuple6_4, RISCV::vtuple6_5},
+                               &RISCV::VRM1T6RegClass);
+  case RISCV::PseudoVBuildVRM1T7:
+    return emitVBuildVRM1Tuple(
+        MI, BB,
+        {RISCV::vtuple7_0, RISCV::vtuple7_1, RISCV::vtuple7_2, RISCV::vtuple7_3,
+         RISCV::vtuple7_4, RISCV::vtuple7_5, RISCV::vtuple7_6},
+        &RISCV::VRM1T7RegClass);
+  case RISCV::PseudoVBuildVRM1T8:
+    return emitVBuildVRM1Tuple(MI, BB,
+                               {RISCV::vtuple8_0, RISCV::vtuple8_1,
+                                RISCV::vtuple8_2, RISCV::vtuple8_3,
+                                RISCV::vtuple8_4, RISCV::vtuple8_5,
+                                RISCV::vtuple8_6, RISCV::vtuple8_7},
+                               &RISCV::VRM1T8RegClass);
   }
 
   switch (MI.getOpcode()) {
@@ -4738,10 +4950,21 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "RISCVISD::TRUNCATE_VECTOR";
   case RISCVISD::SIGN_EXTEND_BITS_INREG:
     return "RISCVISD::SIGN_EXTEND_BITS_INREG";
-  case RISCVISD::VLSEG2:
-    return "RISCVISD::VLSEG2";
-  case RISCVISD::VSSEG2:
-    return "RISCVISD::VSSEG2";
+#define TUPLE_NODE(X)  \
+  case X##2: return #X"2"; \
+  case X##3: return #X"3"; \
+  case X##4: return #X"4"; \
+  case X##5: return #X"5"; \
+  case X##6: return #X"6"; \
+  case X##7: return #X"7"; \
+  case X##8: return #X"8";
+  TUPLE_NODE(RISCVISD::VLSEG)
+  TUPLE_NODE(RISCVISD::VSSEG)
+  TUPLE_NODE(RISCVISD::VLSSEG)
+  TUPLE_NODE(RISCVISD::VSSSEG)
+  TUPLE_NODE(RISCVISD::VLXSEG)
+  TUPLE_NODE(RISCVISD::VSXSEG)
+#undef TUPLE_NODE
   case RISCVISD::VZIP2:
     return "RISCVISD::VZIP2";
   case RISCVISD::VUNZIP2:
