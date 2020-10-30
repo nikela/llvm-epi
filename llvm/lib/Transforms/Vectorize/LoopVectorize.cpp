@@ -213,6 +213,12 @@ static cl::opt<PreferPredicateTy::Option> PreferPredicateOverEpilogue(
                          "prefers tail-folding, don't attempt vectorization if "
                          "tail-folding fails.")));
 
+static cl::opt<unsigned> VectorRegisterWidthFactor(
+    "vector-register-width-factor", cl::init(1), cl::Hidden,
+    cl::desc("On targets that support variable width for vector registers, "
+             "value by which the vector register width is a multiple of "
+             "minimum vector register width."));
+
 static cl::opt<bool> MaximizeBandwidth(
     "vectorizer-maximize-bandwidth", cl::init(false), cl::Hidden,
     cl::desc("Maximize bandwidth when selecting vectorization factor which "
@@ -1147,6 +1153,8 @@ public:
   /// that needs to be vectorized. We ignore values that remain scalar such as
   /// 64 bit loop indices.
   std::pair<unsigned, unsigned> getSmallestAndWidestTypes();
+
+  std::pair<ElementCount, ElementCount> getFeasibleVFRange();
 
   /// \return The desired interleave count.
   /// If interleave count has been specified by metadata it will be returned.
@@ -6121,7 +6129,8 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-  unsigned WidestRegister = TTI.getRegisterBitWidth(true);
+  unsigned WidestRegister =
+      TTI.getVectorRegisterBitWidth(VectorRegisterWidthFactor);
 
   // Get the maximum safe dependence distance in bits computed by LAA.
   // It is computed by MaxVF * sizeOf(type) * 8, where type is taken from
@@ -6134,7 +6143,8 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
   ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
   std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
-      TTI.getFeasibleMaxVFRange(SmallestType, WidestType, MaxSafeRegisterWidth);
+      TTI.getFeasibleMaxVFRange(SmallestType, WidestType, MaxSafeRegisterWidth,
+                                VectorRegisterWidthFactor);
 
   unsigned MaxVFKnownMinLowerBound = FeasibleMaxVFLowerBound.getKnownMinValue();
   bool MaxVFIsScalableLowerBound = FeasibleMaxVFLowerBound.isScalable();
@@ -6970,12 +6980,11 @@ LoopVectorizationCostModel::expectedCost(ElementCount VF) {
   if (Legal->preferPredicatedVectorOps() && foldTailByMasking()) {
     // Add cost of generating a compare instruction to build mask.
     Type *VectorTy = ToVectorTy(Legal->getWidestInductionType(), VF);
-    unsigned MaskCost =
-        TTI.getCmpSelInstrCost(Instruction::ICmp, VectorTy, nullptr,
-                               TTI::TCK_RecipThroughput, nullptr);
+    unsigned MaskCost = TTI.getCmpSelInstrCost(Instruction::ICmp, VectorTy);
     bool TypeNotScalarized =
         VF.isVector() && VectorTy->isVectorTy() &&
-        TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue();
+        (isa<ScalableVectorType>(VectorTy) ||
+         TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
     Cost.first += MaskCost;
     Cost.second |= TypeNotScalarized;
   }
@@ -7207,9 +7216,13 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
   Type *VectorTy;
   unsigned C = getInstructionCost(I, VF, VectorTy);
 
+  // Comparing number of parts for scalable vectors with KnownMin VF does not
+  // make sense, since the actual VF is unknown at compile time. We cannot
+  // scalarize scalable vectors.
   bool TypeNotScalarized =
       VF.isVector() && VectorTy->isVectorTy() &&
-      TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue();
+      (isa<ScalableVectorType>(VectorTy) ||
+       TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
   return VectorizationCostTy(C, TypeNotScalarized);
 }
 

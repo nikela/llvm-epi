@@ -351,6 +351,10 @@ public:
 
   unsigned getMinVectorRegisterBitWidth() { return 128; }
 
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const {
+    return getRegisterBitWidth(true);
+  }
+
   unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
                                   unsigned SafeDepDist = -1U) const {
     unsigned WidestRegister = std::min(getRegisterBitWidth(true), SafeDepDist);
@@ -359,9 +363,10 @@ public:
 
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                        unsigned MaxSafeRegisterWidth = -1U) const {
-    unsigned WidestRegister =
-        std::min(getRegisterBitWidth(true), MaxSafeRegisterWidth);
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const {
+    unsigned WidestRegister = std::min(
+        getVectorRegisterBitWidth(RegWidthFactor), MaxSafeRegisterWidth);
     bool IsScalable = useScalableVectorType();
 
     unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);

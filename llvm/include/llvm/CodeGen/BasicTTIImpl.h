@@ -567,11 +567,15 @@ public:
     return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / WidestRegister);
   }
 
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const {
+    return static_cast<const T *>(this)->getRegisterBitWidth(true);
+  }
+
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                        unsigned MaxSafeRegisterWidth = -1U) const {
-    unsigned WidestRegister =
-        static_cast<const T *>(this)->getRegisterBitWidth(true);
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const {
+    unsigned WidestRegister = getVectorRegisterBitWidth(RegWidthFactor);
     WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
     bool IsScalable = static_cast<const T *>(this)->useScalableVectorType();
 

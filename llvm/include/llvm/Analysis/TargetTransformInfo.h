@@ -925,12 +925,18 @@ public:
   /// \return The width of the smallest vector register type.
   unsigned getMinVectorRegisterBitWidth() const;
 
+  /// \return the actual width of the vector register type. For targets with
+  /// variable width vector registers, \param WidthFactor is the factor by which
+  /// the vector register width is the multiple of min vector register width.
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const;
+
   unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
                                   unsigned SafeDepDist = -1U) const;
 
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                        unsigned MaxSafeRegisterWidth = -1U) const;
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const;
 
   /// \return True if the vectorization factor should be chosen to
   /// make the vector of the smallest element type match the size of a
@@ -1506,12 +1512,14 @@ public:
   virtual unsigned getRegisterBitWidth(bool Vector) const = 0;
   virtual unsigned getMaxElementWidth() const = 0;
   virtual unsigned getMinVectorRegisterBitWidth() = 0;
+  virtual unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const = 0;
   virtual unsigned getVectorRegisterUsage(unsigned VFKnownMin,
                                           unsigned ElementTypeSize,
                                           unsigned SafeDepDist = -1U) const = 0;
   virtual std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                        unsigned MaxSafeRegisterWidth = -1U) const = 0;
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const = 0;
   virtual bool shouldMaximizeVectorBandwidth(bool OptSize) const = 0;
   virtual unsigned getMinimumVF(unsigned ElemWidth) const = 0;
   virtual bool shouldConsiderAddressTypePromotion(
@@ -1925,6 +1933,9 @@ public:
   unsigned getMinVectorRegisterBitWidth() override {
     return Impl.getMinVectorRegisterBitWidth();
   }
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const override {
+    return Impl.getVectorRegisterBitWidth(WidthFactor);
+  }
   unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
                                   unsigned SafeDepDist = -1U) const override {
     return Impl.getVectorRegisterUsage(VFKnownMin, ElementTypeSize,
@@ -1932,9 +1943,10 @@ public:
   }
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                        unsigned MaxSafeRegisterWidth = -1U) const override {
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const override {
     return Impl.getFeasibleMaxVFRange(SmallestType, WidestType,
-                                      MaxSafeRegisterWidth);
+                                      MaxSafeRegisterWidth, RegWidthFactor);
   }
   bool shouldMaximizeVectorBandwidth(bool OptSize) const override {
     return Impl.shouldMaximizeVectorBandwidth(OptSize);

@@ -13,6 +13,7 @@
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/MathExtras.h"
 #include <algorithm>
 using namespace llvm;
 
@@ -347,7 +348,13 @@ bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
 unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
   // Actual min vector register bitwidth is <vscale x ELEN>.
   // getMaxElementWidth() simply return ELEN.
-  return getMaxElementWidth();
+  return ST->hasStdExtV() ? getMaxElementWidth() : 0;
+}
+
+unsigned RISCVTTIImpl::getVectorRegisterBitWidth(unsigned WidthFactor) const {
+  assert(WidthFactor <= 8 && isPowerOf2_32(WidthFactor) &&
+         "Possible RISC-V LMUL values are 1, 2, 4 and 8.");
+  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * WidthFactor : 0;
 }
 
 unsigned RISCVTTIImpl::getMinimumVF(unsigned ElemWidth) const {
@@ -369,7 +376,8 @@ unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
 
 std::pair<ElementCount, ElementCount>
 RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
-                                    unsigned MaxSafeRegisterWidth) const {
+                                    unsigned MaxSafeRegisterWidth,
+                                    unsigned RegWidthFactor) const {
   // check for SEW <= ELEN in the base ISA
   assert(WidestType <= getMaxElementWidth() &&
          "Vector element type larger than the maximum supported type.");
@@ -378,7 +386,7 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
   SmallestType = std::max<unsigned>(8, SmallestType);
   WidestType = std::max<unsigned>(8, WidestType);
   unsigned WidestRegister =
-      std::min(getRegisterBitWidth(true), MaxSafeRegisterWidth);
+      std::min(getVectorRegisterBitWidth(RegWidthFactor), MaxSafeRegisterWidth);
   unsigned SmallestRegister =
       std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
   bool IsScalable = useScalableVectorType();
@@ -396,11 +404,10 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
 }
 
 int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
+                                     CmpInst::Predicate VecPred,
                                      TTI::TargetCostKind CostKind,
                                      const Instruction *I) {
-  int HighCost = -1U >> 1;
-
-  // FIXME: FOr the time being we only consider the case when the ValTy or
+  // FIXME: For the time being we only consider the case when the ValTy or
   // CondTy is illegal and return an artificially high cost. For other cases we
   // default to the base implementation.
   if (ValTy && ValTy->isVectorTy() && !isTypeLegal(ValTy))
@@ -409,5 +416,5 @@ int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
   if (CondTy && CondTy->isVectorTy() && !isTypeLegal(CondTy))
     return HighCost;
 
-  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, CostKind, I);
+  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
