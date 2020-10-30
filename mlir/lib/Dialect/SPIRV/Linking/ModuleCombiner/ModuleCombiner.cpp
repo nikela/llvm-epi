@@ -106,67 +106,65 @@ combine(llvm::MutableArrayRef<spirv::ModuleOp> modules,
     // non-spv.func, we rename that symbol instead and maintain the spv.func in
     // the combined module name as it is.
     for (auto &op : combinedModule.getBlock().without_terminator()) {
-      auto symbolOp = dyn_cast<SymbolOpInterface>(op);
-      if (!symbolOp)
-        continue;
+      if (auto symbolOp = dyn_cast<SymbolOpInterface>(op)) {
+        StringRef oldSymName = symbolOp.getName();
 
-      StringRef oldSymName = symbolOp.getName();
-
-      if (!isa<FuncOp>(op) &&
-          failed(updateSymbolAndAllUses(symbolOp, combinedModule, moduleClone,
-                                        lastUsedID)))
-        return nullptr;
-
-      StringRef newSymName = symbolOp.getName();
-
-      if (symRenameListener && oldSymName != newSymName) {
-        spirv::ModuleOp originalModule = symNameToModuleMap.lookup(oldSymName);
-
-        if (!originalModule) {
-          module.emitError("unable to find original ModuleOp for symbol ")
-              << oldSymName;
+        if (!isa<FuncOp>(op) &&
+            failed(updateSymbolAndAllUses(symbolOp, combinedModule, moduleClone,
+                                          lastUsedID)))
           return nullptr;
+
+        StringRef newSymName = symbolOp.getName();
+
+        if (symRenameListener && oldSymName != newSymName) {
+          spirv::ModuleOp originalModule =
+              symNameToModuleMap.lookup(oldSymName);
+
+          if (!originalModule) {
+            module.emitError("unable to find original ModuleOp for symbol ")
+                << oldSymName;
+            return nullptr;
+          }
+
+          symRenameListener(originalModule, oldSymName, newSymName);
+
+          // Since the symbol name is updated, there is no need to maintain the
+          // entry that assocaites the old symbol name with the original module.
+          symNameToModuleMap.erase(oldSymName);
+          // Instead, add a new entry to map the new symbol name to the original
+          // module in case it gets renamed again later.
+          symNameToModuleMap[newSymName] = originalModule;
         }
-
-        symRenameListener(originalModule, oldSymName, newSymName);
-
-        // Since the symbol name is updated, there is no need to maintain the
-        // entry that assocaites the old symbol name with the original module.
-        symNameToModuleMap.erase(oldSymName);
-        // Instead, add a new entry to map the new symbol name to the original
-        // module in case it gets renamed again later.
-        symNameToModuleMap[newSymName] = originalModule;
       }
     }
 
     // In the current input module, rename all symbols that conflict with
     // symbols from the combined module. This includes renaming spv.funcs.
     for (auto &op : moduleClone.getBlock().without_terminator()) {
-      auto symbolOp = dyn_cast<SymbolOpInterface>(op);
-      if (!symbolOp)
-        continue;
+      if (auto symbolOp = dyn_cast<SymbolOpInterface>(op)) {
+        StringRef oldSymName = symbolOp.getName();
 
-      StringRef oldSymName = symbolOp.getName();
-
-      if (failed(updateSymbolAndAllUses(symbolOp, moduleClone, combinedModule,
-                                        lastUsedID)))
-        return nullptr;
-
-      StringRef newSymName = symbolOp.getName();
-
-      if (symRenameListener && oldSymName != newSymName) {
-        symRenameListener(module, oldSymName, newSymName);
-
-        // Insert the module associated with the symbol name.
-        auto emplaceResult = symNameToModuleMap.try_emplace(newSymName, module);
-
-        // If an entry with the same symbol name is already present, this must
-        // be a problem with the implementation, specially clean-up of the map
-        // while iterating over the combined module above.
-        if (!emplaceResult.second) {
-          module.emitError("did not expect to find an entry for symbol ")
-              << newSymName;
+        if (failed(updateSymbolAndAllUses(symbolOp, moduleClone, combinedModule,
+                                          lastUsedID)))
           return nullptr;
+
+        StringRef newSymName = symbolOp.getName();
+
+        if (symRenameListener && oldSymName != newSymName) {
+          symRenameListener(module, oldSymName, newSymName);
+
+          // Insert the module associated with the symbol name.
+          auto emplaceResult =
+              symNameToModuleMap.try_emplace(symbolOp.getName(), module);
+
+          // If an entry with the same symbol name is already present, this must
+          // be a problem with the implementation, specially clean-up of the map
+          // while iterating over the combined module above.
+          if (!emplaceResult.second) {
+            module.emitError("did not expect to find an entry for symbol ")
+                << symbolOp.getName();
+            return nullptr;
+          }
         }
       }
     }
