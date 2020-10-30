@@ -21,7 +21,6 @@
 #ifndef LLVM_ANALYSIS_TARGETTRANSFORMINFO_H
 #define LLVM_ANALYSIS_TARGETTRANSFORMINFO_H
 
-#include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
@@ -1095,14 +1094,10 @@ public:
 
   /// \returns The expected cost of compare and select instructions. If there
   /// is an existing instruction that holds Opcode, it may be passed in the
-  /// 'I' parameter. The \p VecPred parameter can be used to indicate the select
-  /// is using a compare with the specified predicate as condition. When vector
-  /// types are passed, \p VecPred must be used for all lanes.
-  int getCmpSelInstrCost(
-      unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
-      CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
-      TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
-      const Instruction *I = nullptr) const;
+  /// 'I' parameter.
+  int getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
+                         TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
+                         const Instruction *I = nullptr) const;
 
   /// \return The expected cost of vector Insert and Extract.
   /// Use -1 to indicate that there is no information on the index value.
@@ -1549,7 +1544,6 @@ public:
   virtual int getCFInstrCost(unsigned Opcode,
                              TTI::TargetCostKind CostKind) = 0;
   virtual int getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
-                                 CmpInst::Predicate VecPred,
                                  TTI::TargetCostKind CostKind,
                                  const Instruction *I) = 0;
   virtual int getVectorInstrCost(unsigned Opcode, Type *Val,
@@ -1996,10 +1990,9 @@ public:
     return Impl.getCFInstrCost(Opcode, CostKind);
   }
   int getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
-                         CmpInst::Predicate VecPred,
                          TTI::TargetCostKind CostKind,
                          const Instruction *I) override {
-    return Impl.getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
+    return Impl.getCmpSelInstrCost(Opcode, ValTy, CondTy, CostKind, I);
   }
   int getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index) override {
     return Impl.getVectorInstrCost(Opcode, Val, Index);
