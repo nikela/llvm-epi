@@ -987,7 +987,7 @@ Value *llvm::createSimpleTargetReduction(
   case Instruction::FAdd:
     BuildFunc = [&]() {
       auto Rdx = Builder.CreateFAddReduce(
-          Constant::getNullValue(SrcVTy->getElementType()), Src);
+          ConstantFP::getNegativeZero(SrcVTy->getElementType()), Src);
       return Rdx;
     };
     break;
