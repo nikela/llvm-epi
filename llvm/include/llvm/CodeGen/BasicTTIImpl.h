@@ -1857,7 +1857,8 @@ public:
                                   TTI::TargetCostKind CostKind) {
     Type *ScalarTy = Ty->getElementType();
     Type *ScalarCondTy = CondTy->getElementType();
-    unsigned NumVecElts = cast<FixedVectorType>(Ty)->getNumElements();
+    unsigned NumVecElts =
+        cast<VectorType>(Ty)->getElementCount().getKnownMinValue();
     unsigned NumReduxLevels = Log2_32(NumVecElts);
     unsigned CmpOpcode;
     if (Ty->isFPOrFPVectorTy()) {
