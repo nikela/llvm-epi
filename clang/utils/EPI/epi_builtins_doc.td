@@ -4009,6 +4009,642 @@ Array-of-Structures into a register representation of Structure-of-Arrays.}];
   let ParameterNames = ["address"];
 }
 
+def : DocEPIBuiltin<vlseg3>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of three elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg3e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg4>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of four elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg4e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+       result.v3[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg5>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of five elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg5e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+       result.v3[element] = load_element(address)
+       address = address + SEW / 8
+       result.v4[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg6>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of six elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg6e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+       result.v3[element] = load_element(address)
+       address = address + SEW / 8
+       result.v4[element] = load_element(address)
+       address = address + SEW / 8
+       result.v5[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg7>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of seven elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+       result.v3[element] = load_element(address)
+       address = address + SEW / 8
+       result.v4[element] = load_element(address)
+       address = address + SEW / 8
+       result.v5[element] = load_element(address)
+       address = address + SEW / 8
+       result.v6[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg8>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented load of tuples of eight elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.}];
+
+  let Instruction = "vlseg8e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       result.v0[element] = load_element(address)
+       address = address + SEW / 8
+       result.v1[element] = load_element(address)
+       address = address + SEW / 8
+       result.v2[element] = load_element(address)
+       address = address + SEW / 8
+       result.v3[element] = load_element(address)
+       address = address + SEW / 8
+       result.v4[element] = load_element(address)
+       address = address + SEW / 8
+       result.v5[element] = load_element(address)
+       address = address + SEW / 8
+       result.v6[element] = load_element(address)
+       address = address + SEW / 8
+       result.v7[element] = load_element(address)
+       address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address"];
+}
+
+def : DocEPIBuiltin<vlseg2_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of two elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg2e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg3_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of three elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg3e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg4_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of four elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg4e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg5_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of five elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg5e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg6_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of six elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg6e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg7_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of seven elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v6[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg8_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented load of tuples of eight elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vlsseg8e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v6[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v7[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "stride"];
+}
+
+def : DocEPIBuiltin<vlseg2_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of two elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg2e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg3_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of three elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg3e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg4_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of four elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg4e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg5_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of five elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg5e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg6_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of six elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg6e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg7_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of seven elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v6[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
+def : DocEPIBuiltin<vlseg8_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented load of tuples of seven elements";
+
+  let Description = [{Use these builtins to load a vector of tuples of elements
+from memory such that component of the tuple is loaded into a different vector.
+This operation is useful to convert a memory representation of
+Array-of-Structures into a register representation of Structure-of-Arrays.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vlxseg8e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       result.v0[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v1[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v2[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v3[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v4[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v5[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v6[element] = load_element(element_address)
+       element_address = element_address + SEW / 8
+       result.v7[element] = load_element(element_address)
+  }];
+
+  let ParameterNames = ["address", "index"];
+}
+
 def : DocEPIBuiltin<vsseg2>
 {
   let Category = DocEPISegmentedLoadsStores;
@@ -4030,6 +4666,662 @@ Array-of-Structures}];
   }];
 
   let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg3>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of three elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg3e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg4>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of four elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg4e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+      store_element(address, value.v3[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg5>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of five elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg5e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+      store_element(address, value.v3[element])
+      address = address + SEW / 8
+      store_element(address, value.v4[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg6>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of six elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg6e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+      store_element(address, value.v3[element])
+      address = address + SEW / 8
+      store_element(address, value.v4[element])
+      address = address + SEW / 8
+      store_element(address, value.v5[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg7>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of seven elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg7e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+      store_element(address, value.v3[element])
+      address = address + SEW / 8
+      store_element(address, value.v4[element])
+      address = address + SEW / 8
+      store_element(address, value.v5[element])
+      address = address + SEW / 8
+      store_element(address, value.v6[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg8>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Segmented store of tuples of eight elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures}];
+
+  let Instruction = "vsseg8e.v";
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value.v0[element])
+      address = address + SEW / 8
+      store_element(address, value.v1[element])
+      address = address + SEW / 8
+      store_element(address, value.v2[element])
+      address = address + SEW / 8
+      store_element(address, value.v3[element])
+      address = address + SEW / 8
+      store_element(address, value.v4[element])
+      address = address + SEW / 8
+      store_element(address, value.v5[element])
+      address = address + SEW / 8
+      store_element(address, value.v6[element])
+      address = address + SEW / 8
+      store_element(address, value.v7[element])
+      address = address + SEW / 8
+  }];
+
+  let ParameterNames = ["address", "value"];
+}
+
+def : DocEPIBuiltin<vsseg2_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of two elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg2e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg3_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of three elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg3e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg4_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of four elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg4e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg5_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of five elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg5e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg6_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of six elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg6e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg7_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of seven elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v6[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg8_strided>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Strided segmented store of tuples of eight elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The strided version of these instructions are useful when the tuples are
+not consecutively found in memory but separated between them a constant amount
+of bytes.
+}];
+
+  let Instruction = "vssseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + element * stride
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v6[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v7[element])
+  }];
+
+  let ParameterNames = ["address", "value", "stride"];
+}
+
+def : DocEPIBuiltin<vsseg2_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of two elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg2e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg3_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of three elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg3e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg4_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of four elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg4e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg5_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of five elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg5e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg6_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of six elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg6e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg7_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of seven elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg7e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v6[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
+}
+
+def : DocEPIBuiltin<vsseg8_indexed>
+{
+  let Category = DocEPISegmentedLoadsStores;
+  let Title = "Indexed segmented store of tuples of eight elements";
+
+  let Description = [{Use these builtins to store a tuple of vectors to memory.
+The store happens creating a sequence of elements built from grouping the
+elements of each vector in the tuple. This operation is useful to convert a
+register representation of Structure-of-Arrays into a memory representation of
+Array-of-Structures.
+
+The indexed version of these instructions are useful when the tuples are
+not consecutively found in memory but at an offset of a base address. The
+offset is represented in bytes using a vector of indices.
+}];
+
+  let Instruction = "vsxseg8e.v";
+  let Operation = [{
+     for element = 0 to gvl - 1
+       element_address = address + index[element]
+       store_element(element_address, value.v0[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v1[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v2[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v3[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v4[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v5[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v6[element])
+       element_address = element_address + SEW / 8
+       store_element(element_address, value.v7[element])
+  }];
+
+  let ParameterNames = ["address", "value", "index"];
 }
 
 // EPI custom extensions
