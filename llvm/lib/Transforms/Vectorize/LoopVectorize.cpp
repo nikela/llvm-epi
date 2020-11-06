@@ -8082,15 +8082,13 @@ static void AddRuntimeUnrollDisableMetaData(Loop *L) {
 
 bool LoopVectorizationPlanner::getDecisionAndClampRange(
     const std::function<bool(ElementCount)> &Predicate, VFRange &Range) {
-  assert(Range.End.getKnownMinValue() > Range.Start.getKnownMinValue() &&
-         "Trying to test an empty VF range.");
+  assert(!Range.isEmpty() && "Trying to test an empty VF range.");
   bool PredicateAtRangeStart = Predicate(Range.Start);
 
-  for (unsigned TmpVF = Range.Start.getKnownMinValue() * 2;
-       TmpVF < Range.End.getKnownMinValue(); TmpVF *= 2)
-    if (Predicate(ElementCount::get(TmpVF, Range.Start.isScalable())) !=
-        PredicateAtRangeStart) {
-      Range.End = ElementCount::get(TmpVF, Range.Start.isScalable());
+  for (ElementCount TmpVF = Range.Start * 2;
+       ElementCount::isKnownLT(TmpVF, Range.End); TmpVF *= 2)
+    if (Predicate(TmpVF) != PredicateAtRangeStart) {
+      Range.End = TmpVF;
       break;
     }
 
@@ -8104,13 +8102,12 @@ bool LoopVectorizationPlanner::getDecisionAndClampRange(
 /// buildVPlan().
 void LoopVectorizationPlanner::buildVPlans(ElementCount MinVF,
                                            ElementCount MaxVF) {
-  for (unsigned VF = MinVF.getKnownMinValue();
-       VF < MaxVF.getKnownMinValue() + 1;) {
-    VFRange SubRange = {
-        ElementCount::get(VF, MinVF.isScalable()),
-        ElementCount::get(MaxVF.getKnownMinValue() + 1, MinVF.isScalable())};
+  auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
+  for (ElementCount VF = MinVF;
+       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+    VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlan(SubRange));
-    VF = SubRange.End.getKnownMinValue();
+    VF = SubRange.End;
   }
 }
 
@@ -8639,14 +8636,13 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
   for (Instruction *I : DeadInstructions)
     SinkAfter.erase(I);
 
-  for (unsigned VF = MinVF.getKnownMinValue();
-       VF < MaxVF.getKnownMinValue() + 1;) {
-    VFRange SubRange = {
-        ElementCount::get(VF, MinVF.isScalable()),
-        ElementCount::get(MaxVF.getKnownMinValue() + 1, MinVF.isScalable())};
+  auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
+  for (ElementCount VF = MinVF;
+       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+    VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlanWithVPRecipes(SubRange, NeedDef,
                                              DeadInstructions, SinkAfter));
-    VF = SubRange.End.getKnownMinValue();
+    VF = SubRange.End;
   }
 }
 
@@ -8845,7 +8841,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   ElementCount VF = Range.Start;
   Plan->addVF(VF);
   RSO << "Initial VPlan for VF={" << VF;
-  for (VF *= 2; VF.getKnownMinValue() < Range.End.getKnownMinValue(); VF *= 2) {
+  for (VF *= 2; ElementCount::isKnownLT(VF, Range.End); VF *= 2) {
     Plan->addVF(VF);
     RSO << "," << VF;
   }
@@ -8871,9 +8867,9 @@ VPlanPtr LoopVectorizationPlanner::buildVPlan(VFRange &Range) {
   VPlanHCFGBuilder HCFGBuilder(OrigLoop, LI, *Plan);
   HCFGBuilder.buildHierarchicalCFG();
 
-  for (unsigned VF = Range.Start.getKnownMinValue();
-       VF < Range.End.getKnownMinValue(); VF *= 2)
-    Plan->addVF(ElementCount::get(VF, Range.Start.isScalable()));
+  for (ElementCount VF = Range.Start; ElementCount::isKnownLT(VF, Range.End);
+       VF *= 2)
+    Plan->addVF(VF);
 
   if (EnableVPlanPredication) {
     VPlanPredicator VPP(*Plan);

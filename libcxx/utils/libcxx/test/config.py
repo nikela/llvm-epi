@@ -71,7 +71,6 @@ class Configuration(object):
         self.link_shared = self.get_lit_bool('enable_shared', default=True)
         self.debug_build = self.get_lit_bool('debug_build',   default=False)
         self.exec_env = dict()
-        self.use_system_cxx_lib = self.get_lit_bool('use_system_cxx_lib', False)
         self.use_clang_verify = False
 
     def get_lit_conf(self, name, default=None):
@@ -125,8 +124,9 @@ class Configuration(object):
         self.configure_obj_root()
         self.cxx_stdlib_under_test = self.get_lit_conf('cxx_stdlib_under_test', 'libc++')
         self.cxx_library_root = self.get_lit_conf('cxx_library_root', self.libcxx_obj_root)
-        self.abi_library_root = self.get_lit_conf('abi_library_path', None)
+        self.abi_library_root = self.get_lit_conf('abi_library_root', None)
         self.cxx_runtime_root = self.get_lit_conf('cxx_runtime_root', self.cxx_library_root)
+        self.abi_runtime_root = self.get_lit_conf('abi_runtime_root', self.abi_library_root)
         self.configure_compile_flags()
         self.configure_link_flags()
         self.configure_env()
@@ -159,6 +159,8 @@ class Configuration(object):
         self.lit_config.note('Adding environment variables: %r' % show_env_vars)
         self.lit_config.note("Linking against the C++ Library at {}".format(self.cxx_library_root))
         self.lit_config.note("Running against the C++ Library at {}".format(self.cxx_runtime_root))
+        self.lit_config.note("Linking against the ABI Library at {}".format(self.abi_library_root))
+        self.lit_config.note("Running against the ABI Library at {}".format(self.abi_runtime_root))
         sys.stderr.flush()  # Force flushing to avoid broken output on Windows
 
     def get_test_format(self):
@@ -239,18 +241,6 @@ class Configuration(object):
             for f in additional_features.split(','):
                 self.config.available_features.add(f.strip())
 
-        # Write an "available feature" that combines the triple when
-        # use_system_cxx_lib is enabled. This is so that we can easily write
-        # XFAIL markers for tests that are known to fail with versions of
-        # libc++ as were shipped with a particular triple.
-        if self.use_system_cxx_lib:
-            (arch, vendor, platform) = self.config.target_triple.split('-', 2)
-            (sysname, version) = re.match(r'([^0-9]+)([0-9\.]*)', platform).groups()
-
-            self.config.available_features.add('with_system_cxx_lib={}-{}-{}{}'.format(arch, vendor, sysname, version))
-            self.config.available_features.add('with_system_cxx_lib={}{}'.format(sysname, version))
-            self.config.available_features.add('with_system_cxx_lib={}'.format(sysname))
-
         if self.target_info.is_windows():
             if self.cxx_stdlib_under_test == 'libc++':
                 # LIBCXX-WINDOWS-FIXME is the feature name used to XFAIL the
@@ -328,11 +318,6 @@ class Configuration(object):
         # Add includes for support headers used in the tests.
         support_path = os.path.join(self.libcxx_src_root, 'test/support')
         self.cxx.compile_flags += ['-I' + support_path]
-
-        # If we're testing the upstream LLVM libc++, disable availability markup,
-        # which is not relevant for non-shipped flavors of libc++.
-        if not self.use_system_cxx_lib:
-            self.cxx.compile_flags += ['-D_LIBCPP_DISABLE_AVAILABILITY']
 
         # On GCC, the libc++ headers cause errors due to throw() decorators
         # on operator new clashing with those from the test suite, so we
@@ -441,10 +426,11 @@ class Configuration(object):
         # Configure ABI library paths.
         if self.abi_library_root:
             self.cxx.link_flags += ['-L' + self.abi_library_root]
+        if self.abi_runtime_root:
             if not self.target_info.is_windows():
-                self.cxx.link_flags += ['-Wl,-rpath,' + self.abi_library_root]
+                self.cxx.link_flags += ['-Wl,-rpath,' + self.abi_runtime_root]
             else:
-                self.add_path(self.exec_env, self.abi_library_root)
+                self.add_path(self.exec_env, self.abi_runtime_root)
 
     def configure_link_flags_cxx_library(self):
         if self.link_shared:
@@ -478,7 +464,6 @@ class Configuration(object):
                     if self.abi_library_root:
                         libname = self.make_static_lib_name('c++abi')
                         abs_path = os.path.join(self.abi_library_root, libname)
-                        self.cxx.link_libcxxabi_flag = abs_path
                         self.cxx.link_flags += [abs_path]
                     else:
                         self.cxx.link_flags += ['-lc++abi']
@@ -608,7 +593,7 @@ class Configuration(object):
         sub.append(('%{flags}',         ' '.join(map(pipes.quote, flags))))
         sub.append(('%{compile_flags}', ' '.join(map(pipes.quote, compile_flags))))
         sub.append(('%{link_flags}',    ' '.join(map(pipes.quote, self.cxx.link_flags))))
-        sub.append(('%{link_libcxxabi}', pipes.quote(self.cxx.link_libcxxabi_flag)))
+
         codesign_ident = self.get_lit_conf('llvm_codesign_identity', '')
         env_vars = ' '.join('%s=%s' % (k, pipes.quote(v)) for (k, v) in self.exec_env.items())
         exec_args = [
