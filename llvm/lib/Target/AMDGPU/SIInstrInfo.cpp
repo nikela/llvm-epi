@@ -3108,7 +3108,8 @@ bool SIInstrInfo::hasUnwantedEffectsWhenEXECEmpty(const MachineInstr &MI) const 
   //
   // However, executing them with EXEC = 0 causes them to operate on undefined
   // data, which we avoid by returning true here.
-  if (Opcode == AMDGPU::V_READFIRSTLANE_B32 || Opcode == AMDGPU::V_READLANE_B32)
+  if (Opcode == AMDGPU::V_READFIRSTLANE_B32 ||
+      Opcode == AMDGPU::V_READLANE_B32 || Opcode == AMDGPU::V_WRITELANE_B32)
     return true;
 
   return false;
@@ -3502,13 +3503,7 @@ static bool shouldReadExec(const MachineInstr &MI) {
   if (SIInstrInfo::isVALU(MI)) {
     switch (MI.getOpcode()) {
     case AMDGPU::V_READLANE_B32:
-    case AMDGPU::V_READLANE_B32_gfx6_gfx7:
-    case AMDGPU::V_READLANE_B32_gfx10:
-    case AMDGPU::V_READLANE_B32_vi:
     case AMDGPU::V_WRITELANE_B32:
-    case AMDGPU::V_WRITELANE_B32_gfx6_gfx7:
-    case AMDGPU::V_WRITELANE_B32_gfx10:
-    case AMDGPU::V_WRITELANE_B32_vi:
       return false;
     }
 

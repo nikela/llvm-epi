@@ -57,7 +57,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP15:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double 0.000000e+00, <vscale x 1 x double> [[TMP13]])
+; CHECK-NEXT:    [[TMP15:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP13]])
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END]], label [[FOR_BODY7_PREHEADER5]]
 ; CHECK:       for.body7.preheader5:
