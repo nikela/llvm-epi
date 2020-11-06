@@ -5621,7 +5621,7 @@ void GlobalISelEmitter::run(raw_ostream &OS) {
 
      << "  typedef void(" << Target.getName()
      << "InstructionSelector::*CustomRendererFn)(MachineInstrBuilder &, const "
-        "MachineInstr&, int) "
+        "MachineInstr &, int) "
         "const;\n"
      << "  const ISelInfoTy<PredicateBitset, ComplexMatcherMemFn, "
         "CustomRendererFn> "
@@ -5674,7 +5674,7 @@ void GlobalISelEmitter::run(raw_ostream &OS) {
   OS << "void " << Target.getName() << "InstructionSelector"
     "::setupGeneratedPerFunctionState(MachineFunction &MF) {\n"
     "  AvailableFunctionFeatures = computeAvailableFunctionFeatures("
-    "(const " << Target.getName() << "Subtarget*)&MF.getSubtarget(), &MF);\n"
+    "(const " << Target.getName() << "Subtarget *)&MF.getSubtarget(), &MF);\n"
     "}\n";
 
   if (Target.getName() == "X86" || Target.getName() == "AArch64") {
@@ -5795,7 +5795,7 @@ void GlobalISelEmitter::run(raw_ostream &OS) {
      << "enum {\n"
      << "  GICR_Invalid,\n";
   for (const auto &Record : CustomRendererFns)
-    OS << "  GICR_" << Record->getValueAsString("RendererFn") << ", \n";
+    OS << "  GICR_" << Record->getValueAsString("RendererFn") << ",\n";
   OS << "};\n";
 
   OS << Target.getName() << "InstructionSelector::CustomRendererFn\n"
