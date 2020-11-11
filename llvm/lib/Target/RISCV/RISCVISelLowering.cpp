@@ -1628,7 +1628,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     // Special case because there is no unary narrowing instruction.
     if (IntNo == Intrinsic::vp_trunc || IntNo == Intrinsic::vp_zext ||
         IntNo == Intrinsic::vp_sext) {
-      Operands.push_back(DAG.getTargetConstant(0, DL, MVT::i64));
+      Operands.push_back(DAG.getConstant(0, DL, MVT::i64));
     }
 
     if (IsMasked)
