@@ -45,6 +45,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/MachineValueType.h"
 #include "llvm/Support/MathExtras.h"
+#include "llvm/Support/TypeSize.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -558,6 +559,37 @@ public:
   /// @{
 
   unsigned getRegisterBitWidth(bool Vector) const { return 32; }
+
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist) const {
+    unsigned WidestRegister = std::min(
+        static_cast<const T *>(this)->getRegisterBitWidth(true), SafeDepDist);
+    return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / WidestRegister);
+  }
+
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const {
+    return static_cast<const T *>(this)->getRegisterBitWidth(true);
+  }
+
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const {
+    unsigned WidestRegister = getVectorRegisterBitWidth(RegWidthFactor);
+    WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
+    bool IsScalable = static_cast<const T *>(this)->useScalableVectorType();
+
+    unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
+    ElementCount LowerBoundVF =
+        ElementCount::get(LowerBoundVFKnownMin, IsScalable);
+
+    unsigned UpperBoundVFKnownMin =
+        PowerOf2Floor(WidestRegister / SmallestType);
+    ElementCount UpperBoundVF =
+        ElementCount::get(UpperBoundVFKnownMin, IsScalable);
+
+    return {LowerBoundVF, UpperBoundVF};
+  }
 
   unsigned getMaxElementWidth() const { return 64; }
 

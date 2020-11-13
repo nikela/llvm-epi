@@ -425,8 +425,9 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   }
 
   Register FrameReg;
-  int Offset =
-      getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg);
+  int Offset = getFrameLowering(MF)
+                   ->getFrameIndexReference(MF, FrameIndex, FrameReg)
+                   .getFixed();
 
   // FIXME: PseudoVSE / PseudoVLE don't have an offset operand and in some
   // cases we don't use the EPIVector stack (e.g. a bitcast from

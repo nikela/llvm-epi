@@ -13,6 +13,8 @@
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/MathExtras.h"
+#include <algorithm>
 using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
@@ -98,10 +100,17 @@ int RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
 }
 
 unsigned RISCVTTIImpl::getNumberOfRegisters(unsigned ClassID) const {
-  if (ClassID == 1 && ST->hasStdExtV()) {
-    return 32;
-  }
-  return 0;
+  if (ClassID == 1 && ST->hasStdExtV())
+    // Although there are 32 vector registers, v0 is special in that it is the
+    // only register that can be used to hold a mask. We conservatively return
+    // 31 as the number of usable vector registers.
+    return 31;
+  else if (ClassID == 0)
+    // Similarly for scalar registers, x0(zero), x1(ra) and x2(sp) are special
+    // and we return 29 usable registers.
+    return 29;
+  else
+    return 0;
 }
 
 unsigned RISCVTTIImpl::getMaxElementWidth() const {
@@ -319,4 +328,93 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
 
   // This costs log2(BitRatio) because we need to do several conversions.
   return LegalizationFactor * Log2_32(BitRatio);
+}
+
+unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
+  if (!Vector)
+    return ST->is64Bit() ? 64 : 32;
+
+  // Largest vector register type will be `vscale * 8 * 64` bits for LMUL = 8
+  // (largest LMUL value). Since vscale is unknown at compile time, the largest
+  // possible register (register-group to be precise) bit width will be at least
+  // `64 * 8`.
+  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * 8 : 0;
+}
+
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
+  return (ST->hasStdExtV() && true);
+}
+
+unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
+  // Actual min vector register bitwidth is <vscale x ELEN>.
+  // getMaxElementWidth() simply return ELEN.
+  return ST->hasStdExtV() ? getMaxElementWidth() : 0;
+}
+
+unsigned RISCVTTIImpl::getVectorRegisterBitWidth(unsigned WidthFactor) const {
+  assert(WidthFactor <= 8 && isPowerOf2_32(WidthFactor) &&
+         "Possible RISC-V LMUL values are 1, 2, 4 and 8.");
+  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * WidthFactor : 0;
+}
+
+unsigned RISCVTTIImpl::getMinimumVF(unsigned ElemWidth) const {
+  return ST->hasStdExtV()
+             ? std::max<unsigned>(1, getMinVectorRegisterBitWidth() / ElemWidth)
+             : 0;
+}
+
+unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
+                                              unsigned ElementTypeSize,
+                                              unsigned SafeDepDist) const {
+
+  // FIXME: For the time being we assume dependency distance is always safe.
+  // Once we have dependency distance computations for scalable vectors, we need
+  // to figure out its relationship with register group usage;
+  unsigned RegisterWidth = getMinVectorRegisterBitWidth();
+  return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / RegisterWidth);
+}
+
+std::pair<ElementCount, ElementCount>
+RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                                    unsigned MaxSafeRegisterWidth,
+                                    unsigned RegWidthFactor) const {
+  // check for SEW <= ELEN in the base ISA
+  assert(WidestType <= getMaxElementWidth() &&
+         "Vector element type larger than the maximum supported type.");
+  // Smallest SEW supported = 8. For 1 bit wide Type, clip to 8 bit to get a
+  // valid range of VFs.
+  SmallestType = std::max<unsigned>(8, SmallestType);
+  WidestType = std::max<unsigned>(8, WidestType);
+  unsigned WidestRegister =
+      std::min(getVectorRegisterBitWidth(RegWidthFactor), MaxSafeRegisterWidth);
+  unsigned SmallestRegister =
+      std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
+  bool IsScalable = useScalableVectorType();
+
+  unsigned LowerBoundVFKnownMin =
+      PowerOf2Floor(SmallestRegister / SmallestType);
+  ElementCount LowerBoundVF =
+      ElementCount::get(LowerBoundVFKnownMin, IsScalable);
+
+  unsigned UpperBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
+  ElementCount UpperBoundVF =
+      ElementCount::get(UpperBoundVFKnownMin, IsScalable);
+
+  return {LowerBoundVF, UpperBoundVF};
+}
+
+int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
+                                     CmpInst::Predicate VecPred,
+                                     TTI::TargetCostKind CostKind,
+                                     const Instruction *I) {
+  // FIXME: For the time being we only consider the case when the ValTy or
+  // CondTy is illegal and return an artificially high cost. For other cases we
+  // default to the base implementation.
+  if (ValTy && ValTy->isVectorTy() && !isTypeLegal(ValTy))
+    return HighCost;
+
+  if (CondTy && CondTy->isVectorTy() && !isTypeLegal(CondTy))
+    return HighCost;
+
+  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }

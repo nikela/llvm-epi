@@ -22,6 +22,7 @@
 #include "llvm/InitializePasses.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/TypeSize.h"
 #include <utility>
 
 using namespace llvm;
@@ -616,6 +617,26 @@ unsigned TargetTransformInfo::getMaxElementWidth() const {
 
 unsigned TargetTransformInfo::getMinVectorRegisterBitWidth() const {
   return TTIImpl->getMinVectorRegisterBitWidth();
+}
+
+unsigned
+TargetTransformInfo::getVectorRegisterBitWidth(unsigned WidthFactor) const {
+  return TTIImpl->getVectorRegisterBitWidth(WidthFactor);
+}
+
+unsigned TargetTransformInfo::getVectorRegisterUsage(
+    unsigned VFKnownMin, unsigned ElementTypeSize, unsigned SafeDepDist) const {
+  return TTIImpl->getVectorRegisterUsage(VFKnownMin, ElementTypeSize,
+                                         SafeDepDist);
+}
+
+std::pair<ElementCount, ElementCount>
+TargetTransformInfo::getFeasibleMaxVFRange(unsigned SmallestType,
+                                           unsigned WidestType,
+                                           unsigned MaxSafeRegisterWidth,
+                                           unsigned RegWidthFactor) const {
+  return TTIImpl->getFeasibleMaxVFRange(SmallestType, WidestType,
+                                        MaxSafeRegisterWidth, RegWidthFactor);
 }
 
 bool TargetTransformInfo::shouldMaximizeVectorBandwidth(bool OptSize) const {

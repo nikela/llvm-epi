@@ -30,6 +30,8 @@
 #include "llvm/Analysis/LoopAccessAnalysis.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Transforms/Utils/LoopUtils.h"
+#include <bits/stdint-uintn.h>
+#include <limits>
 
 namespace llvm {
 
@@ -299,6 +301,10 @@ public:
   unsigned getMaxSafeDepDistBytes() { return LAI->getMaxSafeDepDistBytes(); }
 
   uint64_t getMaxSafeRegisterWidth() const {
+
+    if (TTI->useScalableVectorType())
+      return std::numeric_limits<uint64_t>::max();
+
     return LAI->getDepChecker().getMaxSafeRegisterWidth();
   }
 

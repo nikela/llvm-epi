@@ -37,6 +37,13 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
   const RISCVSubtarget *getST() const { return ST; }
   const RISCVTargetLowering *getTLI() const { return TLI; }
 
+  // FIXME:This is just a temporary way to signal that the cost of an
+  // instruction is too high to consider. When we have a more complete cost
+  // object that has inbuilt mechanism to indicate an infinite/saturated cost,
+  // use that. (For the same reason, at the moment we are limiting this const
+  // value only to RISCV.)
+  const int HighCost = 1 << 10;
+
   bool isLegalMaskedLoadStore(Type *DataType) const;
 
   /// Estimate a cost of Broadcast as an extract and sequence of insert
@@ -159,6 +166,22 @@ public:
                             TTI::CastContextHint CCH,
                             TTI::TargetCostKind CostKind,
                             const Instruction *I = nullptr);
+  unsigned getRegisterBitWidth(bool Vector) const;
+  bool shouldMaximizeVectorBandwidth(bool OptSize) const;
+  unsigned getMinVectorRegisterBitWidth() const;
+  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const;
+  unsigned getMinimumVF(unsigned ElemWidth) const;
+  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+                                  unsigned SafeDepDist) const;
+  std::pair<ElementCount, ElementCount>
+  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+                        unsigned MaxSafeRegisterWidth = -1U,
+                        unsigned RegWidthFactor = 1) const;
+  int getCmpSelInstrCost(
+      unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
+      CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
+      TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
+      const Instruction *I = nullptr);
 };
 
 } // end namespace llvm

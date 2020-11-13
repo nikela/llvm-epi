@@ -6,7 +6,7 @@ define <vscale x 2 x i64> @sext.i64.i32(<vscale x 2 x i32> %a, i32 %gvl)
 ; CHECK-LABEL: sext.i64.i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
-; CHECK-NEXT:    vwadd.vx v2, v16, 0
+; CHECK-NEXT:    vwcvt.x.x.v v2, v16
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
 {
@@ -20,7 +20,7 @@ define <vscale x 2 x i64> @sext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 
 ; CHECK-LABEL: sext.i64.i32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
-; CHECK-NEXT:    vwadd.vx v2, v16, 0, v0.t
+; CHECK-NEXT:    vwcvt.x.x.v v2, v16, v0.t
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
 {

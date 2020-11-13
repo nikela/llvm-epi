@@ -32,7 +32,8 @@ static llvm::cl::opt<std::string>
 
 const char *const passDecl = R"(
 /* Create {0} Pass. */
-MlirPass mlirCreate{0}{1}();
+MLIR_CAPI_EXPORTED MlirPass mlirCreate{0}{1}();
+MLIR_CAPI_EXPORTED void mlirRegister{0}{1}();
 
 )";
 
@@ -69,6 +70,9 @@ static bool emitCAPIHeader(const llvm::RecordKeeper &records, raw_ostream &os) {
 const char *const passCreateDef = R"(
 MlirPass mlirCreate{0}{1}() {
   return wrap({2}.release());
+}
+void mlirRegister{0}{1}() {
+  register{1}Pass();
 }
 
 )";

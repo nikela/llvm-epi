@@ -213,6 +213,12 @@ static cl::opt<PreferPredicateTy::Option> PreferPredicateOverEpilogue(
                          "prefers tail-folding, don't attempt vectorization if "
                          "tail-folding fails.")));
 
+static cl::opt<unsigned> VectorRegisterWidthFactor(
+    "vector-register-width-factor", cl::init(1), cl::Hidden,
+    cl::desc("On targets that support variable width for vector registers, "
+             "value by which the vector register width is a multiple of "
+             "minimum vector register width."));
+
 static cl::opt<bool> MaximizeBandwidth(
     "vectorizer-maximize-bandwidth", cl::init(false), cl::Hidden,
     cl::desc("Maximize bandwidth when selecting vectorization factor which "
@@ -1135,11 +1141,7 @@ public:
   /// This method checks every power of two up to MaxVF. If UserVF is not ZERO
   /// then this vectorization factor will be selected if vectorization is
   /// possible.
-  VectorizationFactor selectVectorizationFactor(unsigned MaxVF);
-
-  /// \return The vectorization factor for scalable vectors after processing the
-  /// types.
-  VectorizationFactor selectScalableVectorizationFactor(ElementCount MaxVF);
+  VectorizationFactor selectVectorizationFactor(ElementCount MaxVF);
 
   /// Setup cost-based decisions for user vectorization factor.
   void selectUserVectorizationFactor(ElementCount UserVF) {
@@ -1151,6 +1153,8 @@ public:
   /// that needs to be vectorized. We ignore values that remain scalar such as
   /// 64 bit loop indices.
   std::pair<unsigned, unsigned> getSmallestAndWidestTypes();
+
+  std::pair<ElementCount, ElementCount> getFeasibleVFRange();
 
   /// \return The desired interleave count.
   /// If interleave count has been specified by metadata it will be returned.
@@ -1502,14 +1506,10 @@ public:
 private:
   unsigned NumPredStores = 0;
 
-  /// \return An upper bound for the vectorization factor when using scalable
-  /// vectors.
-  Optional<ElementCount> computeFeasibleScalableMaxVF();
-
   /// \return An upper bound for the vectorization factor, a power-of-2 larger
   /// than zero. One is returned if vectorization should best be avoided due
   /// to cost.
-  ElementCount computeFeasibleMaxVF(unsigned ConstTripCount);
+  Optional<ElementCount> computeFeasibleMaxVF(unsigned ConstTripCount);
 
   /// The vectorization cost is a combination of the cost itself and a boolean
   /// indicating whether any of the contributing operations will actually
@@ -6016,9 +6016,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
     if (UserVF.isNonZero())
       return UserVF;
 
-    Optional<ElementCount> MaxVF = TTI.useScalableVectorType()
-                                       ? computeFeasibleScalableMaxVF()
-                                       : computeFeasibleMaxVF(TC);
+    Optional<ElementCount> MaxVF = computeFeasibleMaxVF(TC);
     if (!MaxVF)
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6064,9 +6062,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
   ElementCount MaxVF = UserVF;
   if (MaxVF.isZero()) {
-    Optional<ElementCount> FeasibleMaxVF = TTI.useScalableVectorType()
-                                               ? computeFeasibleScalableMaxVF()
-                                               : computeFeasibleMaxVF(TC);
+    Optional<ElementCount> FeasibleMaxVF = computeFeasibleMaxVF(TC);
     if (!FeasibleMaxVF) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6129,93 +6125,76 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 }
 
 Optional<ElementCount>
-LoopVectorizationCostModel::computeFeasibleScalableMaxVF() {
-  // For scalable vectors, where vector register width is not fixed, vector
-  // width is represented as `<vscale x k x simpleType>`, where k is a power of
-  // 2 and is known at the compile time (k can range from 1 to 8 for current
-  // RISC-V vector specification). vscale is not known at compile time (vscale =
-  // VLEN / (k * ELEN)). simpleType is a scalr type like f64, f32, etc.
-  //
-  // For mixed width operations we can either use n registers for both wide and
-  // narrow types, in which case the narrow type will waste half the register,
-  // or we can use n*w registers for the wider type and n registers for the
-  // narrow type, where wider type is wider by a factor of w. In the current
-  // implementation we take the latter approach because of the backend
-  // limitations.
-  //
-  // We make the following assumptions:
-  // 1. Assuming f64 to be the largest type we would need, we use
-  // <vscale x 1 x f64> as our base type.
-  // 2. If the only involved scalar type is f64, we use MaxVectorSize to be
-  // vscale x 1. (Eventually we will add support for higher values of k. That
-  // would need further analysis to optimize for register pressure.)
-  // 2a. If the only involved scalar type is f32, we use MaxVectorSize of
-  // vscale x 2. Similar for other narrower types.
-  // 3. For mixed width, we will use the full register for the narrower type
-  // and register grouping for the wider type.
-  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
-  unsigned SmallestType, WidestType;
-  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-  unsigned TargetWidestType = TTI.getMaxElementWidth();
-  if (SmallestType > WidestType)
-    SmallestType = WidestType;
-  unsigned MaxScaleFactor = TargetWidestType / SmallestType;
-  if (!MaxScaleFactor || MaxScaleFactor > 8)
-    return None;
-  if (Legal->getMaxSafeRegisterWidth() < 256 * 8 * 8)
-    return None;
-  return Optional<ElementCount>(ElementCount::getScalable(MaxScaleFactor));
-}
-
-ElementCount
 LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-  unsigned WidestRegister = TTI.getRegisterBitWidth(true);
+  unsigned WidestRegister =
+      TTI.getVectorRegisterBitWidth(VectorRegisterWidthFactor);
 
   // Get the maximum safe dependence distance in bits computed by LAA.
   // It is computed by MaxVF * sizeOf(type) * 8, where type is taken from
   // the memory accesses that is most restrictive (involved in the smallest
   // dependence distance).
+  // FIXME: For scalable vectors for now we assume MaxSafeRegisterWidth = -1U.
+  // See definition of Legal->getMaxSafeRegisterWidth().
   unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
 
-  WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
+  ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
+  ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
+  std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
+      TTI.getFeasibleMaxVFRange(SmallestType, WidestType, MaxSafeRegisterWidth,
+                                VectorRegisterWidthFactor);
 
-  // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
-  // Note that both WidestRegister and WidestType may not be a powers of 2.
-  unsigned MaxVectorSize = PowerOf2Floor(WidestRegister / WidestType);
+  unsigned MaxVFKnownMinLowerBound = FeasibleMaxVFLowerBound.getKnownMinValue();
+  bool MaxVFIsScalableLowerBound = FeasibleMaxVFLowerBound.isScalable();
 
   LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
                     << " / " << WidestType << " bits.\n");
   LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
                     << WidestRegister << " bits.\n");
 
-  assert(MaxVectorSize <= 256 && "Did not expect to pack so many elements"
-                                 " into one vector!");
-  if (MaxVectorSize == 0) {
-    LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
-    MaxVectorSize = 1;
-    return ElementCount::getFixed(MaxVectorSize);
-  } else if (ConstTripCount && ConstTripCount < MaxVectorSize &&
-             isPowerOf2_32(ConstTripCount)) {
-    // We need to clamp the VF to be the ConstTripCount. There is no point in
-    // choosing a higher viable VF as done in the loop below.
-    LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
-                      << ConstTripCount << "\n");
-    MaxVectorSize = ConstTripCount;
-    return ElementCount::getFixed(MaxVectorSize);
+  assert((MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 64) ||
+         (!MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 256) &&
+             "Did not expect to pack so many elements into one vector!");
+
+  if (MaxVFIsScalableLowerBound) {
+    // TODO: Adjust scalable VF for register usage and bandwidth maximization.
+    // FIXME: Remove optional return and use VF.Min=0.
+    if (!MaxVFKnownMinLowerBound) {
+      LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
+      return None;
+    }
+  } else {
+    if (MaxVFKnownMinLowerBound == 0) {
+      LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
+      MaxVFKnownMinLowerBound = 1;
+      return static_cast<ElementCount>(
+          ElementCount::getFixed(MaxVFKnownMinLowerBound));
+    } else if (ConstTripCount && ConstTripCount < MaxVFKnownMinLowerBound &&
+               isPowerOf2_32(ConstTripCount)) {
+      // We need to clamp the VF to be the ConstTripCount. There is no point in
+      // choosing a higher viable VF as done in the loop below.
+      LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
+                        << ConstTripCount << "\n");
+      MaxVFKnownMinLowerBound = ConstTripCount;
+      return static_cast<ElementCount>(
+          ElementCount::getFixed(MaxVFKnownMinLowerBound));
+    }
   }
 
-  ElementCount MaxVF = ElementCount::getFixed(MaxVectorSize);
+  ElementCount MaxVF = FeasibleMaxVFLowerBound;
   if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
     // (i.e. MaxVectorSize).
     SmallVector<ElementCount, 8> VFs;
-    unsigned NewMaxVectorSize = WidestRegister / SmallestType;
-    for (unsigned VS = MaxVectorSize * 2; VS <= NewMaxVectorSize; VS *= 2)
-      VFs.push_back(ElementCount::getFixed(VS));
+    unsigned MaxVFKnownMinUpperBound =
+        FeasibleMaxVFUpperBound.getKnownMinValue();
+
+    for (unsigned VS = MaxVFKnownMinLowerBound * 2;
+         VS <= MaxVFKnownMinUpperBound; VS *= 2)
+      VFs.push_back(ElementCount::get(VS, TTI.useScalableVectorType()));
 
     // For each VF calculate its register usage.
     auto RUs = calculateRegisterUsage(VFs);
@@ -6235,11 +6214,12 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
       }
     }
     // FIXME: Update TTI to use ElementCount for methods that return VF values.
-    if (unsigned MinVF = TTI.getMinimumVF(SmallestType)) {
-      if (MaxVF.getKnownMinValue() < MinVF) {
+    if (unsigned MinVFKnownMinValue = TTI.getMinimumVF(SmallestType)) {
+      if (MaxVF.getKnownMinValue() < MinVFKnownMinValue) {
         LLVM_DEBUG(dbgs() << "LV: Overriding calculated MaxVF(" << MaxVF
-                          << ") with target's minimum: " << MinVF << '\n');
-        MaxVF = ElementCount::getFixed(MinVF);
+                          << ") with target's minimum: " << MinVFKnownMinValue
+                          << '\n');
+        MaxVF = ElementCount::get(MinVFKnownMinValue, MaxVF.isScalable());
       }
     }
   }
@@ -6247,26 +6227,37 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
 }
 
 VectorizationFactor
-LoopVectorizationCostModel::selectVectorizationFactor(unsigned MaxVF) {
-  float Cost = expectedCost(ElementCount::getFixed(1)).first;
+LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
+  // Compute cost of scalar loop or no vectorization. This would be the same for
+  // scalable and fixed vectors.
+  ElementCount Width = ElementCount::getFixed(1);
+  float Cost = expectedCost(Width).first;
   const float ScalarCost = Cost;
-  unsigned Width = 1;
   LLVM_DEBUG(dbgs() << "LV: Scalar loop costs: " << (int)ScalarCost << ".\n");
 
   bool ForceVectorization = Hints->getForce() == LoopVectorizeHints::FK_Enabled;
-  if (ForceVectorization && (MaxVF > 1 || TTI.useScalableVectorType())) {
+  if ((ForceVectorization || MaxVF.isScalable()) && MaxVF.isVector()) {
     // Ignore scalar width, because the user explicitly wants vectorization.
-    // Initialize cost to max so that VF = 2 is, at least, chosen during cost
-    // evaluation.
+    // Initialize cost to max so that VF = 2 for fixed vectors and VF = 1 x
+    // vscale for scalable vectors is, at least, chosen during cost evaluation.
     Cost = std::numeric_limits<float>::max();
   }
 
-  for (unsigned i = 2; i <= MaxVF; i *= 2) {
+  // FIXME: Move MinVF to TTI. A target may have a different MinVF than the
+  // default 2 (1 scalable) based on legal types or other factors.
+  unsigned MinVFKnownValue = MaxVF.isScalable() ? 1 : 2;
+  ElementCount MinVF = ElementCount::get(MinVFKnownValue, MaxVF.isScalable());
+  for (ElementCount i = MinVF; ElementCount::isKnownLE(i, MaxVF); i *= 2) {
     // Notice that the vector loop needs to be executed less times, so
     // we need to divide the cost of the vector loops by the width of
     // the vector elements.
-    VectorizationCostTy C = expectedCost(ElementCount::getFixed(i));
-    float VectorCost = C.first / (float)i;
+    // TODO: Note that for scalable vectors, VectorCost is actually VectorCost /
+    // vscale. While this is fine for comparing costs of different scalable VFs,
+    // comparison to the scalar loop cost is flawed. For now, for scalable
+    // vectors we assume that vectorization is always more profitable than
+    // scalar loop.
+    VectorizationCostTy C = expectedCost(i);
+    float VectorCost = C.first / (float)i.getKnownMinValue();
     LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i
                       << " costs: " << (int)VectorCost << ".\n");
     if (!C.second && !ForceVectorization) {
@@ -6286,43 +6277,18 @@ LoopVectorizationCostModel::selectVectorizationFactor(unsigned MaxVF) {
         "There are conditional stores.",
         "store that is conditionally executed prevents vectorization",
         "ConditionalStore", ORE, TheLoop);
-    Width = 1;
+    Width = ElementCount::getFixed(1);
     Cost = ScalarCost;
   }
 
-  LLVM_DEBUG(if (ForceVectorization && Width > 1 && Cost >= ScalarCost) dbgs()
-             << "LV: Vectorization seems to be not beneficial, "
-             << "but was forced by a user.\n");
+  if (!Width.isScalable())
+    LLVM_DEBUG(if (ForceVectorization && Width.getFixedValue() > 1 &&
+                   Cost >= ScalarCost) dbgs()
+               << "LV: Vectorization seems to be not beneficial, "
+               << "but was forced by a user.\n");
   LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << Width << ".\n");
-  VectorizationFactor Factor = {ElementCount::getFixed(Width),
-                                (unsigned)(Width * Cost)};
-  return Factor;
-}
-
-VectorizationFactor
-LoopVectorizationCostModel::selectScalableVectorizationFactor(ElementCount VF) {
-  // bool ForceVectorization = Hints->getForce() ==
-  // LoopVectorizeHints::FK_Enabled; assert(!ForceVectorization &&
-  //        "We do not support Forced Vectorization for scalable vectors");
-
-  // Notice that the vector loop needs to be executed less times, so
-  // we need to divide the cost of the vector loops by the width of
-  // the vector elements.
-  VectorizationCostTy C = expectedCost(VF);
-  float Cost = C.first / (float)VF.getKnownMinValue();
-  LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << VF.getKnownMinValue()
-                    << " costs: " << (int)Cost << ".\n");
-
-  if (!EnableCondStoresVectorization && NumPredStores) {
-    reportVectorizationFailure(
-        "There are conditional stores.",
-        "store that is conditionally executed prevents vectorization",
-        "ConditionalStore", ORE, TheLoop);
-    assert(false && "Not supported for scalable vectors");
-  }
-
-  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << VF.getKnownMinValue() << ".\n");
-  VectorizationFactor Factor = {VF, (unsigned)(VF.getKnownMinValue() * Cost)};
+  VectorizationFactor Factor = {Width,
+                                (unsigned)(Width.getKnownMinValue() * Cost)};
   return Factor;
 }
 
@@ -6661,9 +6627,9 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   unsigned MaxSafeDepDist = -1U;
   if (Legal->getMaxSafeDepDistBytes() != -1U)
     MaxSafeDepDist = Legal->getMaxSafeDepDistBytes() * 8;
-  unsigned WidestRegister =
-      std::min(TTI.getRegisterBitWidth(true), MaxSafeDepDist);
   const DataLayout &DL = TheFunction->getParent()->getDataLayout();
+  // FIXME: This is wrong. Register grouping is not necessary if using scalable
+  // vector type. We need another TTI method to indicate it.
 
   SmallVector<RegisterUsage, 8> RUs(VFs.size());
   SmallVector<SmallMapVector<unsigned, unsigned, 4>, 8> MaxUsages(VFs.size());
@@ -6671,12 +6637,12 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   LLVM_DEBUG(dbgs() << "LV(REG): Calculating max register usage:\n");
 
   // A lambda that gets the register usage for the given type and VF.
-  auto GetRegUsage = [&DL, WidestRegister](Type *Ty, ElementCount VF) {
+  auto GetRegUsage = [&DL, MaxSafeDepDist, this](Type *Ty, ElementCount VF) {
     if (Ty->isTokenTy())
       return 0U;
     unsigned TypeSize = DL.getTypeSizeInBits(Ty->getScalarType());
-    return std::max<unsigned>(1, VF.getKnownMinValue() * TypeSize /
-                                     WidestRegister);
+    return TTI.getVectorRegisterUsage(VF.getKnownMinValue(), TypeSize,
+                                      MaxSafeDepDist);
   };
 
   for (unsigned int i = 0, s = IdxToInstr.size(); i < s; ++i) {
@@ -6951,6 +6917,8 @@ int LoopVectorizationCostModel::computePredInstDiscount(
 
 LoopVectorizationCostModel::VectorizationCostTy
 LoopVectorizationCostModel::expectedCost(ElementCount VF) {
+  // FIXME: Port Cost to be of PolySize. For scalable vectors, true cost of
+  // vectorization is dependent on vscale.
   VectorizationCostTy Cost;
 
   // For each block.
@@ -6988,6 +6956,37 @@ LoopVectorizationCostModel::expectedCost(ElementCount VF) {
 
     Cost.first += BlockCost.first;
     Cost.second |= BlockCost.second;
+  }
+
+  // If tail folding is enabled, the cost model does not explicitly considers
+  // the cost of inserting the mask instruction and the additional select
+  // instruction for reductions. The mask is based on the induction variable
+  // which is not taken into consideration when computing FeasibleMaxVF
+  // (getSmallestAndWidestTypes is based on the original scalar loop and does
+  // not consider induction PHI. The induction variable of the vector loop might
+  // actually be different from the scalar loop's induction PHI). This allows
+  // for a FeasibleMaxVF value to be considered which might result in an illegal
+  // type to be used in the mask or select instructions based on the induction
+  // PHI for a given target. For eg. a loop with 32-bit values might result in a
+  // FeasibleMaxVF of 16, however the induction variable based on the 64-bit
+  // trip count would be splat into a <vscale x 16 x i64> vector type to be used
+  // for creating the mask, however, <vscale x 16 x i64> might be an illegal
+  // type for the given target (eg. RISC-V).
+  // FIXME: For now we add a rather inelegant hack after the cost computation to
+  // check if there tail folding is enabled and computing the cost of mask based
+  // on the induction variable type, expecting the TTI to result in an
+  // "infinitely" high cost if the type is illegal. We also just enable for the
+  // case when we are using VP instructions to avoid breaking existing tests.
+  if (Legal->preferPredicatedVectorOps() && foldTailByMasking()) {
+    // Add cost of generating a compare instruction to build mask.
+    Type *VectorTy = ToVectorTy(Legal->getWidestInductionType(), VF);
+    unsigned MaskCost = TTI.getCmpSelInstrCost(Instruction::ICmp, VectorTy);
+    bool TypeNotScalarized =
+        VF.isVector() && VectorTy->isVectorTy() &&
+        (isa<ScalableVectorType>(VectorTy) ||
+         TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
+    Cost.first += MaskCost;
+    Cost.second |= TypeNotScalarized;
   }
 
   return Cost;
@@ -7217,9 +7216,13 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
   Type *VectorTy;
   unsigned C = getInstructionCost(I, VF, VectorTy);
 
+  // Comparing number of parts for scalable vectors with KnownMin VF does not
+  // make sense, since the actual VF is unknown at compile time. We cannot
+  // scalarize scalable vectors.
   bool TypeNotScalarized =
       VF.isVector() && VectorTy->isVectorTy() &&
-      TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue();
+      (isa<ScalableVectorType>(VectorTy) ||
+       TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
   return VectorizationCostTy(C, TypeNotScalarized);
 }
 
@@ -7899,32 +7902,23 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
   ElementCount MaxVF = MaybeMaxVF.getValue();
   assert(MaxVF.isNonZero() && "MaxVF is zero.");
 
-  // Most of the VF selection code for fixed length vectors does not make
-  // sense for scalable vectors. So as a starting point we assume that if we
-  // are using scalable vectors we are going to vectorize based on the
-  // computed MaxVF (max K factor).
-  if (MaxVF.isScalable()) {
-    CM.collectUniformsAndScalars(MaxVF);
-    CM.collectInstsToScalarize(MaxVF);
-    buildVPlansWithVPRecipes(MaxVF, MaxVF);
-    LLVM_DEBUG(printPlans(dbgs()));
-    return CM.selectScalableVectorizationFactor(MaxVF);
-  }
-
-  // Handle fixed vector factor
-  for (unsigned VF = 1; VF <= MaxVF.getFixedValue(); VF *= 2) {
+  ElementCount VF = ElementCount::get(1, MaxVF.isScalable());
+  for (; ElementCount::isKnownLE(VF, MaxVF); VF *= 2) {
     // Collect Uniform and Scalar instructions after vectorization with VF.
-    CM.collectUniformsAndScalars(ElementCount::getFixed(VF));
+    CM.collectUniformsAndScalars(VF);
 
     // Collect the instructions (and their associated costs) that will be more
     // profitable to scalarize.
-    if (VF > 1)
-      CM.collectInstsToScalarize(ElementCount::getFixed(VF));
+    if (VF.isVector())
+      CM.collectInstsToScalarize(VF);
   }
 
-  CM.collectInLoopReductions();
+  // FIXME: Disabling for scalable vectors for now. Need to see if and how we
+  // can use it with scalable (and predicated) vectors.
+  if (!VF.isScalable())
+    CM.collectInLoopReductions();
 
-  buildVPlansWithVPRecipes(ElementCount::getFixed(1), MaxVF);
+  buildVPlansWithVPRecipes(ElementCount::get(1, MaxVF.isScalable()), MaxVF);
   LLVM_DEBUG(printPlans(dbgs()));
   if (MaxVF.isScalar())
     // Do not return VectorizationFactor::Disabled() here, since that means a
@@ -7932,7 +7926,7 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
     return VectorizationFactor(MaxVF, 0);
 
   // Select the optimal vectorization factor.
-  return CM.selectVectorizationFactor(MaxVF.getFixedValue());
+  return CM.selectVectorizationFactor(MaxVF);
 }
 
 void LoopVectorizationPlanner::setBestPlan(ElementCount VF, unsigned UF) {
@@ -8082,15 +8076,13 @@ static void AddRuntimeUnrollDisableMetaData(Loop *L) {
 
 bool LoopVectorizationPlanner::getDecisionAndClampRange(
     const std::function<bool(ElementCount)> &Predicate, VFRange &Range) {
-  assert(Range.End.getKnownMinValue() > Range.Start.getKnownMinValue() &&
-         "Trying to test an empty VF range.");
+  assert(!Range.isEmpty() && "Trying to test an empty VF range.");
   bool PredicateAtRangeStart = Predicate(Range.Start);
 
-  for (unsigned TmpVF = Range.Start.getKnownMinValue() * 2;
-       TmpVF < Range.End.getKnownMinValue(); TmpVF *= 2)
-    if (Predicate(ElementCount::get(TmpVF, Range.Start.isScalable())) !=
-        PredicateAtRangeStart) {
-      Range.End = ElementCount::get(TmpVF, Range.Start.isScalable());
+  for (ElementCount TmpVF = Range.Start * 2;
+       ElementCount::isKnownLT(TmpVF, Range.End); TmpVF *= 2)
+    if (Predicate(TmpVF) != PredicateAtRangeStart) {
+      Range.End = TmpVF;
       break;
     }
 
@@ -8104,13 +8096,12 @@ bool LoopVectorizationPlanner::getDecisionAndClampRange(
 /// buildVPlan().
 void LoopVectorizationPlanner::buildVPlans(ElementCount MinVF,
                                            ElementCount MaxVF) {
-  for (unsigned VF = MinVF.getKnownMinValue();
-       VF < MaxVF.getKnownMinValue() + 1;) {
-    VFRange SubRange = {
-        ElementCount::get(VF, MinVF.isScalable()),
-        ElementCount::get(MaxVF.getKnownMinValue() + 1, MinVF.isScalable())};
+  auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
+  for (ElementCount VF = MinVF;
+       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+    VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlan(SubRange));
-    VF = SubRange.End.getKnownMinValue();
+    VF = SubRange.End;
   }
 }
 
@@ -8639,14 +8630,13 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
   for (Instruction *I : DeadInstructions)
     SinkAfter.erase(I);
 
-  for (unsigned VF = MinVF.getKnownMinValue();
-       VF < MaxVF.getKnownMinValue() + 1;) {
-    VFRange SubRange = {
-        ElementCount::get(VF, MinVF.isScalable()),
-        ElementCount::get(MaxVF.getKnownMinValue() + 1, MinVF.isScalable())};
+  auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
+  for (ElementCount VF = MinVF;
+       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+    VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlanWithVPRecipes(SubRange, NeedDef,
                                              DeadInstructions, SinkAfter));
-    VF = SubRange.End.getKnownMinValue();
+    VF = SubRange.End;
   }
 }
 
@@ -8845,7 +8835,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   ElementCount VF = Range.Start;
   Plan->addVF(VF);
   RSO << "Initial VPlan for VF={" << VF;
-  for (VF *= 2; VF.getKnownMinValue() < Range.End.getKnownMinValue(); VF *= 2) {
+  for (VF *= 2; ElementCount::isKnownLT(VF, Range.End); VF *= 2) {
     Plan->addVF(VF);
     RSO << "," << VF;
   }
@@ -8871,9 +8861,9 @@ VPlanPtr LoopVectorizationPlanner::buildVPlan(VFRange &Range) {
   VPlanHCFGBuilder HCFGBuilder(OrigLoop, LI, *Plan);
   HCFGBuilder.buildHierarchicalCFG();
 
-  for (unsigned VF = Range.Start.getKnownMinValue();
-       VF < Range.End.getKnownMinValue(); VF *= 2)
-    Plan->addVF(ElementCount::get(VF, Range.Start.isScalable()));
+  for (ElementCount VF = Range.Start; ElementCount::isKnownLT(VF, Range.End);
+       VF *= 2)
+    Plan->addVF(VF);
 
   if (EnableVPlanPredication) {
     VPlanPredicator VPP(*Plan);
@@ -9026,7 +9016,9 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
          SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
          "Cannot set vector length: Unsupported type");
   SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  LMUL = LMUL ? LMUL : LMULArgMap.at(WidestType / SmallestType);
+  unsigned LMULVal =
+      (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
+  LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
   Constant *LMULArg =

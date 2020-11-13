@@ -72,6 +72,18 @@ struct VFRange {
 
   // Need not be a power of 2. If End <= Start range is empty.
   ElementCount End;
+
+  bool isEmpty() const {
+    return End.getKnownMinValue() <= Start.getKnownMinValue();
+  }
+
+  VFRange(const ElementCount &Start, const ElementCount &End)
+      : Start(Start), End(End) {
+    assert(Start.isScalable() == End.isScalable() &&
+           "Both Start and End should have the same scalable flag");
+    assert(isPowerOf2_32(Start.getKnownMinValue()) &&
+           "Expected Start to be a power of 2");
+  }
 };
 
 using VPlanPtr = std::unique_ptr<VPlan>;

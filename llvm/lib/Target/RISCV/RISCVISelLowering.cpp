@@ -272,8 +272,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setTruncStoreAction(MVT::f64, MVT::f16, Expand);
   }
 
-  if (Subtarget.is64Bit() &&
-      !(Subtarget.hasStdExtD() || Subtarget.hasStdExtF())) {
+  if (Subtarget.is64Bit()) {
     setOperationAction(ISD::FP_TO_UINT, MVT::i32, Custom);
     setOperationAction(ISD::FP_TO_SINT, MVT::i32, Custom);
     setOperationAction(ISD::STRICT_FP_TO_UINT, MVT::i32, Custom);
@@ -1629,7 +1628,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     // Special case because there is no unary narrowing instruction.
     if (IntNo == Intrinsic::vp_trunc || IntNo == Intrinsic::vp_zext ||
         IntNo == Intrinsic::vp_sext) {
-      Operands.push_back(DAG.getTargetConstant(0, DL, MVT::i64));
+      Operands.push_back(DAG.getConstant(0, DL, MVT::i64));
     }
 
     if (IsMasked)
@@ -2765,6 +2764,13 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
     assert(N->getValueType(0) == MVT::i32 && Subtarget.is64Bit() &&
            "Unexpected custom legalisation");
     SDValue Op0 = IsStrict ? N->getOperand(1) : N->getOperand(0);
+    // If the FP type needs to be softened, emit a library call using the 'si'
+    // version. If we left it to default legalization we'd end up with 'di'. If
+    // the FP type doesn't need to be softened just let generic type
+    // legalization promote the result type.
+    if (getTypeAction(*DAG.getContext(), Op0.getValueType()) !=
+        TargetLowering::TypeSoftenFloat)
+      return;
     RTLIB::Libcall LC;
     if (N->getOpcode() == ISD::FP_TO_SINT ||
         N->getOpcode() == ISD::STRICT_FP_TO_SINT)
@@ -3875,9 +3881,9 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
   // Allocate to a register if possible, or else a stack slot.
   Register Reg;
   if (ValVT == MVT::f32 && !UseGPRForF32)
-    Reg = State.AllocateReg(ArgFPR32s, ArgFPR64s);
+    Reg = State.AllocateReg(ArgFPR32s);
   else if (ValVT == MVT::f64 && !UseGPRForF64)
-    Reg = State.AllocateReg(ArgFPR64s, ArgFPR32s);
+    Reg = State.AllocateReg(ArgFPR64s);
   else if (ValVT.isScalableVector()) {
     const TargetRegisterClass *RC = TLI->getRegClassFor(ValVT);
     if (RC->hasSuperClassEq(&RISCV::VRRegClass)) {
