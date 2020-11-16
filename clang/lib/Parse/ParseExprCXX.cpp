@@ -1206,7 +1206,8 @@ addConstexprToLambdaDeclSpecifier(Parser &P, SourceLocation ConstexprLoc,
                              : diag::warn_cxx14_compat_constexpr_on_lambda);
     const char *PrevSpec = nullptr;
     unsigned DiagID = 0;
-    DS.SetConstexprSpec(CSK_constexpr, ConstexprLoc, PrevSpec, DiagID);
+    DS.SetConstexprSpec(ConstexprSpecKind::Constexpr, ConstexprLoc, PrevSpec,
+                        DiagID);
     assert(PrevSpec == nullptr && DiagID == 0 &&
            "Constexpr cannot have been set previously!");
   }
@@ -1219,7 +1220,8 @@ static void addConstevalToLambdaDeclSpecifier(Parser &P,
     P.Diag(ConstevalLoc, diag::warn_cxx20_compat_consteval);
     const char *PrevSpec = nullptr;
     unsigned DiagID = 0;
-    DS.SetConstexprSpec(CSK_consteval, ConstevalLoc, PrevSpec, DiagID);
+    DS.SetConstexprSpec(ConstexprSpecKind::Consteval, ConstevalLoc, PrevSpec,
+                        DiagID);
     if (DiagID != 0)
       P.Diag(ConstevalLoc, DiagID) << PrevSpec;
   }
@@ -2196,10 +2198,10 @@ void Parser::ParseCXXSimpleTypeSpecifier(DeclSpec &DS) {
                         Policy);
     break;
   case tok::kw_signed:
-    DS.SetTypeSpecSign(DeclSpec::TSS_signed, Loc, PrevSpec, DiagID);
+    DS.SetTypeSpecSign(TypeSpecifierSign::Signed, Loc, PrevSpec, DiagID);
     break;
   case tok::kw_unsigned:
-    DS.SetTypeSpecSign(DeclSpec::TSS_unsigned, Loc, PrevSpec, DiagID);
+    DS.SetTypeSpecSign(TypeSpecifierSign::Unsigned, Loc, PrevSpec, DiagID);
     break;
   case tok::kw_void:
     DS.SetTypeSpecType(DeclSpec::TST_void, Loc, PrevSpec, DiagID, Policy);
