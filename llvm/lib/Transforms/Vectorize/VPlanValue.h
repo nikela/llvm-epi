@@ -82,6 +82,7 @@ public:
     VPValueSC,
     VPInstructionSC,
     VPMemoryInstructionSC,
+    VPVWidenCallSC,
     VPPredicatedMemoryInstructionSC,
     VPWidenEVLSC,
     VPWidenEVLMaskSC,

@@ -480,7 +480,7 @@ public:
                                   VPValue *BlockInMask, VPValue *EVL);
 
   /// Widen a single call instruction within the innermost loop.
-  void widenCallInstruction(CallInst &I, VPUser &ArgOperands,
+  void widenCallInstruction(CallInst &I, VPValue *Def, VPUser &ArgOperands,
                             VPTransformState &State);
 
   /// Widen a single select instruction within the innermost loop.
@@ -5392,7 +5392,8 @@ void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
   } // end of switch.
 }
 
-void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPUser &ArgOperands,
+void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
+                                               VPUser &ArgOperands,
                                                VPTransformState &State) {
   assert(!isa<DbgInfoIntrinsic>(I) &&
          "DbgInfoIntrinsic should have been dropped during VPlan construction");
@@ -5455,7 +5456,7 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPUser &ArgOperands,
       if (isa<FPMathOperator>(V))
         V->copyFastMathFlags(CI);
 
-      VectorLoopValueMap.setVectorValue(&I, Part, V);
+      State.set(Def, &I, V, Part);
       addMetadata(V, &I);
   }
 }
@@ -8097,8 +8098,7 @@ bool LoopVectorizationPlanner::getDecisionAndClampRange(
 void LoopVectorizationPlanner::buildVPlans(ElementCount MinVF,
                                            ElementCount MaxVF) {
   auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
-  for (ElementCount VF = MinVF;
-       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+  for (ElementCount VF = MinVF; ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
     VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlan(SubRange));
     VF = SubRange.End;
@@ -8631,8 +8631,7 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
     SinkAfter.erase(I);
 
   auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
-  for (ElementCount VF = MinVF;
-       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+  for (ElementCount VF = MinVF; ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
     VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlanWithVPRecipes(SubRange, NeedDef,
                                              DeadInstructions, SinkAfter));
@@ -8964,7 +8963,8 @@ void VPInterleaveRecipe::print(raw_ostream &O, const Twine &Indent,
 }
 
 void VPWidenCallRecipe::execute(VPTransformState &State) {
-  State.ILV->widenCallInstruction(Ingredient, *this, State);
+  State.ILV->widenCallInstruction(*cast<CallInst>(getUnderlyingInstr()), this,
+                                  *this, State);
 }
 
 void VPWidenSelectRecipe::execute(VPTransformState &State) {
