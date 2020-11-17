@@ -114,33 +114,6 @@ static Value *SimplifyBSwap(BinaryOperator &I,
   return Builder.CreateCall(F, BinOp);
 }
 
-/// This handles expressions of the form ((X + OpRHS) & AndRHS).
-Instruction *InstCombinerImpl::OptAndOp(BinaryOperator *Op, ConstantInt *AndRHS,
-                                        BinaryOperator &TheAnd) {
-  Value *X;
-  const APInt *C;
-  if (!match(Op, m_OneUse(m_Add(m_Value(X), m_APInt(C)))))
-    return nullptr;
-
-  // If there is only one bit set.
-  const APInt &AndRHSV = AndRHS->getValue();
-  if (AndRHSV.isPowerOf2()) {
-    // Ok, at this point, we know that we are masking the result of the
-    // ADD down to exactly one bit.  If the constant we are adding has
-    // no bits set below this bit, then we can eliminate the ADD.
-    // Check to see if any bits below the one bit set in AndRHSV are set.
-    if ((*C & (AndRHSV - 1)).isNullValue()) {
-      // If not, the only thing that can effect the output of the AND is
-      // the bit specified by AndRHSV. If that bit is set, the effect of
-      // the XOR is to toggle the bit.
-      Value *NewAnd = Builder.CreateAnd(X, AndRHS);
-      NewAnd->takeName(Op);
-      return BinaryOperator::CreateXor(NewAnd, AndRHS);
-    }
-  }
-  return nullptr;
-}
-
 /// Emit a computation of: (V >= Lo && V < Hi) if Inside is true, otherwise
 /// (V < Lo || V >= Hi). This method expects that Lo < Hi. IsSigned indicates
 /// whether to treat V, Lo, and Hi as signed or not.
@@ -1820,6 +1793,16 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
       APInt LowMask(APInt::getLowBitsSet(Width, Width - Ctlz));
       if ((*AddC & LowMask).isNullValue())
         return BinaryOperator::CreateAnd(X, Op1);
+
+      // If we are masking the result of the add down to exactly one bit and
+      // the constant we are adding has no bits set below that bit, then the
+      // add is flipping a single bit. Example:
+      // (X + 4) & 4 --> (X & 4) ^ 4
+      if (Op0->hasOneUse() && C->isPowerOf2() && (*AddC & (*C - 1)) == 0) {
+        assert((*C & *AddC) != 0 && "Expected common bit");
+        Value *NewAnd = Builder.CreateAnd(X, Op1);
+        return BinaryOperator::CreateXor(NewAnd, Op1);
+      }
     }
   }
 
@@ -1860,9 +1843,6 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
           }
         }
       }
-
-      if (Instruction *Res = OptAndOp(Op0I, AndRHS, I))
-        return Res;
     }
   }
 
@@ -1922,7 +1902,6 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
 
     // TODO: Make this recursive; it's a little tricky because an arbitrary
     // number of 'and' instructions might have to be created.
-    Value *X, *Y;
     if (LHS && match(Op1, m_OneUse(m_And(m_Value(X), m_Value(Y))))) {
       if (auto *Cmp = dyn_cast<ICmpInst>(X))
         if (Value *Res = foldAndOfICmps(LHS, Cmp, I))
@@ -1962,16 +1941,12 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
     return SelectInst::Create(A, Op0, Constant::getNullValue(Ty));
 
   // and(ashr(subNSW(Y, X), ScalarSizeInBits(Y)-1), X) --> X s> Y ? X : 0.
-  {
-    Value *X, *Y;
-    const APInt *ShAmt;
-    if (match(&I, m_c_And(m_OneUse(m_AShr(m_NSWSub(m_Value(Y), m_Value(X)),
-                                          m_APInt(ShAmt))),
-                          m_Deferred(X))) &&
-        *ShAmt == Ty->getScalarSizeInBits() - 1) {
-      Value *NewICmpInst = Builder.CreateICmpSGT(X, Y);
-      return SelectInst::Create(NewICmpInst, X, ConstantInt::getNullValue(Ty));
-    }
+  if (match(&I, m_c_And(m_OneUse(m_AShr(
+                            m_NSWSub(m_Value(Y), m_Value(X)),
+                            m_SpecificInt(Ty->getScalarSizeInBits() - 1))),
+                        m_Deferred(X)))) {
+    Value *NewICmpInst = Builder.CreateICmpSGT(X, Y);
+    return SelectInst::Create(NewICmpInst, X, ConstantInt::getNullValue(Ty));
   }
 
   return nullptr;
