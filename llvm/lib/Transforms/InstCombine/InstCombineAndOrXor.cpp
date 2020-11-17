@@ -122,27 +122,17 @@ Instruction *InstCombinerImpl::OptAndOp(BinaryOperator *Op, ConstantInt *AndRHS,
   if (!match(Op, m_OneUse(m_Add(m_Value(X), m_APInt(C)))))
     return nullptr;
 
-  // Adding a one to a single bit bit-field should be turned into an XOR
-  // of the bit.  First thing to check is to see if this AND is with a
-  // single bit constant.
-  const APInt &AndRHSV = AndRHS->getValue();
-
   // If there is only one bit set.
+  const APInt &AndRHSV = AndRHS->getValue();
   if (AndRHSV.isPowerOf2()) {
     // Ok, at this point, we know that we are masking the result of the
     // ADD down to exactly one bit.  If the constant we are adding has
     // no bits set below this bit, then we can eliminate the ADD.
-
     // Check to see if any bits below the one bit set in AndRHSV are set.
     if ((*C & (AndRHSV - 1)).isNullValue()) {
       // If not, the only thing that can effect the output of the AND is
-      // the bit specified by AndRHSV.  If that bit is set, the effect of
-      // the XOR is to toggle the bit.  If it is clear, then the ADD has
-      // no effect.
-      if ((*C & AndRHSV).isNullValue()) // Bit is not set, noop
-        return replaceOperand(TheAnd, 0, X);
-
-      // Pull the XOR out of the AND.
+      // the bit specified by AndRHSV. If that bit is set, the effect of
+      // the XOR is to toggle the bit.
       Value *NewAnd = Builder.CreateAnd(X, AndRHS);
       NewAnd->takeName(Op);
       return BinaryOperator::CreateXor(NewAnd, AndRHS);
@@ -1809,9 +1799,10 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
         return BinaryOperator::Create(BinOp, NewLHS, Y);
       }
     }
+
+    unsigned Width = Ty->getScalarSizeInBits();
     const APInt *ShiftC;
     if (match(Op0, m_OneUse(m_SExt(m_AShr(m_Value(X), m_APInt(ShiftC)))))) {
-      unsigned Width = Ty->getScalarSizeInBits();
       if (*C == APInt::getLowBitsSet(Width, Width - ShiftC->getZExtValue())) {
         // We are clearing high bits that were potentially set by sext+ashr:
         // and (sext (ashr X, ShiftC)), C --> lshr (sext X), ShiftC
@@ -1819,6 +1810,16 @@ Instruction *InstCombinerImpl::visitAnd(BinaryOperator &I) {
         Constant *ShAmtC = ConstantInt::get(Ty, ShiftC->zext(Width));
         return BinaryOperator::CreateLShr(Sext, ShAmtC);
       }
+    }
+
+    const APInt *AddC;
+    if (match(Op0, m_Add(m_Value(X), m_APInt(AddC)))) {
+      // If we add zeros to every bit below a mask, the add has no effect:
+      // (X + AddC) & LowMaskC --> X & LowMaskC
+      unsigned Ctlz = C->countLeadingZeros();
+      APInt LowMask(APInt::getLowBitsSet(Width, Width - Ctlz));
+      if ((*AddC & LowMask).isNullValue())
+        return BinaryOperator::CreateAnd(X, Op1);
     }
   }
 

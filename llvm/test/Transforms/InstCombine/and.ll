@@ -1053,13 +1053,49 @@ define i8 @lowmask_add(i8 %x) {
 ; CHECK-LABEL: @lowmask_add(
 ; CHECK-NEXT:    [[A:%.*]] = add i8 [[X:%.*]], -64
 ; CHECK-NEXT:    call void @use8(i8 [[A]])
-; CHECK-NEXT:    [[R:%.*]] = and i8 [[A]], 32
+; CHECK-NEXT:    [[R:%.*]] = and i8 [[X]], 32
 ; CHECK-NEXT:    ret i8 [[R]]
 ;
   %a = add i8 %x, -64 ; 0xc0
   call void @use8(i8 %a)
   %r = and i8 %a, 32 ; 0x20
   ret i8 %r
+}
+
+define i8 @lowmask_add_2(i8 %x) {
+; CHECK-LABEL: @lowmask_add_2(
+; CHECK-NEXT:    [[R:%.*]] = and i8 [[X:%.*]], 63
+; CHECK-NEXT:    ret i8 [[R]]
+;
+  %a = add i8 %x, -64 ; 0xc0
+  %r = and i8 %a, 63 ; 0x3f
+  ret i8 %r
+}
+
+define i8 @lowmask_add_2_uses(i8 %x) {
+; CHECK-LABEL: @lowmask_add_2_uses(
+; CHECK-NEXT:    [[A:%.*]] = add i8 [[X:%.*]], -64
+; CHECK-NEXT:    call void @use8(i8 [[A]])
+; CHECK-NEXT:    [[R:%.*]] = and i8 [[X]], 63
+; CHECK-NEXT:    ret i8 [[R]]
+;
+  %a = add i8 %x, -64 ; 0xc0
+  call void @use8(i8 %a)
+  %r = and i8 %a, 63 ; 0x3f
+  ret i8 %r
+}
+
+define <2 x i8> @lowmask_add_2_splat(<2 x i8> %x, <2 x i8>* %p) {
+; CHECK-LABEL: @lowmask_add_2_splat(
+; CHECK-NEXT:    [[A:%.*]] = add <2 x i8> [[X:%.*]], <i8 -64, i8 -64>
+; CHECK-NEXT:    store <2 x i8> [[A]], <2 x i8>* [[P:%.*]], align 2
+; CHECK-NEXT:    [[R:%.*]] = and <2 x i8> [[X]], <i8 63, i8 63>
+; CHECK-NEXT:    ret <2 x i8> [[R]]
+;
+  %a = add <2 x i8> %x, <i8 -64, i8 -64> ; 0xc0
+  store <2 x i8> %a, <2 x i8>* %p
+  %r = and <2 x i8> %a, <i8 63, i8 63> ; 0x3f
+  ret <2 x i8> %r
 }
 
 define i8 @not_lowmask_add(i8 %x) {
@@ -1092,7 +1128,7 @@ define <2 x i8> @lowmask_add_splat(<2 x i8> %x, <2 x i8>* %p) {
 ; CHECK-LABEL: @lowmask_add_splat(
 ; CHECK-NEXT:    [[A:%.*]] = add <2 x i8> [[X:%.*]], <i8 -64, i8 -64>
 ; CHECK-NEXT:    store <2 x i8> [[A]], <2 x i8>* [[P:%.*]], align 2
-; CHECK-NEXT:    [[R:%.*]] = and <2 x i8> [[A]], <i8 32, i8 32>
+; CHECK-NEXT:    [[R:%.*]] = and <2 x i8> [[X]], <i8 32, i8 32>
 ; CHECK-NEXT:    ret <2 x i8> [[R]]
 ;
   %a = add <2 x i8> %x, <i8 -64, i8 -64> ; 0xc0
