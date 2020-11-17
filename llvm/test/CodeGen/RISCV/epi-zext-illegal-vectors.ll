@@ -20,8 +20,8 @@
 ; 32xi64 64xi32               "LMUL > 8"
 ; 64xi64
 
-define <vscale x 1 x i64> @sext_nxv1i8(<vscale x 1 x i8> %v)
-; CHECK-LABEL: sext_nxv1i8:
+define <vscale x 1 x i64> @zext_nxv1i8(<vscale x 1 x i8> %v)
+; CHECK-LABEL: zext_nxv1i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -30,14 +30,14 @@ define <vscale x 1 x i64> @sext_nxv1i8(<vscale x 1 x i8> %v)
 ; CHECK-NEXT:    addi a0, zero, 56
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vsll.vx v1, v2, a0
-; CHECK-NEXT:    vsra.vx v16, v1, a0
+; CHECK-NEXT:    vsrl.vx v16, v1, a0
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 1 x i8> %v to <vscale x 1 x i64>
+  %sv = zext <vscale x 1 x i8> %v to <vscale x 1 x i64>
   ret <vscale x 1 x i64> %sv
 }
-define <vscale x 2 x i32> @sext_nxv2i8(<vscale x 2 x i8> %v)
-; CHECK-LABEL: sext_nxv2i8:
+define <vscale x 2 x i32> @zext_nxv2i8(<vscale x 2 x i8> %v)
+; CHECK-LABEL: zext_nxv2i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -45,14 +45,14 @@ define <vscale x 2 x i32> @sext_nxv2i8(<vscale x 2 x i8> %v)
 ; CHECK-NEXT:    vrgather.vv v2, v16, v1
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    vsll.vi v1, v2, 24
-; CHECK-NEXT:    vsra.vi v16, v1, 24
+; CHECK-NEXT:    vsrl.vi v16, v1, 24
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 2 x i8> %v to <vscale x 2 x i32>
+  %sv = zext <vscale x 2 x i8> %v to <vscale x 2 x i32>
   ret <vscale x 2 x i32> %sv
 }
-define <vscale x 4 x i16> @sext_nxv4i8(<vscale x 4 x i8> %v)
-; CHECK-LABEL: sext_nxv4i8:
+define <vscale x 4 x i16> @zext_nxv4i8(<vscale x 4 x i8> %v)
+; CHECK-LABEL: zext_nxv4i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -60,16 +60,16 @@ define <vscale x 4 x i16> @sext_nxv4i8(<vscale x 4 x i8> %v)
 ; CHECK-NEXT:    vrgather.vv v2, v16, v1
 ; CHECK-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
 ; CHECK-NEXT:    vsll.vi v1, v2, 8
-; CHECK-NEXT:    vsra.vi v16, v1, 8
+; CHECK-NEXT:    vsrl.vi v16, v1, 8
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 4 x i8> %v to <vscale x 4 x i16>
+  %sv = zext <vscale x 4 x i8> %v to <vscale x 4 x i16>
   ret <vscale x 4 x i16> %sv
 }
 
 
-define <vscale x 1 x i64> @sext_nxv1i16(<vscale x 1 x i16> %v)
-; CHECK-LABEL: sext_nxv1i16:
+define <vscale x 1 x i64> @zext_nxv1i16(<vscale x 1 x i16> %v)
+; CHECK-LABEL: zext_nxv1i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -78,14 +78,14 @@ define <vscale x 1 x i64> @sext_nxv1i16(<vscale x 1 x i16> %v)
 ; CHECK-NEXT:    addi a0, zero, 48
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vsll.vx v1, v2, a0
-; CHECK-NEXT:    vsra.vx v16, v1, a0
+; CHECK-NEXT:    vsrl.vx v16, v1, a0
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 1 x i16> %v to <vscale x 1 x i64>
+  %sv = zext <vscale x 1 x i16> %v to <vscale x 1 x i64>
   ret <vscale x 1 x i64> %sv
 }
-define <vscale x 2 x i32> @sext_nxv2i16(<vscale x 2 x i16> %v)
-; CHECK-LABEL: sext_nxv2i16:
+define <vscale x 2 x i32> @zext_nxv2i16(<vscale x 2 x i16> %v)
+; CHECK-LABEL: zext_nxv2i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -93,16 +93,16 @@ define <vscale x 2 x i32> @sext_nxv2i16(<vscale x 2 x i16> %v)
 ; CHECK-NEXT:    vrgather.vv v2, v16, v1
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    vsll.vi v1, v2, 16
-; CHECK-NEXT:    vsra.vi v16, v1, 16
+; CHECK-NEXT:    vsrl.vi v16, v1, 16
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 2 x i16> %v to <vscale x 2 x i32>
+  %sv = zext <vscale x 2 x i16> %v to <vscale x 2 x i32>
   ret <vscale x 2 x i32> %sv
 }
 
 
-define <vscale x 1 x i64> @sext_nxv1i32(<vscale x 1 x i32> %v)
-; CHECK-LABEL: sext_nxv1i32:
+define <vscale x 1 x i64> @zext_nxv1i32(<vscale x 1 x i32> %v)
+; CHECK-LABEL: zext_nxv1i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    vid.v v1
@@ -111,9 +111,9 @@ define <vscale x 1 x i64> @sext_nxv1i32(<vscale x 1 x i32> %v)
 ; CHECK-NEXT:    addi a0, zero, 32
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vsll.vx v1, v2, a0
-; CHECK-NEXT:    vsra.vx v16, v1, a0
+; CHECK-NEXT:    vsrl.vx v16, v1, a0
 ; CHECK-NEXT:    ret
 {
-  %sv = sext <vscale x 1 x i32> %v to <vscale x 1 x i64>
+  %sv = zext <vscale x 1 x i32> %v to <vscale x 1 x i64>
   ret <vscale x 1 x i64> %sv
 }

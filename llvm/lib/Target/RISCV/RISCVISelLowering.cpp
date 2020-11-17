@@ -345,7 +345,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
     // Custom-legalize this node for scalable vectors.
     for (auto VT : {MVT::nxv1i64, MVT::nxv2i32, MVT::nxv4i16}) {
-      setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Custom);
+      setOperationAction(ISD::SIGN_EXTEND_VECTOR_INREG, VT, Custom);
+      setOperationAction(ISD::ZERO_EXTEND_VECTOR_INREG, VT, Custom);
     }
 
     // Custom-legalize these nodes for scalable vectors.
@@ -719,33 +720,42 @@ SDValue RISCVTargetLowering::lowerTRUNCATE(SDValue Op,
   return Result;
 }
 
-SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
-                                                    SelectionDAG &DAG) const {
+SDValue RISCVTargetLowering::lowerExtendVectorInReg(SDValue Op,
+                                                    SelectionDAG &DAG,
+                                                    int Opcode) const {
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
 
-  VTSDNode *SrcVTNode = cast<VTSDNode>(Op.getOperand(1));
-  assert(SrcVTNode != nullptr && "Unexpected SDNode");
-  EVT SrcVT = SrcVTNode->getVT();
-  MVT::SimpleValueType SimpleSrcVT = SrcVT.getSimpleVT().SimpleTy;
+  EVT SrcVT = Op.getOperand(0).getValueType();
 
-  assert((SimpleSrcVT == MVT::nxv1i8 || SimpleSrcVT == MVT::nxv1i16 ||
-          SimpleSrcVT == MVT::nxv1i32 || SimpleSrcVT == MVT::nxv2i8 ||
-          SimpleSrcVT == MVT::nxv2i16 || SimpleSrcVT == MVT::nxv4i8) &&
-         "Unexpected type to extend");
+  uint64_t ResTyBits = VT.getScalarSizeInBits();
+  uint64_t OpTyBits = SrcVT.getScalarSizeInBits();
 
-  unsigned ResTyBits = VT.getScalarSizeInBits();
-  unsigned OpTyBits = SrcVT.getScalarSizeInBits();
+  assert(isPowerOf2_64(ResTyBits) && isPowerOf2_64(OpTyBits) &&
+         (ResTyBits > OpTyBits));
 
-  assert(ResTyBits > OpTyBits);
+  // For this to work we need to shuffle the elements first.
+  SDValue Shuffled =
+      DAG.getNode(RISCVISD::SHUFFLE_EXTEND, DL, SrcVT, Op.getOperand(0),
+                  DAG.getConstant(Log2_64(ResTyBits / OpTyBits), DL, MVT::i64));
 
   // Compute the number of bits to sign-extend.
   SDValue ExtendBits = DAG.getConstant(ResTyBits - OpTyBits, DL, MVT::i64);
-
-  SDValue SextInreg = DAG.getNode(RISCVISD::SIGN_EXTEND_BITS_INREG, DL, VT,
-                                  Op.getOperand(0), ExtendBits);
+  SDValue SextInreg = DAG.getNode(Opcode, DL, VT, Shuffled, ExtendBits);
 
   return SextInreg;
+}
+
+SDValue
+RISCVTargetLowering::lowerSIGN_EXTEND_VECTOR_INREG(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  return lowerExtendVectorInReg(Op, DAG, RISCVISD::SIGN_EXTEND_BITS_INREG);
+}
+
+SDValue
+RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  return lowerExtendVectorInReg(Op, DAG, RISCVISD::ZERO_EXTEND_BITS_INREG);
 }
 
 SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const {
@@ -978,8 +988,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerZERO_EXTEND(Op, DAG);
   case ISD::TRUNCATE:
     return lowerTRUNCATE(Op, DAG);
-  case ISD::SIGN_EXTEND_INREG:
-    return lowerSIGN_EXTEND_INREG(Op, DAG);
+  case ISD::SIGN_EXTEND_VECTOR_INREG:
+    return lowerSIGN_EXTEND_VECTOR_INREG(Op, DAG);
+  case ISD::ZERO_EXTEND_VECTOR_INREG:
+    return lowerZERO_EXTEND_VECTOR_INREG(Op, DAG);
   case ISD::MGATHER:
     return lowerMGATHER(Op, DAG);
   case ISD::MSCATTER:
@@ -4946,7 +4958,9 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(SIGN_EXTEND_VECTOR)
   NODE_NAME_CASE(ZERO_EXTEND_VECTOR)
   NODE_NAME_CASE(TRUNCATE_VECTOR)
+  NODE_NAME_CASE(SHUFFLE_EXTEND)
   NODE_NAME_CASE(SIGN_EXTEND_BITS_INREG)
+  NODE_NAME_CASE(ZERO_EXTEND_BITS_INREG)
 
   NODE_NAME_CASE(VZIP2)
   NODE_NAME_CASE(VUNZIP2)
@@ -5452,4 +5466,21 @@ bool RISCVTargetLowering::shouldSinkOperands(
   }
 
   return false;
+}
+
+TargetLoweringBase::LegalizeTypeAction
+RISCVTargetLowering::getPreferredVectorAction(MVT VT) const {
+  switch (VT.SimpleTy) {
+  case MVT::nxv1i32:
+  case MVT::nxv1i16:
+  case MVT::nxv1i8:
+  case MVT::nxv2i16:
+  case MVT::nxv2i8:
+  case MVT::nxv4i8:
+    return TypeWidenVector;
+  default:
+    break;
+  }
+
+  return TargetLoweringBase::getPreferredVectorAction(VT);
 }
