@@ -120,8 +120,8 @@ def vecreduce_seq_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 // op vd, vs2, vs1, vm
 class VCustom_VV_VV<bits<6> funct6, RISCVVFormat opv, string opcodestr>
-    : RVCustomInstVV<funct6, opv, (outs VRegOp:$vd),
-                     (ins VRegOp:$vs2, VRegOp:$vs1, VMaskOp:$vm),
+    : RVCustomInstVV<funct6, opv, (outs VR:$vd),
+                     (ins VR:$vs2, VR:$vs1, VMaskOp:$vm),
                      opcodestr, "$vd, $vs2, $vs1${vm}">;
 }
 

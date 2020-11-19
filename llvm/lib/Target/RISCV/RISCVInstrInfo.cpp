@@ -274,14 +274,17 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
                                          const TargetRegisterInfo *TRI) const {
   MachineFunction *MF = MBB.getParent();
   RISCVMachineFunctionInfo *RVFI = MF->getInfo<RISCVMachineFunctionInfo>();
-  MachineFrameInfo &FrameInfo = MF->getFrameInfo();
+  MachineFrameInfo &MFI = MF->getFrameInfo();
 
   DebugLoc DL;
   if (I != MBB.end())
     DL = I->getDebugLoc();
 
-  unsigned Opcode;
+  MachineMemOperand *MMO = MF->getMachineMemOperand(
+      MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOStore,
+      MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
 
+  unsigned Opcode;
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::SW : RISCV::SD;
@@ -291,77 +294,77 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::FSD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M2))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M4))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M8))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T2))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T3))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T4))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T5))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T6))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T7))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVSPILL_M1T8))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
@@ -372,7 +375,8 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   BuildMI(MBB, I, DL, get(Opcode))
       .addReg(SrcReg, getKillRegState(IsKill))
       .addFrameIndex(FI)
-      .addImm(0);
+      .addImm(0)
+      .addMemOperand(MMO);
 }
 
 void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
@@ -382,14 +386,17 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
                                           const TargetRegisterInfo *TRI) const {
   MachineFunction *MF = MBB.getParent();
   RISCVMachineFunctionInfo *RVFI = MF->getInfo<RISCVMachineFunctionInfo>();
-  MachineFrameInfo &FrameInfo = MF->getFrameInfo();
+  MachineFrameInfo &MFI = MF->getFrameInfo();
 
   DebugLoc DL;
   if (I != MBB.end())
     DL = I->getDebugLoc();
 
-  unsigned Opcode;
+  MachineMemOperand *MMO = MF->getMachineMemOperand(
+      MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOLoad,
+      MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
 
+  unsigned Opcode;
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::LW : RISCV::LD;
@@ -399,74 +406,77 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::FLD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M2), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M4), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M8), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T2), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T3), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T4), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T5), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T6), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T7), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    FrameInfo.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::EPIVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoVRELOAD_M1T8), DstReg)
         .addFrameIndex(FI);
     return;
   } else
     llvm_unreachable("Can't load this register from stack slot");
 
-  BuildMI(MBB, I, DL, get(Opcode), DstReg).addFrameIndex(FI).addImm(0);
+  BuildMI(MBB, I, DL, get(Opcode), DstReg)
+    .addFrameIndex(FI)
+    .addImm(0)
+    .addMemOperand(MMO);
 }
 
 void RISCVInstrInfo::movImm(MachineBasicBlock &MBB,

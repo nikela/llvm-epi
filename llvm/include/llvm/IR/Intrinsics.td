@@ -1525,8 +1525,8 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ]
 
 // END FIXME: TO BE REPLACED
 
-// Binary operators
-let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
+// Speculatable Binary operators
+let IntrProperties = [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {
   def int_vp_add : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                              [ LLVMMatchType<0>,
                                LLVMMatchType<0>,
@@ -1538,26 +1538,6 @@ let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                llvm_i32_ty]>;
   def int_vp_mul  : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_sdiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_udiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_srem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_urem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                               [ LLVMMatchType<0>,
                                 LLVMMatchType<0>,
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
@@ -1592,7 +1572,30 @@ let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
                                LLVMMatchType<0>,
                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                llvm_i32_ty]>;
+}
 
+// Non-speculatable binary operators.
+let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
+  def int_vp_sdiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+  def int_vp_udiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+  def int_vp_srem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+  def int_vp_urem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
 }
 
 def int_get_active_lane_mask:
