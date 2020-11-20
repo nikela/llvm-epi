@@ -387,6 +387,8 @@ public:
 
   bool isNoopAddrSpaceCast(unsigned FromAS, unsigned ToAS) const;
 
+  unsigned getAssumedAddrSpace(const Value *V) const;
+
   /// Rewrite intrinsic call \p II such that \p OldV will be replaced with \p
   /// NewV, which has a different address space. This should happen for every
   /// operand index that collectFlatAddressOperands returned for the intrinsic.
@@ -707,6 +709,9 @@ public:
 
   /// Return true if this type is legal.
   bool isTypeLegal(Type *Ty) const;
+
+  /// Returns the estimated number of registers required to represent \p Ty.
+  unsigned getRegUsageForType(Type *Ty) const;
 
   /// Return true if switches should be turned into lookup tables for the
   /// target.
@@ -1407,6 +1412,7 @@ public:
   virtual bool collectFlatAddressOperands(SmallVectorImpl<int> &OpIndexes,
                                           Intrinsic::ID IID) const = 0;
   virtual bool isNoopAddrSpaceCast(unsigned FromAS, unsigned ToAS) const = 0;
+  virtual unsigned getAssumedAddrSpace(const Value *V) const = 0;
   virtual Value *rewriteIntrinsicWithAddressSpace(IntrinsicInst *II,
                                                   Value *OldV,
                                                   Value *NewV) const = 0;
@@ -1470,6 +1476,7 @@ public:
   virtual bool isProfitableToHoist(Instruction *I) = 0;
   virtual bool useAA() = 0;
   virtual bool isTypeLegal(Type *Ty) = 0;
+  virtual unsigned getRegUsageForType(Type *Ty) = 0;
   virtual bool shouldBuildLookupTables() = 0;
   virtual bool shouldBuildLookupTablesForConstant(Constant *C) = 0;
   virtual bool useColdCCForColdCall(Function &F) = 0;
@@ -1711,6 +1718,10 @@ public:
     return Impl.isNoopAddrSpaceCast(FromAS, ToAS);
   }
 
+  unsigned getAssumedAddrSpace(const Value *V) const override {
+    return Impl.getAssumedAddrSpace(V);
+  }
+
   Value *rewriteIntrinsicWithAddressSpace(IntrinsicInst *II, Value *OldV,
                                           Value *NewV) const override {
     return Impl.rewriteIntrinsicWithAddressSpace(II, OldV, NewV);
@@ -1841,6 +1852,9 @@ public:
   }
   bool useAA() override { return Impl.useAA(); }
   bool isTypeLegal(Type *Ty) override { return Impl.isTypeLegal(Ty); }
+  unsigned getRegUsageForType(Type *Ty) override {
+    return Impl.getRegUsageForType(Ty);
+  }
   bool shouldBuildLookupTables() override {
     return Impl.shouldBuildLookupTables();
   }

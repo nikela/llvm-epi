@@ -9253,6 +9253,8 @@ public:
                           LateInstantiatedAttrVec *LateAttrs = nullptr,
                           LocalInstantiationScope *OuterMostScope = nullptr);
 
+  void InstantiateDefaultCtorDefaultArgs(CXXConstructorDecl *Ctor);
+
   bool usesPartialOrExplicitSpecialization(
       SourceLocation Loc, ClassTemplateSpecializationDecl *ClassTemplateSpec);
 
@@ -11498,6 +11500,8 @@ public:
                                           bool IsCompAssign);
   QualType CheckMatrixMultiplyOperands(ExprResult &LHS, ExprResult &RHS,
                                        SourceLocation Loc, bool IsCompAssign);
+
+  bool isValidSveBitcast(QualType srcType, QualType destType);
 
   bool areLaxCompatibleVectorTypes(QualType srcType, QualType destType);
   bool isLaxVectorConversion(QualType srcType, QualType destType);

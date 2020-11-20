@@ -159,6 +159,10 @@ def CopyOp : LinalgStructured_Op<"copy", [
 
     Value getSource() { return input();}
     Value getTarget() { return output(); }
+
+    static std::function<void(Block &)> getRegionBuilder() {
+      return nullptr;
+    }
   }];
   let verifier = [{ return ::verify(*this); }];
 
@@ -187,6 +191,10 @@ def FillOp : LinalgStructured_Op<"fill", [
       // filling_value -> O(ivs)
       return Builder(getContext()).getAffineMapArrayAttr({
           extractOrIdentityMap(llvm::None, getNumParallelLoops(), context)});
+    }
+
+    static std::function<void(Block &)> getRegionBuilder() {
+      return nullptr;
     }
   }];
 
@@ -260,6 +268,10 @@ class PoolingBase_Op<string mnemonic, list<OpTrait> props>
       assert(i < getNumWindowLoops());
       if (!padding().hasValue()) return 0;
       return padding().getValue().getValue<int64_t>({i, 1});
+    }
+
+    static std::function<void(Block &)> getRegionBuilder() {
+      return nullptr;
     }
   }];
 }
@@ -493,6 +505,8 @@ class GenericOpBase<string mnemonic> : LinalgStructuredBase_Op<mnemonic, [
                        ArrayAttr:$iterator_types,
                        OptionalAttr<StrAttr>:$doc,
                        OptionalAttr<StrAttr>:$library_call,
+                       // ArrayAttr of StrArrayAttr:
+                       OptionalAttr<ArrayAttr>:$sparse,
                        Confined<OptionalAttr<I64Attr>, [IntMinValue<0>]>
                          :$symbol_source);
   let results = (outs Variadic<AnyRankedTensor>:$result_tensors);
@@ -513,6 +527,10 @@ class GenericOpBase<string mnemonic> : LinalgStructuredBase_Op<mnemonic, [
       auto ss = symbol_source();
       return ss.hasValue() ?
         llvm::Optional<unsigned>(ss.getValue()) : llvm::None;
+    }
+
+    static std::function<void(Block &)> getRegionBuilder() {
+      return nullptr;
     }
   }];
   let printer = [{ return ::print(p, *this); }];
@@ -549,6 +567,8 @@ def GenericOp : GenericOpBase<"generic"> {
         Each element of the list represents and iterator of one of the following
         types:
           parallel, reduction, window
+      - sparse: an optional list with per-dimension sparsity annotations (either
+        "D" for dense or "S" for sparse) for each input and output view.
       - symbol_source: index of the operand whose dimensions will be propagated
         as symbols to the indexing maps. When specified the number of symbols
         in each of the indexing maps has to be either 0 or the rank of the

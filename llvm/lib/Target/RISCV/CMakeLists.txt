@@ -1,3 +1,5 @@
+add_llvm_component_group(RISCV)
+
 set(LLVM_TARGET_DEFINITIONS RISCV.td)
 
 tablegen(LLVM RISCVGenAsmMatcher.inc -gen-asm-matcher)
@@ -39,6 +41,23 @@ add_llvm_target(RISCVCodeGen
   EPIFMAContraction.cpp
   EPIRemoveRedundantVSETVL.cpp
   EPIRemoveRedundantVSETVLGlobal.cpp
+
+  LINK_COMPONENTS
+  Analysis
+  AsmPrinter
+  Core
+  CodeGen
+  MC
+  RISCVDesc
+  RISCVInfo
+  RISCVUtils
+  SelectionDAG
+  Support
+  Target
+  GlobalISel
+
+  ADD_TO_COMPONENT
+  RISCV
   )
 
 add_subdirectory(AsmParser)

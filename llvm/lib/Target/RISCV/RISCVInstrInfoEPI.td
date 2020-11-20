@@ -32,7 +32,19 @@ def riscv_trunc_vector : SDNode<"RISCVISD::TRUNCATE_VECTOR",
                                 SDTypeProfile<1, 1,
                                  [SDTCisVec<0>, SDTCisVec<1>]>>;
 
+def riscv_shuffle_extend : SDNode<"RISCVISD::SHUFFLE_EXTEND",
+                                     SDTypeProfile<1, 2,
+                                      [SDTCisSameAs<0, 1>,
+                                      SDTCisVec<0>, SDTCisInt<0>,
+                                      SDTCisInt<2>]>>;
+
 def riscv_sign_extend_inreg : SDNode<"RISCVISD::SIGN_EXTEND_BITS_INREG",
+                                     SDTypeProfile<1, 2,
+                                      [SDTCisSameAs<0, 1>,
+                                      SDTCisVec<0>, SDTCisInt<0>,
+                                      SDTCisInt<2>]>>;
+
+def riscv_zero_extend_inreg : SDNode<"RISCVISD::ZERO_EXTEND_BITS_INREG",
                                      SDTypeProfile<1, 2,
                                       [SDTCisSameAs<0, 1>,
                                       SDTCisVec<0>, SDTCisInt<0>,
@@ -108,8 +120,8 @@ def vecreduce_seq_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 // op vd, vs2, vs1, vm
 class VCustom_VV_VV<bits<6> funct6, RISCVVFormat opv, string opcodestr>
-    : RVCustomInstVV<funct6, opv, (outs VRegOp:$vd),
-                     (ins VRegOp:$vs2, VRegOp:$vs1, VMaskOp:$vm),
+    : RVCustomInstVV<funct6, opv, (outs VR:$vd),
+                     (ins VR:$vs2, VR:$vs1, VMaskOp:$vm),
                      opcodestr, "$vd, $vs2, $vs1${vm}">;
 }
 
@@ -3734,6 +3746,27 @@ foreach gfvti = GroupFloatVectors in {
              sub_vrm2)>;
 }
 
+foreach vti = AllIntegerVectors in {
+
+def : Pat<(vti.Vector (riscv_shuffle_extend
+                         (vti.Vector vti.RegClass:$rs1),
+                         uimm5:$shamt)),
+         (!cast<Instruction>("PseudoVRGATHER_VV_M"#vti.RegClass.VLMul)
+             (vti.Vector (IMPLICIT_DEF)),
+             (vti.Vector vti.RegClass:$rs1),
+             (!cast<Instruction>("PseudoVSRL_VI_M"#vti.RegClass.VLMul)
+                (vti.Vector (IMPLICIT_DEF)),
+                (!cast<Instruction>("PseudoVID_V_M"#vti.RegClass.VLMul)
+                   (vti.Vector (IMPLICIT_DEF)),
+                   (vti.Mask zero_reg),
+                   VLMax, vti.SEW),
+                (uimm5:$shamt),
+                (vti.Mask zero_reg),
+                VLMax, vti.SEW),
+             (vti.Mask zero_reg),
+             VLMax, vti.SEW)>;
+}
+
 foreach vti = AllIllegalIntegerVectors in {
   defvar lvti = vti.LegalVti;
 
@@ -3751,14 +3784,40 @@ foreach vti = AllIllegalIntegerVectors in {
              (lvti.Mask zero_reg),
              VLMax,
              lvti.SEW)>;
-}
-
-foreach vti = AllIllegalIntegerVectors in {
-  defvar lvti = vti.LegalVti;
 
   def : Pat<(lvti.Vector (riscv_sign_extend_inreg (lvti.Vector VR:$rs2),
                           GPR:$rs1)),
             (PseudoVSRA_VX_M1
+             (lvti.Vector (IMPLICIT_DEF)),
+             (PseudoVSLL_VX_M1
+              (lvti.Vector (IMPLICIT_DEF)),
+              $rs2, $rs1,
+              (lvti.Mask zero_reg),
+              VLMax,
+              lvti.SEW),
+             $rs1,
+             (lvti.Mask zero_reg),
+             VLMax,
+             lvti.SEW)>;
+
+  def : Pat<(lvti.Vector (riscv_zero_extend_inreg (lvti.Vector VR:$rs2),
+                          uimm5:$rs1)),
+            (PseudoVSRL_VI_M1
+             (lvti.Vector (IMPLICIT_DEF)),
+             (PseudoVSLL_VI_M1
+              (lvti.Vector (IMPLICIT_DEF)),
+              $rs2, uimm5:$rs1,
+              (lvti.Mask zero_reg),
+              VLMax,
+              lvti.SEW),
+             uimm5:$rs1,
+             (lvti.Mask zero_reg),
+             VLMax,
+             lvti.SEW)>;
+
+  def : Pat<(lvti.Vector (riscv_zero_extend_inreg (lvti.Vector VR:$rs2),
+                          GPR:$rs1)),
+            (PseudoVSRL_VX_M1
              (lvti.Vector (IMPLICIT_DEF)),
              (PseudoVSLL_VX_M1
               (lvti.Vector (IMPLICIT_DEF)),

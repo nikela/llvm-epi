@@ -171,8 +171,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::VACOPY, MVT::Other, Expand);
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
-  for (auto VT : {MVT::i1, MVT::i8, MVT::i16})
-    setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Expand);
+  setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
+  if (!Subtarget.hasStdExtZbb()) {
+    setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i8, Expand);
+    setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i16, Expand);
+  }
 
   if (Subtarget.is64Bit()) {
     setOperationAction(ISD::ADD, MVT::i32, Custom);
@@ -342,7 +345,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
     // Custom-legalize this node for scalable vectors.
     for (auto VT : {MVT::nxv1i64, MVT::nxv2i32, MVT::nxv4i16}) {
-      setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Custom);
+      setOperationAction(ISD::SIGN_EXTEND_VECTOR_INREG, VT, Custom);
+      setOperationAction(ISD::ZERO_EXTEND_VECTOR_INREG, VT, Custom);
     }
 
     // Custom-legalize these nodes for scalable vectors.
@@ -561,6 +565,14 @@ bool RISCVTargetLowering::isSExtCheaperThanZExt(EVT SrcVT, EVT DstVT) const {
   return Subtarget.is64Bit() && SrcVT == MVT::i32 && DstVT == MVT::i64;
 }
 
+bool RISCVTargetLowering::isCheapToSpeculateCttz() const {
+  return Subtarget.hasStdExtZbb();
+}
+
+bool RISCVTargetLowering::isCheapToSpeculateCtlz() const {
+  return Subtarget.hasStdExtZbb();
+}
+
 bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
                                        bool ForCodeSize) const {
   if (VT == MVT::f32 && !Subtarget.hasStdExtF())
@@ -708,33 +720,42 @@ SDValue RISCVTargetLowering::lowerTRUNCATE(SDValue Op,
   return Result;
 }
 
-SDValue RISCVTargetLowering::lowerSIGN_EXTEND_INREG(SDValue Op,
-                                                    SelectionDAG &DAG) const {
+SDValue RISCVTargetLowering::lowerExtendVectorInReg(SDValue Op,
+                                                    SelectionDAG &DAG,
+                                                    int Opcode) const {
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
 
-  VTSDNode *SrcVTNode = cast<VTSDNode>(Op.getOperand(1));
-  assert(SrcVTNode != nullptr && "Unexpected SDNode");
-  EVT SrcVT = SrcVTNode->getVT();
-  MVT::SimpleValueType SimpleSrcVT = SrcVT.getSimpleVT().SimpleTy;
+  EVT SrcVT = Op.getOperand(0).getValueType();
 
-  assert((SimpleSrcVT == MVT::nxv1i8 || SimpleSrcVT == MVT::nxv1i16 ||
-          SimpleSrcVT == MVT::nxv1i32 || SimpleSrcVT == MVT::nxv2i8 ||
-          SimpleSrcVT == MVT::nxv2i16 || SimpleSrcVT == MVT::nxv4i8) &&
-         "Unexpected type to extend");
+  uint64_t ResTyBits = VT.getScalarSizeInBits();
+  uint64_t OpTyBits = SrcVT.getScalarSizeInBits();
 
-  unsigned ResTyBits = VT.getScalarSizeInBits();
-  unsigned OpTyBits = SrcVT.getScalarSizeInBits();
+  assert(isPowerOf2_64(ResTyBits) && isPowerOf2_64(OpTyBits) &&
+         (ResTyBits > OpTyBits));
 
-  assert(ResTyBits > OpTyBits);
+  // For this to work we need to shuffle the elements first.
+  SDValue Shuffled =
+      DAG.getNode(RISCVISD::SHUFFLE_EXTEND, DL, SrcVT, Op.getOperand(0),
+                  DAG.getConstant(Log2_64(ResTyBits / OpTyBits), DL, MVT::i64));
 
   // Compute the number of bits to sign-extend.
   SDValue ExtendBits = DAG.getConstant(ResTyBits - OpTyBits, DL, MVT::i64);
-
-  SDValue SextInreg = DAG.getNode(RISCVISD::SIGN_EXTEND_BITS_INREG, DL, VT,
-                                  Op.getOperand(0), ExtendBits);
+  SDValue SextInreg = DAG.getNode(Opcode, DL, VT, Shuffled, ExtendBits);
 
   return SextInreg;
+}
+
+SDValue
+RISCVTargetLowering::lowerSIGN_EXTEND_VECTOR_INREG(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  return lowerExtendVectorInReg(Op, DAG, RISCVISD::SIGN_EXTEND_BITS_INREG);
+}
+
+SDValue
+RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  return lowerExtendVectorInReg(Op, DAG, RISCVISD::ZERO_EXTEND_BITS_INREG);
 }
 
 SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const {
@@ -967,8 +988,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerZERO_EXTEND(Op, DAG);
   case ISD::TRUNCATE:
     return lowerTRUNCATE(Op, DAG);
-  case ISD::SIGN_EXTEND_INREG:
-    return lowerSIGN_EXTEND_INREG(Op, DAG);
+  case ISD::SIGN_EXTEND_VECTOR_INREG:
+    return lowerSIGN_EXTEND_VECTOR_INREG(Op, DAG);
+  case ISD::ZERO_EXTEND_VECTOR_INREG:
+    return lowerZERO_EXTEND_VECTOR_INREG(Op, DAG);
   case ISD::MGATHER:
     return lowerMGATHER(Op, DAG);
   case ISD::MSCATTER:
@@ -1221,9 +1244,8 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
     normaliseSetCC(LHS, RHS, CCVal);
 
     SDValue TargetCC = DAG.getConstant(CCVal, DL, XLenVT);
-    SDVTList VTs = DAG.getVTList(Op.getValueType(), MVT::Glue);
     SDValue Ops[] = {LHS, RHS, TargetCC, TrueV, FalseV};
-    return DAG.getNode(RISCVISD::SELECT_CC, DL, VTs, Ops);
+    return DAG.getNode(RISCVISD::SELECT_CC, DL, Op.getValueType(), Ops);
   }
 
   // Otherwise:
@@ -1232,10 +1254,9 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
   SDValue Zero = DAG.getConstant(0, DL, XLenVT);
   SDValue SetNE = DAG.getConstant(ISD::SETNE, DL, XLenVT);
 
-  SDVTList VTs = DAG.getVTList(Op.getValueType(), MVT::Glue);
   SDValue Ops[] = {CondV, Zero, SetNE, TrueV, FalseV};
 
-  return DAG.getNode(RISCVISD::SELECT_CC, DL, VTs, Ops);
+  return DAG.getNode(RISCVISD::SELECT_CC, DL, Op.getValueType(), Ops);
 }
 
 SDValue RISCVTargetLowering::lowerVASTART(SDValue Op, SelectionDAG &DAG) const {
@@ -4906,80 +4927,64 @@ bool RISCVTargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
 }
 
 const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
+#define NODE_NAME_CASE(NODE)                                                   \
+  case RISCVISD::NODE:                                                         \
+    return "RISCVISD::" #NODE;
+  // clang-format off
   switch ((RISCVISD::NodeType)Opcode) {
   case RISCVISD::FIRST_NUMBER:
     break;
-  case RISCVISD::RET_FLAG:
-    return "RISCVISD::RET_FLAG";
-  case RISCVISD::URET_FLAG:
-    return "RISCVISD::URET_FLAG";
-  case RISCVISD::SRET_FLAG:
-    return "RISCVISD::SRET_FLAG";
-  case RISCVISD::MRET_FLAG:
-    return "RISCVISD::MRET_FLAG";
-  case RISCVISD::CALL:
-    return "RISCVISD::CALL";
-  case RISCVISD::SELECT_CC:
-    return "RISCVISD::SELECT_CC";
-  case RISCVISD::BuildPairF64:
-    return "RISCVISD::BuildPairF64";
-  case RISCVISD::SplitF64:
-    return "RISCVISD::SplitF64";
-  case RISCVISD::TAIL:
-    return "RISCVISD::TAIL";
-  case RISCVISD::SLLW:
-    return "RISCVISD::SLLW";
-  case RISCVISD::SRAW:
-    return "RISCVISD::SRAW";
-  case RISCVISD::SRLW:
-    return "RISCVISD::SRLW";
-  case RISCVISD::DIVW:
-    return "RISCVISD::DIVW";
-  case RISCVISD::DIVUW:
-    return "RISCVISD::DIVUW";
-  case RISCVISD::REMUW:
-    return "RISCVISD::REMUW";
-  case RISCVISD::FMV_W_X_RV64:
-    return "RISCVISD::FMV_W_X_RV64";
-  case RISCVISD::FMV_X_ANYEXTW_RV64:
-    return "RISCVISD::FMV_X_ANYEXTW_RV64";
-  case RISCVISD::READ_CYCLE_WIDE:
-    return "RISCVISD::READ_CYCLE_WIDE";
-  case RISCVISD::VMV_X_S:
-    return "RISCVISD::VMV_X_S";
-  case RISCVISD::EXTRACT_VECTOR_ELT:
-    return "RISCVISD::EXTRACT_VECTOR_ELT";
-  case RISCVISD::SIGN_EXTEND_VECTOR:
-    return "RISCVISD::SIGN_EXTEND_VECTOR";
-  case RISCVISD::ZERO_EXTEND_VECTOR:
-    return "RISCVISD::ZERO_EXTEND_VECTOR";
-  case RISCVISD::TRUNCATE_VECTOR:
-    return "RISCVISD::TRUNCATE_VECTOR";
-  case RISCVISD::SIGN_EXTEND_BITS_INREG:
-    return "RISCVISD::SIGN_EXTEND_BITS_INREG";
+  NODE_NAME_CASE(RET_FLAG)
+  NODE_NAME_CASE(URET_FLAG)
+  NODE_NAME_CASE(SRET_FLAG)
+  NODE_NAME_CASE(MRET_FLAG)
+  NODE_NAME_CASE(CALL)
+  NODE_NAME_CASE(SELECT_CC)
+  NODE_NAME_CASE(BuildPairF64)
+  NODE_NAME_CASE(SplitF64)
+  NODE_NAME_CASE(TAIL)
+  NODE_NAME_CASE(SLLW)
+  NODE_NAME_CASE(SRAW)
+  NODE_NAME_CASE(SRLW)
+  NODE_NAME_CASE(DIVW)
+  NODE_NAME_CASE(DIVUW)
+  NODE_NAME_CASE(REMUW)
+  NODE_NAME_CASE(FMV_W_X_RV64)
+  NODE_NAME_CASE(FMV_X_ANYEXTW_RV64)
+  NODE_NAME_CASE(READ_CYCLE_WIDE)
+
+  NODE_NAME_CASE(VMV_X_S)
+  NODE_NAME_CASE(EXTRACT_VECTOR_ELT)
+  NODE_NAME_CASE(SIGN_EXTEND_VECTOR)
+  NODE_NAME_CASE(ZERO_EXTEND_VECTOR)
+  NODE_NAME_CASE(TRUNCATE_VECTOR)
+  NODE_NAME_CASE(SHUFFLE_EXTEND)
+  NODE_NAME_CASE(SIGN_EXTEND_BITS_INREG)
+  NODE_NAME_CASE(ZERO_EXTEND_BITS_INREG)
+
+  NODE_NAME_CASE(VZIP2)
+  NODE_NAME_CASE(VUNZIP2)
+  NODE_NAME_CASE(VTRN)
+
 #define TUPLE_NODE(X)  \
-  case X##2: return #X"2"; \
-  case X##3: return #X"3"; \
-  case X##4: return #X"4"; \
-  case X##5: return #X"5"; \
-  case X##6: return #X"6"; \
-  case X##7: return #X"7"; \
-  case X##8: return #X"8";
-  TUPLE_NODE(RISCVISD::VLSEG)
-  TUPLE_NODE(RISCVISD::VSSEG)
-  TUPLE_NODE(RISCVISD::VLSSEG)
-  TUPLE_NODE(RISCVISD::VSSSEG)
-  TUPLE_NODE(RISCVISD::VLXSEG)
-  TUPLE_NODE(RISCVISD::VSXSEG)
+  NODE_NAME_CASE(X##2) \
+  NODE_NAME_CASE(X##3) \
+  NODE_NAME_CASE(X##4) \
+  NODE_NAME_CASE(X##5) \
+  NODE_NAME_CASE(X##6) \
+  NODE_NAME_CASE(X##7) \
+  NODE_NAME_CASE(X##8)
+  TUPLE_NODE(VLSEG)
+  TUPLE_NODE(VSSEG)
+  TUPLE_NODE(VLSSEG)
+  TUPLE_NODE(VSSSEG)
+  TUPLE_NODE(VLXSEG)
+  TUPLE_NODE(VSXSEG)
 #undef TUPLE_NODE
-  case RISCVISD::VZIP2:
-    return "RISCVISD::VZIP2";
-  case RISCVISD::VUNZIP2:
-    return "RISCVISD::VUNZIP2";
-  case RISCVISD::VTRN:
-    return "RISCVISD::VTRN";
   }
+  // clang-format on
   return nullptr;
+#undef NODE_NAME_CASE
 }
 
 /// getConstraintType - Given a constraint letter, return the type of
@@ -5461,4 +5466,21 @@ bool RISCVTargetLowering::shouldSinkOperands(
   }
 
   return false;
+}
+
+TargetLoweringBase::LegalizeTypeAction
+RISCVTargetLowering::getPreferredVectorAction(MVT VT) const {
+  switch (VT.SimpleTy) {
+  case MVT::nxv1i32:
+  case MVT::nxv1i16:
+  case MVT::nxv1i8:
+  case MVT::nxv2i16:
+  case MVT::nxv2i8:
+  case MVT::nxv4i8:
+    return TypeWidenVector;
+  default:
+    break;
+  }
+
+  return TargetLoweringBase::getPreferredVectorAction(VT);
 }

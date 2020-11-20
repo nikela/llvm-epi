@@ -480,11 +480,11 @@ public:
                                   VPValue *BlockInMask, VPValue *EVL);
 
   /// Widen a single call instruction within the innermost loop.
-  void widenCallInstruction(CallInst &I, VPUser &ArgOperands,
+  void widenCallInstruction(CallInst &I, VPValue *Def, VPUser &ArgOperands,
                             VPTransformState &State);
 
   /// Widen a single select instruction within the innermost loop.
-  void widenSelectInstruction(SelectInst &I, VPUser &Operands,
+  void widenSelectInstruction(SelectInst &I, VPValue *VPDef, VPUser &Operands,
                               bool InvariantCond, VPTransformState &State);
 
   /// Fix the vectorized code, taking care of header phi's, live-outs, and more.
@@ -500,8 +500,8 @@ public:
 
   /// Vectorize a single GetElementPtrInst based on information gathered and
   /// decisions taken during planning.
-  void widenGEP(GetElementPtrInst *GEP, VPUser &Indices, unsigned UF,
-                ElementCount VF, bool IsPtrLoopInvariant,
+  void widenGEP(GetElementPtrInst *GEP, VPValue *VPDef, VPUser &Indices,
+                unsigned UF, ElementCount VF, bool IsPtrLoopInvariant,
                 SmallBitVector &IsIndexLoopInvariant, VPTransformState &State);
 
   /// Vectorize a single PHINode in a block. This method handles the induction
@@ -4743,9 +4743,9 @@ void InnerLoopVectorizer::fixNonInductionPHIs() {
   }
 }
 
-void InnerLoopVectorizer::widenGEP(GetElementPtrInst *GEP, VPUser &Operands,
-                                   unsigned UF, ElementCount VF,
-                                   bool IsPtrLoopInvariant,
+void InnerLoopVectorizer::widenGEP(GetElementPtrInst *GEP, VPValue *VPDef,
+                                   VPUser &Operands, unsigned UF,
+                                   ElementCount VF, bool IsPtrLoopInvariant,
                                    SmallBitVector &IsIndexLoopInvariant,
                                    VPTransformState &State) {
   // Construct a vector GEP by widening the operands of the scalar GEP as
@@ -5392,7 +5392,8 @@ void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
   } // end of switch.
 }
 
-void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPUser &ArgOperands,
+void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
+                                               VPUser &ArgOperands,
                                                VPTransformState &State) {
   assert(!isa<DbgInfoIntrinsic>(I) &&
          "DbgInfoIntrinsic should have been dropped during VPlan construction");
@@ -5455,12 +5456,12 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPUser &ArgOperands,
       if (isa<FPMathOperator>(V))
         V->copyFastMathFlags(CI);
 
-      VectorLoopValueMap.setVectorValue(&I, Part, V);
+      State.set(Def, &I, V, Part);
       addMetadata(V, &I);
   }
 }
 
-void InnerLoopVectorizer::widenSelectInstruction(SelectInst &I,
+void InnerLoopVectorizer::widenSelectInstruction(SelectInst &I, VPValue *VPDef,
                                                  VPUser &Operands,
                                                  bool InvariantCond,
                                                  VPTransformState &State) {
@@ -5479,7 +5480,7 @@ void InnerLoopVectorizer::widenSelectInstruction(SelectInst &I,
     Value *Op0 = State.get(Operands.getOperand(1), Part);
     Value *Op1 = State.get(Operands.getOperand(2), Part);
     Value *Sel = Builder.CreateSelect(Cond, Op0, Op1);
-    VectorLoopValueMap.setVectorValue(&I, Part, Sel);
+    State.set(VPDef, &I, Sel, Part);
     addMetadata(Sel, &I);
   }
 }
@@ -7293,11 +7294,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
       if (isa<StoreInst>(&I) && isScalarWithPredication(&I))
         NumPredStores++;
 
-      if (Legal->isUniform(Ptr) &&
-          // Conditional loads and stores should be scalarized and predicated.
-          // isScalarWithPredication cannot be used here since masked
-          // gather/scatters are not considered scalar with predication.
-          !Legal->blockNeedsPredication(I.getParent())) {
+      if (Legal->isUniformMemOp(I)) {
         // TODO: Avoid replicating loads and stores instead of
         // relying on instcombine to remove them.
         // Load: Scalar load + broadcast
@@ -8097,8 +8094,7 @@ bool LoopVectorizationPlanner::getDecisionAndClampRange(
 void LoopVectorizationPlanner::buildVPlans(ElementCount MinVF,
                                            ElementCount MaxVF) {
   auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
-  for (ElementCount VF = MinVF;
-       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+  for (ElementCount VF = MinVF; ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
     VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlan(SubRange));
     VF = SubRange.End;
@@ -8598,16 +8594,8 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
 
   // If the tail is to be folded by masking, the primary induction variable, if
   // exists needs to be represented in VPlan for it to model early-exit masking.
-  // Also, both the Phi and the live-out instruction of each reduction are
-  // required in order to introduce a select between them in VPlan.
-  if (CM.foldTailByMasking()) {
-    if (Legal->getPrimaryInduction())
-      NeedDef.insert(Legal->getPrimaryInduction());
-    for (auto &Reduction : Legal->getReductionVars()) {
-      NeedDef.insert(Reduction.first);
-      NeedDef.insert(Reduction.second.getLoopExitInstr());
-    }
-  }
+  if (CM.foldTailByMasking() && Legal->getPrimaryInduction())
+    NeedDef.insert(Legal->getPrimaryInduction());
 
   // Collect instructions from the original loop that will become trivially dead
   // in the vectorized loop. We don't need to vectorize these instructions. For
@@ -8631,8 +8619,7 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
     SinkAfter.erase(I);
 
   auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
-  for (ElementCount VF = MinVF;
-       ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
+  for (ElementCount VF = MinVF; ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
     VFRange SubRange = {VF, MaxVFPlusOne};
     VPlans.push_back(buildVPlanWithVPRecipes(SubRange, NeedDef,
                                              DeadInstructions, SinkAfter));
@@ -8824,8 +8811,8 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
     for (auto &Reduction : Legal->getReductionVars()) {
       if (CM.isInLoopReduction(Reduction.first))
         continue;
-      VPValue *Phi = Plan->getVPValue(Reduction.first);
-      VPValue *Red = Plan->getVPValue(Reduction.second.getLoopExitInstr());
+      VPValue *Phi = Plan->getOrAddVPValue(Reduction.first);
+      VPValue *Red = Plan->getOrAddVPValue(Reduction.second.getLoopExitInstr());
       Builder.createNaryOp(Instruction::Select, {Cond, Red, Phi});
     }
   }
@@ -8964,11 +8951,13 @@ void VPInterleaveRecipe::print(raw_ostream &O, const Twine &Indent,
 }
 
 void VPWidenCallRecipe::execute(VPTransformState &State) {
-  State.ILV->widenCallInstruction(Ingredient, *this, State);
+  State.ILV->widenCallInstruction(*cast<CallInst>(getUnderlyingInstr()), this,
+                                  *this, State);
 }
 
 void VPWidenSelectRecipe::execute(VPTransformState &State) {
-  State.ILV->widenSelectInstruction(Ingredient, *this, InvariantCond, State);
+  State.ILV->widenSelectInstruction(*cast<SelectInst>(getUnderlyingInstr()),
+                                    this, *this, InvariantCond, State);
 }
 
 void VPWidenRecipe::execute(VPTransformState &State) {
@@ -9043,7 +9032,8 @@ Value *InnerLoopVectorizer::createEVL() {
 }
 
 void VPWidenGEPRecipe::execute(VPTransformState &State) {
-  State.ILV->widenGEP(GEP, *this, State.UF, State.VF, IsPtrLoopInvariant,
+  State.ILV->widenGEP(cast<GetElementPtrInst>(getUnderlyingInstr()), this,
+                      *this, State.UF, State.VF, IsPtrLoopInvariant,
                       IsIndexLoopInvariant, State);
 }
 

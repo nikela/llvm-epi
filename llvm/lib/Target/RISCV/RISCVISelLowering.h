@@ -59,7 +59,9 @@ enum NodeType : unsigned {
   SIGN_EXTEND_VECTOR,
   ZERO_EXTEND_VECTOR,
   TRUNCATE_VECTOR,
+  SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
+  ZERO_EXTEND_BITS_INREG,
   VLSEG2,
   VLSEG3,
   VLSEG4,
@@ -127,6 +129,8 @@ public:
   bool isTruncateFree(EVT SrcVT, EVT DstVT) const override;
   bool isZExtFree(SDValue Val, EVT VT2) const override;
   bool isSExtCheaperThanZExt(EVT SrcVT, EVT DstVT) const override;
+  bool isCheapToSpeculateCttz() const override;
+  bool isCheapToSpeculateCtlz() const override;
   bool isFPImmLegal(const APFloat &Imm, EVT VT,
                     bool ForCodeSize) const override;
 
@@ -270,6 +274,9 @@ public:
   bool shouldSinkOperands(Instruction *I,
                           SmallVectorImpl<Use *> &Ops) const override;
 
+  TargetLoweringBase::LegalizeTypeAction
+  getPreferredVectorAction(MVT VT) const override;
+
 private:
   void analyzeInputArgs(MachineFunction &MF, CCState &CCInfo,
                         const SmallVectorImpl<ISD::InputArg> &Ins,
@@ -304,7 +311,10 @@ private:
   SDValue lowerSIGN_EXTEND(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerZERO_EXTEND(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerSIGN_EXTEND_INREG(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
+                                 int Opcode) const;
+  SDValue lowerSIGN_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerZERO_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerEXTRACT_VECTOR_ELT(SDValue Op, SelectionDAG &DAG) const;

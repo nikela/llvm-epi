@@ -1679,7 +1679,7 @@ bool ARMTTIImpl::isHardwareLoopProfitable(Loop *L, ScalarEvolution &SE,
       switch (Call->getIntrinsicID()) {
       default:
         break;
-      case Intrinsic::set_loop_iterations:
+      case Intrinsic::start_loop_iterations:
       case Intrinsic::test_set_loop_iterations:
       case Intrinsic::loop_decrement:
       case Intrinsic::loop_decrement_reg:
@@ -1694,7 +1694,8 @@ bool ARMTTIImpl::isHardwareLoopProfitable(Loop *L, ScalarEvolution &SE,
   auto ScanLoop = [&](Loop *L) {
     for (auto *BB : L->getBlocks()) {
       for (auto &I : *BB) {
-        if (maybeLoweredToCall(I) || IsHardwareLoopIntrinsic(I)) {
+        if (maybeLoweredToCall(I) || IsHardwareLoopIntrinsic(I) ||
+            isa<InlineAsm>(I)) {
           LLVM_DEBUG(dbgs() << "ARMHWLoops: Bad instruction: " << I << "\n");
           return false;
         }
@@ -1944,6 +1945,10 @@ void ARMTTIImpl::getUnrollingPreferences(Loop *L, ScalarEvolution &SE,
   // Limit the CFG of the loop body for targets with a branch predictor.
   // Allowing 4 blocks permits if-then-else diamonds in the body.
   if (ST->hasBranchPredictor() && L->getNumBlocks() > 4)
+    return;
+
+  // Don't unroll vectorized loops, including the remainder loop
+  if (getBooleanLoopAttribute(L, "llvm.loop.isvectorized"))
     return;
 
   // Scan the loop: don't unroll loops with calls as this could prevent
