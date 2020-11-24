@@ -221,17 +221,22 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::ROTR, XLenVT, Expand);
   }
 
-  if (!Subtarget.hasStdExtZbp())
+  if (Subtarget.hasStdExtZbp()) {
+    setOperationAction(ISD::BITREVERSE, XLenVT, Legal);
+
+    if (Subtarget.is64Bit()) {
+      setOperationAction(ISD::BITREVERSE, MVT::i32, Custom);
+      setOperationAction(ISD::BSWAP, MVT::i32, Custom);
+    }
+  } else {
     setOperationAction(ISD::BSWAP, XLenVT, Expand);
+  }
 
   if (!Subtarget.hasStdExtZbb()) {
     setOperationAction(ISD::CTTZ, XLenVT, Expand);
     setOperationAction(ISD::CTLZ, XLenVT, Expand);
     setOperationAction(ISD::CTPOP, XLenVT, Expand);
   }
-
-  if (Subtarget.hasStdExtZbp())
-    setOperationAction(ISD::BITREVERSE, XLenVT, Legal);
 
   if (Subtarget.hasStdExtZbt()) {
     setOperationAction(ISD::FSHL, XLenVT, Legal);
@@ -2903,6 +2908,21 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
     Results.push_back(DAG.getNode(ISD::TRUNCATE, DL, MVT::i32, NewRes));
     break;
   }
+  case ISD::BSWAP:
+  case ISD::BITREVERSE: {
+    assert(N->getValueType(0) == MVT::i32 && Subtarget.is64Bit() &&
+           Subtarget.hasStdExtZbp() && "Unexpected custom legalisation");
+    SDValue NewOp0 = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                 N->getOperand(0));
+    unsigned Imm = N->getOpcode() == ISD::BITREVERSE ? 31 : 24;
+    SDValue GREVIW = DAG.getNode(RISCVISD::GREVIW, DL, MVT::i64, NewOp0,
+                                 DAG.getTargetConstant(Imm, DL,
+                                                       Subtarget.getXLenVT()));
+    // ReplaceNodeResults requires we maintain the same type for the return
+    // value.
+    Results.push_back(DAG.getNode(ISD::TRUNCATE, DL, MVT::i32, GREVIW));
+    break;
+  }
   case ISD::INTRINSIC_WO_CHAIN: {
     unsigned IntNo = cast<ConstantSDNode>(N->getOperand(0))->getZExtValue();
     switch (IntNo) {
@@ -3413,17 +3433,19 @@ static MachineBasicBlock *emitSplitF64Pseudo(MachineInstr &MI,
 
   TII.storeRegToStackSlot(*BB, MI, SrcReg, MI.getOperand(2).isKill(), FI, SrcRC,
                           RI);
-  MachineMemOperand *MMO =
-      MF.getMachineMemOperand(MachinePointerInfo::getFixedStack(MF, FI),
-                              MachineMemOperand::MOLoad, 8, Align(8));
+  MachinePointerInfo MPI = MachinePointerInfo::getFixedStack(MF, FI);
+  MachineMemOperand *MMOLo =
+      MF.getMachineMemOperand(MPI, MachineMemOperand::MOLoad, 4, Align(8));
+  MachineMemOperand *MMOHi = MF.getMachineMemOperand(
+      MPI.getWithOffset(4), MachineMemOperand::MOLoad, 4, Align(8));
   BuildMI(*BB, MI, DL, TII.get(RISCV::LW), LoReg)
       .addFrameIndex(FI)
       .addImm(0)
-      .addMemOperand(MMO);
+      .addMemOperand(MMOLo);
   BuildMI(*BB, MI, DL, TII.get(RISCV::LW), HiReg)
       .addFrameIndex(FI)
       .addImm(4)
-      .addMemOperand(MMO);
+      .addMemOperand(MMOHi);
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;
 }
@@ -3443,19 +3465,21 @@ static MachineBasicBlock *emitBuildPairF64Pseudo(MachineInstr &MI,
   const TargetRegisterClass *DstRC = &RISCV::FPR64RegClass;
   int FI = MF.getInfo<RISCVMachineFunctionInfo>()->getMoveF64FrameIndex(MF);
 
-  MachineMemOperand *MMO =
-      MF.getMachineMemOperand(MachinePointerInfo::getFixedStack(MF, FI),
-                              MachineMemOperand::MOStore, 8, Align(8));
+  MachinePointerInfo MPI = MachinePointerInfo::getFixedStack(MF, FI);
+  MachineMemOperand *MMOLo =
+      MF.getMachineMemOperand(MPI, MachineMemOperand::MOStore, 4, Align(8));
+  MachineMemOperand *MMOHi = MF.getMachineMemOperand(
+      MPI.getWithOffset(4), MachineMemOperand::MOStore, 4, Align(8));
   BuildMI(*BB, MI, DL, TII.get(RISCV::SW))
       .addReg(LoReg, getKillRegState(MI.getOperand(1).isKill()))
       .addFrameIndex(FI)
       .addImm(0)
-      .addMemOperand(MMO);
+      .addMemOperand(MMOLo);
   BuildMI(*BB, MI, DL, TII.get(RISCV::SW))
       .addReg(HiReg, getKillRegState(MI.getOperand(2).isKill()))
       .addFrameIndex(FI)
       .addImm(4)
-      .addMemOperand(MMO);
+      .addMemOperand(MMOHi);
   TII.loadRegFromStackSlot(*BB, MI, DstReg, FI, DstRC, RI);
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return BB;

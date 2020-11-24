@@ -1755,11 +1755,11 @@ public:
 
 /// Described the kind of function definition (if any) provided for
 /// a function.
-enum FunctionDefinitionKind {
-  FDK_Declaration,
-  FDK_Definition,
-  FDK_Defaulted,
-  FDK_Deleted
+enum class FunctionDefinitionKind {
+  Declaration,
+  Definition,
+  Defaulted,
+  Deleted
 };
 
 enum class DeclaratorContext {
@@ -1895,7 +1895,8 @@ public:
   Declarator(const DeclSpec &ds, DeclaratorContext C)
       : DS(ds), Range(ds.getSourceRange()), Context(C),
         InvalidType(DS.getTypeSpecType() == DeclSpec::TST_error),
-        GroupingParens(false), FunctionDefinition(FDK_Declaration),
+        GroupingParens(false), FunctionDefinition(static_cast<unsigned>(
+                                   FunctionDefinitionKind::Declaration)),
         Redeclaration(false), Extension(false), ObjCIvar(false),
         ObjCWeakProperty(false), InlineStorageUsed(false),
         Attrs(ds.getAttributePool().getFactory()), AsmLabel(nullptr),
@@ -2569,11 +2570,11 @@ public:
   void setEllipsisLoc(SourceLocation EL) { EllipsisLoc = EL; }
 
   void setFunctionDefinitionKind(FunctionDefinitionKind Val) {
-    FunctionDefinition = Val;
+    FunctionDefinition = static_cast<unsigned>(Val);
   }
 
   bool isFunctionDefinition() const {
-    return getFunctionDefinitionKind() != FDK_Declaration;
+    return getFunctionDefinitionKind() != FunctionDefinitionKind::Declaration;
   }
 
   FunctionDefinitionKind getFunctionDefinitionKind() const {
