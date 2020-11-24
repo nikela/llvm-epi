@@ -1452,10 +1452,15 @@ static bool hasVariant(ArrayRef<PredTransition> Transitions,
   return false;
 }
 
-static std::vector<Record *> getAllPredicates(ArrayRef<TransVariant> Variants) {
+static std::vector<Record *> getAllPredicates(ArrayRef<TransVariant> Variants,
+                                              ArrayRef<unsigned> ProcIndices) {
   std::vector<Record *> Preds;
   for (auto &Variant : Variants) {
     assert(Variant.VarOrSeqDef->isSubClassOf("SchedVar"));
+    if (ProcIndices[0] && Variant.ProcIdx)
+      if (!llvm::count(ProcIndices, Variant.ProcIdx))
+        continue;
+
     Preds.push_back(Variant.VarOrSeqDef->getValueAsDef("Predicate"));
   }
   return Preds;
@@ -1507,7 +1512,8 @@ void PredTransitions::getIntersectingVariants(
     if (AliasProcIdx == 0)
       GenericRW = true;
   }
-  std::vector<Record *> AllPreds = getAllPredicates(Variants);
+  std::vector<Record *> AllPreds =
+      getAllPredicates(Variants, TransVec[TransIdx].ProcIndices);
   for (TransVariant &Variant : Variants) {
     // Don't expand variants if the processor models don't intersect.
     // A zero processor index means any processor.
@@ -1718,14 +1724,22 @@ static void addSequences(CodeGenSchedModels &SchedModels,
       Result.push_back(SchedModels.findOrInsertRW(S, IsRead));
 }
 
+#ifndef NDEBUG
+static void dumpRecVec(const RecVec &RV) {
+  for (const Record *R : RV)
+    dbgs() << R->getName() << ", ";
+}
+#endif
+
 static void dumpTransition(const CodeGenSchedModels &SchedModels,
                            const CodeGenSchedClass &FromSC,
-                           const CodeGenSchedTransition &SCTrans) {
+                           const CodeGenSchedTransition &SCTrans,
+                           const RecVec &Preds) {
   LLVM_DEBUG(dbgs() << "Adding transition from " << FromSC.Name << "("
                     << FromSC.Index << ") to "
                     << SchedModels.getSchedClass(SCTrans.ToClassIdx).Name << "("
-                    << SCTrans.ToClassIdx << ")"
-                    << " on processor indices: (";
+                    << SCTrans.ToClassIdx << ") on pred term: (";
+             dumpRecVec(Preds); dbgs() << ") on processor indices: (";
              dumpIdxVec(SCTrans.ProcIndices); dbgs() << ")\n");
 }
 // Create a new SchedClass for each variant found by inferFromRW. Pass
@@ -1753,7 +1767,7 @@ static void inferFromTransitions(ArrayRef<PredTransition> LastTransitions,
     SCTrans.ToClassIdx =
         SchedModels.addSchedClass(/*ItinClassDef=*/nullptr, OperWritesVariant,
                                   OperReadsVariant, I->ProcIndices);
-    dumpTransition(SchedModels, FromSC, SCTrans);
+
     // The final PredTerm is unique set of predicates guarding the transition.
     RecVec Preds;
     transform(I->PredTerm, std::back_inserter(Preds),
@@ -1761,6 +1775,7 @@ static void inferFromTransitions(ArrayRef<PredTransition> LastTransitions,
                 return P.Predicate;
               });
     Preds.erase(std::unique(Preds.begin(), Preds.end()), Preds.end());
+    dumpTransition(SchedModels, FromSC, SCTrans, Preds);
     SCTrans.PredTerm = std::move(Preds);
     SchedModels.getSchedClass(FromClassIdx)
         .Transitions.push_back(std::move(SCTrans));
