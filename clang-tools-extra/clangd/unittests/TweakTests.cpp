@@ -2825,7 +2825,66 @@ using namespace one;
 namespace {using two::cc;
 
 cc C;
-})cpp"}};
+})cpp"},
+            // Type defined in main file, make sure using is after that.
+            {R"cpp(
+namespace xx {
+  struct yy {};
+}
+
+x^x::yy X;
+)cpp",
+             R"cpp(
+namespace xx {
+  struct yy {};
+}
+
+using xx::yy;
+
+yy X;
+)cpp"},
+            // Type defined in main file via "using", insert after that.
+            {R"cpp(
+#include "test.hpp"
+
+namespace xx {
+  using yy = one::two::cc;
+}
+
+x^x::yy X;
+)cpp",
+             R"cpp(
+#include "test.hpp"
+
+namespace xx {
+  using yy = one::two::cc;
+}
+
+using xx::yy;
+
+yy X;
+)cpp"},
+            // Using must come after function definition.
+            {R"cpp(
+namespace xx {
+  void yy();
+}
+
+void fun() {
+  x^x::yy();
+}
+)cpp",
+             R"cpp(
+namespace xx {
+  void yy();
+}
+
+using xx::yy;
+
+void fun() {
+  yy();
+}
+)cpp"}};
   llvm::StringMap<std::string> EditedFiles;
   for (const auto &Case : Cases) {
     for (const auto &SubCase : expandCases(Case.TestSource)) {
@@ -3023,6 +3082,12 @@ TEST_F(PopulateSwitchTest, Test) {
           // Duplicated constant names all in switch
           Function,
           R""(enum Enum {A,B,b=B}; ^switch (A) {case A:case B:break;})"",
+          "unavailable",
+      },
+      {
+          // Enum is dependent type
+          File,
+          R""(template<typename T> void f() {enum Enum {A}; ^switch (A) {}})"",
           "unavailable",
       },
   };
