@@ -341,7 +341,6 @@ define double @fma_f64(double %a, double %b, double %c) nounwind {
 declare double @llvm.fmuladd.f64(double, double, double)
 
 define double @fmuladd_f64(double %a, double %b, double %c) nounwind {
-; Use of fmadd depends on TargetLowering::isFMAFasterthanFMulAndFAdd
 ; RV32IFD-LABEL: fmuladd_f64:
 ; RV32IFD:       # %bb.0:
 ; RV32IFD-NEXT:    addi sp, sp, -16

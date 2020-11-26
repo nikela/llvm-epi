@@ -3375,8 +3375,9 @@ bool RISCVTargetLowering::isFMAFasterThanFMulAndFAdd(const MachineFunction &MF,
 
   switch (VT.getSimpleVT().SimpleTy) {
   case MVT::f32:
+    return Subtarget.hasStdExtF();
   case MVT::f64:
-    return true;
+    return Subtarget.hasStdExtD();
   default:
     break;
   }
