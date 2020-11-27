@@ -8413,6 +8413,13 @@ bool PPCTargetLowering::canReuseLoadAddress(SDValue Op, EVT MemVT,
   if (LD->getMemoryVT() != MemVT)
     return false;
 
+  // If the result of the load is an illegal type, then we can't build a
+  // valid chain for reuse since the legalised loads and token factor node that
+  // ties the legalised loads together uses a different output chain then the
+  // illegal load.
+  if (!isTypeLegal(LD->getValueType(0)))
+    return false;
+
   RLI.Ptr = LD->getBasePtr();
   if (LD->isIndexed() && !LD->getOffset().isUndef()) {
     assert(LD->getAddressingMode() == ISD::PRE_INC &&
@@ -11029,28 +11036,6 @@ SDValue PPCTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::ATOMIC_CMP_SWAP:
     return LowerATOMIC_CMP_SWAP(Op, DAG);
   }
-}
-
-void PPCTargetLowering::LowerOperationWrapper(SDNode *N,
-                                              SmallVectorImpl<SDValue> &Results,
-                                              SelectionDAG &DAG) const {
-  SDValue Res = LowerOperation(SDValue(N, 0), DAG);
-
-  if (!Res.getNode())
-    return;
-
-  // Take the return value as-is if original node has only one result.
-  if (N->getNumValues() == 1) {
-    Results.push_back(Res);
-    return;
-  }
-
-  // New node should have the same number of results.
-  assert((N->getNumValues() == Res->getNumValues()) &&
-      "Lowering returned the wrong number of results!");
-
-  for (unsigned i = 0; i < N->getNumValues(); ++i)
-    Results.push_back(Res.getValue(i));
 }
 
 void PPCTargetLowering::ReplaceNodeResults(SDNode *N,

@@ -50,7 +50,7 @@ entry:
 define float @fnms32_2(float %a, float %b, float %c) nounwind {
 ; CHECK-LABEL: fnms32_2:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    fnmsub.s fa0, fa0, fa1, fa2
+; CHECK-NEXT:    fnmsub.s fa0, fa1, fa0, fa2
 ; CHECK-NEXT:    ret
 entry:
   %neg = fmul float %b, -1.000000e+00
@@ -107,7 +107,7 @@ entry:
 define double @fnms64_2(double %a, double %b, double %c) nounwind {
 ; CHECK-LABEL: fnms64_2:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    fnmsub.d fa0, fa0, fa1, fa2
+; CHECK-NEXT:    fnmsub.d fa0, fa1, fa0, fa2
 ; CHECK-NEXT:    ret
 entry:
   %neg = fmul double %b, -1.000000e+00

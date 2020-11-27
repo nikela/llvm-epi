@@ -1276,9 +1276,13 @@ def fno_rounding_math : Flag<["-"], "fno-rounding-math">, Group<f_Group>, Flags<
 def ftrapping_math : Flag<["-"], "ftrapping-math">, Group<f_Group>, Flags<[CC1Option]>;
 def fno_trapping_math : Flag<["-"], "fno-trapping-math">, Group<f_Group>, Flags<[CC1Option]>;
 def ffp_contract : Joined<["-"], "ffp-contract=">, Group<f_Group>,
-  Flags<[CC1Option]>, HelpText<"Form fused FP ops (e.g. FMAs): fast (everywhere)"
-  " | on (according to FP_CONTRACT pragma) | off (never fuse). Default"
-  " is 'fast' for CUDA/HIP and 'on' otherwise.">, Values<"fast,on,off">;
+  Flags<[CC1Option]>, HelpText<"Form fused FP ops (e.g. FMAs):"
+  " fast (fuses across statements disregarding pragmas)"
+  " | on (only fuses in the same statement unless dictated by pragmas)"
+  " | off (never fuses)"
+  " | fast-honor-pragmas (fuses across statements unless diectated by pragmas)."
+  " Default is 'fast' for CUDA, 'fast-honor-pragmas' for HIP, and 'on' otherwise.">,
+  Values<"fast,on,off,fast-honor-pragmas">;
 
 defm strict_float_cast_overflow : OptOutFFlag<"strict-float-cast-overflow",
   "Assume that overflowing float-to-int casts are undefined (default)",
@@ -2669,6 +2673,10 @@ def msmall_data_threshold_EQ : Joined <["-"], "msmall-data-threshold=">,
   Group<m_Group>, Alias<G>;
 def msoft_float : Flag<["-"], "msoft-float">, Group<m_Group>, Flags<[CC1Option]>,
   HelpText<"Use software floating point">;
+def moutline_atomics : Flag<["-"], "moutline-atomics">, Group<f_clang_Group>, Flags<[CC1Option]>,
+  HelpText<"Generate local calls to out-of-line atomic operations">;
+def mno_outline_atomics : Flag<["-"], "mno-outline-atomics">, Group<f_clang_Group>, Flags<[CC1Option]>,
+  HelpText<"Don't generate local calls to out-of-line atomic operations">;
 def mno_implicit_float : Flag<["-"], "mno-implicit-float">, Group<m_Group>,
   HelpText<"Don't generate implicit floating point instructions">;
 def mimplicit_float : Flag<["-"], "mimplicit-float">, Group<m_Group>;
