@@ -418,3 +418,16 @@ int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
 
   return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
+
+unsigned RISCVTTIImpl::getGatherScatterOpCost(
+    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
+    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
+  // We can do gather/scatter using a single instruction.
+  // FIXME: The actual cost is likely to be higher than that.
+  if (isa<ScalableVectorType>(DataTy))
+    return 1;
+
+  return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                       Alignment, CostKind, I);
+}
+
