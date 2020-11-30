@@ -15,15 +15,16 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT:    "for.body:\n" +
 ; CHECK-NEXT:      "WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next\l" +
 ; CHECK-NEXT:      "EMIT vp<%1> = icmp ule ir<%indvars.iv> vp<%0>\l" +
-; CHECK-NEXT:      "CLONE %arrayidx = getelementptr %a, %indvars.iv\l" +
+; CHECK-NEXT:      "CLONE ir<%arrayidx> = getelementptr ir<%a>, ir<%indvars.iv>\l" +
 ; CHECK-NEXT:      "EMIT vp<%2> = GENERATE-EXPLICIT-VECTOR-LENGTH\l" +
 ; CHECK-NEXT:      "PREDICATED-WIDEN %0 = load %arrayidx, ir<%arrayidx>, ALL-ONES-MASK, vp<%2>\l" +
-; CHECK-NEXT:      "CLONE %arrayidx2 = getelementptr %b, %indvars.iv\l" +
+; CHECK-NEXT:      "CLONE ir<%arrayidx2> = getelementptr ir<%b>, ir<%indvars.iv>\l" +
 ; CHECK-NEXT:      "PREDICATED-WIDEN %1 = load %arrayidx2, ir<%arrayidx2>, ALL-ONES-MASK, vp<%2>\l" +
 ; CHECK-NEXT:      "PREDICATED-WIDEN %add = add %1, %0, ALL-ONES-MASK, vp<%2>\l" +
-; CHECK-NEXT:      "CLONE %arrayidx4 = getelementptr %c, %indvars.iv\l" +
+; CHECK-NEXT:      "CLONE ir<%arrayidx4> = getelementptr ir<%c>, ir<%indvars.iv>\l" +
 ; CHECK-NEXT:      "PREDICATED-WIDEN store %add, %arrayidx4, ir<%arrayidx4>, ALL-ONES-MASK, vp<%2>\l"
 ; CHECK-NEXT:  ]
+
 
 ; Function Attrs: nofree norecurse nounwind
 define dso_local void @simple_add(i32 signext %N, i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {
