@@ -14,6 +14,7 @@
 #include "clang/Basic/CommentOptions.h"
 #include "clang/Basic/DebugInfoOptions.h"
 #include "clang/Basic/Diagnostic.h"
+#include "clang/Basic/DiagnosticDriver.h"
 #include "clang/Basic/DiagnosticOptions.h"
 #include "clang/Basic/FileSystemOptions.h"
 #include "clang/Basic/LLVM.h"
@@ -66,6 +67,7 @@
 #include "llvm/Option/OptTable.h"
 #include "llvm/Option/Option.h"
 #include "llvm/ProfileData/InstrProfReader.h"
+#include "llvm/Remarks/HotnessThresholdParser.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/Error.h"
@@ -131,6 +133,14 @@ static llvm::Optional<bool> normalizeSimpleFlag(OptSpecifier Opt,
                                                 DiagnosticsEngine &Diags) {
   if (Args.hasArg(Opt))
     return true;
+  return None;
+}
+
+static Optional<bool> normalizeSimpleNegativeFlag(OptSpecifier Opt, unsigned,
+                                                  const ArgList &Args,
+                                                  DiagnosticsEngine &) {
+  if (Args.hasArg(Opt))
+    return false;
   return None;
 }
 
@@ -276,9 +286,11 @@ static void FixupInvocation(CompilerInvocation &Invocation) {
   LangOptions &LangOpts = *Invocation.getLangOpts();
   DiagnosticOptions &DiagOpts = Invocation.getDiagnosticOpts();
   CodeGenOptions &CodeGenOpts = Invocation.getCodeGenOpts();
+  FrontendOptions &FrontendOpts = Invocation.getFrontendOpts();
   CodeGenOpts.XRayInstrumentFunctions = LangOpts.XRayInstrument;
   CodeGenOpts.XRayAlwaysEmitCustomEvents = LangOpts.XRayAlwaysEmitCustomEvents;
   CodeGenOpts.XRayAlwaysEmitTypedEvents = LangOpts.XRayAlwaysEmitTypedEvents;
+  FrontendOpts.GenerateGlobalModuleIndex = FrontendOpts.UseGlobalModuleIndex;
 
   llvm::sys::Process::UseANSIEscapeCodes(DiagOpts.UseANSIEscapeCodes);
 }
@@ -1501,11 +1513,24 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
     Diags.Report(diag::warn_drv_diagnostics_hotness_requires_pgo)
         << "-fdiagnostics-show-hotness";
 
-  Opts.DiagnosticsHotnessThreshold = getLastArgUInt64Value(
-      Args, options::OPT_fdiagnostics_hotness_threshold_EQ, 0);
-  if (Opts.DiagnosticsHotnessThreshold > 0 && !UsingProfile)
-    Diags.Report(diag::warn_drv_diagnostics_hotness_requires_pgo)
-        << "-fdiagnostics-hotness-threshold=";
+  // Parse remarks hotness threshold. Valid value is either integer or 'auto'.
+  if (auto *arg =
+          Args.getLastArg(options::OPT_fdiagnostics_hotness_threshold_EQ)) {
+    auto ResultOrErr =
+        llvm::remarks::parseHotnessThresholdOption(arg->getValue());
+
+    if (!ResultOrErr) {
+      Diags.Report(diag::err_drv_invalid_diagnotics_hotness_threshold)
+          << "-fdiagnostics-hotness-threshold=";
+    } else {
+      Opts.DiagnosticsHotnessThreshold = *ResultOrErr;
+      if ((!Opts.DiagnosticsHotnessThreshold.hasValue() ||
+           Opts.DiagnosticsHotnessThreshold.getValue() > 0) &&
+          !UsingProfile)
+        Diags.Report(diag::warn_drv_diagnostics_hotness_requires_pgo)
+            << "-fdiagnostics-hotness-threshold=";
+    }
+  }
 
   // If the user requested to use a sample profile for PGO, then the
   // backend will need to track source location information so the profile
@@ -2001,32 +2026,16 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
       Diags.Report(diag::err_drv_invalid_value)
         << A->getAsString(Args) << A->getValue();
   }
-  Opts.DisableFree = Args.hasArg(OPT_disable_free);
 
   Opts.OutputFile = std::string(Args.getLastArgValue(OPT_o));
   Opts.Plugins = Args.getAllArgValues(OPT_load);
-  Opts.RelocatablePCH = Args.hasArg(OPT_relocatable_pch);
-  Opts.ShowHelp = Args.hasArg(OPT_help);
-  Opts.ShowStats = Args.hasArg(OPT_print_stats);
-  Opts.ShowTimers = Args.hasArg(OPT_ftime_report);
-  Opts.PrintSupportedCPUs = Args.hasArg(OPT_print_supported_cpus);
-  Opts.TimeTrace = Args.hasArg(OPT_ftime_trace);
   Opts.TimeTraceGranularity = getLastArgIntValue(
       Args, OPT_ftime_trace_granularity_EQ, Opts.TimeTraceGranularity, Diags);
-  Opts.ShowVersion = Args.hasArg(OPT_version);
   Opts.ASTMergeFiles = Args.getAllArgValues(OPT_ast_merge);
   Opts.LLVMArgs = Args.getAllArgValues(OPT_mllvm);
-  Opts.FixWhatYouCan = Args.hasArg(OPT_fix_what_you_can);
-  Opts.FixOnlyWarnings = Args.hasArg(OPT_fix_only_warnings);
-  Opts.FixAndRecompile = Args.hasArg(OPT_fixit_recompile);
-  Opts.FixToTemporaries = Args.hasArg(OPT_fixit_to_temp);
   Opts.ASTDumpDecls = Args.hasArg(OPT_ast_dump, OPT_ast_dump_EQ);
   Opts.ASTDumpAll = Args.hasArg(OPT_ast_dump_all, OPT_ast_dump_all_EQ);
   Opts.ASTDumpFilter = std::string(Args.getLastArgValue(OPT_ast_dump_filter));
-  Opts.ASTDumpLookups = Args.hasArg(OPT_ast_dump_lookups);
-  Opts.ASTDumpDeclTypes = Args.hasArg(OPT_ast_dump_decl_types);
-  Opts.UseGlobalModuleIndex = !Args.hasArg(OPT_fno_modules_global_index);
-  Opts.GenerateGlobalModuleIndex = Opts.UseGlobalModuleIndex;
   Opts.ModuleMapFiles = Args.getAllArgValues(OPT_fmodule_map_file);
   // Only the -fmodule-file=<file> form.
   for (const auto *A : Args.filtered(OPT_fmodule_file)) {
@@ -2035,28 +2044,11 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
       Opts.ModuleFiles.push_back(std::string(Val));
   }
   Opts.ModulesEmbedFiles = Args.getAllArgValues(OPT_fmodules_embed_file_EQ);
-  Opts.ModulesEmbedAllFiles = Args.hasArg(OPT_fmodules_embed_all_files);
-  Opts.IncludeTimestamps = !Args.hasArg(OPT_fno_pch_timestamp);
-  Opts.UseTemporary = !Args.hasArg(OPT_fno_temp_file);
-  Opts.IsSystemModule = Args.hasArg(OPT_fsystem_module);
   Opts.AllowPCMWithCompilerErrors = Args.hasArg(OPT_fallow_pcm_with_errors);
 
   if (Opts.ProgramAction != frontend::GenerateModule && Opts.IsSystemModule)
     Diags.Report(diag::err_drv_argument_only_allowed_with) << "-fsystem-module"
                                                            << "-emit-module";
-
-  Opts.CodeCompleteOpts.IncludeMacros
-    = Args.hasArg(OPT_code_completion_macros);
-  Opts.CodeCompleteOpts.IncludeCodePatterns
-    = Args.hasArg(OPT_code_completion_patterns);
-  Opts.CodeCompleteOpts.IncludeGlobals
-    = !Args.hasArg(OPT_no_code_completion_globals);
-  Opts.CodeCompleteOpts.IncludeNamespaceLevelDecls
-    = !Args.hasArg(OPT_no_code_completion_ns_level_decls);
-  Opts.CodeCompleteOpts.IncludeBriefComments
-    = Args.hasArg(OPT_code_completion_brief_comments);
-  Opts.CodeCompleteOpts.IncludeFixIts
-    = Args.hasArg(OPT_code_completion_with_fixits);
 
   Opts.OverrideRecordLayoutsFile =
       std::string(Args.getLastArgValue(OPT_foverride_record_layout_EQ));
@@ -2071,8 +2063,6 @@ static InputKind ParseFrontendArgs(FrontendOptions &Opts, ArgList &Args,
       std::string(Args.getLastArgValue(OPT_mt_migrate_directory));
   Opts.ARCMTMigrateReportOut =
       std::string(Args.getLastArgValue(OPT_arcmt_migrate_report_output));
-  Opts.ARCMTMigrateEmitARCErrors
-    = Args.hasArg(OPT_arcmt_migrate_emit_arc_errors);
 
   Opts.ObjCMTWhiteListPath =
       std::string(Args.getLastArgValue(OPT_objcmt_whitelist_dir_path));
@@ -3774,9 +3764,12 @@ bool CompilerInvocation::parseSimpleArgs(const ArgList &Args,
 #define OPTION_WITH_MARSHALLING(                                               \
     PREFIX_TYPE, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,        \
     HELPTEXT, METAVAR, VALUES, SPELLING, ALWAYS_EMIT, KEYPATH, DEFAULT_VALUE,  \
-    NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, TABLE_INDEX)                  \
+    IMPLIED_CHECK, IMPLIED_VALUE, NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, \
+    TABLE_INDEX)                                                               \
   {                                                                            \
     this->KEYPATH = MERGER(this->KEYPATH, DEFAULT_VALUE);                      \
+    if (IMPLIED_CHECK)                                                         \
+      this->KEYPATH = MERGER(this->KEYPATH, IMPLIED_VALUE);                    \
     if (auto MaybeValue = NORMALIZER(OPT_##ID, TABLE_INDEX, Args, Diags))      \
       this->KEYPATH = MERGER(                                                  \
           this->KEYPATH, static_cast<decltype(this->KEYPATH)>(*MaybeValue));   \
@@ -3785,15 +3778,16 @@ bool CompilerInvocation::parseSimpleArgs(const ArgList &Args,
 #define OPTION_WITH_MARSHALLING_BOOLEAN(                                       \
     PREFIX_TYPE, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,        \
     HELPTEXT, METAVAR, VALUES, SPELLING, ALWAYS_EMIT, KEYPATH, DEFAULT_VALUE,  \
-    NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, TABLE_INDEX, NEG_ID,          \
-    NEG_SPELLING)                                                              \
+    IMPLIED_CHECK, IMPLIED_VALUE, NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, \
+    TABLE_INDEX, NEG_ID, NEG_SPELLING)                                         \
   {                                                                            \
+    this->KEYPATH = MERGER(this->KEYPATH, DEFAULT_VALUE);                      \
+    if (IMPLIED_CHECK)                                                         \
+      this->KEYPATH = MERGER(this->KEYPATH, IMPLIED_VALUE);                    \
     if (auto MaybeValue =                                                      \
             NORMALIZER(OPT_##ID, OPT_##NEG_ID, TABLE_INDEX, Args, Diags))      \
       this->KEYPATH = MERGER(                                                  \
           this->KEYPATH, static_cast<decltype(this->KEYPATH)>(*MaybeValue));   \
-    else                                                                       \
-      this->KEYPATH = MERGER(this->KEYPATH, DEFAULT_VALUE);                    \
   }
 
 #include "clang/Driver/Options.inc"
@@ -4047,24 +4041,31 @@ std::string CompilerInvocation::getModuleHash() const {
 
 void CompilerInvocation::generateCC1CommandLine(
     SmallVectorImpl<const char *> &Args, StringAllocator SA) const {
+  // Capture the extracted value as a lambda argument to avoid potential issues
+  // with lifetime extension of the reference.
 #define OPTION_WITH_MARSHALLING(                                               \
     PREFIX_TYPE, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,        \
     HELPTEXT, METAVAR, VALUES, SPELLING, ALWAYS_EMIT, KEYPATH, DEFAULT_VALUE,  \
-    NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, TABLE_INDEX)                  \
-  if (((FLAGS) & options::CC1Option) &&                                        \
-      (ALWAYS_EMIT || EXTRACTOR(this->KEYPATH) != (DEFAULT_VALUE))) {          \
-    DENORMALIZER(Args, SPELLING, SA, TABLE_INDEX, EXTRACTOR(this->KEYPATH));   \
+    IMPLIED_CHECK, IMPLIED_VALUE, NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, \
+    TABLE_INDEX)                                                               \
+  if ((FLAGS)&options::CC1Option) {                                            \
+    [&](const auto &Extracted) {                                               \
+      if (ALWAYS_EMIT || (Extracted != ((IMPLIED_CHECK) ? (IMPLIED_VALUE)      \
+                                                        : (DEFAULT_VALUE))))   \
+        DENORMALIZER(Args, SPELLING, SA, TABLE_INDEX, Extracted);              \
+    }(EXTRACTOR(this->KEYPATH));                                               \
   }
 
 #define OPTION_WITH_MARSHALLING_BOOLEAN(                                       \
     PREFIX_TYPE, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,        \
     HELPTEXT, METAVAR, VALUES, SPELLING, ALWAYS_EMIT, KEYPATH, DEFAULT_VALUE,  \
-    NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, TABLE_INDEX, NEG_ID,          \
-    NEG_SPELLING)                                                              \
-  if (((FLAGS)&options::CC1Option) &&                                          \
-      (ALWAYS_EMIT || EXTRACTOR(this->KEYPATH) != DEFAULT_VALUE)) {            \
-    DENORMALIZER(Args, SPELLING, NEG_SPELLING, SA, TABLE_INDEX,                \
-                 EXTRACTOR(this->KEYPATH));                                    \
+    IMPLIED_CHECK, IMPLIED_VALUE, NORMALIZER, DENORMALIZER, MERGER, EXTRACTOR, \
+    TABLE_INDEX, NEG_ID, NEG_SPELLING)                                         \
+  if ((FLAGS)&options::CC1Option) {                                            \
+    bool Extracted = EXTRACTOR(this->KEYPATH);                                 \
+    if (ALWAYS_EMIT ||                                                         \
+        (Extracted != ((IMPLIED_CHECK) ? (IMPLIED_VALUE) : (DEFAULT_VALUE))))  \
+      DENORMALIZER(Args, SPELLING, NEG_SPELLING, SA, TABLE_INDEX, Extracted);  \
   }
 
 #include "clang/Driver/Options.inc"
