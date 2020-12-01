@@ -638,8 +638,8 @@ MachineIRBuilder::buildBuildVectorTrunc(const DstOp &Res,
 MachineInstrBuilder MachineIRBuilder::buildShuffleSplat(const DstOp &Res,
                                                         const SrcOp &Src) {
   LLT DstTy = Res.getLLTTy(*getMRI());
-  LLT SrcTy = Src.getLLTTy(*getMRI());
-  assert(SrcTy == DstTy.getElementType() && "Expected Src to match Dst elt ty");
+  assert(Src.getLLTTy(*getMRI()) == DstTy.getElementType() &&
+         "Expected Src to match Dst elt ty");
   auto UndefVec = buildUndef(DstTy);
   auto Zero = buildConstant(LLT::scalar(64), 0);
   auto InsElt = buildInsertVectorElement(DstTy, UndefVec, Src, Zero);
@@ -657,6 +657,8 @@ MachineInstrBuilder MachineIRBuilder::buildShuffleVector(const DstOp &Res,
   assert(Src1Ty.getNumElements() + Src2Ty.getNumElements() >= Mask.size());
   assert(DstTy.getElementType() == Src1Ty.getElementType() &&
          DstTy.getElementType() == Src2Ty.getElementType());
+  (void)Src1Ty;
+  (void)Src2Ty;
   ArrayRef<int> MaskAlloc = getMF().allocateShuffleMask(Mask);
   return buildInstr(TargetOpcode::G_SHUFFLE_VECTOR, {DstTy}, {Src1, Src2})
       .addShuffleMask(MaskAlloc);
