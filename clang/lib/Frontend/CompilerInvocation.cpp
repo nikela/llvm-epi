@@ -144,20 +144,44 @@ static Optional<bool> normalizeSimpleNegativeFlag(OptSpecifier Opt, unsigned,
   return None;
 }
 
-void denormalizeSimpleFlag(SmallVectorImpl<const char *> &Args,
-                           const char *Spelling,
-                           CompilerInvocation::StringAllocator SA,
-                           unsigned TableIndex, unsigned Value) {
+/// The tblgen-erated code passes in a fifth parameter of an arbitrary type, but
+/// denormalizeSimpleFlags never looks at it. Avoid bloating compile-time with
+/// unnecessary template instantiations and just ignore it with a variadic
+/// argument.
+static void denormalizeSimpleFlag(SmallVectorImpl<const char *> &Args,
+                                  const char *Spelling,
+                                  CompilerInvocation::StringAllocator, unsigned,
+                                  /*T*/...) {
   Args.push_back(Spelling);
 }
 
-template <typename T, T Value>
-static llvm::Optional<T>
-normalizeFlagToValue(OptSpecifier Opt, unsigned TableIndex, const ArgList &Args,
-                     DiagnosticsEngine &Diags) {
-  if (Args.hasArg(Opt))
-    return Value;
-  return None;
+namespace {
+template <typename T> struct FlagToValueNormalizer {
+  T Value;
+
+  Optional<T> operator()(OptSpecifier Opt, unsigned, const ArgList &Args,
+                         DiagnosticsEngine &) {
+    if (Args.hasArg(Opt))
+      return Value;
+    return None;
+  }
+};
+} // namespace
+
+template <typename T> static constexpr bool is_int_convertible() {
+  return sizeof(T) <= sizeof(uint64_t) &&
+         std::is_trivially_constructible<T, uint64_t>::value &&
+         std::is_trivially_constructible<uint64_t, T>::value;
+}
+
+template <typename T, std::enable_if_t<is_int_convertible<T>(), bool> = false>
+static FlagToValueNormalizer<uint64_t> makeFlagToValueNormalizer(T Value) {
+  return FlagToValueNormalizer<uint64_t>{Value};
+}
+
+template <typename T, std::enable_if_t<!is_int_convertible<T>(), bool> = false>
+static FlagToValueNormalizer<T> makeFlagToValueNormalizer(T Value) {
+  return FlagToValueNormalizer<T>{std::move(Value)};
 }
 
 static Optional<bool> normalizeBooleanFlag(OptSpecifier PosOpt,
@@ -1590,13 +1614,8 @@ static void ParseDependencyOutputArgs(DependencyOutputOptions &Opts,
                                       ArgList &Args) {
   Opts.OutputFile = std::string(Args.getLastArgValue(OPT_dependency_file));
   Opts.Targets = Args.getAllArgValues(OPT_MT);
-  Opts.IncludeSystemHeaders = Args.hasArg(OPT_sys_header_deps);
-  Opts.IncludeModuleFiles = Args.hasArg(OPT_module_file_deps);
-  Opts.UsePhonyTargets = Args.hasArg(OPT_MP);
-  Opts.ShowHeaderIncludes = Args.hasArg(OPT_H);
   Opts.HeaderIncludeOutputFile =
       std::string(Args.getLastArgValue(OPT_header_include_file));
-  Opts.AddMissingHeaderDeps = Args.hasArg(OPT_MG);
   if (Args.hasArg(OPT_show_includes)) {
     // Writing both /showIncludes and preprocessor output to stdout
     // would produce interleaved output, so use stderr for /showIncludes.
@@ -1611,8 +1630,6 @@ static void ParseDependencyOutputArgs(DependencyOutputOptions &Opts,
   Opts.DOTOutputFile = std::string(Args.getLastArgValue(OPT_dependency_dot));
   Opts.ModuleDependencyOutputDir =
       std::string(Args.getLastArgValue(OPT_module_dependency_dir));
-  if (Args.hasArg(OPT_MV))
-    Opts.OutputFormat = DependencyOutputFormat::NMake;
   // Add sanitizer blacklists as extra dependencies.
   // They won't be discovered by the regular preprocessor, so
   // we let make / ninja to know about this implicit dependency.
@@ -2168,10 +2185,6 @@ std::string CompilerInvocation::GetResourcesPath(const char *Argv0,
 static void ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args,
                                   const std::string &WorkingDir) {
   Opts.Sysroot = std::string(Args.getLastArgValue(OPT_isysroot, "/"));
-  Opts.Verbose = Args.hasArg(OPT_v);
-  Opts.UseBuiltinIncludes = !Args.hasArg(OPT_nobuiltininc);
-  Opts.UseStandardSystemIncludes = !Args.hasArg(OPT_nostdsysteminc);
-  Opts.UseStandardCXXIncludes = !Args.hasArg(OPT_nostdincxx);
   if (const Arg *A = Args.getLastArg(OPT_stdlib_EQ))
     Opts.UseLibcxx = (strcmp(A->getValue(), "libc++") == 0);
   Opts.ResourceDir = std::string(Args.getLastArgValue(OPT_resource_dir));
@@ -2200,26 +2213,12 @@ static void ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args,
   }
   for (const auto *A : Args.filtered(OPT_fprebuilt_module_path))
     Opts.AddPrebuiltModulePath(A->getValue());
-  Opts.DisableModuleHash = Args.hasArg(OPT_fdisable_module_hash);
-  Opts.ModulesHashContent = Args.hasArg(OPT_fmodules_hash_content);
-  Opts.ModulesValidateDiagnosticOptions =
-      !Args.hasArg(OPT_fmodules_disable_diagnostic_validation);
-  Opts.ImplicitModuleMaps = Args.hasArg(OPT_fimplicit_module_maps);
-  Opts.ModuleMapFileHomeIsCwd = Args.hasArg(OPT_fmodule_map_file_home_is_cwd);
-  Opts.EnablePrebuiltImplicitModules =
-      Args.hasArg(OPT_fprebuilt_implicit_modules);
   Opts.ModuleCachePruneInterval =
       getLastArgIntValue(Args, OPT_fmodules_prune_interval, 7 * 24 * 60 * 60);
   Opts.ModuleCachePruneAfter =
       getLastArgIntValue(Args, OPT_fmodules_prune_after, 31 * 24 * 60 * 60);
-  Opts.ModulesValidateOncePerBuildSession =
-      Args.hasArg(OPT_fmodules_validate_once_per_build_session);
   Opts.BuildSessionTimestamp =
       getLastArgUInt64Value(Args, OPT_fbuild_session_timestamp, 0);
-  Opts.ModulesValidateSystemHeaders =
-      Args.hasArg(OPT_fmodules_validate_system_headers);
-  Opts.ValidateASTInputFilesContent =
-      Args.hasArg(OPT_fvalidate_ast_input_files_content);
   if (const Arg *A = Args.getLastArg(OPT_fmodule_format_EQ))
     Opts.ModuleFormat = A->getValue();
 
