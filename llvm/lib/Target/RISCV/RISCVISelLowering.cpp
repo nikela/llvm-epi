@@ -1701,6 +1701,51 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   return SDValue();
 }
 
+// This exists to tame complexity when lowering VP intrinsics to EPI. Not ideal.
+// This will probably go away when we handle them earlier in the pipeline.
+#define VP_INTRINSIC_WO_CHAIN_SET                                              \
+  VP_INTRINSIC(vp_add)                                                         \
+  VP_INTRINSIC(vp_sub)                                                         \
+  VP_INTRINSIC(vp_mul)                                                         \
+  VP_INTRINSIC(vp_sdiv)                                                        \
+  VP_INTRINSIC(vp_srem)                                                        \
+  VP_INTRINSIC(vp_udiv)                                                        \
+  VP_INTRINSIC(vp_urem)                                                        \
+  VP_INTRINSIC(vp_and)                                                         \
+  VP_INTRINSIC(vp_or)                                                          \
+  VP_INTRINSIC(vp_xor)                                                         \
+  VP_INTRINSIC(vp_ashr)                                                        \
+  VP_INTRINSIC(vp_lshr)                                                        \
+  VP_INTRINSIC(vp_shl)                                                         \
+  VP_INTRINSIC(vp_fadd)                                                        \
+  VP_INTRINSIC(vp_fsub)                                                        \
+  VP_INTRINSIC(vp_fmul)                                                        \
+  VP_INTRINSIC(vp_fdiv)                                                        \
+  VP_INTRINSIC(vp_frem)                                                        \
+  VP_INTRINSIC(vp_fma)                                                         \
+  VP_INTRINSIC(vp_fneg)                                                        \
+  VP_INTRINSIC(vp_icmp)                                                        \
+  VP_INTRINSIC(vp_fcmp)                                                        \
+  VP_INTRINSIC(vp_select)                                                      \
+  VP_INTRINSIC(vp_bitcast)                                                     \
+  VP_INTRINSIC(vp_sitofp)                                                      \
+  VP_INTRINSIC(vp_uitofp)                                                      \
+  VP_INTRINSIC(vp_fptosi)                                                      \
+  VP_INTRINSIC(vp_fptoui)                                                      \
+  VP_INTRINSIC(vp_fpext)                                                       \
+  VP_INTRINSIC(vp_fptrunc)                                                     \
+  VP_INTRINSIC(vp_trunc)                                                       \
+  VP_INTRINSIC(vp_zext)                                                        \
+  VP_INTRINSIC(vp_sext)
+
+#define VP_INTRINSIC_W_CHAIN_SET                                               \
+  VP_INTRINSIC(vp_load)                                                        \
+  VP_INTRINSIC(vp_gather)
+
+#define VP_INTRINSIC_VOID_SET                                                  \
+  VP_INTRINSIC(vp_store)                                                       \
+  VP_INTRINSIC(vp_scatter)
+
 static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   SDLoc DL(Op);
@@ -2174,111 +2219,48 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
   return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(), Operands);
 }
 
-SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
-                                                     SelectionDAG &DAG) const {
-  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
-  SDLoc DL(Op);
+// Decomposes a vector of addresses into a base address plus a vector of
+// offsets.
+static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
+                                     SDLoc DL, SelectionDAG &DAG,
+                                     SDValue &BaseAddr, SDValue &Offsets) {
+  unsigned Opcode = Addresses.getOpcode();
+  if (Opcode == ISD::SPLAT_VECTOR) {
+    // Addresses is a splat vector. Set the BaseAddr as the splatted value
+    // and the offsets to zero.
+    BaseAddr = Addresses.getOperand(0);
+    Offsets =
+        DAG.getNode(ISD::SPLAT_VECTOR, DL, OffsetsVT,
+                    DAG.getConstant(0, DL, OffsetsVT.getVectorElementType()));
+    return;
+  }
 
-  if (Subtarget.hasStdExtV()) {
-    // Some EPI intrinsics may claim that they want an integer operand to be
-    // extended.
-    if (const RISCVEPIIntrinsicsTable::EPIIntrinsicInfo *EII =
-            RISCVEPIIntrinsicsTable::getEPIIntrinsicInfo(IntNo)) {
-      if (EII->ExtendedOperand) {
-        assert(EII->ExtendedOperand < Op.getNumOperands());
-        std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
-        SDValue &ScalarOp = Operands[EII->ExtendedOperand];
-        if (ScalarOp.getValueType() == MVT::i32 ||
-            ScalarOp.getValueType() == MVT::i16 ||
-            ScalarOp.getValueType() == MVT::i8) {
-          ScalarOp = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, ScalarOp);
-          return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
-                             Operands);
-        }
+  if (Opcode == ISD::ADD) {
+    // Addresses is either (add a, (splat b)) or (add (splat a), b). Compute the
+    // base address as int the previous case and use the addend as offsets.
+    SDValue Op0 = Addresses.getOperand(0);
+    SDValue Op1 = Addresses.getOperand(1);
+    if (Op0.getOpcode() == ISD::SPLAT_VECTOR ||
+        Op1.getOpcode() == ISD::SPLAT_VECTOR) {
+      if (Op0.getOpcode() == ISD::SPLAT_VECTOR) {
+        BaseAddr = Op0.getOperand(0);
+        Offsets = Op1;
+      } else {
+        BaseAddr = Op1.getOperand(0);
+        Offsets = Op0;
       }
+      assert(OffsetsVT == Offsets.getValueType() &&
+             "Unexpected type for the offsets vector");
+      return;
     }
   }
 
-  switch (IntNo) {
-  default:
-    return SDValue();    // Don't custom lower most intrinsics.
-  case Intrinsic::thread_pointer: {
-    EVT PtrVT = getPointerTy(DAG.getDataLayout());
-    return DAG.getRegister(RISCV::X4, PtrVT);
-  }
-  case Intrinsic::epi_vzip2:
-  case Intrinsic::epi_vunzip2:
-  case Intrinsic::epi_vtrn: {
-    SDVTList VTList = Op->getVTList();
-    assert(VTList.NumVTs == 2);
-    EVT VT = VTList.VTs[0];
-
-    unsigned TupleOpcode;
-    switch (IntNo) {
-    default:
-      llvm_unreachable("Invalid opcode");
-      break;
-    case Intrinsic::epi_vzip2:
-      TupleOpcode = RISCVISD::VZIP2;
-      break;
-    case Intrinsic::epi_vunzip2:
-      TupleOpcode = RISCVISD::VUNZIP2;
-      break;
-    case Intrinsic::epi_vtrn:
-      TupleOpcode = RISCVISD::VTRN;
-      break;
-    }
-
-    SDValue TupleNode =
-        DAG.getNode(TupleOpcode, DL, MVT::Untyped, Op->getOperand(1),
-                    Op->getOperand(2), Op->getOperand(3));
-    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtuple2_0, DL, MVT::i32);
-    MachineSDNode *FirstNode = DAG.getMachineNode(
-        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
-
-    SDValue SubRegSecond = DAG.getTargetConstant(RISCV::vtuple2_1, DL, MVT::i32);
-    MachineSDNode *SecondNode = DAG.getMachineNode(
-        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
-
-    SDValue ExtractedOps[] = {SDValue(FirstNode, 0), SDValue(SecondNode, 0)};
-    return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
-  }
-  case Intrinsic::vp_add:
-  case Intrinsic::vp_sub:
-  case Intrinsic::vp_mul:
-  case Intrinsic::vp_sdiv:
-  case Intrinsic::vp_srem:
-  case Intrinsic::vp_udiv:
-  case Intrinsic::vp_urem:
-  case Intrinsic::vp_and:
-  case Intrinsic::vp_or:
-  case Intrinsic::vp_xor:
-  case Intrinsic::vp_ashr:
-  case Intrinsic::vp_lshr:
-  case Intrinsic::vp_shl:
-  case Intrinsic::vp_fadd:
-  case Intrinsic::vp_fsub:
-  case Intrinsic::vp_fmul:
-  case Intrinsic::vp_fdiv:
-  case Intrinsic::vp_frem:
-  case Intrinsic::vp_fma:
-  case Intrinsic::vp_fneg:
-  case Intrinsic::vp_icmp:
-  case Intrinsic::vp_fcmp:
-  case Intrinsic::vp_select:
-  case Intrinsic::vp_bitcast:
-    return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
-  case Intrinsic::vp_sitofp:
-  case Intrinsic::vp_uitofp:
-  case Intrinsic::vp_fptosi:
-  case Intrinsic::vp_fptoui:
-  case Intrinsic::vp_fpext:
-  case Intrinsic::vp_fptrunc:
-  case Intrinsic::vp_trunc:
-  case Intrinsic::vp_zext:
-  case Intrinsic::vp_sext:
-    return LowerVPIntrinsicConversion(Op, DAG);
-  }
+  // Fallback to setting the base address to zero and the offsets to the
+  // Addresses vector.
+  assert(OffsetsVT == Addresses.getValueType() &&
+         "Unexpected type for the offsets vector");
+  BaseAddr = DAG.getConstant(0, DL, MVT::i64);
+  Offsets = Addresses;
 }
 
 // FIXME: This does not handle fractional LMUL.
@@ -2337,49 +2319,6 @@ static std::pair<int64_t, int64_t> getSewLMul(MVT VT) {
   }
 }
 
-// Decomposes a vector of addresses into a base address plus a vector of
-// offsets.
-static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
-                                     SDLoc DL, SelectionDAG &DAG,
-                                     SDValue &BaseAddr, SDValue &Offsets) {
-  unsigned Opcode = Addresses.getOpcode();
-  if (Opcode == ISD::SPLAT_VECTOR) {
-    // Addresses is a splat vector. Set the BaseAddr as the splatted value
-    // and the offsets to zero.
-    BaseAddr = Addresses.getOperand(0);
-    Offsets =
-        DAG.getNode(ISD::SPLAT_VECTOR, DL, OffsetsVT,
-                    DAG.getConstant(0, DL, OffsetsVT.getVectorElementType()));
-    return;
-  }
-
-  if (Opcode == ISD::ADD) {
-    // Addresses is either (add a, (splat b)) or (add (splat a), b). Compute the
-    // base address as int the previous case and use the addend as offsets.
-    SDValue Op0 = Addresses.getOperand(0);
-    SDValue Op1 = Addresses.getOperand(1);
-    if (Op0.getOpcode() == ISD::SPLAT_VECTOR ||
-        Op1.getOpcode() == ISD::SPLAT_VECTOR) {
-      if (Op0.getOpcode() == ISD::SPLAT_VECTOR) {
-        BaseAddr = Op0.getOperand(0);
-        Offsets = Op1;
-      } else {
-        BaseAddr = Op1.getOperand(0);
-        Offsets = Op0;
-      }
-      assert(OffsetsVT == Offsets.getValueType() &&
-             "Unexpected type for the offsets vector");
-      return;
-    }
-  }
-
-  // Fallback to setting the base address to zero and the offsets to the
-  // Addresses vector.
-  assert(OffsetsVT == Addresses.getValueType() &&
-         "Unexpected type for the offsets vector");
-  BaseAddr = DAG.getConstant(0, DL, MVT::i64);
-  Offsets = Addresses;
-}
 
 static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
                           const RISCVSubtarget &Subtarget, unsigned OpCode,
@@ -2419,14 +2358,14 @@ static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
   return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
 }
 
-SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
-                                                    SelectionDAG &DAG) const {
+static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
+                                        const RISCVSubtarget &Subtarget) {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
   SDLoc DL(Op);
+
   switch (IntNo) {
-    // By default we do not lower any intrinsic.
   default:
-    break;
+    llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_load: {
     assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
 
@@ -2438,28 +2377,28 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
         C->getZExtValue() == 1)
       // Unmasked.
       Operands = {
-          Op.getOperand(0),                                          // Chain.
+          Op.getOperand(0), // Chain.
           DAG.getTargetConstant(Intrinsic::epi_vload, DL, MVT::i64),
-          Op.getOperand(2),                                          // Address.
+          Op.getOperand(2), // Address.
           // FIXME Alignment ignored.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5))                              // EVL.
+                      Op.getOperand(5)) // EVL.
       };
     else
       Operands = {
-          Op.getOperand(0),                                    // Chain.
-          DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL,
-                                MVT::i64),
-          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()),      // Merge.
-          Op.getOperand(2),                                    // Address.
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL, MVT::i64),
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
+          Op.getOperand(2),                               // Address.
           // FIXME Alignment ignored.
-          Op.getOperand(4),                                    // Mask.
+          Op.getOperand(4), // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5))                        // EVL.
+                      Op.getOperand(5)) // EVL.
       };
 
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), Operands);
+
     return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
   }
   case Intrinsic::vp_gather: {
@@ -2481,13 +2420,284 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
         BaseAddr,
         Offsets,
         Op.getOperand(4), // Mask.
-        VL
-    };
+        VL};
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
 
     return Result;
   }
+  }
+}
+
+static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
+                          const RISCVSubtarget &Subtarget, unsigned TupleSize,
+                          unsigned Opcode, unsigned BuildOpcode) {
+  SDLoc DL(Op);
+  EVT VT = Op->getOperand(2).getValueType();
+  int64_t LMUL;
+  int64_t SEWBits;
+  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+
+  MVT XLenVT = Subtarget.getXLenVT();
+  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+
+  // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
+  // so we use a pseudo instruction that we will expand later into proper
+  // INSERT_SUBREGs using the right register class.
+  SmallVector<SDValue, 4> TupleOperands;
+  for (unsigned I = 0; I < TupleSize; I++) {
+    TupleOperands.push_back(Op->getOperand(2 + I));
+  }
+
+  MachineSDNode *Tuple =
+      DAG.getMachineNode(BuildOpcode, DL, MVT::Untyped, TupleOperands);
+
+  SmallVector<SDValue, 4> Operands;
+  Operands.push_back(/* Chain */ Op->getOperand(0));
+  Operands.push_back(SDValue(Tuple, 0));
+  for (unsigned I = 2 + TupleSize, E = Op.getNumOperands(); I != E; I++) {
+    Operands.push_back(Op->getOperand(I));
+  }
+  Operands.push_back(SEW);
+
+  SDVTList VTs = DAG.getVTList(MVT::Other);
+  return DAG.getNode(Opcode, DL, VTs, Operands);
+}
+
+static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
+                                     const RISCVSubtarget &Subtarget) {
+  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
+  SDLoc DL(Op);
+
+  switch (IntNo) {
+  default:
+    llvm_unreachable("Unexpected intrinsic");
+  case Intrinsic::vp_store: {
+    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
+
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(5);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1)
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore, DL, MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          // FIXME Alignment ignored.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+    else
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_mask, DL, MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          // FIXME Alignment ignored.
+          MaskOp, // Mask.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+
+    return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
+    break;
+  }
+  case Intrinsic::vp_scatter: {
+    SDValue Data = Op.getOperand(2);
+    EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
+
+    SDValue BaseAddr;
+    SDValue Offsets;
+    SDValue Addresses = Op.getOperand(3);
+    GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
+
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(6));
+
+    // FIXME Address alignment operand (4) ignored.
+    SDValue VSXEOperands[] = {
+        Op.getOperand(0), // Chain.
+        DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
+        Data,
+        BaseAddr,
+        Offsets,
+        Op.getOperand(5), // Mask.
+        VL};
+    SDValue Result =
+        DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
+
+    return Result;
+  }
+  }
+}
+
+// This is just to make sure we properly dispatch all the VP intrinsics
+// of VP_INTRINSIC_WO_CHAIN_SET in LowerVPIntrinsic
+
+enum VPIntrinsicsSubset {
+#define VP_INTRINSIC(X) Intrinsic__##X = Intrinsic::X,
+  VP_INTRINSIC_WO_CHAIN_SET VP_INTRINSIC_W_CHAIN_SET VP_INTRINSIC_VOID_SET
+#undef VP_INTRINSIC
+};
+
+static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
+                                const RISCVSubtarget &Subtarget) {
+  VPIntrinsicsSubset VPIntNo = static_cast<VPIntrinsicsSubset>(IntNo);
+  SDLoc DL(Op);
+
+  switch (VPIntNo) {
+    // Note the use of __ instead of ::
+  case Intrinsic__vp_add:
+  case Intrinsic__vp_sub:
+  case Intrinsic__vp_mul:
+  case Intrinsic__vp_sdiv:
+  case Intrinsic__vp_srem:
+  case Intrinsic__vp_udiv:
+  case Intrinsic__vp_urem:
+  case Intrinsic__vp_and:
+  case Intrinsic__vp_or:
+  case Intrinsic__vp_xor:
+  case Intrinsic__vp_ashr:
+  case Intrinsic__vp_lshr:
+  case Intrinsic__vp_shl:
+  case Intrinsic__vp_fadd:
+  case Intrinsic__vp_fsub:
+  case Intrinsic__vp_fmul:
+  case Intrinsic__vp_fdiv:
+  case Intrinsic__vp_frem:
+  case Intrinsic__vp_fma:
+  case Intrinsic__vp_fneg:
+  case Intrinsic__vp_icmp:
+  case Intrinsic__vp_fcmp:
+  case Intrinsic__vp_select:
+  case Intrinsic__vp_bitcast:
+    return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
+  case Intrinsic__vp_sitofp:
+  case Intrinsic__vp_uitofp:
+  case Intrinsic__vp_fptosi:
+  case Intrinsic__vp_fptoui:
+  case Intrinsic__vp_fpext:
+  case Intrinsic__vp_fptrunc:
+  case Intrinsic__vp_trunc:
+  case Intrinsic__vp_zext:
+  case Intrinsic__vp_sext:
+    return LowerVPIntrinsicConversion(Op, DAG);
+  case Intrinsic__vp_load:
+  case Intrinsic__vp_gather:
+    return LowerVPINTRINSIC_W_CHAIN(Op, DAG, Subtarget);
+  case Intrinsic__vp_store:
+  case Intrinsic__vp_scatter:
+    return LowerVPINTRINSIC_VOID(Op, DAG, Subtarget);
+  }
+}
+
+SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
+                                                     SelectionDAG &DAG) const {
+  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+  SDLoc DL(Op);
+
+  if (Subtarget.hasStdExtV()) {
+    if (const RISCVEPIIntrinsicsTable::EPIIntrinsicInfo *EII =
+            RISCVEPIIntrinsicsTable::getEPIIntrinsicInfo(IntNo)) {
+      // Widen vector operands.
+      std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
+      bool Changed = false;
+      for (SDValue &Operand : Operands) {
+        if (Operand.getValueType().isScalableVector() &&
+            getPreferredVectorAction(Operand.getValueType().getSimpleVT()) ==
+                TypeWidenVector) {
+          EVT WidenVT =
+              getTypeToTransformTo(*DAG.getContext(), Operand.getValueType());
+          Operand =
+              DAG.getNode(ISD::INSERT_SUBVECTOR, DL, WidenVT,
+                          DAG.getNode(ISD::UNDEF, DL, WidenVT), Operand,
+                          DAG.getTargetConstant(0, DL, Subtarget.getXLenVT()));
+          Changed = true;
+        }
+      }
+
+      // Some EPI intrinsics may claim that they want an integer operand to be
+      // extended.
+      if (EII->ExtendedOperand) {
+        assert(EII->ExtendedOperand < Op.getNumOperands());
+        SDValue &ScalarOp = Operands[EII->ExtendedOperand];
+        if (ScalarOp.getValueType() == MVT::i32 ||
+            ScalarOp.getValueType() == MVT::i16 ||
+            ScalarOp.getValueType() == MVT::i8) {
+          ScalarOp = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, ScalarOp);
+          Changed = true;
+        }
+      }
+
+      if (Changed)
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                           Operands);
+    }
+  }
+  switch (IntNo) {
+  default:
+    return SDValue(); // Don't custom lower most intrinsics.
+  case Intrinsic::thread_pointer: {
+    EVT PtrVT = getPointerTy(DAG.getDataLayout());
+    return DAG.getRegister(RISCV::X4, PtrVT);
+  }
+  case Intrinsic::epi_vzip2:
+  case Intrinsic::epi_vunzip2:
+  case Intrinsic::epi_vtrn: {
+    SDVTList VTList = Op->getVTList();
+    assert(VTList.NumVTs == 2);
+    EVT VT = VTList.VTs[0];
+
+    unsigned TupleOpcode;
+    switch (IntNo) {
+    default:
+      llvm_unreachable("Invalid opcode");
+      break;
+    case Intrinsic::epi_vzip2:
+      TupleOpcode = RISCVISD::VZIP2;
+      break;
+    case Intrinsic::epi_vunzip2:
+      TupleOpcode = RISCVISD::VUNZIP2;
+      break;
+    case Intrinsic::epi_vtrn:
+      TupleOpcode = RISCVISD::VTRN;
+      break;
+    }
+
+    SDValue TupleNode =
+        DAG.getNode(TupleOpcode, DL, MVT::Untyped, Op->getOperand(1),
+                    Op->getOperand(2), Op->getOperand(3));
+    SDValue SubRegFirst = DAG.getTargetConstant(RISCV::vtuple2_0, DL, MVT::i32);
+    MachineSDNode *FirstNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegFirst);
+
+    SDValue SubRegSecond =
+        DAG.getTargetConstant(RISCV::vtuple2_1, DL, MVT::i32);
+    MachineSDNode *SecondNode = DAG.getMachineNode(
+        TargetOpcode::EXTRACT_SUBREG, DL, VT, TupleNode, SubRegSecond);
+
+    SDValue ExtractedOps[] = {SDValue(FirstNode, 0), SDValue(SecondNode, 0)};
+    return DAG.getNode(ISD::MERGE_VALUES, DL, VTList, ExtractedOps);
+  }
+  // We handle VP Intrinsics elsewhere.
+#define VP_INTRINSIC(X) case Intrinsic::X:
+    VP_INTRINSIC_WO_CHAIN_SET
+#undef VP_INTRINSIC
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
+  }
+}
+
+SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
+                                                    SelectionDAG &DAG) const {
+  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
+  SDLoc DL(Op);
+  switch (IntNo) {
+    // By default we do not lower any intrinsic.
+  default:
+    break;
   case Intrinsic::epi_vlseg2:
     return lowerVLSEG(Op, DAG, Subtarget, RISCVISD::VLSEG2,
                       {RISCV::vtuple2_0, RISCV::vtuple2_1});
@@ -2572,90 +2782,49 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                       {RISCV::vtuple8_0, RISCV::vtuple8_1, RISCV::vtuple8_2,
                        RISCV::vtuple8_3, RISCV::vtuple8_4, RISCV::vtuple8_5,
                        RISCV::vtuple8_6, RISCV::vtuple8_7});
+#define VP_INTRINSIC(X) case Intrinsic::X:
+    VP_INTRINSIC_W_CHAIN_SET
+#undef VP_INTRINSIC
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
   }
 
   return SDValue();
-}
-
-static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
-                          const RISCVSubtarget &Subtarget, unsigned TupleSize,
-                          unsigned Opcode, unsigned BuildOpcode) {
-  SDLoc DL(Op);
-  EVT VT = Op->getOperand(2).getValueType();
-  int64_t LMUL;
-  int64_t SEWBits;
-  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
-
-  MVT XLenVT = Subtarget.getXLenVT();
-  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
-
-  // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
-  // so we use a pseudo instruction that we will expand later into proper
-  // INSERT_SUBREGs using the right register class.
-  SmallVector<SDValue, 4> TupleOperands;
-  for (unsigned I = 0; I < TupleSize; I++) {
-    TupleOperands.push_back(Op->getOperand(2 + I));
-  }
-
-  MachineSDNode *Tuple =
-      DAG.getMachineNode(BuildOpcode, DL, MVT::Untyped, TupleOperands);
-
-  SmallVector<SDValue, 4> Operands;
-  Operands.push_back(/* Chain */ Op->getOperand(0));
-  Operands.push_back(SDValue(Tuple, 0));
-  for (unsigned I = 2 + TupleSize, E = Op.getNumOperands(); I != E; I++) {
-    Operands.push_back(Op->getOperand(I));
-  }
-  Operands.push_back(SEW);
-
-  SDVTList VTs = DAG.getVTList(MVT::Other);
-  return DAG.getNode(Opcode, DL, VTs, Operands);
 }
 
 SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
                                                  SelectionDAG &DAG) const {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
   SDLoc DL(Op);
+
+  if (Subtarget.hasStdExtV()) {
+    if (const RISCVEPIIntrinsicsTable::EPIIntrinsicInfo *EII =
+            RISCVEPIIntrinsicsTable::getEPIIntrinsicInfo(IntNo)) {
+      // Widen vector operands.
+      std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
+      bool Changed = false;
+      for (SDValue &Operand : Operands) {
+        if (Operand.getValueType().isScalableVector() &&
+            getPreferredVectorAction(Operand.getValueType().getSimpleVT()) ==
+                TypeWidenVector) {
+          EVT WidenVT =
+              getTypeToTransformTo(*DAG.getContext(), Operand.getValueType());
+          Operand =
+              DAG.getNode(ISD::INSERT_SUBVECTOR, DL, WidenVT,
+                          DAG.getNode(ISD::UNDEF, DL, WidenVT), Operand,
+                          DAG.getTargetConstant(0, DL, Subtarget.getXLenVT()));
+          Changed = true;
+        }
+      }
+
+      if (Changed)
+        return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
+    }
+  }
+
   switch (IntNo) {
     // By default we do not lower any intrinsic.
   default:
     break;
-  case Intrinsic::vp_store: {
-    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
-
-    std::vector<SDValue> Operands;
-    const SDValue &MaskOp = Op.getOperand(5);
-    ConstantSDNode *C;
-    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
-        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
-        C->getZExtValue() == 1)
-      // Unmasked.
-      Operands = {
-          Op.getOperand(0),                                     // Chain.
-          DAG.getTargetConstant(Intrinsic::epi_vstore, DL,
-                                MVT::i64),
-          Op.getOperand(2),                                     // Value.
-          Op.getOperand(3),                                     // Address.
-          // FIXME Alignment ignored.
-          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)),                        // EVL.
-      };
-    else
-      Operands = {
-          Op.getOperand(0),                                     // Chain.
-          DAG.getTargetConstant(Intrinsic::epi_vstore_mask, DL,
-                                MVT::i64),
-          Op.getOperand(2),                                     // Value.
-          Op.getOperand(3),                                     // Address.
-          // FIXME Alignment ignored.
-          MaskOp,                                               // Mask.
-          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)),                        // EVL.
-      };
-
-    return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
-    break;
-  }
   case Intrinsic::epi_vsseg2:
     return lowerVSSEG(Op, DAG, Subtarget, 2, RISCVISD::VSSEG2,
                       RISCV::PseudoVBuildVRM1T2);
@@ -2719,32 +2888,11 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
   case Intrinsic::epi_vsseg8_indexed:
     return lowerVSSEG(Op, DAG, Subtarget, 8, RISCVISD::VSXSEG8,
                       RISCV::PseudoVBuildVRM1T8);
-  case Intrinsic::vp_scatter: {
-    SDValue Data = Op.getOperand(2);
-    EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
-
-    SDValue BaseAddr;
-    SDValue Offsets;
-    SDValue Addresses = Op.getOperand(3);
-    GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
-
-    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(6));
-
-    // FIXME Address alignment operand (4) ignored.
-    SDValue VSXEOperands[] = {
-        Op.getOperand(0), // Chain.
-        DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
-        Data,
-        BaseAddr,
-        Offsets,
-        Op.getOperand(5), // Mask.
-        VL
-    };
-    SDValue Result =
-        DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
-
-    return Result;
-  }
+  // We handle VP Intrinsics elsewhere.
+#define VP_INTRINSIC(X) case Intrinsic::X:
+    VP_INTRINSIC_VOID_SET
+#undef VP_INTRINSIC
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
   }
 
   return SDValue();
@@ -3007,6 +3155,23 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
       }
       break;
     }
+#define VP_INTRINSIC(X) case Intrinsic::X:
+      VP_INTRINSIC_WO_CHAIN_SET
+#undef VP_INTRINSIC
+      // VP intrinsics
+      {
+        EVT Ty = N->getValueType(0);
+        assert(Ty.isScalableVector() && "Expecting a scalable type");
+        EVT WidenVT = getTypeToTransformTo(*DAG.getContext(), Ty);
+
+        SDValue NewIntrinsic = LowerINTRINSIC_WO_CHAIN(
+            DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, WidenVT, N->ops()), DAG);
+        SDValue Extract =
+            DAG.getNode(ISD::EXTRACT_SUBVECTOR, DL, Ty, NewIntrinsic,
+                        DAG.getTargetConstant(0, DL, Subtarget.getXLenVT()));
+        Results.push_back(Extract);
+        break;
+      }
     }
     break;
   }
@@ -3019,6 +3184,44 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
                                     N->getOperand(0), N->getOperand(1));
     SDValue Trunc = DAG.getNode(ISD::TRUNCATE, DL, Ty, Extract64);
     Results.push_back(Trunc);
+    break;
+  }
+  case ISD::EXTRACT_SUBVECTOR: {
+    unsigned Idx = cast<ConstantSDNode>(N->getOperand(1))->getZExtValue();
+    assert(Idx == 0 && "We can only extract the lowest vector");
+    Results.push_back(N->getOperand(0));
+    // Results.push_back(DAG.getNode(RISCVISD::LOWER_PART, DL,
+    //                               N->getOperand(0)->getValueType(0),
+    //                               N->getOperand(0)));
+    break;
+  }
+  case ISD::INTRINSIC_W_CHAIN: {
+    unsigned IntNo = cast<ConstantSDNode>(N->getOperand(1))->getZExtValue();
+    switch (IntNo) {
+    case Intrinsic::vp_load: {
+      EVT Ty = N->getValueType(0);
+      EVT ChainTy = N->getValueType(1);
+      assert(Ty.isScalableVector() && "Expecting a scalable type");
+      EVT WidenVT = getTypeToTransformTo(*DAG.getContext(), Ty);
+
+      SmallVector<SDValue, 4> ops(N->op_begin(), N->op_end());
+      SDValue NewIntrinsic = LowerINTRINSIC_W_CHAIN(
+          DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, DAG.getVTList(WidenVT, ChainTy),
+                      ops),
+          DAG);
+
+      SDValue Extract =
+          DAG.getNode(ISD::EXTRACT_SUBVECTOR, DL, Ty, NewIntrinsic,
+                      DAG.getTargetConstant(0, DL, Subtarget.getXLenVT()));
+
+      Results.push_back(Extract);
+      Results.push_back(NewIntrinsic.getValue(1));
+      break;
+    }
+    default:
+      llvm_unreachable("Don't know how to custom type legalize the result of "
+                       "this intrinsic!");
+    }
     break;
   }
   }
