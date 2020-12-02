@@ -8398,8 +8398,6 @@ static SDValue EltsFromConsecutiveLoads(EVT VT, ArrayRef<SDValue> Elts,
   // Handle Special Cases - all undef or undef/zero.
   if (UndefMask.countPopulation() == NumElems)
     return DAG.getUNDEF(VT);
-
-  // FIXME: Should we return this as a BUILD_VECTOR instead?
   if ((ZeroMask.countPopulation() + UndefMask.countPopulation()) == NumElems)
     return VT.isInteger() ? DAG.getConstant(0, DL, VT)
                           : DAG.getConstantFP(0.0, DL, VT);
@@ -8414,7 +8412,8 @@ static SDValue EltsFromConsecutiveLoads(EVT VT, ArrayRef<SDValue> Elts,
   assert(LDBase && "Did not find base load for merging consecutive loads");
   unsigned BaseSizeInBits = EltBaseVT.getStoreSizeInBits();
   unsigned BaseSizeInBytes = BaseSizeInBits / 8;
-  int LoadSizeInBits = (1 + LastLoadedElt - FirstLoadedElt) * BaseSizeInBits;
+  int NumLoadedElts = (1 + LastLoadedElt - FirstLoadedElt);
+  int LoadSizeInBits = NumLoadedElts * BaseSizeInBits;
   assert((BaseSizeInBits % 8) == 0 && "Sub-byte element loads detected");
 
   // TODO: Support offsetting the base load.
@@ -8476,7 +8475,7 @@ static SDValue EltsFromConsecutiveLoads(EVT VT, ArrayRef<SDValue> Elts,
   // base pointer. If the vector contains zeros, then attempt to shuffle those
   // elements.
   if (FirstLoadedElt == 0 &&
-      (LastLoadedElt == (int)(NumElems - 1) || IsDereferenceable) &&
+      (NumLoadedElts == (int)NumElems || IsDereferenceable) &&
       (IsConsecutiveLoad || IsConsecutiveLoadWithZeros)) {
     if (isAfterLegalize && !TLI.isOperationLegal(ISD::LOAD, VT))
       return SDValue();
@@ -36247,10 +36246,6 @@ static SDValue combineX86ShufflesRecursively(
   // Handle the all undef/zero cases early.
   if (all_of(Mask, [](int Idx) { return Idx == SM_SentinelUndef; }))
     return DAG.getUNDEF(Root.getValueType());
-
-  // TODO - should we handle the mixed zero/undef case as well? Just returning
-  // a zero mask will lose information on undef elements possibly reducing
-  // future combine possibilities.
   if (all_of(Mask, [](int Idx) { return Idx < 0; }))
     return getZeroVector(Root.getSimpleValueType(), Subtarget, DAG,
                          SDLoc(Root));
