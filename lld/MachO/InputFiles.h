@@ -15,6 +15,7 @@
 #include "lld/Common/Memory.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/BinaryFormat/MachO.h"
+#include "llvm/DebugInfo/DWARF/DWARFUnit.h"
 #include "llvm/Object/Archive.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/TextAPI/MachO/InterfaceFile.h"
@@ -64,13 +65,15 @@ public:
   std::vector<Symbol *> symbols;
   ArrayRef<llvm::MachO::section_64> sectionHeaders;
   std::vector<SubsectionMap> subsections;
+  // Provides an easy way to sort InputFiles deterministically.
+  const int id;
 
 protected:
   InputFile(Kind kind, MemoryBufferRef mb)
-      : mb(mb), fileKind(kind), name(mb.getBufferIdentifier()) {}
+      : mb(mb), id(idCount++), fileKind(kind), name(mb.getBufferIdentifier()) {}
 
   InputFile(Kind kind, const llvm::MachO::InterfaceFile &interface)
-      : fileKind(kind), name(saver.save(interface.getPath())) {}
+      : id(idCount++), fileKind(kind), name(saver.save(interface.getPath())) {}
 
   void parseSections(ArrayRef<llvm::MachO::section_64>);
 
@@ -84,13 +87,22 @@ protected:
 private:
   const Kind fileKind;
   const StringRef name;
+
+  static int idCount;
 };
 
 // .o file
 class ObjFile : public InputFile {
 public:
-  explicit ObjFile(MemoryBufferRef mb);
+  explicit ObjFile(MemoryBufferRef mb, uint32_t modTime);
   static bool classof(const InputFile *f) { return f->kind() == ObjKind; }
+
+  llvm::DWARFUnit *compileUnit = nullptr;
+  StringRef archiveName = "";
+  const uint32_t modTime;
+
+private:
+  void parseDebugInfo();
 };
 
 // command-line -sectcreate file

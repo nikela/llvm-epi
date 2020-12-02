@@ -44,6 +44,7 @@
 #include "InputFiles.h"
 #include "Config.h"
 #include "Driver.h"
+#include "Dwarf.h"
 #include "ExportTrie.h"
 #include "InputSection.h"
 #include "MachOStructs.h"
@@ -54,6 +55,7 @@
 #include "Symbols.h"
 #include "Target.h"
 
+#include "lld/Common/DWARF.h"
 #include "lld/Common/ErrorHandler.h"
 #include "lld/Common/Memory.h"
 #include "lld/Common/Reproduce.h"
@@ -74,6 +76,7 @@ using namespace lld::macho;
 
 std::vector<InputFile *> macho::inputFiles;
 std::unique_ptr<TarWriter> macho::tar;
+int InputFile::idCount = 0;
 
 // Open a given file path and return it as a memory-mapped file.
 Optional<MemoryBufferRef> macho::readFile(StringRef path) {
@@ -362,7 +365,8 @@ OpaqueFile::OpaqueFile(MemoryBufferRef mb, StringRef segName,
   subsections.push_back({{0, isec}});
 }
 
-ObjFile::ObjFile(MemoryBufferRef mb) : InputFile(ObjKind, mb) {
+ObjFile::ObjFile(MemoryBufferRef mb, uint32_t modTime)
+    : InputFile(ObjKind, mb), modTime(modTime) {
   auto *buf = reinterpret_cast<const uint8_t *>(mb.getBufferStart());
   auto *hdr = reinterpret_cast<const mach_header_64 *>(mb.getBufferStart());
 
@@ -387,6 +391,28 @@ ObjFile::ObjFile(MemoryBufferRef mb) : InputFile(ObjKind, mb) {
   // parsed all the symbols.
   for (size_t i = 0, n = subsections.size(); i < n; ++i)
     parseRelocations(sectionHeaders[i], subsections[i]);
+
+  parseDebugInfo();
+}
+
+void ObjFile::parseDebugInfo() {
+  std::unique_ptr<DwarfObject> dObj = DwarfObject::create(this);
+  if (!dObj)
+    return;
+
+  auto *ctx = make<DWARFContext>(
+      std::move(dObj), "",
+      [&](Error err) { warn(getName() + ": " + toString(std::move(err))); },
+      [&](Error warning) {
+        warn(getName() + ": " + toString(std::move(warning)));
+      });
+
+  // TODO: Since object files can contain a lot of DWARF info, we should verify
+  // that we are parsing just the info we need
+  const DWARFContext::compile_unit_range &units = ctx->compile_units();
+  auto it = units.begin();
+  compileUnit = it->get();
+  assert(std::next(it) == units.end());
 }
 
 // The path can point to either a dylib or a .tbd file.
@@ -558,7 +584,7 @@ void ArchiveFile::fetch(const object::Archive::Symbol &sym) {
   object::Archive::Child c =
       CHECK(sym.getMember(), toString(this) +
                                  ": could not get the member for symbol " +
-                                 sym.getName());
+                                 toMachOString(sym));
 
   if (!seen.insert(c.getChildOffset()).second)
     return;
@@ -567,8 +593,17 @@ void ArchiveFile::fetch(const object::Archive::Symbol &sym) {
       CHECK(c.getMemoryBufferRef(),
             toString(this) +
                 ": could not get the buffer for the member defining symbol " +
-                sym.getName());
-  auto file = make<ObjFile>(mb);
+                toMachOString(sym));
+
+  uint32_t modTime = toTimeT(
+      CHECK(c.getLastModified(), toString(this) +
+                                     ": could not get the modification time "
+                                     "for the member defining symbol " +
+                                     toMachOString(sym)));
+
+  auto file = make<ObjFile>(mb, modTime);
+  file->archiveName = getName();
+
   symbols.insert(symbols.end(), file->symbols.begin(), file->symbols.end());
   subsections.insert(subsections.end(), file->subsections.begin(),
                      file->subsections.end());
