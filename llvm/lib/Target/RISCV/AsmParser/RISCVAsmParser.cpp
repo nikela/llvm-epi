@@ -907,7 +907,7 @@ public:
 
   static std::unique_ptr<RISCVOperand>
   createVType(APInt Sew, APInt Lmul, bool Fractional, bool TailAgnostic,
-              bool MaskedoffAgnostic, SMLoc S, bool IsRV64) {
+              bool MaskedoffAgnostic, bool Nontemporal, SMLoc S, bool IsRV64) {
     auto Op = std::make_unique<RISCVOperand>(KindTy::VType);
     Sew.ashrInPlace(3);
     unsigned SewLog2 = Sew.logBase2();
@@ -928,6 +928,9 @@ public:
     if (MaskedoffAgnostic) {
       Op->VType.Encoding |= 0x80;
     }
+    if (Nontemporal) {
+      Op->VType.Encoding |= 0x200;
+   }
     Op->VType.TailAgnostic = TailAgnostic;
     Op->VType.MaskedoffAgnostic = MaskedoffAgnostic;
     Op->StartLoc = S;
@@ -1253,7 +1256,7 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     return Error(
         ErrorLoc,
         "operand must be "
-        "e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]");
+        "e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu][,nt]");
   }
   case Match_InvalidVMaskRegister: {
     SMLoc ErrorLoc = ((RISCVOperand &)*Operands[ErrorInfo]).getStartLoc();
@@ -1677,11 +1680,23 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
     return MatchOperand_NoMatch;
   getLexer().Lex();
 
+  // Optional ",nt"
+  bool Nontemporal = false;
+  if (getLexer().is(AsmToken::Comma)) {
+    getLexer().Lex();
+    Name = getLexer().getTok().getIdentifier();
+    if (Name == "nt") {
+      Nontemporal = true;
+    } else
+      return MatchOperand_NoMatch;
+    getLexer().Lex();
+  }
+
   if (getLexer().getKind() != AsmToken::EndOfStatement)
     return MatchOperand_NoMatch;
 
   Operands.push_back(RISCVOperand::createVType(
-      Sew, Lmul, Fractional, TailAgnostic, MaskedoffAgnostic, S, isRV64()));
+      Sew, Lmul, Fractional, TailAgnostic, MaskedoffAgnostic, Nontemporal, S, isRV64()));
 
   return MatchOperand_Success;
 }
