@@ -222,6 +222,18 @@ bool EPIFoldBroadcast::foldBroadcasts(Function &F) {
       NewOps = {CBUser->getArgOperand(0), FI.Scalar, CBUser->getArgOperand(2),
                 CBUser->getArgOperand(3), CBUser->getArgOperand(4)};
       break;
+    case RISCVEPIIntrinsicsTable::EPICIDBinaryWide:
+      LLVM_DEBUG(dbgs() << "Binary intrinsic widening/narrowing\n");
+      NewIntrinsicTypes = {FTy->getReturnType(), FTy->getParamType(0), ScalarTy};
+      NewOps = {CBUser->getArgOperand(0), FI.Scalar, CBUser->getArgOperand(2)};
+      break;
+    case RISCVEPIIntrinsicsTable::EPICIDBinaryWideMask:
+      LLVM_DEBUG(dbgs() << "Binary intrinsic widening/narrowing with mask\n");
+      NewIntrinsicTypes = {FTy->getReturnType(), FTy->getParamType(1), ScalarTy,
+                           FTy->getParamType(3)};
+      NewOps = {CBUser->getArgOperand(0), CBUser->getArgOperand(1), FI.Scalar,
+                CBUser->getArgOperand(3), CBUser->getArgOperand(4)};
+      break;
     default:
       // We don't handle this class of intrinsics yet.
       LLVM_DEBUG(dbgs() << "Intrinsic not handled yet\n");

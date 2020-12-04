@@ -87,11 +87,14 @@ public:
   /// type identification.
   enum {
     VPValueSC,
-    VPInstructionSC,
-    VPMemoryInstructionSC,
+    VPVInstructionSC,
+    VPVMemoryInstructionSC,
+    VPVReductionSC,
+    VPVReplicateSC,
+    VPVWidenSC,
     VPVWidenCallSC,
-    VPVWidenSelectSC,
     VPVWidenGEPSC,
+    VPVWidenSelectSC,
     VPPredicatedMemoryInstructionSC,
     VPWidenEVLSC,
     VPWidenEVLMaskSC,

@@ -471,7 +471,7 @@ public:
   BasicBlock *createVectorizedLoopSkeleton();
 
   /// Widen a single instruction within the innermost loop.
-  void widenInstruction(Instruction &I, VPUser &Operands,
+  void widenInstruction(Instruction &I, VPValue *Def, VPUser &Operands,
                         VPTransformState &State);
 
   /// Widen a single instruction within the innermost loop using vector
@@ -565,6 +565,7 @@ public:
   /// values in the vectorized loop.
   void vectorizeInterleaveGroup(const InterleaveGroup<Instruction> *Group,
                                 VPTransformState &State, VPValue *Addr,
+                                ArrayRef<VPValue *> StoredValues,
                                 VPValue *BlockInMask = nullptr);
 
   /// Vectorize Load and Store instructions with the base address given in \p
@@ -2452,7 +2453,7 @@ static bool useMaskedInterleavedAccesses(const TargetTransformInfo &TTI) {
 //   store <12 x i32> %interleaved.vec              ; Write 4 tuples of R,G,B
 void InnerLoopVectorizer::vectorizeInterleaveGroup(
     const InterleaveGroup<Instruction> *Group, VPTransformState &State,
-    VPValue *Addr, VPValue *BlockInMask) {
+    VPValue *Addr, ArrayRef<VPValue *> StoredValues, VPValue *BlockInMask) {
   Instruction *Instr = Group->getInsertPos();
   const DataLayout &DL = Instr->getModule()->getDataLayout();
 
@@ -2595,11 +2596,10 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
     SmallVector<Value *, 4> StoredVecs;
     for (unsigned i = 0; i < InterleaveFactor; i++) {
       // Interleaved store group doesn't allow a gap, so each index has a member
-      Instruction *Member = Group->getMember(i);
-      assert(Member && "Fail to get a member from an interleaved store group");
+      assert(Group->getMember(i) && "Fail to get a member from an interleaved store group");
 
-      Value *StoredVec = getOrCreateVectorValue(
-          cast<StoreInst>(Member)->getValueOperand(), Part);
+      Value *StoredVec = State.get(StoredValues[i], Part);
+
       if (Group->isReverse())
         StoredVec = reverseVector(StoredVec);
 
@@ -2909,7 +2909,9 @@ void InnerLoopVectorizer::scalarizeInstruction(Instruction *Instr, VPUser &User,
   // Place the cloned scalar in the new loop.
   Builder.Insert(Cloned);
 
-  // Add the cloned scalar to the scalar map entry.
+  // TODO: Set result for VPValue of VPReciplicateRecipe. This requires
+  // representing scalar values in VPTransformState. Add the cloned scalar to
+  // the scalar map entry.
   VectorLoopValueMap.setScalarValue(Instr, Instance, Cloned);
 
   // If we just cloned a new assumption, add it the assumption cache.
@@ -2976,7 +2978,7 @@ Value *InnerLoopVectorizer::getOrCreateTripCount(Loop *L) {
   // Find the loop boundaries.
   ScalarEvolution *SE = PSE.getSE();
   const SCEV *BackedgeTakenCount = PSE.getBackedgeTakenCount();
-  assert(BackedgeTakenCount != SE->getCouldNotCompute() &&
+  assert(!isa<SCEVCouldNotCompute>(BackedgeTakenCount) &&
          "Invalid loop count");
 
   Type *IdxTy = Legal->getWidestInductionType();
@@ -4775,7 +4777,7 @@ void InnerLoopVectorizer::widenGEP(GetElementPtrInst *GEP, VPValue *VPDef,
     auto *Clone = Builder.Insert(GEP->clone());
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *EntryPart = Builder.CreateVectorSplat(VF, Clone);
-      VectorLoopValueMap.setVectorValue(GEP, Part, EntryPart);
+      State.set(VPDef, GEP, EntryPart, Part);
       addMetadata(EntryPart, GEP);
     }
   } else {
@@ -4812,7 +4814,7 @@ void InnerLoopVectorizer::widenGEP(GetElementPtrInst *GEP, VPValue *VPDef,
               : Builder.CreateGEP(GEP->getSourceElementType(), Ptr, Indices);
       assert((VF.isScalar() || NewGEP->getType()->isVectorTy()) &&
              "NewGEP is not a pointer vector");
-      VectorLoopValueMap.setVectorValue(GEP, Part, NewGEP);
+      State.set(VPDef, GEP, NewGEP, Part);
       addMetadata(NewGEP, GEP);
     }
   }
@@ -5290,7 +5292,8 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   }
 }
 
-void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
+void InnerLoopVectorizer::widenInstruction(Instruction &I, VPValue *Def,
+                                           VPUser &User,
                                            VPTransformState &State) {
   switch (I.getOpcode()) {
   case Instruction::Call:
@@ -5332,7 +5335,7 @@ void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
         VecOp->copyIRFlags(&I);
 
       // Use this vector value for all users of the original instruction.
-      VectorLoopValueMap.setVectorValue(&I, Part, V);
+      State.set(Def, &I, V, Part);
       addMetadata(V, &I);
     }
 
@@ -5356,7 +5359,7 @@ void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
       } else {
         C = Builder.CreateICmp(Cmp->getPredicate(), A, B);
       }
-      VectorLoopValueMap.setVectorValue(&I, Part, C);
+      State.set(Def, &I, C, Part);
       addMetadata(C, &I);
     }
 
@@ -5385,7 +5388,7 @@ void InnerLoopVectorizer::widenInstruction(Instruction &I, VPUser &User,
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *A = State.get(User.getOperand(0), Part);
       Value *Cast = Builder.CreateCast(CI->getOpcode(), A, DestTy);
-      VectorLoopValueMap.setVectorValue(&I, Part, Cast);
+      State.set(Def, &I, Cast, Part);
       addMetadata(Cast, &I);
     }
     break;
@@ -6169,15 +6172,18 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount) {
   // It is computed by MaxVF * sizeOf(type) * 8, where type is taken from
   // the memory accesses that is most restrictive (involved in the smallest
   // dependence distance).
-  // FIXME: For scalable vectors for now we assume MaxSafeRegisterWidth = -1U.
-  // See definition of Legal->getMaxSafeRegisterWidth().
-  unsigned MaxSafeRegisterWidth = Legal->getMaxSafeRegisterWidth();
+  // FIXME: For scalable vectors for now we assume MaxSafeVectorWidthInBits is
+  // -1U. See definition of Legal->getMaxSafeRegisterWidth().
+  unsigned MaxSafeVectorWidthInBits = Legal->getMaxSafeRegisterWidth();
 
   ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
   ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
   std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
-      TTI.getFeasibleMaxVFRange(SmallestType, WidestType, MaxSafeRegisterWidth,
+      TTI.getFeasibleMaxVFRange(SmallestType, WidestType,
+                                MaxSafeVectorWidthInBits,
                                 VectorRegisterWidthFactor);
+
+  WidestRegister = std::min(WidestRegister, MaxSafeVectorWidthInBits);
 
   unsigned MaxVFKnownMinLowerBound = FeasibleMaxVFLowerBound.getKnownMinValue();
   bool MaxVFIsScalableLowerBound = FeasibleMaxVFLowerBound.isScalable();
@@ -8160,7 +8166,7 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   if (!BI->isConditional() || BI->getSuccessor(0) == BI->getSuccessor(1))
     return EdgeMaskCache[Edge] = SrcMask;
 
-  VPValue *EdgeMask = Plan->getVPValue(BI->getCondition());
+  VPValue *EdgeMask = Plan->getOrAddVPValue(BI->getCondition());
   assert(EdgeMask && "No Edge Mask found for condition");
 
   if (BI->getSuccessor(0) != Dst)
@@ -8198,7 +8204,7 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     // Start by constructing the desired canonical IV.
     VPValue *IV = nullptr;
     if (Legal->getPrimaryInduction())
-      IV = Plan->getVPValue(Legal->getPrimaryInduction());
+      IV = Plan->getOrAddVPValue(Legal->getPrimaryInduction());
     else {
       auto IVRecipe = new VPWidenCanonicalIVRecipe();
       Builder.getInsertBlock()->insert(IVRecipe, NewInsertionPoint);
@@ -8515,6 +8521,7 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
   auto *Recipe = new VPReplicateRecipe(I, Plan->mapToVPValues(I->operands()),
                                        IsUniform, IsPredicated);
   setRecipe(I, Recipe);
+  Plan->addVPValue(I, Recipe);
 
   // Find if I uses a predicated instruction. If so, it will use its scalar
   // value. Avoid hoisting the insert-element which packs the scalar value into
@@ -8620,24 +8627,6 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
                                                         ElementCount MaxVF) {
   assert(OrigLoop->isInnermost() && "Inner loop expected.");
 
-  // Collect conditions feeding internal conditional branches; they need to be
-  // represented in VPlan for it to model masking.
-  SmallPtrSet<Value *, 1> NeedDef;
-
-  auto *Latch = OrigLoop->getLoopLatch();
-  for (BasicBlock *BB : OrigLoop->blocks()) {
-    if (BB == Latch)
-      continue;
-    BranchInst *Branch = dyn_cast<BranchInst>(BB->getTerminator());
-    if (Branch && Branch->isConditional())
-      NeedDef.insert(Branch->getCondition());
-  }
-
-  // If the tail is to be folded by masking, the primary induction variable, if
-  // exists needs to be represented in VPlan for it to model early-exit masking.
-  if (CM.foldTailByMasking() && Legal->getPrimaryInduction())
-    NeedDef.insert(Legal->getPrimaryInduction());
-
   // Collect instructions from the original loop that will become trivially dead
   // in the vectorized loop. We don't need to vectorize these instructions. For
   // example, original induction update instructions can become dead because we
@@ -8662,15 +8651,14 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
   auto MaxVFPlusOne = MaxVF.getWithIncrement(1);
   for (ElementCount VF = MinVF; ElementCount::isKnownLT(VF, MaxVFPlusOne);) {
     VFRange SubRange = {VF, MaxVFPlusOne};
-    VPlans.push_back(buildVPlanWithVPRecipes(SubRange, NeedDef,
-                                             DeadInstructions, SinkAfter));
+    VPlans.push_back(
+        buildVPlanWithVPRecipes(SubRange, DeadInstructions, SinkAfter));
     VF = SubRange.End;
   }
 }
 
 VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
-    VFRange &Range, SmallPtrSetImpl<Value *> &NeedDef,
-    SmallPtrSetImpl<Instruction *> &DeadInstructions,
+    VFRange &Range, SmallPtrSetImpl<Instruction *> &DeadInstructions,
     const DenseMap<Instruction *, Instruction *> &SinkAfter) {
 
   // Hold a mapping from predicated instructions to their recipes, in order to
@@ -8739,10 +8727,6 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   VPBasicBlock *VPBB = new VPBasicBlock("Pre-Entry");
   Plan->setEntry(VPBB);
 
-  // Represent values that will have defs inside VPlan.
-  for (Value *V : NeedDef)
-    Plan->addVPValue(V);
-
   // Scan the body of the loop in a topological order to visit each basic block
   // after having visited its predecessor basic blocks.
   LoopBlocksDFS DFS(OrigLoop);
@@ -8772,12 +8756,8 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
         // Check if the recipe can be converted to a VPValue. We need the extra
         // down-casting step until VPRecipeBase inherits from VPValue.
         VPValue *MaybeVPValue = Recipe->toVPValue();
-        if (!Instr->getType()->isVoidTy() && MaybeVPValue) {
-          if (NeedDef.contains(Instr))
-            Plan->addOrReplaceVPValue(Instr, MaybeVPValue);
-          else
-            Plan->addVPValue(Instr, MaybeVPValue);
-        }
+        if (!Instr->getType()->isVoidTy() && MaybeVPValue)
+          Plan->addVPValue(Instr, MaybeVPValue);
 
         RecipeBuilder.setRecipe(Instr, Recipe);
         VPBB->appendRecipe(Recipe);
@@ -8823,7 +8803,13 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   for (auto IG : InterleaveGroups) {
     auto *Recipe = cast<VPWidenMemoryInstructionRecipe>(
         RecipeBuilder.getRecipe(IG->getInsertPos()));
-    (new VPInterleaveRecipe(IG, Recipe->getAddr(), Recipe->getMask()))
+    SmallVector<VPValue *, 4> StoredValues;
+    for (unsigned i = 0; i < IG->getFactor(); ++i)
+      if (auto *SI = dyn_cast_or_null<StoreInst>(IG->getMember(i)))
+        StoredValues.push_back(Plan->getOrAddVPValue(SI->getOperand(0)));
+
+    (new VPInterleaveRecipe(IG, Recipe->getAddr(), StoredValues,
+                            Recipe->getMask()))
         ->insertBefore(Recipe);
 
     for (unsigned i = 0; i < IG->getFactor(); ++i)
@@ -8949,6 +8935,9 @@ void LoopVectorizationPlanner::adjustRecipesForInLoopReductions(
                          : nullptr;
       VPReductionRecipe *RedRecipe = new VPReductionRecipe(
           &RdxDesc, R, ChainOp, VecOp, CondOp, Legal->hasFunNoNaNAttr(), TTI);
+      WidenRecipe->toVPValue()->replaceAllUsesWith(RedRecipe);
+      Plan->removeVPValueFor(R);
+      Plan->addVPValue(R, RedRecipe);
       WidenRecipe->getParent()->insert(RedRecipe, WidenRecipe->getIterator());
       WidenRecipe->eraseFromParent();
 
@@ -8958,6 +8947,8 @@ void LoopVectorizationPlanner::adjustRecipesForInLoopReductions(
             RecipeBuilder.getRecipe(cast<Instruction>(R->getOperand(0)));
         assert(isa<VPWidenRecipe>(CompareRecipe) &&
                "Expected to replace a VPWidenSC");
+        assert(CompareRecipe->toVPValue()->getNumUsers() == 0 &&
+               "Expected no remaining users");
         CompareRecipe->eraseFromParent();
       }
       Chain = R;
@@ -9002,7 +8993,7 @@ void VPWidenSelectRecipe::execute(VPTransformState &State) {
 }
 
 void VPWidenRecipe::execute(VPTransformState &State) {
-  State.ILV->widenInstruction(Ingredient, *this, State);
+  State.ILV->widenInstruction(*getUnderlyingInstr(), this, *this, State);
 }
 
 void VPPredicatedWidenRecipe::execute(VPTransformState &State) {
@@ -9128,16 +9119,17 @@ void VPBlendRecipe::execute(VPTransformState &State) {
 
 void VPInterleaveRecipe::execute(VPTransformState &State) {
   assert(!State.Instance && "Interleave group being replicated.");
-  State.ILV->vectorizeInterleaveGroup(IG, State, getAddr(), getMask());
+  State.ILV->vectorizeInterleaveGroup(IG, State, getAddr(), getStoredValues(),
+                                      getMask());
 }
 
 void VPReductionRecipe::execute(VPTransformState &State) {
   assert(!State.Instance && "Reduction being replicated.");
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     RecurrenceDescriptor::RecurrenceKind Kind = RdxDesc->getRecurrenceKind();
-    Value *NewVecOp = State.get(VecOp, Part);
-    if (CondOp) {
-      Value *NewCond = State.get(CondOp, Part);
+    Value *NewVecOp = State.get(getVecOp(), Part);
+    if (VPValue *Cond = getCondOp()) {
+      Value *NewCond = State.get(Cond, Part);
       VectorType *VecTy = cast<VectorType>(NewVecOp->getType());
       Constant *Iden = RecurrenceDescriptor::getRecurrenceIdentity(
           Kind, RdxDesc->getMinMaxRecurrenceKind(), VecTy->getElementType());
@@ -9148,7 +9140,7 @@ void VPReductionRecipe::execute(VPTransformState &State) {
     }
     Value *NewRed =
         createTargetReduction(State.Builder, TTI, *RdxDesc, NewVecOp, NoNaN);
-    Value *PrevInChain = State.get(ChainOp, Part);
+    Value *PrevInChain = State.get(getChainOp(), Part);
     Value *NextInChain;
     if (Kind == RecurrenceDescriptor::RK_IntegerMinMax ||
         Kind == RecurrenceDescriptor::RK_FloatMinMax) {
@@ -9157,25 +9149,28 @@ void VPReductionRecipe::execute(VPTransformState &State) {
                          NewRed, PrevInChain);
     } else {
       NextInChain = State.Builder.CreateBinOp(
-          (Instruction::BinaryOps)I->getOpcode(), NewRed, PrevInChain);
+          (Instruction::BinaryOps)getUnderlyingInstr()->getOpcode(), NewRed,
+          PrevInChain);
     }
-    State.ValueMap.setVectorValue(I, Part, NextInChain);
+    State.set(this, getUnderlyingInstr(), NextInChain, Part);
   }
 }
 
 void VPReplicateRecipe::execute(VPTransformState &State) {
   if (State.Instance) { // Generate a single instance.
-    State.ILV->scalarizeInstruction(Ingredient, *this, *State.Instance,
-                                    IsPredicated, State);
+    State.ILV->scalarizeInstruction(getUnderlyingInstr(), *this,
+                                    *State.Instance, IsPredicated, State);
     // Insert scalar instance packing it into a vector.
     if (AlsoPack && State.VF.isVector()) {
       // If we're constructing lane 0, initialize to start from undef.
       if (State.Instance->Lane == 0) {
-        Value *Undef =
-            UndefValue::get(VectorType::get(Ingredient->getType(), State.VF));
-        State.ValueMap.setVectorValue(Ingredient, State.Instance->Part, Undef);
+        Value *Undef = UndefValue::get(
+            VectorType::get(getUnderlyingValue()->getType(), State.VF));
+        State.ValueMap.setVectorValue(getUnderlyingInstr(),
+                                      State.Instance->Part, Undef);
       }
-      State.ILV->packScalarIntoVectorValue(Ingredient, *State.Instance);
+      State.ILV->packScalarIntoVectorValue(getUnderlyingInstr(),
+                                           *State.Instance);
     }
     return;
   }
@@ -9186,7 +9181,7 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
   unsigned EndLane = IsUniform ? 1 : State.VF.getKnownMinValue();
   for (unsigned Part = 0; Part < State.UF; ++Part)
     for (unsigned Lane = 0; Lane < EndLane; ++Lane)
-      State.ILV->scalarizeInstruction(Ingredient, *this, {Part, Lane},
+      State.ILV->scalarizeInstruction(getUnderlyingInstr(), *this, {Part, Lane},
                                       IsPredicated, State);
 }
 
@@ -9324,7 +9319,7 @@ static bool processLoopInVPlanNativePath(
     OptimizationRemarkEmitter *ORE, BlockFrequencyInfo *BFI,
     ProfileSummaryInfo *PSI, LoopVectorizeHints &Hints) {
 
-  if (PSE.getBackedgeTakenCount() == PSE.getSE()->getCouldNotCompute()) {
+  if (isa<SCEVCouldNotCompute>(PSE.getBackedgeTakenCount())) {
     LLVM_DEBUG(dbgs() << "LV: cannot compute the outer-loop trip count\n");
     return false;
   }

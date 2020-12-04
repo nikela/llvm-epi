@@ -2052,6 +2052,88 @@ multiclass pat_intrinsic_binary_int_w_vv_vx<string intrinsic_name,
   }
 }
 
+multiclass pat_intrinsic_binary_int_w_vv_vx_lmul1<string intrinsic_name,
+                                                  string instruction_name,
+                                                  ValueType result_type,
+                                                  ValueType op1_type,
+                                                  ValueType tmp_type,
+                                                  ValueType mask_type,
+                                                  int SourceSEW>
+{
+
+def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
+                        (op1_type VR:$rs1),
+                        (op1_type VR:$rs2),
+                        (i64 GPR:$vl))),
+          (EXTRACT_SUBREG
+            (!cast<Instruction>(instruction_name # "_VV_M1")
+              (tmp_type (IMPLICIT_DEF)),
+              (op1_type VR:$rs1),
+              ToFPR64<VR, (op1_type VR:$rs2)>.ret,
+              (mask_type zero_reg),
+              (NoX0 GPR:$vl),
+              SourceSEW), sub_vrm2)>;
+
+def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
+                        (op1_type VR:$rs1),
+                        (XLenVT GPR:$rs2),
+                        (i64 GPR:$vl))),
+          (EXTRACT_SUBREG
+            (!cast<Instruction>(instruction_name # "_VX_M1")
+              (tmp_type (IMPLICIT_DEF)),
+              (op1_type VR:$rs1),
+              GPR:$rs2,
+              (mask_type zero_reg),
+              (NoX0 GPR:$vl),
+              SourceSEW), sub_vrm2)>;
+}
+
+multiclass pat_intrinsic_binary_int_v_wv_wx_wi_lmul1<string intrinsic_name,
+                                                     string instruction_name,
+                                                     ValueType result_type,
+                                                     ValueType op1_type,
+                                                     ValueType tmp_type,
+                                                     ValueType mask_type,
+                                                     int DestSEW>
+{
+
+def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
+                        (op1_type VR:$rs1),
+                        (op1_type VR:$rs2),
+                        (i64 GPR:$vl))),
+            (!cast<Instruction>(instruction_name # "_WV_M1")
+              (result_type (IMPLICIT_DEF)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              ToFPR64<VR, (op1_type VR:$rs2)>.ret,
+              (mask_type zero_reg),
+              (NoX0 GPR:$vl),
+              DestSEW)>;
+
+def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
+                        (op1_type VR:$rs1),
+                        (XLenVT GPR:$rs2),
+                        (i64 GPR:$vl))),
+            (!cast<Instruction>(instruction_name # "_WX_M1")
+              (result_type (IMPLICIT_DEF)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              GPR:$rs2,
+              (mask_type zero_reg),
+              (NoX0 GPR:$vl),
+              DestSEW)>;
+
+def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
+                        (op1_type VR:$rs1),
+                        (XLenVT uimm5:$rs2),
+                        (i64 GPR:$vl))),
+            (!cast<Instruction>(instruction_name # "_WI_M1")
+              (result_type (IMPLICIT_DEF)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              uimm5:$rs2,
+              (mask_type zero_reg),
+              (NoX0 GPR:$vl),
+              DestSEW)>;
+}
+
 multiclass pat_intrinsic_binary_int_w_wv_wx<string intrinsic_name,
                                             string instruction_name>
 {

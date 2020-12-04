@@ -182,6 +182,11 @@ public:
       CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
       TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
       const Instruction *I = nullptr);
+
+  unsigned getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
+                                  const Value *Ptr, bool VariableMask,
+                                  Align Alignment, TTI::TargetCostKind CostKind,
+                                  const Instruction *I = nullptr);
 };
 
 } // end namespace llvm

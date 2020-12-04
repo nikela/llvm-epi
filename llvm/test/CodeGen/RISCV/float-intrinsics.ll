@@ -319,7 +319,6 @@ define float @fma_f32(float %a, float %b, float %c) nounwind {
 declare float @llvm.fmuladd.f32(float, float, float)
 
 define float @fmuladd_f32(float %a, float %b, float %c) nounwind {
-; Use of fmadd depends on TargetLowering::isFMAFasterthanFMulAndFAdd
 ; RV32IF-LABEL: fmuladd_f32:
 ; RV32IF:       # %bb.0:
 ; RV32IF-NEXT:    fmv.w.x ft0, a2
