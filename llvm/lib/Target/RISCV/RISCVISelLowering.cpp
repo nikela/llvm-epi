@@ -3898,7 +3898,8 @@ static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
   DebugLoc DL = MI.getDebugLoc();
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
-  unsigned SEW = MI.getOperand(SEWIndex).getImm();
+  unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
+  unsigned SEW = MI.getOperand(SEWIndex).getImm() & ~(0x1 << 9);
   RISCVEPIVectorMultiplier::VectorMultiplier Multiplier;
 
   switch (VLMul) {
@@ -3953,7 +3954,7 @@ static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
     MIB.addReg(RISCV::X0, RegState::Kill);
   }
 
-  MIB.addImm((ElementWidth << 2) | Multiplier);
+  MIB.addImm((ElementWidth << 2) | Multiplier | (Nontemporal << 9));
 
   // Remove (now) redundant operands from pseudo
   MI.getOperand(SEWIndex).setImm(-1);
