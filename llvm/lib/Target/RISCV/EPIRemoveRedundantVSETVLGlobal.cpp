@@ -65,14 +65,16 @@ char EPIRemoveRedundantVSETVLGlobal::ID = 0;
 namespace {
 
 // This class holds information related to the operands of a VSETVLI
-// instruction. In particular it contains the (AVL, SEW, VLMul) triplet.
-struct VSETVLInstr : public std::tuple<Register, unsigned, unsigned> {
-  using Base = std::tuple<Register, unsigned, unsigned>;
+// instruction. In particular it contains the (AVL, SEW, VLMul, NT) triplet.
+struct VSETVLInstr : public std::tuple<Register, unsigned, unsigned, bool> {
+  using Base = std::tuple<Register, unsigned, unsigned, bool>;
 
-  VSETVLInstr() : Base(std::make_tuple(Register(), ~0U, ~0U)) {}
+  VSETVLInstr() : Base(std::make_tuple(Register(), ~0U, ~0U, false)) {}
 
-  VSETVLInstr(Register GVLReg, Register AVLReg, unsigned SEW, unsigned VLMul)
-      : Base(std::make_tuple(AVLReg, SEW, VLMul)), GVLReg(GVLReg) {}
+  VSETVLInstr(Register GVLReg, Register AVLReg, unsigned SEW, unsigned VLMul,
+              bool Nontemporal)
+      : Base(std::make_tuple(AVLReg, SEW, VLMul, Nontemporal)),
+        GVLReg(GVLReg) {}
 
   Register getGVLReg() { return GVLReg; }
 
@@ -108,7 +110,9 @@ struct VSETVLInstr : public std::tuple<Register, unsigned, unsigned> {
     unsigned SEW = (1 << SEWBits) * 8;
     unsigned VLMul = 1 << VMulBits;
 
-    return VSETVLInstr(GVLReg, AVLReg, SEW, VLMul);
+    bool Nontemporal = (VTypeI >> 9) & 0x1;
+
+    return VSETVLInstr(GVLReg, AVLReg, SEW, VLMul, Nontemporal);
   }
 
 private:

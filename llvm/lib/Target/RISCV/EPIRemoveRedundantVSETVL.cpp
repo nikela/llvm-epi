@@ -87,9 +87,10 @@ struct VSETVLInfo {
   Register AVLReg;
   unsigned SEW;
   unsigned VLMul;
+  bool Nontemporal;
 
-  VSETVLInfo(Register AVLReg, unsigned SEW, unsigned VLMul)
-      : AVLReg(AVLReg), SEW(SEW), VLMul(VLMul) {}
+  VSETVLInfo(Register AVLReg, unsigned SEW, unsigned VLMul, bool Nontemporal)
+      : AVLReg(AVLReg), SEW(SEW), VLMul(VLMul), Nontemporal(Nontemporal) {}
 
   VSETVLInfo(const MachineInstr &MI) {
     assert(MI.getOpcode() == RISCV::PseudoVSETVLI);
@@ -107,26 +108,34 @@ struct VSETVLInfo {
     unsigned SEWBits = (VTypeI >> 2) & 0x7;
     unsigned VMulBits = VTypeI & 0x3;
 
+    Nontemporal = (VTypeI >> 9) & 0x1;
+
     SEW = (1 << SEWBits) * 8;
     VLMul = 1 << VMulBits;
+  }
+
+  bool sameOpKind(const VSETVLInfo &other) const {
+    return this->Nontemporal == other.Nontemporal;
   }
 
   // A VSETVLI instruction has a 'more restrictive VType' if it entails a
   // smaller VLMAX. This is independent of the AVL operand.
   bool hasMoreRestrictiveVType(const VSETVLInfo &other) const {
-    return (SEW / VLMul) > (other.SEW / other.VLMul);
+    return sameOpKind(other) && (SEW / VLMul) > (other.SEW / other.VLMul);
   }
 
   bool hasMoreRestrictiveOrEqualVType(const VSETVLInfo &other) const {
-    return (SEW / VLMul) >= (other.SEW / other.VLMul);
+    return sameOpKind(other) && ((SEW / VLMul) >= (other.SEW / other.VLMul));
   }
 
   bool computesSameGVL(const VSETVLInfo &other) const {
-    return AVLReg == other.AVLReg && (SEW / VLMul) == (other.SEW / other.VLMul);
+    return sameOpKind(other) && (AVLReg == other.AVLReg &&
+                                 (SEW / VLMul) == (other.SEW / other.VLMul));
   }
 
   bool operator==(const VSETVLInfo &other) const {
-    return AVLReg == other.AVLReg && SEW == other.SEW && VLMul == other.VLMul;
+    return sameOpKind(other) &&
+           (AVLReg == other.AVLReg && SEW == other.SEW && VLMul == other.VLMul);
   }
 
   bool operator!=(const VSETVLInfo &other) const {
@@ -297,18 +306,21 @@ struct SameGVLKeyInfo {
 
   static inline VSETVLInfo getEmptyKey() {
     return {DenseMapInfoReg::getEmptyKey(), DenseMapInfoUnsigned::getEmptyKey(),
-            DenseMapInfoUnsigned::getEmptyKey()};
+            DenseMapInfoUnsigned::getEmptyKey(),
+            !!DenseMapInfoUnsigned::getEmptyKey()};
   }
 
   static inline VSETVLInfo getTombstoneKey() {
     return {DenseMapInfoReg::getTombstoneKey(),
             DenseMapInfoUnsigned::getTombstoneKey(),
-            DenseMapInfoUnsigned::getTombstoneKey()};
+            DenseMapInfoUnsigned::getTombstoneKey(),
+            !!DenseMapInfoUnsigned::getTombstoneKey()};
   }
 
   static unsigned getHashValue(const VSETVLInfo &Val) {
     return DenseMapInfoReg::getHashValue(Val.AVLReg) ^
-           (DenseMapInfoUnsigned::getHashValue(Val.SEW/Val.VLMul) << 1);
+           (DenseMapInfoUnsigned::getHashValue(Val.SEW / Val.VLMul) << 1) ^
+           (DenseMapInfoUnsigned::getHashValue(Val.Nontemporal) << 2);
   }
 
   static bool isEqual(const VSETVLInfo &LHS, const VSETVLInfo &RHS) {
