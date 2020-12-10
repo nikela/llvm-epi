@@ -1208,6 +1208,12 @@ public:
     assert(VF.isVector() &&
            "Profitable to scalarize relevant only for VF > 1.");
 
+    // For scalable vectors, since actual VF is unknown, we cannot scalarize any
+    // instruction. We assume that if vectorization is possible, it is always
+    // more beneficial.
+    if (VF.isScalable())
+      return false;
+
     // Cost model is not run in the VPlan-native path - return conservative
     // result until this changes.
     if (EnableVPlanNativePath)
@@ -7237,7 +7243,7 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
                                                ElementCount VF) {
   // If we know that this instruction will remain uniform, check the cost of
   // the scalar version.
-  if (isUniformAfterVectorization(I, VF))
+  if (isUniformAfterVectorization(I, VF) && !VF.isScalable())
     VF = ElementCount::getFixed(1);
 
   if (VF.isVector() && isProfitableToScalarize(I, VF))
@@ -7245,6 +7251,7 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
 
   // Forced scalars do not have any scalarization overhead.
   auto ForcedScalar = ForcedScalars.find(VF);
+  // Scalable VFs should not have been inserted in ForcedScalars.
   if (VF.isVector() && ForcedScalar != ForcedScalars.end()) {
     auto InstSet = ForcedScalar->second;
     if (InstSet.count(I))
@@ -7437,6 +7444,10 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
             AddrDefs.insert(InstOp).second)
           Worklist.push_back(InstOp);
   }
+
+  // For scalable vectors we do not support scalarization.
+  assert(!VF.isScalable() &&
+         "Scalarization not supported for scalable vectors");
 
   for (auto *I : AddrDefs) {
     if (isa<LoadInst>(I)) {
