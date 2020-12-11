@@ -297,8 +297,11 @@ let ManualCodegen = [{
 }] in
 {
   def vload : EPIBuiltin<"v", "vPCe", "csilfd">;
+  def vload_nt : EPIBuiltin<"v", "vPCe", "csilfd">;
   let IntrinsicName = "vload", IntrinsicNameMask = "vload_mask" in
     def vload_unsigned : EPIBuiltin<"v", "vPCUe", "csil">;
+  let IntrinsicName = "vload_nt", IntrinsicNameMask = "vload_nt_mask" in
+    def vload_nt_unsigned : EPIBuiltin<"v", "vPCUe", "csil">;
 }
 
 let ManualCodegen = [{
@@ -312,9 +315,13 @@ let ManualCodegen = [{
 }] in
 {
   def vload_strided : EPIBuiltin<"v", "vPCes", "csilfd">;
+  def vload_nt_strided : EPIBuiltin<"v", "vPCes", "csilfd">;
   let IntrinsicName = "vload_strided",
       IntrinsicNameMask = "vload_strided_mask" in
     def vload_strided_unsigned : EPIBuiltin<"v", "vPCUes", "csil">;
+  let IntrinsicName = "vload_nt_strided",
+      IntrinsicNameMask = "vload_nt_strided_mask" in
+    def vload_nt_strided_unsigned : EPIBuiltin<"v", "vPCUes", "csil">;
 }
 
 let ManualCodegen = [{
@@ -328,9 +335,13 @@ let ManualCodegen = [{
 }] in
 {
   def vload_indexed : EPIBuiltin<"v", "vPCeIv", "csilfd">;
+  def vload_nt_indexed : EPIBuiltin<"v", "vPCeIv", "csilfd">;
   let IntrinsicName = "vload_indexed",
       IntrinsicNameMask = "vload_indexed_mask" in
     def vload_indexed_unsigned : EPIBuiltin<"v", "vPCUeIv", "csil">;
+  let IntrinsicName = "vload_nt_indexed",
+      IntrinsicNameMask = "vload_nt_indexed_mask" in
+    def vload_nt_indexed_unsigned : EPIBuiltin<"v", "vPCUeIv", "csil">;
 }
 
 // Load mask.
@@ -363,8 +374,11 @@ let HasMergeOperand = 0 in
   }] in
   {
     def vstore : EPIBuiltin<"v", "0Pev", "csilfd">;
+    def vstore_nt : EPIBuiltin<"v", "0Pev", "csilfd">;
     let IntrinsicName = "vstore", IntrinsicNameMask = "vstore_mask" in
       def vstore_unsigned : EPIBuiltin<"v", "0PUev", "csil">;
+    let IntrinsicName = "vstore_nt", IntrinsicNameMask = "vstore_nt_mask" in
+      def vstore_nt_unsigned : EPIBuiltin<"v", "0PUev", "csil">;
   }
 
   let ManualCodegen = [{
@@ -382,9 +396,13 @@ let HasMergeOperand = 0 in
   }] in
   {
     def vstore_strided : EPIBuiltin<"v", "0Pevs", "csilfd">;
+    def vstore_nt_strided : EPIBuiltin<"v", "0Pevs", "csilfd">;
     let IntrinsicName = "vstore_strided",
         IntrinsicNameMask = "vstore_strided_mask" in
       def vstore_strided_unsigned : EPIBuiltin<"v", "0PUevs", "csil">;
+    let IntrinsicName = "vstore_nt_strided",
+        IntrinsicNameMask = "vstore_nt_strided_mask" in
+      def vstore_nt_strided_unsigned : EPIBuiltin<"v", "0PUevs", "csil">;
   }
 
   let ManualCodegen = [{
@@ -402,9 +420,13 @@ let HasMergeOperand = 0 in
   }] in
   {
     def vstore_indexed : EPIBuiltin<"v", "0PevIv", "csilfd">;
+    def vstore_nt_indexed : EPIBuiltin<"v", "0PevIv", "csilfd">;
     let IntrinsicName = "vstore_indexed",
         IntrinsicNameMask = "vstore_indexed_mask" in
       def vstore_indexed_unsigned : EPIBuiltin<"v", "0PUevIv", "csil">;
+    let IntrinsicName = "vstore_nt_indexed",
+        IntrinsicNameMask = "vstore_nt_indexed_mask" in
+      def vstore_nt_indexed_unsigned : EPIBuiltin<"v", "0PUevIv", "csil">;
   }
 
   // Store mask.

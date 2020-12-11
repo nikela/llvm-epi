@@ -156,6 +156,7 @@ void RISCVInstPrinter::printVTypeI(const MCInst *MI, unsigned OpNo,
   unsigned Sew = (Imm >> 2) & 0x7;
   unsigned Lmul = Imm & 0x3;
   bool Fractional = (Imm >> 5) & 0x1;
+  bool NonTemporal = (Imm >> 9) & 0x1;
 
   Sew = 0x1 << (Sew + 3);
   O << "e" << Sew;
@@ -177,6 +178,8 @@ void RISCVInstPrinter::printVTypeI(const MCInst *MI, unsigned OpNo,
     O << ",ma";
   else
     O << ",mu";
+  if (NonTemporal)
+    O << ",nt";
 }
 
 void RISCVInstPrinter::printVMaskReg(const MCInst *MI, unsigned OpNo,

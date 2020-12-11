@@ -4074,6 +4074,7 @@ defm "" : pat_vop_binary_m_mm<or, "PseudoVMOR">;
 // Patterns. Load/store
 //===----------------------------------------------------------------------===//
 
+
 multiclass pat_load {
   foreach vti = AllVectors in {
     defvar ivti = GetIntVectorTypeInfo<vti>.Vti;
@@ -4133,6 +4134,62 @@ multiclass pat_load {
                (vti.Mask V0),
                (NoX0 GPR:$vl),
                vti.SEW)>;
+
+    defvar nontemporal = !shl(1, 9);
+    def : Pat<(vti.Vector (int_epi_vload_nt GPR:$rs1, GPR:$vl)),
+              (!cast<Instruction>("PseudoVLE"#vti.SEW#"_V_M"#vlmul)
+               (vti.Vector (IMPLICIT_DEF)),
+               $rs1,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(vti.Vector (int_epi_vload_nt_strided GPR:$rs1, GPR:$rs2, GPR:$vl)),
+              (!cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_M"#vlmul)
+               (vti.Vector (IMPLICIT_DEF)),
+               $rs1, $rs2,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(vti.Vector (int_epi_vload_nt_indexed GPR:$rs1,
+                           (ivti.Vector vti.RegClass:$rs2), GPR:$vl)),
+              (!cast<Instruction>("PseudoVLXEI"#vti.SEW#"_V_M"#vlmul)
+               (vti.Vector (IMPLICIT_DEF)),
+               $rs1, $rs2,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(vti.Vector (int_epi_vload_nt_mask (vti.Vector vti.RegClass:$merge),
+                           GPR:$rs1, (vti.Mask V0), GPR:$vl)),
+               (!cast<Instruction>("PseudoVLE"#vti.SEW#"_V_M"#vlmul)
+                $merge,
+                $rs1,
+                (vti.Mask V0),
+                (NoX0 GPR:$vl),
+                !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(vti.Vector (int_epi_vload_nt_strided_mask
+                           (vti.Vector vti.RegClass:$merge), GPR:$rs1, GPR:$rs2,
+                           (vti.Mask V0), GPR:$vl)),
+              (!cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_M"#vlmul)
+               $merge,
+               $rs1, $rs2,
+               (vti.Mask V0),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(vti.Vector (int_epi_vload_nt_indexed_mask
+                           (vti.Vector vti.RegClass:$merge), GPR:$rs1,
+                           (ivti.Vector vti.RegClass:$rs2), (vti.Mask V0),
+                           GPR:$vl)),
+              (!cast<Instruction>("PseudoVLXEI"#vti.SEW#"_V_M"#vlmul)
+               $merge,
+               $rs1, $rs2,
+               (vti.Mask V0),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
   }
 }
 
@@ -4192,6 +4249,59 @@ multiclass pat_store {
                (vti.Mask V0),
                (NoX0 GPR:$vl),
                vti.SEW)>;
+
+    defvar nontemporal = !shl(1, 9);
+    def : Pat<(int_epi_vstore_nt (vti.Vector vti.RegClass:$rs3), GPR:$rs1,
+               GPR:$vl),
+              (!cast<Instruction>("PseudoVSE"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(int_epi_vstore_nt_strided
+               (vti.Vector vti.RegClass:$rs3), GPR:$rs1, GPR:$rs2, GPR:$vl),
+              (!cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1, $rs2,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(int_epi_vstore_nt_indexed
+               (vti.Vector vti.RegClass:$rs3), GPR:$rs1,
+               (ivti.Vector vti.RegClass:$rs2), GPR:$vl),
+              (!cast<Instruction>("PseudoVSXEI"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1, $rs2,
+               (vti.Mask zero_reg),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(int_epi_vstore_nt_mask
+               (vti.Vector vti.RegClass:$rs3), GPR:$rs1, (vti.Mask V0),
+               GPR:$vl),
+              (!cast<Instruction>("PseudoVSE"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1,
+               (vti.Mask V0),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(int_epi_vstore_nt_strided_mask
+               (vti.Vector vti.RegClass:$rs3), GPR:$rs1, GPR:$rs2,
+               (vti.Mask V0), GPR:$vl),
+              (!cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1, $rs2,
+               (vti.Mask V0),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
+
+    def : Pat<(int_epi_vstore_nt_indexed_mask
+               (vti.Vector vti.RegClass:$rs3), GPR:$rs1,
+               (ivti.Vector vti.RegClass:$rs2), (vti.Mask V0), GPR:$vl),
+              (!cast<Instruction>("PseudoVSXEI"#vti.SEW#"_V_M"#vlmul)
+               $rs3, $rs1, $rs2,
+               (vti.Mask V0),
+               (NoX0 GPR:$vl),
+               !or(vti.SEW, nontemporal))>;
   }
 }
 
