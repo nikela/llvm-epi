@@ -7251,7 +7251,12 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
 
   // Forced scalars do not have any scalarization overhead.
   auto ForcedScalar = ForcedScalars.find(VF);
+
   // Scalable VFs should not have been inserted in ForcedScalars.
+  if (VF.isScalable())
+    assert(ForcedScalar == ForcedScalars.end() &&
+           "Forced scalarization not supported for scalable VFs");
+
   if (VF.isVector() && ForcedScalar != ForcedScalars.end()) {
     auto InstSet = ForcedScalar->second;
     if (InstSet.count(I))
@@ -7262,6 +7267,20 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
   }
 
   Type *VectorTy;
+
+  // For scalable vectors, if an instruction is uniform, in the vectorized loop
+  // will be widened into a corresponding scalar instruction, however it cannot
+  // be scalarized. For instance, an instruction like %t1 = %t2 + 1 in the
+  // original scalar loop will be widened into something like %t1 = %t2 +
+  // vscale*VF but we will not replicate %t1 = %t2 + 1 vscale*VF times. Thus,
+  // the vectorization cost of uniform instruction will be that of the scalar
+  // instruction but the scalarization bit is false (i.e TypeNotScalarized =
+  // true).
+  if (VF.isVector() && VF.isScalable() && isUniformAfterVectorization(I, VF)) {
+    unsigned C = getInstructionCost(I, ElementCount::getFixed(1), VectorTy);
+    return VectorizationCostTy(C, true);
+  }
+
   unsigned C = getInstructionCost(I, VF, VectorTy);
 
   // Comparing number of parts for scalable vectors with KnownMin VF does not
