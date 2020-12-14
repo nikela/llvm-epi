@@ -45,6 +45,7 @@ unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
   case RISCV::LBU:
   case RISCV::LH:
   case RISCV::LHU:
+  case RISCV::FLH:
   case RISCV::LW:
   case RISCV::FLW:
   case RISCV::LWU:
@@ -70,6 +71,7 @@ unsigned RISCVInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
   case RISCV::SB:
   case RISCV::SH:
   case RISCV::SW:
+  case RISCV::FSH:
   case RISCV::FSW:
   case RISCV::SD:
   case RISCV::FSD:
@@ -98,48 +100,18 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 
   // FPR->FPR
   unsigned Opc;
-  if (RISCV::FPR32RegClass.contains(DstReg, SrcReg) ||
-      RISCV::FPR64RegClass.contains(DstReg, SrcReg)) {
-    if (RISCV::FPR64RegClass.contains(DstReg, SrcReg))
-      Opc = RISCV::FSGNJ_D;
-    else
-      Opc = RISCV::FSGNJ_S;
+  if (RISCV::FPR16RegClass.contains(DstReg, SrcReg))
+    Opc = RISCV::FSGNJ_H;
+  else if (RISCV::FPR32RegClass.contains(DstReg, SrcReg))
+    Opc = RISCV::FSGNJ_S;
+  else if (RISCV::FPR64RegClass.contains(DstReg, SrcReg))
+    Opc = RISCV::FSGNJ_D;
+  else
+    llvm_unreachable("Impossible reg-to-reg copy");
 
-    BuildMI(MBB, MBBI, DL, get(Opc), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc))
-        .addReg(SrcReg, getKillRegState(KillSrc));
-    return;
-  }
-
-  // GPR->FPR
-  if (RISCV::FPR32RegClass.contains(DstReg) &&
-      RISCV::GPRRegClass.contains(SrcReg)) {
-    BuildMI(MBB, MBBI, DL, get(RISCV::FMV_W_X), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc));
-    return;
-  }
-  if (RISCV::FPR64RegClass.contains(DstReg) &&
-      RISCV::GPRRegClass.contains(SrcReg)) {
-    BuildMI(MBB, MBBI, DL, get(RISCV::FMV_D_X), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc));
-    return;
-  }
-
-  // FPR->GPR
-  if (RISCV::GPRRegClass.contains(DstReg) &&
-      RISCV::FPR32RegClass.contains(SrcReg)) {
-    BuildMI(MBB, MBBI, DL, get(RISCV::FMV_X_W), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc));
-    return;
-  }
-  if (RISCV::GPRRegClass.contains(DstReg) &&
-      RISCV::FPR64RegClass.contains(SrcReg)) {
-    BuildMI(MBB, MBBI, DL, get(RISCV::FMV_X_D), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc));
-    return;
-  }
-
-  llvm_unreachable("Impossible reg-to-reg copy");
+  BuildMI(MBB, MBBI, DL, get(Opc), DstReg)
+      .addReg(SrcReg, getKillRegState(KillSrc))
+      .addReg(SrcReg, getKillRegState(KillSrc));
 }
 
 void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
@@ -161,6 +133,8 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::SW : RISCV::SD;
+  else if (RISCV::FPR16RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::FSH;
   else if (RISCV::FPR32RegClass.hasSubClassEq(RC))
     Opcode = RISCV::FSW;
   else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
@@ -194,6 +168,8 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::LW : RISCV::LD;
+  else if (RISCV::FPR16RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::FLH;
   else if (RISCV::FPR32RegClass.hasSubClassEq(RC))
     Opcode = RISCV::FLW;
   else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
@@ -628,14 +604,8 @@ bool RISCVInstrInfo::verifyInstruction(const MachineInstr &MI,
         case RISCVOp::OPERAND_SIMM12:
           Ok = isInt<12>(Imm);
           break;
-        case RISCVOp::OPERAND_SIMM13_LSB0:
-          Ok = isShiftedInt<12, 1>(Imm);
-          break;
         case RISCVOp::OPERAND_UIMM20:
           Ok = isUInt<20>(Imm);
-          break;
-        case RISCVOp::OPERAND_SIMM21_LSB0:
-          Ok = isShiftedInt<20, 1>(Imm);
           break;
         case RISCVOp::OPERAND_UIMMLOG2XLEN:
           if (STI.getTargetTriple().isArch64Bit())
