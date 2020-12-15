@@ -29,6 +29,9 @@ using namespace llvm;
 
 static_assert(RISCV::X1 == RISCV::X0 + 1, "Register list not consecutive");
 static_assert(RISCV::X31 == RISCV::X0 + 31, "Register list not consecutive");
+static_assert(RISCV::F1_H == RISCV::F0_H + 1, "Register list not consecutive");
+static_assert(RISCV::F31_H == RISCV::F0_H + 31,
+              "Register list not consecutive");
 static_assert(RISCV::F1_F == RISCV::F0_F + 1, "Register list not consecutive");
 static_assert(RISCV::F31_F == RISCV::F0_F + 31,
               "Register list not consecutive");
@@ -98,7 +101,7 @@ BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   if (TFI->hasBP(MF))
     markSuperRegs(Reserved, RISCVABI::getBPReg()); // bp
 
-  // EPI registers
+  // V registers for code generation. We handle them manually.
   markSuperRegs(Reserved, RISCV::VL);
   markSuperRegs(Reserved, RISCV::VTYPE);
 
@@ -185,7 +188,7 @@ static Register computeVRSpillReloadInstructions(
       // when spilling the first register.
       assert(VLenBReg == 0 && "Unexpected register");
       VLenBReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-      BuildMI(MBB, II, DL, TII.get(RISCV::PseudoReadVLENB), VLenBReg);
+      BuildMI(MBB, II, DL, TII.get(RISCV::PseudoEPIReadVLENB), VLenBReg);
 
       Register HandleRegSecond = MRI.createVirtualRegister(&RISCV::GPRRegClass);
       BuildMI(MBB, II, DL, TII.get(RISCV::ADD), HandleRegSecond)
@@ -227,7 +230,7 @@ static Register computeVRSpillReloadInstructions(
   // Compute VLENB if it hasn't been computed.
   if (!VLenBReg) {
     VLenBReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-    BuildMI(MBB, II, DL, TII.get(RISCV::PseudoReadVLENB), VLenBReg);
+    BuildMI(MBB, II, DL, TII.get(RISCV::PseudoEPIReadVLENB), VLenBReg);
 
     // The handle should only be killed in the VS1R/VL1R for the last register
     // in the register group. This boolean is forwarded through the odd
@@ -300,29 +303,29 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
           .addImm(0);
 
   // Handle vector spills here.
-  if (MI.getOpcode() == RISCV::PseudoVSPILL_M1 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M2 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M2 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M4 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M4 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M8 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M8 ||
+  if (MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M8 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M8 ||
       // Vector tuples.
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T2 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T2 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T3 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T3 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T4 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T4 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T5 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T5 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T6 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T6 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T7 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T7 ||
-      MI.getOpcode() == RISCV::PseudoVSPILL_M1T8 ||
-      MI.getOpcode() == RISCV::PseudoVRELOAD_M1T8) {
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T3 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T3 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T5 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T5 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T6 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T6 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T7 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T7 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T8 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T8) {
 
     // Make sure we spill/reload all the bits using whole register
     // instructions.
@@ -333,45 +336,45 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
     switch (MI.getOpcode()) {
     default:
       llvm_unreachable("Unexpected instruction");
-    case RISCV::PseudoVSPILL_M1:
+    case RISCV::PseudoEPIVSPILL_M1:
       IsReload = false;
       LMUL = 1;
       break;
-    case RISCV::PseudoVRELOAD_M1:
+    case RISCV::PseudoEPIVRELOAD_M1:
       IsReload = true;
       LMUL = 1;
       break;
-    case RISCV::PseudoVSPILL_M2:
+    case RISCV::PseudoEPIVSPILL_M2:
       IsReload = false;
       LMUL = 2;
       break;
-    case RISCV::PseudoVRELOAD_M2:
+    case RISCV::PseudoEPIVRELOAD_M2:
       IsReload = true;
       LMUL = 2;
       break;
-    case RISCV::PseudoVSPILL_M4:
+    case RISCV::PseudoEPIVSPILL_M4:
       IsReload = false;
       LMUL = 4;
       break;
-    case RISCV::PseudoVRELOAD_M4:
+    case RISCV::PseudoEPIVRELOAD_M4:
       IsReload = true;
       LMUL = 4;
       break;
-    case RISCV::PseudoVSPILL_M8:
+    case RISCV::PseudoEPIVSPILL_M8:
       IsReload = false;
       LMUL = 8;
       break;
-    case RISCV::PseudoVRELOAD_M8:
+    case RISCV::PseudoEPIVRELOAD_M8:
       IsReload = true;
       LMUL = 8;
       break;
 #define TUPLE_SPILL_RELOAD(N)                                                  \
-  case RISCV::PseudoVSPILL_M1T##N:                                             \
+  case RISCV::PseudoEPIVSPILL_M1T##N:                                             \
     IsReload = false;                                                          \
     LMUL = 1;                                                                  \
     TupleSize = N;                                                             \
     break;                                                                     \
-  case RISCV::PseudoVRELOAD_M1T##N:                                            \
+  case RISCV::PseudoEPIVRELOAD_M1T##N:                                            \
     IsReload = true;                                                           \
     LMUL = 1;                                                                  \
     TupleSize = N;                                                             \

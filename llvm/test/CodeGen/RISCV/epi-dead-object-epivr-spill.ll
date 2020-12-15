@@ -6,13 +6,13 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-LABEL: n1fv_32:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -128
-; CHECK-NEXT:    sd ra, 120(sp)
-; CHECK-NEXT:    sd s0, 112(sp)
-; CHECK-NEXT:    sd s1, 104(sp)
-; CHECK-NEXT:    sd s2, 96(sp)
-; CHECK-NEXT:    sd s3, 88(sp)
-; CHECK-NEXT:    sd s4, 80(sp)
-; CHECK-NEXT:    sd s5, 72(sp)
+; CHECK-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s1, 104(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s2, 96(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s3, 88(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s4, 80(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s5, 72(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi s0, sp, 128
 ; CHECK-NEXT:    rdvlenb a1
 ; CHECK-NEXT:    sub sp, sp, a1
@@ -30,7 +30,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    mv s3, a2
 ; CHECK-NEXT:    mv s1, a0
 ; CHECK-NEXT:    addi s5, zero, 8
-; CHECK-NEXT:    vsetvli a0, s5, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, s5, e64,m1,ta,mu
 ; CHECK-NEXT:    vid.v v2
 ; CHECK-NEXT:    ld a0, -112(s0)
 ; CHECK-NEXT:    vs1r.v v2, (a0)
@@ -47,8 +47,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vadd.vv v1, v1, v2
 ; CHECK-NEXT:    ld a0, -104(s0)
 ; CHECK-NEXT:    vs1r.v v1, (a0)
-; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64
-; CHECK-NEXT:    vsetvli a0, s5, e64,m1,tu,mu
+; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64@plt
+; CHECK-NEXT:    vsetvli a0, s5, e64,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -112(s0)
 ; CHECK-NEXT:    vl1r.v v1, (a0)
 ; CHECK-NEXT:    vxor.vi v2, v1, 1

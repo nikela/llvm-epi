@@ -11,200 +11,267 @@
 define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-LABEL: foo:
 ; SPILL-O0:       # %bb.0:
-; SPILL-O0-NEXT:    addi sp, sp, -192
-; SPILL-O0-NEXT:    sd ra, 184(sp)
-; SPILL-O0-NEXT:    sd s0, 176(sp)
-; SPILL-O0-NEXT:    sd s1, 168(sp)
-; SPILL-O0-NEXT:    sd s2, 160(sp)
-; SPILL-O0-NEXT:    sd s3, 152(sp)
-; SPILL-O0-NEXT:    sd s4, 144(sp)
-; SPILL-O0-NEXT:    sd s5, 136(sp)
-; SPILL-O0-NEXT:    sd s6, 128(sp)
-; SPILL-O0-NEXT:    sd s7, 120(sp)
-; SPILL-O0-NEXT:    sd s8, 112(sp)
-; SPILL-O0-NEXT:    sd s9, 104(sp)
-; SPILL-O0-NEXT:    sd s10, 96(sp)
-; SPILL-O0-NEXT:    sd s11, 88(sp)
-; SPILL-O0-NEXT:    addi s0, sp, 192
+; SPILL-O0-NEXT:    addi sp, sp, -208
+; SPILL-O0-NEXT:    sd ra, 200(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s0, 192(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s1, 184(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s2, 176(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s3, 168(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s4, 160(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s5, 152(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s6, 144(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s7, 136(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s8, 128(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s9, 120(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s10, 112(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s11, 104(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    addi s0, sp, 208
 ; SPILL-O0-NEXT:    rdvlenb a1
 ; SPILL-O0-NEXT:    sub sp, sp, a1
-; SPILL-O0-NEXT:    sd sp, -184(s0)
+; SPILL-O0-NEXT:    sd sp, -200(s0)
 ; SPILL-O0-NEXT:    sub sp, sp, a1
-; SPILL-O0-NEXT:    sd sp, -192(s0)
+; SPILL-O0-NEXT:    sd sp, -208(s0)
 ; SPILL-O0-NEXT:    mv a1, a0
 ; SPILL-O0-NEXT:    lui a0, %hi(scratch)
 ; SPILL-O0-NEXT:    addi a0, a0, %lo(scratch)
-; SPILL-O0-NEXT:    sd a0, -176(s0)
+; SPILL-O0-NEXT:    sd a0, -184(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v1
-; SPILL-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vle64.v v1, (a0)
-; SPILL-O0-NEXT:    ld a1, -192(s0)
-; SPILL-O0-NEXT:    vs1r.v v1, (a1)
-; SPILL-O0-NEXT:    addi a1, a0, 8
-; SPILL-O0-NEXT:    sd a1, -168(s0)
+; SPILL-O0-NEXT:    ld a2, -208(s0)
+; SPILL-O0-NEXT:    vs1r.v v1, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 8
+; SPILL-O0-NEXT:    sd a2, -176(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v0
-; SPILL-O0-NEXT:    vle64.v v0, (a1)
-; SPILL-O0-NEXT:    addi a1, a0, 16
-; SPILL-O0-NEXT:    sd a1, -160(s0)
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v0, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 16
+; SPILL-O0-NEXT:    sd a2, -168(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v31
-; SPILL-O0-NEXT:    vle64.v v31, (a1)
-; SPILL-O0-NEXT:    addi a1, a0, 24
-; SPILL-O0-NEXT:    sd a1, -152(s0)
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v31, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 24
+; SPILL-O0-NEXT:    sd a2, -160(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v30
-; SPILL-O0-NEXT:    vle64.v v30, (a1)
-; SPILL-O0-NEXT:    addi a1, a0, 32
-; SPILL-O0-NEXT:    sd a1, -144(s0)
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v30, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 32
+; SPILL-O0-NEXT:    sd a2, -152(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v29
-; SPILL-O0-NEXT:    vle64.v v29, (a1)
-; SPILL-O0-NEXT:    addi a1, a0, 40
-; SPILL-O0-NEXT:    sd a1, -136(s0)
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v29, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 40
+; SPILL-O0-NEXT:    sd a2, -144(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v28
-; SPILL-O0-NEXT:    vle64.v v28, (a1)
-; SPILL-O0-NEXT:    addi ra, a0, 48
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v28, (a2)
+; SPILL-O0-NEXT:    addi a2, a0, 48
+; SPILL-O0-NEXT:    sd a2, -136(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v27
-; SPILL-O0-NEXT:    vle64.v v27, (ra)
-; SPILL-O0-NEXT:    addi s11, a0, 56
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v27, (a2)
+; SPILL-O0-NEXT:    addi ra, a0, 56
 ; SPILL-O0-NEXT:    # implicit-def: $v26
-; SPILL-O0-NEXT:    vle64.v v26, (s11)
-; SPILL-O0-NEXT:    addi s10, a0, 64
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v26, (ra)
+; SPILL-O0-NEXT:    addi s11, a0, 64
 ; SPILL-O0-NEXT:    # implicit-def: $v25
-; SPILL-O0-NEXT:    vle64.v v25, (s10)
-; SPILL-O0-NEXT:    addi s9, a0, 72
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v25, (s11)
+; SPILL-O0-NEXT:    addi s10, a0, 72
 ; SPILL-O0-NEXT:    # implicit-def: $v24
-; SPILL-O0-NEXT:    vle64.v v24, (s9)
-; SPILL-O0-NEXT:    addi s8, a0, 80
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v24, (s10)
+; SPILL-O0-NEXT:    addi s9, a0, 80
 ; SPILL-O0-NEXT:    # implicit-def: $v15
-; SPILL-O0-NEXT:    vle64.v v15, (s8)
-; SPILL-O0-NEXT:    addi s7, a0, 88
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v15, (s9)
+; SPILL-O0-NEXT:    addi s8, a0, 88
 ; SPILL-O0-NEXT:    # implicit-def: $v14
-; SPILL-O0-NEXT:    vle64.v v14, (s7)
-; SPILL-O0-NEXT:    addi s6, a0, 96
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v14, (s8)
+; SPILL-O0-NEXT:    addi s7, a0, 96
 ; SPILL-O0-NEXT:    # implicit-def: $v13
-; SPILL-O0-NEXT:    vle64.v v13, (s6)
-; SPILL-O0-NEXT:    addi s5, a0, 104
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v13, (s7)
+; SPILL-O0-NEXT:    addi s6, a0, 104
 ; SPILL-O0-NEXT:    # implicit-def: $v12
-; SPILL-O0-NEXT:    vle64.v v12, (s5)
-; SPILL-O0-NEXT:    addi s4, a0, 112
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v12, (s6)
+; SPILL-O0-NEXT:    addi s5, a0, 112
 ; SPILL-O0-NEXT:    # implicit-def: $v11
-; SPILL-O0-NEXT:    vle64.v v11, (s4)
-; SPILL-O0-NEXT:    addi s3, a0, 120
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v11, (s5)
+; SPILL-O0-NEXT:    addi s4, a0, 120
 ; SPILL-O0-NEXT:    # implicit-def: $v10
-; SPILL-O0-NEXT:    vle64.v v10, (s3)
-; SPILL-O0-NEXT:    addi s2, a0, 128
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v10, (s4)
+; SPILL-O0-NEXT:    addi s3, a0, 128
 ; SPILL-O0-NEXT:    # implicit-def: $v9
-; SPILL-O0-NEXT:    vle64.v v9, (s2)
-; SPILL-O0-NEXT:    addi s1, a0, 136
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v9, (s3)
+; SPILL-O0-NEXT:    addi s2, a0, 136
 ; SPILL-O0-NEXT:    # implicit-def: $v8
-; SPILL-O0-NEXT:    vle64.v v8, (s1)
-; SPILL-O0-NEXT:    addi t6, a0, 144
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v8, (s2)
+; SPILL-O0-NEXT:    addi s1, a0, 144
 ; SPILL-O0-NEXT:    # implicit-def: $v23
-; SPILL-O0-NEXT:    vle64.v v23, (t6)
-; SPILL-O0-NEXT:    addi t5, a0, 152
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v23, (s1)
+; SPILL-O0-NEXT:    addi t6, a0, 152
 ; SPILL-O0-NEXT:    # implicit-def: $v22
-; SPILL-O0-NEXT:    vle64.v v22, (t5)
-; SPILL-O0-NEXT:    addi t4, a0, 160
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v22, (t6)
+; SPILL-O0-NEXT:    addi t5, a0, 160
 ; SPILL-O0-NEXT:    # implicit-def: $v21
-; SPILL-O0-NEXT:    vle64.v v21, (t4)
-; SPILL-O0-NEXT:    addi t3, a0, 168
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v21, (t5)
+; SPILL-O0-NEXT:    addi t4, a0, 168
 ; SPILL-O0-NEXT:    # implicit-def: $v20
-; SPILL-O0-NEXT:    vle64.v v20, (t3)
-; SPILL-O0-NEXT:    addi t2, a0, 176
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v20, (t4)
+; SPILL-O0-NEXT:    addi t3, a0, 176
 ; SPILL-O0-NEXT:    # implicit-def: $v19
-; SPILL-O0-NEXT:    vle64.v v19, (t2)
-; SPILL-O0-NEXT:    addi t1, a0, 184
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v19, (t3)
+; SPILL-O0-NEXT:    addi t2, a0, 184
 ; SPILL-O0-NEXT:    # implicit-def: $v18
-; SPILL-O0-NEXT:    vle64.v v18, (t1)
-; SPILL-O0-NEXT:    addi t0, a0, 192
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v18, (t2)
+; SPILL-O0-NEXT:    addi t1, a0, 192
 ; SPILL-O0-NEXT:    # implicit-def: $v17
-; SPILL-O0-NEXT:    vle64.v v17, (t0)
-; SPILL-O0-NEXT:    addi a7, a0, 200
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v17, (t1)
+; SPILL-O0-NEXT:    addi t0, a0, 200
 ; SPILL-O0-NEXT:    # implicit-def: $v16
-; SPILL-O0-NEXT:    vle64.v v16, (a7)
-; SPILL-O0-NEXT:    addi a6, a0, 208
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v16, (t0)
+; SPILL-O0-NEXT:    addi a7, a0, 208
 ; SPILL-O0-NEXT:    # implicit-def: $v7
-; SPILL-O0-NEXT:    vle64.v v7, (a6)
-; SPILL-O0-NEXT:    addi a5, a0, 216
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v7, (a7)
+; SPILL-O0-NEXT:    addi a6, a0, 216
 ; SPILL-O0-NEXT:    # implicit-def: $v6
-; SPILL-O0-NEXT:    vle64.v v6, (a5)
-; SPILL-O0-NEXT:    addi a4, a0, 224
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v6, (a6)
+; SPILL-O0-NEXT:    addi a5, a0, 224
 ; SPILL-O0-NEXT:    # implicit-def: $v5
-; SPILL-O0-NEXT:    vle64.v v5, (a4)
-; SPILL-O0-NEXT:    addi a3, a0, 232
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v5, (a5)
+; SPILL-O0-NEXT:    addi a4, a0, 232
 ; SPILL-O0-NEXT:    # implicit-def: $v4
-; SPILL-O0-NEXT:    vle64.v v4, (a3)
-; SPILL-O0-NEXT:    addi a2, a0, 240
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v4, (a4)
+; SPILL-O0-NEXT:    addi a3, a0, 240
 ; SPILL-O0-NEXT:    # implicit-def: $v3
-; SPILL-O0-NEXT:    vle64.v v3, (a2)
-; SPILL-O0-NEXT:    addi a1, a0, 248
+; SPILL-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vle64.v v3, (a3)
+; SPILL-O0-NEXT:    addi a2, a0, 248
 ; SPILL-O0-NEXT:    # implicit-def: $v2
-; SPILL-O0-NEXT:    vle64.v v2, (a1)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -184(s0) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    vle64.v v2, (a2)
 ; SPILL-O0-NEXT:    addi a0, a0, 256
-; SPILL-O0-NEXT:    sd a0, -128(s0)
+; SPILL-O0-NEXT:    sd a0, -128(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v1
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -128(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vle64.v v1, (a0)
-; SPILL-O0-NEXT:    ld a0, -176(s0)
-; SPILL-O0-NEXT:    sd t0, -112(s0)
-; SPILL-O0-NEXT:    ld t0, -184(s0)
-; SPILL-O0-NEXT:    vs1r.v v1, (t0)
-; SPILL-O0-NEXT:    ld t0, -192(s0)
-; SPILL-O0-NEXT:    vl1r.v v1, (t0)
+; SPILL-O0-NEXT:    ld a0, -200(s0)
+; SPILL-O0-NEXT:    vs1r.v v1, (a0)
+; SPILL-O0-NEXT:    ld a0, -208(s0)
+; SPILL-O0-NEXT:    vl1r.v v1, (a0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -184(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v1, (a0)
-; SPILL-O0-NEXT:    ld a0, -168(s0)
-; SPILL-O0-NEXT:    ld t0, -184(s0)
-; SPILL-O0-NEXT:    vl1r.v v1, (t0)
-; SPILL-O0-NEXT:    ld t0, -112(s0)
+; SPILL-O0-NEXT:    ld a0, -200(s0)
+; SPILL-O0-NEXT:    vl1r.v v1, (a0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -176(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v0, (a0)
-; SPILL-O0-NEXT:    ld a0, -160(s0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -168(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v31, (a0)
-; SPILL-O0-NEXT:    ld a0, -152(s0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -160(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v30, (a0)
-; SPILL-O0-NEXT:    ld a0, -144(s0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -152(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v29, (a0)
-; SPILL-O0-NEXT:    ld a0, -136(s0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -144(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v28, (a0)
-; SPILL-O0-NEXT:    ld a0, -128(s0)
-; SPILL-O0-NEXT:    vse64.v v27, (ra)
-; SPILL-O0-NEXT:    vse64.v v26, (s11)
-; SPILL-O0-NEXT:    vse64.v v25, (s10)
-; SPILL-O0-NEXT:    vse64.v v24, (s9)
-; SPILL-O0-NEXT:    vse64.v v15, (s8)
-; SPILL-O0-NEXT:    vse64.v v14, (s7)
-; SPILL-O0-NEXT:    vse64.v v13, (s6)
-; SPILL-O0-NEXT:    vse64.v v12, (s5)
-; SPILL-O0-NEXT:    vse64.v v11, (s4)
-; SPILL-O0-NEXT:    vse64.v v10, (s3)
-; SPILL-O0-NEXT:    vse64.v v9, (s2)
-; SPILL-O0-NEXT:    vse64.v v8, (s1)
-; SPILL-O0-NEXT:    vse64.v v23, (t6)
-; SPILL-O0-NEXT:    vse64.v v22, (t5)
-; SPILL-O0-NEXT:    vse64.v v21, (t4)
-; SPILL-O0-NEXT:    vse64.v v20, (t3)
-; SPILL-O0-NEXT:    vse64.v v19, (t2)
-; SPILL-O0-NEXT:    vse64.v v18, (t1)
-; SPILL-O0-NEXT:    vse64.v v17, (t0)
-; SPILL-O0-NEXT:    vse64.v v16, (a7)
-; SPILL-O0-NEXT:    vse64.v v7, (a6)
-; SPILL-O0-NEXT:    vse64.v v6, (a5)
-; SPILL-O0-NEXT:    vse64.v v5, (a4)
-; SPILL-O0-NEXT:    vse64.v v4, (a3)
-; SPILL-O0-NEXT:    vse64.v v3, (a2)
-; SPILL-O0-NEXT:    vse64.v v2, (a1)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -136(s0) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    vse64.v v27, (a0)
+; SPILL-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    ld a0, -128(s0) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    vse64.v v26, (ra)
+; SPILL-O0-NEXT:    vsetvli ra, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v25, (s11)
+; SPILL-O0-NEXT:    vsetvli s11, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v24, (s10)
+; SPILL-O0-NEXT:    vsetvli s10, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v15, (s9)
+; SPILL-O0-NEXT:    vsetvli s9, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v14, (s8)
+; SPILL-O0-NEXT:    vsetvli s8, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v13, (s7)
+; SPILL-O0-NEXT:    vsetvli s7, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v12, (s6)
+; SPILL-O0-NEXT:    vsetvli s6, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v11, (s5)
+; SPILL-O0-NEXT:    vsetvli s5, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v10, (s4)
+; SPILL-O0-NEXT:    vsetvli s4, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v9, (s3)
+; SPILL-O0-NEXT:    vsetvli s3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v8, (s2)
+; SPILL-O0-NEXT:    vsetvli s2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v23, (s1)
+; SPILL-O0-NEXT:    vsetvli s1, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v22, (t6)
+; SPILL-O0-NEXT:    vsetvli t6, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v21, (t5)
+; SPILL-O0-NEXT:    vsetvli t5, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v20, (t4)
+; SPILL-O0-NEXT:    vsetvli t4, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v19, (t3)
+; SPILL-O0-NEXT:    vsetvli t3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v18, (t2)
+; SPILL-O0-NEXT:    vsetvli t2, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v17, (t1)
+; SPILL-O0-NEXT:    vsetvli t1, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v16, (t0)
+; SPILL-O0-NEXT:    vsetvli t0, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v7, (a7)
+; SPILL-O0-NEXT:    vsetvli a7, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v6, (a6)
+; SPILL-O0-NEXT:    vsetvli a6, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v5, (a5)
+; SPILL-O0-NEXT:    vsetvli a5, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v4, (a4)
+; SPILL-O0-NEXT:    vsetvli a4, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v3, (a3)
+; SPILL-O0-NEXT:    vsetvli a3, a1, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vse64.v v2, (a2)
+; SPILL-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vse64.v v1, (a0)
-; SPILL-O0-NEXT:    addi sp, s0, -192
-; SPILL-O0-NEXT:    ld s11, 88(sp)
-; SPILL-O0-NEXT:    ld s10, 96(sp)
-; SPILL-O0-NEXT:    ld s9, 104(sp)
-; SPILL-O0-NEXT:    ld s8, 112(sp)
-; SPILL-O0-NEXT:    ld s7, 120(sp)
-; SPILL-O0-NEXT:    ld s6, 128(sp)
-; SPILL-O0-NEXT:    ld s5, 136(sp)
-; SPILL-O0-NEXT:    ld s4, 144(sp)
-; SPILL-O0-NEXT:    ld s3, 152(sp)
-; SPILL-O0-NEXT:    ld s2, 160(sp)
-; SPILL-O0-NEXT:    ld s1, 168(sp)
-; SPILL-O0-NEXT:    ld s0, 176(sp)
-; SPILL-O0-NEXT:    ld ra, 184(sp)
-; SPILL-O0-NEXT:    addi sp, sp, 192
+; SPILL-O0-NEXT:    addi sp, s0, -208
+; SPILL-O0-NEXT:    ld s11, 104(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s10, 112(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s9, 120(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s8, 128(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s7, 136(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s6, 144(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s5, 152(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s4, 160(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s3, 168(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s2, 176(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s1, 184(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s0, 192(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld ra, 200(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    addi sp, sp, 208
 ; SPILL-O0-NEXT:    ret
   %p1 = getelementptr inbounds i64, i64* @scratch, i64 1
   %p2 = getelementptr inbounds i64, i64* @scratch, i64 2

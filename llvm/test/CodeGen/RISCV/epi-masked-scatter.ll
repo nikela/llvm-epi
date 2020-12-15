@@ -5,7 +5,7 @@
 define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %indices, <vscale x 1 x i1> %mask) {
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vsll.vi v1, v17, 3
 ; CHECK-NEXT:    vsxei64.v v16, (a0), v1, v0.t
 ; CHECK-NEXT:    ret
@@ -37,7 +37,7 @@ define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %in
 define void @nxv8f64(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask) {
 ; CHECK-LABEL: nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64,m8,tu,mu
+; CHECK-NEXT:    vsetvli a2, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vle64.v v8, (a1)
 ; CHECK-NEXT:    vsll.vi v24, v8, 3
 ; CHECK-NEXT:    vsxei64.v v16, (a0), v24, v0.t

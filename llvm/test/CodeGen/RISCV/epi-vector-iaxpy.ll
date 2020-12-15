@@ -28,7 +28,7 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t3, a2, a5
-; CHECK-NEXT:    vsetvli a4, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a4, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vle16.v v1, (t3)
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vle16.v v2, (a4)
@@ -146,7 +146,7 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t3, a2, a5
-; CHECK-NEXT:    vsetvli a4, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a4, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v1, (t3)
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vle32.v v2, (a4)

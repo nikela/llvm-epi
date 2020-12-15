@@ -55,7 +55,7 @@ entry:
 define dso_local float @s32tof32(i32 signext %x) nounwind {
 ; CHECK-LABEL: s32tof32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    fcvt.s.l fa0, a0
+; CHECK-NEXT:    fcvt.s.w fa0, a0
 ; CHECK-NEXT:    ret
 entry:
   %conv = sitofp i32 %x to float
@@ -75,7 +75,7 @@ entry:
 define dso_local double @s32tof64(i32 signext %x) nounwind {
 ; CHECK-LABEL: s32tof64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    fcvt.d.l fa0, a0
+; CHECK-NEXT:    fcvt.d.w fa0, a0
 ; CHECK-NEXT:    ret
 entry:
   %conv = sitofp i32 %x to double

@@ -8,22 +8,24 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-LABEL: bar:
 ; SPILL-O0:       # %bb.0: # %entry
 ; SPILL-O0-NEXT:    addi sp, sp, -64
-; SPILL-O0-NEXT:    sd ra, 56(sp)
-; SPILL-O0-NEXT:    sd s0, 48(sp)
+; SPILL-O0-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    addi s0, sp, 64
 ; SPILL-O0-NEXT:    rdvlenb a3
 ; SPILL-O0-NEXT:    sub sp, sp, a3
 ; SPILL-O0-NEXT:    sd sp, -56(s0)
 ; SPILL-O0-NEXT:    sub sp, sp, a3
 ; SPILL-O0-NEXT:    sd sp, -64(s0)
-; SPILL-O0-NEXT:    sd a2, -48(s0)
-; SPILL-O0-NEXT:    sd a0, -40(s0)
+; SPILL-O0-NEXT:    sd a2, -48(s0) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    sd a0, -40(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v3
-; SPILL-O0-NEXT:    vsetvli a2, a2, e64,m1,tu,mu
+; SPILL-O0-NEXT:    vsetvli a3, a2, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vle64.v v3, (a0)
 ; SPILL-O0-NEXT:    # implicit-def: $v4
+; SPILL-O0-NEXT:    vsetvli a0, a2, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vle64.v v4, (a1)
 ; SPILL-O0-NEXT:    # implicit-def: $v1_v2
+; SPILL-O0-NEXT:    vsetvli a0, a2, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vzip2.vv v1, v3, v4
 ; SPILL-O0-NEXT:    vmv1r.v v3, v2
 ; SPILL-O0-NEXT:    ld a0, -56(s0)
@@ -32,28 +34,29 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    ld a0, -64(s0)
 ; SPILL-O0-NEXT:    vs1r.v v1, (a0)
 ; SPILL-O0-NEXT:    call foo
-; SPILL-O0-NEXT:    ld a2, -48(s0)
 ; SPILL-O0-NEXT:    ld a0, -64(s0)
 ; SPILL-O0-NEXT:    vl1r.v v2, (a0)
-; SPILL-O0-NEXT:    ld a0, -40(s0)
+; SPILL-O0-NEXT:    ld a2, -48(s0) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld a0, -40(s0) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld a1, -56(s0)
 ; SPILL-O0-NEXT:    vl1r.v v1, (a1)
-; SPILL-O0-NEXT:    vsetvli a1, a2, e64,m1,tu,mu
+; SPILL-O0-NEXT:    vsetvli a1, a2, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vse64.v v2, (a0)
+; SPILL-O0-NEXT:    vsetvli a1, a2, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    vse64.v v1, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -64
-; SPILL-O0-NEXT:    ld s0, 48(sp)
-; SPILL-O0-NEXT:    ld ra, 56(sp)
+; SPILL-O0-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    addi sp, sp, 64
 ; SPILL-O0-NEXT:    ret
 ;
 ; SPILL-O2-LABEL: bar:
 ; SPILL-O2:       # %bb.0: # %entry
 ; SPILL-O2-NEXT:    addi sp, sp, -64
-; SPILL-O2-NEXT:    sd ra, 56(sp)
-; SPILL-O2-NEXT:    sd s0, 48(sp)
-; SPILL-O2-NEXT:    sd s1, 40(sp)
-; SPILL-O2-NEXT:    sd s2, 32(sp)
+; SPILL-O2-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    sd s1, 40(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    sd s2, 32(sp) # 8-byte Folded Spill
 ; SPILL-O2-NEXT:    addi s0, sp, 64
 ; SPILL-O2-NEXT:    rdvlenb a3
 ; SPILL-O2-NEXT:    slli a3, a3, 1
@@ -61,7 +64,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    sd sp, -56(s0)
 ; SPILL-O2-NEXT:    mv s2, a2
 ; SPILL-O2-NEXT:    mv s1, a0
-; SPILL-O2-NEXT:    vsetvli a0, a2, e64,m1,tu,mu
+; SPILL-O2-NEXT:    vsetvli a0, a2, e64,m1,ta,mu
 ; SPILL-O2-NEXT:    vle64.v v1, (s1)
 ; SPILL-O2-NEXT:    vle64.v v2, (a1)
 ; SPILL-O2-NEXT:    vzip2.vv v1, v1, v2
@@ -71,7 +74,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vs1r.v v1, (a1)
 ; SPILL-O2-NEXT:    vs1r.v v2, (a0)
 ; SPILL-O2-NEXT:    call foo
-; SPILL-O2-NEXT:    vsetvli a0, s2, e64,m1,tu,mu
+; SPILL-O2-NEXT:    vsetvli a0, s2, e64,m1,ta,mu
 ; SPILL-O2-NEXT:    ld a1, -56(s0)
 ; SPILL-O2-NEXT:    rdvlenb a0
 ; SPILL-O2-NEXT:    add a0, a1, a0
@@ -80,10 +83,10 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vse64.v v1, (s1)
 ; SPILL-O2-NEXT:    vse64.v v2, (s1)
 ; SPILL-O2-NEXT:    addi sp, s0, -64
-; SPILL-O2-NEXT:    ld s2, 32(sp)
-; SPILL-O2-NEXT:    ld s1, 40(sp)
-; SPILL-O2-NEXT:    ld s0, 48(sp)
-; SPILL-O2-NEXT:    ld ra, 56(sp)
+; SPILL-O2-NEXT:    ld s2, 32(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    addi sp, sp, 64
 ; SPILL-O2-NEXT:    ret
 entry:

@@ -6,9 +6,9 @@
 define <vscale x 8 x i8> @test_trunc_i32_i8_m1(<vscale x 8 x i32> %a) nounwind
 ; CHECK-LABEL: test_trunc_i32_i8_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v2, v16, 0
-; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v16, v2, 0
 ; CHECK-NEXT:    ret
 {
@@ -20,11 +20,11 @@ define <vscale x 8 x i8> @test_trunc_i32_i8_m1(<vscale x 8 x i32> %a) nounwind
 define <vscale x 8 x i8> @test_trunc_i64_i8_m1(<vscale x 8 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i8_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v4, v16, 0
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v2, v4, 0
-; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v16, v2, 0
 ; CHECK-NEXT:    ret
 {
@@ -36,9 +36,9 @@ define <vscale x 8 x i8> @test_trunc_i64_i8_m1(<vscale x 8 x i64> %a) nounwind
 define <vscale x 4 x i16> @test_trunc_i64_i16_m1(<vscale x 4 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i16_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m2,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v2, v16, 0
-; CHECK-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v16, v2, 0
 ; CHECK-NEXT:    ret
 {
@@ -49,9 +49,9 @@ define <vscale x 4 x i16> @test_trunc_i64_i16_m1(<vscale x 4 x i64> %a) nounwind
 define <vscale x 8 x i16> @test_trunc_i64_i16_m2(<vscale x 8 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i16_m2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v4, v16, 0
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vnsrl.wi v16, v4, 0
 ; CHECK-NEXT:    ret
 {

@@ -20,20 +20,20 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    sub t2, a6, a5
 ; CHECK-NEXT:    vsetvli t1, t2, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v1, (a7)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmset.m v2
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,ta,mu
 ; CHECK-NEXT:    vmflt.vf v1, v1, ft0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v1, v2
 ; CHECK-NEXT:    add t3, a2, t0
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v3, (t3)
 ; CHECK-NEXT:    add a0, a3, t0
 ; CHECK-NEXT:    vle64.v v4, (a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmxor.mm v0, v1, v2
-; CHECK-NEXT:    vsetvli a0, t2, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, t2, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmul.vv v2, v3, v4, v0.t
 ; CHECK-NEXT:    add a0, a4, t0
 ; CHECK-NEXT:    vse64.v v2, (a0), v0.t

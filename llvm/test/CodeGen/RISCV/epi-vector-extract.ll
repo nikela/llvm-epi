@@ -5,7 +5,7 @@
 define i64 @extract_nxv1i64(<vscale x 1 x i64> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vmv.x.s a0, v1
 ; CHECK-NEXT:    vmv.x.s a1, v16
@@ -21,7 +21,7 @@ define i64 @extract_nxv1i64(<vscale x 1 x i64> %v, i64 %idx)
 define i32 @extract_nxv2i32(<vscale x 2 x i32> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vmv.x.s a0, v1
 ; CHECK-NEXT:    vmv.x.s a1, v16
@@ -37,7 +37,7 @@ define i32 @extract_nxv2i32(<vscale x 2 x i32> %v, i64 %idx)
 define i16 @extract_nxv4i16(<vscale x 4 x i16> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vmv.x.s a0, v1
 ; CHECK-NEXT:    vmv.x.s a1, v16
@@ -53,7 +53,7 @@ define i16 @extract_nxv4i16(<vscale x 4 x i16> %v, i64 %idx)
 define i8 @extract_nxv8i8(<vscale x 8 x i8> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vmv.x.s a0, v1
 ; CHECK-NEXT:    vmv.x.s a1, v16
@@ -69,9 +69,9 @@ define i8 @extract_nxv8i8(<vscale x 8 x i8> %v, i64 %idx)
 define i64 @extract_nxv2i64(<vscale x 2 x i64> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v2
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -86,9 +86,9 @@ define i64 @extract_nxv2i64(<vscale x 2 x i64> %v, i64 %idx)
 define i32 @extract_nxv4i32(<vscale x 4 x i32> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v2
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    addw a0, a0, a1
@@ -103,9 +103,9 @@ define i32 @extract_nxv4i32(<vscale x 4 x i32> %v, i64 %idx)
 define i16 @extract_nxv8i16(<vscale x 8 x i16> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e16,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v2
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -120,9 +120,9 @@ define i16 @extract_nxv8i16(<vscale x 8 x i16> %v, i64 %idx)
 define i8 @extract_nxv16i8(<vscale x 16 x i8> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v2
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -137,9 +137,9 @@ define i8 @extract_nxv16i8(<vscale x 16 x i8> %v, i64 %idx)
 define i64 @extract_nxv4i64(<vscale x 4 x i64> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v4
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -154,9 +154,9 @@ define i64 @extract_nxv4i64(<vscale x 4 x i64> %v, i64 %idx)
 define i32 @extract_nxv8i32(<vscale x 8 x i32> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v4
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    addw a0, a0, a1
@@ -171,9 +171,9 @@ define i32 @extract_nxv8i32(<vscale x 8 x i32> %v, i64 %idx)
 define i16 @extract_nxv16i16(<vscale x 16 x i16> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e16,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v4
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -188,9 +188,9 @@ define i16 @extract_nxv16i16(<vscale x 16 x i16> %v, i64 %idx)
 define i8 @extract_nxv32i8(<vscale x 32 x i8> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv32i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v4
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -205,9 +205,9 @@ define i8 @extract_nxv32i8(<vscale x 32 x i8> %v, i64 %idx)
 define i64 @extract_nxv8i64(<vscale x 8 x i64> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v8, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -222,9 +222,9 @@ define i64 @extract_nxv8i64(<vscale x 8 x i64> %v, i64 %idx)
 define i32 @extract_nxv16i32(<vscale x 16 x i32> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v8, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    addw a0, a0, a1
@@ -239,9 +239,9 @@ define i32 @extract_nxv16i32(<vscale x 16 x i32> %v, i64 %idx)
 define i16 @extract_nxv32i16(<vscale x 32 x i16> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv32i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e16,m8,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v8, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1
@@ -265,7 +265,7 @@ define i16 @extract_nxv32i16(<vscale x 32 x i16> %v, i64 %idx)
 define double @extract_nxv1f64(<vscale x 1 x double> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vfmv.f.s ft0, v1
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
@@ -281,7 +281,7 @@ define double @extract_nxv1f64(<vscale x 1 x double> %v, i64 %idx)
 define float @extract_nxv2f32(<vscale x 2 x float> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v1, v16, a0
 ; CHECK-NEXT:    vfmv.f.s ft0, v1
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
@@ -297,9 +297,9 @@ define float @extract_nxv2f32(<vscale x 2 x float> %v, i64 %idx)
 define double @extract_nxv2f64(<vscale x 2 x double> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v2
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.d fa0, ft0, ft1
@@ -314,9 +314,9 @@ define double @extract_nxv2f64(<vscale x 2 x double> %v, i64 %idx)
 define float @extract_nxv4f32(<vscale x 4 x float> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m2,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v2, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v2
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.s fa0, ft0, ft1
@@ -331,9 +331,9 @@ define float @extract_nxv4f32(<vscale x 4 x float> %v, i64 %idx)
 define double @extract_nxv4f64(<vscale x 4 x double> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v4
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.d fa0, ft0, ft1
@@ -348,9 +348,9 @@ define double @extract_nxv4f64(<vscale x 4 x double> %v, i64 %idx)
 define float @extract_nxv8f32(<vscale x 8 x float> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v4
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.s fa0, ft0, ft1
@@ -365,9 +365,9 @@ define float @extract_nxv8f32(<vscale x 8 x float> %v, i64 %idx)
 define double @extract_nxv8f64(<vscale x 8 x double> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m8,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v8, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.d fa0, ft0, ft1
@@ -382,9 +382,9 @@ define double @extract_nxv8f64(<vscale x 8 x double> %v, i64 %idx)
 define float @extract_nxv16f32(<vscale x 16 x float> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m8,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vslidedown.vx v8, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
 ; CHECK-NEXT:    vfmv.f.s ft1, v16
 ; CHECK-NEXT:    fadd.s fa0, ft0, ft1
@@ -399,7 +399,7 @@ define float @extract_nxv16f32(<vscale x 16 x float> %v, i64 %idx)
 define i1 @extract_nxv1i1(<vscale x 1 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv1i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v1, 0
 ; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v2, v1, a0
@@ -417,7 +417,7 @@ define i1 @extract_nxv1i1(<vscale x 1 x i1> %v, i64 %idx)
 define i1 @extract_nxv2i1(<vscale x 2 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv2i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v1, 0
 ; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v2, v1, a0
@@ -435,7 +435,7 @@ define i1 @extract_nxv2i1(<vscale x 2 x i1> %v, i64 %idx)
 define i1 @extract_nxv4i1(<vscale x 4 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv4i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v1, 0
 ; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v2, v1, a0
@@ -453,7 +453,7 @@ define i1 @extract_nxv4i1(<vscale x 4 x i1> %v, i64 %idx)
 define i1 @extract_nxv8i1(<vscale x 8 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v1, 0
 ; CHECK-NEXT:    vmerge.vim v1, v1, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v2, v1, a0
@@ -471,11 +471,11 @@ define i1 @extract_nxv8i1(<vscale x 8 x i1> %v, i64 %idx)
 define i1 @extract_nxv16i1(<vscale x 16 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv16i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vmv.v.i v2, 0
 ; CHECK-NEXT:    vmerge.vim v4, v2, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v2, v4, a0
-; CHECK-NEXT:    vsetvli zero, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v2
 ; CHECK-NEXT:    vmv.x.s a1, v4
 ; CHECK-NEXT:    add a0, a0, a1
@@ -490,11 +490,11 @@ define i1 @extract_nxv16i1(<vscale x 16 x i1> %v, i64 %idx)
 define i1 @extract_nxv32i1(<vscale x 32 x i1> %v, i64 %idx)
 ; CHECK-LABEL: extract_nxv32i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vmv.v.i v4, 0
 ; CHECK-NEXT:    vmerge.vim v16, v4, 1, v0
 ; CHECK-NEXT:    vslidedown.vx v4, v16, a0
-; CHECK-NEXT:    vsetvli zero, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v4
 ; CHECK-NEXT:    vmv.x.s a1, v16
 ; CHECK-NEXT:    add a0, a0, a1

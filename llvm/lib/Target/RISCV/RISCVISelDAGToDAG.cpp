@@ -88,7 +88,6 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       if (!(-4096 <= Imm && Imm <= -2049) && !(2048 <= Imm && Imm <= 4094))
         break;
       // Break the imm to imm0+imm1.
-      SDLoc DL(Node);
       EVT VT = Node->getValueType(0);
       const SDValue ImmOp0 = CurDAG->getTargetConstant(Imm - Imm / 2, DL, VT);
       const SDValue ImmOp1 = CurDAG->getTargetConstant(Imm / 2, DL, VT);
@@ -104,14 +103,14 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
   case ISD::Constant: {
     auto ConstNode = cast<ConstantSDNode>(Node);
     if (VT == XLenVT && ConstNode->isNullValue()) {
-      SDValue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
-                                           RISCV::X0, XLenVT);
+      SDValue New =
+          CurDAG->getCopyFromReg(CurDAG->getEntryNode(), DL, RISCV::X0, XLenVT);
       ReplaceNode(Node, New.getNode());
       return;
     }
     int64_t Imm = ConstNode->getSExtValue();
     if (XLenVT == MVT::i64) {
-      ReplaceNode(Node, selectImm(CurDAG, SDLoc(Node), Imm, XLenVT));
+      ReplaceNode(Node, selectImm(CurDAG, DL, Imm, XLenVT));
       return;
     }
     break;
@@ -136,8 +135,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       uint64_t ShAmt = Node->getConstantOperandVal(1);
 
       if ((Mask | maskTrailingOnes<uint64_t>(ShAmt)) == 0xffffffff) {
-        SDValue ShAmtVal =
-            CurDAG->getTargetConstant(ShAmt, SDLoc(Node), XLenVT);
+        SDValue ShAmtVal = CurDAG->getTargetConstant(ShAmt, DL, XLenVT);
         CurDAG->SelectNodeTo(Node, RISCV::SRLIW, XLenVT, Op0->getOperand(0),
                              ShAmtVal);
         return;
@@ -239,24 +237,24 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       unsigned VIDInst, VRSUBInst, VRGATHERInst;
       switch (LMul) {
       case 1:
-        VIDInst = RISCV::PseudoVID_V_M1;
-        VRSUBInst = RISCV::PseudoVRSUB_VX_M1;
-        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M1;
+        VIDInst = RISCV::PseudoEPIVID_V_M1;
+        VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M1;
+        VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M1;
         break;
       case 2:
-        VIDInst = RISCV::PseudoVID_V_M2;
-        VRSUBInst = RISCV::PseudoVRSUB_VX_M2;
-        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M2;
+        VIDInst = RISCV::PseudoEPIVID_V_M2;
+        VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M2;
+        VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M2;
         break;
       case 4:
-        VIDInst = RISCV::PseudoVID_V_M4;
-        VRSUBInst = RISCV::PseudoVRSUB_VX_M4;
-        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M4;
+        VIDInst = RISCV::PseudoEPIVID_V_M4;
+        VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M4;
+        VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M4;
         break;
       case 8:
-        VIDInst = RISCV::PseudoVID_V_M8;
-        VRSUBInst = RISCV::PseudoVRSUB_VX_M8;
-        VRGATHERInst = RISCV::PseudoVRGATHER_VV_M8;
+        VIDInst = RISCV::PseudoEPIVID_V_M8;
+        VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M8;
+        VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M8;
         break;
       }
 
@@ -548,6 +546,7 @@ void RISCVDAGToDAGISel::doPeepholeLoadStoreADDI() {
     case RISCV::LHU:
     case RISCV::LWU:
     case RISCV::LD:
+    case RISCV::FLH:
     case RISCV::FLW:
     case RISCV::FLD:
       BaseOpIdx = 0;
@@ -557,6 +556,7 @@ void RISCVDAGToDAGISel::doPeepholeLoadStoreADDI() {
     case RISCV::SH:
     case RISCV::SW:
     case RISCV::SD:
+    case RISCV::FSH:
     case RISCV::FSW:
     case RISCV::FSD:
       BaseOpIdx = 1;

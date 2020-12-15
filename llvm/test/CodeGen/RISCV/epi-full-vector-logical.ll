@@ -8,17 +8,17 @@ define void @nxv1i1(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmxor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -40,17 +40,17 @@ define void @nxv2i1(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vmxor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -72,17 +72,17 @@ define void @nxv4i1(<vscale x 4 x i1> %a, <vscale x 4 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vmxor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 4 x i1>*
@@ -104,7 +104,7 @@ define void @nxv8i1(<vscale x 8 x i1> %a, <vscale x 8 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
@@ -131,17 +131,17 @@ define void @nxv16i1(<vscale x 16 x i1> %a, <vscale x 16 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vmxor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 16 x i1>*
@@ -163,17 +163,17 @@ define void @nxv32i1(<vscale x 32 x i1> %a, <vscale x 32 x i1> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vmand.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vmor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vmxor.mm v1, v0, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v1, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 32 x i1>*

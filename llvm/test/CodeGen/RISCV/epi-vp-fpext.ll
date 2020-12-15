@@ -5,7 +5,7 @@
 define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-LABEL: fpext.f64.f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.f.f.v v2, v16
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
@@ -20,7 +20,7 @@ define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 %gvl)
 define <vscale x 2 x double> @fpext.f64.f32.mask(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 ; CHECK-LABEL: fpext.f64.f32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.f.f.v v2, v16, v0.t
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret

@@ -205,7 +205,7 @@ public:
   }
 
   bool operator!=(const VectorizationFactor &rhs) const {
-    return !this->operator==(rhs);
+    return !(*this == rhs);
   }
 };
 
@@ -286,6 +286,18 @@ public:
   void printPlans(raw_ostream &O) {
     for (const auto &Plan : VPlans)
       O << *Plan;
+  }
+
+  /// Look through the existing plans and return true if we have one with all
+  /// the vectorization factors in question.
+  bool hasPlanWithVFs(const ArrayRef<ElementCount> VFs) const {
+    return any_of(VPlans, [&](const VPlanPtr &Plan) {
+      return all_of(VFs, [&](const ElementCount &VF) {
+        if (Plan->hasVF(VF))
+          return true;
+        return false;
+      });
+    });
   }
 
   /// Test a \p Predicate on a \p Range of VF's. Return the value of applying

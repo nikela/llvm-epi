@@ -24,7 +24,7 @@ declare <vscale x 2 x i32> @llvm.epi.vnclipu.nxv2i64(<vscale x 2 x i64>, i64, i6
 define <vscale x 1 x i64> @foo(<vscale x 1 x i64> %v, <vscale x 2 x i64> %w, i64 %gvl) nounwind
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vsll.vi v1, v16, 0
 ; CHECK-NEXT:    vsll.vi v1, v1, 31
 ; CHECK-NEXT:    addi a0, zero, -1

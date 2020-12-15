@@ -26,32 +26,33 @@ declare void @llvm.epi.vstore.nxv1f64(
 define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_vtype:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a2, a1, e64,m1,tu,mu
-; CHECK-O0-NEXT:    srli a2, a2, 1
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O0-NEXT:    srli a2, a1, 1
 ; CHECK-O0-NEXT:    #APP
 ; CHECK-O0-NEXT:    rdvtype t0
 ; CHECK-O0-NEXT:    vsetvl zero, a2, t0
 ; CHECK-O0-NEXT:    #NO_APP
 ; CHECK-O0-NEXT:    # implicit-def: $v2
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v2, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v1
+; CHECK-O0-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vfadd.vv v1, v2, v2
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vse64.v v1, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_vtype:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a1, e64,m1,tu,mu
-; CHECK-O2-NEXT:    srli a2, a2, 1
-; CHECK-O2-NEXT:    #APP
-; CHECK-O2-NEXT:    rdvtype t0
-; CHECK-O2-NEXT:    vsetvl zero, a2, t0
-; CHECK-O2-NEXT:    #NO_APP
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-O2-NEXT:    vle64.v v1, (a0)
+; CHECK-O2-NEXT:    srli a0, a1, 1
+; CHECK-O2-NEXT:    #APP
+; CHECK-O2-NEXT:    rdvtype t0
+; CHECK-O2-NEXT:    vsetvl zero, a0, t0
+; CHECK-O2-NEXT:    #NO_APP
 ; CHECK-O2-NEXT:    vfadd.vv v1, v1, v1
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)

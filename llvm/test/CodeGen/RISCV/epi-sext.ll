@@ -6,7 +6,7 @@
 define <vscale x 2 x i64> @test_sext_i32_i64_m1(<vscale x 2 x i32> %a) nounwind
 ; CHECK-LABEL: test_sext_i32_i64_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v2, v16
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
@@ -18,7 +18,7 @@ define <vscale x 2 x i64> @test_sext_i32_i64_m1(<vscale x 2 x i32> %a) nounwind
 define <vscale x 4 x i64> @test_sext_i32_i64_m2(<vscale x 4 x i32> %a) nounwind
 ; CHECK-LABEL: test_sext_i32_i64_m2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m2,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v4, v16
 ; CHECK-NEXT:    vmv4r.v v16, v4
 ; CHECK-NEXT:    ret
@@ -30,7 +30,7 @@ define <vscale x 4 x i64> @test_sext_i32_i64_m2(<vscale x 4 x i32> %a) nounwind
 define <vscale x 8 x i64> @test_sext_i32_i64_m4(<vscale x 8 x i32> %a) nounwind
 ; CHECK-LABEL: test_sext_i32_i64_m4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v8, v16
 ; CHECK-NEXT:    vmv8r.v v16, v8
 ; CHECK-NEXT:    ret
@@ -43,7 +43,7 @@ define <vscale x 8 x i64> @test_sext_i32_i64_m4(<vscale x 8 x i32> %a) nounwind
 define <vscale x 4 x i32> @test_sext_i16_i32_m1(<vscale x 4 x i16> %a) nounwind
 ; CHECK-LABEL: test_sext_i16_i32_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v2, v16
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
@@ -55,7 +55,7 @@ define <vscale x 4 x i32> @test_sext_i16_i32_m1(<vscale x 4 x i16> %a) nounwind
 define <vscale x 8 x i32> @test_sext_i16_i32_m2(<vscale x 8 x i16> %a) nounwind
 ; CHECK-LABEL: test_sext_i16_i32_m2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v4, v16
 ; CHECK-NEXT:    vmv4r.v v16, v4
 ; CHECK-NEXT:    ret
@@ -67,7 +67,7 @@ define <vscale x 8 x i32> @test_sext_i16_i32_m2(<vscale x 8 x i16> %a) nounwind
 define <vscale x 16 x i32> @test_sext_i16_i32_m4(<vscale x 16 x i16> %a) nounwind
 ; CHECK-LABEL: test_sext_i16_i32_m4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,m4,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e16,m4,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v8, v16
 ; CHECK-NEXT:    vmv8r.v v16, v8
 ; CHECK-NEXT:    ret
@@ -80,7 +80,7 @@ define <vscale x 16 x i32> @test_sext_i16_i32_m4(<vscale x 16 x i16> %a) nounwin
 define <vscale x 8 x i16> @test_sext_i8_i16_m1(<vscale x 8 x i8> %a) nounwind
 ; CHECK-LABEL: test_sext_i8_i16_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v2, v16
 ; CHECK-NEXT:    vmv2r.v v16, v2
 ; CHECK-NEXT:    ret
@@ -92,7 +92,7 @@ define <vscale x 8 x i16> @test_sext_i8_i16_m1(<vscale x 8 x i8> %a) nounwind
 define <vscale x 16 x i16> @test_sext_i8_i16_m2(<vscale x 16 x i8> %a) nounwind
 ; CHECK-LABEL: test_sext_i8_i16_m2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,m2,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,m2,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v4, v16
 ; CHECK-NEXT:    vmv4r.v v16, v4
 ; CHECK-NEXT:    ret
@@ -104,7 +104,7 @@ define <vscale x 16 x i16> @test_sext_i8_i16_m2(<vscale x 16 x i8> %a) nounwind
 define <vscale x 32 x i16> @test_sext_i8_i16_m4(<vscale x 32 x i8> %a) nounwind
 ; CHECK-LABEL: test_sext_i8_i16_m4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,m4,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,m4,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v8, v16
 ; CHECK-NEXT:    vmv8r.v v16, v8
 ; CHECK-NEXT:    ret

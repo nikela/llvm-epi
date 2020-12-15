@@ -4,7 +4,7 @@
 define i64 @vscale() nounwind {
 ; CHECK-LABEL: vscale:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    ret
   %1 = call i64 @llvm.vscale.i64()
   ret i64 %1
@@ -13,7 +13,7 @@ define i64 @vscale() nounwind {
 define i64 @vscale_neg() nounwind {
 ; CHECK-LABEL: vscale_neg:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    addi a0, a0, 1
 ; CHECK-NEXT:    ret
@@ -25,7 +25,7 @@ define i64 @vscale_neg() nounwind {
 define i64 @vscale_neg_plus_1() nounwind {
 ; CHECK-LABEL: vscale_neg_plus_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    ret
   %1 = call i64 @llvm.vscale.i64()
@@ -36,7 +36,7 @@ define i64 @vscale_neg_plus_1() nounwind {
 define i64 @vscale_pow2() nounwind {
 ; CHECK-LABEL: vscale_pow2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    slli a0, a0, 6
 ; CHECK-NEXT:    ret
   %1 = call i64 @llvm.vscale.i64()
@@ -47,7 +47,7 @@ define i64 @vscale_pow2() nounwind {
 define i64 @vscale_mul() nounwind {
 ; CHECK-LABEL: vscale_mul:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    addi a1, zero, 5
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    ret

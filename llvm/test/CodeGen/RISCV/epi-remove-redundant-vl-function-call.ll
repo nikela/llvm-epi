@@ -11,7 +11,7 @@ define <vscale x 1 x double> @add1(<vscale x 1 x double>, i64) nounwind {
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    lui a1, %hi(.LCPI0_0)
 ; DISABLED-NEXT:    fld ft0, %lo(.LCPI0_0)(a1)
-; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
+; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; DISABLED-NEXT:    vfadd.vf v16, v16, ft0
 ; DISABLED-NEXT:    ret
 ;
@@ -19,7 +19,7 @@ define <vscale x 1 x double> @add1(<vscale x 1 x double>, i64) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a1)
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vfadd.vf v16, v16, ft0
 ; CHECK-NEXT:    ret
   %3 = call <vscale x 1 x double> @llvm.epi.vfmv.v.f.nxv1f64.f64(double 1.0, i64 %1)
@@ -35,37 +35,37 @@ define void @foo(double*) nounwind {
 ; DISABLED-LABEL: foo:
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    addi sp, sp, -32
-; DISABLED-NEXT:    sd ra, 24(sp)
-; DISABLED-NEXT:    sd s1, 16(sp)
-; DISABLED-NEXT:    sd s2, 8(sp)
+; DISABLED-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; DISABLED-NEXT:    sd s1, 16(sp) # 8-byte Folded Spill
+; DISABLED-NEXT:    sd s2, 8(sp) # 8-byte Folded Spill
 ; DISABLED-NEXT:    add s2, zero, a0
 ; DISABLED-NEXT:    vsetvli s1, zero, e64,m1,tu,mu
-; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,tu,mu
+; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
 ; DISABLED-NEXT:    vle64.v v16, (s2)
 ; DISABLED-NEXT:    srli a0, s1, 1
 ; DISABLED-NEXT:    call add1
-; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,tu,mu
+; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
 ; DISABLED-NEXT:    vse64.v v16, (s2)
-; DISABLED-NEXT:    ld s2, 8(sp)
-; DISABLED-NEXT:    ld s1, 16(sp)
-; DISABLED-NEXT:    ld ra, 24(sp)
+; DISABLED-NEXT:    ld s2, 8(sp) # 8-byte Folded Reload
+; DISABLED-NEXT:    ld s1, 16(sp) # 8-byte Folded Reload
+; DISABLED-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
 ; DISABLED-NEXT:    addi sp, sp, 32
 ; DISABLED-NEXT:    ret
 ;
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp)
-; CHECK-NEXT:    sd s1, 0(sp)
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s1, 0(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    add s1, zero, a0
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v16, (s1)
 ; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call add1
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vse64.v v16, (s1)
-; CHECK-NEXT:    ld s1, 0(sp)
-; CHECK-NEXT:    ld ra, 8(sp)
+; CHECK-NEXT:    ld s1, 0(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %2 = call i64 @llvm.epi.vsetvlmax(i64 3, i64 0)

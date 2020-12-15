@@ -6,7 +6,7 @@ define dso_local <vscale x 1 x i1> @foo(<vscale x 1 x i64> %a, <vscale x 1 x i64
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vmv1r.v v1, v0
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv1r.v v0, v18
 ; CHECK-NEXT:    vmseq.vv v1, v16, v17, v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v1

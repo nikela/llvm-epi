@@ -7,7 +7,7 @@ declare { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <
 define <vscale x 1 x double> @test_vlseg8_f64(double *%a, <vscale x 1 x i64> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei64.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -24,7 +24,7 @@ define void @test_vsseg8_f64(<vscale x 1 x double> %v0, <vscale x 1 x double> %v
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle64.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
@@ -42,7 +42,7 @@ declare { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vsc
 define <vscale x 2 x float> @test_vlseg8_f32(float *%a, <vscale x 2 x i32> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei32.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -59,7 +59,7 @@ define void @test_vsseg8_f32(<vscale x 2 x float> %v0, <vscale x 2 x float> %v1,
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle32.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
@@ -77,7 +77,7 @@ declare { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 
 define <vscale x 1 x i64> @test_vlseg8_i64(i64 *%a, <vscale x 1 x i64> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei64.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -94,7 +94,7 @@ define void @test_vsseg8_i64(<vscale x 1 x i64> %v0, <vscale x 1 x i64> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle64.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
@@ -112,7 +112,7 @@ declare { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 
 define <vscale x 2 x i32> @test_vlseg8_i32(i32 *%a, <vscale x 2 x i32> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei32.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -129,7 +129,7 @@ define void @test_vsseg8_i32(<vscale x 2 x i32> %v0, <vscale x 2 x i32> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle32.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
@@ -147,7 +147,7 @@ declare { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 
 define <vscale x 4 x i16> @test_vlseg8_i16(i16 *%a, <vscale x 4 x i16> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e16,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei16.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -164,7 +164,7 @@ define void @test_vsseg8_i16(<vscale x 4 x i16> %v0, <vscale x 4 x i16> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e16,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e16,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle16.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
@@ -182,7 +182,7 @@ declare { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x
 define <vscale x 8 x i8> @test_vlseg8_i8(i8 *%a, <vscale x 8 x i8> %index, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg8_i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, a1, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli a1, a1, e8,m1,ta,mu
 ; CHECK-NEXT:    vlxseg8ei8.v v16, (a0), v16
 ; CHECK-NEXT:    # kill: def $v16 killed $v16 killed $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    ret
@@ -199,7 +199,7 @@ define void @test_vsseg8_i8(<vscale x 8 x i8> %v0, <vscale x 8 x i8> %v1, <vscal
 ; CHECK-NEXT:    # kill: def $v23 killed $v23 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v22 killed $v22 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    # kill: def $v21 killed $v21 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
-; CHECK-NEXT:    vsetvli zero, a2, e8,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, a2, e8,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v20 killed $v20 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23
 ; CHECK-NEXT:    vle8.v v1, (a1)
 ; CHECK-NEXT:    # kill: def $v19 killed $v19 killed $v16_v17_v18_v19_v20_v21_v22_v23 def $v16_v17_v18_v19_v20_v21_v22_v23

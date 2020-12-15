@@ -321,20 +321,20 @@ void RISCVMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
     return;
   }
 
-  if (MI.getOpcode() == RISCV::PseudoReadVL ||
-      MI.getOpcode() == RISCV::PseudoReadVTYPE ||
-      MI.getOpcode() == RISCV::PseudoReadVLENB) {
+  if (MI.getOpcode() == RISCV::PseudoEPIReadVL ||
+      MI.getOpcode() == RISCV::PseudoEPIReadVTYPE ||
+      MI.getOpcode() == RISCV::PseudoEPIReadVLENB) {
     int64_t CSRNum;
     switch (MI.getOpcode()) {
     default:
       llvm_unreachable("Unexpected pseudo-instruction");
-    case RISCV::PseudoReadVL:
+    case RISCV::PseudoEPIReadVL:
       CSRNum = EPICSR::VL;
       break;
-    case RISCV::PseudoReadVTYPE:
+    case RISCV::PseudoEPIReadVTYPE:
       CSRNum = EPICSR::VTYPE;
       break;
-    case RISCV::PseudoReadVLENB:
+    case RISCV::PseudoEPIReadVLENB:
       CSRNum = EPICSR::VLENB;
       break;
     }

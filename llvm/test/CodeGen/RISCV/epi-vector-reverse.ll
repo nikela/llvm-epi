@@ -5,7 +5,7 @@
 define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v1
 ; CHECK-NEXT:    vrsub.vx v2, v1, a0
@@ -19,7 +19,7 @@ define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %a) nounwind {
 define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-LABEL: nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v1
 ; CHECK-NEXT:    vrsub.vx v2, v1, a0
@@ -33,7 +33,7 @@ define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %a) nounwind {
 define <vscale x 2 x i64> @nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-LABEL: nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2
+; CHECK-NEXT:    vsetvli a0, zero, e64,m2,tu,mu
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v2
 ; CHECK-NEXT:    vrsub.vx v4, v2, a0

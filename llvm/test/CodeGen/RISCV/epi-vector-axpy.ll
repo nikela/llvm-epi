@@ -28,7 +28,7 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a0, a2, a5
-; CHECK-NEXT:    vsetvli a3, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a3, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v1, (a0)
 ; CHECK-NEXT:    add a0, a1, a5
 ; CHECK-NEXT:    vle32.v v2, (a0)

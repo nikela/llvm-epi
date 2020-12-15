@@ -6,15 +6,15 @@ define void @lmul1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    sd ra, 24(sp)
-; CHECK-NEXT:    sd s0, 16(sp)
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi s0, sp, 32
 ; CHECK-NEXT:    rdvlenb a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    addi sp, s0, -32
-; CHECK-NEXT:    ld s0, 16(sp)
-; CHECK-NEXT:    ld ra, 24(sp)
+; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 1 x i64>

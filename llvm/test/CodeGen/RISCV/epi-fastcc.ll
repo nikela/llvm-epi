@@ -14,9 +14,9 @@ define void @foo(<vscale x 1 x double> %v, i64 %vl) nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp)
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    call bar
-; CHECK-NEXT:    ld ra, 8(sp)
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   call fastcc void @bar(<vscale x 1 x double> %v, i64  %vl)

@@ -97,9 +97,7 @@ bool RISCVExpandAtomicPseudo::expandVSETVL(MachineBasicBlock &MBB,
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
   const MCInstrDesc *MCInstr;
-  if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
-    MCInstr = &TII.get(RISCV::VSETVLI);
-  } else if (MI.getOpcode() == RISCV::PseudoVSETVL) {
+  if (MI.getOpcode() == RISCV::PseudoEPIVSETVL) {
     MCInstr = &TII.get(RISCV::VSETVL);
   } else {
     llvm_unreachable("Unexpected pseudo instruction");
@@ -160,8 +158,7 @@ bool RISCVExpandAtomicPseudo::expandMI(MachineBasicBlock &MBB,
   // RISCVExpandPseudoInsts.
   // TODO: Put those in a specific pass other than the one for expanding
   // atomics.
-  case RISCV::PseudoVSETVL:
-  case RISCV::PseudoVSETVLI:
+  case RISCV::PseudoEPIVSETVL:
     return expandVSETVL(MBB, MBBI);
   }
 
