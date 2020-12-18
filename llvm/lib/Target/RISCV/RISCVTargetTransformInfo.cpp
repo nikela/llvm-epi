@@ -392,11 +392,12 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
   bool IsScalable = useScalableVectorType();
 
   unsigned LowerBoundVFKnownMin =
-      PowerOf2Floor(SmallestRegister / SmallestType);
+      std::max<unsigned>(1, PowerOf2Floor(SmallestRegister / SmallestType));
   ElementCount LowerBoundVF =
       ElementCount::get(LowerBoundVFKnownMin, IsScalable);
 
-  unsigned UpperBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
+  unsigned UpperBoundVFKnownMin =
+      std::min<unsigned>(64, PowerOf2Floor(WidestRegister / WidestType));
   ElementCount UpperBoundVF =
       ElementCount::get(UpperBoundVFKnownMin, IsScalable);
 
