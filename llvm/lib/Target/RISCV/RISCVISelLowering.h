@@ -142,6 +142,8 @@ public:
   explicit RISCVTargetLowering(const TargetMachine &TM,
                                const RISCVSubtarget &STI);
 
+  const RISCVSubtarget &getSubtarget() const { return Subtarget; }
+
   bool getTgtMemIntrinsic(IntrinsicInfo &Info, const CallInst &I,
                           MachineFunction &MF,
                           unsigned Intrinsic) const override;
@@ -243,8 +245,6 @@ public:
   bool allowsMisalignedMemoryAccesses(EVT E, unsigned AddrSpace, unsigned Align,
                                       MachineMemOperand::Flags Flags,
                                       bool *Fast) const override;
-
-  const RISCVSubtarget &getSubtarget() const { return Subtarget; }
 
   bool shouldExtendTypeInLibCall(EVT Type) const override;
 
@@ -355,6 +355,20 @@ private:
       const SmallVectorImpl<std::pair<llvm::Register, llvm::SDValue>> &Regs,
       MachineFunction &MF) const;
 };
+
+namespace RISCVVIntrinsicsTable {
+
+struct RISCVVIntrinsicInfo {
+  unsigned int IntrinsicID;
+  unsigned int ExtendedOperand;
+};
+
+using namespace RISCV;
+
+#define GET_RISCVVIntrinsicsTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVVIntrinsicsTable
 }
 
 #endif

@@ -2887,9 +2887,6 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
       InBounds = gep->isInBounds();
 
     if (Reverse) {
-      assert(!VF.isScalable() &&
-             "Reversing vectors is not yet supported for scalable vectors.");
-
       // If the address is consecutive but reversed, then the
       // wide store needs to start at the last vector element.
 
@@ -3256,11 +3253,6 @@ Value *InnerLoopVectorizer::getOrCreateVectorTripCount(Loop *L) {
   // iterations are not required for correctness, or N - Step, otherwise. Step
   // is equal to the vectorization factor (number of SIMD elements) times the
   // unroll factor (number of SIMD instructions).
-  if (VF.isScalable()) {
-    CallInst *VscaleFuncCall =
-        emitVscaleCall(Builder, L->getHeader()->getModule(), Ty);
-    Step = Builder.CreateMul(Step, VscaleFuncCall, "step.vscale");
-  }
   Value *R = Builder.CreateURem(TC, Step, "n.mod.vf");
 
   // If there is a non-reversed interleaved group that may speculatively access
@@ -6251,9 +6243,6 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
   switch (ScalarEpilogueStatus) {
   case CM_ScalarEpilogueAllowed: {
-    if (UserVF.isNonZero())
-      return UserVF;
-
     Optional<ElementCount> MaxVF = computeFeasibleMaxVF(TC, UserVF);
     if (!MaxVF)
       reportVectorizationFailure(
@@ -6668,7 +6657,8 @@ LoopVectorizationCostModel::selectEpilogueVectorizationFactor(
 
   for (auto &NextVF : ProfitableVFs)
     if (ElementCount::isKnownLT(NextVF.getWidth(), MainLoopVF) &&
-        (Result.getWidth().getFixedValue() == 1 ||
+        (Result == VectorizationFactor::Disabled() ||
+         Result.getWidth().getFixedValue() == 1 ||
          NextVF.getCost() < Result.getCost()) &&
         LVP.hasPlanWithVFs({MainLoopVF, NextVF.getWidth()}))
       Result = NextVF;
@@ -8324,9 +8314,6 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
     return {{UserVF, 0}};
   }
 
-  assert(!MaxVF.isScalable() &&
-         "Scalable vectors not yet supported beyond this point");
-
   ElementCount VF = ElementCount::get(1, MaxVF.isScalable());
   for (; ElementCount::isKnownLE(VF, MaxVF); VF *= 2) {
     // Collect Uniform and Scalar instructions after vectorization with VF.
@@ -8370,10 +8357,6 @@ void LoopVectorizationPlanner::executePlan(InnerLoopVectorizer &ILV,
   VPCallbackILV CallbackILV(ILV);
 
   assert(BestVF.hasValue() && "Vectorization Factor is missing");
-
-  // FIXME: If UF > 1 and isScalable, bail out early.
-  if (BestVF->isScalable())
-    assert(BestUF == 1 && "Interleaving not supported for scalable vectors.");
 
   VPTransformState State{*BestVF, BestUF,      LI,
                          DT,      ILV.Builder, ILV.VectorLoopValueMap,
@@ -9919,11 +9902,10 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
 
 void VPPredicatedWidenMemoryInstructionRecipe::execute(
     VPTransformState &State) {
-  Instruction *Instr = getUnderlyingInstr();
-  VPValue *StoredValue = isa<StoreInst>(Instr) ? getStoredValue() : nullptr;
-  State.ILV->vectorizeMemoryInstruction(Instr, State,
-                                        StoredValue ? nullptr : this, getAddr(),
-                                        StoredValue, getMask(), getEVL());
+  VPValue *StoredValue = isStore() ? getStoredValue() : nullptr;
+  State.ILV->vectorizeMemoryInstruction(
+      &Ingredient, State, StoredValue ? nullptr : toVPValue(), getAddr(),
+      StoredValue, getMask(), getEVL());
 }
 
 // Determine how to lower the scalar epilogue, which depends on 1) optimising
@@ -10305,7 +10287,8 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     // Consider vectorizing the epilogue too if it's profitable.
     VectorizationFactor EpilogueVF =
       CM.selectEpilogueVectorizationFactor(VF.getWidth(), LVP);
-    if (EpilogueVF.getWidth().isVector()) {
+    if (EpilogueVF != VectorizationFactor::Disabled() &&
+        EpilogueVF.getWidth().isVector()) {
 
       // The first pass vectorizes the main loop and creates a scalar epilogue
       // to be vectorized by executing the plan (potentially with a different

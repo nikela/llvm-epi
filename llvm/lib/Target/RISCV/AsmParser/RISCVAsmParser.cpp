@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MCTargetDesc/RISCVAsmBackend.h"
+#include "MCTargetDesc/RISCVInstPrinter.h"
 #include "MCTargetDesc/RISCVMCExpr.h"
 #include "MCTargetDesc/RISCVMCTargetDesc.h"
 #include "MCTargetDesc/RISCVTargetStreamer.h"
@@ -757,7 +758,7 @@ public:
   }
 
   StringRef getSysReg() const {
-    assert(Kind == KindTy::SystemRegister && "Invalid access!");
+    assert(Kind == KindTy::SystemRegister && "Invalid type access!");
     return StringRef(SysReg.Data, SysReg.Length);
   }
 
@@ -771,61 +772,25 @@ public:
     return Tok;
   }
 
-  static StringRef getSEWStr(RISCVVSEW Sew) {
-    switch (Sew) {
-    case RISCVVSEW::SEW_8:
-      return "e8";
-    case RISCVVSEW::SEW_16:
-      return "e16";
-    case RISCVVSEW::SEW_32:
-      return "e32";
-    case RISCVVSEW::SEW_64:
-      return "e64";
-    case RISCVVSEW::SEW_128:
-      return "e128";
-    case RISCVVSEW::SEW_256:
-      return "e256";
-    case RISCVVSEW::SEW_512:
-      return "e512";
-    case RISCVVSEW::SEW_1024:
-      return "e1024";
-    }
-    llvm_unreachable("Unknown SEW.");
-  }
-
-  static StringRef getLMULStr(RISCVVLMUL Lmul) {
-    switch (Lmul) {
-    case RISCVVLMUL::LMUL_1:
-      return "m1";
-    case RISCVVLMUL::LMUL_2:
-      return "m2";
-    case RISCVVLMUL::LMUL_4:
-      return "m4";
-    case RISCVVLMUL::LMUL_8:
-      return "m8";
-    case RISCVVLMUL::LMUL_F2:
-      return "mf2";
-    case RISCVVLMUL::LMUL_F4:
-      return "mf4";
-    case RISCVVLMUL::LMUL_F8:
-      return "mf8";
-    }
-    llvm_unreachable("Unknown LMUL.");
-  }
-
   unsigned getVType() const {
     assert(Kind == KindTy::VType && "Invalid type access!");
     return VType.Val;
   }
 
   void print(raw_ostream &OS) const override {
+    auto RegName = [](unsigned Reg) {
+      if (Reg)
+        return RISCVInstPrinter::getRegisterName(Reg);
+      else
+        return "noreg";
+    };
+
     switch (Kind) {
     case KindTy::Immediate:
       OS << *getImm();
       break;
     case KindTy::Register:
-      OS << "<register x";
-      OS << getReg() << ">";
+      OS << "<register " << RegName(getReg()) << ">";
       break;
     case KindTy::Token:
       OS << "'" << getToken() << "'";
@@ -837,6 +802,7 @@ public:
       OS << "<vtype: ";
       RISCVVType::printVType(getVType(), OS);
       OS << '>';
+      break;
     }
   }
 
@@ -1114,6 +1080,9 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     return generateImmOutOfRangeError(Operands, ErrorInfo, 0, (1 << 4) - 1);
   case Match_InvalidUImm5:
     return generateImmOutOfRangeError(Operands, ErrorInfo, 0, (1 << 5) - 1);
+  case Match_InvalidSImm5:
+    return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 4),
+                                      (1 << 4) - 1);
   case Match_InvalidSImm6:
     return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 5),
                                       (1 << 5) - 1);
@@ -1668,8 +1637,8 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
 
   unsigned VTypeI = RISCVVType::encodeVTYPE(VLMUL, VSEW, TailAgnostic,
                                             MaskAgnostic, Nontemporal);
-
   Operands.push_back(RISCVOperand::createVType(VTypeI, S, isRV64()));
+
   return MatchOperand_Success;
 }
 
@@ -2389,7 +2358,9 @@ bool RISCVAsmParser::validateInstruction(MCInst &Inst,
     unsigned Opcode = Inst.getOpcode();
     if (Opcode == RISCV::VADC_VVM || Opcode == RISCV::VADC_VXM ||
         Opcode == RISCV::VADC_VIM || Opcode == RISCV::VSBC_VVM ||
-        Opcode == RISCV::VSBC_VXM)
+        Opcode == RISCV::VSBC_VXM || Opcode == RISCV::VFMERGE_VFM ||
+        Opcode == RISCV::VMERGE_VIM || Opcode == RISCV::VMERGE_VVM ||
+        Opcode == RISCV::VMERGE_VXM)
       return Error(Loc, "The destination vector register group cannot be V0.");
 
     // Regardless masked or unmasked version, the number of operands is the

@@ -136,6 +136,12 @@ static cl::opt<unsigned> SwitchPeelThreshold(
              "switch statement. A value greater than 100 will void this "
              "optimization"));
 
+// EPI: temporary until we have patterns for vpred.
+// FIXME: Remove
+static cl::opt<bool> DisableVPRedIntrinsics("disable-vpred-sdags", cl::init(false),
+                     cl::desc("Do not create sdags for VPred intrinsics"),
+                     cl::ReallyHidden);
+
 // Limit the width of DAG chains. This is important in general to prevent
 // DAG-based analysis from blowing up. For example, alias analysis and
 // load clustering may not complete in reasonable time. It is difficult to
@@ -6201,7 +6207,10 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     return;
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #include "llvm/IR/VPIntrinsics.def"
-    visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
+    if (!DisableVPRedIntrinsics)
+      visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
+    else
+      visitTargetIntrinsic(I, Intrinsic);
     return;
   case Intrinsic::fmuladd: {
     EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
@@ -9913,14 +9922,6 @@ void SelectionDAGISel::LowerArguments(const Function &F) {
       }
 
       Type *ArgMemTy = nullptr;
-      if (F.getCallingConv() == CallingConv::X86_INTR) {
-        // IA Interrupt passes frame (1st parameter) by value in the stack.
-        if (ArgNo == 0) {
-          Flags.setByVal();
-          // FIXME: Dependence on pointee element type. See bug 46672.
-          ArgMemTy = Arg.getType()->getPointerElementType();
-        }
-      }
       if (Flags.isByVal() || Flags.isInAlloca() || Flags.isPreallocated() ||
           Flags.isByRef()) {
         if (!ArgMemTy)

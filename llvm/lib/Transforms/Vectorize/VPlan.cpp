@@ -149,8 +149,12 @@ VPValue *VPRecipeBase::toVPValue() {
     return V;
   if (auto *V = dyn_cast<VPReplicateRecipe>(this))
     return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
-    return V;
+  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this)) {
+    if (!V->isStore())
+      return V->getVPValue();
+    else
+      return nullptr;
+  }
   if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
     return V;
   if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
@@ -179,8 +183,12 @@ const VPValue *VPRecipeBase::toVPValue() const {
     return V;
   if (auto *V = dyn_cast<VPReplicateRecipe>(this))
     return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
-    return V;
+  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this)) {
+    if (!V->isStore())
+      return V->getVPValue();
+    else
+      return nullptr;
+  }
   if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
     return V;
   if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
@@ -1141,17 +1149,20 @@ void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPPredicatedWidenMemoryInstructionRecipe::print(
     raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
-  O << "\"PREDICATED-WIDEN " << VPlanIngredient(getUnderlyingInstr());
-  O << ", ";
-  getAddr()->printAsOperand(O, SlotTracker);
-  O << ", ";
+  O << "\"PREDICATED-WIDEN ";
+
+  if (!isStore()) {
+    getVPValue()->printAsOperand(O, SlotTracker);
+    O << " = ";
+  }
+  O << Instruction::getOpcodeName(Ingredient.getOpcode()) << " ";
+
+  printOperands(O, SlotTracker);
+
+  // Improve this.
   VPValue *Mask = getMask();
   if (isOuterMask(Mask))
-    O << "ALL-ONES-MASK";
-  else
-    Mask->printAsOperand(O, SlotTracker);
-  O << ", ";
-  getEVL()->printAsOperand(O, SlotTracker);
+    O << " (ALL-ONES-MASK)";
 }
 
 template void DomTreeBuilder::Calculate<VPDominatorTree>(VPDominatorTree &DT);

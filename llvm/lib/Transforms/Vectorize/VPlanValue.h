@@ -37,6 +37,7 @@ class VPUser;
 class VPRecipeBase;
 class VPPredInstPHIRecipe;
 class VPWidenMemoryInstructionRecipe;
+class VPPredicatedWidenMemoryInstructionRecipe;
 
 // This is the base class of the VPlan Def/Use graph, used for modeling the data
 // flow into, within and out of the VPlan. VPValues can stand for live-ins
@@ -52,6 +53,7 @@ class VPValue {
   friend class VPRecipeBase;
   friend class VPPredInstPHIRecipe;
   friend class VPWidenMemoryInstructionRecipe;
+  friend class VPPredicatedWidenMemoryInstructionRecipe;
 
   const unsigned char SubclassID; ///< Subclass identifier (for isa/dyn_cast).
 
@@ -99,9 +101,9 @@ public:
     VPVWidenCallSC,
     VPVWidenGEPSC,
     VPVWidenSelectSC,
-    VPPredicatedMemoryInstructionSC,
-    VPWidenEVLSC,
-    VPWidenEVLMaskSC,
+    VPVPredicatedMemoryInstructionSC,
+    VPVWidenEVLSC,
+    VPVWidenEVLMaskSC,
   };
 
   VPValue(Value *UV = nullptr, VPDef *Def = nullptr)

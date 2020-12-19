@@ -917,13 +917,16 @@ public:
 };
 
 /// A recipe for widening Call instructions.
-class VPWidenCallRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenCallRecipe : public VPRecipeBase,
+                          public VPDef,
+                          public VPUser,
+                          public VPValue {
 
 public:
   template <typename IterT>
   VPWidenCallRecipe(CallInst &I, iterator_range<IterT> CallArguments)
-      : VPRecipeBase(VPRecipeBase::VPWidenCallSC),
-        VPValue(VPValue::VPVWidenCallSC, &I), VPUser(CallArguments) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenCallSC), VPUser(CallArguments),
+        VPValue(VPValue::VPVWidenCallSC, &I, this) {}
 
   ~VPWidenCallRecipe() override = default;
 
@@ -941,7 +944,10 @@ public:
 };
 
 /// A recipe for widening select instructions.
-class VPWidenSelectRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenSelectRecipe : public VPRecipeBase,
+                            public VPDef,
+                            public VPUser,
+                            public VPValue {
 
   /// Is the condition of the select loop invariant?
   bool InvariantCond;
@@ -950,8 +956,8 @@ public:
   template <typename IterT>
   VPWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands,
                       bool InvariantCond)
-      : VPRecipeBase(VPRecipeBase::VPWidenSelectSC),
-        VPValue(VPValue::VPVWidenSelectSC, &I), VPUser(Operands),
+      : VPRecipeBase(VPRecipeBase::VPWidenSelectSC), VPUser(Operands),
+        VPValue(VPValue::VPVWidenSelectSC, &I, this),
         InvariantCond(InvariantCond) {}
 
   ~VPWidenSelectRecipe() override = default;
@@ -970,21 +976,25 @@ public:
 };
 
 /// A recipe for handling GEP instructions.
-class VPWidenGEPRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenGEPRecipe : public VPRecipeBase,
+                         public VPDef,
+                         public VPUser,
+                         public VPValue {
   bool IsPtrLoopInvariant;
   SmallBitVector IsIndexLoopInvariant;
 
 public:
   template <typename IterT>
   VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands)
-      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPValue(VPWidenGEPSC, GEP),
-        VPUser(Operands), IsIndexLoopInvariant(GEP->getNumIndices(), false) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPUser(Operands),
+        VPValue(VPWidenGEPSC, GEP, this),
+        IsIndexLoopInvariant(GEP->getNumIndices(), false) {}
 
   template <typename IterT>
   VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands,
                    Loop *OrigLoop)
-      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC),
-        VPValue(VPValue::VPVWidenGEPSC, GEP), VPUser(Operands),
+      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPUser(Operands),
+        VPValue(VPValue::VPVWidenGEPSC, GEP, this),
         IsIndexLoopInvariant(GEP->getNumIndices(), false) {
     IsPtrLoopInvariant = OrigLoop->isLoopInvariant(GEP->getPointerOperand());
     for (auto Index : enumerate(GEP->indices()))
@@ -1388,8 +1398,10 @@ public:
 };
 
 class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
-                                                 public VPValue,
+                                                 public VPDef,
                                                  public VPUser {
+  Instruction &Ingredient;
+
   void setMask(VPValue *Mask) {
     if (!Mask)
       return;
@@ -1397,16 +1409,15 @@ class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
   }
 
   bool isMasked() const {
-    return (isa<LoadInst>(getUnderlyingInstr()) && getNumOperands() == 3) ||
-           (isa<StoreInst>(getUnderlyingInstr()) && getNumOperands() == 4);
+    return isStore() ? getNumOperands() == 4 : getNumOperands() == 3;
   }
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, VPValue *EVL)
       : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Load),
-        VPUser({Addr, EVL}) {
+        VPUser({Addr, EVL}), Ingredient(Load) {
+    new VPValue(VPValue::VPVPredicatedMemoryInstructionSC, &Load, this);
     setMask(Mask);
   }
 
@@ -1414,8 +1425,8 @@ public:
                                            VPValue *StoredValue, VPValue *Mask,
                                            VPValue *EVL)
       : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue, EVL}) {
+        VPUser({Addr, StoredValue, EVL}),
+        Ingredient(Store) {
     setMask(Mask);
   }
 
@@ -1441,10 +1452,12 @@ public:
                       : getOperand(getNumOperands() - 1);
   }
 
+  /// Returns true if this recipe is a store.
+  bool isStore() const { return isa<StoreInst>(Ingredient); }
+
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
-    assert(isa<StoreInst>(getUnderlyingInstr()) &&
-           "Stored value only available for store instructions");
+    assert(isStore() && "Stored value only available for store instructions");
     return getOperand(1); // Stored value is the 2nd, mandatory operand.
   }
 
@@ -1492,7 +1505,7 @@ class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
 public:
   VPWidenEVLRecipe()
       : VPRecipeBase(VPRecipeBase::VPWidenEVLSC),
-        VPValue(VPValue::VPWidenEVLSC) {}
+        VPValue(VPValue::VPVWidenEVLSC) {}
   ~VPWidenEVLRecipe() override = default;
 
   /// Return the VPValue representing EVL.
@@ -1527,7 +1540,7 @@ class VPWidenEVLMaskRecipe : public VPRecipeBase,
 public:
   VPWidenEVLMaskRecipe(VPValue *EVL)
       : VPRecipeBase(VPRecipeBase::VPWidenEVLMaskSC),
-        VPValue(VPValue::VPWidenEVLMaskSC), VPUser({EVL}) {}
+        VPValue(VPValue::VPVWidenEVLMaskSC), VPUser({EVL}) {}
   ~VPWidenEVLMaskRecipe() override = default;
 
   /// Return the VPValue representing EVL.

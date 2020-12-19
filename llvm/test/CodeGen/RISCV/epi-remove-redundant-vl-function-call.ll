@@ -2,9 +2,9 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+experimental-v \
 ; RUN:    -verify-machineinstrs -no-epi-remove-redundant-vsetvl \
 ; RUN:    -no-epi-remove-redundant-vsetvl-global  < %s \
-; RUN:    | FileCheck --check-prefix=DISABLED %s
+; RUN:    -epi-pipeline | FileCheck --check-prefix=DISABLED %s
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+a,+c,+experimental-v \
-; RUN:    -verify-machineinstrs < %s | FileCheck %s
+; RUN:    -verify-machineinstrs < %s -epi-pipeline | FileCheck %s
 
 define <vscale x 1 x double> @add1(<vscale x 1 x double>, i64) nounwind {
 ; DISABLED-LABEL: add1:

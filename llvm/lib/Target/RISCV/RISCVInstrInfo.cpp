@@ -149,30 +149,7 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     return;
   }
 
-  // VR->VR, VRM2->VRM2, VRM4->VRM4, VRM8->VRM8
-  if (RISCV::VRRegClass.contains(DstReg, SrcReg) ||
-      RISCV::VRM2RegClass.contains(DstReg, SrcReg) ||
-      RISCV::VRM4RegClass.contains(DstReg, SrcReg) ||
-      RISCV::VRM8RegClass.contains(DstReg, SrcReg)) {
-    unsigned VMVOpcode;
-    if (RISCV::VRRegClass.contains(DstReg, SrcReg))
-      VMVOpcode = RISCV::VMV1R_V;
-    else if (RISCV::VRM2RegClass.contains(DstReg, SrcReg))
-      VMVOpcode = RISCV::PseudoEPIVMV2R_M2;
-    else if (RISCV::VRM4RegClass.contains(DstReg, SrcReg))
-      VMVOpcode = RISCV::PseudoEPIVMV4R_M4;
-    else {
-      assert(RISCV::VRM8RegClass.contains(DstReg, SrcReg));
-      VMVOpcode = RISCV::PseudoEPIVMV8R_M8;
-    }
-
-    // vmv<nf>r.v dest, src
-    BuildMI(MBB, MBBI, DL, get(VMVOpcode), DstReg)
-        .addReg(SrcReg, getKillRegState(KillSrc));
-
-    return;
-  }
-
+  // FIXME: Layout this a bit better.
   // VRM1T2->VRM1T2
   if (RISCV::VRM1T2RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
@@ -223,20 +200,37 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     return;
   }
 
-  // FPR->FPR
+  // FPR->FPR copies and VR->VR copies.
   unsigned Opc;
+  bool IsScalableVector = false;
   if (RISCV::FPR16RegClass.contains(DstReg, SrcReg))
     Opc = RISCV::FSGNJ_H;
   else if (RISCV::FPR32RegClass.contains(DstReg, SrcReg))
     Opc = RISCV::FSGNJ_S;
   else if (RISCV::FPR64RegClass.contains(DstReg, SrcReg))
     Opc = RISCV::FSGNJ_D;
-  else
+  else if (RISCV::VRRegClass.contains(DstReg, SrcReg)) {
+    Opc = RISCV::PseudoVMV1R_V;
+    IsScalableVector = true;
+  } else if (RISCV::VRM2RegClass.contains(DstReg, SrcReg)) {
+    Opc = RISCV::PseudoVMV2R_V;
+    IsScalableVector = true;
+  } else if (RISCV::VRM4RegClass.contains(DstReg, SrcReg)) {
+    Opc = RISCV::PseudoVMV4R_V;
+    IsScalableVector = true;
+  } else if (RISCV::VRM8RegClass.contains(DstReg, SrcReg)) {
+    Opc = RISCV::PseudoVMV8R_V;
+    IsScalableVector = true;
+  } else
     llvm_unreachable("Impossible reg-to-reg copy");
 
-  BuildMI(MBB, MBBI, DL, get(Opc), DstReg)
-      .addReg(SrcReg, getKillRegState(KillSrc))
-      .addReg(SrcReg, getKillRegState(KillSrc));
+  if (IsScalableVector)
+    BuildMI(MBB, MBBI, DL, get(Opc), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc));
+  else
+    BuildMI(MBB, MBBI, DL, get(Opc), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc))
+        .addReg(SrcReg, getKillRegState(KillSrc));
 }
 
 void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
