@@ -338,6 +338,20 @@ let TargetPrefix = "riscv" in {
                     [IntrNoMem]>, RISCVVIntrinsic {
     let ExtendOperand = 2;
   }
+  class RISCVTernaryWideNoMask
+        : Intrinsic< [llvm_anyvector_ty],
+                     [LLVMMatchType<0>, llvm_any_ty, llvm_anyvector_ty,
+                      llvm_anyint_ty],
+                     [IntrNoMem] >, RISCVVIntrinsic {
+    let ExtendOperand = 2;
+  }
+  class RISCVTernaryWideMask
+        : Intrinsic< [llvm_anyvector_ty],
+                     [LLVMMatchType<0>, llvm_any_ty, llvm_anyvector_ty,
+                      LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>, llvm_anyint_ty],
+                     [IntrNoMem]>, RISCVVIntrinsic {
+    let ExtendOperand = 2;
+  }
 
   multiclass RISCVUSLoad {
     def "int_riscv_" # NAME : RISCVUSLoad;
@@ -405,6 +419,10 @@ let TargetPrefix = "riscv" in {
   multiclass RISCVCompare {
     def "int_riscv_" # NAME : RISCVCompareNoMask;
     def "int_riscv_" # NAME # "_mask" : RISCVCompareMask;
+  }
+  multiclass RISCVTernaryWide {
+    def "int_riscv_" # NAME : RISCVTernaryWideNoMask;
+    def "int_riscv_" # NAME # "_mask" : RISCVTernaryWideMask;
   }
 
   defm vle : RISCVUSLoad;
@@ -481,6 +499,11 @@ let TargetPrefix = "riscv" in {
   defm vmadd : RISCVTernaryAAXA;
   defm vnmsub : RISCVTernaryAAXA;
 
+  defm vwmaccu  : RISCVTernaryWide;
+  defm vwmacc   : RISCVTernaryWide;
+  defm vwmaccus : RISCVTernaryWide;
+  defm vwmaccsu : RISCVTernaryWide;
+
   defm vfadd : RISCVBinaryAAX;
   defm vfsub : RISCVBinaryAAX;
   defm vfrsub : RISCVBinaryAAX;
@@ -535,6 +558,11 @@ let TargetPrefix = "riscv" in {
   defm vslideup : RISCVTernaryAAAX;
   defm vslidedown : RISCVTernaryAAAX;
 
+  defm vslide1up : RISCVBinaryAAX;
+  defm vslide1down : RISCVBinaryAAX;
+  defm vfslide1up : RISCVBinaryAAX;
+  defm vfslide1down : RISCVBinaryAAX;
+
   defm vaaddu : RISCVSaturatingBinaryAAX;
   defm vaadd : RISCVSaturatingBinaryAAX;
   defm vasubu : RISCVSaturatingBinaryAAX;
@@ -554,5 +582,4 @@ let TargetPrefix = "riscv" in {
   defm vmfle : RISCVCompare;
   defm vmfgt : RISCVCompare;
   defm vmfge : RISCVCompare;
-
 } // TargetPrefix = "riscv"
