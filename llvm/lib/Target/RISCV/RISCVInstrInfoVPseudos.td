@@ -779,6 +779,14 @@ multiclass VPseudoUnaryV_V_X_I_NoDummyMask {
   }
 }
 
+multiclass VPseudoUnaryV_F_NoDummyMask {
+  foreach m = MxList.m in {
+    let VLMul = m.value in {
+      def "_F_" # m.MX : VPseudoUnaryNoDummyMask<m.vrclass, FPR32>;
+    }
+  }
+}
+
 // The destination EEW is 1.
 // The source EEW is 8, 16, 32, or 64.
 // When the destination EEW is different from source EEW, we need to use
@@ -939,58 +947,6 @@ multiclass VPseudoBinaryM_VV_VX<bit IsFloat = 0> {
 multiclass VPseudoBinaryM_VX_VI {
   defm "" : VPseudoBinaryM_VX</*IsFloat=*/0>;
   defm "" : VPseudoBinaryM_VI;
-}
-
-//===----------------------------------------------------------------------===//
-// Helpers to define the SDNode patterns.
-//===----------------------------------------------------------------------===//
-
-multiclass VPatUSLoadStoreSDNode<LLVMType type,
-                                 LLVMType mask_type,
-                                 int sew,
-                                 LMULInfo vlmul,
-                                 RegisterClass reg_rs1,
-                                 VReg reg_class>
-{
-  defvar load_instr = !cast<Instruction>("PseudoVLE"#sew#"_V_"#vlmul.MX);
-  defvar store_instr = !cast<Instruction>("PseudoVSE"#sew#"_V_"#vlmul.MX);
-  // Load
-  def : Pat<(type (load reg_rs1:$rs1)),
-            (load_instr reg_rs1:$rs1, VLMax, sew)>;
-  // Store
-  def : Pat<(store type:$rs2, reg_rs1:$rs1),
-            (store_instr reg_class:$rs2, reg_rs1:$rs1, VLMax, sew)>;
-}
-
-multiclass VPatUSLoadStoreSDNodes<RegisterClass reg_rs1> {
-  foreach vti = AllVectors in
-    defm "" : VPatUSLoadStoreSDNode<vti.Vector, vti.Mask, vti.SEW, vti.LMul,
-                                    reg_rs1, vti.RegClass>;
-}
-
-class VPatBinarySDNode<SDNode vop,
-                       string instruction_name,
-                       ValueType result_type,
-                       ValueType op_type,
-                       ValueType mask_type,
-                       int sew,
-                       LMULInfo vlmul,
-                       VReg RetClass,
-                       VReg op_reg_class> :
-    Pat<(result_type (vop
-                     (op_type op_reg_class:$rs1),
-                     (op_type op_reg_class:$rs2))),
-                     (!cast<Instruction>(instruction_name#"_VV_"# vlmul.MX)
-                     op_reg_class:$rs1,
-                     op_reg_class:$rs2,
-                     VLMax, sew)>;
-
-multiclass VPatBinarySDNode<SDNode vop, string instruction_name>
-{
-  foreach vti = AllIntegerVectors in
-    def : VPatBinarySDNode<vop, instruction_name,
-                           vti.Vector, vti.Vector, vti.Mask, vti.SEW,
-                           vti.LMul, vti.RegClass, vti.RegClass>;
 }
 
 //===----------------------------------------------------------------------===//
@@ -1996,11 +1952,15 @@ defm PseudoVMFGT       : VPseudoBinaryM_VX</*IsFloat=*/1>;
 defm PseudoVMFGE       : VPseudoBinaryM_VX</*IsFloat=*/1>;
 
 //===----------------------------------------------------------------------===//
+// 14.14. Vector Floating-Point Move Instruction
+//===----------------------------------------------------------------------===//
+defm PseudoVFMV_V      : VPseudoUnaryV_F_NoDummyMask;
+
+//===----------------------------------------------------------------------===//
 // 14.15. Vector Floating-Point Merge Instruction
 //===----------------------------------------------------------------------===//
 defm PseudoVFMERGE     : VPseudoBinaryV_XM</*CarryOut =*/0,/*CarryIn =*/true,
                                            /*Constraint =*/"", /*IsFloat=*/true>;
-
 } // Predicates = [HasStdExtV, HasStdExtF]
 
 //===----------------------------------------------------------------------===//
@@ -2071,15 +2031,6 @@ let Predicates = [HasStdExtV, HasStdExtF] in {
 // Patterns.
 //===----------------------------------------------------------------------===//
 let Predicates = [HasStdExtV] in {
-
-// Whole-register vector patterns.
-
-// 7.4. Vector Unit-Stride Instructions
-defm "" : VPatUSLoadStoreSDNodes<GPR>;
-defm "" : VPatUSLoadStoreSDNodes<AddrFI>;
-
-// 12.1. Vector Single-Width Integer Add and Subtract
-defm "" : VPatBinarySDNode<add, "PseudoVADD">;
 
 //===----------------------------------------------------------------------===//
 // 7. Vector Loads and Stores
@@ -2415,6 +2366,23 @@ defm "" : VPatBinaryM_VX<"int_riscv_vmfgt", "PseudoVMFGT", AllFloatVectors>;
 defm "" : VPatBinaryM_VX<"int_riscv_vmfge", "PseudoVMFGE", AllFloatVectors>;
 
 //===----------------------------------------------------------------------===//
+// 14.14. Vector Floating-Point Move Instruction
+//===----------------------------------------------------------------------===//
+foreach fvti = AllFloatVectors in {
+  // If we're splatting fpimm0, use vmv.v.x vd, x0.
+  def : Pat<(fvti.Vector (int_riscv_vfmv_v_f
+                         (fvti.Scalar (fpimm0)), GPR:$vl)),
+            (!cast<Instruction>("PseudoVMV_V_X_"#fvti.LMul.MX)
+             X0, (NoX0 GPR:$vl), fvti.SEW)>;
+
+  def : Pat<(fvti.Vector (int_riscv_vfmv_v_f
+                         (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
+            (!cast<Instruction>("PseudoVFMV_V_F_"#fvti.LMul.MX)
+             ToFPR32<fvti.Scalar, fvti.ScalarRegClass, "rs2">.ret,
+             (NoX0 GPR:$vl), fvti.SEW)>;
+}
+
+//===----------------------------------------------------------------------===//
 // 14.15. Vector Floating-Point Merge Instruction
 //===----------------------------------------------------------------------===//
 // We can use vmerge.vvm to support vector-vector vfmerge.
@@ -2491,3 +2459,6 @@ let Predicates = [HasStdExtV, HasStdExtF] in {
   defm "" : VPatBinaryV_VX<"int_riscv_vfslide1up", "PseudoVFSLIDE1UP", AllFloatVectors>;
   defm "" : VPatBinaryV_VX<"int_riscv_vfslide1down", "PseudoVFSLIDE1DOWN", AllFloatVectors>;
 } // Predicates = [HasStdExtV, HasStdExtF]
+
+// Include the non-intrinsic ISel patterns
+include "RISCVInstrInfoVSDPatterns.td"
