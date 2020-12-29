@@ -13,6 +13,7 @@
 
 #include "llvm/Transforms/IPO/IROutliner.h"
 #include "llvm/Analysis/IRSimilarityIdentifier.h"
+#include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/PassManager.h"
@@ -28,6 +29,13 @@
 
 using namespace llvm;
 using namespace IRSimilarity;
+
+// This is a debug option to test small pieces of code to ensure that outlining
+// works correctly.
+static cl::opt<bool> NoCostModel(
+    "ir-outlining-no-cost", cl::init(false), cl::ReallyHidden,
+    cl::desc("Debug option to outline greedily, without restriction that "
+             "calculated benefit outweighs cost"));
 
 /// The OutlinableGroup holds all the overarching information for outlining
 /// a set of regions that are structurally similar to one another, such as the
@@ -65,6 +73,13 @@ struct OutlinableGroup {
   /// The number of input values in \ref ArgumentTypes.  Anything after this
   /// index in ArgumentTypes is an output argument.
   unsigned NumAggregateInputs = 0;
+
+  /// The number of instructions that will be outlined by extracting \ref
+  /// Regions.
+  unsigned Benefit = 0;
+  /// The number of added instructions needed for the outlining of the \ref
+  /// Regions.
+  unsigned Cost = 0;
 
   /// For the \ref Regions, we look at every Value.  If it is a constant,
   /// we check whether it is the same in Region.
@@ -202,6 +217,7 @@ constantMatches(Value *V, unsigned GVN,
   DenseMap<unsigned, Constant *>::iterator GVNToConstantIt;
   bool Inserted;
 
+
   // If we have a constant, try to make a new entry in the GVNToConstant.
   std::tie(GVNToConstantIt, Inserted) =
       GVNToConstant.insert(std::make_pair(GVN, CST));
@@ -211,6 +227,40 @@ constantMatches(Value *V, unsigned GVN,
     return true;
 
   return false;
+}
+
+unsigned OutlinableRegion::getBenefit(TargetTransformInfo &TTI) {
+  InstructionCost Benefit(0);
+
+  // Estimate the benefit of outlining a specific sections of the program.  We
+  // delegate mostly this task to the TargetTransformInfo so that if the target
+  // has specific changes, we can have a more accurate estimate.
+
+  // However, getInstructionCost delegates the code size calculation for
+  // arithmetic instructions to getArithmeticInstrCost in
+  // include/Analysis/TargetTransformImpl.h, where it always estimates that the
+  // code size for a division and remainder instruction to be equal to 4, and
+  // everything else to 1.  This is not an accurate representation of the
+  // division instruction for targets that have a native division instruction.
+  // To be overly conservative, we only add 1 to the number of instructions for
+  // each division instruction.
+  for (Instruction &I : *StartBB) {
+    switch (I.getOpcode()) {
+    case Instruction::FDiv:
+    case Instruction::FRem:
+    case Instruction::SDiv:
+    case Instruction::SRem:
+    case Instruction::UDiv:
+    case Instruction::URem:
+      Benefit += 1;
+      break;
+    default:
+      Benefit += TTI.getInstructionCost(&I, TargetTransformInfo::TCK_CodeSize);
+      break;
+    }
+  }
+
+  return *Benefit.getValue();
 }
 
 /// Find whether \p Region matches the global value numbering to Constant
@@ -279,7 +329,7 @@ void OutlinableGroup::findSameConstants(DenseSet<unsigned> &NotSame) {
 }
 
 void OutlinableGroup::collectGVNStoreSets(Module &M) {
-  for (OutlinableRegion *OS : Regions) 
+  for (OutlinableRegion *OS : Regions)
     OutputGVNCombinations.insert(OS->GVNStores);
 
   // We are adding an extracted argument to decide between which output path
@@ -874,7 +924,7 @@ findDuplicateOutputBlock(BasicBlock *OutputBB,
       MatchingNum++;
       continue;
     }
-    
+
     WrongSize = false;
     BasicBlock::iterator NIt = OutputBB->begin();
     for (Instruction &I : *CompBB) {
@@ -888,7 +938,7 @@ findDuplicateOutputBlock(BasicBlock *OutputBB,
 
       NIt++;
     }
-    if (!WrongInst && !WrongSize) 
+    if (!WrongInst && !WrongSize)
       return MatchingNum;
 
     MatchingNum++;
@@ -963,7 +1013,7 @@ alignOutputBlockWithAggFunc(OutlinableGroup &OG, OutlinableRegion &Region,
     Region.OutputBlockNum = -1;
     OutputBB->eraseFromParent();
     return;
-  } 
+  }
 
   // Determine is there is a duplicate block.
   Optional<unsigned> MatchingBB =
@@ -1189,6 +1239,152 @@ void IROutliner::pruneIncompatibleRegions(
   }
 }
 
+unsigned IROutliner::findBenefitFromAllRegions(OutlinableGroup &CurrentGroup) {
+  unsigned RegionBenefit = 0;
+  for (OutlinableRegion *Region : CurrentGroup.Regions) {
+    TargetTransformInfo &TTI = getTTI(*Region->StartBB->getParent());
+    // We add the number of instructions in the region to the benefit as an
+    // estimate as to how much will be removed.
+    RegionBenefit += Region->getBenefit(TTI);
+    LLVM_DEBUG(dbgs() << "Adding: " << RegionBenefit
+                      << " saved instructions to overfall benefit.\n");
+    CurrentGroup.Benefit += RegionBenefit;
+  }
+
+  return RegionBenefit;
+}
+
+unsigned IROutliner::findCostOutputReloads(OutlinableGroup &CurrentGroup) {
+  unsigned OverallCost = 0;
+  for (OutlinableRegion *Region : CurrentGroup.Regions) {
+    TargetTransformInfo &TTI = getTTI(*Region->StartBB->getParent());
+
+    // Each output incurs a load after the call, so we add that to the cost.
+    for (unsigned OutputGVN : Region->GVNStores) {
+      Optional<Value *> OV = Region->Candidate->fromGVN(OutputGVN);
+      assert(OV.hasValue() && "Could not find value for GVN?");
+      Value *V = OV.getValue();
+      unsigned LoadCost =
+          TTI.getMemoryOpCost(Instruction::Load, V->getType(), Align(1), 0,
+                              TargetTransformInfo::TCK_CodeSize);
+
+      LLVM_DEBUG(dbgs() << "Adding: " << LoadCost
+                        << " instructions to cost for output of type "
+                        << *V->getType() << "\n");
+      OverallCost += LoadCost;
+    }
+  }
+
+  return OverallCost;
+}
+
+/// Find the extra instructions needed to handle any output values for the
+/// region.
+///
+/// \param [in] M - The Module to outline from.
+/// \param [in] CurrentGroup - The collection of OutlinableRegions to analyze.
+/// \param [in] TTI - The TargetTransformInfo used to collect information for
+/// new instruction costs.
+/// \returns the additional cost to handle the outputs.
+static unsigned findCostForOutputBlocks(Module &M,
+                                        OutlinableGroup &CurrentGroup,
+                                        TargetTransformInfo &TTI) {
+  unsigned OutputCost = 0;
+
+  for (const ArrayRef<unsigned> &OutputUse :
+       CurrentGroup.OutputGVNCombinations) {
+    IRSimilarityCandidate &Candidate = *CurrentGroup.Regions[0]->Candidate;
+    for (unsigned GVN : OutputUse) {
+      Optional<Value *> OV = Candidate.fromGVN(GVN);
+      assert(OV.hasValue() && "Could not find value for GVN?");
+      Value *V = OV.getValue();
+      unsigned StoreCost =
+          TTI.getMemoryOpCost(Instruction::Load, V->getType(), Align(1), 0,
+                              TargetTransformInfo::TCK_CodeSize);
+
+      // An instruction cost is added for each store set that needs to occur for
+      // various output combinations inside the function, plus a branch to
+      // return to the exit block.
+      LLVM_DEBUG(dbgs() << "Adding: " << StoreCost
+                        << " instructions to cost for output of type "
+                        << *V->getType() << "\n");
+      OutputCost += StoreCost;
+    }
+
+    unsigned BranchCost =
+        TTI.getCFInstrCost(Instruction::Br, TargetTransformInfo::TCK_CodeSize);
+    LLVM_DEBUG(dbgs() << "Adding " << BranchCost << " to the current cost for"
+                      << " a branch instruction\n");
+    OutputCost += BranchCost;
+  }
+
+  // If there is more than one output scheme, we must have a comparison and
+  // branch for each different item in the switch statement.
+  if (CurrentGroup.OutputGVNCombinations.size() > 1) {
+    unsigned ComparisonCost = TTI.getCmpSelInstrCost(
+        Instruction::ICmp, Type::getInt32Ty(M.getContext()),
+        Type::getInt32Ty(M.getContext()), CmpInst::BAD_ICMP_PREDICATE,
+        TargetTransformInfo::TCK_CodeSize);
+    unsigned BranchCost =
+        TTI.getCFInstrCost(Instruction::Br, TargetTransformInfo::TCK_CodeSize);
+
+    unsigned DifferentBlocks = CurrentGroup.OutputGVNCombinations.size();
+    unsigned TotalCost = ComparisonCost * BranchCost * DifferentBlocks;
+
+    LLVM_DEBUG(dbgs() << "Adding: " << TotalCost
+                      << " instructions for each switch case for each different"
+                      << " output path in a function\n");
+    OutputCost += TotalCost;
+  }
+
+  return OutputCost;
+}
+
+void IROutliner::findCostBenefit(Module &M, OutlinableGroup &CurrentGroup) {
+  unsigned RegionBenefit = findBenefitFromAllRegions(CurrentGroup);
+  CurrentGroup.Benefit += RegionBenefit;
+  LLVM_DEBUG(dbgs() << "Current Benefit: " << CurrentGroup.Benefit << "\n");
+
+  unsigned OutputReloadCost = findCostOutputReloads(CurrentGroup);
+  CurrentGroup.Cost += OutputReloadCost;
+  LLVM_DEBUG(dbgs() << "Current Cost: " << CurrentGroup.Cost << "\n");
+
+  unsigned AverageRegionBenefit = RegionBenefit / CurrentGroup.Regions.size();
+  unsigned OverallArgumentNum = CurrentGroup.ArgumentTypes.size();
+  unsigned NumRegions = CurrentGroup.Regions.size();
+  TargetTransformInfo &TTI =
+      getTTI(*CurrentGroup.Regions[0]->Candidate->getFunction());
+
+  // We add one region to the cost once, to account for the instructions added
+  // inside of the newly created function.
+  LLVM_DEBUG(dbgs() << "Adding: " << AverageRegionBenefit
+                    << " instructions to cost for body of new function.\n");
+  CurrentGroup.Cost += AverageRegionBenefit;
+  LLVM_DEBUG(dbgs() << "Current Cost: " << CurrentGroup.Cost << "\n");
+
+  // For each argument, we must add an instruction for loading the argument
+  // out of the register and into a value inside of the newly outlined function.
+  LLVM_DEBUG(dbgs() << "Adding: " << OverallArgumentNum
+                    << " instructions to cost for each argument in the new"
+                    << " function.\n");
+  CurrentGroup.Cost += 2 * OverallArgumentNum * TargetTransformInfo::TCC_Basic;
+  LLVM_DEBUG(dbgs() << "Current Cost: " << CurrentGroup.Cost << "\n");
+
+  // Each argument needs to either be loaded into a register or onto the stack.
+  // Some arguments will only be loaded into the stack once the argument
+  // registers are filled.
+  LLVM_DEBUG(dbgs() << "Adding: " << OverallArgumentNum
+                    << " instructions to cost for each argument in the new"
+                    << " function " << NumRegions << " times for the "
+                    << "needed argument handling at the call site.\n");
+  CurrentGroup.Cost +=
+      2 * OverallArgumentNum * TargetTransformInfo::TCC_Basic * NumRegions;
+  LLVM_DEBUG(dbgs() << "Current Cost: " << CurrentGroup.Cost << "\n");
+
+  CurrentGroup.Cost += findCostForOutputBlocks(M, CurrentGroup, TTI);
+  LLVM_DEBUG(dbgs() << "Current Cost: " << CurrentGroup.Cost << "\n");
+}
+
 void IROutliner::updateOutputMapping(OutlinableRegion &Region,
                                      ArrayRef<Value *> Outputs,
                                      LoadInst *LI) {
@@ -1348,6 +1544,42 @@ unsigned IROutliner::doOutline(Module &M) {
 
     CurrentGroup.collectGVNStoreSets(M);
 
+    if (CostModel)
+      findCostBenefit(M, CurrentGroup);
+
+    // If we are adhering to the cost model, reattach all the candidates
+    if (CurrentGroup.Cost >= CurrentGroup.Benefit && CostModel) {
+      for (OutlinableRegion *OS : CurrentGroup.Regions)
+        OS->reattachCandidate();
+      OptimizationRemarkEmitter &ORE = getORE(
+          *CurrentGroup.Regions[0]->Candidate->getFunction());
+      ORE.emit([&]() {
+        IRSimilarityCandidate *C = CurrentGroup.Regions[0]->Candidate;
+        OptimizationRemarkMissed R(DEBUG_TYPE, "WouldNotDecreaseSize",
+                                   C->frontInstruction());
+        R << "did not outline "
+          << ore::NV(std::to_string(CurrentGroup.Regions.size()))
+          << " regions due to estimated increase of "
+          << ore::NV("InstructionIncrease",
+                     std::to_string(static_cast<int>(CurrentGroup.Cost -
+                                                     CurrentGroup.Benefit)))
+          << " instructions at locations ";
+        interleave(
+            CurrentGroup.Regions.begin(), CurrentGroup.Regions.end(),
+            [&R](OutlinableRegion *Region) {
+              R << ore::NV(
+                  "DebugLoc",
+                  Region->Candidate->frontInstruction()->getDebugLoc());
+            },
+            [&R]() { R << " "; });
+        return R;
+      });
+      continue;
+    }
+
+    LLVM_DEBUG(dbgs() << "Outlining regions with cost " << CurrentGroup.Cost
+                      << " and benefit " << CurrentGroup.Benefit << "\n");
+
     // Create functions out of all the sections, and mark them as outlined.
     OutlinedRegions.clear();
     for (OutlinableRegion *OS : CurrentGroup.Regions) {
@@ -1362,10 +1594,34 @@ unsigned IROutliner::doOutline(Module &M) {
       }
     }
 
+    LLVM_DEBUG(dbgs() << "Outlined " << OutlinedRegions.size()
+                      << " with benefit " << CurrentGroup.Benefit
+                      << " and cost " << CurrentGroup.Cost << "\n");
+
     CurrentGroup.Regions = std::move(OutlinedRegions);
 
     if (CurrentGroup.Regions.empty())
       continue;
+
+    OptimizationRemarkEmitter &ORE =
+        getORE(*CurrentGroup.Regions[0]->Call->getFunction());
+    ORE.emit([&]() {
+      IRSimilarityCandidate *C = CurrentGroup.Regions[0]->Candidate;
+      OptimizationRemark R(DEBUG_TYPE, "Outlined", C->front()->Inst);
+      R << "outlined " << ore::NV(std::to_string(CurrentGroup.Regions.size()))
+        << " regions with decrease of "
+        << ore::NV("Benefit", std::to_string(static_cast<int>(
+                                  CurrentGroup.Benefit - CurrentGroup.Cost)))
+        << " instructions at locations ";
+      interleave(
+          CurrentGroup.Regions.begin(), CurrentGroup.Regions.end(),
+          [&R](OutlinableRegion *Region) {
+            R << ore::NV("DebugLoc",
+                         Region->Candidate->frontInstruction()->getDebugLoc());
+          },
+          [&R]() { R << " "; });
+      return R;
+    });
 
     deduplicateExtractedSections(M, CurrentGroup, FuncsToRemove,
                                  OutlinedFunctionNum);
@@ -1377,7 +1633,11 @@ unsigned IROutliner::doOutline(Module &M) {
   return OutlinedFunctionNum;
 }
 
-bool IROutliner::run(Module &M) { return doOutline(M) > 0; }
+bool IROutliner::run(Module &M) {
+  CostModel = !NoCostModel;
+
+  return doOutline(M) > 0;
+}
 
 // Pass Manager Boilerplate
 class IROutlinerLegacyPass : public ModulePass {
@@ -1388,6 +1648,7 @@ public:
   }
 
   void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<OptimizationRemarkEmitterWrapperPass>();
     AU.addRequired<TargetTransformInfoWrapperPass>();
     AU.addRequired<IRSimilarityIdentifierWrapperPass>();
   }
@@ -1399,6 +1660,12 @@ bool IROutlinerLegacyPass::runOnModule(Module &M) {
   if (skipModule(M))
     return false;
 
+  std::unique_ptr<OptimizationRemarkEmitter> ORE;
+  auto GORE = [&ORE](Function &F) -> OptimizationRemarkEmitter & {
+    ORE.reset(new OptimizationRemarkEmitter(&F));
+    return *ORE.get();
+  };
+
   auto GTTI = [this](Function &F) -> TargetTransformInfo & {
     return this->getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
   };
@@ -1407,7 +1674,7 @@ bool IROutlinerLegacyPass::runOnModule(Module &M) {
     return this->getAnalysis<IRSimilarityIdentifierWrapperPass>().getIRSI();
   };
 
-  return IROutliner(GTTI, GIRSI).run(M);
+  return IROutliner(GTTI, GIRSI, GORE).run(M);
 }
 
 PreservedAnalyses IROutlinerPass::run(Module &M, ModuleAnalysisManager &AM) {
@@ -1423,7 +1690,14 @@ PreservedAnalyses IROutlinerPass::run(Module &M, ModuleAnalysisManager &AM) {
     return AM.getResult<IRSimilarityAnalysis>(M);
   };
 
-  if (IROutliner(GTTI, GIRSI).run(M))
+  std::unique_ptr<OptimizationRemarkEmitter> ORE;
+  std::function<OptimizationRemarkEmitter &(Function &)> GORE =
+      [&ORE](Function &F) -> OptimizationRemarkEmitter & {
+    ORE.reset(new OptimizationRemarkEmitter(&F));
+    return *ORE.get();
+  };
+
+  if (IROutliner(GTTI, GIRSI, GORE).run(M))
     return PreservedAnalyses::none();
   return PreservedAnalyses::all();
 }
@@ -1432,6 +1706,7 @@ char IROutlinerLegacyPass::ID = 0;
 INITIALIZE_PASS_BEGIN(IROutlinerLegacyPass, "iroutliner", "IR Outliner", false,
                       false)
 INITIALIZE_PASS_DEPENDENCY(IRSimilarityIdentifierWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(OptimizationRemarkEmitterWrapperPass)
 INITIALIZE_PASS_DEPENDENCY(TargetTransformInfoWrapperPass)
 INITIALIZE_PASS_END(IROutlinerLegacyPass, "iroutliner", "IR Outliner", false,
                     false)
