@@ -63,7 +63,6 @@ static cl::opt<bool> ForceReductionIntrinsic(
 
 static const char *LLVMLoopDisableNonforced = "llvm.loop.disable_nonforced";
 static const char *LLVMLoopDisableLICM = "llvm.licm.disable";
-static const char *LLVMLoopMustProgress = "llvm.loop.mustprogress";
 
 bool llvm::formDedicatedExitBlocks(Loop *L, DominatorTree *DT, LoopInfo *LI,
                                    MemorySSAUpdater *MSSAU,
@@ -420,10 +419,6 @@ bool llvm::hasDisableLICMTransformsHint(const Loop *L) {
   return getBooleanLoopAttribute(L, LLVMLoopDisableLICM);
 }
 
-bool llvm::hasMustProgress(const Loop *L) {
-  return getBooleanLoopAttribute(L, LLVMLoopMustProgress);
-}
-
 TransformationMode llvm::hasUnrollTransformation(Loop *L) {
   if (getBooleanLoopAttribute(L, "llvm.loop.unroll.disable"))
     return TM_SuppressedByUser;
@@ -594,7 +589,6 @@ void llvm::deleteDeadLoop(Loop *L, DominatorTree *DT, ScalarEvolution *SE,
   IRBuilder<> Builder(OldBr);
 
   auto *ExitBlock = L->getUniqueExitBlock();
-  DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
   if (ExitBlock) {
     assert(ExitBlock && "Should have a unique exit block!");
     assert(L->hasDedicatedExits() && "Loop should have dedicated exits!");
@@ -626,6 +620,7 @@ void llvm::deleteDeadLoop(Loop *L, DominatorTree *DT, ScalarEvolution *SE,
              "Should have exactly one value and that's from the preheader!");
     }
 
+    DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
     if (DT) {
       DTU.applyUpdates({{DominatorTree::Insert, Preheader, ExitBlock}});
       if (MSSA) {
@@ -641,26 +636,25 @@ void llvm::deleteDeadLoop(Loop *L, DominatorTree *DT, ScalarEvolution *SE,
     Builder.CreateBr(ExitBlock);
     // Remove the old branch.
     Preheader->getTerminator()->eraseFromParent();
+
+    if (DT) {
+      DTU.applyUpdates({{DominatorTree::Delete, Preheader, L->getHeader()}});
+      if (MSSA) {
+        MSSAU->applyUpdates(
+            {{DominatorTree::Delete, Preheader, L->getHeader()}}, *DT);
+        SmallSetVector<BasicBlock *, 8> DeadBlockSet(L->block_begin(),
+                                                     L->block_end());
+        MSSAU->removeBlocks(DeadBlockSet);
+        if (VerifyMemorySSA)
+          MSSA->verifyMemorySSA();
+      }
+    }
   } else {
     assert(L->hasNoExitBlocks() &&
            "Loop should have either zero or one exit blocks.");
-
     Builder.SetInsertPoint(OldBr);
     Builder.CreateUnreachable();
     Preheader->getTerminator()->eraseFromParent();
-  }
-
-  if (DT) {
-    DTU.applyUpdates({{DominatorTree::Delete, Preheader, L->getHeader()}});
-    if (MSSA) {
-      MSSAU->applyUpdates({{DominatorTree::Delete, Preheader, L->getHeader()}},
-                          *DT);
-      SmallSetVector<BasicBlock *, 8> DeadBlockSet(L->block_begin(),
-                                                   L->block_end());
-      MSSAU->removeBlocks(DeadBlockSet);
-      if (VerifyMemorySSA)
-        MSSA->verifyMemorySSA();
-    }
   }
 
   // Use a map to unique and a vector to guarantee deterministic ordering.
@@ -874,29 +868,28 @@ bool llvm::hasIterationCountInvariantInParent(Loop *InnerLoop,
   return true;
 }
 
-Value *llvm::createMinMaxOp(IRBuilderBase &Builder,
-                            RecurrenceDescriptor::MinMaxRecurrenceKind RK,
-                            Value *Left, Value *Right) {
+Value *llvm::createMinMaxOp(IRBuilderBase &Builder, RecurKind RK, Value *Left,
+                            Value *Right) {
   CmpInst::Predicate P = CmpInst::ICMP_NE;
   switch (RK) {
   default:
     llvm_unreachable("Unknown min/max recurrence kind");
-  case RecurrenceDescriptor::MRK_UIntMin:
+  case RecurKind::UMin:
     P = CmpInst::ICMP_ULT;
     break;
-  case RecurrenceDescriptor::MRK_UIntMax:
+  case RecurKind::UMax:
     P = CmpInst::ICMP_UGT;
     break;
-  case RecurrenceDescriptor::MRK_SIntMin:
+  case RecurKind::SMin:
     P = CmpInst::ICMP_SLT;
     break;
-  case RecurrenceDescriptor::MRK_SIntMax:
+  case RecurKind::SMax:
     P = CmpInst::ICMP_SGT;
     break;
-  case RecurrenceDescriptor::MRK_FloatMin:
+  case RecurKind::FMin:
     P = CmpInst::FCMP_OLT;
     break;
-  case RecurrenceDescriptor::MRK_FloatMax:
+  case RecurKind::FMax:
     P = CmpInst::FCMP_OGT;
     break;
   }
@@ -913,11 +906,9 @@ Value *llvm::createMinMaxOp(IRBuilderBase &Builder,
 }
 
 // Helper to generate an ordered reduction.
-Value *
-llvm::getOrderedReduction(IRBuilderBase &Builder, Value *Acc, Value *Src,
-                          unsigned Op,
-                          RecurrenceDescriptor::MinMaxRecurrenceKind MinMaxKind,
-                          ArrayRef<Value *> RedOps) {
+Value *llvm::getOrderedReduction(IRBuilderBase &Builder, Value *Acc, Value *Src,
+                                 unsigned Op, RecurKind RdxKind,
+                                 ArrayRef<Value *> RedOps) {
   unsigned VF = cast<FixedVectorType>(Src->getType())->getNumElements();
 
   // Extract and apply reduction ops in ascending order:
@@ -931,9 +922,9 @@ llvm::getOrderedReduction(IRBuilderBase &Builder, Value *Acc, Value *Src,
       Result = Builder.CreateBinOp((Instruction::BinaryOps)Op, Result, Ext,
                                    "bin.rdx");
     } else {
-      assert(MinMaxKind != RecurrenceDescriptor::MRK_Invalid &&
+      assert(RecurrenceDescriptor::isMinMaxRecurrenceKind(RdxKind) &&
              "Invalid min/max");
-      Result = createMinMaxOp(Builder, MinMaxKind, Result, Ext);
+      Result = createMinMaxOp(Builder, RdxKind, Result, Ext);
     }
 
     if (!RedOps.empty())
@@ -944,10 +935,9 @@ llvm::getOrderedReduction(IRBuilderBase &Builder, Value *Acc, Value *Src,
 }
 
 // Helper to generate a log2 shuffle reduction.
-Value *
-llvm::getShuffleReduction(IRBuilderBase &Builder, Value *Src, unsigned Op,
-                          RecurrenceDescriptor::MinMaxRecurrenceKind MinMaxKind,
-                          ArrayRef<Value *> RedOps) {
+Value *llvm::getShuffleReduction(IRBuilderBase &Builder, Value *Src,
+                                 unsigned Op, RecurKind RdxKind,
+                                 ArrayRef<Value *> RedOps) {
   unsigned VF = cast<FixedVectorType>(Src->getType())->getNumElements();
   // VF is a power of 2 so we can emit the reduction using log2(VF) shuffles
   // and vector ops, reducing the set of values being computed by half each
@@ -971,9 +961,9 @@ llvm::getShuffleReduction(IRBuilderBase &Builder, Value *Src, unsigned Op,
       TmpVec = Builder.CreateBinOp((Instruction::BinaryOps)Op, TmpVec, Shuf,
                                    "bin.rdx");
     } else {
-      assert(MinMaxKind != RecurrenceDescriptor::MRK_Invalid &&
+      assert(RecurrenceDescriptor::isMinMaxRecurrenceKind(RdxKind) &&
              "Invalid min/max");
-      TmpVec = createMinMaxOp(Builder, MinMaxKind, TmpVec, Shuf);
+      TmpVec = createMinMaxOp(Builder, RdxKind, TmpVec, Shuf);
     }
     if (!RedOps.empty())
       propagateIRFlags(TmpVec, RedOps);
@@ -987,16 +977,14 @@ llvm::getShuffleReduction(IRBuilderBase &Builder, Value *Src, unsigned Op,
   return Builder.CreateExtractElement(TmpVec, Builder.getInt32(0));
 }
 
-/// Create a simple vector reduction specified by an opcode and some
-/// flags (if generating min/max reductions).
-Value *llvm::createSimpleTargetReduction(
-    IRBuilderBase &Builder, const TargetTransformInfo *TTI, unsigned Opcode,
-    Value *Src, RecurrenceDescriptor::MinMaxRecurrenceKind MinMaxKind,
-    ArrayRef<Value *> RedOps) {
+Value *llvm::createSimpleTargetReduction(IRBuilderBase &Builder,
+                                         const TargetTransformInfo *TTI,
+                                         unsigned Opcode, Value *Src,
+                                         RecurKind RdxKind,
+                                         ArrayRef<Value *> RedOps) {
   auto *SrcVTy = cast<VectorType>(Src->getType());
 
   std::function<Value *()> BuildFunc;
-  using RD = RecurrenceDescriptor;
   switch (Opcode) {
   case Instruction::Add:
     BuildFunc = [&]() { return Builder.CreateAddReduce(Src); };
@@ -1028,17 +1016,17 @@ Value *llvm::createSimpleTargetReduction(
     };
     break;
   case Instruction::ICmp:
-    switch (MinMaxKind) {
-    case RD::MRK_SIntMax:
+    switch (RdxKind) {
+    case RecurKind::SMax:
       BuildFunc = [&]() { return Builder.CreateIntMaxReduce(Src, true); };
       break;
-    case RD::MRK_SIntMin:
+    case RecurKind::SMin:
       BuildFunc = [&]() { return Builder.CreateIntMinReduce(Src, true); };
       break;
-    case RD::MRK_UIntMax:
+    case RecurKind::UMax:
       BuildFunc = [&]() { return Builder.CreateIntMaxReduce(Src, false); };
       break;
-    case RD::MRK_UIntMin:
+    case RecurKind::UMin:
       BuildFunc = [&]() { return Builder.CreateIntMinReduce(Src, false); };
       break;
     default:
@@ -1046,9 +1034,9 @@ Value *llvm::createSimpleTargetReduction(
     }
     break;
   case Instruction::FCmp:
-    assert((MinMaxKind == RD::MRK_FloatMax || MinMaxKind == RD::MRK_FloatMin) &&
+    assert((RdxKind == RecurKind::FMax || RdxKind == RecurKind::FMin) &&
            "Unexpected min/max reduction type");
-    if (MinMaxKind == RD::MRK_FloatMax)
+    if (RdxKind == RecurKind::FMax)
       BuildFunc = [&]() { return Builder.CreateFPMaxReduce(Src); };
     else
       BuildFunc = [&]() { return Builder.CreateFPMinReduce(Src); };
@@ -1057,32 +1045,26 @@ Value *llvm::createSimpleTargetReduction(
     llvm_unreachable("Unhandled opcode");
   }
   TargetTransformInfo::ReductionFlags RdxFlags;
-  RdxFlags.IsMaxOp = MinMaxKind == RD::MRK_SIntMax ||
-                     MinMaxKind == RD::MRK_UIntMax ||
-                     MinMaxKind == RD::MRK_FloatMax;
-  RdxFlags.IsSigned =
-      MinMaxKind == RD::MRK_SIntMax || MinMaxKind == RD::MRK_SIntMin;
+  RdxFlags.IsMaxOp = RdxKind == RecurKind::SMax ||
+                     RdxKind == RecurKind::UMax ||
+                     RdxKind == RecurKind::FMax;
+  RdxFlags.IsSigned = RdxKind == RecurKind::SMax || RdxKind == RecurKind::SMin;
   if (ForceReductionIntrinsic ||
       TTI->useReductionIntrinsic(Opcode, Src->getType(), RdxFlags))
     return BuildFunc();
-  return getShuffleReduction(Builder, Src, Opcode, MinMaxKind, RedOps);
+  return getShuffleReduction(Builder, Src, Opcode, RdxKind, RedOps);
 }
 
-/// Create a vector reduction using a given recurrence descriptor.
 Value *llvm::createTargetReduction(IRBuilderBase &B,
                                    const TargetTransformInfo *TTI,
                                    RecurrenceDescriptor &Desc, Value *Src) {
   // TODO: Support in-order reductions based on the recurrence descriptor.
-  using RD = RecurrenceDescriptor;
-
   // All ops in the reduction inherit fast-math-flags from the recurrence
   // descriptor.
   IRBuilderBase::FastMathFlagGuard FMFGuard(B);
   B.setFastMathFlags(Desc.getFastMathFlags());
-
-  RD::MinMaxRecurrenceKind MMKind = Desc.getMinMaxRecurrenceKind();
   return createSimpleTargetReduction(B, TTI, Desc.getRecurrenceBinOp(), Src,
-                                     MMKind);
+                                     Desc.getRecurrenceKind());
 }
 
 void llvm::propagateIRFlags(Value *I, ArrayRef<Value *> VL, Value *OpValue) {
