@@ -1347,7 +1347,7 @@ SDValue SelectionDAG::getConstant(const ConstantInt &Val, const SDLoc &DL,
 
     SmallVector<SDValue, 8> Ops;
     for (unsigned i = 0, e = VT.getVectorNumElements(); i != e; ++i)
-      Ops.insert(Ops.end(), EltParts.begin(), EltParts.end());
+      llvm::append_range(Ops, EltParts);
 
     SDValue V = getNode(ISD::BITCAST, DL, VT, getBuildVector(ViaVecVT, DL, Ops));
     return V;
@@ -8768,7 +8768,7 @@ void SelectionDAG::updateDivergence(SDNode *N) {
     bool IsDivergent = calculateDivergence(N);
     if (N->SDNodeBits.IsDivergent != IsDivergent) {
       N->SDNodeBits.IsDivergent = IsDivergent;
-      Worklist.insert(Worklist.end(), N->use_begin(), N->use_end());
+      llvm::append_range(Worklist, N->uses());
     }
   } while (!Worklist.empty());
 }
@@ -8967,23 +8967,30 @@ void SelectionDAG::AddDbgLabel(SDDbgLabel *DB) {
   DbgInfo->add(DB);
 }
 
-SDValue SelectionDAG::makeEquivalentMemoryOrdering(LoadSDNode *OldLoad,
-                                                   SDValue NewMemOp) {
-  assert(isa<MemSDNode>(NewMemOp.getNode()) && "Expected a memop node");
+SDValue SelectionDAG::makeEquivalentMemoryOrdering(SDValue OldChain,
+                                                   SDValue NewMemOpChain) {
+  assert(isa<MemSDNode>(NewMemOpChain) && "Expected a memop node");
+  assert(NewMemOpChain.getValueType() == MVT::Other && "Expected a token VT");
   // The new memory operation must have the same position as the old load in
   // terms of memory dependency. Create a TokenFactor for the old load and new
   // memory operation and update uses of the old load's output chain to use that
   // TokenFactor.
-  SDValue OldChain = SDValue(OldLoad, 1);
-  SDValue NewChain = SDValue(NewMemOp.getNode(), 1);
-  if (OldChain == NewChain || !OldLoad->hasAnyUseOfValue(1))
-    return NewChain;
+  if (OldChain == NewMemOpChain || OldChain.use_empty())
+    return NewMemOpChain;
 
-  SDValue TokenFactor =
-      getNode(ISD::TokenFactor, SDLoc(OldLoad), MVT::Other, OldChain, NewChain);
+  SDValue TokenFactor = getNode(ISD::TokenFactor, SDLoc(OldChain), MVT::Other,
+                                OldChain, NewMemOpChain);
   ReplaceAllUsesOfValueWith(OldChain, TokenFactor);
-  UpdateNodeOperands(TokenFactor.getNode(), OldChain, NewChain);
+  UpdateNodeOperands(TokenFactor.getNode(), OldChain, NewMemOpChain);
   return TokenFactor;
+}
+
+SDValue SelectionDAG::makeEquivalentMemoryOrdering(LoadSDNode *OldLoad,
+                                                   SDValue NewMemOp) {
+  assert(isa<MemSDNode>(NewMemOp.getNode()) && "Expected a memop node");
+  SDValue OldChain = SDValue(OldLoad, 1);
+  SDValue NewMemOpChain = NewMemOp.getValue(1);
+  return makeEquivalentMemoryOrdering(OldChain, NewMemOpChain);
 }
 
 SDValue SelectionDAG::getSymbolFunctionGlobalAddress(SDValue Op,

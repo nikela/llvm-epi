@@ -389,6 +389,7 @@ std::string tools::getCPUName(const ArgList &Args, const llvm::Triple &T,
     return "";
 
   case llvm::Triple::ppc:
+  case llvm::Triple::ppcle:
   case llvm::Triple::ppc64:
   case llvm::Triple::ppc64le: {
     std::string TargetCPUName = ppc::getPPCTargetCPU(Args);
@@ -1564,7 +1565,7 @@ unsigned tools::getOrCheckAMDGPUCodeObjectVersion(
     const Driver &D, const llvm::opt::ArgList &Args, bool Diagnose) {
   const unsigned MinCodeObjVer = 2;
   const unsigned MaxCodeObjVer = 4;
-  unsigned CodeObjVer = 4;
+  unsigned CodeObjVer = 3;
 
   // Emit warnings for legacy options even if they are overridden.
   if (Diagnose) {

@@ -12,10 +12,10 @@
 
 #include "mlir/Target/SPIRV/Serialization.h"
 
-#include "mlir/Dialect/SPIRV/SPIRVAttributes.h"
-#include "mlir/Dialect/SPIRV/SPIRVDialect.h"
-#include "mlir/Dialect/SPIRV/SPIRVOps.h"
-#include "mlir/Dialect/SPIRV/SPIRVTypes.h"
+#include "mlir/Dialect/SPIRV/IR/SPIRVAttributes.h"
+#include "mlir/Dialect/SPIRV/IR/SPIRVDialect.h"
+#include "mlir/Dialect/SPIRV/IR/SPIRVOps.h"
+#include "mlir/Dialect/SPIRV/IR/SPIRVTypes.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/RegionGraphTraits.h"
 #include "mlir/Support/LogicalResult.h"
@@ -364,15 +364,23 @@ private:
   /// Main dispatch method for serializing an operation.
   LogicalResult processOperation(Operation *op);
 
-  /// Method to dispatch to the serialization function for an operation in
-  /// SPIR-V dialect that is a mirror of an instruction in the SPIR-V spec.
-  /// This is auto-generated from ODS. Dispatch is handled for all operations
-  /// in SPIR-V dialect that have hasOpcode == 1.
+  /// Serializes an operation `op` as core instruction with `opcode` if
+  /// `extInstSet` is empty. Otherwise serializes it as an extended instruction
+  /// with `opcode` from `extInstSet`.
+  /// This method is a generic one for dispatching any SPIR-V ops that has no
+  /// variadic operands and attributes in TableGen definitions.
+  LogicalResult processOpWithoutGrammarAttr(Operation *op, StringRef extInstSet,
+                                            uint32_t opcode);
+
+  /// Dispatches to the serialization function for an operation in SPIR-V
+  /// dialect that is a mirror of an instruction in the SPIR-V spec. This is
+  /// auto-generated from ODS. Dispatch is handled for all operations in SPIR-V
+  /// dialect that have hasOpcode == 1.
   LogicalResult dispatchToAutogenSerialization(Operation *op);
 
-  /// Method to serialize an operation in the SPIR-V dialect that is a mirror of
-  /// an instruction in the SPIR-V spec. This is auto generated if hasOpcode ==
-  /// 1 and autogenSerialization == 1 in ODS.
+  /// Serializes an operation in the SPIR-V dialect that is a mirror of an
+  /// instruction in the SPIR-V spec. This is auto generated if hasOpcode == 1
+  /// and autogenSerialization == 1 in ODS.
   template <typename OpTy>
   LogicalResult processOp(OpTy op) {
     return op.emitError("unsupported op serialization");
@@ -1267,7 +1275,7 @@ LogicalResult Serializer::prepareBasicType(
     }
     typeEnum = spirv::Opcode::OpTypeCooperativeMatrixNV;
     auto getConstantOp = [&](uint32_t id) {
-      auto attr = IntegerAttr::get(IntegerType::get(32, type.getContext()), id);
+      auto attr = IntegerAttr::get(IntegerType::get(type.getContext(), 32), id);
       return prepareConstantInt(loc, attr);
     };
     operands.push_back(elementTypeID);
@@ -1930,6 +1938,46 @@ LogicalResult Serializer::processOperation(Operation *opInst) {
           [&](Operation *op) { return dispatchToAutogenSerialization(op); });
 }
 
+LogicalResult Serializer::processOpWithoutGrammarAttr(Operation *op,
+                                                      StringRef extInstSet,
+                                                      uint32_t opcode) {
+  SmallVector<uint32_t, 4> operands;
+  Location loc = op->getLoc();
+
+  uint32_t resultID = 0;
+  if (op->getNumResults() != 0) {
+    uint32_t resultTypeID = 0;
+    if (failed(processType(loc, op->getResult(0).getType(), resultTypeID)))
+      return failure();
+    operands.push_back(resultTypeID);
+
+    resultID = getNextID();
+    operands.push_back(resultID);
+    valueIDMap[op->getResult(0)] = resultID;
+  };
+
+  for (Value operand : op->getOperands())
+    operands.push_back(getValueID(operand));
+
+  emitDebugLine(functionBody, loc);
+
+  if (extInstSet.empty()) {
+    encodeInstructionInto(functionBody, static_cast<spirv::Opcode>(opcode),
+                          operands);
+  } else {
+    encodeExtensionInstruction(op, extInstSet, opcode, operands);
+  }
+
+  if (op->getNumResults() != 0) {
+    for (auto attr : op->getAttrs()) {
+      if (failed(processDecoration(loc, resultID, attr)))
+        return failure();
+    }
+  }
+
+  return success();
+}
+
 namespace {
 template <>
 LogicalResult
@@ -2107,7 +2155,7 @@ Serializer::processOp<spirv::CopyMemoryOp>(spirv::CopyMemoryOp op) {
 // Pull in auto-generated Serializer::dispatchToAutogenSerialization() and
 // various Serializer::processOp<...>() specializations.
 #define GET_SERIALIZATION_FNS
-#include "mlir/Dialect/SPIRV/SPIRVSerialization.inc"
+#include "mlir/Dialect/SPIRV/IR/SPIRVSerialization.inc"
 } // namespace
 
 LogicalResult Serializer::emitDecoration(uint32_t target,

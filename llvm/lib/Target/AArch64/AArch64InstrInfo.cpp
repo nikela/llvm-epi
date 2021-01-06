@@ -6030,10 +6030,7 @@ outliner::OutlinedFunction AArch64InstrInfo::getOutliningCandidateInfo(
       return false;
     };
     // Remove candidates with illegal stack modifying instructions
-    RepeatedSequenceLocs.erase(std::remove_if(RepeatedSequenceLocs.begin(),
-                                              RepeatedSequenceLocs.end(),
-                                              hasIllegalSPModification),
-                               RepeatedSequenceLocs.end());
+    llvm::erase_if(RepeatedSequenceLocs, hasIllegalSPModification);
 
     // If the sequence doesn't have enough candidates left, then we're done.
     if (RepeatedSequenceLocs.size() < 2)
@@ -6076,10 +6073,7 @@ outliner::OutlinedFunction AArch64InstrInfo::getOutliningCandidateInfo(
     // Erase every candidate that violates the restrictions above. (It could be
     // true that we have viable candidates, so it's not worth bailing out in
     // the case that, say, 1 out of 20 candidates violate the restructions.)
-    RepeatedSequenceLocs.erase(std::remove_if(RepeatedSequenceLocs.begin(),
-                                              RepeatedSequenceLocs.end(),
-                                              CantGuaranteeValueAcrossCall),
-                               RepeatedSequenceLocs.end());
+    llvm::erase_if(RepeatedSequenceLocs, CantGuaranteeValueAcrossCall);
 
     // If the sequence doesn't have enough candidates left, then we're done.
     if (RepeatedSequenceLocs.size() < 2)
@@ -6745,7 +6739,7 @@ void AArch64InstrInfo::buildOutlinedFrame(
     return MI.isCall() && !MI.isReturn();
   };
 
-  if (std::any_of(MBB.instr_begin(), MBB.instr_end(), IsNonTailCall)) {
+  if (llvm::any_of(MBB.instrs(), IsNonTailCall)) {
     // Fix up the instructions in the range, since we're going to modify the
     // stack.
 

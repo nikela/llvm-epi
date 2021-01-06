@@ -11,10 +11,6 @@
 // Target Specific DAG nodes
 //===----------------------------------------------------------------------===//
 
-def riscv_vmv_x_s : SDNode<"RISCVISD::VMV_X_S",
-                           SDTypeProfile<1, 1, [SDTCisInt<0>, SDTCisVec<1>,
-                                                SDTCisInt<1>]>>;
-
 def riscv_extract_vector_elt : SDNode<"RISCVISD::EXTRACT_VECTOR_ELT",
                                       SDTypeProfile<1, 2,
                                        [SDTCisInt<0>, SDTCisVec<1>,
@@ -282,7 +278,7 @@ class FloatVectorTypeInfoToWide<FloatVectorTypeInfo fvti, FloatVectorTypeInfo fw
 defset list<VectorTypeInfo> EPIAllVectors = {
 
   defset list<VectorTypeInfo> EPIAllIntegerVectors = {
-    defset list<VectorTypeInfo> NoGroupIntegerVectors = {
+    defset list<VectorTypeInfo> EPINoGroupIntegerVectors = {
       def Vtype1xi8  : VectorTypeInfo<nxv1i8,  nxv1i1, 8,  V_MF8>;
       def Vtype2xi8  : VectorTypeInfo<nxv2i8,  nxv2i1, 8,  V_MF4>;
       def Vtype4xi8  : VectorTypeInfo<nxv4i8,  nxv4i1, 8,  V_MF2>;
@@ -298,7 +294,7 @@ defset list<VectorTypeInfo> EPIAllVectors = {
       def Vtype1xi64 : VectorTypeInfo<nxv1i64, nxv1i1, 64, V_M1>;
     }
 
-    defset list<GroupVectorTypeInfo> GroupIntegerVectors = {
+    defset list<GroupVectorTypeInfo> EPIGroupIntegerVectors = {
       def Vtype16xi8  : GroupVectorTypeInfo<nxv16i8,  nxv8i8,  nxv16i1, 8,  V_M2>;
       def Vtype32xi8  : GroupVectorTypeInfo<nxv32i8,  nxv8i8,  nxv32i1, 8,  V_M4>;
       def Vtype64xi8  : GroupVectorTypeInfo<nxv64i8,  nxv8i8,  nxv64i1, 8,  V_M8>;
@@ -317,15 +313,15 @@ defset list<VectorTypeInfo> EPIAllVectors = {
     }
   }
 
-  defset list<FloatVectorTypeInfo> AllFloatVectors = {
-    defset list<FloatVectorTypeInfo> NoGroupFloatVectors = {
+  defset list<FloatVectorTypeInfo> EPIAllFloatVectors = {
+    defset list<FloatVectorTypeInfo> EPINoGroupFloatVectors = {
       def Vtype1xf32 : FloatVectorTypeInfo<nxv1f32, nxv1i1, 32, V_MF2, f32, FPR32>;
       def Vtype2xf32 : FloatVectorTypeInfo<nxv2f32, nxv2i1, 32, V_M1, f32, FPR32>;
 
       def Vtype1xf64 : FloatVectorTypeInfo<nxv1f64, nxv1i1, 64, V_M1, f64, FPR64>;
     }
 
-    defset list<GroupFloatVectorTypeInfo> GroupFloatVectors = {
+    defset list<GroupFloatVectorTypeInfo> EPIGroupFloatVectors = {
       def Vtype4xf32  : GroupFloatVectorTypeInfo<nxv4f32,  nxv2f32, nxv4i1,  32, V_M2, f32, FPR32>;
       def Vtype8xf32  : GroupFloatVectorTypeInfo<nxv8f32,  nxv2f32, nxv8i1,  32, V_M4, f32, FPR32>;
       def Vtype16xf32 : GroupFloatVectorTypeInfo<nxv16f32, nxv2f32, nxv16i1, 32, V_M8, f32, FPR32>;
@@ -337,7 +333,7 @@ defset list<VectorTypeInfo> EPIAllVectors = {
   }
 }
 
-defvar NoGroupVectors = !listconcat(NoGroupIntegerVectors, NoGroupFloatVectors);
+defvar NoGroupVectors = !listconcat(EPINoGroupIntegerVectors, EPINoGroupFloatVectors);
 
 // This functor is used to obtain the int vector type that has the same SEW and
 // multiplier as the input parameter type
@@ -421,7 +417,7 @@ class MaskTypeInfo<ValueType Mas, int Sew, LMULInfo MI> {
   LMULInfo MInfo = MI; // Convention: Minimum VLMul where this mask type appears.
 }
 
-defset list<MaskTypeInfo> AllMasks = {
+defset list<MaskTypeInfo> EPIAllMasks = {
   def : MaskTypeInfo<nxv1i1,  64, V_M1>; // FIXME SEW should be ELEN/1
   def : MaskTypeInfo<nxv2i1,  32, V_M1>; // FIXME SEW should be ELEN/2
   def : MaskTypeInfo<nxv4i1,  16, V_M1>; // FIXME SEW should be ELEN/4
@@ -1150,8 +1146,8 @@ let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
                                (ins VR:$rs2, ixlenimm:$sew),
                                []>,
                         EPIPseudo;
-  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
-      BaseInstr = VMV_S_X in
+  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
+      MergeOpIndex = -1, BaseInstr = VMV_S_X in
     def PseudoEPIVMV_S_X : Pseudo<(outs VR:$rd),
                                (ins VR:$merge, GPR:$rs1, GPR:$vl,
                                     ixlenimm:$sew),
@@ -1218,8 +1214,8 @@ let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
                                 (ins VR:$rs2, ixlenimm:$sew),
                                 []>,
                          EPIPseudo;
-  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
-      BaseInstr = VFMV_S_F in
+  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
+      MergeOpIndex = -1, BaseInstr = VFMV_S_F in
     def PseudoEPIVFMV_S_F : Pseudo<(outs VR:$rd),
                                 (ins VR:$merge, FPR64:$rs2, GPR:$vl,
                                      ixlenimm:$sew),
@@ -1598,7 +1594,7 @@ let Predicates = [HasStdExtV] in {
                               vti.MInfo.vrclass>;
   }
 
-  foreach mti = AllMasks in
+  foreach mti = EPIAllMasks in
   {
     // Mask values are stored as vectors of bytes
     defm : pat_load_store_mask<mti.Mask, /* eew */ 8, V_M1, VR>;
@@ -2186,7 +2182,7 @@ multiclass pat_intrinsic_binary_int_m_vv_swapped<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vv<string intrinsic_name,
                                         string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VV",
                                 fvti.Vector, fvti.Vector, fvti.Vector,
@@ -2198,7 +2194,7 @@ multiclass pat_intrinsic_binary_fp_v_vv<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vf<string intrinsic_name,
                                         string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VF",
                                 fvti.Vector, fvti.Vector, fvti.Scalar,
@@ -2211,7 +2207,7 @@ multiclass pat_intrinsic_binary_fp_v_vf<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vs<string intrinsic_name,
                                         string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VS",
                                 fvti.Vector, fvti.Vector, fvti.Vector,
@@ -2223,7 +2219,7 @@ multiclass pat_intrinsic_binary_fp_v_vs<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vv_vf<string intrinsic_name,
                                            string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VV",
                                 fvti.Vector, fvti.Vector, fvti.Vector,
@@ -2240,7 +2236,7 @@ multiclass pat_intrinsic_binary_fp_v_vv_vf<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vvm<string intrinsic_name,
                                          string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary_mask_in<intrinsic_name, instruction_name, "VVM",
                                         fvti.Vector, fvti.Vector, fvti.Vector,
@@ -2253,7 +2249,7 @@ multiclass pat_intrinsic_binary_fp_v_vvm<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_v_vfm<string intrinsic_name,
                                          string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary_mask_in<intrinsic_name, instruction_name, "VFM",
                                         fvti.Vector, fvti.Vector, fvti.Scalar,
@@ -2306,7 +2302,7 @@ multiclass pat_intrinsic_binary_fp_w_wv_wf<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_m_vv_vf<string intrinsic_name,
                                            string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VV",
                                 fvti.Mask, fvti.Vector, fvti.Vector, fvti.Mask,
@@ -2322,7 +2318,7 @@ multiclass pat_intrinsic_binary_fp_m_vv_vf<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_m_vf<string intrinsic_name,
                                         string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VF",
                                 fvti.Mask, fvti.Vector, fvti.Scalar, fvti.Mask,
@@ -2334,7 +2330,7 @@ multiclass pat_intrinsic_binary_fp_m_vf<string intrinsic_name,
 multiclass pat_intrinsic_binary_fp_m_vv_swapped<string intrinsic_name,
                                                 string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VV",
                                 fvti.Mask, fvti.Vector, fvti.Vector, fvti.Mask,
@@ -2346,7 +2342,7 @@ multiclass pat_intrinsic_binary_fp_m_vv_swapped<string intrinsic_name,
 multiclass pat_intrinsic_binary_m_mm<string intrinsic_name,
                                      string instruction_name>
 {
-  foreach mti = AllMasks in
+  foreach mti = EPIAllMasks in
   {
     defm : pat_intrinsic_binary_nomask<intrinsic_name, instruction_name, "MM",
                                        mti.Mask, mti.Mask, mti.Mask, mti.Mask,
@@ -2414,7 +2410,7 @@ multiclass pat_intrinsic_ternary_int_v_vv_vx<string intrinsic_name,
 multiclass pat_intrinsic_ternary_fp_v_vv_vf<string intrinsic_name,
                                             string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_intrinsic_ternary<intrinsic_name, instruction_name, "VV",
                                  fvti.Vector, fvti.Vector, fvti.Vector,
@@ -2775,14 +2771,14 @@ foreach vti = [Vtype2xi32, Vtype4xi16, Vtype8xi8] in
   def : Pat<(riscv_vmv_x_s (vti.Vector vti.MInfo.vrclass:$rs2)),
             (PseudoEPIVMV_X_S $rs2, vti.SEW)>;
 
-foreach vti = NoGroupIntegerVectors in
+foreach vti = EPINoGroupIntegerVectors in
   def : Pat<(vti.Vector (int_epi_vmv_s_x (vti.Vector VR:$merge), GPR:$rs1, GPR:$vl)),
             (PseudoEPIVMV_S_X $merge, $rs1, (NoX0 GPR:$vl), vti.SEW)>;
 
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1up", "PseudoEPIVSLIDE1UP">;
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1down", "PseudoEPIVSLIDE1DOWN">;
 
-foreach mti = AllMasks in {
+foreach mti = EPIAllMasks in {
   def : Pat<(int_epi_vpopc (mti.Mask VR:$rs2), GPR:$vl),
             (!cast<Instruction>("PseudoEPIVPOPC_M_" # mti.MInfo.MX) $rs2,
               (mti.Mask zero_reg), (NoX0 GPR:$vl), mti.SEW)>;
@@ -2871,7 +2867,7 @@ defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnj", "PseudoEPIVFSGNJ">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnjn", "PseudoEPIVFSGNJN">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnjx", "PseudoEPIVFSGNJX">;
 
-foreach fvti = NoGroupFloatVectors in
+foreach fvti = EPINoGroupFloatVectors in
 {
   def : Pat<(fvti.Scalar (int_epi_vfmv_f_s (fvti.Vector fvti.MInfo.vrclass:$rs2))),
              FromFPR64<fvti.ScalarRegClass, (PseudoEPIVFMV_F_S $rs2, fvti.SEW)>.ret>;
@@ -2930,7 +2926,7 @@ defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwmul", "PseudoEPIVFWMUL">;
 //defm "" : pat_intrinsic_ternary_fp_vv_vf<"int_epi_vfwmsac", "VFWMSAC">;
 //defm "" : pat_intrinsic_ternary_fp_vv_vf<"int_epi_vfwnmsac", "VFWNMSAC">;
 
-foreach vti = AllFloatVectors in
+foreach vti = EPIAllFloatVectors in
   def : Pat<(vti.Vector (int_epi_vfsqrt (vti.Vector vti.MInfo.vrclass:$rs2),
                          GPR:$vl)),
             (!cast<Instruction>("PseudoEPIVFSQRT_V_" # vti.MInfo.MX)
@@ -2939,7 +2935,7 @@ foreach vti = AllFloatVectors in
              (vti.Mask zero_reg),
              (NoX0 GPR:$vl), vti.SEW)>;
 
-foreach vti = AllFloatVectors in
+foreach vti = EPIAllFloatVectors in
   def : Pat<(vti.Vector (int_epi_vfsqrt_mask (vti.Vector vti.MInfo.vrclass:$merge),
                          (vti.Vector vti.MInfo.vrclass:$rs2), (vti.Mask V0),
                          GPR:$vl)),
@@ -2950,12 +2946,12 @@ foreach vti = AllFloatVectors in
              (NoX0 GPR:$vl), vti.SEW)>;
 
 //foreach itp = [ nxv1i32, nxv1i64 ] in
-//foreach vtp = AllFloatVectors in
+//foreach vtp = EPIAllFloatVectors in
 //def : Pat<(itp (int_epi_vfclass (vtp.Vector VR:$rs2))),
 //          (VFCLASS_V $rs2)>;
 
 //foreach itp = [ nxv1i32, nxv1i64 ] in
-//foreach vtp = AllFloatVectors in
+//foreach vtp = EPIAllFloatVectors in
 //def : Pat<(itp (int_epi_vfclass_mask (vtp.Vector VR:$rs2), V0)),
 //          (VFCLASS_V_MASK $rs2, vmask_only_true.Value)>;
 
@@ -2980,7 +2976,7 @@ multiclass pat_conversions_same_sew<string intrinsic_float_to_int,
                                     string intrinsic_int_to_float,
                                     string instruction_int_to_float>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   foreach ivti = [GetIntVectorTypeInfo<fvti>.Vti] in
   {
     defvar MInfo = fvti.MInfo;
@@ -3142,7 +3138,7 @@ foreach vti = EPIAllIntegerVectors in {
              simm5:$imm5,
              (NoX0 GPR:$vl), vti.SEW)>;
 }
-foreach fvti = AllFloatVectors in {
+foreach fvti = EPIAllFloatVectors in {
   def : Pat<(fvti.Vector (int_epi_vfmv_v_f
                          (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
             (!cast<Instruction>("PseudoEPIVFMV_V_F_" # fvti.MInfo.MX)
@@ -3272,7 +3268,7 @@ multiclass pat_vop_binary_int_v_vv_vx_vi<SDNode vop,
 multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
                                      string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_vop_binary_v<vop, instruction_name,
                             fvti.Vector, fvti.Vector, fvti.Mask,
@@ -3289,7 +3285,7 @@ multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
 multiclass pat_vop_binary_reduction_int<SDNode vop,
                                         string instruction_name>
 {
-  foreach vti = NoGroupIntegerVectors in {
+  foreach vti = EPINoGroupIntegerVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_M1");
     def : Pat<(vop (vti.Vector vti.MInfo.vrclass:$rs2)),
@@ -3305,7 +3301,7 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
                 VLMax, vti.SEW)),
                vti.SEW)>;
   }
-  foreach gvti = GroupIntegerVectors in {
+  foreach gvti = EPIGroupIntegerVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_" # gvti.MInfo.MX);
     def : Pat<(vop (gvti.Vector gvti.MInfo.vrclass:$rs2)),
@@ -3332,7 +3328,7 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
 multiclass pat_vop_binary_reduction_fp<SDNode vop,
                                        string instruction_name>
 {
-  foreach fvti = NoGroupFloatVectors in {
+  foreach fvti = EPINoGroupFloatVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_M1");
     def : Pat<(vop (fvti.Vector fvti.MInfo.vrclass:$rs2)),
@@ -3349,7 +3345,7 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
                  VLMax, fvti.SEW)),
                 fvti.SEW)>.ret>;
   }
-  foreach gfvti = GroupFloatVectors in {
+  foreach gfvti = EPIGroupFloatVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_" # gfvti.MInfo.MX);
     def : Pat<(vop (gfvti.Vector gfvti.MInfo.vrclass:$rs2)),
@@ -3377,7 +3373,7 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
 multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                                           string instruction_name>
 {
-  foreach fvti = NoGroupFloatVectors in {
+  foreach fvti = EPINoGroupFloatVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_M1");
     def : Pat<(vop (fvti.Scalar fvti.ScalarRegClass:$init),
@@ -3396,7 +3392,7 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                  VLMax, fvti.SEW)),
                 fvti.SEW)>.ret>;
   }
-  foreach gfvti = GroupFloatVectors in {
+  foreach gfvti = EPIGroupFloatVectors in {
     defvar instruction =
       !cast<Instruction>(instruction_name#"_VS_" # gfvti.MInfo.MX);
     def : Pat<(vop (gfvti.Scalar gfvti.ScalarRegClass:$init),
@@ -3471,7 +3467,7 @@ multiclass pat_vop_ternary_xf<SDNode vop,
 multiclass pat_vop_ternary_fp_v_vv_vf<SDNode vop,
                                       string instruction_name>
 {
-  foreach fvti = AllFloatVectors in
+  foreach fvti = EPIAllFloatVectors in
   {
     defm : pat_vop_ternary_v<vop, instruction_name,
                              fvti.Vector, fvti.Mask,
@@ -3506,7 +3502,7 @@ multiclass pat_vop_unary<SDNode vop,
 multiclass pat_vop_unary_fp_v_v<SDNode vop,
                                 string instruction_name>
 {
-  foreach vti = AllFloatVectors in
+  foreach vti = EPIAllFloatVectors in
   {
     defm : pat_vop_unary<vop, instruction_name,
                          vti.Vector, vti.Mask,
@@ -3517,10 +3513,10 @@ multiclass pat_vop_unary_fp_v_v<SDNode vop,
 
 let Predicates = [HasStdExtV] in {
 
-defm "" : pat_vop_binary_int_v_vv_vx_vi<add, "PseudoEPIVADD">;
-defm "" : pat_vop_binary_int_v_vv_vx_vi<shl, "PseudoEPIVSLL", uimm5>;
-defm "" : pat_vop_binary_int_v_vv_vx_vi<and, "PseudoEPIVAND">;
-defm "" : pat_vop_binary_int_v_vv_vx<sub, "PseudoEPIVSUB">;
+// defm "" : pat_vop_binary_int_v_vv_vx_vi<add, "PseudoEPIVADD">;
+// defm "" : pat_vop_binary_int_v_vv_vx_vi<shl, "PseudoEPIVSLL", uimm5>;
+// defm "" : pat_vop_binary_int_v_vv_vx_vi<and, "PseudoEPIVAND">;
+// defm "" : pat_vop_binary_int_v_vv_vx<sub, "PseudoEPIVSUB">;
 defm "" : pat_vop_binary_int_v_vv_vx<mul, "PseudoEPIVMUL">;
 
 defm "" : pat_vop_binary_fp_v_vv_vf<fadd, "PseudoEPIVFADD">;
@@ -3550,7 +3546,7 @@ defm "" : pat_vop_ternary_fp_v_vv_vf<fma, "PseudoEPIVFMADD">;
 
 defm "" : pat_vop_unary_fp_v_v<fsqrt, "PseudoEPIVFSQRT">;
 
-foreach fvti = AllFloatVectors in
+foreach fvti = EPIAllFloatVectors in
 {
   defvar ivti = GetIntVectorTypeInfo<fvti>.Vti;
 
@@ -3612,14 +3608,14 @@ foreach vti = EPIAllIntegerVectors in
              VLMax, vti.SEW)>;
 }
 
-foreach mti = AllMasks in {
+foreach mti = EPIAllMasks in {
   def : Pat<(mti.Mask (splat_vector (i64 1))),
             (!cast<Instruction>("PseudoEPIVMSET_" # mti.MInfo.MX) VLMax, mti.SEW)>;
   def : Pat<(mti.Mask (splat_vector (i64 0))),
             (!cast<Instruction>("PseudoEPIVMCLR_" # mti.MInfo.MX) VLMax, mti.SEW)>;
 }
 
-foreach vti = NoGroupIntegerVectors in {
+foreach vti = EPINoGroupIntegerVectors in {
   // Note: It is not valid in extractelt to have a return type that is different
   // to the vector element type. For those cases (EltTy != i64) we use a custom
   // node. There is another (deprecated) node vector_extract that won't fail in
@@ -3659,7 +3655,7 @@ foreach vti = NoGroupIntegerVectors in {
              vti.SEW)>;
 }
 
-foreach fvti = NoGroupFloatVectors in {
+foreach fvti = EPINoGroupFloatVectors in {
   def : Pat<(fvti.Scalar (extractelt (fvti.Vector fvti.MInfo.vrclass:$rs2),
                           GPR:$rs1)),
             FromFPR64<fvti.ScalarRegClass,
@@ -3686,7 +3682,7 @@ foreach fvti = NoGroupFloatVectors in {
              VLMax, fvti.SEW)>;
 }
 
-foreach gvti = GroupIntegerVectors in {
+foreach gvti = EPIGroupIntegerVectors in {
   // Note: It is not valid in extractelt to have a return type that is different
   // to the vector element type. For those cases (EltTy != i64) we use a custom
   // node. There is another (deprecated) node vector_extract that won't fail in
@@ -3736,7 +3732,7 @@ foreach gvti = GroupIntegerVectors in {
              sub_vrm2)>;
 }
 
-foreach gfvti = GroupFloatVectors in {
+foreach gfvti = EPIGroupFloatVectors in {
   def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
                            GPR:$rs1)),
             FromFPR64<gfvti.ScalarRegClass,
@@ -3804,7 +3800,7 @@ foreach vti = EPIAllVectors in {
              VLMax, vti.SEW)>;
 }
 
-foreach fvti = AllFloatVectors in {
+foreach fvti = EPIAllFloatVectors in {
   def : Pat<(fabs (fvti.Vector fvti.MInfo.vrclass:$rs2)),
             (!cast<Instruction>("PseudoEPIVFSGNJX_VV_" # fvti.MInfo.MX)
              (fvti.Vector (IMPLICIT_DEF)),
@@ -3935,7 +3931,7 @@ foreach vtiToWti = AllWideableIntVectors in
 multiclass pat_vop_binary_m_mm<SDNode vop,
                                string instruction_name>
 {
-  foreach mti = AllMasks in
+  foreach mti = EPIAllMasks in
   {
     defm : pat_vop_binary_v_nomask<vop, instruction_name, "MM",
                                    mti.Mask, mti.Mask,

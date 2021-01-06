@@ -2543,10 +2543,14 @@ MachineBlockPlacement::collectLoopBlockSet(const MachineLoop &L) {
                     MBPI->getEdgeProbability(LoopPred, L.getHeader());
 
     for (MachineBasicBlock *LoopBB : L.getBlocks()) {
+      if (LoopBlockSet.count(LoopBB))
+        continue;
       auto Freq = MBFI->getBlockFreq(LoopBB).getFrequency();
       if (Freq == 0 || LoopFreq.getFrequency() / Freq > LoopToColdBlockRatio)
         continue;
-      LoopBlockSet.insert(LoopBB);
+      BlockChain *Chain = BlockToChain[LoopBB];
+      for (MachineBasicBlock *ChainBB : *Chain)
+        LoopBlockSet.insert(ChainBB);
     }
   } else
     LoopBlockSet.insert(L.block_begin(), L.block_end());
@@ -3156,8 +3160,8 @@ void MachineBlockPlacement::findDuplicateCandidates(
   MachineBasicBlock *Fallthrough = nullptr;
   BranchProbability DefaultBranchProb = BranchProbability::getZero();
   BlockFrequency BBDupThreshold(scaleThreshold(BB));
-  SmallVector<MachineBasicBlock *, 8> Preds(BB->pred_begin(), BB->pred_end());
-  SmallVector<MachineBasicBlock *, 8> Succs(BB->succ_begin(), BB->succ_end());
+  SmallVector<MachineBasicBlock *, 8> Preds(BB->predecessors());
+  SmallVector<MachineBasicBlock *, 8> Succs(BB->successors());
 
   // Sort for highest frequency.
   auto CmpSucc = [&](MachineBasicBlock *A, MachineBasicBlock *B) {

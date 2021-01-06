@@ -57,10 +57,10 @@ struct GPUShuffleOpLowering : public ConvertOpToLLVMPattern<gpu::ShuffleOp> {
     gpu::ShuffleOpAdaptor adaptor(operands);
 
     auto valueTy = adaptor.value().getType().cast<LLVM::LLVMType>();
-    auto int32Type = LLVM::LLVMType::getInt32Ty(rewriter.getContext());
-    auto predTy = LLVM::LLVMType::getInt1Ty(rewriter.getContext());
-    auto resultTy =
-        LLVM::LLVMType::getStructTy(rewriter.getContext(), {valueTy, predTy});
+    auto int32Type = LLVM::LLVMIntegerType::get(rewriter.getContext(), 32);
+    auto predTy = LLVM::LLVMIntegerType::get(rewriter.getContext(), 1);
+    auto resultTy = LLVM::LLVMStructType::getLiteral(rewriter.getContext(),
+                                                     {valueTy, predTy});
 
     Value one = rewriter.create<LLVM::ConstantOp>(
         loc, int32Type, rewriter.getI32IntegerAttr(1));
@@ -148,7 +148,7 @@ void mlir::configureGpuToNVVMConversionLegality(ConversionTarget &target) {
   target.addIllegalDialect<gpu::GPUDialect>();
   target.addIllegalOp<LLVM::CosOp, LLVM::ExpOp, LLVM::FAbsOp, LLVM::FCeilOp,
                       LLVM::FFloorOp, LLVM::LogOp, LLVM::Log10Op, LLVM::Log2Op,
-                      LLVM::SinOp, LLVM::SqrtOp>();
+                      LLVM::PowOp, LLVM::SinOp, LLVM::SqrtOp>();
 
   // TODO: Remove once we support replacing non-root ops.
   target.addLegalOp<gpu::YieldOp, gpu::GPUModuleOp, gpu::ModuleEndOp>();
@@ -191,6 +191,8 @@ void mlir::populateGpuToNVVMConversionPatterns(
                                                  "__nv_log10");
   patterns.insert<OpToFuncCallLowering<Log2Op>>(converter, "__nv_log2f",
                                                 "__nv_log2");
+  patterns.insert<OpToFuncCallLowering<PowFOp>>(converter, "__nv_powf",
+                                                "__nv_pow");
   patterns.insert<OpToFuncCallLowering<RsqrtOp>>(converter, "__nv_rsqrtf",
                                                  "__nv_rsqrt");
   patterns.insert<OpToFuncCallLowering<SinOp>>(converter, "__nv_sinf",

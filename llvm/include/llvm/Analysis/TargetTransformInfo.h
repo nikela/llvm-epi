@@ -333,8 +333,7 @@ public:
   /// This is a helper function which calls the two-argument getUserCost
   /// with \p Operands which are the current operands U has.
   int getUserCost(const User *U, TargetCostKind CostKind) const {
-    SmallVector<const Value *, 4> Operands(U->value_op_begin(),
-                                           U->value_op_end());
+    SmallVector<const Value *, 4> Operands(U->operand_values());
     return getUserCost(U, Operands, CostKind);
   }
 
@@ -945,6 +944,10 @@ public:
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const;
 
+  /// \return The maximum value of vscale if the target specifies an
+  ///  architectural maximum vector length, and None otherwise.
+  Optional<unsigned> getMaxVScale() const;
+
   /// \return True if the vectorization factor should be chosen to
   /// make the vector of the smallest element type match the size of a
   /// vector register. For wider element types, this could result in
@@ -1364,6 +1367,9 @@ public:
   /// instead of just loads and stores.
   bool preferPredicatedVectorOps() const;
 
+  /// \returns True if the target supports scalable vectors.
+  bool supportsScalableVectors() const;
+
   /// \name Vector Predication Information
   /// @{
   /// Whether the target supports the %evl parameter of VP intrinsic efficiently
@@ -1534,6 +1540,7 @@ public:
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const = 0;
+  virtual Optional<unsigned> getMaxVScale() const = 0;
   virtual bool shouldMaximizeVectorBandwidth(bool OptSize) const = 0;
   virtual unsigned getMinimumVF(unsigned ElemWidth) const = 0;
   virtual unsigned getMaximumVF(unsigned ElemWidth, unsigned Opcode) const = 0;
@@ -1667,6 +1674,7 @@ public:
                                                ReductionFlags) const = 0;
   virtual bool shouldExpandReduction(const IntrinsicInst *II) const = 0;
   virtual unsigned getGISelRematGlobalCost() const = 0;
+  virtual bool supportsScalableVectors() const = 0;
   virtual bool hasActiveVectorLength() const = 0;
   virtual int getInstructionLatency(const Instruction *I) = 0;
   virtual bool useScalableVectorType() const = 0;
@@ -1970,6 +1978,9 @@ public:
     return Impl.getFeasibleMaxVFRange(SmallestType, WidestType,
                                       MaxSafeRegisterWidth, RegWidthFactor);
   }
+  Optional<unsigned> getMaxVScale() const override {
+    return Impl.getMaxVScale();
+  }
   bool shouldMaximizeVectorBandwidth(bool OptSize) const override {
     return Impl.shouldMaximizeVectorBandwidth(OptSize);
   }
@@ -2214,6 +2225,10 @@ public:
 
   unsigned getGISelRematGlobalCost() const override {
     return Impl.getGISelRematGlobalCost();
+  }
+
+  bool supportsScalableVectors() const override {
+    return Impl.supportsScalableVectors();
   }
 
   bool hasActiveVectorLength() const override {

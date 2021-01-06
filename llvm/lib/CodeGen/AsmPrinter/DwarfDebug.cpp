@@ -788,14 +788,9 @@ static void collectCallSiteParameters(const MachineInstr *CallMI,
   }
 
   // Do not emit CSInfo for undef forwarding registers.
-  for (auto &MO : CallMI->uses()) {
-    if (!MO.isReg() || !MO.isUndef())
-      continue;
-    auto It = ForwardedRegWorklist.find(MO.getReg());
-    if (It == ForwardedRegWorklist.end())
-      continue;
-    ForwardedRegWorklist.erase(It);
-  }
+  for (auto &MO : CallMI->uses())
+    if (MO.isReg() && MO.isUndef())
+      ForwardedRegWorklist.erase(MO.getReg());
 
   // We erase, from the ForwardedRegWorklist, those forwarding registers for
   // which we successfully describe a loaded value (by using
@@ -1636,9 +1631,7 @@ bool DwarfDebug::buildLocationList(SmallVectorImpl<DebugLocEntry> &DebugLoc,
 
     // Remove all values that are no longer live.
     size_t Index = std::distance(EB, EI);
-    auto Last =
-        remove_if(OpenRanges, [&](OpenRange &R) { return R.first <= Index; });
-    OpenRanges.erase(Last, OpenRanges.end());
+    erase_if(OpenRanges, [&](OpenRange &R) { return R.first <= Index; });
 
     // If we are dealing with a clobbering entry, this iteration will result in
     // a location list entry starting after the clobbering instruction.
@@ -2479,13 +2472,13 @@ void DwarfDebug::emitDebugLocValue(const AsmPrinter &AP, const DIBasicType *BT,
       DwarfExpr.addExpression(std::move(ExprCursor));
       return;
   } else if (Value.isConstantFP()) {
-    if (AP.getDwarfVersion() >= 4 && !AP.getDwarfDebug()->tuneForSCE()) {
+    if (AP.getDwarfVersion() >= 4 && !AP.getDwarfDebug()->tuneForSCE() &&
+        !ExprCursor) {
       DwarfExpr.addConstantFP(Value.getConstantFP()->getValueAPF(), AP);
       return;
-    } else if (Value.getConstantFP()
-                   ->getValueAPF()
-                   .bitcastToAPInt()
-                   .getBitWidth() <= 64 /*bits*/)
+    }
+    if (Value.getConstantFP()->getValueAPF().bitcastToAPInt().getBitWidth() <=
+        64 /*bits*/)
       DwarfExpr.addUnsignedConstant(
           Value.getConstantFP()->getValueAPF().bitcastToAPInt());
     else

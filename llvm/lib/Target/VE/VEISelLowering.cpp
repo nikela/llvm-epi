@@ -135,6 +135,10 @@ void VETargetLowering::initSPUActions() {
   /// Stack {
   setOperationAction(ISD::DYNAMIC_STACKALLOC, MVT::i32, Custom);
   setOperationAction(ISD::DYNAMIC_STACKALLOC, MVT::i64, Custom);
+
+  // Use the default implementation.
+  setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
+  setOperationAction(ISD::STACKRESTORE, MVT::Other, Expand);
   /// } Stack
 
   /// Branch {
@@ -310,6 +314,7 @@ VETargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
   for (unsigned i = 0; i != RVLocs.size(); ++i) {
     CCValAssign &VA = RVLocs[i];
     assert(VA.isRegLoc() && "Can only return in registers!");
+    assert(!VA.needsCustom() && "Unexpected custom lowering");
     SDValue OutVal = OutVals[i];
 
     // Integer return values must be sign or zero extended by the callee.
@@ -344,8 +349,6 @@ VETargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
     default:
       llvm_unreachable("Unknown loc info!");
     }
-
-    assert(!VA.needsCustom() && "Unexpected custom lowering");
 
     Chain = DAG.getCopyToReg(Chain, DL, VA.getLocReg(), OutVal, Flag);
 
@@ -386,6 +389,7 @@ SDValue VETargetLowering::LowerFormalArguments(
 
   for (unsigned i = 0, e = ArgLocs.size(); i != e; ++i) {
     CCValAssign &VA = ArgLocs[i];
+    assert(!VA.needsCustom() && "Unexpected custom lowering");
     if (VA.isRegLoc()) {
       // This argument is passed in a register.
       // All integer register arguments are promoted by the caller to i64.
@@ -394,11 +398,6 @@ SDValue VETargetLowering::LowerFormalArguments(
       unsigned VReg =
           MF.addLiveIn(VA.getLocReg(), getRegClassFor(VA.getLocVT()));
       SDValue Arg = DAG.getCopyFromReg(Chain, DL, VReg, VA.getLocVT());
-
-      // Get the high bits for i32 struct elements.
-      if (VA.getValVT() == MVT::i32 && VA.needsCustom())
-        Arg = DAG.getNode(ISD::SRL, DL, VA.getLocVT(), Arg,
-                          DAG.getConstant(32, DL, MVT::i32));
 
       // The caller promoted the argument, so insert an Assert?ext SDNode so we
       // won't promote the value again in this function.
@@ -730,6 +729,7 @@ SDValue VETargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   // Copy all of the result registers out of their specified physreg.
   for (unsigned i = 0; i != RVLocs.size(); ++i) {
     CCValAssign &VA = RVLocs[i];
+    assert(!VA.needsCustom() && "Unexpected custom lowering");
     unsigned Reg = VA.getLocReg();
 
     // When returning 'inreg {i32, i32 }', two consecutive i32 arguments can
@@ -746,11 +746,6 @@ SDValue VETargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       Chain = RV.getValue(1);
       InGlue = Chain.getValue(2);
     }
-
-    // Get the high bits for i32 struct elements.
-    if (VA.getValVT() == MVT::i32 && VA.needsCustom())
-      RV = DAG.getNode(ISD::SRL, DL, VA.getLocVT(), RV,
-                       DAG.getConstant(32, DL, MVT::i32));
 
     // The callee promoted the return value, so insert an Assert?ext SDNode so
     // we won't promote the value again in this function.
@@ -1510,6 +1505,26 @@ static SDValue lowerFRAMEADDR(SDValue Op, SelectionDAG &DAG,
   return FrameAddr;
 }
 
+static SDValue lowerRETURNADDR(SDValue Op, SelectionDAG &DAG,
+                               const VETargetLowering &TLI,
+                               const VESubtarget *Subtarget) {
+  MachineFunction &MF = DAG.getMachineFunction();
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  MFI.setReturnAddressIsTaken(true);
+
+  if (TLI.verifyReturnAddressArgumentIsConstant(Op, DAG))
+    return SDValue();
+
+  SDValue FrameAddr = lowerFRAMEADDR(Op, DAG, TLI, Subtarget);
+
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+  SDValue Offset = DAG.getConstant(8, DL, VT);
+  return DAG.getLoad(VT, DL, DAG.getEntryNode(),
+                     DAG.getNode(ISD::ADD, DL, VT, FrameAddr, Offset),
+                     MachinePointerInfo());
+}
+
 static SDValue getSplatValue(SDNode *N) {
   if (auto *BuildVec = dyn_cast<BuildVectorSDNode>(N)) {
     return BuildVec->getSplatValue();
@@ -1560,6 +1575,8 @@ SDValue VETargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
     return lowerJumpTable(Op, DAG);
   case ISD::LOAD:
     return lowerLOAD(Op, DAG);
+  case ISD::RETURNADDR:
+    return lowerRETURNADDR(Op, DAG, *this, Subtarget);
   case ISD::BUILD_VECTOR:
     return lowerBUILD_VECTOR(Op, DAG);
   case ISD::STORE:

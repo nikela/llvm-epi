@@ -146,7 +146,7 @@ class ValuesCode<code valuecode> { code ValuesCode = valuecode; }
 
 class ImpliedByAnyOf<list<Option> options, code value = "true"> {
   code ImpliedCheck = !foldl("false", options, accumulator, option,
-                             !strconcat(accumulator, " || ", !cast<string>(option.KeyPath)));
+                             !strconcat(accumulator, " || ", option.KeyPath));
   code ImpliedValue = value;
 }
 
@@ -158,6 +158,12 @@ class MarshallingInfo<code keypath, code defaultvalue> {
 class MarshallingInfoString<code keypath, code defaultvalue="std::string()">
   : MarshallingInfo<keypath, defaultvalue> {
   code Normalizer = "normalizeString";
+  code Denormalizer = "denormalizeString";
+}
+
+class MarshallingInfoStringInt<code keypath, code defaultvalue="0", code type="unsigned">
+  : MarshallingInfo<keypath, defaultvalue> {
+  code Normalizer = "normalizeStringIntegral<"#type#">";
   code Denormalizer = "denormalizeString";
 }
 
@@ -176,10 +182,10 @@ class MarshallingInfoBitfieldFlag<code keypath, code value>
 
 // Marshalling info for booleans. Applied to the flag setting keypath to false.
 class MarshallingInfoBooleanFlag<code keypath, code defaultvalue, code value, code name,
-                                 code other_value, code other_name, string other_spelling>
+                                 code other_value, code other_name>
   : MarshallingInfoFlag<keypath, defaultvalue> {
   code Normalizer = "makeBooleanOptionNormalizer("#value#", "#other_value#", OPT_"#other_name#")";
-  code Denormalizer = "makeBooleanOptionDenormalizer("#value#", \""#other_spelling#"\")";
+  code Denormalizer = "makeBooleanOptionDenormalizer("#value#")";
 }
 
 // Mixins for additional marshalling attributes.

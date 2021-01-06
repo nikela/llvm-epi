@@ -505,8 +505,6 @@ private:
   void verifySwiftErrorCall(CallBase &Call, const Value *SwiftErrorVal);
   void verifySwiftErrorValue(const Value *SwiftErrorVal);
   void verifyMustTailCall(CallInst &CI);
-  bool performTypeCheck(Intrinsic::ID ID, Function *F, Type *Ty, int VT,
-                        unsigned ArgNo, std::string &Suffix);
   bool verifyAttributeCount(AttributeList Attrs, unsigned Params);
   void verifyAttributeTypes(AttributeSet Attrs, bool IsFunction,
                             const Value *V);
@@ -1626,6 +1624,7 @@ static bool isFuncOnlyAttr(Attribute::AttrKind Kind) {
   case Attribute::Builtin:
   case Attribute::NoBuiltin:
   case Attribute::Cold:
+  case Attribute::Hot:
   case Attribute::OptForFuzzing:
   case Attribute::OptimizeNone:
   case Attribute::JumpTable:
@@ -2567,7 +2566,7 @@ void Verifier::visitBasicBlock(BasicBlock &BB) {
   // Check constraints that this basic block imposes on all of the PHI nodes in
   // it.
   if (isa<PHINode>(BB.front())) {
-    SmallVector<BasicBlock*, 8> Preds(pred_begin(&BB), pred_end(&BB));
+    SmallVector<BasicBlock *, 8> Preds(predecessors(&BB));
     SmallVector<std::pair<BasicBlock*, Value*>, 8> Values;
     llvm::sort(Preds);
     for (const PHINode &PN : BB.phis()) {
@@ -2961,8 +2960,8 @@ void Verifier::visitAddrSpaceCastInst(AddrSpaceCastInst &I) {
   Assert(SrcTy->getPointerAddressSpace() != DestTy->getPointerAddressSpace(),
          "AddrSpaceCast must be between different address spaces", &I);
   if (auto *SrcVTy = dyn_cast<VectorType>(SrcTy))
-    Assert(cast<FixedVectorType>(SrcVTy)->getNumElements() ==
-               cast<FixedVectorType>(DestTy)->getNumElements(),
+    Assert(SrcVTy->getElementCount() ==
+               cast<VectorType>(DestTy)->getElementCount(),
            "AddrSpaceCast vector pointer number of elements mismatch", &I);
   visitInstruction(I);
 }
@@ -3496,7 +3495,7 @@ void Verifier::visitGetElementPtrInst(GetElementPtrInst &GEP) {
          "GEP base pointer is not a vector or a vector of pointers", &GEP);
   Assert(GEP.getSourceElementType()->isSized(), "GEP into unsized type!", &GEP);
 
-  SmallVector<Value*, 16> Idxs(GEP.idx_begin(), GEP.idx_end());
+  SmallVector<Value *, 16> Idxs(GEP.indices());
   Assert(all_of(
       Idxs, [](Value* V) { return V->getType()->isIntOrIntVectorTy(); }),
       "GEP indexes must be integers", &GEP);

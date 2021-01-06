@@ -128,6 +128,7 @@ void TargetLoweringObjectFileELF::Initialize(MCContext &Ctx,
     // Fallthrough if not using EHABI
     LLVM_FALLTHROUGH;
   case Triple::ppc:
+  case Triple::ppcle:
   case Triple::x86:
     PersonalityEncoding = isPositionIndependent()
                               ? dwarf::DW_EH_PE_indirect |
@@ -2054,6 +2055,29 @@ MCSection *TargetLoweringObjectFileWasm::getStaticDtorSection(
 //===----------------------------------------------------------------------===//
 //                                  XCOFF
 //===----------------------------------------------------------------------===//
+bool TargetLoweringObjectFileXCOFF::ShouldEmitEHBlock(
+    const MachineFunction *MF) {
+  if (!MF->getLandingPads().empty())
+    return true;
+
+  const Function &F = MF->getFunction();
+  if (!F.hasPersonalityFn() || !F.needsUnwindTableEntry())
+    return false;
+
+  const Function *Per =
+      dyn_cast<Function>(F.getPersonalityFn()->stripPointerCasts());
+  if (isNoOpWithoutInvoke(classifyEHPersonality(Per)))
+    return false;
+
+  return true;
+}
+
+MCSymbol *
+TargetLoweringObjectFileXCOFF::getEHInfoTableSymbol(const MachineFunction *MF) {
+  return MF->getMMI().getContext().getOrCreateSymbol(
+      "__ehinfo." + Twine(MF->getFunctionNumber()));
+}
+
 MCSymbol *
 TargetLoweringObjectFileXCOFF::getTargetSymbol(const GlobalValue *GV,
                                                const TargetMachine &TM) const {

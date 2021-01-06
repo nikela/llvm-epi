@@ -121,78 +121,12 @@ VPUser *VPRecipeBase::toVPUser() {
     return U;
   if (auto *U = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this))
     return U;
+  if (auto *U = dyn_cast<VPPredicatedWidenRecipe>(this))
+    return U;
   if (auto *U = dyn_cast<VPWidenEVLMaskRecipe>(this))
     return U;
   if (auto *U = dyn_cast<VPPredInstPHIRecipe>(this))
     return U;
-  return nullptr;
-}
-
-VPValue *VPRecipeBase::toVPValue() {
-  if (auto *V = dyn_cast<VPInstruction>(this))
-    return V;
-  if (auto *V = dyn_cast<VPReductionRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this)) {
-    if (!V->isStore())
-      return V->getVPValue();
-    else
-      return nullptr;
-  }
-  if (auto *V = dyn_cast<VPWidenCallRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenSelectRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenGEPRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPReplicateRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this)) {
-    if (!V->isStore())
-      return V->getVPValue();
-    else
-      return nullptr;
-  }
-  if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
-    return V;
-  return nullptr;
-}
-
-const VPValue *VPRecipeBase::toVPValue() const {
-  if (auto *V = dyn_cast<VPInstruction>(this))
-    return V;
-  if (auto *V = dyn_cast<VPReductionRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenMemoryInstructionRecipe>(this)) {
-    if (!V->isStore())
-      return V->getVPValue();
-    else
-      return nullptr;
-  }
-  if (auto *V = dyn_cast<VPWidenCallRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenSelectRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenGEPRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPReplicateRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPPredicatedWidenMemoryInstructionRecipe>(this)) {
-    if (!V->isStore())
-      return V->getVPValue();
-    else
-      return nullptr;
-  }
-  if (auto *V = dyn_cast<VPWidenEVLRecipe>(this))
-    return V;
-  if (auto *V = dyn_cast<VPWidenEVLMaskRecipe>(this))
-    return V;
   return nullptr;
 }
 
@@ -413,8 +347,8 @@ void VPBasicBlock::execute(VPTransformState *State) {
 
 void VPBasicBlock::dropAllReferences(VPValue *NewValue) {
   for (VPRecipeBase &R : Recipes) {
-    if (auto *VPV = R.toVPValue())
-      VPV->replaceAllUsesWith(NewValue);
+    for (auto *Def : R.definedValues())
+      Def->replaceAllUsesWith(NewValue);
 
     if (auto *User = R.toVPUser())
       for (unsigned I = 0, E = User->getNumOperands(); I != E; I++)
@@ -963,15 +897,15 @@ static bool isOuterMask(VPValue *V) {
 
 void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                                     VPSlotTracker &SlotTracker) const {
-  O << "\"PREDICATED-WIDEN " << VPlanIngredient(&Ingredient);
-  O << ", ";
+  O << "\"PREDICATED-WIDEN ";
+  printAsOperand(O, SlotTracker);
+  O << " = " << getUnderlyingInstr()->getOpcodeName() << " ";
+  printOperands(O, SlotTracker);
+
+  // Improve this.
   VPValue *Mask = getMask();
   if (isOuterMask(Mask))
-    O << "ALL-ONES-MASK";
-  else
-    Mask->printAsOperand(O, SlotTracker);
-  O << ", ";
-  getEVL()->printAsOperand(O, SlotTracker);
+    O << " (ALL-ONES-MASK)";
 }
 
 void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
@@ -1030,7 +964,7 @@ void VPReductionRecipe::print(raw_ostream &O, const Twine &Indent,
   printAsOperand(O, SlotTracker);
   O << " = ";
   getChainOp()->printAsOperand(O, SlotTracker);
-  O << " + reduce." << Instruction::getOpcodeName(RdxDesc->getRecurrenceBinOp())
+  O << " + reduce." << Instruction::getOpcodeName(RdxDesc->getOpcode())
     << " (";
   getVecOp()->printAsOperand(O, SlotTracker);
   if (getCondOp()) {

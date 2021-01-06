@@ -77,9 +77,7 @@ enum NodeType : unsigned {
   GREVIW,
   GORCI,
   GORCIW,
-
   // EPI nodes
-  VMV_X_S,
   EXTRACT_VECTOR_ELT,
   SIGN_EXTEND_VECTOR,
   ZERO_EXTEND_VECTOR,
@@ -132,6 +130,14 @@ enum NodeType : unsigned {
   VZIP2,
   VUNZIP2,
   VTRN,
+  // Vector Extension
+  // VMV_X_S matches the semantics of vmv.x.s. The result is always XLenVT
+  // sign extended from the vector element size. NOTE: The result size will
+  // never be less than the vector element size.
+  VMV_X_S,
+  // Splats an i64 scalar to a vector type (with element type i64) where the
+  // scalar is a sign-extended i32.
+  SPLAT_VECTOR_I64,
 };
 } // namespace RISCVISD
 
@@ -320,6 +326,7 @@ private:
   SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerGlobalTLSAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSELECT(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVASTART(SDValue Op, SelectionDAG &DAG) const;
@@ -327,6 +334,7 @@ private:
   SDValue lowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftLeftParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftRightParts(SDValue Op, SelectionDAG &DAG, bool IsSRA) const;
+  SDValue lowerSPLATVECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;

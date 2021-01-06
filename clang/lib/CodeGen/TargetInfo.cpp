@@ -2603,7 +2603,7 @@ static std::string qualifyWindowsLibrary(llvm::StringRef Lib) {
   // If the argument does not end in .lib, automatically add the suffix.
   // If the argument contains a space, enclose it in quotes.
   // This matches the behavior of MSVC.
-  bool Quote = (Lib.find(" ") != StringRef::npos);
+  bool Quote = (Lib.find(' ') != StringRef::npos);
   std::string ArgStr = Quote ? "\"" : "";
   ArgStr += Lib;
   if (!Lib.endswith_lower(".lib") && !Lib.endswith_lower(".a"))
@@ -4858,7 +4858,7 @@ Address PPC32_SVR4_ABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAList,
 
 bool PPC32TargetCodeGenInfo::isStructReturnInRegABI(
     const llvm::Triple &Triple, const CodeGenOptions &Opts) {
-  assert(Triple.getArch() == llvm::Triple::ppc);
+  assert(Triple.isPPC32());
 
   switch (Opts.getStructReturnConvention()) {
   case CodeGenOptions::SRCK_Default:
@@ -10944,6 +10944,13 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
 
     bool IsSoftFloat =
         CodeGenOpts.FloatABI == "soft" || getTarget().hasFeature("spe");
+    bool RetSmallStructInRegABI =
+        PPC32TargetCodeGenInfo::isStructReturnInRegABI(Triple, CodeGenOpts);
+    return SetCGInfo(
+        new PPC32TargetCodeGenInfo(Types, IsSoftFloat, RetSmallStructInRegABI));
+  }
+  case llvm::Triple::ppcle: {
+    bool IsSoftFloat = CodeGenOpts.FloatABI == "soft";
     bool RetSmallStructInRegABI =
         PPC32TargetCodeGenInfo::isStructReturnInRegABI(Triple, CodeGenOpts);
     return SetCGInfo(

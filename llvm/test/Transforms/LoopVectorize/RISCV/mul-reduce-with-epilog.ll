@@ -62,8 +62,8 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK-NEXT:    [[TMP22:%.*]] = urem i32 [[CURRENT_LEN]], 2
 ; CHECK-NEXT:    [[HALFLEN]] = add i32 [[TMP21]], [[TMP22]]
 ; CHECK-NEXT:    [[INDEX_VEC:%.*]] = call <vscale x 16 x i32> @llvm.experimental.vector.stepvector.nxv16i32()
-; CHECK-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 16 x i32> undef, i32 [[HALFLEN]], i32 0
-; CHECK-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 16 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer
+; CHECK-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 16 x i32> poison, i32 [[HALFLEN]], i32 0
+; CHECK-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 16 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 16 x i32> poison, <vscale x 16 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP23:%.*]] = icmp ult <vscale x 16 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
 ; CHECK-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 16 x i1> [[TMP23]], <vscale x 16 x i32> [[CURRENT_VEC]], <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 16 x i32> @llvm.experimental.vector.slideleftfill.nxv16i32(<vscale x 16 x i32> [[CURRENT_VEC]], <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer), i32 [[HALFLEN]])
@@ -144,8 +144,8 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK1-NEXT:    [[TMP22:%.*]] = urem i32 [[CURRENT_LEN]], 2
 ; CHECK1-NEXT:    [[HALFLEN]] = add i32 [[TMP21]], [[TMP22]]
 ; CHECK1-NEXT:    [[INDEX_VEC:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.stepvector.nxv2i32()
-; CHECK1-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> undef, i32 [[HALFLEN]], i32 0
-; CHECK1-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer
+; CHECK1-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 [[HALFLEN]], i32 0
+; CHECK1-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK1-NEXT:    [[TMP23:%.*]] = icmp ult <vscale x 2 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
 ; CHECK1-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 2 x i1> [[TMP23]], <vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.slideleftfill.nxv2i32(<vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[HALFLEN]])

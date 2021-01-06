@@ -600,10 +600,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a3, a3, 32
 ; CHECK-NEXT:    srli a3, a3, 32
 ; CHECK-NEXT:    sd a3, -264(s0) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a3, s0, -184
-; CHECK-NEXT:    addi t4, a3, 8
-; CHECK-NEXT:    addi a3, s0, -248
-; CHECK-NEXT:    addi t5, a3, 8
+; CHECK-NEXT:    addi t4, zero, 2
+; CHECK-NEXT:    addi t5, zero, 56
 ; CHECK-NEXT:  .LBB0_8: # %for.cond211
 ; CHECK-NEXT:    # =>This Loop Header: Depth=1
 ; CHECK-NEXT:    # Child Loop BB0_9 Depth 2
@@ -656,8 +654,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli s1, t0, 32
 ; CHECK-NEXT:    srli s5, s1, 32
 ; CHECK-NEXT:    slli s1, t1, 32
-; CHECK-NEXT:    srli t1, s1, 32
-; CHECK-NEXT:    lwu a7, -180(s0)
+; CHECK-NEXT:    srli t0, s1, 32
+; CHECK-NEXT:    lwu t1, -180(s0)
 ; CHECK-NEXT:    lwu s8, -164(s0)
 ; CHECK-NEXT:    lwu s6, -132(s0)
 ; CHECK-NEXT:    lwu a6, -148(s0)
@@ -667,7 +665,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    srli s9, a5, 32
 ; CHECK-NEXT:    slli a4, a4, 32
 ; CHECK-NEXT:    srli s7, a4, 32
-; CHECK-NEXT:    lwu t0, -172(s0)
+; CHECK-NEXT:    lwu a7, -172(s0)
 ; CHECK-NEXT:    lwu s10, -156(s0)
 ; CHECK-NEXT:    lwu t6, -124(s0)
 ; CHECK-NEXT:    lwu s3, -140(s0)
@@ -682,42 +680,42 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    xor a5, a5, s5
 ; CHECK-NEXT:    slli s1, a5, 16
 ; CHECK-NEXT:    srliw a5, a5, 16
-; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    add s5, a5, t1
-; CHECK-NEXT:    addw a3, a5, t1
+; CHECK-NEXT:    or s1, s1, a5
+; CHECK-NEXT:    add s5, s1, t0
+; CHECK-NEXT:    addw a3, s1, t0
 ; CHECK-NEXT:    xor a3, a3, ra
-; CHECK-NEXT:    slli s1, a3, 12
-; CHECK-NEXT:    srliw a3, a3, 20
-; CHECK-NEXT:    or s1, s1, a3
-; CHECK-NEXT:    addw s11, s1, a4
-; CHECK-NEXT:    xor a3, s11, a5
-; CHECK-NEXT:    slli a5, a3, 8
-; CHECK-NEXT:    srliw a3, a3, 24
-; CHECK-NEXT:    or t1, a5, a3
-; CHECK-NEXT:    addw t3, t1, s5
-; CHECK-NEXT:    xor a5, t3, s1
-; CHECK-NEXT:    slli s1, a5, 7
-; CHECK-NEXT:    srliw a5, a5, 25
-; CHECK-NEXT:    or ra, s1, a5
-; CHECK-NEXT:    add s5, a7, s8
-; CHECK-NEXT:    addw s1, a7, s8
-; CHECK-NEXT:    xor s1, s1, s6
-; CHECK-NEXT:    slli a4, s1, 16
-; CHECK-NEXT:    srliw s1, s1, 16
-; CHECK-NEXT:    or a4, a4, s1
-; CHECK-NEXT:    add s1, a4, a6
-; CHECK-NEXT:    addw a3, a4, a6
-; CHECK-NEXT:    xor a3, a3, s8
 ; CHECK-NEXT:    slli a5, a3, 12
 ; CHECK-NEXT:    srliw a3, a3, 20
 ; CHECK-NEXT:    or a3, a3, a5
-; CHECK-NEXT:    addw a7, a3, s5
-; CHECK-NEXT:    xor a4, a7, a4
+; CHECK-NEXT:    addw s11, a3, a4
+; CHECK-NEXT:    xor a4, s11, s1
 ; CHECK-NEXT:    slli a5, a4, 8
 ; CHECK-NEXT:    srliw a4, a4, 24
-; CHECK-NEXT:    or s6, a5, a4
+; CHECK-NEXT:    or t0, a5, a4
+; CHECK-NEXT:    addw t3, t0, s5
+; CHECK-NEXT:    xor a3, t3, a3
+; CHECK-NEXT:    slli a4, a3, 7
+; CHECK-NEXT:    srliw a3, a3, 25
+; CHECK-NEXT:    or ra, a4, a3
+; CHECK-NEXT:    add s5, t1, s8
+; CHECK-NEXT:    addw a4, t1, s8
+; CHECK-NEXT:    xor a4, a4, s6
+; CHECK-NEXT:    slli s1, a4, 16
+; CHECK-NEXT:    srliw a4, a4, 16
+; CHECK-NEXT:    or a4, a4, s1
+; CHECK-NEXT:    add s1, a4, a6
+; CHECK-NEXT:    addw a5, a4, a6
+; CHECK-NEXT:    xor a5, a5, s8
+; CHECK-NEXT:    slli a3, a5, 12
+; CHECK-NEXT:    srliw a5, a5, 20
+; CHECK-NEXT:    or a5, a5, a3
+; CHECK-NEXT:    addw t1, a5, s5
+; CHECK-NEXT:    xor a4, t1, a4
+; CHECK-NEXT:    slli a3, a4, 8
+; CHECK-NEXT:    srliw a4, a4, 24
+; CHECK-NEXT:    or s6, a3, a4
 ; CHECK-NEXT:    addw a6, s6, s1
-; CHECK-NEXT:    xor a3, a6, a3
+; CHECK-NEXT:    xor a3, a6, a5
 ; CHECK-NEXT:    slli a4, a3, 7
 ; CHECK-NEXT:    srliw a3, a3, 25
 ; CHECK-NEXT:    or s5, a4, a3
@@ -726,25 +724,25 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    xor a5, a5, s7
 ; CHECK-NEXT:    slli s1, a5, 16
 ; CHECK-NEXT:    srliw a5, a5, 16
-; CHECK-NEXT:    or s1, s1, a5
-; CHECK-NEXT:    add a5, s1, s4
-; CHECK-NEXT:    addw a3, s1, s4
+; CHECK-NEXT:    or a5, a5, s1
+; CHECK-NEXT:    add s1, a5, s4
+; CHECK-NEXT:    addw a3, a5, s4
 ; CHECK-NEXT:    xor a3, a3, s9
 ; CHECK-NEXT:    slli a4, a3, 12
 ; CHECK-NEXT:    srliw a3, a3, 20
 ; CHECK-NEXT:    or a3, a3, a4
 ; CHECK-NEXT:    addw t2, a3, s8
-; CHECK-NEXT:    xor s1, t2, s1
-; CHECK-NEXT:    slli a4, s1, 8
-; CHECK-NEXT:    srliw s1, s1, 24
-; CHECK-NEXT:    or s7, a4, s1
-; CHECK-NEXT:    addw s8, s7, a5
+; CHECK-NEXT:    xor a5, t2, a5
+; CHECK-NEXT:    slli a4, a5, 8
+; CHECK-NEXT:    srliw a5, a5, 24
+; CHECK-NEXT:    or s7, a4, a5
+; CHECK-NEXT:    addw s8, s7, s1
 ; CHECK-NEXT:    xor a3, s8, a3
 ; CHECK-NEXT:    slli a5, a3, 7
 ; CHECK-NEXT:    srliw a3, a3, 25
 ; CHECK-NEXT:    or s9, a5, a3
-; CHECK-NEXT:    add s4, t0, s10
-; CHECK-NEXT:    addw s1, t0, s10
+; CHECK-NEXT:    add s4, a7, s10
+; CHECK-NEXT:    addw s1, a7, s10
 ; CHECK-NEXT:    xor s1, s1, t6
 ; CHECK-NEXT:    slli a3, s1, 16
 ; CHECK-NEXT:    srliw s1, s1, 16
@@ -755,8 +753,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli s1, a5, 12
 ; CHECK-NEXT:    srliw a5, a5, 20
 ; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    addw t0, a5, s4
-; CHECK-NEXT:    xor a3, t0, a3
+; CHECK-NEXT:    addw a7, a5, s4
+; CHECK-NEXT:    xor a3, a7, a3
 ; CHECK-NEXT:    slli s1, a3, 8
 ; CHECK-NEXT:    srliw a3, a3, 24
 ; CHECK-NEXT:    or a3, a3, s1
@@ -787,9 +785,9 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a4, a3, 7
 ; CHECK-NEXT:    srliw a3, a3, 25
 ; CHECK-NEXT:    or s8, a4, a3
-; CHECK-NEXT:    add s3, s9, a7
-; CHECK-NEXT:    addw a4, s9, a7
-; CHECK-NEXT:    xor a4, t1, a4
+; CHECK-NEXT:    add s3, s9, t1
+; CHECK-NEXT:    addw a4, s9, t1
+; CHECK-NEXT:    xor a4, t0, a4
 ; CHECK-NEXT:    slli a5, a4, 16
 ; CHECK-NEXT:    srliw a4, a4, 16
 ; CHECK-NEXT:    or a4, a4, a5
@@ -799,8 +797,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a3, s1, 12
 ; CHECK-NEXT:    srliw s1, s1, 20
 ; CHECK-NEXT:    or a3, a3, s1
-; CHECK-NEXT:    addw a7, a3, s3
-; CHECK-NEXT:    xor a4, a7, a4
+; CHECK-NEXT:    addw t1, a3, s3
+; CHECK-NEXT:    xor a4, t1, a4
 ; CHECK-NEXT:    slli s1, a4, 8
 ; CHECK-NEXT:    srliw a4, a4, 24
 ; CHECK-NEXT:    or s5, s1, a4
@@ -809,7 +807,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a4, a3, 7
 ; CHECK-NEXT:    srliw a3, a3, 25
 ; CHECK-NEXT:    or s9, a4, a3
-; CHECK-NEXT:    add t1, s10, t2
+; CHECK-NEXT:    add t0, s10, t2
 ; CHECK-NEXT:    addw a4, s10, t2
 ; CHECK-NEXT:    xor a4, s6, a4
 ; CHECK-NEXT:    slli a5, a4, 16
@@ -821,18 +819,18 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a3, s1, 12
 ; CHECK-NEXT:    srliw s1, s1, 20
 ; CHECK-NEXT:    or a3, a3, s1
-; CHECK-NEXT:    addw t2, a3, t1
+; CHECK-NEXT:    addw t2, a3, t0
 ; CHECK-NEXT:    xor a4, t2, a4
 ; CHECK-NEXT:    slli s1, a4, 8
 ; CHECK-NEXT:    srliw a4, a4, 24
 ; CHECK-NEXT:    or s6, s1, a4
-; CHECK-NEXT:    addw t1, s6, a5
-; CHECK-NEXT:    xor a3, t1, a3
+; CHECK-NEXT:    addw t0, s6, a5
+; CHECK-NEXT:    xor a3, t0, a3
 ; CHECK-NEXT:    slli a4, a3, 7
 ; CHECK-NEXT:    srliw a3, a3, 25
 ; CHECK-NEXT:    or s10, a4, a3
-; CHECK-NEXT:    add t3, ra, t0
-; CHECK-NEXT:    addw a4, ra, t0
+; CHECK-NEXT:    add t3, ra, a7
+; CHECK-NEXT:    addw a4, ra, a7
 ; CHECK-NEXT:    xor a4, a4, s7
 ; CHECK-NEXT:    slli a5, a4, 16
 ; CHECK-NEXT:    srliw a4, a4, 16
@@ -843,9 +841,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli a3, s1, 12
 ; CHECK-NEXT:    srliw s1, s1, 20
 ; CHECK-NEXT:    or a3, a3, s1
-; CHECK-NEXT:    addw t0, a3, t3
-; CHECK-NEXT:    addi t3, zero, 2
-; CHECK-NEXT:    xor a4, t0, a4
+; CHECK-NEXT:    addw a7, a3, t3
+; CHECK-NEXT:    xor a4, a7, a4
 ; CHECK-NEXT:    slli s1, a4, 8
 ; CHECK-NEXT:    srliw a4, a4, 24
 ; CHECK-NEXT:    or s7, s1, a4
@@ -856,20 +853,20 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    sext.w a5, s2
 ; CHECK-NEXT:    addi s2, s2, -2
 ; CHECK-NEXT:    or ra, a4, a3
-; CHECK-NEXT:    bltu t3, a5, .LBB0_9
+; CHECK-NEXT:    bltu t4, a5, .LBB0_9
 ; CHECK-NEXT:  # %bb.10: # %for.cond451.preheader.i
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    lw a4, 0(a0)
-; CHECK-NEXT:    add s11, s11, a4
-; CHECK-NEXT:    sw s11, -184(s0)
+; CHECK-NEXT:    add s2, a4, s11
+; CHECK-NEXT:    sw s2, -184(s0)
 ; CHECK-NEXT:    lw a4, 4(a0)
-; CHECK-NEXT:    add s2, a4, a7
-; CHECK-NEXT:    sw s2, -180(s0)
+; CHECK-NEXT:    add t1, t1, a4
+; CHECK-NEXT:    sw t1, -180(s0)
 ; CHECK-NEXT:    lw s1, 8(a0)
 ; CHECK-NEXT:    add s1, s1, t2
 ; CHECK-NEXT:    sw s1, -176(s0)
 ; CHECK-NEXT:    lw s1, 12(a0)
-; CHECK-NEXT:    add s1, s1, t0
+; CHECK-NEXT:    add s1, s1, a7
 ; CHECK-NEXT:    sw s1, -172(s0)
 ; CHECK-NEXT:    lw s1, 16(a0)
 ; CHECK-NEXT:    add a3, s1, ra
@@ -884,7 +881,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    add a3, a3, s10
 ; CHECK-NEXT:    sw a3, -156(s0)
 ; CHECK-NEXT:    lw a3, 32(a0)
-; CHECK-NEXT:    add a3, a3, t1
+; CHECK-NEXT:    add a3, a3, t0
 ; CHECK-NEXT:    sw a3, -152(s0)
 ; CHECK-NEXT:    lw a3, 36(a0)
 ; CHECK-NEXT:    add a3, a3, a6
@@ -908,36 +905,37 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    mv a3, zero
 ; CHECK-NEXT:    add s1, s1, t6
 ; CHECK-NEXT:    sw s1, -124(s0)
-; CHECK-NEXT:    srli s1, s11, 8
-; CHECK-NEXT:    srli a4, s11, 16
-; CHECK-NEXT:    srli a5, s11, 24
-; CHECK-NEXT:    sb s11, -248(s0)
+; CHECK-NEXT:    srli s1, s2, 8
+; CHECK-NEXT:    srli a4, s2, 16
+; CHECK-NEXT:    srli a5, s2, 24
+; CHECK-NEXT:    sb s2, -248(s0)
 ; CHECK-NEXT:    sb s1, -247(s0)
 ; CHECK-NEXT:    sb a4, -246(s0)
 ; CHECK-NEXT:    sb a5, -245(s0)
-; CHECK-NEXT:    srli a4, s2, 8
-; CHECK-NEXT:    srli a5, s2, 16
-; CHECK-NEXT:    srli s1, s2, 24
-; CHECK-NEXT:    sb s2, -244(s0)
+; CHECK-NEXT:    srli a4, t1, 8
+; CHECK-NEXT:    srli a5, t1, 16
+; CHECK-NEXT:    srli s1, t1, 24
+; CHECK-NEXT:    sb t1, -244(s0)
 ; CHECK-NEXT:    sb a4, -243(s0)
 ; CHECK-NEXT:    sb a5, -242(s0)
 ; CHECK-NEXT:    sb s1, -241(s0)
-; CHECK-NEXT:    addi t2, zero, 56
+; CHECK-NEXT:    addi t2, s0, -176
+; CHECK-NEXT:    addi t3, s0, -240
 ; CHECK-NEXT:  .LBB0_11: # %do.body.do.body_crit_edge.i.do.body.do.body_crit_edge.i_crit_edge
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
-; CHECK-NEXT:    add a4, t4, a3
+; CHECK-NEXT:    add a4, t2, a3
 ; CHECK-NEXT:    lw a4, 0(a4)
 ; CHECK-NEXT:    srli t1, a4, 8
 ; CHECK-NEXT:    srli s1, a4, 16
 ; CHECK-NEXT:    srli t0, a4, 24
-; CHECK-NEXT:    add a5, t5, a3
+; CHECK-NEXT:    add a5, t3, a3
 ; CHECK-NEXT:    sb a4, 0(a5)
 ; CHECK-NEXT:    sb t1, 1(a5)
 ; CHECK-NEXT:    sb s1, 2(a5)
 ; CHECK-NEXT:    addi a3, a3, 4
 ; CHECK-NEXT:    sb t0, 3(a5)
-; CHECK-NEXT:    bne a3, t2, .LBB0_11
+; CHECK-NEXT:    bne a3, t5, .LBB0_11
 ; CHECK-NEXT:  # %bb.12: # %salsa20_wordtobyte.exit
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    addi a3, a7, 1
@@ -953,8 +951,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    ld a7, -256(s0) # 8-byte Folded Reload
 ; CHECK-NEXT:    sext.w a3, a7
-; CHECK-NEXT:    addi t0, s0, -248
 ; CHECK-NEXT:    addi a4, zero, 65
+; CHECK-NEXT:    addi t0, s0, -248
 ; CHECK-NEXT:    addi s1, zero, 64
 ; CHECK-NEXT:    bltu a3, a4, .LBB0_18
 ; CHECK-NEXT:  # %bb.15: # %for.body243.preheader

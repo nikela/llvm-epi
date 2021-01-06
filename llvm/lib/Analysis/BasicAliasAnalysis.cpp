@@ -422,6 +422,7 @@ BasicAAResult::DecomposeGEPExpression(const Value *V, const DataLayout &DL,
   // Limit recursion depth to limit compile time in crazy cases.
   unsigned MaxLookup = MaxLookupSearchDepth;
   SearchTimes++;
+  const Instruction *CxtI = dyn_cast<Instruction>(V);
 
   unsigned MaxPointerSize = getMaxPointerSize(DL);
   DecomposedGEP Decomposed;
@@ -584,7 +585,7 @@ BasicAAResult::DecomposeGEPExpression(const Value *V, const DataLayout &DL,
       Scale = adjustToPointerSize(Scale, PointerSize);
 
       if (!!Scale) {
-        VariableGEPIndex Entry = {Index, ZExtBits, SExtBits, Scale};
+        VariableGEPIndex Entry = {Index, ZExtBits, SExtBits, Scale, CxtI};
         Decomposed.VarIndices.push_back(Entry);
       }
     }
@@ -1098,22 +1099,6 @@ AliasResult BasicAAResult::aliasGEP(
     const GEPOperator *GEP1, LocationSize V1Size, const AAMDNodes &V1AAInfo,
     const Value *V2, LocationSize V2Size, const AAMDNodes &V2AAInfo,
     const Value *UnderlyingV1, const Value *UnderlyingV2, AAQueryInfo &AAQI) {
-  // If both accesses are unknown size, we can only check whether the
-  // underlying objects are different.
-  if (!V1Size.hasValue() && !V2Size.hasValue()) {
-    // If the other operand is a phi/select, let phi/select handling perform
-    // this check. Otherwise the same recursive walk is done twice.
-    if (!isa<PHINode>(V2) && !isa<SelectInst>(V2)) {
-      AliasResult BaseAlias =
-          aliasCheck(UnderlyingV1, LocationSize::beforeOrAfterPointer(),
-                     AAMDNodes(), UnderlyingV2,
-                     LocationSize::beforeOrAfterPointer(), AAMDNodes(), AAQI);
-      if (BaseAlias == NoAlias)
-        return NoAlias;
-    }
-    return MayAlias;
-  }
-
   DecomposedGEP DecompGEP1 = DecomposeGEPExpression(GEP1, DL, &AC, DT);
   DecomposedGEP DecompGEP2 = DecomposeGEPExpression(V2, DL, &AC, DT);
 
@@ -1280,9 +1265,9 @@ AliasResult BasicAAResult::aliasGEP(
         // the Value this cycle may not hold in the next cycle. We'll just
         // give up if we can't determine conditions that hold for every cycle:
         const Value *V = DecompGEP1.VarIndices[i].V;
+        const Instruction *CxtI = DecompGEP1.VarIndices[i].CxtI;
 
-        KnownBits Known =
-            computeKnownBits(V, DL, 0, &AC, dyn_cast<Instruction>(GEP1), DT);
+        KnownBits Known = computeKnownBits(V, DL, 0, &AC, CxtI, DT);
         bool SignKnownZero = Known.isNonNegative();
         bool SignKnownOne = Known.isNegative();
 
@@ -1334,7 +1319,7 @@ AliasResult BasicAAResult::aliasGEP(
       if (DecompGEP1.VarIndices.size() == 1) {
         // VarIndex = Scale*V. If V != 0 then abs(VarIndex) >= abs(Scale).
         const VariableGEPIndex &Var = DecompGEP1.VarIndices[0];
-        if (isKnownNonZero(Var.V, DL))
+        if (isKnownNonZero(Var.V, DL, 0, &AC, Var.CxtI, DT))
           MinAbsVarIndex = Var.Scale.abs();
       } else if (DecompGEP1.VarIndices.size() == 2) {
         // VarIndex = Scale*V0 + (-Scale)*V1.
@@ -1345,7 +1330,7 @@ AliasResult BasicAAResult::aliasGEP(
         const VariableGEPIndex &Var1 = DecompGEP1.VarIndices[1];
         if (Var0.Scale == -Var1.Scale && Var0.ZExtBits == Var1.ZExtBits &&
             Var0.SExtBits == Var1.SExtBits && VisitedPhiBBs.empty() &&
-            isKnownNonEqual(Var0.V, Var1.V, DL))
+            isKnownNonEqual(Var0.V, Var1.V, DL, &AC, /* CxtI */ nullptr, DT))
           MinAbsVarIndex = Var0.Scale.abs();
       }
 
@@ -1810,7 +1795,7 @@ void BasicAAResult::GetIndexDifference(
 
     // If we didn't consume this entry, add it to the end of the Dest list.
     if (!!Scale) {
-      VariableGEPIndex Entry = {V, ZExtBits, SExtBits, -Scale};
+      VariableGEPIndex Entry = {V, ZExtBits, SExtBits, -Scale, Src[i].CxtI};
       Dest.push_back(Entry);
     }
   }
