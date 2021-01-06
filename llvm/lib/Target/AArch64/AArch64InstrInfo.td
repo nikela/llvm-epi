@@ -813,7 +813,21 @@ def WFET : RegInputSystemI<0b0000, 0b000, "wfet">;
 def WFIT : RegInputSystemI<0b0000, 0b001, "wfit">;
 }
 
+// Branch Record Buffer two-word mnemonic instructions
+class BRBEI<bits<3> op2, string keyword>
+    : SimpleSystemI<0, (ins), "brb", keyword>, Sched<[WriteSys]> {
+  let Inst{31-8} = 0b110101010000100101110010;
+  let Inst{7-5} = op2;
+  let Predicates = [HasBRBE];
 }
+def BRB_IALL: BRBEI<0b100, "\tiall">;
+def BRB_INJ:  BRBEI<0b101, "\tinj">;
+
+}
+
+// Allow uppercase and lowercase keyword arguments for BRB IALL and BRB INJ
+def : TokenAlias<"INJ", "inj">;
+def : TokenAlias<"IALL", "iall">;
 
 // ARMv8.2-A Dot Product
 let Predicates = [HasDotProd] in {
@@ -4765,18 +4779,18 @@ defm SSUBW   : SIMDWideThreeVectorBHS<0, 0b0011, "ssubw",
 defm UABAL   : SIMDLongThreeVectorTiedBHSabal<1, 0b0101, "uabal",
                                               AArch64uabd>;
 defm UADDL   : SIMDLongThreeVectorBHS<1, 0b0000, "uaddl",
-                 BinOpFrag<(add (zext node:$LHS), (zext node:$RHS))>>;
+                 BinOpFrag<(add (zanyext node:$LHS), (zanyext node:$RHS))>>;
 defm UADDW   : SIMDWideThreeVectorBHS<1, 0b0001, "uaddw",
-                 BinOpFrag<(add node:$LHS, (zext node:$RHS))>>;
+                 BinOpFrag<(add node:$LHS, (zanyext node:$RHS))>>;
 defm UMLAL   : SIMDLongThreeVectorTiedBHS<1, 0b1000, "umlal",
     TriOpFrag<(add node:$LHS, (int_aarch64_neon_umull node:$MHS, node:$RHS))>>;
 defm UMLSL   : SIMDLongThreeVectorTiedBHS<1, 0b1010, "umlsl",
     TriOpFrag<(sub node:$LHS, (int_aarch64_neon_umull node:$MHS, node:$RHS))>>;
 defm UMULL   : SIMDLongThreeVectorBHS<1, 0b1100, "umull", int_aarch64_neon_umull>;
 defm USUBL   : SIMDLongThreeVectorBHS<1, 0b0010, "usubl",
-                 BinOpFrag<(sub (zext node:$LHS), (zext node:$RHS))>>;
+                 BinOpFrag<(sub (zanyext node:$LHS), (zanyext node:$RHS))>>;
 defm USUBW   : SIMDWideThreeVectorBHS<   1, 0b0011, "usubw",
-                 BinOpFrag<(sub node:$LHS, (zext node:$RHS))>>;
+                 BinOpFrag<(sub node:$LHS, (zanyext node:$RHS))>>;
 
 // Additional patterns for SMULL and UMULL
 multiclass Neon_mul_widen_patterns<SDPatternOperator opnode,
