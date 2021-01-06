@@ -178,7 +178,6 @@ def PseudoEPIReadVLENB : Pseudo<(outs GPR:$rd),
                              (ins), [], "rdvlenb", "$rd">;
 
 let hasSideEffects = 1, mayLoad = 0, mayStore = 0, Defs = [VL, VTYPE] in {
-// def PseudoEPIVSETVLI : Pseudo<(outs GPR:$rd), (ins GPR:$rs1, VTypeIOp:$vtypei), []>;
 def PseudoEPIVSETVL : Pseudo<(outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2), []>;
 }
 
