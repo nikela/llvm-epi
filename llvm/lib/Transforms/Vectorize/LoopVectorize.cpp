@@ -4532,15 +4532,16 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // contain the last HalfLenQuotient elements of the CurrVec followed by
   // (HalfLen - HalfLenQuotient) identity elements.
   // Note that CurrLen = HalfLen + HalfLenQuotient
-  Value *SecondHalf =
-      preferPredicatedVectorOps()
-          ? Builder.CreateIntrinsic(
-                Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
-                {CurrVec, Identity, HalfLen, getSetVL(CurrLen)}, nullptr,
-                "second.half")
-          : Builder.CreateIntrinsic(
-                Intrinsic::experimental_vector_slideleftfill, RdxTy,
-                {CurrVec, Identity, HalfLen}, nullptr, "second.half");
+  Value *SecondHalf = nullptr;
+  if (preferPredicatedVectorOps()) {
+    auto *CurrVL = getSetVL(CurrLen);
+    SecondHalf = Builder.CreateIntrinsic(
+        Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
+        {CurrVec, Identity, HalfLen, CurrVL, CurrVL}, nullptr, "second.half");
+  } else
+    SecondHalf = Builder.CreateIntrinsic(
+        Intrinsic::experimental_vector_slideleftfill, RdxTy,
+        {CurrVec, Identity, HalfLen}, nullptr, "second.half");
 
   // All ops in the reduction inherit fast-math-flags from the recurrence
   // descriptor.
