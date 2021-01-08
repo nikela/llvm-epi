@@ -5,7 +5,7 @@
 define <vscale x 1 x i1> @vmset() {
 ; CHECK-LABEL: vmset:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
 ; CHECK-NEXT:    vmset.m v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -16,7 +16,7 @@ define <vscale x 1 x i1> @vmset() {
 define <vscale x 2 x i1> @vmset_2() {
 ; CHECK-LABEL: vmset_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,mf4,ta,mu
 ; CHECK-NEXT:    vmset.m v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -56,7 +56,7 @@ define <vscale x 32 x i1> @vmset_4() {
 define <vscale x 1 x i1> @vmclr() {
 ; CHECK-LABEL: vmclr:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
 ; CHECK-NEXT:    vmclr.m v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 0, i32 0
@@ -67,7 +67,7 @@ define <vscale x 1 x i1> @vmclr() {
 define <vscale x 2 x i1> @vmclr_2() {
 ; CHECK-LABEL: vmclr_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e8,mf4,ta,mu
 ; CHECK-NEXT:    vmclr.m v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 0, i32 0
