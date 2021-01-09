@@ -241,7 +241,6 @@ bool RISCVFrameLowering::hasBP(const MachineFunction &MF) const {
 // Determines the size of the frame and maximum call frame size.
 void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
   MachineFrameInfo &MFI = MF.getFrameInfo();
-  const RISCVRegisterInfo *RI = STI.getRegisterInfo();
 
   // Get the number of bytes to allocate from the FrameInfo.
   uint64_t FrameSize = MFI.getStackSize();
@@ -252,11 +251,6 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
 #if 0
   // Get the alignment.
   Align StackAlign = getStackAlign();
-  if (RI->needsStackRealignment(MF)) {
-    Align MaxStackAlign = std::max(StackAlign, MFI.getMaxAlign());
-    FrameSize += (MaxStackAlign.value() - StackAlign.value());
-    StackAlign = MaxStackAlign;
-  }
 
   // Set Max Call Frame Size
   uint64_t MaxCallSize = alignTo(MFI.getMaxCallFrameSize(), StackAlign);
