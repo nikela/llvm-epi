@@ -3782,15 +3782,6 @@ def : Pat<(vti.Vector (riscv_shuffle_extend
              VLMax, vti.SEW)>;
 }
 
-foreach vti = EPIAllVectors in {
-  def : Pat<(vti.Vector (vselect (vti.Mask V0), (vti.Vector vti.MInfo.vrclass:$rs2), (vti.Vector vti.MInfo.vrclass:$rs1))),
-            (!cast<Instruction>("PseudoEPIVMERGE_VVM_" # vti.MInfo.MX)
-             (vti.Vector vti.MInfo.vrclass:$rs1),
-             (vti.Vector vti.MInfo.vrclass:$rs2),
-             (vti.Mask V0),
-             VLMax, vti.SEW)>;
-}
-
 foreach fvti = EPIAllFloatVectors in {
   def : Pat<(fabs (fvti.Vector fvti.MInfo.vrclass:$rs2)),
             (!cast<Instruction>("PseudoEPIVFSGNJX_VV_" # fvti.MInfo.MX)

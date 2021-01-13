@@ -259,7 +259,7 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
       continue;
 
     switch (StackID) {
-    case TargetStackID::EPIVector:
+    case TargetStackID::ScalableVector:
       FrameSize =
           alignTo(FrameSize, RegInfo->getSpillAlignment(RISCV::GPRRegClass));
       FrameSize += RegInfo->getSpillSize(RISCV::GPRRegClass);
@@ -278,7 +278,7 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
       continue;
     if (MFI.isDeadObjectIndex(FI))
       continue;
-    assert(MFI.getStackID(FI) == TargetStackID::EPIVector &&
+    assert(MFI.getStackID(FI) == TargetStackID::ScalableVector &&
            "Unexpected Stack ID!");
     LLVM_DEBUG(dbgs() << "alloc FI(" << FI << ") at SP["
                       << MFI.getObjectOffset(FI) << "] StackID: VR_SPILL\n");
@@ -387,11 +387,10 @@ void RISCVFrameLowering::alignSP(MachineBasicBlock &MBB,
 bool RISCVFrameLowering::isSupportedStackID(TargetStackID::Value ID) const {
   switch (ID) {
   case TargetStackID::Default:
-  case TargetStackID::EPIVector:
+  case TargetStackID::ScalableVector:
     return true;
   case TargetStackID::NoAlloc:
   case TargetStackID::SGPRSpill:
-  case TargetStackID::SVEVector:
     return false;
   }
   llvm_unreachable("Invalid TargetStackID::Value");
@@ -625,7 +624,7 @@ void RISCVFrameLowering::prepareStorageSpilledVR(
       continue;
     if (MFI.isDeadObjectIndex(FI))
       continue;
-    assert(StackID == TargetStackID::EPIVector && "Unexpected StackID");
+    assert(StackID == TargetStackID::ScalableVector && "Unexpected StackID");
 
     int64_t ObjectSize = MFI.getObjectSize(FI);
 
@@ -867,7 +866,7 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
 
     if (const ScalableVectorType *VT = dyn_cast<const ScalableVectorType>(
             Alloca->getType()->getElementType())) {
-      MFI.setStackID(FI, TargetStackID::EPIVector);
+      MFI.setStackID(FI, TargetStackID::ScalableVector);
       RVFI->setHasSpilledVR();
     } else if (const StructType *Sty = dyn_cast<const StructType>(
                    Alloca->getType()->getElementType())) {
@@ -875,7 +874,7 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
       // tuples.
       for (const Type *ElTy : Sty->elements()) {
         if (isa<const ScalableVectorType>(ElTy)) {
-          MFI.setStackID(FI, TargetStackID::EPIVector);
+          MFI.setStackID(FI, TargetStackID::ScalableVector);
           RVFI->setHasSpilledVR();
           break;
         }

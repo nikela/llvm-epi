@@ -299,9 +299,8 @@ define void @test_select_scalar_int_4(<vscale x 8 x i64> %a, <vscale x 8 x i64> 
 ; CHECK-O0-LABEL: test_select_scalar_int_4:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a2, a1
-; CHECK-O0-NEXT:    vmv8r.v v24, v16
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-O0-NEXT:    vle64.v v16, (a0)
+; CHECK-O0-NEXT:    vle64.v v8, (a0)
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x12
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
@@ -310,7 +309,7 @@ define void @test_select_scalar_int_4(<vscale x 8 x i64> %a, <vscale x 8 x i64> 
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vmv.v.x v0, a1
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-O0-NEXT:    vmerge.vvm v8, v16, v24, v0
+; CHECK-O0-NEXT:    vmerge.vvm v8, v8, v16, v0
 ; CHECK-O0-NEXT:    vse64.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -324,8 +323,8 @@ define void @test_select_scalar_int_4(<vscale x 8 x i64> %a, <vscale x 8 x i64> 
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v0, a1
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-O2-NEXT:    vmerge.vvm v24, v8, v16, v0
-; CHECK-O2-NEXT:    vse64.v v24, (a0)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v8, v16, v0
+; CHECK-O2-NEXT:    vse64.v v8, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 8 x i64>*
 
@@ -339,9 +338,8 @@ define void @test_select_scalar_int_5(<vscale x 16 x i32> %a, <vscale x 16 x i32
 ; CHECK-O0-LABEL: test_select_scalar_int_5:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a2, a1
-; CHECK-O0-NEXT:    vmv8r.v v24, v16
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
-; CHECK-O0-NEXT:    vle32.v v16, (a0)
+; CHECK-O0-NEXT:    vle32.v v8, (a0)
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x12
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
@@ -350,7 +348,7 @@ define void @test_select_scalar_int_5(<vscale x 16 x i32> %a, <vscale x 16 x i32
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vmv.v.x v0, a1
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
-; CHECK-O0-NEXT:    vmerge.vvm v8, v16, v24, v0
+; CHECK-O0-NEXT:    vmerge.vvm v8, v8, v16, v0
 ; CHECK-O0-NEXT:    vse32.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -364,8 +362,8 @@ define void @test_select_scalar_int_5(<vscale x 16 x i32> %a, <vscale x 16 x i32
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v0, a1
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
-; CHECK-O2-NEXT:    vmerge.vvm v24, v8, v16, v0
-; CHECK-O2-NEXT:    vse32.v v24, (a0)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v8, v16, v0
+; CHECK-O2-NEXT:    vse32.v v8, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 16 x i32>*
 
@@ -379,9 +377,8 @@ define void @test_select_scalar_int_6(<vscale x 32 x i16> %a, <vscale x 32 x i16
 ; CHECK-O0-LABEL: test_select_scalar_int_6:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a2, a1
-; CHECK-O0-NEXT:    vmv8r.v v24, v16
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
-; CHECK-O0-NEXT:    vle16.v v16, (a0)
+; CHECK-O0-NEXT:    vle16.v v8, (a0)
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x12
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
@@ -390,7 +387,7 @@ define void @test_select_scalar_int_6(<vscale x 32 x i16> %a, <vscale x 32 x i16
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vmv.v.x v0, a1
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
-; CHECK-O0-NEXT:    vmerge.vvm v8, v16, v24, v0
+; CHECK-O0-NEXT:    vmerge.vvm v8, v8, v16, v0
 ; CHECK-O0-NEXT:    vse16.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -404,8 +401,8 @@ define void @test_select_scalar_int_6(<vscale x 32 x i16> %a, <vscale x 32 x i16
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v0, a1
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
-; CHECK-O2-NEXT:    vmerge.vvm v24, v8, v16, v0
-; CHECK-O2-NEXT:    vse16.v v24, (a0)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v8, v16, v0
+; CHECK-O2-NEXT:    vse16.v v8, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 32 x i16>*
 

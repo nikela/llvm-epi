@@ -1272,7 +1272,8 @@ LogicalResult TCParser::parseAttrDef() {
     return parser.emitError(arrayLoc, "unsupported vector array attribute");
 
   auto iterBoolPair = registeredAttrs.emplace(
-      attrName, RegisteredAttr{elementType, vectorDims, isArray, isOptional});
+      attrName.str(),
+      RegisteredAttr{elementType, vectorDims, isArray, isOptional});
   if (!iterBoolPair.second)
     return parser.emitError(attrLoc,
                             "Failed to register attribute '" + attrName + "'");

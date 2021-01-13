@@ -262,77 +262,77 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::FSD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M2))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M4))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M8))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T2))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T3))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T4))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T5))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T6))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T7))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T8))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
@@ -376,67 +376,67 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
     Opcode = RISCV::FLD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M2), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M4), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M8), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T2), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T3), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T4), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T5), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T6), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T7), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::EPIVector);
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T8), DstReg)
         .addFrameIndex(FI);
     return;

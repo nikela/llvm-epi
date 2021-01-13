@@ -10069,7 +10069,7 @@ bool ShuffleVectorSDNode::isSplatMask(const int *Mask, EVT VT) {
 
 // Returns the SDNode if it is a constant integer BuildVector
 // or constant integer.
-SDNode *SelectionDAG::isConstantIntBuildVectorOrConstantInt(SDValue N) {
+SDNode *SelectionDAG::isConstantIntBuildVectorOrConstantInt(SDValue N) const {
   if (isa<ConstantSDNode>(N))
     return N.getNode();
   if (ISD::isBuildVectorOfConstantSDNodes(N.getNode()))
@@ -10086,7 +10086,9 @@ SDNode *SelectionDAG::isConstantIntBuildVectorOrConstantInt(SDValue N) {
   return nullptr;
 }
 
-SDNode *SelectionDAG::isConstantFPBuildVectorOrConstantFP(SDValue N) {
+// Returns the SDNode if it is a constant float BuildVector
+// or constant float.
+SDNode *SelectionDAG::isConstantFPBuildVectorOrConstantFP(SDValue N) const {
   if (isa<ConstantFPSDNode>(N))
     return N.getNode();
 

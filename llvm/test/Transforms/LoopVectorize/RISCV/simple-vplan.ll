@@ -14,16 +14,17 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK:       N0 [label =
 ; CHECK-NEXT:     "for.body:\n" +
 ; CHECK-NEXT:       "WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next\l" +
-; CHECK-NEXT:       "EMIT vp<%1> = icmp ule ir<%indvars.iv> vp<%0>\l" +
+; CHECK-NEXT:       "EMIT vp<%2> = icmp ule ir<%indvars.iv> vp<%0>\l" +
 ; CHECK-NEXT:       "CLONE ir<%arrayidx> = getelementptr ir<%a>, ir<%indvars.iv>\l" +
-; CHECK-NEXT:       "EMIT vp<%2> = GENERATE-EXPLICIT-VECTOR-LENGTH\l" +
-; CHECK-NEXT:       "PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%2>, vp<%1> (ALL-ONES-MASK)\l" +
+; CHECK-NEXT:       "EMIT vp<%4> = GENERATE-EXPLICIT-VECTOR-LENGTH\l" +
+; CHECK-NEXT:       "PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%4>, vp<%2> (ALL-ONES-MASK)\l" +
 ; CHECK-NEXT:       "CLONE ir<%arrayidx2> = getelementptr ir<%b>, ir<%indvars.iv>\l" +
-; CHECK-NEXT:       "PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%2>, vp<%1> (ALL-ONES-MASK)\l" +
-; CHECK-NEXT:       "PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%2>, vp<%1> (ALL-ONES-MASK)\l" +
+; CHECK-NEXT:       "PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%4>, vp<%2> (ALL-ONES-MASK)\l" +
+; CHECK-NEXT:       "PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%4>, vp<%2> (ALL-ONES-MASK)\l" +
 ; CHECK-NEXT:       "CLONE ir<%arrayidx4> = getelementptr ir<%c>, ir<%indvars.iv>\l" +
-; CHECK-NEXT:       "PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%2>, vp<%1> (ALL-ONES-MASK)\l"
+; CHECK-NEXT:       "PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%4>, vp<%2> (ALL-ONES-MASK)\l"
 ; CHECK-NEXT:  ]
+
 
 ; Function Attrs: nofree norecurse nounwind
 define dso_local void @simple_add(i32 signext %N, i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {

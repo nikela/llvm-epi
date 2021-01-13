@@ -947,7 +947,7 @@ multiclass VPseudoUnaryV_M {
 multiclass VPseudoUnaryV_V_AnyMask {
   foreach m = MxList.m in {
     let VLMul = m.value in
-      def _VM # "_" # m.MX # "_MASK" : VPseudoUnaryAnyMask<m.vrclass, m.vrclass>;
+      def _VM # "_" # m.MX : VPseudoUnaryAnyMask<m.vrclass, m.vrclass>;
   }
 }
 
@@ -1404,12 +1404,12 @@ class VPatUnaryAnyMask<string intrinsic,
                        LMULInfo vlmul,
                        VReg result_reg_class,
                        VReg op1_reg_class> :
-  Pat<(result_type (!cast<Intrinsic>(intrinsic#"_mask")
+  Pat<(result_type (!cast<Intrinsic>(intrinsic)
                    (result_type result_reg_class:$merge),
                    (op1_type op1_reg_class:$rs1),
                    (mask_type VR:$rs2),
                    (XLenVT GPR:$vl))),
-                   (!cast<Instruction>(inst#"_"#kind#"_"#vlmul.MX#"_MASK")
+                   (!cast<Instruction>(inst#"_"#kind#"_"#vlmul.MX)
                    (result_type result_reg_class:$merge),
                    (op1_type op1_reg_class:$rs1),
                    (mask_type VR:$rs2),
@@ -2707,6 +2707,11 @@ defm PseudoVMFGT       : VPseudoBinaryM_VX</*IsFloat=*/1>;
 defm PseudoVMFGE       : VPseudoBinaryM_VX</*IsFloat=*/1>;
 
 //===----------------------------------------------------------------------===//
+// 14.14. Vector Floating-Point Classify Instruction
+//===----------------------------------------------------------------------===//
+defm PseudoVFCLASS     : VPseudoUnaryV_V;
+
+//===----------------------------------------------------------------------===//
 // 14.15. Vector Floating-Point Merge Instruction
 //===----------------------------------------------------------------------===//
 defm PseudoVFMERGE     : VPseudoBinaryV_XM</*CarryOut =*/0,/*CarryIn =*/true,
@@ -2785,6 +2790,7 @@ defm PseudoVFREDMAX    : VPseudoReductionV_VS;
 //===----------------------------------------------------------------------===//
 defm PseudoVFWREDSUM   : VPseudoReductionV_VS;
 defm PseudoVFWREDOSUM  : VPseudoReductionV_VS;
+
 } // Predicates = [HasStdExtV, HasStdExtF]
 
 //===----------------------------------------------------------------------===//
@@ -3354,6 +3360,11 @@ defm "" : VPatBinaryM_VX<"int_riscv_vmfgt", "PseudoVMFGT", AllFloatVectors>;
 defm "" : VPatBinaryM_VX<"int_riscv_vmfge", "PseudoVMFGE", AllFloatVectors>;
 
 //===----------------------------------------------------------------------===//
+// 14.14. Vector Floating-Point Classify Instruction
+//===----------------------------------------------------------------------===//
+defm "" : VPatConversionVI_VF<"int_riscv_vfclass", "PseudoVFCLASS">;
+
+//===----------------------------------------------------------------------===//
 // 14.15. Vector Floating-Point Merge Instruction
 //===----------------------------------------------------------------------===//
 // We can use vmerge.vvm to support vector-vector vfmerge.
@@ -3362,6 +3373,14 @@ defm "" : VPatBinaryV_VM<"int_riscv_vfmerge", "PseudoVMERGE",
 defm "" : VPatBinaryV_XM<"int_riscv_vfmerge", "PseudoVFMERGE",
                          /*CarryOut = */0, /*vtilist=*/AllFloatVectors>;
 
+foreach fvti = AllFloatVectors in {
+  defvar instr = !cast<Instruction>("PseudoVMERGE_VIM_"#fvti.LMul.MX);
+  def : Pat<(fvti.Vector (int_riscv_vfmerge (fvti.Vector fvti.RegClass:$rs2),
+                                            (fvti.Scalar (fpimm0)),
+                                            (fvti.Mask V0), (XLenVT GPR:$vl))),
+            (instr fvti.RegClass:$rs2, 0, (fvti.Mask V0), (NoX0 GPR:$vl), fvti.SEW)>;
+}
+
 //===----------------------------------------------------------------------===//
 // 14.16. Vector Floating-Point Move Instruction
 //===----------------------------------------------------------------------===//
@@ -3369,8 +3388,8 @@ foreach fvti = AllFloatVectors in {
   // If we're splatting fpimm0, use vmv.v.x vd, x0.
   def : Pat<(fvti.Vector (int_riscv_vfmv_v_f
                          (fvti.Scalar (fpimm0)), GPR:$vl)),
-            (!cast<Instruction>("PseudoVMV_V_X_"#fvti.LMul.MX)
-             X0, (NoX0 GPR:$vl), fvti.SEW)>;
+            (!cast<Instruction>("PseudoVMV_V_I_"#fvti.LMul.MX)
+             0, (NoX0 GPR:$vl), fvti.SEW)>;
 
   def : Pat<(fvti.Vector (int_riscv_vfmv_v_f
                          (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
@@ -3447,6 +3466,7 @@ defm "" : VPatReductionV_VS<"int_riscv_vfredmax", "PseudoVFREDMAX", /*IsFloat=*/
 //===----------------------------------------------------------------------===//
 defm "" : VPatReductionW_VS<"int_riscv_vfwredsum", "PseudoVFWREDSUM", /*IsFloat=*/1>;
 defm "" : VPatReductionW_VS<"int_riscv_vfwredosum", "PseudoVFWREDOSUM", /*IsFloat=*/1>;
+
 } // Predicates = [HasStdExtV, HasStdExtF]
 
 //===----------------------------------------------------------------------===//

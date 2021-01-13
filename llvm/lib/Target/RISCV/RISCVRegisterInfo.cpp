@@ -274,7 +274,7 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
 
   const MachineFrameInfo &MFI = MF.getFrameInfo();
-  assert(MFI.getStackID(FrameIndex) == TargetStackID::EPIVector &&
+  assert(MFI.getStackID(FrameIndex) == TargetStackID::ScalableVector &&
          "Unexpected stack ID");
 
   MachineOperand SlotAddr = MI.getOperand(FIOperandNum);
@@ -422,7 +422,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
-  if (!IsHandle && MFI.getStackID(FrameIndex) == TargetStackID::EPIVector
+  if (!IsHandle && MFI.getStackID(FrameIndex) == TargetStackID::ScalableVector
       // FIXME: This is a quirk caused by the way we use handles. If we don't
       // do this, we emit an incorrect load.
       // FIXME: Stop using handles.

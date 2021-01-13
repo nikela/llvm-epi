@@ -129,7 +129,6 @@ define <vscale x 2 x i32> @binary_nxv1i32_imm(<vscale x 2 x i32> %a) nounwind {
 define <vscale x 2 x float> @binary_nxv1f32(<vscale x 2 x float> %a, float %b) nounwind {
 ; CHECK-LABEL: binary_nxv1f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfadd.vf v16, v16, fa0
 ; CHECK-NEXT:    ret

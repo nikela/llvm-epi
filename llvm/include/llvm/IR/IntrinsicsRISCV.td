@@ -300,7 +300,21 @@ let TargetPrefix = "riscv" in {
                     [IntrNoMem]>, RISCVVIntrinsic {
     let ExtendOperand = 3;
   }
-
+  // For FP classify operations.
+  // Output: (bit mask type output)
+  // Input: (vector_in, vl)
+  class RISCVClassifyNoMask
+        : Intrinsic<[LLVMVectorOfBitcastsToInt<0>],
+                    [llvm_anyvector_ty, llvm_anyint_ty],
+                    [IntrNoMem]>, RISCVVIntrinsic;
+  // For FP classify operations with mask.
+  // Output: (bit mask type output)
+  // Input: (maskedoff, vector_in, mask, vl)
+  class RISCVClassifyMask
+        : Intrinsic<[LLVMVectorOfBitcastsToInt<0>],
+                    [LLVMVectorOfBitcastsToInt<0>, llvm_anyvector_ty,
+                     LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>, llvm_anyint_ty],
+                    [IntrNoMem]>, RISCVVIntrinsic;
   // For Saturating binary operations.
   // The destination vector type is the same as first source vector.
   // Input: (vector_in, vector_in/scalar_in, vl)
@@ -486,6 +500,10 @@ let TargetPrefix = "riscv" in {
     def "int_riscv_" # NAME : RISCVUnaryAANoMask;
     def "int_riscv_" # NAME # "_mask" : RISCVUnaryAAMask;
   }
+  multiclass RISCVUnaryAB {
+    def "int_riscv_" # NAME : RISCVUnaryABNoMask;
+    def "int_riscv_" # NAME # "_mask" : RISCVUnaryABMask;
+  }
   // AAX means the destination type(A) is the same as the first source
   // type(A). X means any type for the second source operand.
   multiclass RISCVBinaryAAX {
@@ -527,6 +545,10 @@ let TargetPrefix = "riscv" in {
     def "int_riscv_" # NAME : RISCVCompareNoMask;
     def "int_riscv_" # NAME # "_mask" : RISCVCompareMask;
   }
+  multiclass RISCVClassify {
+    def "int_riscv_" # NAME : RISCVClassifyNoMask;
+    def "int_riscv_" # NAME # "_mask" : RISCVClassifyMask;
+  }
   multiclass RISCVTernaryWide {
     def "int_riscv_" # NAME : RISCVTernaryWideNoMask;
     def "int_riscv_" # NAME # "_mask" : RISCVTernaryWideMask;
@@ -538,10 +560,6 @@ let TargetPrefix = "riscv" in {
   multiclass RISCVMaskUnarySOut {
     def "int_riscv_" # NAME : RISCVMaskUnarySOutNoMask;
     def "int_riscv_" # NAME # "_mask" : RISCVMaskUnarySOutMask;
-  }
-  multiclass RISCVUnaryAB {
-    def "int_riscv_" # NAME : RISCVUnaryABNoMask;
-    def "int_riscv_" # NAME # "_mask" : RISCVUnaryABMask;
   }
   multiclass RISCVMaskUnaryMOut {
     def "int_riscv_" # NAME : RISCVUnaryNoMask;
@@ -709,6 +727,8 @@ let TargetPrefix = "riscv" in {
   defm vfsgnjn : RISCVBinaryAAX;
   defm vfsgnjx : RISCVBinaryAAX;
 
+  defm vfclass : RISCVClassify;
+
   defm vfmerge : RISCVBinaryWithV0;
 
   defm vslideup : RISCVTernaryAAAX;
@@ -721,7 +741,7 @@ let TargetPrefix = "riscv" in {
 
   defm vrgather : RISCVBinaryAAX;
 
-  def "int_riscv_vcompress_mask" : RISCVBinaryAAAMask;
+  def "int_riscv_vcompress" : RISCVBinaryAAAMask;
 
   defm vaaddu : RISCVSaturatingBinaryAAX;
   defm vaadd : RISCVSaturatingBinaryAAX;
