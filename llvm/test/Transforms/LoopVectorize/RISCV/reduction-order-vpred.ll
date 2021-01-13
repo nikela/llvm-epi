@@ -18,12 +18,12 @@ define internal i64 @foo(i32* %t0) !prof !1 {
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 undef, i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
+; CHECK-NEXT:    [[TMP0:%.*]] = insertelement <vscale x 8 x i32> zeroinitializer, i32 0, i32 0
+; CHECK-NEXT:    [[TMP1:%.*]] = insertelement <vscale x 8 x i32> zeroinitializer, i32 0, i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT4:%.*]] = insertelement <vscale x 8 x i32> poison, i32 3, i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT5:%.*]] = shufflevector <vscale x 8 x i32> [[BROADCAST_SPLATINSERT4]], <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT6:%.*]] = insertelement <vscale x 8 x i32> poison, i32 5, i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT7:%.*]] = shufflevector <vscale x 8 x i32> [[BROADCAST_SPLATINSERT6]], <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer
-; CHECK-NEXT:    [[TMP0:%.*]] = insertelement <vscale x 8 x i32> zeroinitializer, i32 0, i32 0
-; CHECK-NEXT:    [[TMP1:%.*]] = insertelement <vscale x 8 x i32> zeroinitializer, i32 0, i32 0
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
@@ -89,12 +89,12 @@ define internal i64 @foo(i32* %t0) !prof !1 {
 ; CHECK1:       vector.ph:
 ; CHECK1-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 undef, i32 0
 ; CHECK1-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; CHECK1-NEXT:    [[TMP0:%.*]] = insertelement <vscale x 2 x i32> zeroinitializer, i32 0, i32 0
+; CHECK1-NEXT:    [[TMP1:%.*]] = insertelement <vscale x 2 x i32> zeroinitializer, i32 0, i32 0
 ; CHECK1-NEXT:    [[BROADCAST_SPLATINSERT4:%.*]] = insertelement <vscale x 2 x i32> poison, i32 3, i32 0
 ; CHECK1-NEXT:    [[BROADCAST_SPLAT5:%.*]] = shufflevector <vscale x 2 x i32> [[BROADCAST_SPLATINSERT4]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK1-NEXT:    [[BROADCAST_SPLATINSERT6:%.*]] = insertelement <vscale x 2 x i32> poison, i32 5, i32 0
 ; CHECK1-NEXT:    [[BROADCAST_SPLAT7:%.*]] = shufflevector <vscale x 2 x i32> [[BROADCAST_SPLATINSERT6]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
-; CHECK1-NEXT:    [[TMP0:%.*]] = insertelement <vscale x 2 x i32> zeroinitializer, i32 0, i32 0
-; CHECK1-NEXT:    [[TMP1:%.*]] = insertelement <vscale x 2 x i32> zeroinitializer, i32 0, i32 0
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]

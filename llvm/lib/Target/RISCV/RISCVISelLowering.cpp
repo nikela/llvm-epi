@@ -4162,7 +4162,7 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
 
 static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
                                     int VLIndex, unsigned SEWIndex,
-                                    unsigned VLMul, bool WritesElement0) {
+                                    RISCVVLMUL VLMul, bool WritesElement0) {
   MachineFunction &MF = *BB->getParent();
   DebugLoc DL = MI.getDebugLoc();
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
@@ -4171,9 +4171,6 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
   unsigned SEW = MI.getOperand(SEWIndex).getImm();
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
   RISCVVSEW ElementWidth = static_cast<RISCVVSEW>(Log2_32(SEW / 8));
-
-  // LMUL should already be encoded correctly.
-  RISCVVLMUL Multiplier = static_cast<RISCVVLMUL>(VLMul);
 
   MachineRegisterInfo &MRI = MF.getRegInfo();
 
@@ -4201,7 +4198,7 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
     TailAgnostic = false;
 
   // For simplicity we reuse the vtype representation here.
-  MIB.addImm(RISCVVType::encodeVTYPE(Multiplier, ElementWidth,
+  MIB.addImm(RISCVVType::encodeVTYPE(VLMul, ElementWidth,
                                      /*TailAgnostic*/ TailAgnostic,
                                      /*MaskAgnostic*/ false,
                                      Nontemporal));
@@ -4486,14 +4483,16 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                &RISCV::VRM1T8RegClass);
   }
 
-  if (const RISCVVPseudosTable::PseudoInfo *RVV =
-          RISCVVPseudosTable::getPseudoInfo(MI.getOpcode())) {
-    int VLIndex = RVV->getVLIndex();
-    int SEWIndex = RVV->getSEWIndex();
-    bool WritesElement0 = RVV->writesElement0();
+  uint64_t TSFlags = MI.getDesc().TSFlags;
+  if (TSFlags & RISCVII::HasSEWOpMask) {
+    unsigned NumOperands = MI.getNumExplicitOperands();
+    int VLIndex = (TSFlags & RISCVII::HasVLOpMask) ? NumOperands - 2 : -1;
+    unsigned SEWIndex = NumOperands - 1;
+    bool WritesElement0 = TSFlags & RISCVII::WritesElement0Mask;
 
-    assert(SEWIndex >= 0 && "SEWIndex must be >= 0");
-    return addVSetVL(MI, BB, VLIndex, SEWIndex, RVV->VLMul, WritesElement0);
+    RISCVVLMUL VLMul = static_cast<RISCVVLMUL>((TSFlags & RISCVII::VLMulMask) >>
+                                               RISCVII::VLMulShift);
+    return addVSetVL(MI, BB, VLIndex, SEWIndex, VLMul, WritesElement0);
   }
 
   switch (MI.getOpcode()) {
@@ -6322,16 +6321,28 @@ bool RISCVTargetLowering::decomposeMulByConstant(LLVMContext &Context, EVT VT,
                                                  SDValue C) const {
   // Check integral scalar types.
   if (VT.isScalarInteger()) {
-    // Do not perform the transformation on riscv32 with the M extension.
-    if (!Subtarget.is64Bit() && Subtarget.hasStdExtM())
+    // Omit the optimization if the sub target has the M extension and the data
+    // size exceeds XLen.
+    if (Subtarget.hasStdExtM() && VT.getSizeInBits() > Subtarget.getXLen())
       return false;
     if (auto *ConstNode = dyn_cast<ConstantSDNode>(C.getNode())) {
-      if (ConstNode->getAPIntValue().getBitWidth() > 8 * sizeof(int64_t))
-        return false;
-      int64_t Imm = ConstNode->getSExtValue();
-      if (isPowerOf2_64(Imm + 1) || isPowerOf2_64(Imm - 1) ||
-          isPowerOf2_64(1 - Imm) || isPowerOf2_64(-1 - Imm))
+      // Break the MUL to a SLLI and an ADD/SUB.
+      const APInt &Imm = ConstNode->getAPIntValue();
+      if ((Imm + 1).isPowerOf2() || (Imm - 1).isPowerOf2() ||
+          (1 - Imm).isPowerOf2() || (-1 - Imm).isPowerOf2())
         return true;
+      // Omit the following optimization if the sub target has the M extension
+      // and the data size >= XLen.
+      if (Subtarget.hasStdExtM() && VT.getSizeInBits() >= Subtarget.getXLen())
+        return false;
+      // Break the MUL to two SLLI instructions and an ADD/SUB, if Imm needs
+      // a pair of LUI/ADDI.
+      if (!Imm.isSignedIntN(12) && Imm.countTrailingZeros() < 12) {
+        APInt ImmS = Imm.ashr(Imm.countTrailingZeros());
+        if ((ImmS + 1).isPowerOf2() || (ImmS - 1).isPowerOf2() ||
+            (1 - ImmS).isPowerOf2())
+        return true;
+      }
     }
   }
 

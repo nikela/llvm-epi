@@ -180,13 +180,13 @@ private:
   // Vector width with best cost
   ElementCount Width;
   // Cost of the loop with that width
-  unsigned Cost;
+  InstructionCost Cost;
 
   // Width 0 means no vectorization, cost 0 means uncomputed cost.
   VectorizationFactor() : Width(ElementCount::getFixed(0)), Cost(0) {}
 
 public:
-  VectorizationFactor(ElementCount Width, unsigned Cost)
+  VectorizationFactor(ElementCount Width, InstructionCost Cost)
       : Width(Width), Cost(Cost) {
     assert(Width.getKnownMinValue() > 0 && "Width cannot be zero");
   }
@@ -196,7 +196,7 @@ public:
            "Cannot get width of invalid vectorization factor");
     return Width;
   }
-  unsigned getCost() const { return Cost; }
+  InstructionCost getCost() const { return Cost; }
 
   static VectorizationFactor Disabled() { return VectorizationFactor(); }
 

@@ -242,11 +242,9 @@ bool RISCVFrameLowering::hasBP(const MachineFunction &MF) const {
   return MFI.hasVarSizedObjects() && TRI->needsStackRealignment(MF);
 }
 
-// Determines the size of the frame and maximum call frame size.
 void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
   MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
-  const RISCVRegisterInfo *RI = STI.getRegisterInfo();
 
   // Get the number of bytes to allocate from the FrameInfo.
   uint64_t FrameSize = MFI.getStackSize();
@@ -288,40 +286,11 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
 #endif
 
   // Get the alignment.
-  Align StackAlign =
-      RI->needsStackRealignment(MF) ? MFI.getMaxAlign() : getStackAlign();
-#if 0
-  // Get the alignment.
   Align StackAlign = getStackAlign();
-  if (RI->needsStackRealignment(MF)) {
-    Align MaxStackAlign = std::max(StackAlign, MFI.getMaxAlign());
-    FrameSize += (MaxStackAlign.value() - StackAlign.value());
-    StackAlign = MaxStackAlign;
-  }
 
   // Set Max Call Frame Size
   uint64_t MaxCallSize = alignTo(MFI.getMaxCallFrameSize(), StackAlign);
   MFI.setMaxCallFrameSize(MaxCallSize);
-#endif
-
-// rferrer: This seems not used at the moment and makes a test fail
-//          because the stack is overaligned.
-#if 0
-  // Get the maximum call frame size of all the calls.
-  uint64_t MaxCallFrameSize = MFI.getMaxCallFrameSize();
-
-  // If we have dynamic alloca then MaxCallFrameSize needs to be aligned so
-  // that allocations will be aligned.
-  if (MFI.hasVarSizedObjects())
-    MaxCallFrameSize = alignTo(MaxCallFrameSize, StackAlign);
-
-  // Update maximum call frame size.
-  MFI.setMaxCallFrameSize(MaxCallFrameSize);
-
-  // Include call frame size in total.
-  if (!(hasReservedCallFrame(MF) && MFI.adjustsStack()))
-    FrameSize += MaxCallFrameSize;
-#endif
 
   // Make sure the frame is aligned.
   FrameSize = alignTo(FrameSize, StackAlign);

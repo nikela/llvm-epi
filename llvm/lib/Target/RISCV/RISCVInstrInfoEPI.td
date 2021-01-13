@@ -3606,13 +3606,6 @@ foreach vti = EPIAllIntegerVectors in
              VLMax, vti.SEW)>;
 }
 
-foreach mti = EPIAllMasks in {
-  def : Pat<(mti.Mask (splat_vector (i64 1))),
-            (!cast<Instruction>("PseudoEPIVMSET_" # mti.MInfo.MX) VLMax, mti.SEW)>;
-  def : Pat<(mti.Mask (splat_vector (i64 0))),
-            (!cast<Instruction>("PseudoEPIVMCLR_" # mti.MInfo.MX) VLMax, mti.SEW)>;
-}
-
 foreach vti = EPINoGroupIntegerVectors in {
   // Note: It is not valid in extractelt to have a return type that is different
   // to the vector element type. For those cases (EltTy != i64) we use a custom
