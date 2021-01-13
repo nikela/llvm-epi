@@ -1864,33 +1864,41 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
                                                 [LLVMMatchType<0>],
                                                 [IntrNoMem]>;
 
-// This intrinsic takes two vector arguments %v1 and %v2, an integer number %num,
-// and and integer %evl (Explicit Vector Length similar to VP intrinsics) such
-// that 0 <= %num <= %evl <= W, where W is the runtime vector register(group)
-// width (vscale x k). If %evl and %num do not follow this constraint, the
-// intrinsic has undefined behaviour.
+// This intrinsic takes two vector arguments %v1 and %v2, an integer number
+// %num, and and integer Explicit Vector Length values %evl1 and %evl2 such that
+// 0 <= %num <= %evl1 <= W and 0 <= %evl2 <= W, where W is the runtime vector
+// register(group) width (vscale x k). If %evl1, %evl2 and %num do not follow
+// these constraints, the intrinsic has undefined behaviour.
+//
 // Semantics:
 // Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1]
 // and selects the elements in a window of size %evl, starting at index %num of
 // the concatenated vector. Elements in the result vector beyond %evl are undef.
-// This is equivalent to "sliding" the first %evl elements of %v1 to the left by
-// %num places (discarding the elements moved left of index 0), and replacing
-// the empty places on the right, indices [%evl-%num-1..%evl-1] by first %num
-// elements of %v2.
-// Example:
-// %v1: [a b c d e f]
-// %v2: [0 1 2 3 4 5]
-// %evl: 5, %num: 2
-// transformations: %v1 -> [c d e _ _ f] -> [c d e 0 1 undef]
-// result: [c d e 0 1 undef]
+// The result vector of length %evl2 contains %evl1 - %num elements from indices
+// [%num..%evl1 - 1] of %v1 followed by the first %evl2 - (%evl1 - %num)
+// elements of %v2. If %evl1 - %num >= %evl2, only the first %evl2 elements are
+// considered and the remaining are undef.
+//
+// Examples:
+// %v1: [a b c d e]
+// %v2: [0 1 2 3]
+// %evl1: 5, %evl2: 4, %num: 2
+// transformations: %v1 -> [c d e _ _] -> [c d e _] -> [c d e 0]
+//
+// %v1: [0 1 2 3]
+// %v2: [a b c d e f]
+// %evl1: 4, %evl2: 6, %num: 3
+// transformations: %v1 -> [3 _ _ _] -> [3 _ _ _ _ _] -> [3 a b c d e]
+
 def int_experimental_vector_vp_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,
-                                                     llvm_i32_ty, llvm_i32_ty],
+                                                     llvm_i32_ty, llvm_i32_ty,
+                                                     llvm_i32_ty],
                                                     [IntrNoMem]>;
 
 // This is the non-predicated version of the above slideleftfill intrinsic that
-// has the same semantics assuming %evl = W. This is needed for
+// has the same semantics assuming %evl1 = %evl2 = W. This is needed for
 // non-predicated/whole register operation on scalable vectors.
 def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,

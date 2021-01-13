@@ -74,7 +74,7 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK-NEXT:    [[TMP23:%.*]] = zext i32 [[CURRENT_LEN]] to i64
 ; CHECK-NEXT:    [[TMP24:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP23]], i64 2, i64 2)
 ; CHECK-NEXT:    [[TMP25:%.*]] = trunc i64 [[TMP24]] to i32
-; CHECK-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 8 x i32> @llvm.experimental.vector.vp.slideleftfill.nxv8i32(<vscale x 8 x i32> [[CURRENT_VEC]], <vscale x 8 x i32> shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> undef, i32 1, i32 0), <vscale x 8 x i32> undef, <vscale x 8 x i32> zeroinitializer), i32 [[HALFLEN]], i32 [[TMP25]])
+; CHECK-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 8 x i32> @llvm.experimental.vector.vp.slideleftfill.nxv8i32(<vscale x 8 x i32> [[CURRENT_VEC]], <vscale x 8 x i32> shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> undef, i32 1, i32 0), <vscale x 8 x i32> undef, <vscale x 8 x i32> zeroinitializer), i32 [[HALFLEN]], i32 [[TMP25]], i32 [[TMP25]])
 ; CHECK-NEXT:    [[TMP26:%.*]] = zext i32 [[HALFLEN]] to i64
 ; CHECK-NEXT:    [[TMP27:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP26]], i64 2, i64 2)
 ; CHECK-NEXT:    [[TMP28:%.*]] = trunc i64 [[TMP27]] to i32
@@ -168,7 +168,7 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK1-NEXT:    [[TMP23:%.*]] = zext i32 [[CURRENT_LEN]] to i64
 ; CHECK1-NEXT:    [[TMP24:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP23]], i64 2, i64 0)
 ; CHECK1-NEXT:    [[TMP25:%.*]] = trunc i64 [[TMP24]] to i32
-; CHECK1-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.vp.slideleftfill.nxv2i32(<vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[HALFLEN]], i32 [[TMP25]])
+; CHECK1-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.vp.slideleftfill.nxv2i32(<vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[HALFLEN]], i32 [[TMP25]], i32 [[TMP25]])
 ; CHECK1-NEXT:    [[TMP26:%.*]] = zext i32 [[HALFLEN]] to i64
 ; CHECK1-NEXT:    [[TMP27:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP26]], i64 2, i64 0)
 ; CHECK1-NEXT:    [[TMP28:%.*]] = trunc i64 [[TMP27]] to i32

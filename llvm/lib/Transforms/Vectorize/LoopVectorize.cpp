@@ -660,11 +660,11 @@ protected:
   void fixEVLInduction(VPTransformState &State);
 
   /// Handle all cross-iteration phis in the header.
-  void fixCrossIterationPHIs();
+  void fixCrossIterationPHIs(VPTransformState &State);
 
   /// Fix a first-order recurrence. This is the second phase of vectorizing
   /// this phi node.
-  void fixFirstOrderRecurrence(PHINode *Phi);
+  void fixFirstOrderRecurrence(PHINode *Phi, VPTransformState &State);
 
   /// Fix a reduction cross-iteration phi. This is the second phase of
   /// vectorizing this phi node.
@@ -4186,7 +4186,7 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
   // vector form. Now we need to fix the recurrences in the loop. These PHI
   // nodes are currently empty because we did not want to introduce cycles.
   // This is the second stage of vectorizing recurrences.
-  fixCrossIterationPHIs();
+  fixCrossIterationPHIs(State);
 
   // Forget the original basic block.
   PSE.getSE()->forgetLoop(OrigLoop);
@@ -4234,7 +4234,7 @@ void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
                                      State.get(EVL, 0)));
 }
 
-void InnerLoopVectorizer::fixCrossIterationPHIs() {
+void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {
   // In order to support recurrences we need to be able to vectorize Phi nodes.
   // Phi nodes have cycles, so we need to vectorize them in two stages. This is
   // stage #2: We now need to fix the recurrences by adding incoming edges to
@@ -4244,13 +4244,14 @@ void InnerLoopVectorizer::fixCrossIterationPHIs() {
   for (PHINode &Phi : OrigLoop->getHeader()->phis()) {
     // Handle first-order recurrences and reductions that need to be fixed.
     if (Legal->isFirstOrderRecurrence(&Phi))
-      fixFirstOrderRecurrence(&Phi);
+      fixFirstOrderRecurrence(&Phi, State);
     else if (Legal->isReductionVariable(&Phi))
       fixReduction(&Phi);
   }
 }
 
-void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
+void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
+                                                  VPTransformState &State) {
   // This is the second phase of vectorizing first-order recurrences. An
   // overview of the transformation is described below. Suppose we have the
   // following loop.
@@ -4310,11 +4311,25 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
 
   // Create a vector from the initial value.
   auto *VectorInit = ScalarInit;
+  Value *InitLen = Builder.getInt32(VF.getKnownMinValue());
   if (VF.isVector()) {
     Builder.SetInsertPoint(LoopVectorPreHeader->getTerminator());
-    VectorInit = Builder.CreateInsertElement(
-        PoisonValue::get(VectorType::get(VectorInit->getType(), VF)), VectorInit,
-        Builder.getInt32(VF.getKnownMinValue() - 1), "vector.recur.init");
+    if (VF.isScalable() && preferPredicatedVectorOps()) {
+      Value *EVLInstr = State.get(EVL, 0);
+      CallInst *Vscale =
+          emitVscaleCall(Builder, Preheader->getModule(), EVLInstr->getType());
+      InitLen = Builder.CreateMul(
+          ConstantInt::get(EVLInstr->getType(), VF.getKnownMinValue()), Vscale,
+          "vscale.x.vf");
+      Value *LastIndex =
+          Builder.CreateSub(InitLen, ConstantInt::get(EVLInstr->getType(), 1));
+      VectorInit = Builder.CreateInsertElement(
+          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
+          VectorInit, LastIndex, "vector.recur.init");
+    } else
+      VectorInit = Builder.CreateInsertElement(
+          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)), VectorInit,
+          Builder.getInt32(VF.getKnownMinValue() - 1), "vector.recur.init");
   }
 
   // We constructed a temporary phi node in the first phase of vectorization.
@@ -4326,6 +4341,18 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
   // the initial value inserted into a vector or loop-varying vector value.
   auto *VecPhi = Builder.CreatePHI(VectorInit->getType(), 2, "vector.recur");
   VecPhi->addIncoming(VectorInit, LoopVectorPreHeader);
+
+  // If using tail folding with vector predication for scalable vectors, Add a
+  // PHI node to select the EVL for the previous iteration or the initial value
+  // vscale x VF.
+  PHINode *EVLPhi = nullptr;
+  if (VF.isScalable() && preferPredicatedVectorOps()) {
+    Value *EVLInstr = State.get(EVL, 0);
+    EVLPhi = Builder.CreatePHI(EVLInstr->getType(), 2, "prev.evl");
+    EVLPhi->addIncoming(InitLen, LoopVectorPreHeader);
+    EVLPhi->addIncoming(EVLInstr,
+                        LI->getLoopFor(LoopVectorBody)->getLoopLatch());
+  }
 
   // Get the vectorized previous value of the last part UF - 1. It appears last
   // among all unrolled iterations, due to the order of their construction.
@@ -4370,22 +4397,24 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi) {
     Value *PhiPart = VectorLoopValueMap.getVectorValue(Phi, Part);
     Value *Shuffle;
     if (VF.isScalable()) {
-      // FIXME: Add support for first order recurrence operations using VP
-      // intrinsics. We will need to keep track of the vector length used in the
-      // previous iteration to be able to correctly shift the vector from the
-      // previous iteration.
-      assert(!preferPredicatedVectorOps() &&
-             "First order recurrence operations not currently supported by "
-             "predicated vector operations.");
       Type *Int32Ty = Type::getInt32Ty(Phi->getContext());
       Module *M = OrigLoop->getHeader()->getModule();
       CallInst *Vscale = emitVscaleCall(Builder, M, Int32Ty);
       Value *Vlen = Builder.CreateMul(
           Vscale, ConstantInt::get(Int32Ty, VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(Int32Ty, 1));
-      Shuffle = Builder.CreateIntrinsic(
-          Intrinsic::experimental_vector_slideleftfill, {VecPhi->getType()},
-          {Incoming, PreviousPart, Shift}, nullptr);
+      if (preferPredicatedVectorOps())
+        Shuffle = Builder.CreateIntrinsic(
+            Intrinsic::experimental_vector_vp_slideleftfill,
+            {VecPhi->getType()},
+            {Incoming, PreviousPart, Shift,
+             Builder.CreateTrunc(EVLPhi, Int32Ty),
+             Builder.CreateTrunc(State.get(EVL, 0), Int32Ty)},
+            nullptr);
+      else
+        Shuffle = Builder.CreateIntrinsic(
+            Intrinsic::experimental_vector_slideleftfill, {VecPhi->getType()},
+            {Incoming, PreviousPart, Shift}, nullptr);
     } else {
       Shuffle =
           VF.getKnownMinValue() > 1
@@ -4747,15 +4776,16 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
   // contain the last HalfLenQuotient elements of the CurrVec followed by
   // (HalfLen - HalfLenQuotient) identity elements.
   // Note that CurrLen = HalfLen + HalfLenQuotient
-  Value *SecondHalf =
-      preferPredicatedVectorOps()
-          ? Builder.CreateIntrinsic(
-                Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
-                {CurrVec, Identity, HalfLen, getSetVL(CurrLen)}, nullptr,
-                "second.half")
-          : Builder.CreateIntrinsic(
-                Intrinsic::experimental_vector_slideleftfill, RdxTy,
-                {CurrVec, Identity, HalfLen}, nullptr, "second.half");
+  Value *SecondHalf = nullptr;
+  if (preferPredicatedVectorOps()) {
+    auto *CurrVL = getSetVL(CurrLen);
+    SecondHalf = Builder.CreateIntrinsic(
+        Intrinsic::experimental_vector_vp_slideleftfill, RdxTy,
+        {CurrVec, Identity, HalfLen, CurrVL, CurrVL}, nullptr, "second.half");
+  } else
+    SecondHalf = Builder.CreateIntrinsic(
+        Intrinsic::experimental_vector_slideleftfill, RdxTy,
+        {CurrVec, Identity, HalfLen}, nullptr, "second.half");
 
   // All ops in the reduction inherit fast-math-flags from the recurrence
   // descriptor.
