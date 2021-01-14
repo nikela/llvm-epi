@@ -129,7 +129,7 @@ struct VSETVLInfo {
 
     if (VMulBits & 0x4) {
       // Fractional LMUL
-      VLMul = VLMulRatio{1u, 1u << (VMulBits & 0x3)};
+      VLMul = VLMulRatio{1u, 4 - (1u << (VMulBits & 0x3))};
     } else {
       VLMul = VLMulRatio{1u << (VMulBits & 0x3), 1u};
     }

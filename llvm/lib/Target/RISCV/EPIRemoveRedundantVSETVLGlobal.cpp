@@ -122,7 +122,7 @@ struct VSETVLInstr : public std::tuple<Register, unsigned, VLMulRatio, bool> {
     VLMulRatio VLMul;
     if (VLMulBits & 0x4) {
       // Fractional LMUL.
-      VLMul = VLMulRatio{1u, 1u << VLMulBits};
+      VLMul = VLMulRatio{1u, 4 - (1u << VLMulBits)};
     } else {
       VLMul = VLMulRatio{1u << VLMulBits, 1u};
     }
