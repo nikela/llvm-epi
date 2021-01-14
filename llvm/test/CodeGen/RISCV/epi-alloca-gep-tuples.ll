@@ -20,9 +20,9 @@ define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v16, a1
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    ld a1, -32(s0)
-; CHECK-NEXT:    vse64.v v16, (a1)
-; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    ld a0, -32(s0)
+; CHECK-NEXT:    vse64.v v16, (a0)
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    ld a1, -32(s0)
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    vse64.v v16, (a0)
@@ -62,8 +62,10 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v25, a1
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    ld a1, -32(s0)
-; CHECK-NEXT:    vse64.v v25, (a1)
+; CHECK-NEXT:    ld a0, -32(s0)
+; CHECK-NEXT:    vse64.v v25, (a0)
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    slli a1, a0, 3
 ; CHECK-NEXT:    ld a2, -32(s0)
 ; CHECK-NEXT:    add a1, a1, a2

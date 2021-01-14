@@ -24,7 +24,8 @@ declare i64 @llvm.vscale.i64()
 define i64 @test_vscale() nounwind
 ; CHECK-LABEL: test_vscale:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    ret
 {
 entry:
