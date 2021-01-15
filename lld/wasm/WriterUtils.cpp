@@ -30,8 +30,6 @@ std::string toString(ValType type) {
     return "f64";
   case ValType::V128:
     return "v128";
-  case ValType::EXNREF:
-    return "exnref";
   case ValType::FUNCREF:
     return "funcref";
   case ValType::EXTERNREF:
@@ -134,6 +132,14 @@ void writeI32Const(raw_ostream &os, int32_t number, const Twine &msg) {
 void writeI64Const(raw_ostream &os, int64_t number, const Twine &msg) {
   writeU8(os, WASM_OPCODE_I64_CONST, "i64.const");
   writeSleb128(os, number, msg);
+}
+
+void writePtrConst(raw_ostream &os, int64_t number, bool is64,
+                   const Twine &msg) {
+  if (is64)
+    writeI64Const(os, number, msg);
+  else
+    writeI32Const(os, static_cast<int32_t>(number), msg);
 }
 
 void writeMemArg(raw_ostream &os, uint32_t alignment, uint64_t offset) {

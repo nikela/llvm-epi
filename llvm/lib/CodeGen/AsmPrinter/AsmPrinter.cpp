@@ -14,6 +14,7 @@
 #include "CodeViewDebug.h"
 #include "DwarfDebug.h"
 #include "DwarfException.h"
+#include "PseudoProbePrinter.h"
 #include "WasmException.h"
 #include "WinCFGuard.h"
 #include "WinException.h"
@@ -30,6 +31,7 @@
 #include "llvm/ADT/Twine.h"
 #include "llvm/Analysis/ConstantFolding.h"
 #include "llvm/Analysis/EHPersonalities.h"
+#include "llvm/Analysis/MemoryLocation.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/BinaryFormat/COFF.h"
 #include "llvm/BinaryFormat/Dwarf.h"
@@ -77,6 +79,7 @@
 #include "llvm/IR/Metadata.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Operator.h"
+#include "llvm/IR/PseudoProbe.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -136,17 +139,20 @@ static cl::opt<bool>
     DisableDebugInfoPrinting("disable-debug-info-print", cl::Hidden,
                              cl::desc("Disable debug info printing"));
 
-static const char *const DWARFGroupName = "dwarf";
-static const char *const DWARFGroupDescription = "DWARF Emission";
-static const char *const DbgTimerName = "emit";
-static const char *const DbgTimerDescription = "Debug Info Emission";
-static const char *const EHTimerName = "write_exception";
-static const char *const EHTimerDescription = "DWARF Exception Writer";
-static const char *const CFGuardName = "Control Flow Guard";
-static const char *const CFGuardDescription = "Control Flow Guard";
-static const char *const CodeViewLineTablesGroupName = "linetables";
-static const char *const CodeViewLineTablesGroupDescription =
-  "CodeView Line Tables";
+const char DWARFGroupName[] = "dwarf";
+const char DWARFGroupDescription[] = "DWARF Emission";
+const char DbgTimerName[] = "emit";
+const char DbgTimerDescription[] = "Debug Info Emission";
+const char EHTimerName[] = "write_exception";
+const char EHTimerDescription[] = "DWARF Exception Writer";
+const char CFGuardName[] = "Control Flow Guard";
+const char CFGuardDescription[] = "Control Flow Guard";
+const char CodeViewLineTablesGroupName[] = "linetables";
+const char CodeViewLineTablesGroupDescription[] = "CodeView Line Tables";
+const char PPTimerName[] = "emit";
+const char PPTimerDescription[] = "Pseudo Probe Emission";
+const char PPGroupName[] = "pseudo probe";
+const char PPGroupDescription[] = "Pseudo Probe Emission";
 
 STATISTIC(EmittedInsts, "Number of machine instrs printed");
 
@@ -334,6 +340,12 @@ bool AsmPrinter::doInitialization(Module &M) {
     }
   }
 
+  if (M.getNamedMetadata(PseudoProbeDescMetadataName)) {
+    PP = new PseudoProbeHandler(this, &M);
+    Handlers.emplace_back(std::unique_ptr<PseudoProbeHandler>(PP), PPTimerName,
+                          PPTimerDescription, PPGroupName, PPGroupDescription);
+  }
+
   switch (MAI->getExceptionHandlingType()) {
   case ExceptionHandling::SjLj:
   case ExceptionHandling::DwarfCFI:
@@ -380,6 +392,9 @@ bool AsmPrinter::doInitialization(Module &M) {
     break;
   case ExceptionHandling::Wasm:
     ES = new WasmException(this);
+    break;
+  case ExceptionHandling::AIX:
+    ES = new AIXException(this);
     break;
   }
   if (ES)
@@ -469,10 +484,8 @@ MCSymbol *AsmPrinter::getSymbolPreferLocal(const GlobalValue &GV) const {
   if (TM.getTargetTriple().isOSBinFormatELF() && GV.canBenefitFromLocalAlias()) {
     const Module &M = *GV.getParent();
     if (TM.getRelocationModel() != Reloc::Static &&
-        M.getPIELevel() == PIELevel::Default)
-      if (GV.isDSOLocal() || (TM.getTargetTriple().isX86() &&
-                              GV.getParent()->noSemanticInterposition()))
-        return getSymbolWithGlobalValueBase(&GV, "$local");
+        M.getPIELevel() == PIELevel::Default && GV.isDSOLocal())
+      return getSymbolWithGlobalValueBase(&GV, "$local");
   }
   return TM.getSymbol(&GV);
 }
@@ -520,8 +533,8 @@ void AsmPrinter::emitGlobalVariable(const GlobalVariable *GV) {
 
   GVSym->redefineIfPossible();
   if (GVSym->isDefined() || GVSym->isVariable())
-    report_fatal_error("symbol '" + Twine(GVSym->getName()) +
-                       "' is already defined");
+    OutContext.reportError(SMLoc(), "symbol '" + Twine(GVSym->getName()) +
+                                        "' is already defined");
 
   if (MAI->hasDotTypeDotSizeDirective())
     OutStreamer->emitSymbolAttribute(EmittedSym, MCSA_ELF_TypeObject);
@@ -832,13 +845,21 @@ static void emitComments(const MachineInstr &MI, raw_ostream &CommentOS) {
   if ((Size = MI.getRestoreSize(TII))) {
     CommentOS << *Size << "-byte Reload\n";
   } else if ((Size = MI.getFoldedRestoreSize(TII))) {
-    if (*Size)
-      CommentOS << *Size << "-byte Folded Reload\n";
+    if (*Size) {
+      if (*Size == static_cast<unsigned>(MemoryLocation::UnknownSize))
+        CommentOS << "Unknown-size Folded Reload\n";
+      else
+        CommentOS << *Size << "-byte Folded Reload\n";
+    }
   } else if ((Size = MI.getSpillSize(TII))) {
     CommentOS << *Size << "-byte Spill\n";
   } else if ((Size = MI.getFoldedSpillSize(TII))) {
-    if (*Size)
-      CommentOS << *Size << "-byte Folded Spill\n";
+    if (*Size) {
+      if (*Size == static_cast<unsigned>(MemoryLocation::UnknownSize))
+        CommentOS << "Unknown-size Folded Spill\n";
+      else
+        CommentOS << *Size << "-byte Folded Spill\n";
+    }
   }
 
   // Check for spill-induced copies
@@ -936,6 +957,8 @@ static bool emitDebugValueComment(const MachineInstr *MI, AsmPrinter &AP) {
   } else if (MI->getDebugOperand(0).isTargetIndex()) {
     auto Op = MI->getDebugOperand(0);
     OS << "!target-index(" << Op.getIndex() << "," << Op.getOffset() << ")";
+    // NOTE: Want this comment at start of line, don't emit with AddComment.
+    AP.OutStreamer->emitRawComment(OS.str());
     return true;
   } else {
     Register Reg;
@@ -1084,6 +1107,15 @@ void AsmPrinter::emitBBAddrMapSection(const MachineFunction &MF) {
   OutStreamer->PopSection();
 }
 
+void AsmPrinter::emitPseudoProbe(const MachineInstr &MI) {
+  auto GUID = MI.getOperand(0).getImm();
+  auto Index = MI.getOperand(1).getImm();
+  auto Type = MI.getOperand(2).getImm();
+  auto Attr = MI.getOperand(3).getImm();
+  DILocation *DebugLoc = MI.getDebugLoc();
+  PP->emitPseudoProbe(GUID, Index, Type, Attr, DebugLoc);
+}
+
 void AsmPrinter::emitStackSizeSection(const MachineFunction &MF) {
   if (!MF.getTarget().Options.EmitStackSizeSection)
     return;
@@ -1216,6 +1248,9 @@ void AsmPrinter::emitFunctionBody() {
         break;
       case TargetOpcode::KILL:
         if (isVerbose()) emitKill(&MI, *this);
+        break;
+      case TargetOpcode::PSEUDO_PROBE:
+        emitPseudoProbe(MI);
         break;
       default:
         emitInstruction(&MI);
@@ -1946,8 +1981,7 @@ void AsmPrinter::emitConstantPool() {
       unsigned NewOffset = alignTo(Offset, CPE.getAlign());
       OutStreamer->emitZeros(NewOffset - Offset);
 
-      Type *Ty = CPE.getType();
-      Offset = NewOffset + getDataLayout().getTypeAllocSize(Ty);
+      Offset = NewOffset + CPE.getSizeInBytes(getDataLayout());
 
       OutStreamer->emitLabel(Sym);
       if (CPE.isMachineConstantPoolEntry())

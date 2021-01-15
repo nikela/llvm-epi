@@ -80,9 +80,10 @@ IntrinsicCostAttributes::IntrinsicCostAttributes(Intrinsic::ID Id,
 
 IntrinsicCostAttributes::IntrinsicCostAttributes(Intrinsic::ID Id,
                                                  const CallBase &CI,
-                                                 unsigned Factor) :
-    RetTy(CI.getType()), IID(Id), VF(Factor) {
+                                                 ElementCount Factor)
+    : RetTy(CI.getType()), IID(Id), VF(Factor) {
 
+  assert(!Factor.isScalable() && "Scalable vectors are not yet supported");
   if (auto *FPMO = dyn_cast<FPMathOperator>(&CI))
     FMF = FPMO->getFastMathFlags();
 
@@ -94,9 +95,9 @@ IntrinsicCostAttributes::IntrinsicCostAttributes(Intrinsic::ID Id,
 
 IntrinsicCostAttributes::IntrinsicCostAttributes(Intrinsic::ID Id,
                                                  const CallBase &CI,
-                                                 unsigned Factor,
-                                                 unsigned ScalarCost) :
-    RetTy(CI.getType()), IID(Id), VF(Factor), ScalarizationCost(ScalarCost) {
+                                                 ElementCount Factor,
+                                                 unsigned ScalarCost)
+    : RetTy(CI.getType()), IID(Id), VF(Factor), ScalarizationCost(ScalarCost) {
 
   if (const auto *FPMO = dyn_cast<FPMathOperator>(&CI))
     FMF = FPMO->getFastMathFlags();
@@ -651,12 +652,21 @@ TargetTransformInfo::getFeasibleMaxVFRange(unsigned SmallestType,
                                         MaxSafeRegisterWidth, RegWidthFactor);
 }
 
+Optional<unsigned> TargetTransformInfo::getMaxVScale() const {
+  return TTIImpl->getMaxVScale();
+}
+
 bool TargetTransformInfo::shouldMaximizeVectorBandwidth(bool OptSize) const {
   return TTIImpl->shouldMaximizeVectorBandwidth(OptSize);
 }
 
 unsigned TargetTransformInfo::getMinimumVF(unsigned ElemWidth) const {
   return TTIImpl->getMinimumVF(ElemWidth);
+}
+
+unsigned TargetTransformInfo::getMaximumVF(unsigned ElemWidth,
+                                           unsigned Opcode) const {
+  return TTIImpl->getMaximumVF(ElemWidth, Opcode);
 }
 
 bool TargetTransformInfo::shouldConsiderAddressTypePromotion(
@@ -1073,6 +1083,10 @@ bool TargetTransformInfo::shouldExpandReduction(const IntrinsicInst *II) const {
 
 unsigned TargetTransformInfo::getGISelRematGlobalCost() const {
   return TTIImpl->getGISelRematGlobalCost();
+}
+
+bool TargetTransformInfo::supportsScalableVectors() const {
+  return TTIImpl->supportsScalableVectors();
 }
 
 int TargetTransformInfo::getInstructionLatency(const Instruction *I) const {

@@ -12,7 +12,7 @@
 
 #include "Parser.h"
 #include "mlir/IR/AffineMap.h"
-#include "mlir/IR/StandardTypes.h"
+#include "mlir/IR/BuiltinTypes.h"
 
 using namespace mlir;
 using namespace mlir::detail;
@@ -181,12 +181,14 @@ ParseResult Parser::parseStridedLayout(int64_t &offset,
 ///   memref-type ::= ranked-memref-type | unranked-memref-type
 ///
 ///   ranked-memref-type ::= `memref` `<` dimension-list-ranked type
-///                          (`,` semi-affine-map-composition)? (`,`
-///                          memory-space)? `>`
+///                          (`,` layout-specification)? (`,` memory-space)? `>`
 ///
 ///   unranked-memref-type ::= `memref` `<*x` type (`,` memory-space)? `>`
 ///
+///   stride-list ::= `[` (dimension (`,` dimension)*)? `]`
+///   strided-layout ::= `offset:` dimension `,` `strides: ` stride-list
 ///   semi-affine-map-composition ::= (semi-affine-map `,` )* semi-affine-map
+///   layout-specification ::= semi-affine-map-composition | strided-layout
 ///   memory-space ::= integer-literal /* | TODO: address-space-id */
 ///
 Type Parser::parseMemRefType() {
@@ -338,7 +340,7 @@ Type Parser::parseNonFunctionType() {
       signSemantics = *signedness ? IntegerType::Signed : IntegerType::Unsigned;
 
     consumeToken(Token::inttype);
-    return IntegerType::get(width.getValue(), signSemantics, getContext());
+    return IntegerType::get(getContext(), width.getValue(), signSemantics);
   }
 
   // float-type
@@ -432,7 +434,7 @@ Type Parser::parseTupleType() {
       parseToken(Token::greater, "expected '>' in tuple type"))
     return nullptr;
 
-  return TupleType::get(types, getContext());
+  return TupleType::get(getContext(), types);
 }
 
 /// Parse a vector type.

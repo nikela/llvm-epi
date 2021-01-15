@@ -1,6 +1,6 @@
-# RUN: llvm-mc --triple=riscv64 -mattr +experimental-v < %s --show-encoding \
+# RUN: llvm-mc --triple=riscv64 -mattr +f,+d,+experimental-v < %s --show-encoding \
 # RUN:    2>&1 | FileCheck --check-prefix=ALIAS %s
-# RUN: llvm-mc --triple=riscv64 -mattr=+experimental-v --riscv-no-aliases < %s \
+# RUN: llvm-mc --triple=riscv64 -mattr=+f,+d,+experimental-v --riscv-no-aliases < %s \
 # RUN:    --show-encoding 2>&1 | FileCheck --check-prefix=NO-ALIAS %s
 
 # ALIAS:    vwcvt.x.x.v     v2, v1          # encoding: [0x57,0x61,0x10,0xc6]

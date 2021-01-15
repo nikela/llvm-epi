@@ -30,6 +30,7 @@
 #include "ObjCARC.h"
 #include "ProvenanceAnalysis.h"
 #include "llvm/ADT/Statistic.h"
+#include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/EHPersonalities.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/InlineAsm.h"
@@ -62,7 +63,7 @@ namespace {
 
 class ObjCARCContract {
   bool Changed;
-  AliasAnalysis *AA;
+  AAResults *AA;
   DominatorTree *DT;
   ProvenanceAnalysis PA;
   ARCRuntimeEntryPoints EP;
@@ -195,7 +196,7 @@ bool ObjCARCContract::contractAutorelease(Function &F, Instruction *Autorelease,
 static StoreInst *findSafeStoreForStoreStrongContraction(LoadInst *Load,
                                                          Instruction *Release,
                                                          ProvenanceAnalysis &PA,
-                                                         AliasAnalysis *AA) {
+                                                         AAResults *AA) {
   StoreInst *Store = nullptr;
   bool SawRelease = false;
 
@@ -475,7 +476,7 @@ bool ObjCARCContract::tryToPeepholeInstruction(
       --BBI;
     } while (IsNoopInstruction(&*BBI));
 
-    if (&*BBI == GetArgRCIdentityRoot(Inst)) {
+    if (GetRCIdentityRoot(&*BBI) == GetArgRCIdentityRoot(Inst)) {
       LLVM_DEBUG(dbgs() << "Adding inline asm marker for the return value "
                            "optimization.\n");
       Changed = true;
@@ -749,19 +750,13 @@ bool ObjCARCContractLegacyPass::runOnFunction(Function &F) {
   return OCARCC.run(F, AA, DT);
 }
 
-PreservedAnalyses ObjCARCContractPass::run(Module &M,
-                                           ModuleAnalysisManager &AM) {
+PreservedAnalyses ObjCARCContractPass::run(Function &F,
+                                           FunctionAnalysisManager &AM) {
   ObjCARCContract OCAC;
-  OCAC.init(M);
+  OCAC.init(*F.getParent());
 
-  auto &FAM = AM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
-  bool Changed = false;
-  for (Function &F : M) {
-    if (F.isDeclaration())
-      continue;
-    Changed |= OCAC.run(F, &FAM.getResult<AAManager>(F),
-                        &FAM.getResult<DominatorTreeAnalysis>(F));
-  }
+  bool Changed = OCAC.run(F, &AM.getResult<AAManager>(F),
+                          &AM.getResult<DominatorTreeAnalysis>(F));
   if (Changed) {
     PreservedAnalyses PA;
     PA.preserveSet<CFGAnalyses>();

@@ -435,7 +435,7 @@ static Instruction *findLocationForEntrySafepoint(Function &F,
   return Cursor;
 }
 
-static const char *const GCSafepointPollName = "gc.safepoint_poll";
+const char GCSafepointPollName[] = "gc.safepoint_poll";
 
 static bool isGCSafepointPoll(Function &F) {
   return F.getName().equals(GCSafepointPollName);
@@ -589,8 +589,7 @@ bool PlaceSafepoints::runOnFunction(Function &F) {
   for (Instruction *PollLocation : PollsNeeded) {
     std::vector<CallBase *> RuntimeCalls;
     InsertSafepointPoll(PollLocation, RuntimeCalls, TLI);
-    ParsePointNeeded.insert(ParsePointNeeded.end(), RuntimeCalls.begin(),
-                            RuntimeCalls.end());
+    llvm::append_range(ParsePointNeeded, RuntimeCalls);
   }
 
   return Modified;

@@ -57,6 +57,19 @@ static SmallVector<std::pair<int64_t, Value *>, 4> decompose(Value *V) {
                nullptr},
               {1, GEP->getPointerOperand()}};
     }
+    Value *Op0;
+    ConstantInt *CI;
+    if (match(GEP->getOperand(GEP->getNumOperands() - 1),
+              m_NUWShl(m_Value(Op0), m_ConstantInt(CI))))
+      return {{0, nullptr},
+              {1, GEP->getPointerOperand()},
+              {std::pow(int64_t(2), CI->getSExtValue()), Op0}};
+    if (match(GEP->getOperand(GEP->getNumOperands() - 1),
+              m_ZExt(m_NUWShl(m_Value(Op0), m_ConstantInt(CI)))))
+      return {{0, nullptr},
+              {1, GEP->getPointerOperand()},
+              {std::pow(int64_t(2), CI->getSExtValue()), Op0}};
+
     return {{0, nullptr},
             {1, GEP->getPointerOperand()},
             {1, GEP->getOperand(GEP->getNumOperands() - 1)}};
@@ -205,14 +218,15 @@ static bool eliminateConstraints(Function &F, DominatorTree &DT) {
     // If the condition is an OR of 2 compares and the false successor only has
     // the current block as predecessor, queue both negated conditions for the
     // false successor.
-    if (match(Br->getCondition(), m_Or(m_Cmp(), m_Cmp()))) {
+    Value *Op0, *Op1;
+    if (match(Br->getCondition(), m_LogicalOr(m_Value(Op0), m_Value(Op1))) &&
+        match(Op0, m_Cmp()) && match(Op1, m_Cmp())) {
       BasicBlock *FalseSuccessor = Br->getSuccessor(1);
       if (FalseSuccessor->getSinglePredecessor()) {
-        auto *OrI = cast<Instruction>(Br->getCondition());
-        WorkList.emplace_back(DT.getNode(FalseSuccessor),
-                              cast<CmpInst>(OrI->getOperand(0)), true);
-        WorkList.emplace_back(DT.getNode(FalseSuccessor),
-                              cast<CmpInst>(OrI->getOperand(1)), true);
+        WorkList.emplace_back(DT.getNode(FalseSuccessor), cast<CmpInst>(Op0),
+                              true);
+        WorkList.emplace_back(DT.getNode(FalseSuccessor), cast<CmpInst>(Op1),
+                              true);
       }
       continue;
     }
@@ -220,14 +234,14 @@ static bool eliminateConstraints(Function &F, DominatorTree &DT) {
     // If the condition is an AND of 2 compares and the true successor only has
     // the current block as predecessor, queue both conditions for the true
     // successor.
-    if (match(Br->getCondition(), m_And(m_Cmp(), m_Cmp()))) {
+    if (match(Br->getCondition(), m_LogicalAnd(m_Value(Op0), m_Value(Op1))) &&
+        match(Op0, m_Cmp()) && match(Op1, m_Cmp())) {
       BasicBlock *TrueSuccessor = Br->getSuccessor(0);
       if (TrueSuccessor->getSinglePredecessor()) {
-        auto *AndI = cast<Instruction>(Br->getCondition());
-        WorkList.emplace_back(DT.getNode(TrueSuccessor),
-                              cast<CmpInst>(AndI->getOperand(0)), false);
-        WorkList.emplace_back(DT.getNode(TrueSuccessor),
-                              cast<CmpInst>(AndI->getOperand(1)), false);
+        WorkList.emplace_back(DT.getNode(TrueSuccessor), cast<CmpInst>(Op0),
+                              false);
+        WorkList.emplace_back(DT.getNode(TrueSuccessor), cast<CmpInst>(Op1),
+                              false);
       }
       continue;
     }
@@ -333,8 +347,10 @@ static bool eliminateConstraints(Function &F, DominatorTree &DT) {
     if (CB.Not)
       R = ConstraintSystem::negate(R);
 
-    CS.addVariableRowFill(R);
-    DFSInStack.emplace_back(CB.NumIn, CB.NumOut, CB.Condition, CB.Not);
+    // If R has been added to the system, queue it for removal once it goes
+    // out-of-scope.
+    if (CS.addVariableRowFill(R))
+      DFSInStack.emplace_back(CB.NumIn, CB.NumOut, CB.Condition, CB.Not);
   }
 
   return Changed;

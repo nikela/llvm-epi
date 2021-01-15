@@ -290,6 +290,10 @@ Value *llvm::findScalarElement(Value *V, unsigned EltNo) {
     if (EltNo == IIElt)
       return III->getOperand(1);
 
+    // Guard against infinite loop on malformed, unreachable IR.
+    if (III == III->getOperand(0))
+      return nullptr;
+
     // Otherwise, the insertelement doesn't modify the value, recurse on its
     // vector input.
     return findScalarElement(III->getOperand(0), EltNo);
@@ -825,8 +829,7 @@ static Value *concatenateTwoVectors(IRBuilderBase &Builder, Value *V1,
   if (NumElts1 > NumElts2) {
     // Extend with UNDEFs.
     V2 = Builder.CreateShuffleVector(
-        V2, UndefValue::get(VecTy2),
-        createSequentialMask(0, NumElts2, NumElts1 - NumElts2));
+        V2, createSequentialMask(0, NumElts2, NumElts1 - NumElts2));
   }
 
   return Builder.CreateShuffleVector(

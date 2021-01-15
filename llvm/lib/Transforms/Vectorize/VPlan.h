@@ -626,50 +626,21 @@ public:
 };
 
 /// VPRecipeBase is a base class modeling a sequence of one or more output IR
-/// instructions.
-class VPRecipeBase : public ilist_node_with_parent<VPRecipeBase, VPBasicBlock> {
+/// instructions. VPRecipeBase owns the the VPValues it defines through VPDef
+/// and is responsible for deleting its defined values. Single-value
+/// VPRecipeBases that also inherit from VPValue must make sure to inherit from
+/// VPRecipeBase before VPValue.
+class VPRecipeBase : public ilist_node_with_parent<VPRecipeBase, VPBasicBlock>,
+                     public VPDef {
   friend VPBasicBlock;
   friend class VPBlockUtils;
-
-  const unsigned char SubclassID; ///< Subclass identifier (for isa/dyn_cast).
 
   /// Each VPRecipe belongs to a single VPBasicBlock.
   VPBasicBlock *Parent = nullptr;
 
 public:
-  /// An enumeration for keeping track of the concrete subclass of VPRecipeBase
-  /// that is actually instantiated. Values of this enumeration are kept in the
-  /// SubclassID field of the VPRecipeBase objects. They are used for concrete
-  /// type identification.
-  using VPRecipeTy = enum {
-    VPBlendSC,
-    VPBranchOnMaskSC,
-    VPInstructionSC,
-    VPInterleaveSC,
-    VPPredInstPHISC,
-    VPPredicatedWidenMemoryInstructionSC,
-    VPPredicatedWidenSC,
-    VPReductionSC,
-    VPReplicateSC,
-    VPWidenCallSC,
-    VPWidenCanonicalIVSC,
-    VPWidenEVLSC,
-    VPWidenEVLMaskSC,
-    VPWidenGEPSC,
-    VPWidenIntOrFpInductionSC,
-    VPWidenMemoryInstructionSC,
-    VPWidenPHISC,
-    VPWidenSC,
-    VPWidenSelectSC
-  };
-
-  VPRecipeBase(const unsigned char SC) : SubclassID(SC) {}
+  VPRecipeBase(const unsigned char SC) : VPDef(SC) {}
   virtual ~VPRecipeBase() = default;
-
-  /// \return an ID for the concrete type of this object.
-  /// This is used to implement the classof checks. This should not be used
-  /// for any other purpose, as the values may change as LLVM evolves.
-  unsigned getVPRecipeID() const { return SubclassID; }
 
   /// \return the VPBasicBlock which this VPRecipe belongs to.
   VPBasicBlock *getParent() { return Parent; }
@@ -678,13 +649,6 @@ public:
   /// The method which generates the output IR instructions that correspond to
   /// this VPRecipe, thereby "executing" the VPlan.
   virtual void execute(struct VPTransformState &State) = 0;
-
-  /// Each recipe prints itself.
-  virtual void print(raw_ostream &O, const Twine &Indent,
-                     VPSlotTracker &SlotTracker) const = 0;
-
-  /// Dump the recipe to stderr (for debugging).
-  void dump() const;
 
   /// Insert an unlinked recipe into a basic block immediately before
   /// the specified recipe.
@@ -697,6 +661,11 @@ public:
   /// Unlink this recipe from its current VPBasicBlock and insert it into
   /// the VPBasicBlock that MovePos lives in, right after MovePos.
   void moveAfter(VPRecipeBase *MovePos);
+
+  /// Unlink this recipe and insert into BB before I.
+  ///
+  /// \pre I is a valid iterator into BB.
+  void moveBefore(VPBasicBlock &BB, iplist<VPRecipeBase>::iterator I);
 
   /// This method unlinks 'this' from the containing basic block, but does not
   /// delete it.
@@ -711,38 +680,35 @@ public:
   /// nullptr otherwise.
   VPUser *toVPUser();
 
-  /// Returns a pointer to a VPValue, if the recipe inherits from VPValue or
-  /// nullptr otherwise.
-  VPValue *toVPValue();
-  const VPValue *toVPValue() const;
-
   /// Returns the underlying instruction, if the recipe is a VPValue or nullptr
   /// otherwise.
   Instruction *getUnderlyingInstr() {
-    if (auto *VPV = toVPValue())
-      return cast_or_null<Instruction>(VPV->getUnderlyingValue());
-    return nullptr;
+    return cast<Instruction>(getVPValue()->getUnderlyingValue());
   }
   const Instruction *getUnderlyingInstr() const {
-    if (auto *VPV = toVPValue())
-      return cast_or_null<Instruction>(VPV->getUnderlyingValue());
-    return nullptr;
+    return cast<Instruction>(getVPValue()->getUnderlyingValue());
+  }
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPDef *D) {
+    // All VPDefs are also VPRecipeBases.
+    return true;
   }
 };
 
-inline bool VPUser::classof(const VPRecipeBase *Recipe) {
-  return Recipe->getVPRecipeID() == VPRecipeBase::VPInstructionSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenCallSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenSelectSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenGEPSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPBlendSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPInterleaveSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPReplicateSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPReductionSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPBranchOnMaskSC ||
-         Recipe->getVPRecipeID() == VPRecipeBase::VPWidenMemoryInstructionSC ||
-         Recipe->getVPRecipeID() ==
+inline bool VPUser::classof(const VPDef *Def) {
+  return Def->getVPDefID() == VPRecipeBase::VPInstructionSC ||
+         Def->getVPDefID() == VPRecipeBase::VPWidenSC ||
+         Def->getVPDefID() == VPRecipeBase::VPWidenCallSC ||
+         Def->getVPDefID() == VPRecipeBase::VPWidenSelectSC ||
+         Def->getVPDefID() == VPRecipeBase::VPWidenGEPSC ||
+         Def->getVPDefID() == VPRecipeBase::VPBlendSC ||
+         Def->getVPDefID() == VPRecipeBase::VPInterleaveSC ||
+         Def->getVPDefID() == VPRecipeBase::VPReplicateSC ||
+         Def->getVPDefID() == VPRecipeBase::VPReductionSC ||
+         Def->getVPDefID() == VPRecipeBase::VPBranchOnMaskSC ||
+         Def->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC ||
+         Def->getVPDefID() ==
              VPRecipeBase::VPPredicatedWidenMemoryInstructionSC;
 }
 
@@ -750,7 +716,7 @@ inline bool VPUser::classof(const VPRecipeBase *Recipe) {
 /// While as any Recipe it may generate a sequence of IR instructions when
 /// executed, these instructions would always form a single-def expression as
 /// the VPInstruction is also a single def-use vertex.
-class VPInstruction : public VPUser, public VPValue, public VPRecipeBase {
+class VPInstruction : public VPRecipeBase, public VPUser, public VPValue {
   friend class VPlanSlp;
 
 public:
@@ -776,8 +742,15 @@ protected:
 
 public:
   VPInstruction(unsigned Opcode, ArrayRef<VPValue *> Operands)
-      : VPUser(Operands), VPValue(VPValue::VPVInstructionSC),
-        VPRecipeBase(VPRecipeBase::VPInstructionSC), Opcode(Opcode) {}
+      : VPRecipeBase(VPRecipeBase::VPInstructionSC), VPUser(Operands),
+        VPValue(VPValue::VPVInstructionSC, nullptr, this), Opcode(Opcode) {}
+
+  VPInstruction(unsigned Opcode, ArrayRef<VPInstruction *> Operands)
+      : VPRecipeBase(VPRecipeBase::VPInstructionSC), VPUser({}),
+        VPValue(VPValue::VPVInstructionSC, nullptr, this), Opcode(Opcode) {
+    for (auto *I : Operands)
+      addOperand(I->getVPValue());
+  }
 
   VPInstruction(unsigned Opcode, std::initializer_list<VPValue *> Operands)
       : VPInstruction(Opcode, ArrayRef<VPValue *>(Operands)) {}
@@ -793,8 +766,8 @@ public:
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *R) {
-    return R->getVPRecipeID() == VPRecipeBase::VPInstructionSC;
+  static inline bool classof(const VPDef *R) {
+    return R->getVPDefID() == VPRecipeBase::VPInstructionSC;
   }
 
   unsigned getOpcode() const { return Opcode; }
@@ -804,13 +777,12 @@ public:
   /// provided.
   void execute(VPTransformState &State) override;
 
-  /// Print the Recipe.
+  /// Print the VPInstruction to \p O.
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
 
-  /// Print the VPInstruction.
-  void print(raw_ostream &O) const;
-  void print(raw_ostream &O, VPSlotTracker &SlotTracker) const;
+  /// Print the VPInstruction to dbgs() (for debugging).
+  void dump() const;
 
   /// Return true if this instruction may modify memory.
   bool mayWriteToMemory() const {
@@ -848,14 +820,14 @@ class VPWidenRecipe : public VPRecipeBase, public VPValue, public VPUser {
 public:
   template <typename IterT>
   VPWidenRecipe(Instruction &I, iterator_range<IterT> Operands)
-      : VPRecipeBase(VPRecipeBase::VPWidenSC), VPValue(VPValue::VPVWidenSC, &I),
-        VPUser(Operands) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenSC),
+        VPValue(VPValue::VPVWidenSC, &I, this), VPUser(Operands) {}
 
   ~VPWidenRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenSC;
   }
   static inline bool classof(const VPValue *V) {
     return V->getVPValueID() == VPValue::VPVWidenSC;
@@ -869,9 +841,10 @@ public:
              VPSlotTracker &SlotTracker) const override;
 };
 
-class VPPredicatedWidenRecipe : public VPRecipeBase, public VPUser {
+class VPPredicatedWidenRecipe : public VPRecipeBase,
+                                public VPValue,
+                                public VPUser {
 private:
-  Instruction &Ingredient;
   bool Masked = false;
 
   void setMask(VPValue *Mask) {
@@ -885,7 +858,8 @@ public:
   template <typename IterT>
   VPPredicatedWidenRecipe(Instruction &I, iterator_range<IterT> Operands,
                           VPValue *Mask, VPValue *EVL)
-      : VPRecipeBase(VPPredicatedWidenSC), VPUser(Operands), Ingredient(I) {
+      : VPRecipeBase(VPRecipeBase::VPPredicatedWidenSC),
+        VPValue(VPValue::VPVPredicatedWidenSC, &I, this), VPUser(Operands) {
     addOperand(EVL);
     setMask(Mask);
   }
@@ -893,8 +867,11 @@ public:
   ~VPPredicatedWidenRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPPredicatedWidenSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPPredicatedWidenSC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVPredicatedWidenSC;
   }
 
   /// Return the mask used by this recipe.
@@ -917,19 +894,19 @@ public:
 };
 
 /// A recipe for widening Call instructions.
-class VPWidenCallRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenCallRecipe : public VPRecipeBase, public VPUser, public VPValue {
 
 public:
   template <typename IterT>
   VPWidenCallRecipe(CallInst &I, iterator_range<IterT> CallArguments)
-      : VPRecipeBase(VPRecipeBase::VPWidenCallSC),
-        VPValue(VPValue::VPVWidenCallSC, &I), VPUser(CallArguments) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenCallSC), VPUser(CallArguments),
+        VPValue(VPValue::VPVWidenCallSC, &I, this) {}
 
   ~VPWidenCallRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenCallSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenCallSC;
   }
 
   /// Produce a widened version of the call instruction.
@@ -941,7 +918,7 @@ public:
 };
 
 /// A recipe for widening select instructions.
-class VPWidenSelectRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenSelectRecipe : public VPRecipeBase, public VPUser, public VPValue {
 
   /// Is the condition of the select loop invariant?
   bool InvariantCond;
@@ -950,15 +927,15 @@ public:
   template <typename IterT>
   VPWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands,
                       bool InvariantCond)
-      : VPRecipeBase(VPRecipeBase::VPWidenSelectSC),
-        VPValue(VPValue::VPVWidenSelectSC, &I), VPUser(Operands),
+      : VPRecipeBase(VPRecipeBase::VPWidenSelectSC), VPUser(Operands),
+        VPValue(VPValue::VPVWidenSelectSC, &I, this),
         InvariantCond(InvariantCond) {}
 
   ~VPWidenSelectRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenSelectSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenSelectSC;
   }
 
   /// Produce a widened version of the select instruction.
@@ -970,21 +947,24 @@ public:
 };
 
 /// A recipe for handling GEP instructions.
-class VPWidenGEPRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPWidenGEPRecipe : public VPRecipeBase,
+                         public VPUser,
+                         public VPValue {
   bool IsPtrLoopInvariant;
   SmallBitVector IsIndexLoopInvariant;
 
 public:
   template <typename IterT>
   VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands)
-      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPValue(VPWidenGEPSC, GEP),
-        VPUser(Operands), IsIndexLoopInvariant(GEP->getNumIndices(), false) {}
+      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPUser(Operands),
+        VPValue(VPWidenGEPSC, GEP, this),
+        IsIndexLoopInvariant(GEP->getNumIndices(), false) {}
 
   template <typename IterT>
   VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands,
                    Loop *OrigLoop)
-      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC),
-        VPValue(VPValue::VPVWidenGEPSC, GEP), VPUser(Operands),
+      : VPRecipeBase(VPRecipeBase::VPWidenGEPSC), VPUser(Operands),
+        VPValue(VPValue::VPVWidenGEPSC, GEP, this),
         IsIndexLoopInvariant(GEP->getNumIndices(), false) {
     IsPtrLoopInvariant = OrigLoop->isLoopInvariant(GEP->getPointerOperand());
     for (auto Index : enumerate(GEP->indices()))
@@ -994,8 +974,8 @@ public:
   ~VPWidenGEPRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenGEPSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenGEPSC;
   }
 
   /// Generate the gep nodes.
@@ -1008,18 +988,25 @@ public:
 
 /// A recipe for handling phi nodes of integer and floating-point inductions,
 /// producing their vector and scalar values.
-class VPWidenIntOrFpInductionRecipe : public VPRecipeBase {
+class VPWidenIntOrFpInductionRecipe : public VPRecipeBase, public VPUser {
   PHINode *IV;
   TruncInst *Trunc;
 
 public:
-  VPWidenIntOrFpInductionRecipe(PHINode *IV, TruncInst *Trunc = nullptr)
-      : VPRecipeBase(VPWidenIntOrFpInductionSC), IV(IV), Trunc(Trunc) {}
+  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start,
+                                TruncInst *Trunc = nullptr)
+      : VPRecipeBase(VPWidenIntOrFpInductionSC), VPUser({Start}), IV(IV),
+        Trunc(Trunc) {
+    if (Trunc)
+      new VPValue(Trunc, this);
+    else
+      new VPValue(IV, this);
+  }
   ~VPWidenIntOrFpInductionRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenIntOrFpInductionSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenIntOrFpInductionSC;
   }
 
   /// Generate the vectorized and scalarized versions of the phi node as
@@ -1029,19 +1016,38 @@ public:
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
+
+  /// Returns the start value of the induction.
+  VPValue *getStartValue() { return getOperand(0); }
 };
 
 /// A recipe for handling all phi nodes except for integer and FP inductions.
-class VPWidenPHIRecipe : public VPRecipeBase {
+/// For reduction PHIs, RdxDesc must point to the corresponding recurrence
+/// descriptor and the start value is the first operand of the recipe.
+class VPWidenPHIRecipe : public VPRecipeBase, public VPUser {
   PHINode *Phi;
 
+  /// Descriptor for a reduction PHI.
+  RecurrenceDescriptor *RdxDesc = nullptr;
+
 public:
-  VPWidenPHIRecipe(PHINode *Phi) : VPRecipeBase(VPWidenPHISC), Phi(Phi) {}
+  /// Create a new VPWidenPHIRecipe for the reduction \p Phi described by \p
+  /// RdxDesc.
+  VPWidenPHIRecipe(PHINode *Phi, RecurrenceDescriptor &RdxDesc, VPValue &Start)
+      : VPWidenPHIRecipe(Phi) {
+    this->RdxDesc = &RdxDesc;
+    addOperand(&Start);
+  }
+
+  /// Create a VPWidenPHIRecipe for \p Phi
+  VPWidenPHIRecipe(PHINode *Phi) : VPRecipeBase(VPWidenPHISC), Phi(Phi) {
+    new VPValue(Phi, this);
+  }
   ~VPWidenPHIRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenPHISC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenPHISC;
   }
 
   /// Generate the phi/select nodes.
@@ -1050,6 +1056,11 @@ public:
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
+
+  /// Returns the start value of the phi, if it is a reduction.
+  VPValue *getStartValue() {
+    return getNumOperands() == 0 ? nullptr : getOperand(0);
+  }
 };
 
 /// A recipe for vectorizing a phi-node as a sequence of mask-based select
@@ -1063,6 +1074,7 @@ public:
   /// might be incoming with a full mask for which there is no VPValue.
   VPBlendRecipe(PHINode *Phi, ArrayRef<VPValue *> Operands)
       : VPRecipeBase(VPBlendSC), VPUser(Operands), Phi(Phi) {
+    new VPValue(Phi, this);
     assert(Operands.size() > 0 &&
            ((Operands.size() == 1) || (Operands.size() % 2 == 0)) &&
            "Expected either a single incoming value or a positive even number "
@@ -1070,8 +1082,8 @@ public:
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPBlendSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPBlendSC;
   }
 
   /// Return the number of incoming values, taking into account that a single
@@ -1104,7 +1116,14 @@ class VPInterleaveRecipe : public VPRecipeBase, public VPUser {
 public:
   VPInterleaveRecipe(const InterleaveGroup<Instruction> *IG, VPValue *Addr,
                      ArrayRef<VPValue *> StoredValues, VPValue *Mask)
-      : VPRecipeBase(VPInterleaveSC), VPUser({Addr}), IG(IG) {
+      : VPRecipeBase(VPInterleaveSC), VPUser(Addr), IG(IG) {
+    for (unsigned i = 0; i < IG->getFactor(); ++i)
+      if (Instruction *I = IG->getMember(i)) {
+        if (I->getType()->isVoidTy())
+          continue;
+        new VPValue(I, this);
+      }
+
     for (auto *SV : StoredValues)
       addOperand(SV);
     if (Mask) {
@@ -1115,8 +1134,8 @@ public:
   ~VPInterleaveRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPInterleaveSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPInterleaveSC;
   }
 
   /// Return the address accessed by this recipe.
@@ -1153,7 +1172,7 @@ public:
 /// A recipe to represent inloop reduction operations, performing a reduction on
 /// a vector operand into a scalar value, and adding the result to a chain.
 /// The Operands are {ChainOp, VecOp, [Condition]}.
-class VPReductionRecipe : public VPRecipeBase, public VPValue, public VPUser {
+class VPReductionRecipe : public VPRecipeBase, public VPUser, public VPValue {
   /// The recurrence decriptor for the reduction in question.
   RecurrenceDescriptor *RdxDesc;
   /// Fast math flags to use for the resulting reduction operation.
@@ -1165,9 +1184,9 @@ public:
   VPReductionRecipe(RecurrenceDescriptor *R, Instruction *I, VPValue *ChainOp,
                     VPValue *VecOp, VPValue *CondOp, bool NoNaN,
                     const TargetTransformInfo *TTI)
-      : VPRecipeBase(VPRecipeBase::VPReductionSC),
-        VPValue(VPValue::VPVReductionSC, I), VPUser({ChainOp, VecOp}),
-        RdxDesc(R), NoNaN(NoNaN), TTI(TTI) {
+      : VPRecipeBase(VPRecipeBase::VPReductionSC), VPUser({ChainOp, VecOp}),
+        VPValue(VPValue::VPVReductionSC, I, this), RdxDesc(R), NoNaN(NoNaN),
+        TTI(TTI) {
     if (CondOp)
       addOperand(CondOp);
   }
@@ -1178,8 +1197,9 @@ public:
   static inline bool classof(const VPValue *V) {
     return V->getVPValueID() == VPValue::VPVReductionSC;
   }
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPReductionSC;
+
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPReductionSC;
   }
 
   /// Generate the reduction in the loop
@@ -1218,7 +1238,7 @@ public:
   VPReplicateRecipe(Instruction *I, iterator_range<IterT> Operands,
                     bool IsUniform, bool IsPredicated = false)
       : VPRecipeBase(VPReplicateSC), VPUser(Operands),
-        VPValue(VPVReplicateSC, I), IsUniform(IsUniform),
+        VPValue(VPVReplicateSC, I, this), IsUniform(IsUniform),
         IsPredicated(IsPredicated) {
     // Retain the previous behavior of predicateInstructions(), where an
     // insert-element of a predicated instruction got hoisted into the
@@ -1231,8 +1251,8 @@ public:
   ~VPReplicateRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPReplicateSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPReplicateSC;
   }
 
   static inline bool classof(const VPValue *V) {
@@ -1262,8 +1282,8 @@ public:
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPBranchOnMaskSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPBranchOnMaskSC;
   }
 
   /// Generate the extraction of the appropriate bit from the block mask and the
@@ -1275,7 +1295,7 @@ public:
              VPSlotTracker &SlotTracker) const override {
     O << " +\n" << Indent << "\"BRANCH-ON-MASK ";
     if (VPValue *Mask = getMask())
-      Mask->print(O, SlotTracker);
+      Mask->printAsOperand(O, SlotTracker);
     else
       O << " All-One";
     O << "\\l\"";
@@ -1295,19 +1315,20 @@ public:
 /// order to merge values that are set under such a branch and feed their uses.
 /// The phi nodes can be scalar or vector depending on the users of the value.
 /// This recipe works in concert with VPBranchOnMaskRecipe.
-class VPPredInstPHIRecipe : public VPRecipeBase {
-  Instruction *PredInst;
+class VPPredInstPHIRecipe : public VPRecipeBase, public VPUser {
 
 public:
   /// Construct a VPPredInstPHIRecipe given \p PredInst whose value needs a phi
   /// nodes after merging back from a Branch-on-Mask.
-  VPPredInstPHIRecipe(Instruction *PredInst)
-      : VPRecipeBase(VPPredInstPHISC), PredInst(PredInst) {}
+  VPPredInstPHIRecipe(VPValue *PredV)
+      : VPRecipeBase(VPPredInstPHISC), VPUser(PredV) {
+    new VPValue(PredV->getUnderlyingValue(), this);
+  }
   ~VPPredInstPHIRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPPredInstPHISC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPPredInstPHISC;
   }
 
   /// Generates phi nodes for live-outs as needed to retain SSA form.
@@ -1325,8 +1346,8 @@ public:
 /// TODO: We currently execute only per-part unless a specific instance is
 /// provided.
 class VPWidenMemoryInstructionRecipe : public VPRecipeBase,
-                                       public VPValue,
                                        public VPUser {
+  Instruction &Ingredient;
 
   void setMask(VPValue *Mask) {
     if (!Mask)
@@ -1340,22 +1361,22 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase,
 
 public:
   VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask)
-      : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPVMemoryInstructionSC, &Load), VPUser({Addr}) {
+      : VPRecipeBase(VPWidenMemoryInstructionSC), VPUser({Addr}),
+        Ingredient(Load) {
+    new VPValue(VPValue::VPVMemoryInstructionSC, &Load, this);
     setMask(Mask);
   }
 
   VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
                                  VPValue *StoredValue, VPValue *Mask)
-      : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPVMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue}) {
+      : VPRecipeBase(VPWidenMemoryInstructionSC), VPUser({Addr, StoredValue}),
+        Ingredient(Store) {
     setMask(Mask);
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenMemoryInstructionSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC;
   }
 
   /// Return the address accessed by this recipe.
@@ -1371,7 +1392,7 @@ public:
   }
 
   /// Returns true if this recipe is a store.
-  bool isStore() const { return isa<StoreInst>(getUnderlyingInstr()); }
+  bool isStore() const { return isa<StoreInst>(Ingredient); }
 
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
@@ -1388,8 +1409,9 @@ public:
 };
 
 class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
-                                                 public VPValue,
                                                  public VPUser {
+  Instruction &Ingredient;
+
   void setMask(VPValue *Mask) {
     if (!Mask)
       return;
@@ -1397,16 +1419,15 @@ class VPPredicatedWidenMemoryInstructionRecipe : public VPRecipeBase,
   }
 
   bool isMasked() const {
-    return (isa<LoadInst>(getUnderlyingInstr()) && getNumOperands() == 3) ||
-           (isa<StoreInst>(getUnderlyingInstr()) && getNumOperands() == 4);
+    return isStore() ? getNumOperands() == 4 : getNumOperands() == 3;
   }
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, VPValue *EVL)
       : VPRecipeBase(VPPredicatedWidenMemoryInstructionSC),
-        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Load),
-        VPUser({Addr, EVL}) {
+        VPUser({Addr, EVL}), Ingredient(Load) {
+    new VPValue(VPValue::VPVPredicatedMemoryInstructionSC, &Load, this);
     setMask(Mask);
   }
 
@@ -1414,14 +1435,14 @@ public:
                                            VPValue *StoredValue, VPValue *Mask,
                                            VPValue *EVL)
       : VPRecipeBase(VPWidenMemoryInstructionSC),
-        VPValue(VPValue::VPPredicatedMemoryInstructionSC, &Store),
-        VPUser({Addr, StoredValue, EVL}) {
+        VPUser({Addr, StoredValue, EVL}),
+        Ingredient(Store) {
     setMask(Mask);
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() ==
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() ==
            VPRecipeBase::VPPredicatedWidenMemoryInstructionSC;
   }
 
@@ -1441,10 +1462,12 @@ public:
                       : getOperand(getNumOperands() - 1);
   }
 
+  /// Returns true if this recipe is a store.
+  bool isStore() const { return isa<StoreInst>(Ingredient); }
+
   /// Return the address accessed by this recipe.
   VPValue *getStoredValue() const {
-    assert(isa<StoreInst>(getUnderlyingInstr()) &&
-           "Stored value only available for store instructions");
+    assert(isStore() && "Stored value only available for store instructions");
     return getOperand(1); // Stored value is the 2nd, mandatory operand.
   }
 
@@ -1458,21 +1481,16 @@ public:
 
 /// A Recipe for widening the canonical induction variable of the vector loop.
 class VPWidenCanonicalIVRecipe : public VPRecipeBase {
-  /// A VPValue representing the canonical vector IV.
-  VPValue Val;
-
 public:
-  VPWidenCanonicalIVRecipe() : VPRecipeBase(VPWidenCanonicalIVSC) {}
+  VPWidenCanonicalIVRecipe() : VPRecipeBase(VPWidenCanonicalIVSC) {
+    new VPValue(nullptr, this);
+  }
+
   ~VPWidenCanonicalIVRecipe() override = default;
 
-  /// Return the VPValue representing the canonical vector induction variable of
-  /// the vector loop.
-  const VPValue *getVPValue() const { return &Val; }
-  VPValue *getVPValue() { return &Val; }
-
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenCanonicalIVSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenCanonicalIVSC;
   }
 
   /// Generate a canonical vector induction variable of the vector loop, with
@@ -1492,7 +1510,7 @@ class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
 public:
   VPWidenEVLRecipe()
       : VPRecipeBase(VPRecipeBase::VPWidenEVLSC),
-        VPValue(VPValue::VPWidenEVLSC) {}
+        VPValue(VPValue::VPVWidenEVLSC, nullptr, this) {}
   ~VPWidenEVLRecipe() override = default;
 
   /// Return the VPValue representing EVL.
@@ -1500,8 +1518,8 @@ public:
   VPValue *getEVL() { return this; }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenEVLSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenEVLSC;
   }
 
   /// Generate the instructions to compute EVL.
@@ -1527,7 +1545,7 @@ class VPWidenEVLMaskRecipe : public VPRecipeBase,
 public:
   VPWidenEVLMaskRecipe(VPValue *EVL)
       : VPRecipeBase(VPRecipeBase::VPWidenEVLMaskSC),
-        VPValue(VPValue::VPWidenEVLMaskSC), VPUser({EVL}) {}
+        VPValue(VPValue::VPVWidenEVLMaskSC, nullptr, this), VPUser({EVL}) {}
   ~VPWidenEVLMaskRecipe() override = default;
 
   /// Return the VPValue representing EVL.
@@ -1537,8 +1555,8 @@ public:
   VPValue *getEVL() { return getOperand(0); }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *V) {
-    return V->getVPRecipeID() == VPRecipeBase::VPWidenEVLMaskSC;
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPWidenEVLMaskSC;
   }
 
   /// Generate the instructions to compute EVL.
@@ -2223,9 +2241,7 @@ public:
   /// \returns nullptr if doesn't have such group.
   InterleaveGroup<VPInstruction> *
   getInterleaveGroup(VPInstruction *Instr) const {
-    if (InterleaveGroupMap.count(Instr))
-      return InterleaveGroupMap.find(Instr)->second;
-    return nullptr;
+    return InterleaveGroupMap.lookup(Instr);
   }
 };
 

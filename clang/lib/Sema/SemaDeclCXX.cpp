@@ -902,7 +902,8 @@ static bool checkSimpleDecomposition(
     llvm::function_ref<ExprResult(SourceLocation, Expr *, unsigned)> GetInit) {
   if ((int64_t)Bindings.size() != NumElems) {
     S.Diag(Src->getLocation(), diag::err_decomp_decl_wrong_number_bindings)
-        << DecompType << (unsigned)Bindings.size() << NumElems.toString(10)
+        << DecompType << (unsigned)Bindings.size()
+        << (unsigned)NumElems.getLimitedValue(UINT_MAX) << NumElems.toString(10)
         << (NumElems < Bindings.size());
     return true;
   }
@@ -1148,8 +1149,9 @@ static bool checkTupleLikeDecomposition(Sema &S,
                                         const llvm::APSInt &TupleSize) {
   if ((int64_t)Bindings.size() != TupleSize) {
     S.Diag(Src->getLocation(), diag::err_decomp_decl_wrong_number_bindings)
-        << DecompType << (unsigned)Bindings.size() << TupleSize.toString(10)
-        << (TupleSize < Bindings.size());
+        << DecompType << (unsigned)Bindings.size()
+        << (unsigned)TupleSize.getLimitedValue(UINT_MAX)
+        << TupleSize.toString(10) << (TupleSize < Bindings.size());
     return true;
   }
 
@@ -1373,7 +1375,7 @@ static bool checkMemberDecomposition(Sema &S, ArrayRef<BindingDecl*> Bindings,
                       [](FieldDecl *FD) { return !FD->isUnnamedBitfield(); });
     assert(Bindings.size() != NumFields);
     S.Diag(Src->getLocation(), diag::err_decomp_decl_wrong_number_bindings)
-        << DecompType << (unsigned)Bindings.size() << NumFields
+        << DecompType << (unsigned)Bindings.size() << NumFields << NumFields
         << (NumFields < Bindings.size());
     return true;
   };
@@ -3942,9 +3944,22 @@ void Sema::ActOnStartTrailingRequiresClause(Scope *S, Declarator &D) {
 }
 
 ExprResult Sema::ActOnFinishTrailingRequiresClause(ExprResult ConstraintExpr) {
+  return ActOnRequiresClause(ConstraintExpr);
+}
+
+ExprResult Sema::ActOnRequiresClause(ExprResult ConstraintExpr) {
   if (ConstraintExpr.isInvalid())
     return ExprError();
-  return CorrectDelayedTyposInExpr(ConstraintExpr);
+
+  ConstraintExpr = CorrectDelayedTyposInExpr(ConstraintExpr);
+  if (ConstraintExpr.isInvalid())
+    return ExprError();
+
+  if (DiagnoseUnexpandedParameterPack(ConstraintExpr.get(),
+                                      UPPC_RequiresClause))
+    return ExprError();
+
+  return ConstraintExpr;
 }
 
 /// This is invoked after parsing an in-class initializer for a
@@ -6102,8 +6117,7 @@ void Sema::checkClassLevelDLLAttribute(CXXRecordDecl *Class) {
   Attr *ClassAttr = getDLLAttr(Class);
 
   // MSVC inherits DLL attributes to partial class template specializations.
-  if ((Context.getTargetInfo().getCXXABI().isMicrosoft() || 
-       Context.getTargetInfo().getTriple().isWindowsItaniumEnvironment()) && !ClassAttr) {
+  if (Context.getTargetInfo().shouldDLLImportComdatSymbols() && !ClassAttr) {
     if (auto *Spec = dyn_cast<ClassTemplatePartialSpecializationDecl>(Class)) {
       if (Attr *TemplateAttr =
               getDLLAttr(Spec->getSpecializedTemplate()->getTemplatedDecl())) {
@@ -6123,8 +6137,7 @@ void Sema::checkClassLevelDLLAttribute(CXXRecordDecl *Class) {
     return;
   }
 
-  if ((Context.getTargetInfo().getCXXABI().isMicrosoft() || 
-       Context.getTargetInfo().getTriple().isWindowsItaniumEnvironment()) &&
+  if (Context.getTargetInfo().shouldDLLImportComdatSymbols() &&
       !ClassAttr->isInherited()) {
     // Diagnose dll attributes on members of class with dll attribute.
     for (Decl *Member : Class->decls()) {
@@ -6189,8 +6202,7 @@ void Sema::checkClassLevelDLLAttribute(CXXRecordDecl *Class) {
       if (MD->isInlined()) {
         // MinGW does not import or export inline methods. But do it for
         // template instantiations.
-        if (!Context.getTargetInfo().getCXXABI().isMicrosoft() &&
-            !Context.getTargetInfo().getTriple().isWindowsItaniumEnvironment() &&
+        if (!Context.getTargetInfo().shouldDLLImportComdatSymbols() &&
             TSK != TSK_ExplicitInstantiationDeclaration &&
             TSK != TSK_ExplicitInstantiationDefinition)
           continue;

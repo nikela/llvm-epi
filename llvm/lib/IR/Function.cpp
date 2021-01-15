@@ -611,6 +611,12 @@ void Function::clearGC() {
   setValueSubclassDataBit(14, false);
 }
 
+bool Function::hasStackProtectorFnAttr() const {
+  return hasFnAttribute(Attribute::StackProtect) ||
+         hasFnAttribute(Attribute::StackProtectStrong) ||
+         hasFnAttribute(Attribute::StackProtectReq);
+}
+
 /// Copy all additional attributes (those not needed to create a Function) from
 /// the Function Src to this one.
 void Function::copyAttributesFrom(const Function *Src) {
@@ -759,6 +765,7 @@ static std::string getMangledTypeStr(Type* Ty) {
     case Type::FP128TyID:     Result += "f128";     break;
     case Type::PPC_FP128TyID: Result += "ppcf128";  break;
     case Type::X86_MMXTyID:   Result += "x86mmx";   break;
+    case Type::X86_AMXTyID:   Result += "x86amx";   break;
     case Type::IntegerTyID:
       Result += "i" + utostr(cast<IntegerType>(Ty)->getBitWidth());
       break;
@@ -776,6 +783,8 @@ StringRef Intrinsic::getName(ID id) {
 
 std::string Intrinsic::getName(ID id, ArrayRef<Type*> Tys) {
   assert(id < num_intrinsics && "Invalid intrinsic ID!");
+  assert((Tys.empty() || Intrinsic::isOverloaded(id)) &&
+         "This version of getName is for overloaded intrinsics only");
   std::string Result(IntrinsicNameTable[id]);
   for (Type *Ty : Tys) {
     Result += "." + getMangledTypeStr(Ty);
@@ -841,7 +850,8 @@ enum IIT_Info {
   IIT_V128  = 47,
   IIT_BF16 = 48,
   IIT_STRUCT9 = 49,
-  IIT_V256 = 50
+  IIT_V256 = 50,
+  IIT_AMX  = 51
 };
 
 static void DecodeIITType(unsigned &NextElt, ArrayRef<unsigned char> Infos,
@@ -863,6 +873,9 @@ static void DecodeIITType(unsigned &NextElt, ArrayRef<unsigned char> Infos,
     return;
   case IIT_MMX:
     OutputTable.push_back(IITDescriptor::get(IITDescriptor::MMX, 0));
+    return;
+  case IIT_AMX:
+    OutputTable.push_back(IITDescriptor::get(IITDescriptor::AMX, 0));
     return;
   case IIT_TOKEN:
     OutputTable.push_back(IITDescriptor::get(IITDescriptor::Token, 0));
@@ -1101,6 +1114,7 @@ static Type *DecodeFixedType(ArrayRef<Intrinsic::IITDescriptor> &Infos,
   case IITDescriptor::Void: return Type::getVoidTy(Context);
   case IITDescriptor::VarArg: return Type::getVoidTy(Context);
   case IITDescriptor::MMX: return Type::getX86_MMXTy(Context);
+  case IITDescriptor::AMX: return Type::getX86_AMXTy(Context);
   case IITDescriptor::Token: return Type::getTokenTy(Context);
   case IITDescriptor::Metadata: return Type::getMetadataTy(Context);
   case IITDescriptor::Half: return Type::getHalfTy(Context);
@@ -1238,7 +1252,7 @@ Function *Intrinsic::getDeclaration(Module *M, ID id, ArrayRef<Type*> Tys) {
   // There can never be multiple globals with the same name of different types,
   // because intrinsics must be a specific type.
   return cast<Function>(
-      M->getOrInsertFunction(getName(id, Tys),
+      M->getOrInsertFunction(Tys.empty() ? getName(id) : getName(id, Tys),
                              getType(M->getContext(), id, Tys))
           .getCallee());
 }
@@ -1280,6 +1294,7 @@ static bool matchIntrinsicType(
     case IITDescriptor::Void: return !Ty->isVoidTy();
     case IITDescriptor::VarArg: return true;
     case IITDescriptor::MMX:  return !Ty->isX86_MMXTy();
+    case IITDescriptor::AMX:  return !Ty->isX86_AMXTy();
     case IITDescriptor::Token: return !Ty->isTokenTy();
     case IITDescriptor::Metadata: return !Ty->isMetadataTy();
     case IITDescriptor::Half: return !Ty->isHalfTy();

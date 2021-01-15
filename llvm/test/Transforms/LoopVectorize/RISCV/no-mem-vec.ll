@@ -11,26 +11,32 @@ define i64 @foo(i64 %t7, i64 %b) {
 ; CHECK-NEXT:    [[TMP0:%.*]] = add i64 [[T7:%.*]], -1
 ; CHECK-NEXT:    [[TMP1:%.*]] = sub i64 [[TMP0]], [[B]]
 ; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP2]], 8
-; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[TMP1]], [[STEP_VSCALE]]
+; CHECK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
+; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[TMP1]], [[TMP3]]
 ; CHECK-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
-; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE1:%.*]] = mul i64 8, [[TMP3]]
-; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[TMP1]], [[STEP_VSCALE1]]
+; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP5:%.*]] = mul i64 [[TMP4]], 8
+; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[TMP1]], [[TMP5]]
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 [[TMP1]], [[N_MOD_VF]]
 ; CHECK-NEXT:    [[IND_END:%.*]] = add i64 [[A]], [[N_VEC]]
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = add i64 [[A]], [[INDEX]]
-; CHECK-NEXT:    [[TMP4:%.*]] = add i64 [[OFFSET_IDX]], 0
-; CHECK-NEXT:    [[TMP5:%.*]] = add nuw nsw i64 [[TMP4]], 1
 ; CHECK-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP6]], 8
+; CHECK-NEXT:    [[TMP7:%.*]] = mul i64 [[TMP6]], 0
+; CHECK-NEXT:    [[TMP8:%.*]] = add i64 [[TMP7]], 0
+; CHECK-NEXT:    [[TMP9:%.*]] = mul i64 [[TMP8]], 1
+; CHECK-NEXT:    [[TMP10:%.*]] = add i64 [[OFFSET_IDX]], [[TMP9]]
+; CHECK-NEXT:    [[TMP11:%.*]] = add nuw nsw i64 [[TMP10]], 1
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = mul i64 [[TMP12]], 8
+; CHECK-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP14]], [[TMP13]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP7:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP7]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP15]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[TMP1]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[T9:%.*]], label [[SCALAR_PH]]

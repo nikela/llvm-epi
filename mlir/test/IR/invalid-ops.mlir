@@ -135,8 +135,8 @@ func @test_alloc_memref_map_rank_mismatch() {
 
 func @intlimit2() {
 ^bb:
-  %0 = "std.constant"() {value = 0} : () -> i4096
-  %1 = "std.constant"() {value = 1} : () -> i4097 // expected-error {{integer bitwidth is limited to 4096 bits}}
+  %0 = "std.constant"() {value = 0} : () -> i16777215
+  %1 = "std.constant"() {value = 1} : () -> i16777216 // expected-error {{integer bitwidth is limited to 16777215 bits}}
   return
 }
 
@@ -537,61 +537,6 @@ func @cmpf_generic_operand_type_mismatch(%a : f32, %b : f64) {
 func @cmpf_canonical_type_mismatch(%a : f32, %b : f64) { // expected-note {{prior use here}}
   // expected-error@+1 {{use of value '%b' expects different type than prior uses}}
   %r = cmpf "oeq", %a, %b : f32
-}
-
-// -----
-
-func @extract_element_no_operands() {
-  // expected-error@+1 {{op expected 1 or more operands}}
-  %0 = "std.extract_element"() : () -> f32
-  return
-}
-
-// -----
-
-func @extract_element_no_indices(%v : vector<3xf32>) {
-  // expected-error@+1 {{incorrect number of indices for extract_element}}
-  %0 = "std.extract_element"(%v) : (vector<3xf32>) -> f32
-  return
-}
-
-// -----
-
-func @extract_element_invalid_index_type(%v : vector<3xf32>, %i : i32) {
-  // expected-error@+1 {{operand #1 must be index}}
-  %0 = "std.extract_element"(%v, %i) : (vector<3xf32>, i32) -> f32
-  return
-}
-
-// -----
-
-func @extract_element_element_result_type_mismatch(%v : vector<3xf32>, %i : index) {
-  // expected-error@+1 {{result type matches element type of aggregate}}
-  %0 = "std.extract_element"(%v, %i) : (vector<3xf32>, index) -> f64
-  return
-}
-
-// -----
-
-func @extract_element_vector_too_many_indices(%v : vector<3xf32>, %i : index) {
-  // expected-error@+1 {{incorrect number of indices for extract_element}}
-  %0 = "std.extract_element"(%v, %i, %i) : (vector<3xf32>, index, index) -> f32
-  return
-}
-
-// -----
-
-func @extract_element_tensor_too_many_indices(%t : tensor<2x3xf32>, %i : index) {
-  // expected-error@+1 {{incorrect number of indices for extract_element}}
-  %0 = "std.extract_element"(%t, %i, %i, %i) : (tensor<2x3xf32>, index, index, index) -> f32
-  return
-}
-
-// -----
-
-func @extract_element_tensor_too_few_indices(%t : tensor<2x3xf32>, %i : index) {
-  // expected-error@+1 {{incorrect number of indices for extract_element}}
-  %0 = "std.extract_element"(%t, %i) : (tensor<2x3xf32>, index) -> f32 return
 }
 
 // -----
@@ -1305,5 +1250,13 @@ func @subtensor_wrong_static_type(%t: tensor<8x16x4xf32>, %idx : index) {
   %0 = subtensor %t[0, 0, 0][%idx, 3, %idx][1, 1, 1]
     : tensor<8x16x4xf32> to tensor<4x4x4xf32>
 
+  return
+}
+
+// -----
+
+func @no_zero_bit_integer_attrs() {
+  // expected-error @+1 {{integer constant out of range for attribute}}
+  %x = "some.op"(){value = 0 : i0} : () -> f32
   return
 }

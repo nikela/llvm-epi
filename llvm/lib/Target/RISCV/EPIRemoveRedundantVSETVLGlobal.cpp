@@ -64,25 +64,35 @@ char EPIRemoveRedundantVSETVLGlobal::ID = 0;
 
 namespace {
 
+// Helper struct to simplify handling fractional LMUL.
+struct VLMulRatio {
+  // Numerator / Denominator.
+  unsigned N;
+  unsigned D;
+
+  bool operator==(const VLMulRatio &other) const {
+    return other.N == N && other.D == D;
+  }
+};
+
+
 // This class holds information related to the operands of a VSETVLI
 // instruction. In particular it contains the (AVL, SEW, VLMul, NT) triplet.
-struct VSETVLInstr : public std::tuple<Register, unsigned, unsigned, bool> {
-  using Base = std::tuple<Register, unsigned, unsigned, bool>;
+struct VSETVLInstr : public std::tuple<Register, unsigned, VLMulRatio, bool> {
+  using Base = std::tuple<Register, unsigned, VLMulRatio, bool>;
 
-  VSETVLInstr() : Base(std::make_tuple(Register(), ~0U, ~0U, false)) {}
+  VSETVLInstr()
+      : Base(std::make_tuple(Register(), ~0U, VLMulRatio{~0U, ~0U}, false)) {}
 
-  VSETVLInstr(Register GVLReg, Register AVLReg, unsigned SEW, unsigned VLMul,
+  VSETVLInstr(Register GVLReg, Register AVLReg, unsigned SEW, VLMulRatio VLMul,
               bool Nontemporal)
       : Base(std::make_tuple(AVLReg, SEW, VLMul, Nontemporal)),
         GVLReg(GVLReg) {}
 
   Register getGVLReg() { return GVLReg; }
-
   Register getAVLReg() { return std::get<0>(*this); }
-
-  Register getSEW() { return std::get<1>(*this); }
-
-  Register getVLMul() { return std::get<2>(*this); }
+  unsigned getSEW() { return std::get<1>(*this); }
+  VLMulRatio getVLMul() { return std::get<2>(*this); }
 
   static VSETVLInstr createFromMI(const MachineInstr &MI) {
     assert(MI.getOpcode() == RISCV::PseudoVSETVLI);
@@ -104,15 +114,21 @@ struct VSETVLInstr : public std::tuple<Register, unsigned, unsigned, bool> {
 
     unsigned VTypeI = VTypeIOp.getImm();
 
-    unsigned SEWBits = (VTypeI >> 2) & 0x7;
-    unsigned VMulBits = VTypeI & 0x3;
+    unsigned SEWBits = static_cast<unsigned>(RISCVVType::getVSEW(VTypeI));
+    unsigned VLMulBits = static_cast<unsigned>(RISCVVType::getVLMUL(VTypeI));
 
     unsigned SEW = (1 << SEWBits) * 8;
-    unsigned VLMul = 1 << VMulBits;
 
-    bool Nontemporal = (VTypeI >> 9) & 0x1;
+    VLMulRatio VLMul;
+    if (VLMulBits & 0x4) {
+      // Fractional LMUL.
+      VLMul = VLMulRatio{1u, 4 - (1u << VLMulBits)};
+    } else {
+      VLMul = VLMulRatio{1u << VLMulBits, 1u};
+    }
 
-    return VSETVLInstr(GVLReg, AVLReg, SEW, VLMul, Nontemporal);
+    bool Nontemporal = RISCVVType::isNontemporal(VTypeI);
+    return VSETVLInstr{GVLReg, AVLReg, SEW, VLMul, Nontemporal};
   }
 
 private:
@@ -244,7 +260,8 @@ bool EPIRemoveRedundantVSETVLGlobal::runOnMachineFunction(MachineFunction &F) {
       } else {
         dbgs() << "BB: '" << MBB.getNumber() << "." << MBB.getName() << "'\t"
                << "(AVL: '" << printReg(VI.getAVLReg()) << "', SEW: e"
-               << VI.getSEW() << ", LMUL: m" << VI.getVLMul() << ")\n";
+               << VI.getSEW() << ", LMUL: m" << VI.getVLMul().N << "/"
+               << VI.getVLMul().D << ")\n";
       }
     }
     dbgs() << "\n"

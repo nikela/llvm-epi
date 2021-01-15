@@ -40,16 +40,22 @@ EnableGEPOpt("riscv-gep-opt", cl::Hidden,
              cl::desc("Enable optimizations on complex GEPs"),
              cl::init(false));
 
+static cl::opt<bool> EPIPipeline("epi-pipeline", cl::Hidden,
+                                 cl::desc("Use EPI pipeline passes"),
+                                 cl::init(false));
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
   RegisterTargetMachine<RISCVTargetMachine> Y(getTheRISCV64Target());
-  auto PR = PassRegistry::getPassRegistry();
+  auto *PR = PassRegistry::getPassRegistry();
   initializeGlobalISel(*PR);
+  initializeRISCVMergeBaseOffsetOptPass(*PR);
   initializeRISCVExpandPseudoPass(*PR);
   initializeEPIFoldBroadcastPass(*PR);
   initializeEPIFMAContractionPass(*PR);
   initializeEPIRemoveRedundantVSETVLPass(*PR);
   initializeEPIRemoveRedundantVSETVLGlobalPass(*PR);
+  initializeRISCVCleanupVSETVLIPass(*PR);
 }
 
 static StringRef computeDataLayout(const Triple &TT, StringRef FS) {
@@ -133,6 +139,15 @@ RISCVTargetMachine::getTargetTransformInfo(const Function &F) {
   return TargetTransformInfo(RISCVTTIImpl(this, F));
 }
 
+// A RISC-V hart has a single byte-addressable address space of 2^XLEN bytes
+// for all memory accesses, so it is reasonable to assume that an
+// implementation has no-op address space casts. If an implementation makes a
+// change to this, they can override it here.
+bool RISCVTargetMachine::isNoopAddrSpaceCast(unsigned SrcAS,
+                                             unsigned DstAS) const {
+  return true;
+}
+
 namespace {
 class RISCVPassConfig : public TargetPassConfig {
 public:
@@ -154,7 +169,7 @@ public:
   void addPreSched2() override;
   void addPreRegAlloc() override;
 };
-}
+} // namespace
 
 TargetPassConfig *RISCVTargetMachine::createPassConfig(PassManagerBase &PM) {
   return new RISCVPassConfig(*this, PM);
@@ -221,9 +236,14 @@ void RISCVPassConfig::addPreEmitPass2() {
 }
 
 void RISCVPassConfig::addPreRegAlloc() {
-  addPass(createRISCVMergeBaseOffsetOptPass());
-
-  addPass(createEPIRemoveRedundantVSETVLPass());
-
-  addPass(createEPIRemoveRedundantVSETVLGlobalPass());
+  if (TM->getOptLevel() != CodeGenOpt::None) {
+    addPass(createRISCVMergeBaseOffsetOptPass());
+    if (!EPIPipeline) {
+      addPass(createRISCVCleanupVSETVLIPass());
+    }
+  }
+  if (EPIPipeline) {
+    addPass(createEPIRemoveRedundantVSETVLPass());
+    addPass(createEPIRemoveRedundantVSETVLGlobalPass());
+  }
 }

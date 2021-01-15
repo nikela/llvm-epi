@@ -1286,6 +1286,7 @@ def FENTRY_CALL : StandardPseudoInstruction {
   let InOperandList = (ins);
   let AsmString = "# FEntry call";
   let usesCustomInserter = true;
+  let isCall = true;
   let mayLoad = true;
   let mayStore = true;
   let hasSideEffects = true;

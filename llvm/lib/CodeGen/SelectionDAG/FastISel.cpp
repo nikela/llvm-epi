@@ -113,11 +113,6 @@ using namespace PatternMatch;
 
 #define DEBUG_TYPE "isel"
 
-// FIXME: Remove this after the feature has proven reliable.
-static cl::opt<bool> SinkLocalValues("fast-isel-sink-local-values",
-                                     cl::init(true), cl::Hidden,
-                                     cl::desc("Sink local values in FastISel"));
-
 STATISTIC(NumFastIselSuccessIndependent, "Number of insts selected by "
                                          "target-independent selector");
 STATISTIC(NumFastIselSuccessTarget, "Number of insts selected by "
@@ -192,6 +187,10 @@ void FastISel::flushLocalValueMap() {
   // If FastISel bails out, it could leave local value instructions behind
   // that aren't used for anything.  Detect and erase those.
   if (LastLocalValue != EmitStartPt) {
+    // Save the first instruction after local values, for later.
+    MachineBasicBlock::iterator FirstNonValue(LastLocalValue);
+    ++FirstNonValue;
+
     MachineBasicBlock::reverse_iterator RE =
         EmitStartPt ? MachineBasicBlock::reverse_iterator(EmitStartPt)
                     : FuncInfo.MBB->rend();
@@ -214,13 +213,29 @@ void FastISel::flushLocalValueMap() {
         LocalMI.eraseFromParent();
       }
     }
+
+    if (FirstNonValue != FuncInfo.MBB->end()) {
+      // See if there are any local value instructions left.  If so, we want to
+      // make sure the first one has a debug location; if it doesn't, use the
+      // first non-value instruction's debug location.
+
+      // If EmitStartPt is non-null, this block had copies at the top before
+      // FastISel started doing anything; it points to the last one, so the
+      // first local value instruction is the one after EmitStartPt.
+      // If EmitStartPt is null, the first local value instruction is at the
+      // top of the block.
+      MachineBasicBlock::iterator FirstLocalValue =
+          EmitStartPt ? ++MachineBasicBlock::iterator(EmitStartPt)
+                      : FuncInfo.MBB->begin();
+      if (FirstLocalValue != FirstNonValue && !FirstLocalValue->getDebugLoc())
+        FirstLocalValue->setDebugLoc(FirstNonValue->getDebugLoc());
+    }
   }
 
   LocalValueMap.clear();
   LastLocalValue = EmitStartPt;
   recomputeInsertPt();
   SavedInsertPt = FuncInfo.InsertPt;
-  LastFlushPoint = FuncInfo.InsertPt;
 }
 
 bool FastISel::hasTrivialKill(const Value *V) {
@@ -442,8 +457,6 @@ void FastISel::removeDeadCode(MachineBasicBlock::iterator I,
   assert(I.isValid() && E.isValid() && std::distance(I, E) > 0 &&
          "Invalid iterator!");
   while (I != E) {
-    if (LastFlushPoint == I)
-      LastFlushPoint = E;
     if (SavedInsertPt == I)
       SavedInsertPt = E;
     if (EmitStartPt == I)
@@ -1194,11 +1207,6 @@ bool FastISel::selectCall(const User *I) {
 
   // Handle simple inline asms.
   if (const InlineAsm *IA = dyn_cast<InlineAsm>(Call->getCalledOperand())) {
-    // If the inline asm has side effects, then make sure that no local value
-    // lives across by flushing the local value map.
-    if (IA->hasSideEffects())
-      flushLocalValueMap();
-
     // Don't attempt to handle constraints.
     if (!IA->getConstraintString().empty())
       return false;
@@ -1227,15 +1235,6 @@ bool FastISel::selectCall(const User *I) {
   // Handle intrinsic function calls.
   if (const auto *II = dyn_cast<IntrinsicInst>(Call))
     return selectIntrinsicCall(II);
-
-  // Usually, it does not make sense to initialize a value,
-  // make an unrelated function call and use the value, because
-  // it tends to be spilled on the stack. So, we move the pointer
-  // to the last local value to the beginning of the block, so that
-  // all the values which have already been materialized,
-  // appear after the call. It also makes sense to skip intrinsics
-  // since they tend to be inlined.
-  flushLocalValueMap();
 
   return lowerCall(Call);
 }
@@ -1393,20 +1392,6 @@ bool FastISel::selectIntrinsicCall(const IntrinsicInst *II) {
     return selectXRayCustomEvent(II);
   case Intrinsic::xray_typedevent:
     return selectXRayTypedEvent(II);
-
-  case Intrinsic::memcpy:
-  case Intrinsic::memcpy_element_unordered_atomic:
-  case Intrinsic::memcpy_inline:
-  case Intrinsic::memmove:
-  case Intrinsic::memmove_element_unordered_atomic:
-  case Intrinsic::memset:
-  case Intrinsic::memset_element_unordered_atomic:
-    // Flush the local value map just like we do for regular calls,
-    // to avoid excessive spills and reloads.
-    // These intrinsics mostly turn into library calls at O0; and
-    // even memcpy_inline should be treated like one for this purpose.
-    flushLocalValueMap();
-    break;
   }
 
   return fastLowerIntrinsicCall(II);
@@ -2245,9 +2230,9 @@ bool FastISel::handlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
 
       const Value *PHIOp = PN.getIncomingValueForBlock(LLVMBB);
 
-      // Set the DebugLoc for the copy. Prefer the location of the operand
-      // if there is one; use the location of the PHI otherwise.
-      DbgLoc = PN.getDebugLoc();
+      // Set the DebugLoc for the copy. Use the location of the operand if
+      // there is one; otherwise no location, flushLocalValueMap will fix it.
+      DbgLoc = DebugLoc();
       if (const auto *Inst = dyn_cast<Instruction>(PHIOp))
         DbgLoc = Inst->getDebugLoc();
 

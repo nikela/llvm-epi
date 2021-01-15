@@ -2,6 +2,73 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+f -verify-machineinstrs < %s \
 ; RUN:   | FileCheck %s -check-prefix=RV64IF
 
+; This file exhaustively checks float<->i32 conversions. In general,
+; fcvt.l[u].s can be selected instead of fcvt.w[u].s because poison is
+; generated for an fpto[s|u]i conversion if the result doesn't fit in the
+; target type.
+
+define i32 @aext_fptosi(float %a) nounwind {
+; RV64IF-LABEL: aext_fptosi:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.l.s a0, ft0, rtz
+; RV64IF-NEXT:    ret
+  %1 = fptosi float %a to i32
+  ret i32 %1
+}
+
+define signext i32 @sext_fptosi(float %a) nounwind {
+; RV64IF-LABEL: sext_fptosi:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.l.s a0, ft0, rtz
+; RV64IF-NEXT:    ret
+  %1 = fptosi float %a to i32
+  ret i32 %1
+}
+
+define zeroext i32 @zext_fptosi(float %a) nounwind {
+; RV64IF-LABEL: zext_fptosi:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.l.s a0, ft0, rtz
+; RV64IF-NEXT:    slli a0, a0, 32
+; RV64IF-NEXT:    srli a0, a0, 32
+; RV64IF-NEXT:    ret
+  %1 = fptosi float %a to i32
+  ret i32 %1
+}
+
+define i32 @aext_fptoui(float %a) nounwind {
+; RV64IF-LABEL: aext_fptoui:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.lu.s a0, ft0, rtz
+; RV64IF-NEXT:    ret
+  %1 = fptoui float %a to i32
+  ret i32 %1
+}
+
+define signext i32 @sext_fptoui(float %a) nounwind {
+; RV64IF-LABEL: sext_fptoui:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.wu.s a0, ft0, rtz
+; RV64IF-NEXT:    ret
+  %1 = fptoui float %a to i32
+  ret i32 %1
+}
+
+define zeroext i32 @zext_fptoui(float %a) nounwind {
+; RV64IF-LABEL: zext_fptoui:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fmv.w.x ft0, a0
+; RV64IF-NEXT:    fcvt.lu.s a0, ft0, rtz
+; RV64IF-NEXT:    ret
+  %1 = fptoui float %a to i32
+  ret i32 %1
+}
+
 define i32 @bcvt_f32_to_aext_i32(float %a, float %b) nounwind {
 ; RV64IF-LABEL: bcvt_f32_to_aext_i32:
 ; RV64IF:       # %bb.0:
@@ -86,5 +153,35 @@ define float @uitofp_zext_i32_to_f32(i32 zeroext %a) nounwind {
 ; RV64IF-NEXT:    fmv.x.w a0, ft0
 ; RV64IF-NEXT:    ret
   %1 = uitofp i32 %a to float
+  ret float %1
+}
+
+define float @sitofp_aext_i32_to_f32(i32 %a) nounwind {
+; RV64IF-LABEL: sitofp_aext_i32_to_f32:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fcvt.s.w ft0, a0
+; RV64IF-NEXT:    fmv.x.w a0, ft0
+; RV64IF-NEXT:    ret
+  %1 = sitofp i32 %a to float
+  ret float %1
+}
+
+define float @sitofp_sext_i32_to_f32(i32 signext %a) nounwind {
+; RV64IF-LABEL: sitofp_sext_i32_to_f32:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fcvt.s.w ft0, a0
+; RV64IF-NEXT:    fmv.x.w a0, ft0
+; RV64IF-NEXT:    ret
+  %1 = sitofp i32 %a to float
+  ret float %1
+}
+
+define float @sitofp_zext_i32_to_f32(i32 zeroext %a) nounwind {
+; RV64IF-LABEL: sitofp_zext_i32_to_f32:
+; RV64IF:       # %bb.0:
+; RV64IF-NEXT:    fcvt.s.w ft0, a0
+; RV64IF-NEXT:    fmv.x.w a0, ft0
+; RV64IF-NEXT:    ret
+  %1 = sitofp i32 %a to float
   ret float %1
 }

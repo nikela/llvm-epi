@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MCTargetDesc/RISCVAsmBackend.h"
+#include "MCTargetDesc/RISCVInstPrinter.h"
 #include "MCTargetDesc/RISCVMCExpr.h"
 #include "MCTargetDesc/RISCVMCTargetDesc.h"
 #include "MCTargetDesc/RISCVTargetStreamer.h"
@@ -31,6 +32,7 @@
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/MC/MCValue.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/RISCVAttributes.h"
@@ -122,6 +124,13 @@ class RISCVAsmParser : public MCTargetAsmParser {
   // Helper to emit pseudo load/store instruction with a symbol.
   void emitLoadStoreSymbol(MCInst &Inst, unsigned Opcode, SMLoc IDLoc,
                            MCStreamer &Out, bool HasTmpReg);
+
+  // Helper to emit pseudo sign/zero extend instruction.
+  void emitPseudoExtend(MCInst &Inst, bool SignExtend, int64_t Width,
+                        SMLoc IDLoc, MCStreamer &Out);
+
+  // Helper to emit pseudo vmsge{u}.vx instruction.
+  void emitVMSGE(MCInst &Inst, unsigned Opcode, SMLoc IDLoc, MCStreamer &Out);
 
   // Checks that a PseudoAddTPRel is using x4/tp in its second input operand.
   // Enforcing this using a restricted register class for the second input
@@ -274,33 +283,8 @@ struct RISCVOperand : public MCParsedAsmOperand {
     // e.g.: read/write or user/supervisor/machine privileges.
   };
 
-  enum class VSEW {
-    SEW_8 = 0,
-    SEW_16,
-    SEW_32,
-    SEW_64,
-    SEW_128,
-    SEW_256,
-    SEW_512,
-    SEW_1024,
-  };
-
-  enum class VLMUL {
-    LMUL_1 = 0,
-    LMUL_2,
-    LMUL_4,
-    LMUL_8,
-    LMUL_F8 = 5,
-    LMUL_F4,
-    LMUL_F2
-  };
-
   struct VTypeOp {
-    VSEW Sew;
-    VLMUL Lmul;
-    bool TailAgnostic;
-    bool MaskedoffAgnostic;
-    unsigned Encoding;
+    unsigned Val;
   };
 
   SMLoc StartLoc, EndLoc;
@@ -570,16 +554,6 @@ public:
     return IsConstantImm && isUInt<5>(Imm) && VK == RISCVMCExpr::VK_RISCV_None;
   }
 
-  bool isUImm5NonZero() const {
-    int64_t Imm;
-    RISCVMCExpr::VariantKind VK = RISCVMCExpr::VK_RISCV_None;
-    if (!isImm())
-      return false;
-    bool IsConstantImm = evaluateConstantImm(getImm(), Imm, VK);
-    return IsConstantImm && isUInt<5>(Imm) && (Imm != 0) &&
-           VK == RISCVMCExpr::VK_RISCV_None;
-  }
-
   bool isSImm5() const {
     if (!isImm())
       return false;
@@ -596,7 +570,7 @@ public:
     int64_t Imm;
     bool IsConstantImm = evaluateConstantImm(getImm(), Imm, VK);
     return IsConstantImm && isInt<6>(Imm) &&
-	    VK == RISCVMCExpr::VK_RISCV_None;
+           VK == RISCVMCExpr::VK_RISCV_None;
   }
 
   bool isSImm6NonZero() const {
@@ -777,7 +751,7 @@ public:
   }
 
   StringRef getSysReg() const {
-    assert(Kind == KindTy::SystemRegister && "Invalid access!");
+    assert(Kind == KindTy::SystemRegister && "Invalid type access!");
     return StringRef(SysReg.Data, SysReg.Length);
   }
 
@@ -791,65 +765,25 @@ public:
     return Tok;
   }
 
-  static StringRef getSEWStr(VSEW Sew) {
-    switch (Sew) {
-    case VSEW::SEW_8:
-      return "e8";
-    case VSEW::SEW_16:
-      return "e16";
-    case VSEW::SEW_32:
-      return "e32";
-    case VSEW::SEW_64:
-      return "e64";
-    case VSEW::SEW_128:
-      return "e128";
-    case VSEW::SEW_256:
-      return "e256";
-    case VSEW::SEW_512:
-      return "e512";
-    case VSEW::SEW_1024:
-      return "e1024";
-    }
-    llvm_unreachable("Unknown SEW.");
-  }
-
-  static StringRef getLMULStr(VLMUL Lmul) {
-    switch (Lmul) {
-    case VLMUL::LMUL_1:
-      return "m1";
-    case VLMUL::LMUL_2:
-      return "m2";
-    case VLMUL::LMUL_4:
-      return "m4";
-    case VLMUL::LMUL_8:
-      return "m8";
-    case VLMUL::LMUL_F2:
-      return "mf2";
-    case VLMUL::LMUL_F4:
-      return "mf4";
-    case VLMUL::LMUL_F8:
-      return "mf8";
-    }
-    llvm_unreachable("Unknown LMUL.");
-  }
-
-  StringRef getVType(SmallString<32> &Buf) const {
-    assert(Kind == KindTy::VType && "Invalid access!");
-    Buf.append(getSEWStr(VType.Sew));
-    Buf.append(",");
-    Buf.append(getLMULStr(VType.Lmul));
-
-    return Buf.str();
+  unsigned getVType() const {
+    assert(Kind == KindTy::VType && "Invalid type access!");
+    return VType.Val;
   }
 
   void print(raw_ostream &OS) const override {
+    auto RegName = [](unsigned Reg) {
+      if (Reg)
+        return RISCVInstPrinter::getRegisterName(Reg);
+      else
+        return "noreg";
+    };
+
     switch (Kind) {
     case KindTy::Immediate:
       OS << *getImm();
       break;
     case KindTy::Register:
-      OS << "<register x";
-      OS << getReg() << ">";
+      OS << "<register " << RegName(getReg()) << ">";
       break;
     case KindTy::Token:
       OS << "'" << getToken() << "'";
@@ -858,8 +792,9 @@ public:
       OS << "<sysreg: " << getSysReg() << '>';
       break;
     case KindTy::VType:
-      SmallString<32> VTypeBuf;
-      OS << "<vtype: " << getVType(VTypeBuf) << '>';
+      OS << "<vtype: ";
+      RISCVVType::printVType(getVType(), OS);
+      OS << '>';
       break;
     }
   }
@@ -905,34 +840,10 @@ public:
     return Op;
   }
 
-  static std::unique_ptr<RISCVOperand>
-  createVType(APInt Sew, APInt Lmul, bool Fractional, bool TailAgnostic,
-              bool MaskedoffAgnostic, bool Nontemporal, SMLoc S, bool IsRV64) {
+  static std::unique_ptr<RISCVOperand> createVType(unsigned VTypeI, SMLoc S,
+                                                   bool IsRV64) {
     auto Op = std::make_unique<RISCVOperand>(KindTy::VType);
-    Sew.ashrInPlace(3);
-    unsigned SewLog2 = Sew.logBase2();
-    unsigned LmulLog2 = Lmul.logBase2();
-    Op->VType.Sew = static_cast<VSEW>(SewLog2);
-    if (Fractional) {
-      unsigned Flmul = 8 - LmulLog2;
-      Op->VType.Lmul = static_cast<VLMUL>(Flmul);
-      Op->VType.Encoding =
-          ((Flmul & 0x4) << 3) | ((SewLog2 & 0x7) << 2) | (Flmul & 0x3);
-    } else {
-      Op->VType.Lmul = static_cast<VLMUL>(LmulLog2);
-      Op->VType.Encoding = (SewLog2 << 2) | LmulLog2;
-    }
-    if (TailAgnostic) {
-      Op->VType.Encoding |= 0x40;
-    }
-    if (MaskedoffAgnostic) {
-      Op->VType.Encoding |= 0x80;
-    }
-    if (Nontemporal) {
-      Op->VType.Encoding |= 0x200;
-   }
-    Op->VType.TailAgnostic = TailAgnostic;
-    Op->VType.MaskedoffAgnostic = MaskedoffAgnostic;
+    Op->VType.Val = VTypeI;
     Op->StartLoc = S;
     Op->IsRV64 = IsRV64;
     return Op;
@@ -961,16 +872,6 @@ public:
     addExpr(Inst, getImm());
   }
 
-  void addSImm5Plus1Operands(MCInst &Inst, unsigned N) const {
-    assert(N == 1 && "Invalid number of operands!");
-    int64_t Imm = 0;
-    RISCVMCExpr::VariantKind VK = RISCVMCExpr::VK_RISCV_None;
-    bool IsConstant = evaluateConstantImm(getImm(), Imm, VK);
-    assert(IsConstant && "Expect constant value!");
-    (void)IsConstant;
-    Inst.addOperand(MCOperand::createImm(Imm - 1));
-  }
-
   void addFenceArgOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
     // isFenceArg has validated the operand, meaning this cast is safe
@@ -997,7 +898,7 @@ public:
 
   void addVTypeIOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
-    Inst.addOperand(MCOperand::createImm(VType.Encoding));
+    Inst.addOperand(MCOperand::createImm(getVType()));
   }
 
   // Returns the rounding mode represented by this RISCVOperand. Should only
@@ -1024,6 +925,11 @@ public:
 #define GET_MNEMONIC_SPELL_CHECKER
 #include "RISCVGenAsmMatcher.inc"
 
+static MCRegister convertFPR64ToFPR16(MCRegister Reg) {
+  assert(Reg >= RISCV::F0_D && Reg <= RISCV::F31_D && "Invalid register");
+  return Reg - RISCV::F0_D + RISCV::F0_H;
+}
+
 static MCRegister convertFPR64ToFPR32(MCRegister Reg) {
   assert(Reg >= RISCV::F0_D && Reg <= RISCV::F31_D && "Invalid register");
   return Reg - RISCV::F0_D + RISCV::F0_F;
@@ -1046,6 +952,12 @@ unsigned RISCVAsmParser::validateTargetOperandClass(MCParsedAsmOperand &AsmOp,
   if ((IsRegFPR64 && Kind == MCK_FPR32) ||
       (IsRegFPR64C && Kind == MCK_FPR32C)) {
     Op.Reg.RegNum = convertFPR64ToFPR32(Reg);
+    return Match_Success;
+  }
+  // As the parser couldn't differentiate an FPR16 from an FPR64, coerce the
+  // register from FPR64 to FPR16 if necessary.
+  if (IsRegFPR64 && Kind == MCK_FPR16) {
+    Op.Reg.RegNum = convertFPR64ToFPR16(Reg);
     return Match_Success;
   }
   return Match_InvalidOperand;
@@ -1151,6 +1063,9 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     return generateImmOutOfRangeError(Operands, ErrorInfo, 0, (1 << 4) - 1);
   case Match_InvalidUImm5:
     return generateImmOutOfRangeError(Operands, ErrorInfo, 0, (1 << 5) - 1);
+  case Match_InvalidSImm5:
+    return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 4),
+                                      (1 << 4) - 1);
   case Match_InvalidSImm6:
     return generateImmOutOfRangeError(Operands, ErrorInfo, -(1 << 5),
                                       (1 << 5) - 1);
@@ -1279,10 +1194,12 @@ bool RISCVAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
 static bool matchRegisterNameHelper(bool IsRV32E, MCRegister &RegNo,
                                     StringRef Name) {
   RegNo = MatchRegisterName(Name);
-  // The 32- and 64-bit FPRs have the same asm name. Check that the initial
-  // match always matches the 64-bit variant, and not the 32-bit one.
+  // The 16-/32- and 64-bit FPRs have the same asm name. Check that the initial
+  // match always matches the 64-bit variant, and not the 16/32-bit one.
+  assert(!(RegNo >= RISCV::F0_H && RegNo <= RISCV::F31_H));
   assert(!(RegNo >= RISCV::F0_F && RegNo <= RISCV::F31_F));
   // The default FPR register class is based on the tablegen enum ordering.
+  static_assert(RISCV::F0_D < RISCV::F0_H, "FPR matching must be updated");
   static_assert(RISCV::F0_D < RISCV::F0_F, "FPR matching must be updated");
   if (RegNo == RISCV::NoRegister)
     RegNo = MatchRegisterAltName(Name);
@@ -1627,9 +1544,10 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
   StringRef Name = getLexer().getTok().getIdentifier();
   if (!Name.consume_front("e"))
     return MatchOperand_NoMatch;
-  APInt Sew(16, Name, 10);
-  if (Sew != 8 && Sew != 16 && Sew != 32 && Sew != 64 && Sew != 128 &&
-      Sew != 256 && Sew != 512 && Sew != 1024)
+  unsigned Sew;
+  if (Name.getAsInteger(10, Sew))
+    return MatchOperand_NoMatch;
+  if (!RISCVVType::isValidSEW(Sew))
     return MatchOperand_NoMatch;
   getLexer().Lex();
 
@@ -1641,12 +1559,11 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
   if (!Name.consume_front("m"))
     return MatchOperand_NoMatch;
   // "m" or "mf"
-  bool Fractional = false;
-  if (Name.consume_front("f")) {
-    Fractional = true;
-  }
-  APInt Lmul(16, Name, 10);
-  if (Lmul != 1 && Lmul != 2 && Lmul != 4 && Lmul != 8)
+  bool Fractional = Name.consume_front("f");
+  unsigned Lmul;
+  if (Name.getAsInteger(10, Lmul))
+    return MatchOperand_NoMatch;
+  if (!RISCVVType::isValidLMUL(Lmul, Fractional))
     return MatchOperand_NoMatch;
   getLexer().Lex();
 
@@ -1657,9 +1574,9 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
   Name = getLexer().getTok().getIdentifier();
   // ta or tu
   bool TailAgnostic;
-  if (Name.consume_front("ta"))
+  if (Name == "ta")
     TailAgnostic = true;
-  else if (Name.consume_front("tu"))
+  else if (Name == "tu")
     TailAgnostic = false;
   else
     return MatchOperand_NoMatch;
@@ -1671,11 +1588,11 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
 
   Name = getLexer().getTok().getIdentifier();
   // ma or mu
-  bool MaskedoffAgnostic;
-  if (Name.consume_front("ma"))
-    MaskedoffAgnostic = true;
-  else if (Name.consume_front("mu"))
-    MaskedoffAgnostic = false;
+  bool MaskAgnostic;
+  if (Name == "ma")
+    MaskAgnostic = true;
+  else if (Name == "mu")
+    MaskAgnostic = false;
   else
     return MatchOperand_NoMatch;
   getLexer().Lex();
@@ -1695,8 +1612,15 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
   if (getLexer().getKind() != AsmToken::EndOfStatement)
     return MatchOperand_NoMatch;
 
-  Operands.push_back(RISCVOperand::createVType(
-      Sew, Lmul, Fractional, TailAgnostic, MaskedoffAgnostic, Nontemporal, S, isRV64()));
+  unsigned SewLog2 = Log2_32(Sew / 8);
+  unsigned LmulLog2 = Log2_32(Lmul);
+  RISCVVSEW VSEW = static_cast<RISCVVSEW>(SewLog2);
+  RISCVVLMUL VLMUL =
+      static_cast<RISCVVLMUL>(Fractional ? 8 - LmulLog2 : LmulLog2);
+
+  unsigned VTypeI = RISCVVType::encodeVTYPE(VLMUL, VSEW, TailAgnostic,
+                                            MaskAgnostic, Nontemporal);
+  Operands.push_back(RISCVOperand::createVType(VTypeI, S, isRV64()));
 
   return MatchOperand_Success;
 }
@@ -1911,34 +1835,11 @@ bool RISCVAsmParser::classifySymbolRef(const MCExpr *Expr,
     Expr = RE->getSubExpr();
   }
 
-  // It's a simple symbol reference or constant with no addend.
-  if (isa<MCConstantExpr>(Expr) || isa<MCSymbolRefExpr>(Expr))
-    return true;
-
-  const MCBinaryExpr *BE = dyn_cast<MCBinaryExpr>(Expr);
-  if (!BE)
-    return false;
-
-  if (!isa<MCSymbolRefExpr>(BE->getLHS()))
-    return false;
-
-  if (BE->getOpcode() != MCBinaryExpr::Add &&
-      BE->getOpcode() != MCBinaryExpr::Sub)
-    return false;
-
-  // We are able to support the subtraction of two symbol references
-  if (BE->getOpcode() == MCBinaryExpr::Sub &&
-      isa<MCSymbolRefExpr>(BE->getRHS()))
-    return true;
-
-  // See if the addend is a constant, otherwise there's more going
-  // on here than we can deal with.
-  auto AddendExpr = dyn_cast<MCConstantExpr>(BE->getRHS());
-  if (!AddendExpr)
-    return false;
-
-  // It's some symbol reference + a constant addend
-  return Kind != RISCVMCExpr::VK_RISCV_Invalid;
+  MCValue Res;
+  MCFixup Fixup;
+  if (Expr->evaluateAsRelocatable(Res, nullptr, &Fixup))
+    return Res.getRefKind() == RISCVMCExpr::VK_RISCV_None;
+  return false;
 }
 
 bool RISCVAsmParser::ParseDirective(AsmToken DirectiveID) {
@@ -2258,8 +2159,7 @@ void RISCVAsmParser::emitAuipcInstPair(MCOperand DestReg, MCOperand TmpReg,
   //             OP DestReg, TmpReg, %pcrel_lo(TmpLabel)
   MCContext &Ctx = getContext();
 
-  MCSymbol *TmpLabel = Ctx.createTempSymbol(
-      "pcrel_hi", /* AlwaysAddSuffix */ true, /* CanBeUnnamed */ false);
+  MCSymbol *TmpLabel = Ctx.createNamedTempSymbol("pcrel_hi");
   Out.emitLabel(TmpLabel);
 
   const RISCVMCExpr *SymbolHi = RISCVMCExpr::create(Symbol, VKHi, Ctx);
@@ -2363,6 +2263,88 @@ void RISCVAsmParser::emitLoadStoreSymbol(MCInst &Inst, unsigned Opcode,
                     Opcode, IDLoc, Out);
 }
 
+void RISCVAsmParser::emitPseudoExtend(MCInst &Inst, bool SignExtend,
+                                      int64_t Width, SMLoc IDLoc,
+                                      MCStreamer &Out) {
+  // The sign/zero extend pseudo-instruction does two shifts, with the shift
+  // amounts dependent on the XLEN.
+  //
+  // The expansion looks like this
+  //
+  //    SLLI rd, rs, XLEN - Width
+  //    SR[A|R]I rd, rd, XLEN - Width
+  MCOperand DestReg = Inst.getOperand(0);
+  MCOperand SourceReg = Inst.getOperand(1);
+
+  unsigned SecondOpcode = SignExtend ? RISCV::SRAI : RISCV::SRLI;
+  int64_t ShAmt = (isRV64() ? 64 : 32) - Width;
+
+  assert(ShAmt > 0 && "Shift amount must be non-zero.");
+
+  emitToStreamer(Out, MCInstBuilder(RISCV::SLLI)
+                          .addOperand(DestReg)
+                          .addOperand(SourceReg)
+                          .addImm(ShAmt));
+
+  emitToStreamer(Out, MCInstBuilder(SecondOpcode)
+                          .addOperand(DestReg)
+                          .addOperand(DestReg)
+                          .addImm(ShAmt));
+}
+
+void RISCVAsmParser::emitVMSGE(MCInst &Inst, unsigned Opcode, SMLoc IDLoc,
+                               MCStreamer &Out) {
+  if (Inst.getNumOperands() == 3) {
+    // unmasked va >= x
+    //
+    //  pseudoinstruction: vmsge{u}.vx vd, va, x
+    //  expansion: vmslt{u}.vx vd, va, x; vmnand.mm vd, vd, vd
+    emitToStreamer(Out, MCInstBuilder(Opcode)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(1))
+                            .addOperand(Inst.getOperand(2))
+                            .addReg(RISCV::NoRegister));
+    emitToStreamer(Out, MCInstBuilder(RISCV::VMNAND_MM)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(0)));
+  } else if (Inst.getNumOperands() == 4) {
+    // masked va >= x, vd != v0
+    //
+    //  pseudoinstruction: vmsge{u}.vx vd, va, x, v0.t
+    //  expansion: vmslt{u}.vx vd, va, x, v0.t; vmxor.mm vd, vd, v0
+    assert(Inst.getOperand(0).getReg() != RISCV::V0 &&
+           "The destination register should not be V0.");
+    emitToStreamer(Out, MCInstBuilder(Opcode)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(1))
+                            .addOperand(Inst.getOperand(2))
+                            .addOperand(Inst.getOperand(3)));
+    emitToStreamer(Out, MCInstBuilder(RISCV::VMXOR_MM)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(0))
+                            .addReg(RISCV::V0));
+  } else if (Inst.getNumOperands() == 5) {
+    // masked va >= x, vd == v0
+    //
+    //  pseudoinstruction: vmsge{u}.vx vd, va, x, v0.t, vt
+    //  expansion: vmslt{u}.vx vt, va, x;  vmandnot.mm vd, vd, vt
+    assert(Inst.getOperand(0).getReg() == RISCV::V0 &&
+           "The destination register should be V0.");
+    assert(Inst.getOperand(1).getReg() != RISCV::V0 &&
+           "The temporary vector register should not be V0.");
+    emitToStreamer(Out, MCInstBuilder(Opcode)
+                            .addOperand(Inst.getOperand(1))
+                            .addOperand(Inst.getOperand(2))
+                            .addOperand(Inst.getOperand(3))
+                            .addOperand(Inst.getOperand(4)));
+    emitToStreamer(Out, MCInstBuilder(RISCV::VMANDNOT_MM)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(1)));
+  }
+}
+
 bool RISCVAsmParser::checkPseudoAddTPRel(MCInst &Inst,
                                          OperandVector &Operands) {
   assert(Inst.getOpcode() == RISCV::PseudoAddTPRel && "Invalid instruction");
@@ -2384,44 +2366,45 @@ std::unique_ptr<RISCVOperand> RISCVAsmParser::defaultMaskRegOp() const {
 bool RISCVAsmParser::validateInstruction(MCInst &Inst,
                                          OperandVector &Operands) {
   const MCInstrDesc &MCID = MII.get(Inst.getOpcode());
-  unsigned TargetFlags =
-      (MCID.TSFlags >> RISCVII::ConstraintOffset) & RISCVII::ConstraintMask;
-  if (TargetFlags == RISCVII::NoConstraint)
+  unsigned Constraints =
+      (MCID.TSFlags & RISCVII::ConstraintMask) >> RISCVII::ConstraintShift;
+  if (Constraints == RISCVII::NoConstraint)
     return false;
 
   unsigned DestReg = Inst.getOperand(0).getReg();
-  unsigned CheckReg;
   // Operands[1] will be the first operand, DestReg.
   SMLoc Loc = Operands[1]->getStartLoc();
-  if (TargetFlags & RISCVII::VS2Constraint) {
-    CheckReg = Inst.getOperand(1).getReg();
+  if (Constraints & RISCVII::VS2Constraint) {
+    unsigned CheckReg = Inst.getOperand(1).getReg();
     if (DestReg == CheckReg)
       return Error(Loc, "The destination vector register group cannot overlap"
                         " the source vector register group.");
   }
-  if ((TargetFlags & RISCVII::VS1Constraint) && (Inst.getOperand(2).isReg())) {
-    CheckReg = Inst.getOperand(2).getReg();
+  if ((Constraints & RISCVII::VS1Constraint) && (Inst.getOperand(2).isReg())) {
+    unsigned CheckReg = Inst.getOperand(2).getReg();
     if (DestReg == CheckReg)
       return Error(Loc, "The destination vector register group cannot overlap"
                         " the source vector register group.");
   }
-  if ((TargetFlags & RISCVII::VMConstraint) && (DestReg == RISCV::V0)) {
+  if ((Constraints & RISCVII::VMConstraint) && (DestReg == RISCV::V0)) {
     // vadc, vsbc are special cases. These instructions have no mask register.
     // The destination register could not be V0.
     unsigned Opcode = Inst.getOpcode();
     if (Opcode == RISCV::VADC_VVM || Opcode == RISCV::VADC_VXM ||
         Opcode == RISCV::VADC_VIM || Opcode == RISCV::VSBC_VVM ||
-        Opcode == RISCV::VSBC_VXM)
+        Opcode == RISCV::VSBC_VXM || Opcode == RISCV::VFMERGE_VFM ||
+        Opcode == RISCV::VMERGE_VIM || Opcode == RISCV::VMERGE_VVM ||
+        Opcode == RISCV::VMERGE_VXM)
       return Error(Loc, "The destination vector register group cannot be V0.");
 
     // Regardless masked or unmasked version, the number of operands is the
     // same. For example, "viota.m v0, v2" is "viota.m v0, v2, NoRegister"
     // actually. We need to check the last operand to ensure whether it is
     // masked or not.
-    if ((TargetFlags & RISCVII::OneInput) && (Inst.getNumOperands() == 3))
-      CheckReg = Inst.getOperand(2).getReg();
-    else if (Inst.getNumOperands() == 4)
-      CheckReg = Inst.getOperand(3).getReg();
+    unsigned CheckReg = Inst.getOperand(Inst.getNumOperands() - 1).getReg();
+    assert((CheckReg == RISCV::V0 || CheckReg == RISCV::NoRegister) &&
+           "Unexpected register for mask operand");
+
     if (DestReg == CheckReg)
       return Error(Loc, "The destination vector register group cannot overlap"
                         " the mask register.");
@@ -2491,6 +2474,9 @@ bool RISCVAsmParser::processInstruction(MCInst &Inst, SMLoc IDLoc,
   case RISCV::PseudoLD:
     emitLoadStoreSymbol(Inst, RISCV::LD, IDLoc, Out, /*HasTmpReg=*/false);
     return false;
+  case RISCV::PseudoFLH:
+    emitLoadStoreSymbol(Inst, RISCV::FLH, IDLoc, Out, /*HasTmpReg=*/true);
+    return false;
   case RISCV::PseudoFLW:
     emitLoadStoreSymbol(Inst, RISCV::FLW, IDLoc, Out, /*HasTmpReg=*/true);
     return false;
@@ -2509,6 +2495,9 @@ bool RISCVAsmParser::processInstruction(MCInst &Inst, SMLoc IDLoc,
   case RISCV::PseudoSD:
     emitLoadStoreSymbol(Inst, RISCV::SD, IDLoc, Out, /*HasTmpReg=*/true);
     return false;
+  case RISCV::PseudoFSH:
+    emitLoadStoreSymbol(Inst, RISCV::FSH, IDLoc, Out, /*HasTmpReg=*/true);
+    return false;
   case RISCV::PseudoFSW:
     emitLoadStoreSymbol(Inst, RISCV::FSW, IDLoc, Out, /*HasTmpReg=*/true);
     return false;
@@ -2519,6 +2508,72 @@ bool RISCVAsmParser::processInstruction(MCInst &Inst, SMLoc IDLoc,
     if (checkPseudoAddTPRel(Inst, Operands))
       return true;
     break;
+  case RISCV::PseudoSEXT_B:
+    emitPseudoExtend(Inst, /*SignExtend=*/true, /*Width=*/8, IDLoc, Out);
+    return false;
+  case RISCV::PseudoSEXT_H:
+    emitPseudoExtend(Inst, /*SignExtend=*/true, /*Width=*/16, IDLoc, Out);
+    return false;
+  case RISCV::PseudoZEXT_H:
+    emitPseudoExtend(Inst, /*SignExtend=*/false, /*Width=*/16, IDLoc, Out);
+    return false;
+  case RISCV::PseudoZEXT_W:
+    emitPseudoExtend(Inst, /*SignExtend=*/false, /*Width=*/32, IDLoc, Out);
+    return false;
+  case RISCV::PseudoVMSGEU_VX:
+  case RISCV::PseudoVMSGEU_VX_M:
+  case RISCV::PseudoVMSGEU_VX_M_T:
+    emitVMSGE(Inst, RISCV::VMSLTU_VX, IDLoc, Out);
+    return false;
+  case RISCV::PseudoVMSGE_VX:
+  case RISCV::PseudoVMSGE_VX_M:
+  case RISCV::PseudoVMSGE_VX_M_T:
+    emitVMSGE(Inst, RISCV::VMSLT_VX, IDLoc, Out);
+    return false;
+  case RISCV::PseudoVMSGE_VI:
+  case RISCV::PseudoVMSLT_VI: {
+    // These instructions are signed and so is immediate so we can subtract one
+    // and change the opcode.
+    int64_t Imm = Inst.getOperand(2).getImm();
+    unsigned Opc = Inst.getOpcode() == RISCV::PseudoVMSGE_VI ? RISCV::VMSGT_VI
+                                                             : RISCV::VMSLE_VI;
+    emitToStreamer(Out, MCInstBuilder(Opc)
+                            .addOperand(Inst.getOperand(0))
+                            .addOperand(Inst.getOperand(1))
+                            .addImm(Imm - 1)
+                            .addOperand(Inst.getOperand(3)));
+    return false;
+  }
+  case RISCV::PseudoVMSGEU_VI:
+  case RISCV::PseudoVMSLTU_VI: {
+    int64_t Imm = Inst.getOperand(2).getImm();
+    // Unsigned comparisons are tricky because the immediate is signed. If the
+    // immediate is 0 we can't just subtract one. vmsltu.vi v0, v1, 0 is always
+    // false, but vmsle.vi v0, v1, -1 is always true. Instead we use
+    // vmsne v0, v1, v1 which is always false.
+    if (Imm == 0) {
+      unsigned Opc = Inst.getOpcode() == RISCV::PseudoVMSGEU_VI
+                         ? RISCV::VMSEQ_VV
+                         : RISCV::VMSNE_VV;
+      emitToStreamer(Out, MCInstBuilder(Opc)
+                              .addOperand(Inst.getOperand(0))
+                              .addOperand(Inst.getOperand(1))
+                              .addOperand(Inst.getOperand(1))
+                              .addOperand(Inst.getOperand(3)));
+    } else {
+      // Other immediate values can subtract one like signed.
+      unsigned Opc = Inst.getOpcode() == RISCV::PseudoVMSGEU_VI
+                         ? RISCV::VMSGTU_VI
+                         : RISCV::VMSLEU_VI;
+      emitToStreamer(Out, MCInstBuilder(Opc)
+                              .addOperand(Inst.getOperand(0))
+                              .addOperand(Inst.getOperand(1))
+                              .addImm(Imm - 1)
+                              .addOperand(Inst.getOperand(3)));
+    }
+
+    return false;
+  }
   }
 
   emitToStreamer(Out, Inst);

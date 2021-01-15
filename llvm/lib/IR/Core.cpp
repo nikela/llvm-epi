@@ -512,6 +512,8 @@ LLVMTypeKind LLVMGetTypeKind(LLVMTypeRef Ty) {
     return LLVMVectorTypeKind;
   case Type::X86_MMXTyID:
     return LLVMX86_MMXTypeKind;
+  case Type::X86_AMXTyID:
+    return LLVMX86_AMXTypeKind;
   case Type::TokenTyID:
     return LLVMTokenTypeKind;
   case Type::ScalableVectorTyID:
@@ -623,6 +625,9 @@ LLVMTypeRef LLVMPPCFP128TypeInContext(LLVMContextRef C) {
 LLVMTypeRef LLVMX86MMXTypeInContext(LLVMContextRef C) {
   return (LLVMTypeRef) Type::getX86_MMXTy(*unwrap(C));
 }
+LLVMTypeRef LLVMX86AMXTypeInContext(LLVMContextRef C) {
+  return (LLVMTypeRef) Type::getX86_AMXTy(*unwrap(C));
+}
 
 LLVMTypeRef LLVMHalfType(void) {
   return LLVMHalfTypeInContext(LLVMGetGlobalContext());
@@ -647,6 +652,9 @@ LLVMTypeRef LLVMPPCFP128Type(void) {
 }
 LLVMTypeRef LLVMX86MMXType(void) {
   return LLVMX86MMXTypeInContext(LLVMGetGlobalContext());
+}
+LLVMTypeRef LLVMX86AMXType(void) {
+  return LLVMX86AMXTypeInContext(LLVMGetGlobalContext());
 }
 
 /*--.. Operations on function types ........................................--*/
@@ -739,7 +747,11 @@ LLVMBool LLVMIsLiteralStruct(LLVMTypeRef StructTy) {
 }
 
 LLVMTypeRef LLVMGetTypeByName(LLVMModuleRef M, const char *Name) {
-  return wrap(unwrap(M)->getTypeByName(Name));
+  return wrap(StructType::getTypeByName(unwrap(M)->getContext(), Name));
+}
+
+LLVMTypeRef LLVMGetTypeByName2(LLVMContextRef C, const char *Name) {
+  return wrap(StructType::getTypeByName(*unwrap(C), Name));
 }
 
 /*--.. Operations on array, pointer, and vector types (sequence types) .....--*/

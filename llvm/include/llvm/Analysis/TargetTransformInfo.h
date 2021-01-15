@@ -27,6 +27,7 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/AtomicOrdering.h"
 #include "llvm/Support/DataTypes.h"
+#include "llvm/Support/InstructionCost.h"
 #include "llvm/Support/TypeSize.h"
 #include <functional>
 
@@ -118,7 +119,7 @@ class IntrinsicCostAttributes {
   SmallVector<Type *, 4> ParamTys;
   SmallVector<const Value *, 4> Arguments;
   FastMathFlags FMF;
-  unsigned VF = 1;
+  ElementCount VF = ElementCount::getFixed(1);
   // If ScalarizationCost is UINT_MAX, the cost of scalarizing the
   // arguments and the return value will be computed based on types.
   unsigned ScalarizationCost = std::numeric_limits<unsigned>::max();
@@ -129,14 +130,10 @@ public:
   IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI);
 
   IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI,
-                          unsigned Factor);
-  IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI,
-                          ElementCount Factor)
-      : IntrinsicCostAttributes(Id, CI, Factor.getKnownMinValue()) {
-  }
+                          ElementCount Factor);
 
   IntrinsicCostAttributes(Intrinsic::ID Id, const CallBase &CI,
-                          unsigned Factor, unsigned ScalarCost);
+                          ElementCount Factor, unsigned ScalarCost);
 
   IntrinsicCostAttributes(Intrinsic::ID Id, Type *RTy,
                           ArrayRef<Type *> Tys, FastMathFlags Flags);
@@ -159,7 +156,7 @@ public:
   Intrinsic::ID getID() const { return IID; }
   const IntrinsicInst *getInst() const { return II; }
   Type *getReturnType() const { return RetTy; }
-  unsigned getVectorFactor() const { return VF; }
+  ElementCount getVectorFactor() const { return VF; }
   FastMathFlags getFlags() const { return FMF; }
   unsigned getScalarizationCost() const { return ScalarizationCost; }
   const SmallVectorImpl<const Value *> &getArgs() const { return Arguments; }
@@ -236,19 +233,24 @@ public:
   ///
   /// Note, this method does not cache the cost calculation and it
   /// can be expensive in some cases.
-  int getInstructionCost(const Instruction *I, enum TargetCostKind kind) const {
+  InstructionCost getInstructionCost(const Instruction *I,
+                                     enum TargetCostKind kind) const {
+    InstructionCost Cost;
     switch (kind) {
     case TCK_RecipThroughput:
-      return getInstructionThroughput(I);
-
+      Cost = getInstructionThroughput(I);
+      break;
     case TCK_Latency:
-      return getInstructionLatency(I);
-
+      Cost = getInstructionLatency(I);
+      break;
     case TCK_CodeSize:
     case TCK_SizeAndLatency:
-      return getUserCost(I, kind);
+      Cost = getUserCost(I, kind);
+      break;
     }
-    llvm_unreachable("Unknown instruction cost kind");
+    if (Cost == -1)
+      Cost.setInvalid();
+    return Cost;
   }
 
   /// Underlying constants for 'cost' values in this interface.
@@ -331,8 +333,7 @@ public:
   /// This is a helper function which calls the two-argument getUserCost
   /// with \p Operands which are the current operands U has.
   int getUserCost(const User *U, TargetCostKind CostKind) const {
-    SmallVector<const Value *, 4> Operands(U->value_op_begin(),
-                                           U->value_op_end());
+    SmallVector<const Value *, 4> Operands(U->operand_values());
     return getUserCost(U, Operands, CostKind);
   }
 
@@ -943,6 +944,10 @@ public:
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const;
 
+  /// \return The maximum value of vscale if the target specifies an
+  ///  architectural maximum vector length, and None otherwise.
+  Optional<unsigned> getMaxVScale() const;
+
   /// \return True if the vectorization factor should be chosen to
   /// make the vector of the smallest element type match the size of a
   /// vector register. For wider element types, this could result in
@@ -955,6 +960,11 @@ public:
   /// bit width, or 0 if there is no minimum VF. The returned value only
   /// applies when shouldMaximizeVectorBandwidth returns true.
   unsigned getMinimumVF(unsigned ElemWidth) const;
+
+  /// \return The maximum vectorization factor for types of given element
+  /// bit width and opcode, or 0 if there is no maximum VF.
+  /// Currently only used by the SLP vectorizer.
+  unsigned getMaximumVF(unsigned ElemWidth, unsigned Opcode) const;
 
   /// \return True if it should be considered for address type promotion.
   /// \p AllowPromotionWithoutCommonHeader Set true if promoting \p I is
@@ -1357,6 +1367,9 @@ public:
   /// instead of just loads and stores.
   bool preferPredicatedVectorOps() const;
 
+  /// \returns True if the target supports scalable vectors.
+  bool supportsScalableVectors() const;
+
   /// \name Vector Predication Information
   /// @{
   /// Whether the target supports the %evl parameter of VP intrinsic efficiently
@@ -1527,8 +1540,10 @@ public:
   getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const = 0;
+  virtual Optional<unsigned> getMaxVScale() const = 0;
   virtual bool shouldMaximizeVectorBandwidth(bool OptSize) const = 0;
   virtual unsigned getMinimumVF(unsigned ElemWidth) const = 0;
+  virtual unsigned getMaximumVF(unsigned ElemWidth, unsigned Opcode) const = 0;
   virtual bool shouldConsiderAddressTypePromotion(
       const Instruction &I, bool &AllowPromotionWithoutCommonHeader) = 0;
   virtual unsigned getCacheLineSize() const = 0;
@@ -1659,6 +1674,7 @@ public:
                                                ReductionFlags) const = 0;
   virtual bool shouldExpandReduction(const IntrinsicInst *II) const = 0;
   virtual unsigned getGISelRematGlobalCost() const = 0;
+  virtual bool supportsScalableVectors() const = 0;
   virtual bool hasActiveVectorLength() const = 0;
   virtual int getInstructionLatency(const Instruction *I) = 0;
   virtual bool useScalableVectorType() const = 0;
@@ -1962,11 +1978,17 @@ public:
     return Impl.getFeasibleMaxVFRange(SmallestType, WidestType,
                                       MaxSafeRegisterWidth, RegWidthFactor);
   }
+  Optional<unsigned> getMaxVScale() const override {
+    return Impl.getMaxVScale();
+  }
   bool shouldMaximizeVectorBandwidth(bool OptSize) const override {
     return Impl.shouldMaximizeVectorBandwidth(OptSize);
   }
   unsigned getMinimumVF(unsigned ElemWidth) const override {
     return Impl.getMinimumVF(ElemWidth);
+  }
+  unsigned getMaximumVF(unsigned ElemWidth, unsigned Opcode) const override {
+    return Impl.getMaximumVF(ElemWidth, Opcode);
   }
   bool shouldConsiderAddressTypePromotion(
       const Instruction &I, bool &AllowPromotionWithoutCommonHeader) override {
@@ -2203,6 +2225,10 @@ public:
 
   unsigned getGISelRematGlobalCost() const override {
     return Impl.getGISelRematGlobalCost();
+  }
+
+  bool supportsScalableVectors() const override {
+    return Impl.supportsScalableVectors();
   }
 
   bool hasActiveVectorLength() const override {

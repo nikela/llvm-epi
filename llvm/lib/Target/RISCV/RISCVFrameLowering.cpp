@@ -141,7 +141,7 @@ static int getLibCallID(const MachineFunction &MF,
     // RISCVRegisterInfo::hasReservedSpillSlot assigns negative frame indexes to
     // registers which can be saved by libcall.
     if (CS.getFrameIdx() < 0)
-      MaxReg = std::max(MaxReg.id(), CS.getReg());
+      MaxReg = std::max(MaxReg.id(), CS.getReg().id());
 
   if (MaxReg == RISCV::NoRegister)
     return -1;
@@ -242,11 +242,9 @@ bool RISCVFrameLowering::hasBP(const MachineFunction &MF) const {
   return MFI.hasVarSizedObjects() && TRI->needsStackRealignment(MF);
 }
 
-// Determines the size of the frame and maximum call frame size.
 void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
   MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
-  const RISCVRegisterInfo *RI = STI.getRegisterInfo();
 
   // Get the number of bytes to allocate from the FrameInfo.
   uint64_t FrameSize = MFI.getStackSize();
@@ -261,7 +259,7 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
       continue;
 
     switch (StackID) {
-    case TargetStackID::EPIVector:
+    case TargetStackID::ScalableVector:
       FrameSize =
           alignTo(FrameSize, RegInfo->getSpillAlignment(RISCV::GPRRegClass));
       FrameSize += RegInfo->getSpillSize(RISCV::GPRRegClass);
@@ -280,7 +278,7 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
       continue;
     if (MFI.isDeadObjectIndex(FI))
       continue;
-    assert(MFI.getStackID(FI) == TargetStackID::EPIVector &&
+    assert(MFI.getStackID(FI) == TargetStackID::ScalableVector &&
            "Unexpected Stack ID!");
     LLVM_DEBUG(dbgs() << "alloc FI(" << FI << ") at SP["
                       << MFI.getObjectOffset(FI) << "] StackID: VR_SPILL\n");
@@ -288,40 +286,11 @@ void RISCVFrameLowering::determineFrameLayout(MachineFunction &MF) const {
 #endif
 
   // Get the alignment.
-  Align StackAlign =
-      RI->needsStackRealignment(MF) ? MFI.getMaxAlign() : getStackAlign();
-#if 0
-  // Get the alignment.
   Align StackAlign = getStackAlign();
-  if (RI->needsStackRealignment(MF)) {
-    Align MaxStackAlign = std::max(StackAlign, MFI.getMaxAlign());
-    FrameSize += (MaxStackAlign.value() - StackAlign.value());
-    StackAlign = MaxStackAlign;
-  }
 
   // Set Max Call Frame Size
   uint64_t MaxCallSize = alignTo(MFI.getMaxCallFrameSize(), StackAlign);
   MFI.setMaxCallFrameSize(MaxCallSize);
-#endif
-
-// rferrer: This seems not used at the moment and makes a test fail
-//          because the stack is overaligned.
-#if 0
-  // Get the maximum call frame size of all the calls.
-  uint64_t MaxCallFrameSize = MFI.getMaxCallFrameSize();
-
-  // If we have dynamic alloca then MaxCallFrameSize needs to be aligned so
-  // that allocations will be aligned.
-  if (MFI.hasVarSizedObjects())
-    MaxCallFrameSize = alignTo(MaxCallFrameSize, StackAlign);
-
-  // Update maximum call frame size.
-  MFI.setMaxCallFrameSize(MaxCallFrameSize);
-
-  // Include call frame size in total.
-  if (!(hasReservedCallFrame(MF) && MFI.adjustsStack()))
-    FrameSize += MaxCallFrameSize;
-#endif
 
   // Make sure the frame is aligned.
   FrameSize = alignTo(FrameSize, StackAlign);
@@ -418,11 +387,10 @@ void RISCVFrameLowering::alignSP(MachineBasicBlock &MBB,
 bool RISCVFrameLowering::isSupportedStackID(TargetStackID::Value ID) const {
   switch (ID) {
   case TargetStackID::Default:
-  case TargetStackID::EPIVector:
+  case TargetStackID::ScalableVector:
     return true;
   case TargetStackID::NoAlloc:
   case TargetStackID::SGPRSpill:
-  case TargetStackID::SVEVector:
     return false;
   }
   llvm_unreachable("Invalid TargetStackID::Value");
@@ -644,7 +612,7 @@ void RISCVFrameLowering::prepareStorageSpilledVR(
 
   // FIXME: We're presuming in advance that this is all about VRs
   unsigned SizeOfVector = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-  BuildMI(MBB, MBBI, DL, TII.get(RISCV::PseudoReadVLENB), SizeOfVector);
+  BuildMI(MBB, MBBI, DL, TII.get(RISCV::PseudoEPIReadVLENB), SizeOfVector);
 
   // Classify the FIs.
   std::array<llvm::SmallVector<int, 4>, 4> BinSizes;
@@ -656,7 +624,7 @@ void RISCVFrameLowering::prepareStorageSpilledVR(
       continue;
     if (MFI.isDeadObjectIndex(FI))
       continue;
-    assert(StackID == TargetStackID::EPIVector && "Unexpected StackID");
+    assert(StackID == TargetStackID::ScalableVector && "Unexpected StackID");
 
     int64_t ObjectSize = MFI.getObjectSize(FI);
 
@@ -898,7 +866,7 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
 
     if (const ScalableVectorType *VT = dyn_cast<const ScalableVectorType>(
             Alloca->getType()->getElementType())) {
-      MFI.setStackID(FI, TargetStackID::EPIVector);
+      MFI.setStackID(FI, TargetStackID::ScalableVector);
       RVFI->setHasSpilledVR();
     } else if (const StructType *Sty = dyn_cast<const StructType>(
                    Alloca->getType()->getElementType())) {
@@ -906,7 +874,7 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
       // tuples.
       for (const Type *ElTy : Sty->elements()) {
         if (isa<const ScalableVectorType>(ElTy)) {
-          MFI.setStackID(FI, TargetStackID::EPIVector);
+          MFI.setStackID(FI, TargetStackID::ScalableVector);
           RVFI->setHasSpilledVR();
           break;
         }
@@ -942,14 +910,14 @@ void RISCVFrameLowering::determineCalleeSaves(MachineFunction &MF,
     for (unsigned i = 0; CSRegs[i]; ++i)
       SavedRegs.set(CSRegs[i]);
 
-    if (MF.getSubtarget<RISCVSubtarget>().hasStdExtD() ||
-        MF.getSubtarget<RISCVSubtarget>().hasStdExtF()) {
+    if (MF.getSubtarget<RISCVSubtarget>().hasStdExtF()) {
 
       // If interrupt is enabled, this list contains all FP registers.
       const MCPhysReg * Regs = MF.getRegInfo().getCalleeSavedRegs();
 
       for (unsigned i = 0; Regs[i]; ++i)
-        if (RISCV::FPR32RegClass.contains(Regs[i]) ||
+        if (RISCV::FPR16RegClass.contains(Regs[i]) ||
+            RISCV::FPR32RegClass.contains(Regs[i]) ||
             RISCV::FPR64RegClass.contains(Regs[i]))
           SavedRegs.set(Regs[i]);
     }

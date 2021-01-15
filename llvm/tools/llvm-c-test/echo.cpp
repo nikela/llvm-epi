@@ -110,7 +110,7 @@ struct TypeCloner {
         LLVMTypeRef S = nullptr;
         const char *Name = LLVMGetStructName(Src);
         if (Name) {
-          S = LLVMGetTypeByName(M, Name);
+          S = LLVMGetTypeByName2(Ctx, Name);
           if (S)
             return S;
           S = LLVMStructCreateNamed(Ctx, Name);
@@ -149,6 +149,8 @@ struct TypeCloner {
                                       LLVMGetVectorSize(Src));
       case LLVMMetadataTypeKind:
         return LLVMMetadataTypeInContext(Ctx);
+      case LLVMX86_AMXTypeKind:
+        return LLVMX86AMXTypeInContext(Ctx);
       case LLVMX86_MMXTypeKind:
         return LLVMX86MMXTypeInContext(Ctx);
       case LLVMTokenTypeKind:

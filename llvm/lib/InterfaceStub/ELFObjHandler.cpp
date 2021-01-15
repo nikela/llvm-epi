@@ -17,6 +17,7 @@
 #include "llvm/Support/FileOutputBuffer.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Process.h"
 
 using llvm::MemoryBufferRef;
 using llvm::object::ELFObjectFile;
@@ -585,15 +586,15 @@ buildStub(const ELFObjectFile<ELFT> &ElfObj) {
   using Elf_Sym_Range = typename ELFT::SymRange;
   using Elf_Sym = typename ELFT::Sym;
   std::unique_ptr<ELFStub> DestStub = std::make_unique<ELFStub>();
-  const ELFFile<ELFT> *ElfFile = ElfObj.getELFFile();
+  const ELFFile<ELFT> &ElfFile = ElfObj.getELFFile();
   // Fetch .dynamic table.
-  Expected<Elf_Dyn_Range> DynTable = ElfFile->dynamicEntries();
+  Expected<Elf_Dyn_Range> DynTable = ElfFile.dynamicEntries();
   if (!DynTable) {
     return DynTable.takeError();
   }
 
   // Fetch program headers.
-  Expected<Elf_Phdr_Range> PHdrs = ElfFile->program_headers();
+  Expected<Elf_Phdr_Range> PHdrs = ElfFile.program_headers();
   if (!PHdrs) {
     return PHdrs.takeError();
   }
@@ -604,8 +605,7 @@ buildStub(const ELFObjectFile<ELFT> &ElfObj) {
     return std::move(Err);
 
   // Get pointer to in-memory location of .dynstr section.
-  Expected<const uint8_t *> DynStrPtr =
-      ElfFile->toMappedAddr(DynEnt.StrTabAddr);
+  Expected<const uint8_t *> DynStrPtr = ElfFile.toMappedAddr(DynEnt.StrTabAddr);
   if (!DynStrPtr)
     return appendToError(DynStrPtr.takeError(),
                          "when locating .dynstr section contents");
@@ -614,7 +614,7 @@ buildStub(const ELFObjectFile<ELFT> &ElfObj) {
                    DynEnt.StrSize);
 
   // Populate Arch from ELF header.
-  DestStub->Arch = ElfFile->getHeader().e_machine;
+  DestStub->Arch = ElfFile.getHeader().e_machine;
 
   // Populate SoName from .dynamic entries and dynamic string table.
   if (DynEnt.SONameOffset.hasValue()) {
@@ -637,13 +637,13 @@ buildStub(const ELFObjectFile<ELFT> &ElfObj) {
   }
 
   // Populate Symbols from .dynsym table and dynamic string table.
-  Expected<uint64_t> SymCount = getNumSyms(DynEnt, *ElfFile);
+  Expected<uint64_t> SymCount = getNumSyms(DynEnt, ElfFile);
   if (!SymCount)
     return SymCount.takeError();
   if (*SymCount > 0) {
     // Get pointer to in-memory location of .dynsym section.
     Expected<const uint8_t *> DynSymPtr =
-        ElfFile->toMappedAddr(DynEnt.DynSymAddr);
+        ElfFile.toMappedAddr(DynEnt.DynSymAddr);
     if (!DynSymPtr)
       return appendToError(DynSymPtr.takeError(),
                            "when locating .dynsym section contents");
@@ -664,8 +664,25 @@ buildStub(const ELFObjectFile<ELFT> &ElfObj) {
 /// @param FilePath File path for writing the ELF binary.
 /// @param Stub Source ELFStub to generate a binary ELF stub from.
 template <class ELFT>
-static Error writeELFBinaryToFile(StringRef FilePath, const ELFStub &Stub) {
+static Error writeELFBinaryToFile(StringRef FilePath, const ELFStub &Stub,
+                                  bool WriteIfChanged) {
   ELFStubBuilder<ELFT> Builder{Stub};
+  // Write Stub to memory first.
+  std::vector<uint8_t> Buf(Builder.getSize());
+  Builder.write(Buf.data());
+
+  if (WriteIfChanged) {
+    if (ErrorOr<std::unique_ptr<MemoryBuffer>> BufOrError =
+            MemoryBuffer::getFile(FilePath)) {
+      // Compare Stub output with existing Stub file.
+      // If Stub file unchanged, abort updating.
+      if ((*BufOrError)->getBufferSize() == Builder.getSize() &&
+          !memcmp((*BufOrError)->getBufferStart(), Buf.data(),
+                  Builder.getSize()))
+        return Error::success();
+    }
+  }
+
   Expected<std::unique_ptr<FileOutputBuffer>> BufOrError =
       FileOutputBuffer::create(FilePath, Builder.getSize());
   if (!BufOrError)
@@ -675,13 +692,10 @@ static Error writeELFBinaryToFile(StringRef FilePath, const ELFStub &Stub) {
                                  "` for writing");
 
   // Write binary to file.
-  std::unique_ptr<FileOutputBuffer> Buf = std::move(*BufOrError);
-  Builder.write(Buf->getBufferStart());
+  std::unique_ptr<FileOutputBuffer> FileBuf = std::move(*BufOrError);
+  memcpy(FileBuf->getBufferStart(), Buf.data(), Buf.size());
 
-  if (Error E = Buf->commit())
-    return E;
-
-  return Error::success();
+  return FileBuf->commit();
 }
 
 Expected<std::unique_ptr<ELFStub>> readELFFile(MemoryBufferRef Buf) {
@@ -706,15 +720,15 @@ Expected<std::unique_ptr<ELFStub>> readELFFile(MemoryBufferRef Buf) {
 // This function wraps the ELFT writeELFBinaryToFile() so writeBinaryStub()
 // can be called without having to use ELFType templates directly.
 Error writeBinaryStub(StringRef FilePath, const ELFStub &Stub,
-                      ELFTarget OutputFormat) {
+                      ELFTarget OutputFormat, bool WriteIfChanged) {
   if (OutputFormat == ELFTarget::ELF32LE)
-    return writeELFBinaryToFile<ELF32LE>(FilePath, Stub);
+    return writeELFBinaryToFile<ELF32LE>(FilePath, Stub, WriteIfChanged);
   if (OutputFormat == ELFTarget::ELF32BE)
-    return writeELFBinaryToFile<ELF32BE>(FilePath, Stub);
+    return writeELFBinaryToFile<ELF32BE>(FilePath, Stub, WriteIfChanged);
   if (OutputFormat == ELFTarget::ELF64LE)
-    return writeELFBinaryToFile<ELF64LE>(FilePath, Stub);
+    return writeELFBinaryToFile<ELF64LE>(FilePath, Stub, WriteIfChanged);
   if (OutputFormat == ELFTarget::ELF64BE)
-    return writeELFBinaryToFile<ELF64BE>(FilePath, Stub);
+    return writeELFBinaryToFile<ELF64BE>(FilePath, Stub, WriteIfChanged);
   llvm_unreachable("invalid binary output target");
 }
 

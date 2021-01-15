@@ -19,6 +19,7 @@
 #include "llvm/CodeGen/Register.h"
 #include "llvm/MC/MCInstrDesc.h"
 #include "llvm/MC/SubtargetFeature.h"
+#include "llvm/Support/MachineValueType.h"
 
 namespace llvm {
 
@@ -47,60 +48,43 @@ enum {
 
   InstFormatMask = 31,
 
-  ConstraintOffset = 5,
-  ConstraintMask = 0b1111
+  ConstraintShift = 5,
+  ConstraintMask = 0b111 << ConstraintShift,
+
+  VLMulShift = ConstraintShift + 3,
+  VLMulMask = 0b111 << VLMulShift,
+
+  // Do we need to add a dummy mask op when converting RVV Pseudo to MCInst.
+  HasDummyMaskOpShift = VLMulShift + 3,
+  HasDummyMaskOpMask = 1 << HasDummyMaskOpShift,
+
+  // Does this instruction only update element 0 the destination register.
+  WritesElement0Shift = HasDummyMaskOpShift + 1,
+  WritesElement0Mask = 1 << WritesElement0Shift,
+
+  // Does this instruction have a merge operand that must be removed when
+  // converting to MCInst. It will be the first explicit use operand. Used by
+  // RVV Pseudos.
+  HasMergeOpShift = WritesElement0Shift + 1,
+  HasMergeOpMask = 1 << HasMergeOpShift,
+
+  // Does this instruction have a SEW operand. It will be the last explicit
+  // operand. Used by RVV Pseudos.
+  HasSEWOpShift = HasMergeOpShift + 1,
+  HasSEWOpMask = 1 << HasSEWOpShift,
+
+  // Does this instruction have a VL operand. It will be the second to last
+  // explicit operand. Used by RVV Pseudos.
+  HasVLOpShift = HasSEWOpShift + 1,
+  HasVLOpMask = 1 << HasVLOpShift,
 };
 
 // Match with the definitions in RISCVInstrFormatsV.td
 enum RVVConstraintType {
   NoConstraint = 0,
-  VS2Constraint = 0b0001,
-  VS1Constraint = 0b0010,
-  VMConstraint = 0b0100,
-  OneInput = 0b1000,
-
-  // Illegal instructions:
-  //
-  // * The destination vector register group for a masked vector instruction
-  // cannot overlap the source mask register (v0), unless the destination vector
-  // register is being written with a mask value (e.g., comparisons) or the
-  // scalar result of a reduction.
-  //
-  // * Widening: The destination vector register group cannot overlap a source
-  // vector register group of a different EEW
-  //
-  // * Narrowing: The destination vector register group cannot overlap the
-  // first source vector register group
-  //
-  // * For vadc and vsbc, an illegal instruction exception is raised if the
-  // destination vector register is v0.
-  //
-  // * For vmadc and vmsbc, an illegal instruction exception is raised if the
-  // destination vector register overlaps a source vector register group.
-  //
-  // * viota: An illegal instruction exception is raised if the destination
-  // vector register group overlaps the source vector mask register. If the
-  // instruction is masked, an illegal instruction exception is issued if the
-  // destination vector register group overlaps v0.
-  //
-  // * v[f]slide[1]up: The destination vector register group for vslideup cannot
-  // overlap the source vector register group.
-  //
-  // * vrgather: The destination vector register group cannot overlap with the
-  // source vector register groups.
-  //
-  // * vcompress: The destination vector register group cannot overlap the
-  // source vector register group or the source mask register
-  WidenV = VS2Constraint | VS1Constraint | VMConstraint,
-  WidenW = VS1Constraint | VMConstraint,
-  WidenCvt = VS2Constraint | VMConstraint | OneInput,
-  Narrow = VS2Constraint | VMConstraint,
-  NarrowCvt = VS2Constraint | VMConstraint | OneInput,
-  Vmadc = VS2Constraint | VS1Constraint,
-  Iota = VS2Constraint | VMConstraint | OneInput,
-  SlideUp = VS2Constraint | VMConstraint,
-  Vrgather = VS2Constraint | VS1Constraint | VMConstraint,
-  Vcompress = VS2Constraint | VS1Constraint,
+  VS2Constraint = 0b001,
+  VS1Constraint = 0b010,
+  VMConstraint = 0b100,
 };
 
 // RISC-V Specific Machine Operand Flags
@@ -147,9 +131,7 @@ enum OperandType : unsigned {
   OPERAND_UIMM5,
   OPERAND_UIMM12,
   OPERAND_SIMM12,
-  OPERAND_SIMM13_LSB0,
   OPERAND_UIMM20,
-  OPERAND_SIMM21_LSB0,
   OPERAND_UIMMLOG2XLEN,
   OPERAND_LAST_RISCV_IMM = OPERAND_UIMMLOG2XLEN
 };
@@ -285,54 +267,6 @@ inline static bool isValidVectorElementWidth(unsigned Mode) {
 
 } // namespace RISCVEPIVectorElementWidth
 
-namespace RISCVEPIVectorMultiplier {
-
-#define VECTOR_MULTIPLIER_LIST                                                 \
-  VECTOR_MULTIPLIER(VMul1, 0, "m1")                                            \
-  VECTOR_MULTIPLIER(VMul2, 1, "m2")                                            \
-  VECTOR_MULTIPLIER(VMul4, 2, "m4")                                            \
-  VECTOR_MULTIPLIER(VMul8, 3, "m8")
-
-enum VectorMultiplier {
-#define VECTOR_MULTIPLIER(ID, ENC, __) ID = ENC,
-  VECTOR_MULTIPLIER_LIST
-#undef VECTOR_MULTIPLIER
-  Invalid
-};
-
-inline static VectorMultiplier stringToVectorMultiplier(StringRef Str) {
-  return StringSwitch<VectorMultiplier>(Str)
-#define VECTOR_MULTIPLIER(ID, _, STR) .Case(STR, RISCVEPIVectorMultiplier::ID)
-      VECTOR_MULTIPLIER_LIST
-#undef VECTOR_MULTIPLIER
-      .Default(RISCVEPIVectorMultiplier::Invalid);
-}
-
-inline static StringRef VectorMultiplierToString(VectorMultiplier VM) {
-  switch (VM) {
-  default:
-    llvm_unreachable("Invalid vector type");
-#define VECTOR_MULTIPLIER(ID, _, STR) case RISCVEPIVectorMultiplier::ID: return STR;
-  VECTOR_MULTIPLIER_LIST
-#undef VECTOR_MULTIPLIER
-  }
-}
-
-inline static bool isValidVectorMultiplier(unsigned Mode) {
-  switch (Mode) {
-  default:
-    return false;
-#define VECTOR_MULTIPLIER(ID, _, STR) case RISCVEPIVectorMultiplier::ID:
-  VECTOR_MULTIPLIER_LIST
-#undef VECTOR_MULTIPLIER
-    return true;
-  }
-}
-
-#undef VECTOR_MULTIPLIER_LIST
-
-} // namespace RISCVEPIVectorMultiplier
-
 namespace RISCVSysReg {
 struct SysReg {
   const char *Name;
@@ -363,8 +297,6 @@ struct SysReg {
 
 #define GET_SysRegsList_DECL
 #include "RISCVGenSearchableTables.inc"
-
-
 } // end namespace RISCVSysReg
 
 namespace RISCVABI {
@@ -442,6 +374,163 @@ using namespace RISCV;
 #include "RISCVGenSearchableTables.inc"
 
 } // end namespace RISCVEPIPseudosTable
+
+namespace RISCVVMVTs {
+
+constexpr MVT vint8mf8_t = MVT::nxv1i8;
+constexpr MVT vint8mf4_t = MVT::nxv2i8;
+constexpr MVT vint8mf2_t = MVT::nxv4i8;
+constexpr MVT vint8m1_t = MVT::nxv8i8;
+constexpr MVT vint8m2_t = MVT::nxv16i8;
+constexpr MVT vint8m4_t = MVT::nxv32i8;
+constexpr MVT vint8m8_t = MVT::nxv64i8;
+
+constexpr MVT vint16mf4_t = MVT::nxv1i16;
+constexpr MVT vint16mf2_t = MVT::nxv2i16;
+constexpr MVT vint16m1_t = MVT::nxv4i16;
+constexpr MVT vint16m2_t = MVT::nxv8i16;
+constexpr MVT vint16m4_t = MVT::nxv16i16;
+constexpr MVT vint16m8_t = MVT::nxv32i16;
+
+constexpr MVT vint32mf2_t = MVT::nxv1i32;
+constexpr MVT vint32m1_t = MVT::nxv2i32;
+constexpr MVT vint32m2_t = MVT::nxv4i32;
+constexpr MVT vint32m4_t = MVT::nxv8i32;
+constexpr MVT vint32m8_t = MVT::nxv16i32;
+
+constexpr MVT vint64m1_t = MVT::nxv1i64;
+constexpr MVT vint64m2_t = MVT::nxv2i64;
+constexpr MVT vint64m4_t = MVT::nxv4i64;
+constexpr MVT vint64m8_t = MVT::nxv8i64;
+
+constexpr MVT vfloat16mf4_t = MVT::nxv1f16;
+constexpr MVT vfloat16mf2_t = MVT::nxv2f16;
+constexpr MVT vfloat16m1_t = MVT::nxv4f16;
+constexpr MVT vfloat16m2_t = MVT::nxv8f16;
+constexpr MVT vfloat16m4_t = MVT::nxv16f16;
+constexpr MVT vfloat16m8_t = MVT::nxv32f16;
+
+constexpr MVT vfloat32mf2_t = MVT::nxv1f32;
+constexpr MVT vfloat32m1_t = MVT::nxv2f32;
+constexpr MVT vfloat32m2_t = MVT::nxv4f32;
+constexpr MVT vfloat32m4_t = MVT::nxv8f32;
+constexpr MVT vfloat32m8_t = MVT::nxv16f32;
+
+constexpr MVT vfloat64m1_t = MVT::nxv1f64;
+constexpr MVT vfloat64m2_t = MVT::nxv2f64;
+constexpr MVT vfloat64m4_t = MVT::nxv4f64;
+constexpr MVT vfloat64m8_t = MVT::nxv8f64;
+
+constexpr MVT vbool1_t = MVT::nxv64i1;
+constexpr MVT vbool2_t = MVT::nxv32i1;
+constexpr MVT vbool4_t = MVT::nxv16i1;
+constexpr MVT vbool8_t = MVT::nxv8i1;
+constexpr MVT vbool16_t = MVT::nxv4i1;
+constexpr MVT vbool32_t = MVT::nxv2i1;
+constexpr MVT vbool64_t = MVT::nxv1i1;
+
+} // namespace RISCVVMVTs
+
+enum class RISCVVSEW {
+  SEW_8 = 0,
+  SEW_16,
+  SEW_32,
+  SEW_64,
+  SEW_128,
+  SEW_256,
+  SEW_512,
+  SEW_1024,
+};
+
+enum class RISCVVLMUL {
+  LMUL_1 = 0,
+  LMUL_2,
+  LMUL_4,
+  LMUL_8,
+  LMUL_RESERVED,
+  LMUL_F8,
+  LMUL_F4,
+  LMUL_F2
+};
+
+namespace RISCVVType {
+// Is this a SEW value that can be encoded into the VTYPE format.
+inline static bool isValidSEW(unsigned SEW) {
+  return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;
+}
+
+// Is this a LMUL value that can be encoded into the VTYPE format.
+inline static bool isValidLMUL(unsigned LMUL, bool Fractional) {
+  return isPowerOf2_32(LMUL) && LMUL <= 8 && (!Fractional || LMUL != 1);
+}
+
+// Encode VTYPE into the binary format used by the the VSETVLI instruction which
+// is used by our MC layer representation.
+//
+// Bits | Name       | Description
+// -----+------------+------------------------------------------------
+// 7    | vma        | Vector mask agnostic
+// 6    | vta        | Vector tail agnostic
+// 5    | vlmul[2]   | Fractional lmul?
+// 4:2  | vsew[2:0]  | Standard element width (SEW) setting
+// 1:0  | vlmul[1:0] | Vector register group multiplier (LMUL) setting
+//
+// TODO: This format will change for the V extensions spec v1.0.
+inline static unsigned encodeVTYPE(RISCVVLMUL VLMUL, RISCVVSEW VSEW,
+                                   bool TailAgnostic, bool MaskAgnostic,
+                                   bool Nontemporal) {
+  unsigned VLMULBits = static_cast<unsigned>(VLMUL);
+  unsigned VSEWBits = static_cast<unsigned>(VSEW);
+  unsigned VTypeI =
+      ((VLMULBits & 0x4) << 3) | (VSEWBits << 2) | (VLMULBits & 0x3);
+  if (TailAgnostic)
+    VTypeI |= 0x40;
+  if (MaskAgnostic)
+    VTypeI |= 0x80;
+  if (Nontemporal)
+    VTypeI |= 0x200;
+
+  return VTypeI;
+}
+
+// TODO: This format will change for the V extensions spec v1.0.
+inline static RISCVVLMUL getVLMUL(unsigned VType) {
+  unsigned VLMUL = (VType & 0x3) | ((VType & 0x20) >> 3);
+  return static_cast<RISCVVLMUL>(VLMUL);
+}
+
+inline static RISCVVSEW getVSEW(unsigned VType) {
+  unsigned VSEW = (VType >> 2) & 0x7;
+  return static_cast<RISCVVSEW>(VSEW);
+}
+
+inline static bool isTailAgnostic(unsigned VType) { return VType & 0x40; }
+
+inline static bool isMaskAgnostic(unsigned VType) { return VType & 0x80; }
+
+inline static bool isNontemporal(unsigned VType) { return VType & 0x200; }
+
+void printVType(unsigned VType, raw_ostream &OS);
+
+} // namespace RISCVVType
+
+namespace RISCVVPseudosTable {
+
+// The definition should be consistent with `class RISCVVPseudo` in
+// RISCVInstrInfoVPseudos.td.
+static const uint8_t InvalidIndex = 0x80;
+
+struct PseudoInfo {
+  uint16_t Pseudo;
+  uint16_t BaseInstr;
+};
+
+using namespace RISCV;
+
+#define GET_RISCVVPseudosTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVVPseudosTable
 
 } // namespace llvm
 

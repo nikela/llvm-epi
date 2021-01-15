@@ -50,11 +50,18 @@ enum NodeType : unsigned {
   // but the same operand order as fshl/fshr intrinsics.
   FSRW,
   FSLW,
-  // FPR32<->GPR transfer operations for RV64. Needed as an i32<->f32 bitcast
-  // is not legal on RV64. FMV_W_X_RV64 matches the semantics of the FMV.W.X.
+  // FPR<->GPR transfer operations when the FPR is smaller than XLEN, needed as
+  // XLEN is the only legal integer width.
+  //
+  // FMV_H_X matches the semantics of the FMV.H.X.
+  // FMV_X_ANYEXTH is similar to FMV.X.H but has an any-extended result.
+  // FMV_W_X_RV64 matches the semantics of the FMV.W.X.
   // FMV_X_ANYEXTW_RV64 is similar to FMV.X.W but has an any-extended result.
+  //
   // This is a more convenient semantic for producing dagcombines that remove
   // unnecessary GPR->FPR->GPR moves.
+  FMV_H_X,
+  FMV_X_ANYEXTH,
   FMV_W_X_RV64,
   FMV_X_ANYEXTW_RV64,
   // READ_CYCLE_WIDE - A read of the 64-bit cycle CSR on a 32-bit target
@@ -70,9 +77,7 @@ enum NodeType : unsigned {
   GREVIW,
   GORCI,
   GORCIW,
-
   // EPI nodes
-  VMV_X_S,
   EXTRACT_VECTOR_ELT,
   SIGN_EXTEND_VECTOR,
   ZERO_EXTEND_VECTOR,
@@ -125,6 +130,16 @@ enum NodeType : unsigned {
   VZIP2,
   VUNZIP2,
   VTRN,
+  // Vector Extension
+  // VMV_X_S matches the semantics of vmv.x.s. The result is always XLenVT
+  // sign extended from the vector element size. NOTE: The result size will
+  // never be less than the vector element size.
+  VMV_X_S,
+  // Splats an i64 scalar to a vector type (with element type i64) where the
+  // scalar is a sign-extended i32.
+  SPLAT_VECTOR_I64,
+  // Read VLENB CSR
+  READ_VLENB,
 };
 } // namespace RISCVISD
 
@@ -134,6 +149,8 @@ class RISCVTargetLowering : public TargetLowering {
 public:
   explicit RISCVTargetLowering(const TargetMachine &TM,
                                const RISCVSubtarget &STI);
+
+  const RISCVSubtarget &getSubtarget() const { return Subtarget; }
 
   bool getTgtMemIntrinsic(IntrinsicInfo &Info, const CallInst &I,
                           MachineFunction &MF,
@@ -163,6 +180,11 @@ public:
 
   SDValue PerformDAGCombine(SDNode *N, DAGCombinerInfo &DCI) const override;
 
+  void computeKnownBitsForTargetNode(const SDValue Op,
+                                     KnownBits &Known,
+                                     const APInt &DemandedElts,
+                                     const SelectionDAG &DAG,
+                                     unsigned Depth) const override;
   unsigned ComputeNumSignBitsForTargetNode(SDValue Op,
                                            const APInt &DemandedElts,
                                            const SelectionDAG &DAG,
@@ -236,8 +258,6 @@ public:
   bool allowsMisalignedMemoryAccesses(EVT E, unsigned AddrSpace, unsigned Align,
                                       MachineMemOperand::Flags Flags,
                                       bool *Fast) const override;
-
-  const RISCVSubtarget &getSubtarget() const { return Subtarget; }
 
   bool shouldExtendTypeInLibCall(EVT Type) const override;
 
@@ -313,6 +333,7 @@ private:
   SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerGlobalTLSAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSELECT(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVASTART(SDValue Op, SelectionDAG &DAG) const;
@@ -320,6 +341,7 @@ private:
   SDValue lowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftLeftParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftRightParts(SDValue Op, SelectionDAG &DAG, bool IsSRA) const;
+  SDValue lowerSPLATVECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
@@ -348,6 +370,20 @@ private:
       const SmallVectorImpl<std::pair<llvm::Register, llvm::SDValue>> &Regs,
       MachineFunction &MF) const;
 };
+
+namespace RISCVVIntrinsicsTable {
+
+struct RISCVVIntrinsicInfo {
+  unsigned int IntrinsicID;
+  unsigned int ExtendedOperand;
+};
+
+using namespace RISCV;
+
+#define GET_RISCVVIntrinsicsTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVVIntrinsicsTable
 }
 
 #endif

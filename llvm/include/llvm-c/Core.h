@@ -160,6 +160,7 @@ typedef enum {
   LLVMVectorTypeKind,    /**< Fixed width SIMD vector type */
   LLVMMetadataTypeKind,  /**< Metadata */
   LLVMX86_MMXTypeKind,   /**< X86 MMX */
+  LLVMX86_AMXTypeKind,   /**< X86 AMX */
   LLVMTokenTypeKind,     /**< Tokens */
   LLVMScalableVectorTypeKind, /**< Scalable SIMD vector type */
   LLVMBFloatTypeKind     /**< 16 bit brain floating point type */
@@ -627,6 +628,11 @@ LLVMBool LLVMIsEnumAttribute(LLVMAttributeRef A);
 LLVMBool LLVMIsStringAttribute(LLVMAttributeRef A);
 
 /**
+ * Obtain a Type from a context by its registered name.
+ */
+LLVMTypeRef LLVMGetTypeByName2(LLVMContextRef C, const char *Name);
+
+/**
  * @}
  */
 
@@ -867,9 +873,7 @@ LLVMValueRef LLVMGetInlineAsm(LLVMTypeRef Ty,
  */
 LLVMContextRef LLVMGetModuleContext(LLVMModuleRef M);
 
-/**
- * Obtain a Type from a module by its registered name.
- */
+/** Deprecated: Use LLVMGetTypeByName2 instead. */
 LLVMTypeRef LLVMGetTypeByName(LLVMModuleRef M, const char *Name);
 
 /**
@@ -1491,6 +1495,11 @@ LLVMTypeRef LLVMLabelTypeInContext(LLVMContextRef C);
 LLVMTypeRef LLVMX86MMXTypeInContext(LLVMContextRef C);
 
 /**
+ * Create a X86 AMX type in a context.
+ */
+LLVMTypeRef LLVMX86AMXTypeInContext(LLVMContextRef C);
+
+/**
  * Create a token type in a context.
  */
 LLVMTypeRef LLVMTokenTypeInContext(LLVMContextRef C);
@@ -1507,6 +1516,7 @@ LLVMTypeRef LLVMMetadataTypeInContext(LLVMContextRef C);
 LLVMTypeRef LLVMVoidType(void);
 LLVMTypeRef LLVMLabelType(void);
 LLVMTypeRef LLVMX86MMXType(void);
+LLVMTypeRef LLVMX86AMXType(void);
 
 /**
  * @}

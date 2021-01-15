@@ -19,49 +19,57 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP0]], 16
-; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE]]
+; CHECK-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 16
+; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
 ; CHECK-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
-; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[STEP_VSCALE1:%.*]] = mul i64 16, [[TMP1]]
-; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE1]]
+; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 16
+; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP3]]
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
-; CHECK-NEXT:    [[TMP2:%.*]] = insertelement <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer), i32 [[C:%.*]], i32 0
+; CHECK-NEXT:    [[TMP4:%.*]] = insertelement <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer), i32 [[C:%.*]], i32 0
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 16 x i32> [ [[TMP2]], [[VECTOR_PH]] ], [ [[TMP7:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[TMP3:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP3]]
-; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, i32* [[TMP4]], i32 0
-; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i32* [[TMP5]] to <vscale x 16 x i32>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 16 x i32>, <vscale x 16 x i32>* [[TMP6]], align 4
-; CHECK-NEXT:    [[TMP7]] = mul <vscale x 16 x i32> [[WIDE_LOAD]], [[VEC_PHI]]
-; CHECK-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP8]], 16
+; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 16 x i32> [ [[TMP4]], [[VECTOR_PH]] ], [ [[TMP15:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 0
+; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; CHECK-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; CHECK-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP9]]
+; CHECK-NEXT:    [[TMP11:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-NEXT:    [[TMP12:%.*]] = mul i32 [[TMP11]], 0
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i32, i32* [[TMP10]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP14:%.*]] = bitcast i32* [[TMP13]] to <vscale x 16 x i32>*
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 16 x i32>, <vscale x 16 x i32>* [[TMP14]], align 4
+; CHECK-NEXT:    [[TMP15]] = mul <vscale x 16 x i32> [[WIDE_LOAD]], [[VEC_PHI]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 16
+; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP18]], [[TMP17]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP9:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP9]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP19]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       reduction.loop.ph:
-; CHECK-NEXT:    [[TMP10:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 16, [[TMP10]]
+; CHECK-NEXT:    [[TMP20:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 16, [[TMP20]]
 ; CHECK-NEXT:    br label [[REDUCTION_LOOP_BODY:%.*]]
 ; CHECK:       reduction.loop.body:
 ; CHECK-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[VSCALE_X_VF]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
-; CHECK-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 16 x i32> [ [[TMP7]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
-; CHECK-NEXT:    [[TMP11:%.*]] = udiv i32 [[CURRENT_LEN]], 2
-; CHECK-NEXT:    [[TMP12:%.*]] = urem i32 [[CURRENT_LEN]], 2
-; CHECK-NEXT:    [[HALFLEN]] = add i32 [[TMP11]], [[TMP12]]
+; CHECK-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 16 x i32> [ [[TMP15]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
+; CHECK-NEXT:    [[TMP21:%.*]] = udiv i32 [[CURRENT_LEN]], 2
+; CHECK-NEXT:    [[TMP22:%.*]] = urem i32 [[CURRENT_LEN]], 2
+; CHECK-NEXT:    [[HALFLEN]] = add i32 [[TMP21]], [[TMP22]]
 ; CHECK-NEXT:    [[INDEX_VEC:%.*]] = call <vscale x 16 x i32> @llvm.experimental.vector.stepvector.nxv16i32()
-; CHECK-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 16 x i32> undef, i32 [[HALFLEN]], i32 0
-; CHECK-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 16 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer
-; CHECK-NEXT:    [[TMP13:%.*]] = icmp ult <vscale x 16 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
-; CHECK-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 16 x i1> [[TMP13]], <vscale x 16 x i32> [[CURRENT_VEC]], <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer)
+; CHECK-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 16 x i32> poison, i32 [[HALFLEN]], i32 0
+; CHECK-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 16 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 16 x i32> poison, <vscale x 16 x i32> zeroinitializer
+; CHECK-NEXT:    [[TMP23:%.*]] = icmp ult <vscale x 16 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
+; CHECK-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 16 x i1> [[TMP23]], <vscale x 16 x i32> [[CURRENT_VEC]], <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 16 x i32> @llvm.experimental.vector.slideleftfill.nxv16i32(<vscale x 16 x i32> [[CURRENT_VEC]], <vscale x 16 x i32> shufflevector (<vscale x 16 x i32> insertelement (<vscale x 16 x i32> undef, i32 1, i32 0), <vscale x 16 x i32> undef, <vscale x 16 x i32> zeroinitializer), i32 [[HALFLEN]])
 ; CHECK-NEXT:    [[REDUCTION_VEC]] = mul <vscale x 16 x i32> [[FIRST_HALF]], [[SECOND_HALF]]
-; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i32 [[HALFLEN]], 1
-; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[REDUCTION_LOOP_BODY]]
+; CHECK-NEXT:    [[TMP24:%.*]] = icmp eq i32 [[HALFLEN]], 1
+; CHECK-NEXT:    br i1 [[TMP24]], label [[MIDDLE_BLOCK:%.*]], label [[REDUCTION_LOOP_BODY]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[REDUCED:%.*]] = extractelement <vscale x 16 x i32> [[REDUCTION_VEC]], i32 0
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
@@ -74,8 +82,8 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[C_ADDR_06:%.*]] = phi i32 [ [[BC_MERGE_RDX]], [[SCALAR_PH]] ], [ [[MUL:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP15:%.*]] = load i32, i32* [[ARRAYIDX]], align 4
-; CHECK-NEXT:    [[MUL]] = mul nsw i32 [[TMP15]], [[C_ADDR_06]]
+; CHECK-NEXT:    [[TMP25:%.*]] = load i32, i32* [[ARRAYIDX]], align 4
+; CHECK-NEXT:    [[MUL]] = mul nsw i32 [[TMP25]], [[C_ADDR_06]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], [[LOOP2:!llvm.loop !.*]]
@@ -93,49 +101,57 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK1:       for.body.preheader:
 ; CHECK1-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK1-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[STEP_VSCALE:%.*]] = mul i64 [[TMP0]], 2
-; CHECK1-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE]]
+; CHECK1-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 2
+; CHECK1-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
 ; CHECK1-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK1:       vector.ph:
-; CHECK1-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[STEP_VSCALE1:%.*]] = mul i64 2, [[TMP1]]
-; CHECK1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[STEP_VSCALE1]]
+; CHECK1-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 2
+; CHECK1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP3]]
 ; CHECK1-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
-; CHECK1-NEXT:    [[TMP2:%.*]] = insertelement <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[C:%.*]], i32 0
+; CHECK1-NEXT:    [[TMP4:%.*]] = insertelement <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[C:%.*]], i32 0
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK1-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 2 x i32> [ [[TMP2]], [[VECTOR_PH]] ], [ [[TMP7:%.*]], [[VECTOR_BODY]] ]
-; CHECK1-NEXT:    [[TMP3:%.*]] = add i64 [[INDEX]], 0
-; CHECK1-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP3]]
-; CHECK1-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, i32* [[TMP4]], i32 0
-; CHECK1-NEXT:    [[TMP6:%.*]] = bitcast i32* [[TMP5]] to <vscale x 2 x i32>*
-; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 2 x i32>, <vscale x 2 x i32>* [[TMP6]], align 4
-; CHECK1-NEXT:    [[TMP7]] = mul <vscale x 2 x i32> [[WIDE_LOAD]], [[VEC_PHI]]
-; CHECK1-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP8]], 2
+; CHECK1-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 2 x i32> [ [[TMP4]], [[VECTOR_PH]] ], [ [[TMP15:%.*]], [[VECTOR_BODY]] ]
+; CHECK1-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 0
+; CHECK1-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; CHECK1-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; CHECK1-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; CHECK1-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32, i32* [[A:%.*]], i64 [[TMP9]]
+; CHECK1-NEXT:    [[TMP11:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK1-NEXT:    [[TMP12:%.*]] = mul i32 [[TMP11]], 0
+; CHECK1-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i32, i32* [[TMP10]], i32 [[TMP12]]
+; CHECK1-NEXT:    [[TMP14:%.*]] = bitcast i32* [[TMP13]] to <vscale x 2 x i32>*
+; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 2 x i32>, <vscale x 2 x i32>* [[TMP14]], align 4
+; CHECK1-NEXT:    [[TMP15]] = mul <vscale x 2 x i32> [[WIDE_LOAD]], [[VEC_PHI]]
+; CHECK1-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 2
+; CHECK1-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP18]], [[TMP17]]
 ; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK1-NEXT:    [[TMP9:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK1-NEXT:    br i1 [[TMP9]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK1-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK1-NEXT:    br i1 [[TMP19]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK1:       reduction.loop.ph:
-; CHECK1-NEXT:    [[TMP10:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK1-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 2, [[TMP10]]
+; CHECK1-NEXT:    [[TMP20:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK1-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 2, [[TMP20]]
 ; CHECK1-NEXT:    br label [[REDUCTION_LOOP_BODY:%.*]]
 ; CHECK1:       reduction.loop.body:
 ; CHECK1-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[VSCALE_X_VF]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
-; CHECK1-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 2 x i32> [ [[TMP7]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
-; CHECK1-NEXT:    [[TMP11:%.*]] = udiv i32 [[CURRENT_LEN]], 2
-; CHECK1-NEXT:    [[TMP12:%.*]] = urem i32 [[CURRENT_LEN]], 2
-; CHECK1-NEXT:    [[HALFLEN]] = add i32 [[TMP11]], [[TMP12]]
+; CHECK1-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 2 x i32> [ [[TMP15]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
+; CHECK1-NEXT:    [[TMP21:%.*]] = udiv i32 [[CURRENT_LEN]], 2
+; CHECK1-NEXT:    [[TMP22:%.*]] = urem i32 [[CURRENT_LEN]], 2
+; CHECK1-NEXT:    [[HALFLEN]] = add i32 [[TMP21]], [[TMP22]]
 ; CHECK1-NEXT:    [[INDEX_VEC:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.stepvector.nxv2i32()
-; CHECK1-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> undef, i32 [[HALFLEN]], i32 0
-; CHECK1-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer
-; CHECK1-NEXT:    [[TMP13:%.*]] = icmp ult <vscale x 2 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
-; CHECK1-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 2 x i1> [[TMP13]], <vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[HALFLEN_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 [[HALFLEN]], i32 0
+; CHECK1-NEXT:    [[HALFLEN_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[HALFLEN_SPLATINSERT]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
+; CHECK1-NEXT:    [[TMP23:%.*]] = icmp ult <vscale x 2 x i32> [[INDEX_VEC]], [[HALFLEN_SPLAT]]
+; CHECK1-NEXT:    [[FIRST_HALF:%.*]] = select <vscale x 2 x i1> [[TMP23]], <vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[SECOND_HALF:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vector.slideleftfill.nxv2i32(<vscale x 2 x i32> [[CURRENT_VEC]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> undef, i32 1, i32 0), <vscale x 2 x i32> undef, <vscale x 2 x i32> zeroinitializer), i32 [[HALFLEN]])
 ; CHECK1-NEXT:    [[REDUCTION_VEC]] = mul <vscale x 2 x i32> [[FIRST_HALF]], [[SECOND_HALF]]
-; CHECK1-NEXT:    [[TMP14:%.*]] = icmp eq i32 [[HALFLEN]], 1
-; CHECK1-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[REDUCTION_LOOP_BODY]]
+; CHECK1-NEXT:    [[TMP24:%.*]] = icmp eq i32 [[HALFLEN]], 1
+; CHECK1-NEXT:    br i1 [[TMP24]], label [[MIDDLE_BLOCK:%.*]], label [[REDUCTION_LOOP_BODY]]
 ; CHECK1:       middle.block:
 ; CHECK1-NEXT:    [[REDUCED:%.*]] = extractelement <vscale x 2 x i32> [[REDUCTION_VEC]], i32 0
 ; CHECK1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
@@ -148,8 +164,8 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK1-NEXT:    [[C_ADDR_06:%.*]] = phi i32 [ [[BC_MERGE_RDX]], [[SCALAR_PH]] ], [ [[MUL:%.*]], [[FOR_BODY]] ]
 ; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP15:%.*]] = load i32, i32* [[ARRAYIDX]], align 4
-; CHECK1-NEXT:    [[MUL]] = mul nsw i32 [[TMP15]], [[C_ADDR_06]]
+; CHECK1-NEXT:    [[TMP25:%.*]] = load i32, i32* [[ARRAYIDX]], align 4
+; CHECK1-NEXT:    [[MUL]] = mul nsw i32 [[TMP25]], [[C_ADDR_06]]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK1-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
 ; CHECK1-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], [[LOOP2:!llvm.loop !.*]]

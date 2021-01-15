@@ -60,7 +60,7 @@ private:
                            int Width, MachineBasicBlock::iterator &NextMBBI);
 
   // TODO: Remove.
-  bool expandVSETVL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
+  bool expandEPIVSETVL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
 };
 
 char RISCVExpandAtomicPseudo::ID = 0;
@@ -87,7 +87,7 @@ bool RISCVExpandAtomicPseudo::expandMBB(MachineBasicBlock &MBB) {
 }
 
 // TODO: Remove.
-bool RISCVExpandAtomicPseudo::expandVSETVL(MachineBasicBlock &MBB,
+bool RISCVExpandAtomicPseudo::expandEPIVSETVL(MachineBasicBlock &MBB,
                                      MachineBasicBlock::iterator MBBI) {
   MachineInstr &MI = *MBBI;
   assert(MI.getNumOperands() == 5 && "Unexpected instruction format");
@@ -97,9 +97,9 @@ bool RISCVExpandAtomicPseudo::expandVSETVL(MachineBasicBlock &MBB,
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
   const MCInstrDesc *MCInstr;
-  if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
+  /* if (MI.getOpcode() == RISCV::PseudoEPIVSETVLI) {
     MCInstr = &TII.get(RISCV::VSETVLI);
-  } else if (MI.getOpcode() == RISCV::PseudoVSETVL) {
+  } else */ if (MI.getOpcode() == RISCV::PseudoEPIVSETVL) {
     MCInstr = &TII.get(RISCV::VSETVL);
   } else {
     llvm_unreachable("Unexpected pseudo instruction");
@@ -160,9 +160,9 @@ bool RISCVExpandAtomicPseudo::expandMI(MachineBasicBlock &MBB,
   // RISCVExpandPseudoInsts.
   // TODO: Put those in a specific pass other than the one for expanding
   // atomics.
-  case RISCV::PseudoVSETVL:
-  case RISCV::PseudoVSETVLI:
-    return expandVSETVL(MBB, MBBI);
+  case RISCV::PseudoEPIVSETVL:
+  // case RISCV::PseudoEPIVSETVLI:
+    return expandEPIVSETVL(MBB, MBBI);
   }
 
   return false;

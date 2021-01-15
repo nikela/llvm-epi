@@ -224,10 +224,6 @@ protected:
   /// makes sense (for example, on function calls)
   MachineInstr *EmitStartPt;
 
-  /// Last local value flush point. On a subsequent flush, no local value will
-  /// sink past this point.
-  MachineBasicBlock::iterator LastFlushPoint;
-
 public:
   virtual ~FastISel();
 
@@ -521,7 +517,6 @@ protected:
   bool selectFreeze(const User *I);
   bool selectCast(const User *I, unsigned Opcode);
   bool selectExtractValue(const User *U);
-  bool selectInsertValue(const User *I);
   bool selectXRayCustomEvent(const CallInst *II);
   bool selectXRayTypedEvent(const CallInst *II);
 

@@ -644,8 +644,20 @@ int AArch64TTIImpl::getArithmeticInstrCost(
     }
     return Cost;
 
-  case ISD::ADD:
   case ISD::MUL:
+    if (LT.second != MVT::v2i64)
+      return (Cost + 1) * LT.first;
+    // Since we do not have a MUL.2d instruction, a mul <2 x i64> is expensive
+    // as elements are extracted from the vectors and the muls scalarized.
+    // As getScalarizationOverhead is a bit too pessimistic, we estimate the
+    // cost for a i64 vector directly here, which is:
+    // - four i64 extracts,
+    // - two i64 inserts, and
+    // - two muls.
+    // So, for a v2i64 with LT.First = 1 the cost is 8, and for a v4i64 with
+    // LT.first = 2 the cost is 16.
+    return LT.first * 8;
+  case ISD::ADD:
   case ISD::XOR:
   case ISD::OR:
   case ISD::AND:
@@ -756,6 +768,26 @@ AArch64TTIImpl::enableMemCmpExpansion(bool OptSize, bool IsZeroCmp) const {
   // they could be used with no holds barred (-O3).
   Options.LoadSizes = {8, 4, 2, 1};
   return Options;
+}
+
+unsigned AArch64TTIImpl::getGatherScatterOpCost(
+    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
+    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
+
+  if (!isa<ScalableVectorType>(DataTy))
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+  auto *VT = cast<VectorType>(DataTy);
+  auto LT = TLI->getTypeLegalizationCost(DL, DataTy);
+  ElementCount LegalVF = LT.second.getVectorElementCount();
+  Optional<unsigned> MaxNumVScale = getMaxVScale();
+  assert(MaxNumVScale && "Expected valid max vscale value");
+
+  unsigned MemOpCost =
+      getMemoryOpCost(Opcode, VT->getElementType(), Alignment, 0, CostKind, I);
+  unsigned MaxNumElementsPerGather =
+      MaxNumVScale.getValue() * LegalVF.getKnownMinValue();
+  return LT.first * MaxNumElementsPerGather * MemOpCost;
 }
 
 bool AArch64TTIImpl::useNeonVector(const Type *Ty) const {

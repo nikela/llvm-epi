@@ -175,13 +175,13 @@ private:
   Error setAlignment(AlignTypeEnum align_type, Align abi_align,
                      Align pref_align, uint32_t bit_width);
 
-  Align getAlignmentInfo(AlignTypeEnum align_type, uint32_t bit_width,
-                         bool ABIAlign, Type *Ty) const;
-
   /// Attempts to set the alignment of a pointer in the given address space.
   /// Returns an error description on failure.
   Error setPointerAlignment(uint32_t AddrSpace, Align ABIAlign, Align PrefAlign,
                             uint32_t TypeByteWidth, uint32_t IndexWidth);
+
+  /// Internal helper to get alignment for integer of given bitwidth.
+  Align getIntegerAlignment(uint32_t BitWidth, bool abi_or_pref) const;
 
   /// Internal helper method that returns requested alignment for type.
   Align getAlignment(Type *Ty, bool abi_or_pref) const;
@@ -388,7 +388,7 @@ public:
 
   bool isNonIntegralAddressSpace(unsigned AddrSpace) const {
     ArrayRef<unsigned> NonIntegralSpaces = getNonIntegralAddressSpaces();
-    return find(NonIntegralSpaces, AddrSpace) != NonIntegralSpaces.end();
+    return is_contained(NonIntegralSpaces, AddrSpace);
   }
 
   bool isNonIntegralPointerType(PointerType *PT) const {
@@ -530,7 +530,9 @@ public:
 
   /// Returns the minimum ABI-required alignment for an integer type of
   /// the specified bitwidth.
-  Align getABIIntegerTypeAlignment(unsigned BitWidth) const;
+  Align getABIIntegerTypeAlignment(unsigned BitWidth) const {
+    return getIntegerAlignment(BitWidth, /* abi_or_pref */ true);
+  }
 
   /// Returns the preferred stack/global alignment for the specified
   /// type.
@@ -688,6 +690,8 @@ inline TypeSize DataLayout::getTypeSizeInBits(Type *Ty) const {
   case Type::PPC_FP128TyID:
   case Type::FP128TyID:
     return TypeSize::Fixed(128);
+  case Type::X86_AMXTyID:
+    return TypeSize::Fixed(8192);
   // In memory objects this is always aligned to a higher boundary, but
   // only 80 bits contain information.
   case Type::X86_FP80TyID:

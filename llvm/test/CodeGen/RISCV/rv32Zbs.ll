@@ -80,17 +80,14 @@ define i64 @sbclr_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    andi a3, a2, 63
 ; RV32IB-NEXT:    addi a3, a3, -32
-; RV32IB-NEXT:    bltz a3, .LBB2_2
-; RV32IB-NEXT:  # %bb.1:
-; RV32IB-NEXT:    mv a2, zero
-; RV32IB-NEXT:    sbset a3, zero, a3
-; RV32IB-NEXT:    j .LBB2_3
-; RV32IB-NEXT:  .LBB2_2:
-; RV32IB-NEXT:    mv a3, zero
+; RV32IB-NEXT:    slti a4, a3, 0
+; RV32IB-NEXT:    sbset a5, zero, a3
+; RV32IB-NEXT:    cmov a4, a4, a5, zero
 ; RV32IB-NEXT:    sbset a2, zero, a2
-; RV32IB-NEXT:  .LBB2_3:
+; RV32IB-NEXT:    srai a3, a3, 31
+; RV32IB-NEXT:    and a2, a3, a2
+; RV32IB-NEXT:    andn a1, a1, a4
 ; RV32IB-NEXT:    andn a0, a0, a2
-; RV32IB-NEXT:    andn a1, a1, a3
 ; RV32IB-NEXT:    ret
 ;
 ; RV32IBS-LABEL: sbclr_i64:
@@ -239,15 +236,13 @@ define signext i64 @sbset_i64_zero(i64 signext %a) nounwind {
 ;
 ; RV32IB-LABEL: sbset_i64_zero:
 ; RV32IB:       # %bb.0:
-; RV32IB-NEXT:    addi a1, a0, -32
-; RV32IB-NEXT:    bltz a1, .LBB7_2
-; RV32IB-NEXT:  # %bb.1:
-; RV32IB-NEXT:    mv a0, zero
-; RV32IB-NEXT:    sbset a1, zero, a1
-; RV32IB-NEXT:    ret
-; RV32IB-NEXT:  .LBB7_2:
-; RV32IB-NEXT:    mv a1, zero
+; RV32IB-NEXT:    addi a2, a0, -32
+; RV32IB-NEXT:    slti a1, a2, 0
+; RV32IB-NEXT:    sbset a3, zero, a2
+; RV32IB-NEXT:    cmov a1, a1, a3, zero
 ; RV32IB-NEXT:    sbset a0, zero, a0
+; RV32IB-NEXT:    srai a2, a2, 31
+; RV32IB-NEXT:    and a0, a2, a0
 ; RV32IB-NEXT:    ret
 ;
 ; RV32IBS-LABEL: sbset_i64_zero:
@@ -398,20 +393,17 @@ define i64 @sbext_i64(i64 %a, i64 %b) nounwind {
 ;
 ; RV32IB-LABEL: sbext_i64:
 ; RV32IB:       # %bb.0:
-; RV32IB-NEXT:    andi a3, a2, 63
-; RV32IB-NEXT:    addi a4, a3, -32
-; RV32IB-NEXT:    bltz a4, .LBB12_2
-; RV32IB-NEXT:  # %bb.1:
-; RV32IB-NEXT:    srl a0, a1, a4
-; RV32IB-NEXT:    j .LBB12_3
-; RV32IB-NEXT:  .LBB12_2:
 ; RV32IB-NEXT:    srl a0, a0, a2
-; RV32IB-NEXT:    addi a2, zero, 31
-; RV32IB-NEXT:    sub a2, a2, a3
-; RV32IB-NEXT:    slli a1, a1, 1
-; RV32IB-NEXT:    sll a1, a1, a2
-; RV32IB-NEXT:    or a0, a0, a1
-; RV32IB-NEXT:  .LBB12_3:
+; RV32IB-NEXT:    andi a2, a2, 63
+; RV32IB-NEXT:    addi a3, zero, 31
+; RV32IB-NEXT:    sub a3, a3, a2
+; RV32IB-NEXT:    slli a4, a1, 1
+; RV32IB-NEXT:    sll a3, a4, a3
+; RV32IB-NEXT:    or a0, a0, a3
+; RV32IB-NEXT:    addi a2, a2, -32
+; RV32IB-NEXT:    srl a1, a1, a2
+; RV32IB-NEXT:    slti a2, a2, 0
+; RV32IB-NEXT:    cmov a0, a2, a1, a0
 ; RV32IB-NEXT:    andi a0, a0, 1
 ; RV32IB-NEXT:    mv a1, zero
 ; RV32IB-NEXT:    ret
@@ -484,4 +476,246 @@ define i64 @sbexti_i64(i64 %a) nounwind {
   %shr = lshr i64 %a, 5
   %and = and i64 %shr, 1
   ret i64 %and
+}
+
+define i32 @sbclri_i32_10(i32 %a) nounwind {
+; RV32I-LABEL: sbclri_i32_10:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    andi a0, a0, -1025
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbclri_i32_10:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    andi a0, a0, -1025
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbclri_i32_10:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    andi a0, a0, -1025
+; RV32IBS-NEXT:    ret
+  %and = and i32 %a, -1025
+  ret i32 %and
+}
+
+define i32 @sbclri_i32_11(i32 %a) nounwind {
+; RV32I-LABEL: sbclri_i32_11:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 1048575
+; RV32I-NEXT:    addi a1, a1, 2047
+; RV32I-NEXT:    and a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbclri_i32_11:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbclri a0, a0, 11
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbclri_i32_11:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbclri a0, a0, 11
+; RV32IBS-NEXT:    ret
+  %and = and i32 %a, -2049
+  ret i32 %and
+}
+
+define i32 @sbclri_i32_30(i32 %a) nounwind {
+; RV32I-LABEL: sbclri_i32_30:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 786432
+; RV32I-NEXT:    addi a1, a1, -1
+; RV32I-NEXT:    and a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbclri_i32_30:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbclri a0, a0, 30
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbclri_i32_30:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbclri a0, a0, 30
+; RV32IBS-NEXT:    ret
+  %and = and i32 %a, -1073741825
+  ret i32 %and
+}
+
+define i32 @sbclri_i32_31(i32 %a) nounwind {
+; RV32I-LABEL: sbclri_i32_31:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 524288
+; RV32I-NEXT:    addi a1, a1, -1
+; RV32I-NEXT:    and a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbclri_i32_31:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbclri a0, a0, 31
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbclri_i32_31:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbclri a0, a0, 31
+; RV32IBS-NEXT:    ret
+  %and = and i32 %a, -2147483649
+  ret i32 %and
+}
+
+define i32 @sbseti_i32_10(i32 %a) nounwind {
+; RV32I-LABEL: sbseti_i32_10:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    ori a0, a0, 1024
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbseti_i32_10:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    ori a0, a0, 1024
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbseti_i32_10:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    ori a0, a0, 1024
+; RV32IBS-NEXT:    ret
+  %or = or i32 %a, 1024
+  ret i32 %or
+}
+
+define i32 @sbseti_i32_11(i32 %a) nounwind {
+; RV32I-LABEL: sbseti_i32_11:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 1
+; RV32I-NEXT:    addi a1, a1, -2048
+; RV32I-NEXT:    or a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbseti_i32_11:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbseti a0, a0, 11
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbseti_i32_11:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbseti a0, a0, 11
+; RV32IBS-NEXT:    ret
+  %or = or i32 %a, 2048
+  ret i32 %or
+}
+
+define i32 @sbseti_i32_30(i32 %a) nounwind {
+; RV32I-LABEL: sbseti_i32_30:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 262144
+; RV32I-NEXT:    or a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbseti_i32_30:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbseti a0, a0, 30
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbseti_i32_30:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbseti a0, a0, 30
+; RV32IBS-NEXT:    ret
+  %or = or i32 %a, 1073741824
+  ret i32 %or
+}
+
+define i32 @sbseti_i32_31(i32 %a) nounwind {
+; RV32I-LABEL: sbseti_i32_31:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 524288
+; RV32I-NEXT:    or a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbseti_i32_31:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbseti a0, a0, 31
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbseti_i32_31:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbseti a0, a0, 31
+; RV32IBS-NEXT:    ret
+  %or = or i32 %a, 2147483648
+  ret i32 %or
+}
+
+define i32 @sbinvi_i32_10(i32 %a) nounwind {
+; RV32I-LABEL: sbinvi_i32_10:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    xori a0, a0, 1024
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbinvi_i32_10:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    xori a0, a0, 1024
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbinvi_i32_10:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    xori a0, a0, 1024
+; RV32IBS-NEXT:    ret
+  %xor = xor i32 %a, 1024
+  ret i32 %xor
+}
+
+define i32 @sbinvi_i32_11(i32 %a) nounwind {
+; RV32I-LABEL: sbinvi_i32_11:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 1
+; RV32I-NEXT:    addi a1, a1, -2048
+; RV32I-NEXT:    xor a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbinvi_i32_11:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbinvi a0, a0, 11
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbinvi_i32_11:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbinvi a0, a0, 11
+; RV32IBS-NEXT:    ret
+  %xor = xor i32 %a, 2048
+  ret i32 %xor
+}
+
+define i32 @sbinvi_i32_30(i32 %a) nounwind {
+; RV32I-LABEL: sbinvi_i32_30:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 262144
+; RV32I-NEXT:    xor a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbinvi_i32_30:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbinvi a0, a0, 30
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbinvi_i32_30:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbinvi a0, a0, 30
+; RV32IBS-NEXT:    ret
+  %xor = xor i32 %a, 1073741824
+  ret i32 %xor
+}
+
+define i32 @sbinvi_i32_31(i32 %a) nounwind {
+; RV32I-LABEL: sbinvi_i32_31:
+; RV32I:       # %bb.0:
+; RV32I-NEXT:    lui a1, 524288
+; RV32I-NEXT:    xor a0, a0, a1
+; RV32I-NEXT:    ret
+;
+; RV32IB-LABEL: sbinvi_i32_31:
+; RV32IB:       # %bb.0:
+; RV32IB-NEXT:    sbinvi a0, a0, 31
+; RV32IB-NEXT:    ret
+;
+; RV32IBS-LABEL: sbinvi_i32_31:
+; RV32IBS:       # %bb.0:
+; RV32IBS-NEXT:    sbinvi a0, a0, 31
+; RV32IBS-NEXT:    ret
+  %xor = xor i32 %a, 2147483648
+  ret i32 %xor
 }

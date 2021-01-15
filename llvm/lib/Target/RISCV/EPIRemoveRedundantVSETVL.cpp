@@ -81,15 +81,31 @@ private:
 
 char EPIRemoveRedundantVSETVL::ID = 0;
 
+// Helper struct to simplify handling fractional LMUL.
+struct VLMulRatio {
+  // Numerator / Denominator.
+  unsigned N;
+  unsigned D;
+
+  bool operator==(const VLMulRatio &other) const {
+    return other.N == N && other.D == D;
+  }
+};
+
+unsigned operator /(unsigned A, VLMulRatio R)
+{
+  return (A * R.D) / R.N;
+}
+
 // This class holds information related to the operands of a VSETVLI
 // instruction. It provides mechanisms to compare such instructions.
 struct VSETVLInfo {
   Register AVLReg;
   unsigned SEW;
-  unsigned VLMul;
+  VLMulRatio VLMul;
   bool Nontemporal;
 
-  VSETVLInfo(Register AVLReg, unsigned SEW, unsigned VLMul, bool Nontemporal)
+  VSETVLInfo(Register AVLReg, unsigned SEW, VLMulRatio VLMul, bool Nontemporal)
       : AVLReg(AVLReg), SEW(SEW), VLMul(VLMul), Nontemporal(Nontemporal) {}
 
   VSETVLInfo(const MachineInstr &MI) {
@@ -105,13 +121,18 @@ struct VSETVLInfo {
 
     unsigned VTypeI = VTypeIOp.getImm();
 
-    unsigned SEWBits = (VTypeI >> 2) & 0x7;
-    unsigned VMulBits = VTypeI & 0x3;
+    unsigned SEWBits = static_cast<unsigned>(RISCVVType::getVSEW(VTypeI));
+    unsigned VMulBits = static_cast<unsigned>(RISCVVType::getVLMUL(VTypeI));
 
-    Nontemporal = (VTypeI >> 9) & 0x1;
-
+    Nontemporal = RISCVVType::isNontemporal(VTypeI);
     SEW = (1 << SEWBits) * 8;
-    VLMul = 1 << VMulBits;
+
+    if (VMulBits & 0x4) {
+      // Fractional LMUL
+      VLMul = VLMulRatio{1u, 4 - (1u << (VMulBits & 0x3))};
+    } else {
+      VLMul = VLMulRatio{1u << (VMulBits & 0x3), 1u};
+    }
   }
 
   bool sameOpKind(const VSETVLInfo &other) const {
@@ -305,15 +326,18 @@ struct SameGVLKeyInfo {
   using DenseMapInfoUnsigned = DenseMapInfo<unsigned>;
 
   static inline VSETVLInfo getEmptyKey() {
-    return {DenseMapInfoReg::getEmptyKey(), DenseMapInfoUnsigned::getEmptyKey(),
+    return {DenseMapInfoReg::getEmptyKey(),
             DenseMapInfoUnsigned::getEmptyKey(),
+            {DenseMapInfoUnsigned::getEmptyKey(),
+             DenseMapInfoUnsigned::getEmptyKey()},
             !!DenseMapInfoUnsigned::getEmptyKey()};
   }
 
   static inline VSETVLInfo getTombstoneKey() {
     return {DenseMapInfoReg::getTombstoneKey(),
             DenseMapInfoUnsigned::getTombstoneKey(),
-            DenseMapInfoUnsigned::getTombstoneKey(),
+            {DenseMapInfoUnsigned::getTombstoneKey(),
+             DenseMapInfoUnsigned::getTombstoneKey()},
             !!DenseMapInfoUnsigned::getTombstoneKey()};
   }
 

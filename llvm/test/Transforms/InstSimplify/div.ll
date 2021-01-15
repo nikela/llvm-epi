@@ -43,10 +43,9 @@ define <2 x i8> @udiv_zero_elt_vec_constfold(<2 x i8> %x) {
   ret <2 x i8> %div
 }
 
-; TODO: instsimplify should fold these to poison
 define <2 x i8> @sdiv_zero_elt_vec(<2 x i8> %x) {
 ; CHECK-LABEL: @sdiv_zero_elt_vec(
-; CHECK-NEXT:    ret <2 x i8> undef
+; CHECK-NEXT:    ret <2 x i8> poison
 ;
   %div = sdiv <2 x i8> %x, <i8 -42, i8 0>
   ret <2 x i8> %div
@@ -54,7 +53,7 @@ define <2 x i8> @sdiv_zero_elt_vec(<2 x i8> %x) {
 
 define <2 x i8> @udiv_zero_elt_vec(<2 x i8> %x) {
 ; CHECK-LABEL: @udiv_zero_elt_vec(
-; CHECK-NEXT:    ret <2 x i8> undef
+; CHECK-NEXT:    ret <2 x i8> poison
 ;
   %div = udiv <2 x i8> %x, <i8 0, i8 42>
   ret <2 x i8> %div
@@ -62,7 +61,7 @@ define <2 x i8> @udiv_zero_elt_vec(<2 x i8> %x) {
 
 define <2 x i8> @sdiv_undef_elt_vec(<2 x i8> %x) {
 ; CHECK-LABEL: @sdiv_undef_elt_vec(
-; CHECK-NEXT:    ret <2 x i8> undef
+; CHECK-NEXT:    ret <2 x i8> poison
 ;
   %div = sdiv <2 x i8> %x, <i8 -42, i8 undef>
   ret <2 x i8> %div
@@ -70,7 +69,7 @@ define <2 x i8> @sdiv_undef_elt_vec(<2 x i8> %x) {
 
 define <2 x i8> @udiv_undef_elt_vec(<2 x i8> %x) {
 ; CHECK-LABEL: @udiv_undef_elt_vec(
-; CHECK-NEXT:    ret <2 x i8> undef
+; CHECK-NEXT:    ret <2 x i8> poison
 ;
   %div = udiv <2 x i8> %x, <i8 undef, i8 42>
   ret <2 x i8> %div
@@ -186,7 +185,7 @@ declare i32 @external()
 
 define i32 @div1() {
 ; CHECK-LABEL: @div1(
-; CHECK-NEXT:    [[CALL:%.*]] = call i32 @external(), !range !0
+; CHECK-NEXT:    [[CALL:%.*]] = call i32 @external(), [[RNG0:!range !.*]]
 ; CHECK-NEXT:    ret i32 0
 ;
   %call = call i32 @external(), !range !0
@@ -195,10 +194,36 @@ define i32 @div1() {
 }
 
 define i8 @sdiv_minusone_divisor() {
-; CHECK-LABEL: @sdiv_minusone_divisor
-; CHECK-NEXT:   ret i8 poison
+; CHECK-LABEL: @sdiv_minusone_divisor(
+; CHECK-NEXT:    ret i8 poison
+;
   %v = sdiv i8 -128, -1
   ret i8 %v
+}
+
+define i32 @poison(i32 %x) {
+; CHECK-LABEL: @poison(
+; CHECK-NEXT:    ret i32 poison
+;
+  %v = udiv i32 %x, poison
+  ret i32 %v
+}
+
+; TODO: this should be poison
+define i32 @poison2(i32 %x) {
+; CHECK-LABEL: @poison2(
+; CHECK-NEXT:    ret i32 0
+;
+  %v = udiv i32 poison, %x
+  ret i32 %v
+}
+
+define <2 x i32> @poison3(<2 x i32> %x) {
+; CHECK-LABEL: @poison3(
+; CHECK-NEXT:    ret <2 x i32> poison
+;
+  %v = udiv <2 x i32> %x, <i32 poison, i32 1>
+  ret <2 x i32> %v
 }
 
 !0 = !{i32 0, i32 3}

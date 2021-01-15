@@ -338,8 +338,8 @@ static cl::opt<uint64_t> ClOriginBase("msan-origin-base",
                                       cl::desc("Define custom MSan OriginBase"),
                                       cl::Hidden, cl::init(0));
 
-static const char *const kMsanModuleCtorName = "msan.module_ctor";
-static const char *const kMsanInitName = "__msan_init";
+const char kMsanModuleCtorName[] = "msan.module_ctor";
+const char kMsanInitName[] = "__msan_init";
 
 namespace {
 
@@ -3190,18 +3190,15 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
   // and then apply the usual shadow combining logic.
   void handlePclmulIntrinsic(IntrinsicInst &I) {
     IRBuilder<> IRB(&I);
-    Type *ShadowTy = getShadowTy(&I);
     unsigned Width =
         cast<FixedVectorType>(I.getArgOperand(0)->getType())->getNumElements();
     assert(isa<ConstantInt>(I.getArgOperand(2)) &&
            "pclmul 3rd operand must be a constant");
     unsigned Imm = cast<ConstantInt>(I.getArgOperand(2))->getZExtValue();
-    Value *Shuf0 =
-        IRB.CreateShuffleVector(getShadow(&I, 0), UndefValue::get(ShadowTy),
-                                getPclmulMask(Width, Imm & 0x01));
-    Value *Shuf1 =
-        IRB.CreateShuffleVector(getShadow(&I, 1), UndefValue::get(ShadowTy),
-                                getPclmulMask(Width, Imm & 0x10));
+    Value *Shuf0 = IRB.CreateShuffleVector(getShadow(&I, 0),
+                                           getPclmulMask(Width, Imm & 0x01));
+    Value *Shuf1 = IRB.CreateShuffleVector(getShadow(&I, 1),
+                                           getPclmulMask(Width, Imm & 0x10));
     ShadowAndOriginCombiner SOC(this, IRB);
     SOC.Add(Shuf0, getOrigin(&I, 0));
     SOC.Add(Shuf1, getOrigin(&I, 1));
@@ -3708,7 +3705,7 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
       (void)Store;
       assert(Size != 0 && Store != nullptr);
       LLVM_DEBUG(dbgs() << "  Param:" << *Store << "\n");
-      ArgOffset += alignTo(Size, 8);
+      ArgOffset += alignTo(Size, kShadowTLSAlignment);
     }
     LLVM_DEBUG(dbgs() << "  done with call args\n");
 

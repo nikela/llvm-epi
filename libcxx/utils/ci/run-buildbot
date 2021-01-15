@@ -58,7 +58,7 @@ done
 
 MONOREPO_ROOT="${MONOREPO_ROOT:="$(git rev-parse --show-toplevel)"}"
 BUILD_DIR="${BUILD_DIR:=${MONOREPO_ROOT}/build/${BUILDER}}"
-INSTALL_DIR="${BUILD_DIR}/install}"
+INSTALL_DIR="${BUILD_DIR}/install"
 
 function clean() {
     rm -rf "${BUILD_DIR}"
@@ -92,7 +92,11 @@ function check-cxx-cxxabi() {
 #       this to the Lit test suite instead of being a separate CMake target.
 function check-abi-list() {
     echo "+++ Running the libc++ ABI list test"
-    ninja -C "${BUILD_DIR}" check-cxx-abilist
+    ninja -C "${BUILD_DIR}" check-cxx-abilist || (
+        echo "+++ Generating the libc++ ABI list after failed check"
+        ninja -C "${BUILD_DIR}" generate-cxx-abilist
+        false
+    )
 }
 
 function check-cxx-benchmarks() {
@@ -133,11 +137,19 @@ generic-cxx17)
     check-cxx-cxxabi
     check-abi-list
 ;;
-generic-cxx2a)
+generic-cxx20)
     export CC=clang
     export CXX=clang++
     clean
-    generate-cmake -C "${MONOREPO_ROOT}/libcxx/cmake/caches/Generic-cxx2a.cmake"
+    generate-cmake -C "${MONOREPO_ROOT}/libcxx/cmake/caches/Generic-cxx20.cmake"
+    check-cxx-cxxabi
+    check-abi-list
+;;
+generic-cxx2b)
+    export CC=clang-tot
+    export CXX=clang++-tot
+    clean
+    generate-cmake -C "${MONOREPO_ROOT}/libcxx/cmake/caches/Generic-cxx2b.cmake"
     check-cxx-cxxabi
     check-abi-list
 ;;

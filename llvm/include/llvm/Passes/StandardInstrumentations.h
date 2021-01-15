@@ -19,7 +19,6 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/OptBisect.h"
-#include "llvm/IR/PassInstrumentation.h"
 #include "llvm/IR/PassTimingInfo.h"
 #include "llvm/IR/ValueHandle.h"
 #include "llvm/Support/CommandLine.h"
@@ -31,6 +30,7 @@ namespace llvm {
 
 class Module;
 class Function;
+class PassInstrumentationCallbacks;
 
 /// Instrumentation to print IR before/after passes.
 ///
@@ -47,11 +47,15 @@ private:
   void printAfterPass(StringRef PassID, Any IR);
   void printAfterPassInvalidated(StringRef PassID);
 
+  bool shouldPrintBeforePass(StringRef PassID);
+  bool shouldPrintAfterPass(StringRef PassID);
+
   using PrintModuleDesc = std::tuple<const Module *, std::string, StringRef>;
 
   void pushModuleDesc(StringRef PassID, Any IR);
   PrintModuleDesc popModuleDesc(StringRef PassID);
 
+  PassInstrumentationCallbacks *PIC;
   /// Stack of Module description, enough to print the module after a given
   /// pass.
   SmallVector<PrintModuleDesc, 2> ModuleDescStack;
@@ -68,7 +72,7 @@ private:
   bool shouldRun(StringRef PassID, Any IR);
 };
 
-class OptBisectInstrumentation : public OptBisect {
+class OptBisectInstrumentation {
 public:
   OptBisectInstrumentation() {}
   void registerCallbacks(PassInstrumentationCallbacks &PIC);
@@ -148,7 +152,7 @@ public:
 // 8.  To compare two IR representations (of type \p T).
 template <typename IRUnitT> class ChangeReporter {
 protected:
-  ChangeReporter() {}
+  ChangeReporter(bool RunInVerboseMode) : VerboseMode(RunInVerboseMode) {}
 
 public:
   virtual ~ChangeReporter();
@@ -200,6 +204,9 @@ protected:
   std::vector<IRUnitT> BeforeStack;
   // Is this the first IR seen?
   bool InitialIR = true;
+
+  // Run in verbose mode, printing everything?
+  const bool VerboseMode;
 };
 
 // An abstract template base class that handles printing banners and
@@ -207,7 +214,7 @@ protected:
 template <typename IRUnitT>
 class TextChangeReporter : public ChangeReporter<IRUnitT> {
 protected:
-  TextChangeReporter();
+  TextChangeReporter(bool Verbose);
 
   // Print a module dump of the first IR that is changed.
   void handleInitialIR(Any IR) override;
@@ -231,7 +238,8 @@ protected:
 // included in this representation but it is massaged before reporting.
 class IRChangedPrinter : public TextChangeReporter<std::string> {
 public:
-  IRChangedPrinter() {}
+  IRChangedPrinter(bool VerboseMode)
+      : TextChangeReporter<std::string>(VerboseMode) {}
   ~IRChangedPrinter() override;
   void registerCallbacks(PassInstrumentationCallbacks &PIC);
 
@@ -270,9 +278,7 @@ class StandardInstrumentations {
   bool VerifyEach;
 
 public:
-  StandardInstrumentations(bool DebugLogging, bool VerifyEach = false)
-      : PrintPass(DebugLogging), OptNone(DebugLogging), Verify(DebugLogging),
-        VerifyEach(VerifyEach) {}
+  StandardInstrumentations(bool DebugLogging, bool VerifyEach = false);
 
   void registerCallbacks(PassInstrumentationCallbacks &PIC);
 

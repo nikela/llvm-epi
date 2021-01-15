@@ -15,14 +15,13 @@
 #include "mlir/IR/AffineMap.h"
 #include "mlir/IR/AsmState.h"
 #include "mlir/IR/Attributes.h"
-#include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/IntegerSet.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/OpImplementation.h"
 #include "mlir/IR/Operation.h"
-#include "mlir/IR/StandardTypes.h"
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/MapVector.h"
@@ -49,7 +48,39 @@ void OperationName::dump() const { print(llvm::errs()); }
 
 DialectAsmPrinter::~DialectAsmPrinter() {}
 
+//===--------------------------------------------------------------------===//
+// OpAsmPrinter
+//===--------------------------------------------------------------------===//
+
 OpAsmPrinter::~OpAsmPrinter() {}
+
+void OpAsmPrinter::printFunctionalType(Operation *op) {
+  auto &os = getStream();
+  os << '(';
+  llvm::interleaveComma(op->getOperands(), os, [&](Value operand) {
+    // Print the types of null values as <<NULL TYPE>>.
+    *this << (operand ? operand.getType() : Type());
+  });
+  os << ") -> ";
+
+  // Print the result list.  We don't parenthesize single result types unless
+  // it is a function (avoiding a grammar ambiguity).
+  bool wrapped = op->getNumResults() != 1;
+  if (!wrapped && op->getResult(0).getType() &&
+      op->getResult(0).getType().isa<FunctionType>())
+    wrapped = true;
+
+  if (wrapped)
+    os << '(';
+
+  llvm::interleaveComma(op->getResults(), os, [&](const OpResult &result) {
+    // Print the types of null values as <<NULL TYPE>>.
+    *this << (result ? result.getType() : Type());
+  });
+
+  if (wrapped)
+    os << ')';
+}
 
 //===--------------------------------------------------------------------===//
 // Operation OpAsm interface.
@@ -347,7 +378,7 @@ public:
 private:
   /// Print the given operation in the generic form.
   void printGenericOp(Operation *op) override {
-    // Consider nested opertions for aliases.
+    // Consider nested operations for aliases.
     if (op->getNumRegions() != 0) {
       for (Region &region : op->getRegions())
         printRegion(region, /*printEntryBlockArgs=*/true,
@@ -430,6 +461,7 @@ private:
   /// The following are hooks of `OpAsmPrinter` that are not necessary for
   /// determining potential aliases.
   void printAffineMapOfSSAIds(AffineMapAttr, ValueRange) override {}
+  void printNewline() override {}
   void printOperand(Value) override {}
   void printOperand(Value, raw_ostream &os) override {
     // Users expect the output string to have at least the prefixed % to signal
@@ -579,7 +611,7 @@ void AliasInitializer::visit(Type type) {
   if (succeeded(generateAlias(type, aliasToType)))
     return;
 
-  // Visit several subtypes that contain types or atttributes.
+  // Visit several subtypes that contain types or attributes.
   if (auto funcType = type.dyn_cast<FunctionType>()) {
     // Visit input and result types for functions.
     for (auto input : funcType.getInputs())
@@ -2189,8 +2221,9 @@ public:
                             AsmStateImpl &state)
       : ModulePrinter(os, flags, &state) {}
 
-  /// Print the given top-level module.
-  void print(ModuleOp op);
+  /// Print the given top-level operation.
+  void printTopLevelOperation(Operation *op);
+
   /// Print the given operation with its indent and location.
   void print(Operation *op);
   /// Print the bare location, not including indentation/location/etc.
@@ -2217,6 +2250,13 @@ public:
 
   /// Return the current stream of the printer.
   raw_ostream &getStream() const override { return os; }
+
+  /// Print a newline and indent the printer to the start of the current
+  /// operation.
+  void printNewline() override {
+    os << newLine;
+    os.indent(currentIndent);
+  }
 
   /// Print the given type.
   void printType(Type type) override { ModulePrinter::printType(type); }
@@ -2289,12 +2329,12 @@ private:
 };
 } // end anonymous namespace
 
-void OperationPrinter::print(ModuleOp op) {
+void OperationPrinter::printTopLevelOperation(Operation *op) {
   // Output the aliases at the top level that can't be deferred.
   state->getAliasState().printNonDeferredAliases(os, newLine);
 
   // Print the module.
-  print(op.getOperation());
+  print(op);
   os << newLine;
 
   // Output the aliases at the top level that can be deferred.
@@ -2588,6 +2628,14 @@ void Value::printAsOperand(raw_ostream &os, AsmState &state) {
 }
 
 void Operation::print(raw_ostream &os, OpPrintingFlags flags) {
+  // If this is a top level operation, we also print aliases.
+  if (!getParent() && !flags.shouldUseLocalScope()) {
+    AsmState state(this);
+    state.getImpl().initializeAliases(this, flags);
+    print(os, state, flags);
+    return;
+  }
+
   // Find the operation to number from based upon the provided flags.
   Operation *printedOp = this;
   bool shouldUseLocalScope = flags.shouldUseLocalScope();
@@ -2608,7 +2656,11 @@ void Operation::print(raw_ostream &os, OpPrintingFlags flags) {
   print(os, state, flags);
 }
 void Operation::print(raw_ostream &os, AsmState &state, OpPrintingFlags flags) {
-  OperationPrinter(os, flags, state.getImpl()).print(this);
+  OperationPrinter printer(os, flags, state.getImpl());
+  if (!getParent() && !flags.shouldUseLocalScope())
+    printer.printTopLevelOperation(this);
+  else
+    printer.print(this);
 }
 
 void Operation::dump() {
@@ -2649,17 +2701,3 @@ void Block::printAsOperand(raw_ostream &os, AsmState &state) {
   OperationPrinter printer(os, /*flags=*/llvm::None, state.getImpl());
   printer.printBlockName(this);
 }
-
-void ModuleOp::print(raw_ostream &os, OpPrintingFlags flags) {
-  AsmState state(*this);
-
-  // Don't populate aliases when printing at local scope.
-  if (!flags.shouldUseLocalScope())
-    state.getImpl().initializeAliases(*this, flags);
-  print(os, state, flags);
-}
-void ModuleOp::print(raw_ostream &os, AsmState &state, OpPrintingFlags flags) {
-  OperationPrinter(os, flags, state.getImpl()).print(*this);
-}
-
-void ModuleOp::dump() { print(llvm::errs()); }
