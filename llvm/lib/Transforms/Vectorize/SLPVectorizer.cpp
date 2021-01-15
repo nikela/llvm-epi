@@ -6621,16 +6621,6 @@ class HorizontalReduction {
       return Kind == OD.Kind && Opcode == OD.Opcode;
     }
     bool operator!=(const OperationData &OD) const { return !(*this == OD); }
-    void clear() {
-      Opcode = 0;
-      Kind = RecurKind::None;
-    }
-
-    /// Get the opcode of the reduction operation.
-    unsigned getOpcode() const {
-      assert(isVectorizable() && "Expected vectorizable operation.");
-      return Opcode;
-    }
 
     /// Get kind of reduction data.
     RecurKind getKind() const { return Kind; }
@@ -6893,12 +6883,6 @@ public:
             markExtraArg(Stack.back(), I);
             continue;
           }
-        } else if (RdxLeafVal && RdxLeafVal != EdgeOpData) {
-          // Make sure that the opcodes of the operations that we are going to
-          // reduce match.
-          // I is an extra argument for TreeN (its parent operation).
-          markExtraArg(Stack.back(), I);
-          continue;
         } else if (!RdxLeafVal) {
           RdxLeafVal = EdgeOpData;
         }
