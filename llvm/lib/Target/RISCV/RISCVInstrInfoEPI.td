@@ -3586,6 +3586,15 @@ foreach fvti = EPIAllFloatVectors in
              (fvti.Mask zero_reg),
              VLMax,
              fvti.SEW)>;
+
+  def : Pat<(fvti.Vector (fneg (fvti.Vector fvti.MInfo.vrclass:$value))),
+            (!cast<Instruction>("PseudoEPIVFSGNJN_VV_" # fvti.MInfo.MX)
+             (fvti.Vector (IMPLICIT_DEF)),
+             $value,
+             $value,
+             (fvti.Mask zero_reg),
+             VLMax,
+             fvti.SEW)>;
 }
 
 foreach vti = EPIAllIntegerVectors in
