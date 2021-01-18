@@ -6461,6 +6461,10 @@ class HorizontalReduction {
       case RecurKind::FMul:
         return Builder.CreateBinOp((Instruction::BinaryOps)RdxOpcode, LHS, RHS,
                                    Name);
+      case RecurKind::FMax:
+        return Builder.CreateBinaryIntrinsic(Intrinsic::maxnum, LHS, RHS);
+      case RecurKind::FMin:
+        return Builder.CreateBinaryIntrinsic(Intrinsic::minnum, LHS, RHS);
 
       case RecurKind::SMax: {
         Value *Cmp = Builder.CreateICmpSGT(LHS, RHS, Name);
@@ -6574,6 +6578,15 @@ class HorizontalReduction {
       if (RecurrenceDescriptor::isIntMinMaxRecurrenceKind(Kind))
         return true;
 
+      if (Kind == RecurKind::FMax || Kind == RecurKind::FMin) {
+        // FP min/max are associative except for NaN and -0.0. We do not
+        // have to rule out -0.0 here because the intrinsic semantics do not
+        // specify a fixed result for it.
+        // TODO: This is artificially restricted to fast because the code that
+        //       creates reductions assumes/produces fast ops.
+        return I->getFastMathFlags().isFast();
+      }
+
       return I->isAssociative();
     }
 
@@ -6682,6 +6695,11 @@ class HorizontalReduction {
       return OperationData(RecurKind::FAdd);
     if (match(I, m_FMul(m_Value(), m_Value())))
       return OperationData(RecurKind::FMul);
+
+    if (match(I, m_Intrinsic<Intrinsic::maxnum>(m_Value(), m_Value())))
+      return OperationData(RecurKind::FMax);
+    if (match(I, m_Intrinsic<Intrinsic::minnum>(m_Value(), m_Value())))
+      return OperationData(RecurKind::FMin);
 
     if (match(I, m_SMax(m_Value(), m_Value())))
       return OperationData(RecurKind::SMax);
@@ -7082,6 +7100,18 @@ private:
       ScalarCost = TTI->getArithmeticInstrCost(RdxOpcode, ScalarTy);
       break;
     }
+    case RecurKind::FMax:
+    case RecurKind::FMin: {
+      auto *VecCondTy = cast<VectorType>(CmpInst::makeCmpResultType(VectorTy));
+      VectorCost =
+          TTI->getMinMaxReductionCost(VectorTy, VecCondTy,
+                                      /*pairwise=*/false, /*unsigned=*/false);
+      ScalarCost =
+          TTI->getCmpSelInstrCost(Instruction::FCmp, ScalarTy) +
+          TTI->getCmpSelInstrCost(Instruction::Select, ScalarTy,
+                                  CmpInst::makeCmpResultType(ScalarTy));
+      break;
+    }
     case RecurKind::SMax:
     case RecurKind::SMin:
     case RecurKind::UMax:
@@ -7316,6 +7346,16 @@ static Value *getReductionValue(const DominatorTree *DT, PHINode *P,
   return nullptr;
 }
 
+static bool matchRdxBop(Instruction *I, Value *&V0, Value *&V1) {
+  if (match(I, m_BinOp(m_Value(V0), m_Value(V1))))
+    return true;
+  if (match(I, m_Intrinsic<Intrinsic::maxnum>(m_Value(V0), m_Value(V1))))
+    return true;
+  if (match(I, m_Intrinsic<Intrinsic::minnum>(m_Value(V0), m_Value(V1))))
+    return true;
+  return false;
+}
+
 /// Attempt to reduce a horizontal reduction.
 /// If it is legal to match a horizontal reduction feeding the phi node \a P
 /// with reduction operators \a Root (or one of its operands) in a basic block
@@ -7356,7 +7396,7 @@ static bool tryToVectorizeHorReductionOrInstOperands(
     unsigned Level;
     std::tie(Inst, Level) = Stack.pop_back_val();
     Value *B0, *B1;
-    bool IsBinop = match(Inst, m_BinOp(m_Value(B0), m_Value(B1)));
+    bool IsBinop = matchRdxBop(Inst, B0, B1);
     bool IsSelect = match(Inst, m_Select(m_Value(), m_Value(), m_Value()));
     if (IsBinop || IsSelect) {
       HorizontalReduction HorRdx;
