@@ -384,6 +384,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SMAX, VT, Legal);
       setOperationAction(ISD::UMIN, VT, Legal);
       setOperationAction(ISD::UMAX, VT, Legal);
+
+      // Lower RVV truncates as a series of "RISCVISD::TRUNCATE_VECTOR"
+      // nodes which truncate by one power of two at a time.
+      setOperationAction(ISD::TRUNCATE, VT, Custom);
     }
 
     // We must custom-lower SPLAT_VECTOR vXi64 on RV32
@@ -822,36 +826,6 @@ SDValue RISCVTargetLowering::lowerZERO_EXTEND(SDValue Op,
   return lowerExtend(Op, DAG, RISCVISD::ZERO_EXTEND_VECTOR);
 }
 
-SDValue RISCVTargetLowering::lowerTRUNCATE(SDValue Op,
-                                           SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  EVT VT = Op.getValueType();
-
-  SDValue Src = Op.getOperand(0);
-  EVT SrcVT = Src.getValueType();
-
-  // Skip masks.
-  if (VT.getVectorElementType() == MVT::i1)
-    return Op;
-
-  auto HalfIntegerVectorElementType = [&DAG](EVT PrevVT) {
-    EVT EltVT = PrevVT.getVectorElementType();
-    assert(EltVT.getSizeInBits() % 2 == 0 && "Invalid bit size");
-    EltVT = EVT::getIntegerVT(*DAG.getContext(), EltVT.getSizeInBits() / 2);
-    return EVT::getVectorVT(*DAG.getContext(), EltVT,
-                            PrevVT.getVectorElementCount());
-  };
-
-  EVT ResultVT = SrcVT;
-  SDValue Result = Src;
-  do {
-    ResultVT = HalfIntegerVectorElementType(ResultVT);
-    Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR, DL, ResultVT, Result);
-  } while (ResultVT != VT);
-
-  return Result;
-}
-
 SDValue RISCVTargetLowering::lowerExtendVectorInReg(SDValue Op,
                                                     SelectionDAG &DAG,
                                                     int Opcode) const {
@@ -1133,8 +1107,6 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSIGN_EXTEND(Op, DAG);
   case ISD::ZERO_EXTEND:
     return lowerZERO_EXTEND(Op, DAG);
-  case ISD::TRUNCATE:
-    return lowerTRUNCATE(Op, DAG);
   case ISD::SIGN_EXTEND_VECTOR_INREG:
     return lowerSIGN_EXTEND_VECTOR_INREG(Op, DAG);
   case ISD::ZERO_EXTEND_VECTOR_INREG:
@@ -1160,6 +1132,38 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
       Imm &= ~0x7U;
     return DAG.getNode(RISCVISD::GREVI, DL, VT, Op.getOperand(0),
                        DAG.getTargetConstant(Imm, DL, Subtarget.getXLenVT()));
+  }
+  case ISD::TRUNCATE: {
+    // RVV only has truncates which operate from SEW*2->SEW, so lower arbitrary
+    // truncates as a series of "RISCVISD::TRUNCATE_VECTOR" nodes which
+    // truncate by one power of two at a time.
+    SDLoc DL(Op);
+    EVT VT = Op.getValueType();
+    // Only custom-lower non-mask truncates
+    if (!VT.isVector() || VT.getVectorElementType() == MVT::i1)
+      return Op;
+
+    EVT DstEltVT = VT.getVectorElementType();
+
+    SDValue Src = Op.getOperand(0);
+    EVT SrcVT = Src.getValueType();
+    EVT SrcEltVT = SrcVT.getVectorElementType();
+
+    assert(DstEltVT.bitsLT(SrcEltVT) &&
+           isPowerOf2_64(DstEltVT.getSizeInBits()) &&
+           isPowerOf2_64(SrcEltVT.getSizeInBits()) &&
+           "Unexpected vector truncate lowering");
+
+    SDValue Result = Src;
+    LLVMContext &Context = *DAG.getContext();
+    const ElementCount Count = SrcVT.getVectorElementCount();
+    do {
+      SrcEltVT = EVT::getIntegerVT(Context, SrcEltVT.getSizeInBits() / 2);
+      EVT ResultVT = EVT::getVectorVT(Context, SrcEltVT, Count);
+      Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR, DL, ResultVT, Result);
+    } while (SrcEltVT != DstEltVT);
+
+    return Result;
   }
   case ISD::SPLAT_VECTOR:
     return lowerSPLATVECTOR(Op, DAG);
@@ -4384,8 +4388,15 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
   // FIXME: This is conservatively correct, but we might want to detect that
   // the input is undefined.
   bool TailAgnostic = true;
-  if (MI.isRegTiedToUseOperand(0) && !WritesElement0)
+  unsigned UseOpIdx;
+  if (MI.isRegTiedToUseOperand(0, &UseOpIdx) && !WritesElement0) {
     TailAgnostic = false;
+    // If the tied operand is an IMPLICIT_DEF we can keep TailAgnostic.
+    const MachineOperand &UseMO = MI.getOperand(UseOpIdx);
+    MachineInstr *UseMI = MRI.getVRegDef(UseMO.getReg());
+    if (UseMI && UseMI->isImplicitDef())
+      TailAgnostic = true;
+  }
 
   // For simplicity we reuse the vtype representation here.
   MIB.addImm(RISCVVType::encodeVTYPE(VLMul, ElementWidth,
@@ -6061,7 +6072,6 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(EXTRACT_VECTOR_ELT)
   NODE_NAME_CASE(SIGN_EXTEND_VECTOR)
   NODE_NAME_CASE(ZERO_EXTEND_VECTOR)
-  NODE_NAME_CASE(TRUNCATE_VECTOR)
   NODE_NAME_CASE(SHUFFLE_EXTEND)
   NODE_NAME_CASE(SIGN_EXTEND_BITS_INREG)
   NODE_NAME_CASE(ZERO_EXTEND_BITS_INREG)
@@ -6087,6 +6097,7 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
 #undef TUPLE_NODE
   NODE_NAME_CASE(SPLAT_VECTOR_I64)
   NODE_NAME_CASE(READ_VLENB)
+  NODE_NAME_CASE(TRUNCATE_VECTOR)
   }
   // clang-format on
   return nullptr;

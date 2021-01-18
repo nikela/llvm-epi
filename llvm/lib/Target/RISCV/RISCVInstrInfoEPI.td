@@ -24,10 +24,6 @@ def riscv_zero_extend_vector : SDNode<"RISCVISD::ZERO_EXTEND_VECTOR",
                                       SDTypeProfile<1, 1,
                                        [SDTCisVec<0>, SDTCisVec<1>]>>;
 
-def riscv_trunc_vector : SDNode<"RISCVISD::TRUNCATE_VECTOR",
-                                SDTypeProfile<1, 1,
-                                 [SDTCisVec<0>, SDTCisVec<1>]>>;
-
 def riscv_shuffle_extend : SDNode<"RISCVISD::SHUFFLE_EXTEND",
                                      SDTypeProfile<1, 2,
                                       [SDTCisSameAs<0, 1>,

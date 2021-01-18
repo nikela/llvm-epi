@@ -87,7 +87,6 @@ enum NodeType : unsigned {
   EXTRACT_VECTOR_ELT,
   SIGN_EXTEND_VECTOR,
   ZERO_EXTEND_VECTOR,
-  TRUNCATE_VECTOR,
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
   ZERO_EXTEND_BITS_INREG,
@@ -146,6 +145,8 @@ enum NodeType : unsigned {
   SPLAT_VECTOR_I64,
   // Read VLENB CSR
   READ_VLENB,
+  // Truncates a RVV integer vector by one power-of-two.
+  TRUNCATE_VECTOR,
 };
 } // namespace RISCVISD
 
