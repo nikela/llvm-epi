@@ -51,16 +51,14 @@ static SDNode *selectImm(SelectionDAG *CurDAG, const SDLoc &DL, int64_t Imm,
   return Result;
 }
 
-static SDNode *SelectVPSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
-                                     MVT XLenVT) {
+static SDNode *SelectSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
+                                   SDValue EVL1, SDValue EVL2, SDValue Offset,
+                                   MVT XLenVT) {
   EVT VT = Node->getValueType(0);
   EVT VTMask = VT.changeVectorElementType(MVT::i1);
   SDLoc DL(Node);
   SDValue V1 = Node->getOperand(1);
   SDValue V2 = Node->getOperand(2);
-  SDValue EVL1 = Node->getOperand(3);
-  SDValue EVL2 = Node->getOperand(4);
-  SDValue Offset = Node->getOperand(5);
 
   uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
 
@@ -436,7 +434,69 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       return;
     }
     case Intrinsic::experimental_vector_vp_slideleftfill: {
-      auto *Result = SelectVPSlideLeftFill(Node, CurDAG, XLenVT);
+      SDValue EVL1 = Node->getOperand(3);
+      SDValue EVL2 = Node->getOperand(4);
+      SDValue Offset = Node->getOperand(5);
+      auto *Result =
+          SelectSlideLeftFill(Node, CurDAG, EVL1, EVL2, Offset, XLenVT);
+      ReplaceNode(Node, Result);
+      return;
+    }
+    case Intrinsic::experimental_vector_slideleftfill: {
+      SDValue Offset = Node->getOperand(3);
+
+      // FIXME: Make all this easier.
+      uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+      RISCVVSEW SEWBits;
+      switch (SEW) {
+      default:
+        llvm_unreachable("Unexpected SEW");
+      case 8:
+        SEWBits = RISCVVSEW::SEW_8;
+        break;
+      case 16:
+        SEWBits = RISCVVSEW::SEW_16;
+        break;
+      case 32:
+        SEWBits = RISCVVSEW::SEW_32;
+        break;
+      case 64:
+        SEWBits = RISCVVSEW::SEW_64;
+        break;
+      }
+      ElementCount EC = VT.getVectorElementCount();
+      assert(EC.isScalable() && "Unexpected VT");
+      uint64_t LMul =
+          EC.getKnownMinValue() * SEW / 64; // FIXME: ELEN=64 hardcoded.
+      RISCVVLMUL LMulBits;
+      switch (LMul) {
+      default:
+        llvm_unreachable("Unexpected LMUL");
+      case 1:
+        LMulBits = RISCVVLMUL::LMUL_1;
+        break;
+      case 2:
+        LMulBits = RISCVVLMUL::LMUL_2;
+        break;
+      case 4:
+        LMulBits = RISCVVLMUL::LMUL_4;
+        break;
+      case 8:
+        LMulBits = RISCVVLMUL::LMUL_8;
+        break;
+      }
+      SDValue VTypeIOp = CurDAG->getTargetConstant(
+          RISCVVType::encodeVTYPE(LMulBits, SEWBits, /*TailAgnostic*/ true,
+                                  /*MaskAgnostic*/ false,
+                                  /* Nontemporal */ false),
+          DL, XLenVT);
+      SDValue VLMax =
+          SDValue(CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
+                                         CurDAG->getRegister(RISCV::X0, XLenVT),
+                                         VTypeIOp),
+                  0);
+      auto *Result =
+          SelectSlideLeftFill(Node, CurDAG, VLMax, VLMax, Offset, XLenVT);
       ReplaceNode(Node, Result);
       return;
     }

@@ -2924,10 +2924,19 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
     assert(Op.getValueType() == Subtarget.getXLenVT() && "Unexpected VT!");
     return DAG.getNode(RISCVISD::VMV_X_S, DL, Op.getValueType(),
                        Op.getOperand(1));
-  case Intrinsic::experimental_vector_vp_slideleftfill: {
+  case Intrinsic::experimental_vector_vp_slideleftfill:
+  case Intrinsic::experimental_vector_slideleftfill: {
     SmallVector<SDValue, 8> Operands(Op->op_begin(), Op->op_end());
+    SmallVector<unsigned, 8> OpIdxs;
+    if (IntNo == Intrinsic::experimental_vector_vp_slideleftfill) {
+      OpIdxs = {3, 4, 5};
+    } else if (IntNo == Intrinsic::experimental_vector_slideleftfill) {
+      OpIdxs = {3};
+    } else {
+      llvm_unreachable("Unexpected intrinsic");
+    }
     // evl1, evl2, offset
-    for (auto OpIdx : {3, 4, 5}) {
+    for (auto OpIdx : OpIdxs) {
       SDValue &ScalarOp = Operands[OpIdx];
       EVT OpVT = ScalarOp.getValueType();
       if (OpVT == MVT::i8 || OpVT == MVT::i16 ||
