@@ -2924,6 +2924,22 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
     assert(Op.getValueType() == Subtarget.getXLenVT() && "Unexpected VT!");
     return DAG.getNode(RISCVISD::VMV_X_S, DL, Op.getValueType(),
                        Op.getOperand(1));
+  case Intrinsic::experimental_vector_vp_slideleftfill: {
+    SmallVector<SDValue, 8> Operands(Op->op_begin(), Op->op_end());
+    // evl1, evl2, offset
+    for (auto OpIdx : {3, 4, 5}) {
+      SDValue &ScalarOp = Operands[OpIdx];
+      EVT OpVT = ScalarOp.getValueType();
+      if (OpVT == MVT::i8 || OpVT == MVT::i16 ||
+          (OpVT == MVT::i32 && Subtarget.is64Bit())) {
+        ScalarOp =
+            DAG.getNode(ISD::ANY_EXTEND, DL, Subtarget.getXLenVT(), ScalarOp);
+      }
+    }
+    return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                       Operands);
+    break;
+  }
   }
 }
 

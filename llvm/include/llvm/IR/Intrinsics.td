@@ -1881,9 +1881,9 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // these constraints, the intrinsic has undefined behaviour.
 //
 // Semantics:
-// Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1]
-// and selects the elements in a window of size %evl, starting at index %num of
-// the concatenated vector. Elements in the result vector beyond %evl are undef.
+// Effectively, this intrinsic concatenates %v1[0..%evl1-1] and %v2[0..%evl2-1]
+// and selects the elements in a window of size %evl2, starting at index %num of
+// the concatenated vector. Elements in the result vector beyond %evl2 are undef.
 // The result vector of length %evl2 contains %evl1 - %num elements from indices
 // [%num..%evl1 - 1] of %v1 followed by the first %evl2 - (%evl1 - %num)
 // elements of %v2. If %evl1 - %num >= %evl2, only the first %evl2 elements are

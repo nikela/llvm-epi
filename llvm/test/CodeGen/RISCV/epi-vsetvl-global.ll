@@ -397,13 +397,11 @@ define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double>
 ; CHECK-NEXT:  .LBB7_1: # %do.cond
 ; CHECK-NEXT:    # in Loop: Header=BB7_2 Depth=1
 ; CHECK-NEXT:    feq.s a2, ft1, ft2
-; CHECK-NEXT:    xori a2, a2, 1
-; CHECK-NEXT:    beqz a2, .LBB7_4
+; CHECK-NEXT:    bnez a2, .LBB7_4
 ; CHECK-NEXT:  .LBB7_2: # %do.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    flt.s a2, ft0, ft1
-; CHECK-NEXT:    xori a2, a2, 1
-; CHECK-NEXT:    bnez a2, .LBB7_1
+; CHECK-NEXT:    beqz a2, .LBB7_1
 ; CHECK-NEXT:  # %bb.3: # %if.then
 ; CHECK-NEXT:    # in Loop: Header=BB7_2 Depth=1
 ; CHECK-NEXT:    vsetvli a2, a0, e64,m1,ta,mu

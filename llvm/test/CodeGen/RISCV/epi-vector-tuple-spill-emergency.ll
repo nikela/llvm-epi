@@ -25,14 +25,14 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    addi s0, sp, 224
 ; CHECK-NEXT:    rdvlenb a1
 ; CHECK-NEXT:    sub sp, sp, a1
+; CHECK-NEXT:    sd sp, -192(s0)
+; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -200(s0)
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -208(s0)
-; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -216(s0)
 ; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -224(s0)
+; CHECK-NEXT:    sd sp, -216(s0)
 ; CHECK-NEXT:    bge a4, a5, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.lr.ph
 ; CHECK-NEXT:    slli a1, a4, 6
@@ -126,7 +126,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vmv1r.v v25, v31
 ; CHECK-NEXT:    vfnmsac.vv v25, v4, v12
 ; CHECK-NEXT:    vmv1r.v v14, v8
-; CHECK-NEXT:    ld a3, -224(s0)
+; CHECK-NEXT:    ld a3, -216(s0)
 ; CHECK-NEXT:    rdvlenb a2
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:    vs1r.v v1, (a3)
@@ -139,7 +139,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vmv1r.v v16, v18
 ; CHECK-NEXT:    vfnmsac.vv v16, v20, v12
 ; CHECK-NEXT:    vle64.v v28, (a0)
-; CHECK-NEXT:    ld a2, -200(s0)
+; CHECK-NEXT:    ld a2, -192(s0)
 ; CHECK-NEXT:    vs1r.v v28, (a2)
 ; CHECK-NEXT:    add t6, a0, s9
 ; CHECK-NEXT:    vle64.v v27, (t6)
@@ -238,10 +238,10 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    add a5, a0, a2
 ; CHECK-NEXT:    vle64.v v21, (a5)
 ; CHECK-NEXT:    vfadd.vv v11, v15, v19
-; CHECK-NEXT:    ld a2, -216(s0)
+; CHECK-NEXT:    ld a2, -208(s0)
 ; CHECK-NEXT:    vs1r.v v11, (a2)
 ; CHECK-NEXT:    vfadd.vv v31, v20, v17
-; CHECK-NEXT:    ld a2, -208(s0)
+; CHECK-NEXT:    ld a2, -200(s0)
 ; CHECK-NEXT:    vs1r.v v31, (a2)
 ; CHECK-NEXT:    vfsub.vv v22, v11, v31
 ; CHECK-NEXT:    vfmul.vv v23, v21, v5
@@ -271,7 +271,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v3, v4, v21
 ; CHECK-NEXT:    vfnmsac.vv v16, v2, v3
 ; CHECK-NEXT:    sd a1, -112(s0)
-; CHECK-NEXT:    ld a1, -224(s0)
+; CHECK-NEXT:    ld a1, -216(s0)
 ; CHECK-NEXT:    rdvlenb a2
 ; CHECK-NEXT:    add a2, a2, a1
 ; CHECK-NEXT:    vl1r.v v3, (a1)
@@ -312,7 +312,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vse64.v v27, (t1)
 ; CHECK-NEXT:    vfsub.vv v25, v3, v25
 ; CHECK-NEXT:    vse64.v v25, (t0)
-; CHECK-NEXT:    ld a2, -200(s0)
+; CHECK-NEXT:    ld a2, -192(s0)
 ; CHECK-NEXT:    vl1r.v v25, (a2)
 ; CHECK-NEXT:    vfsub.vv v28, v25, v29
 ; CHECK-NEXT:    vfsub.vv v25, v30, v8
@@ -359,9 +359,9 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfadd.vv v27, v12, v7
 ; CHECK-NEXT:    vfadd.vv v31, v31, v11
 ; CHECK-NEXT:    vfadd.vv v13, v27, v31
-; CHECK-NEXT:    ld a2, -208(s0)
+; CHECK-NEXT:    ld a2, -200(s0)
 ; CHECK-NEXT:    vl1r.v v11, (a2)
-; CHECK-NEXT:    ld a2, -216(s0)
+; CHECK-NEXT:    ld a2, -208(s0)
 ; CHECK-NEXT:    vl1r.v v12, (a2)
 ; CHECK-NEXT:    vfadd.vv v11, v12, v11
 ; CHECK-NEXT:    vfadd.vv v12, v24, v1
