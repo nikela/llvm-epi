@@ -3168,20 +3168,8 @@ PHINode *InnerLoopVectorizer::createInductionVariable(Loop *L, Value *Start,
   setDebugLocFromInst(Builder, OldInst);
 
   // Create i+1 and fill the PHINode.
-  // If using scalable vectors, multiply step size by vscale.
-  // If using predicated vector ops, index.next will be later fixed to
-  // index.next = index + EVL (EVL is the result from call to vsetvl)
-  // At that point index.vscale def will be dead.
-  Value *ScaleStep = Step;
-  if (TTI->useScalableVectorType() && !preferPredicatedVectorOps()) {
-    Function *VscaleFunc = Intrinsic::getDeclaration(
-        Header->getModule(), Intrinsic::vscale,
-        Step->getType());
-    CallInst *VscaleFuncCall = Builder.CreateCall(VscaleFunc, {});
-    ScaleStep = Builder.CreateMul(VscaleFuncCall, Step, "index.vscale");
-  }
   NextIndex =
-      cast<Instruction>(Builder.CreateAdd(Induction, ScaleStep, "index.next"));
+      cast<Instruction>(Builder.CreateAdd(Induction, Step, "index.next"));
   Induction->addIncoming(Start, L->getLoopPreheader());
   Induction->addIncoming(NextIndex, Latch);
   // Create the compare.
@@ -6411,7 +6399,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
       BackedgeTakenCount, SE->getOne(BackedgeTakenCount->getType()));
   const SCEV *Rem = SE->getURemExpr(
       ExitCount, SE->getConstant(BackedgeTakenCount->getType(), MaxVFtimesIC));
-  if (Rem->isZero()) {
+  if (Rem->isZero() && MaxVF.getKnownMinValue() > 1) {
     // Accept MaxVF if we do not have a tail.
     LLVM_DEBUG(dbgs() << "LV: No tail will remain for any chosen VF.\n");
     return MaxVF;

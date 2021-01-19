@@ -68,11 +68,9 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK-NEXT:    store <vscale x 8 x double> [[TMP20]], <vscale x 8 x double>* [[TMP24]], align 8, [[TBAA2]], !alias.scope !9, !noalias !6
 ; CHECK-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 8
-; CHECK-NEXT:    [[TMP27:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP27]], [[TMP26]]
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP28]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP11:!llvm.loop !.*]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP26]]
+; CHECK-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP11:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -82,11 +80,11 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP29:%.*]] = load double, double* [[ARRAYIDX]], align 8, [[TBAA2]]
-; CHECK-NEXT:    [[MUL:%.*]] = fmul double [[TMP29]], [[A]]
+; CHECK-NEXT:    [[TMP28:%.*]] = load double, double* [[ARRAYIDX]], align 8, [[TBAA2]]
+; CHECK-NEXT:    [[MUL:%.*]] = fmul double [[TMP28]], [[A]]
 ; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP30:%.*]] = load double, double* [[ARRAYIDX2]], align 8, [[TBAA2]]
-; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP30]], [[MUL]]
+; CHECK-NEXT:    [[TMP29:%.*]] = load double, double* [[ARRAYIDX2]], align 8, [[TBAA2]]
+; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP29]], [[MUL]]
 ; CHECK-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8, [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
@@ -151,11 +149,9 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK1-NEXT:    [[TMP22:%.*]] = bitcast double* [[TMP21]] to <vscale x 1 x double>*
 ; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP18]], <vscale x 1 x double>* [[TMP22]], align 8, [[TBAA2]], !alias.scope !9, !noalias !6
 ; CHECK1-NEXT:    [[TMP23:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP24:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP24]], [[TMP23]]
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK1-NEXT:    [[TMP25:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK1-NEXT:    br i1 [[TMP25]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP11:!llvm.loop !.*]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP23]]
+; CHECK1-NEXT:    [[TMP24:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK1-NEXT:    br i1 [[TMP24]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP11:!llvm.loop !.*]]
 ; CHECK1:       middle.block:
 ; CHECK1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -165,11 +161,11 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK1:       for.body:
 ; CHECK1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP26:%.*]] = load double, double* [[ARRAYIDX]], align 8, [[TBAA2]]
-; CHECK1-NEXT:    [[MUL:%.*]] = fmul double [[TMP26]], [[A]]
+; CHECK1-NEXT:    [[TMP25:%.*]] = load double, double* [[ARRAYIDX]], align 8, [[TBAA2]]
+; CHECK1-NEXT:    [[MUL:%.*]] = fmul double [[TMP25]], [[A]]
 ; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP27:%.*]] = load double, double* [[ARRAYIDX2]], align 8, [[TBAA2]]
-; CHECK1-NEXT:    [[ADD:%.*]] = fadd double [[TMP27]], [[MUL]]
+; CHECK1-NEXT:    [[TMP26:%.*]] = load double, double* [[ARRAYIDX2]], align 8, [[TBAA2]]
+; CHECK1-NEXT:    [[ADD:%.*]] = fadd double [[TMP26]], [[MUL]]
 ; CHECK1-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8, [[TBAA2]]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK1-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]

@@ -54,11 +54,9 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    store <vscale x 16 x float> [[TMP19]], <vscale x 16 x float>* [[TMP24]], align 4, [[TBAA2]]
 ; CHECK-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 16
-; CHECK-NEXT:    [[TMP27:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP27]], [[TMP26]]
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP28]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP26]]
+; CHECK-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -68,10 +66,10 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, float* [[DX]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP29:%.*]] = load float, float* [[ARRAYIDX]], align 4, [[TBAA2]]
+; CHECK-NEXT:    [[TMP28:%.*]] = load float, float* [[ARRAYIDX]], align 4, [[TBAA2]]
 ; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, float* [[DY]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP30:%.*]] = load float, float* [[ARRAYIDX2]], align 4, [[TBAA2]]
-; CHECK-NEXT:    [[ADD:%.*]] = fadd float [[TMP29]], [[TMP30]]
+; CHECK-NEXT:    [[TMP29:%.*]] = load float, float* [[ARRAYIDX2]], align 4, [[TBAA2]]
+; CHECK-NEXT:    [[ADD:%.*]] = fadd float [[TMP28]], [[TMP29]]
 ; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, float* [[DZ]], i64 [[INDVARS_IV]]
 ; CHECK-NEXT:    store float [[ADD]], float* [[ARRAYIDX4]], align 4, [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
@@ -126,11 +124,9 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK1-NEXT:    store <vscale x 2 x float> [[TMP19]], <vscale x 2 x float>* [[TMP24]], align 4, [[TBAA2]]
 ; CHECK1-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 2
-; CHECK1-NEXT:    [[TMP27:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP27]], [[TMP26]]
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK1-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK1-NEXT:    br i1 [[TMP28]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP26]]
+; CHECK1-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK1-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
 ; CHECK1:       middle.block:
 ; CHECK1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -140,10 +136,10 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK1:       for.body:
 ; CHECK1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, float* [[DX]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP29:%.*]] = load float, float* [[ARRAYIDX]], align 4, [[TBAA2]]
+; CHECK1-NEXT:    [[TMP28:%.*]] = load float, float* [[ARRAYIDX]], align 4, [[TBAA2]]
 ; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, float* [[DY]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP30:%.*]] = load float, float* [[ARRAYIDX2]], align 4, [[TBAA2]]
-; CHECK1-NEXT:    [[ADD:%.*]] = fadd float [[TMP29]], [[TMP30]]
+; CHECK1-NEXT:    [[TMP29:%.*]] = load float, float* [[ARRAYIDX2]], align 4, [[TBAA2]]
+; CHECK1-NEXT:    [[ADD:%.*]] = fadd float [[TMP28]], [[TMP29]]
 ; CHECK1-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, float* [[DZ]], i64 [[INDVARS_IV]]
 ; CHECK1-NEXT:    store float [[ADD]], float* [[ARRAYIDX4]], align 4, [[TBAA2]]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
