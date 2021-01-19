@@ -1,3 +1,4 @@
+; XFAIL: *
 ; RUN: not opt -S -verify < %s 2>&1 | FileCheck %s
 
 define void @alloca() {

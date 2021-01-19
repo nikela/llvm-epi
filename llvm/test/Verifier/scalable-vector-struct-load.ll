@@ -1,3 +1,4 @@
+; XFAIL: *
 ; RUN: not opt -S -verify < %s 2>&1 | FileCheck %s
 
 define <vscale x 1 x i32> @load({ i32, <vscale x 1 x i32> }* %x) {
