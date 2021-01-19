@@ -354,6 +354,9 @@ cl::opt<bool> EnableVPlanPredication(
     cl::desc("Enable VPlan-native vectorization path predicator with "
              "support for outer loop vectorization."));
 
+// FIXME: Remove this once InstructionCost has been properly updated.
+constexpr long HighCost = 1048576;
+
 // This flag enables the stress testing of the VPlan H-CFG construction in the
 // VPlan-native vectorization path. It must be used in conjuction with
 // -enable-vplan-native-path. -vplan-verify-hcfg can also be used to enable the
@@ -6700,11 +6703,23 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     Cost = ScalarCost;
   }
 
-  if (!Width.isScalable())
-    LLVM_DEBUG(if (ForceVectorization && Width.getFixedValue() > 1 &&
-                   Cost >= ScalarCost) dbgs()
-               << "LV: Vectorization seems to be not beneficial, "
-               << "but was forced by a user.\n");
+
+  if (Width.isScalable() && ScalarCost < Cost) {
+    if (!ForceVectorization) {
+      LLVM_DEBUG(dbgs() << "LV: Scalable vectorization is not profitable\n");
+      return VectorizationFactor::Disabled();
+    } else {
+      LLVM_DEBUG(
+          dbgs() << "LV: Scalable vectorization seems to be not beneficial, "
+                 << "but was forced by a user.\n");
+    }
+  }
+
+  LLVM_DEBUG(if (!Width.isScalable() && ForceVectorization &&
+                 Width.getFixedValue() > 1 && Cost >= ScalarCost) dbgs()
+             << "LV: Vectorization seems to be not beneficial, "
+             << "but was forced by a user.\n");
+
   LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << Width << ".\n");
   VectorizationFactor Factor = {Width,
                                 Width.getKnownMinValue() * Cost};
@@ -7413,6 +7428,14 @@ int LoopVectorizationCostModel::computePredInstDiscount(
     // includes the scalarization overhead of the predicated instruction.
     InstructionCost VectorCost = getInstructionCost(I, VF).first;
 
+    if (VF.isScalable()) {
+      // No discount for scalables yet.
+      // FIXME: Use InstructionCost.
+      Discount += -HighCost;
+      ScalarCosts[I] = HighCost;
+      continue;
+    }
+
     // Compute the cost of the scalarized instruction. This cost is the cost of
     // the instruction as if it wasn't if-converted and instead remained in the
     // predicated block. We will scale this cost by block probability after
@@ -7815,7 +7838,7 @@ unsigned LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
   // in place is to artificially inflate the scalarization overhead to force the
   // Cost Model to decide against scalarization.
   if (VF.isScalable())
-    return 1048576;
+    return HighCost;
 
   unsigned Cost = 0;
   Type *RetTy = ToVectorTy(I->getType(), VF);
@@ -8036,14 +8059,18 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
 
     if (ScalarPredicatedBB) {
       // Return cost for branches around scalarized and predicated blocks.
-      assert(!VF.isScalable() && "scalable vectors not yet supported.");
-      auto *Vec_i1Ty =
-          VectorType::get(IntegerType::getInt1Ty(RetTy->getContext()), VF);
-      return (TTI.getScalarizationOverhead(
-                  Vec_i1Ty, APInt::getAllOnesValue(VF.getKnownMinValue()),
-                  false, true) +
-              (TTI.getCFInstrCost(Instruction::Br, CostKind) *
-               VF.getKnownMinValue()));
+      if (!VF.isScalable()) {
+        auto *Vec_i1Ty =
+            VectorType::get(IntegerType::getInt1Ty(RetTy->getContext()), VF);
+        return (TTI.getScalarizationOverhead(
+                    Vec_i1Ty, APInt::getAllOnesValue(VF.getKnownMinValue()),
+                    false, true) +
+                (TTI.getCFInstrCost(Instruction::Br, CostKind) *
+                 VF.getKnownMinValue()));
+      } else {
+        // FIXME: Use InstructionCost.
+        return HighCost;
+      }
     } else if (I->getParent() == TheLoop->getLoopLatch() || VF.isScalar())
       // The back-edge branch will remain, as will all scalar branches.
       return TTI.getCFInstrCost(Instruction::Br, CostKind);
