@@ -16,14 +16,6 @@ def riscv_extract_vector_elt : SDNode<"RISCVISD::EXTRACT_VECTOR_ELT",
                                        [SDTCisInt<0>, SDTCisVec<1>,
                                        SDTCisInt<1>, SDTCisPtrTy<2>]>>;
 
-def riscv_sign_extend_vector : SDNode<"RISCVISD::SIGN_EXTEND_VECTOR",
-                                      SDTypeProfile<1, 1,
-                                       [SDTCisVec<0>, SDTCisVec<1>]>>;
-
-def riscv_zero_extend_vector : SDNode<"RISCVISD::ZERO_EXTEND_VECTOR",
-                                      SDTypeProfile<1, 1,
-                                       [SDTCisVec<0>, SDTCisVec<1>]>>;
-
 def riscv_shuffle_extend : SDNode<"RISCVISD::SHUFFLE_EXTEND",
                                      SDTypeProfile<1, 2,
                                       [SDTCisSameAs<0, 1>,
@@ -3867,48 +3859,6 @@ defm "" : pat_vop_binary_int_m_vv<setgt, "PseudoEPIVMSLT", /* swap */ 1>;
 defm "" : pat_vop_binary_int_m_vv<setuge, "PseudoEPIVMSLEU", /* swap */ 1>;
 defm "" : pat_vop_binary_int_m_vv<setge, "PseudoEPIVMSLE", /* swap */ 1>;
 
-}
-
-//===----------------------------------------------------------------------===//
-// Patterns. Full vector conversions
-//===----------------------------------------------------------------------===//
-
-foreach vtiToWti = AllWideableIntVectors in
-{
-  defvar vti = vtiToWti.Vti;
-  defvar wti = vtiToWti.Wti;
-
-  // sext (SEW->2*SEW)
-  def : Pat<(wti.Vector (riscv_sign_extend_vector (vti.Vector vti.MInfo.vrclass:$rs1))),
-             (!cast<Instruction>("PseudoEPIVWADD_VX_" # vti.MInfo.MX)
-               (wti.Vector (IMPLICIT_DEF)),
-               (vti.Vector $rs1),
-               X0,
-               (vti.Mask zero_reg),
-               X0,
-               vti.SEW)>;
-
-  // zext (SEW->2*SEW)
-  def : Pat<(wti.Vector (riscv_zero_extend_vector (vti.Vector vti.MInfo.vrclass:$rs1))),
-             (!cast<Instruction>("PseudoEPIVWADDU_VX_" # vti.MInfo.MX)
-               (wti.Vector (IMPLICIT_DEF)),
-               (vti.Vector $rs1),
-               X0,
-               (vti.Mask zero_reg),
-               X0,
-               vti.SEW)>;
-
-  // trunc (2*SEW->SEW)
-  def : Pat<(vti.Vector (riscv_trunc_vector (wti.Vector wti.MInfo.vrclass:$rs1))),
-             (!cast<Instruction>("PseudoEPIVNSRL_WI_" # vti.MInfo.MX)
-               (vti.Vector (IMPLICIT_DEF)),
-               (wti.Vector $rs1),
-               0,
-               (vti.Mask zero_reg),
-               X0,
-               vti.SEW)>;
-
-  // FIXME: Missing remaining conversions.
 }
 
 //===----------------------------------------------------------------------===//

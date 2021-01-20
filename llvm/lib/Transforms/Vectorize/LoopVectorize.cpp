@@ -3111,6 +3111,13 @@ void InnerLoopVectorizer::scalarizeInstruction(Instruction *Instr, VPUser &User,
                                                VPTransformState &State) {
   assert(!Instr->getType()->isAggregateType() && "Can't handle vectors");
 
+  // llvm.experimental.noalias.scope.decl intrinsics must only be duplicated for
+  // the first lane and part.
+  if (auto *II = dyn_cast<IntrinsicInst>(Instr))
+    if (Instance.Lane != 0 || Instance.Part != 0)
+      if (II->getIntrinsicID() == Intrinsic::experimental_noalias_scope_decl)
+        return;
+
   setDebugLocFromInst(Builder, Instr);
 
   // Does this instruction return a value ?
@@ -7538,9 +7545,16 @@ LoopVectorizationCostModel::expectedCost(ElementCount VF) {
     // the predicated block, if it is an if-else block. Thus, scale the block's
     // cost by the probability of executing it. blockNeedsPredication from
     // Legal is used so as to not include all blocks in tail folded loops.
-    if (VF.isScalar() && Legal->blockNeedsPredication(BB))
-      BlockCost.first /= getReciprocalPredBlockProb();
+    if (VF.isScalar() && Legal->blockNeedsPredication(BB) &&
+        !Legal->preferPredicatedVectorOps()) {
+      auto Scale = getReciprocalPredBlockProb();
+      // LLVM_DEBUG(dbgs() << "LV: Dividing cost of " << BlockCost.first << " by "
+      //                   << Scale << " due to branch probability\n");
+      BlockCost.first /= Scale;
+    }
 
+    // LLVM_DEBUG(dbgs() << "LV: Adding cost of " << BlockCost.first << " for VF "
+    //                   << VF << " in block " << BB->getName() << "\n");
     Cost.first += BlockCost.first;
     Cost.second |= BlockCost.second;
   }
@@ -7574,6 +7588,9 @@ LoopVectorizationCostModel::expectedCost(ElementCount VF) {
          TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
     Cost.first += MaskCost;
     Cost.second |= TypeNotScalarized;
+
+    LLVM_DEBUG(dbgs() << "LV: Adding cost of predication by tail folding "
+                      << MaskCost << " for VF " << VF << "\n");
   }
 
   return Cost;
@@ -9278,7 +9295,8 @@ VPWidenCallRecipe *VPRecipeBuilder::tryToWidenCall(CallInst *CI, VFRange &Range,
   Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
   if (ID && (ID == Intrinsic::assume || ID == Intrinsic::lifetime_end ||
              ID == Intrinsic::lifetime_start || ID == Intrinsic::sideeffect ||
-             ID == Intrinsic::pseudoprobe))
+             ID == Intrinsic::pseudoprobe ||
+             ID == Intrinsic::experimental_noalias_scope_decl))
     return nullptr;
 
   auto willWiden = [&](ElementCount VF) -> bool {

@@ -85,8 +85,6 @@ enum NodeType : unsigned {
   GORCIW,
   // EPI nodes
   EXTRACT_VECTOR_ELT,
-  SIGN_EXTEND_VECTOR,
-  ZERO_EXTEND_VECTOR,
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
   ZERO_EXTEND_BITS_INREG,
@@ -353,14 +351,14 @@ private:
   SDValue lowerShiftLeftParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftRightParts(SDValue Op, SelectionDAG &DAG, bool IsSRA) const;
   SDValue lowerSPLATVECTOR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVectorMaskExt(SDValue Op, SelectionDAG &DAG,
+                             int64_t ExtTrueVal) const;
+  SDValue lowerVectorMaskTrunc(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerExtend(SDValue Op, SelectionDAG &DAG, int Opcode) const;
-  SDValue lowerSIGN_EXTEND(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerZERO_EXTEND(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
                                  int Opcode) const;

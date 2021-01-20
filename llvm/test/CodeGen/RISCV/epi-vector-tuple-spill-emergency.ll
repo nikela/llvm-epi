@@ -43,8 +43,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vand.vi v25, v25, 1
 ; CHECK-NEXT:    vsetvli a2, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vand.vi v25, v25, 1
-; CHECK-NEXT:    vmv.v.i v26, 0
-; CHECK-NEXT:    vmsne.vv v0, v25, v26
+; CHECK-NEXT:    vmsne.vi v0, v25, 0
 ; CHECK-NEXT:    slli a2, a3, 3
 ; CHECK-NEXT:    sd a2, -128(s0) # 8-byte Folded Spill
 ; CHECK-NEXT:    sub s10, a5, a4
