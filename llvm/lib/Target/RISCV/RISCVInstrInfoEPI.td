@@ -192,11 +192,11 @@ multiclass pseudo_spill_reload<LMULInfo MInfo> {
 
   let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
       Uses = [VL, VTYPE] in
-  def "PseudoEPIVSPILL_" # MInfo.MX : Pseudo<(outs), (ins reg_class:$rs1, GPR:$rs2), []>;
+  def "PseudoEPIVSPILL_VR" # MInfo.MX : Pseudo<(outs), (ins reg_class:$rs1, GPR:$rs2), []>;
 
   let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
       Uses = [VL, VTYPE] in
-  def "PseudoEPIVRELOAD_" # MInfo.MX : Pseudo<(outs reg_class:$rs1), (ins GPR:$rs2), []>;
+  def "PseudoEPIVRELOAD_VR" # MInfo.MX : Pseudo<(outs reg_class:$rs1), (ins GPR:$rs2), []>;
 
 }
 

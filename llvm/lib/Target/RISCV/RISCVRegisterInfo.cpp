@@ -305,14 +305,14 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
           .addImm(0);
 
   // Handle vector spills here.
-  if (MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M8 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M8 ||
+  if (MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM2 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM4 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM8 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM8 ||
       // Vector tuples.
       MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN2M1 ||
       MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN2M1 ||
@@ -338,35 +338,35 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
     switch (MI.getOpcode()) {
     default:
       llvm_unreachable("Unexpected instruction");
-    case RISCV::PseudoEPIVSPILL_M1:
+    case RISCV::PseudoEPIVSPILL_VRM1:
       IsReload = false;
       LMUL = 1;
       break;
-    case RISCV::PseudoEPIVRELOAD_M1:
+    case RISCV::PseudoEPIVRELOAD_VRM1:
       IsReload = true;
       LMUL = 1;
       break;
-    case RISCV::PseudoEPIVSPILL_M2:
+    case RISCV::PseudoEPIVSPILL_VRM2:
       IsReload = false;
       LMUL = 2;
       break;
-    case RISCV::PseudoEPIVRELOAD_M2:
+    case RISCV::PseudoEPIVRELOAD_VRM2:
       IsReload = true;
       LMUL = 2;
       break;
-    case RISCV::PseudoEPIVSPILL_M4:
+    case RISCV::PseudoEPIVSPILL_VRM4:
       IsReload = false;
       LMUL = 4;
       break;
-    case RISCV::PseudoEPIVRELOAD_M4:
+    case RISCV::PseudoEPIVRELOAD_VRM4:
       IsReload = true;
       LMUL = 4;
       break;
-    case RISCV::PseudoEPIVSPILL_M8:
+    case RISCV::PseudoEPIVSPILL_VRM8:
       IsReload = false;
       LMUL = 8;
       break;
-    case RISCV::PseudoEPIVRELOAD_M8:
+    case RISCV::PseudoEPIVRELOAD_VRM8:
       IsReload = true;
       LMUL = 8;
       break;
