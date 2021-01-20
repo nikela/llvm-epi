@@ -183,8 +183,8 @@ static Register computeVRSpillReloadInstructions(
       return HandleReg;
     } else {
       assert(TupleSize == 2 && "Unexpected tuple size");
-      Register VRegFirst = RI.getSubReg(VReg, RISCV::vtuple2_0);
-      Register VRegSecond = RI.getSubReg(VReg, RISCV::vtuple2_1);
+      Register VRegFirst = RI.getSubReg(VReg, RISCV::sub_vrm1_0);
+      Register VRegSecond = RI.getSubReg(VReg, RISCV::sub_vrm1_1);
 
       // Compute the second handle already so we can kill the first handle
       // when spilling the first register.
@@ -216,16 +216,16 @@ static Register computeVRSpillReloadInstructions(
   default:
     llvm_unreachable("Unexpected LMUL value");
   case 2:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm2);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm2_hi);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm1_0);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm1_1);
     break;
   case 4:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm4);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm4_hi);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm2_0);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm2_1);
     break;
   case 8:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm8);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm8_hi);
+    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm4_0);
+    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm4_1);
     break;
   }
 
@@ -314,20 +314,20 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
       MI.getOpcode() == RISCV::PseudoEPIVSPILL_M8 ||
       MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M8 ||
       // Vector tuples.
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T3 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T3 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T5 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T5 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T6 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T6 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T7 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T7 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_M1T8 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_M1T8) {
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN2M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN2M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN3M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN3M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN4M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN4M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN5M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN5M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN6M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN6M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN7M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN7M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN8M1 ||
+      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN8M1) {
 
     // Make sure we spill/reload all the bits using whole register
     // instructions.
@@ -371,12 +371,12 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
       LMUL = 8;
       break;
 #define TUPLE_SPILL_RELOAD(N)                                                  \
-  case RISCV::PseudoEPIVSPILL_M1T##N:                                             \
+  case RISCV::PseudoEPIVSPILL_VRN##N##M1:                                      \
     IsReload = false;                                                          \
     LMUL = 1;                                                                  \
     TupleSize = N;                                                             \
     break;                                                                     \
-  case RISCV::PseudoEPIVRELOAD_M1T##N:                                            \
+  case RISCV::PseudoEPIVRELOAD_VRN##N##M1:                                     \
     IsReload = true;                                                           \
     LMUL = 1;                                                                  \
     TupleSize = N;                                                             \

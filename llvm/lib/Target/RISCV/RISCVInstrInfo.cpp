@@ -47,13 +47,13 @@ unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
   case RISCV::PseudoEPIVRELOAD_M4:
   case RISCV::PseudoEPIVRELOAD_M8:
 
-  case RISCV::PseudoEPIVRELOAD_M1T2:
-  case RISCV::PseudoEPIVRELOAD_M1T3:
-  case RISCV::PseudoEPIVRELOAD_M1T4:
-  case RISCV::PseudoEPIVRELOAD_M1T5:
-  case RISCV::PseudoEPIVRELOAD_M1T6:
-  case RISCV::PseudoEPIVRELOAD_M1T7:
-  case RISCV::PseudoEPIVRELOAD_M1T8:
+  case RISCV::PseudoEPIVRELOAD_VRN2M1:
+  case RISCV::PseudoEPIVRELOAD_VRN3M1:
+  case RISCV::PseudoEPIVRELOAD_VRN4M1:
+  case RISCV::PseudoEPIVRELOAD_VRN5M1:
+  case RISCV::PseudoEPIVRELOAD_VRN6M1:
+  case RISCV::PseudoEPIVRELOAD_VRN7M1:
+  case RISCV::PseudoEPIVRELOAD_VRN8M1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -90,13 +90,13 @@ unsigned RISCVInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
   case RISCV::PseudoEPIVSPILL_M4:
   case RISCV::PseudoEPIVSPILL_M8:
 
-  case RISCV::PseudoEPIVSPILL_M1T2:
-  case RISCV::PseudoEPIVSPILL_M1T3:
-  case RISCV::PseudoEPIVSPILL_M1T4:
-  case RISCV::PseudoEPIVSPILL_M1T5:
-  case RISCV::PseudoEPIVSPILL_M1T6:
-  case RISCV::PseudoEPIVSPILL_M1T7:
-  case RISCV::PseudoEPIVSPILL_M1T8:
+  case RISCV::PseudoEPIVSPILL_VRN2M1:
+  case RISCV::PseudoEPIVSPILL_VRN3M1:
+  case RISCV::PseudoEPIVSPILL_VRN4M1:
+  case RISCV::PseudoEPIVSPILL_VRN5M1:
+  case RISCV::PseudoEPIVSPILL_VRN6M1:
+  case RISCV::PseudoEPIVSPILL_VRN7M1:
+  case RISCV::PseudoEPIVSPILL_VRN8M1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -150,53 +150,53 @@ void RISCVInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   }
 
   // FIXME: Layout this a bit better.
-  // VRM1T2->VRM1T2
-  if (RISCV::VRM1T2RegClass.contains(DstReg, SrcReg)) {
+  // VRN2M1->VRN2M1
+  if (RISCV::VRN2M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple2_0, RISCV::vtuple2_1});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1});
     return;
   }
-  // VRM1T3->VRM1T3
-  if (RISCV::VRM1T3RegClass.contains(DstReg, SrcReg)) {
+  // VRN3M1->VRN3M1
+  if (RISCV::VRN3M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple3_0, RISCV::vtuple3_1, RISCV::vtuple3_2});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2});
     return;
   }
-  // VRM1T4->VRM1T4
-  if (RISCV::VRM1T4RegClass.contains(DstReg, SrcReg)) {
+  // VRN4M1->VRN4M1
+  if (RISCV::VRN4M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple4_0, RISCV::vtuple4_1, RISCV::vtuple4_2,
-                       RISCV::vtuple4_3});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2,
+                       RISCV::sub_vrm1_3});
     return;
   }
-  // VRM1T5->VRM1T5
-  if (RISCV::VRM1T5RegClass.contains(DstReg, SrcReg)) {
+  // VRN5M1->VRN5M1
+  if (RISCV::VRN5M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple5_0, RISCV::vtuple5_1, RISCV::vtuple5_2,
-                       RISCV::vtuple5_3, RISCV::vtuple5_4});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2,
+                       RISCV::sub_vrm1_3, RISCV::sub_vrm1_4});
     return;
   }
-  // VRM1T6->VRM1T6
-  if (RISCV::VRM1T6RegClass.contains(DstReg, SrcReg)) {
+  // VRN6M1->VRN6M1
+  if (RISCV::VRN6M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple6_0, RISCV::vtuple6_1, RISCV::vtuple6_2,
-                       RISCV::vtuple6_3, RISCV::vtuple6_4, RISCV::vtuple6_5});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2,
+                       RISCV::sub_vrm1_3, RISCV::sub_vrm1_4, RISCV::sub_vrm1_5});
     return;
   }
-  // VRM1T7->VRM1T7
-  if (RISCV::VRM1T7RegClass.contains(DstReg, SrcReg)) {
+  // VRN7M1->VRN7M1
+  if (RISCV::VRN7M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple7_0, RISCV::vtuple7_1, RISCV::vtuple7_2,
-                       RISCV::vtuple7_3, RISCV::vtuple7_4, RISCV::vtuple7_5,
-                       RISCV::vtuple7_6});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2,
+                       RISCV::sub_vrm1_3, RISCV::sub_vrm1_4, RISCV::sub_vrm1_5,
+                       RISCV::sub_vrm1_6});
     return;
   }
-  // VRM1T8->VRM1T8
-  if (RISCV::VRM1T8RegClass.contains(DstReg, SrcReg)) {
+  // VRN8M1->VRN8M1
+  if (RISCV::VRN8M1RegClass.contains(DstReg, SrcReg)) {
     copyTupleRegister(*this, MBB, MBBI, DL, DstReg, SrcReg, KillSrc,
-                      {RISCV::vtuple8_0, RISCV::vtuple8_1, RISCV::vtuple8_2,
-                       RISCV::vtuple8_3, RISCV::vtuple8_4, RISCV::vtuple8_5,
-                       RISCV::vtuple8_6, RISCV::vtuple8_7});
+                      {RISCV::sub_vrm1_0, RISCV::sub_vrm1_1, RISCV::sub_vrm1_2,
+                       RISCV::sub_vrm1_3, RISCV::sub_vrm1_4, RISCV::sub_vrm1_5,
+                       RISCV::sub_vrm1_6, RISCV::sub_vrm1_7});
     return;
   }
 
@@ -288,52 +288,52 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T2))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN2M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T3))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN3M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T4))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN4M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T5))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN5M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T6))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN6M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T7))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN7M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_M1T8))
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN8M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
@@ -398,46 +398,46 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M8), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T2RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T2), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN2M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T3RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T3), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN3M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T4RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T4), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN4M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T5RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T5), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN5M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T6RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T6), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN6M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T7RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T7), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN7M1), DstReg)
         .addFrameIndex(FI);
     return;
-  } else if (RISCV::VRM1T8RegClass.hasSubClassEq(RC)) {
+  } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
     RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_M1T8), DstReg)
+    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN8M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else

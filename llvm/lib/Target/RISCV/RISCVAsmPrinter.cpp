@@ -146,7 +146,7 @@ bool RISCVAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
     if (RC->hasSuperClassEq(&RISCV::VRM2RegClass) ||
         RC->hasSuperClassEq(&RISCV::VRM4RegClass) ||
         RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
-      Reg = TRI->getSubReg(Reg, RISCV::sub_vrm2);
+      Reg = TRI->getSubReg(Reg, RISCV::sub_vrm1_0);
       assert(Reg && "Subregister does not exist");
     }
 

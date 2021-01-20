@@ -105,6 +105,13 @@ def MxListNonFractional {
   list<LMULInfo> m = [V_M1, V_M2, V_M4, V_M8];
 }
 
+class Iota<int N>
+{
+  list<int> Value = !if(!eq(N, 0),
+                        []<int>,
+                        !listconcat(Iota<!add(N, -1)>.Value, [!add(N, -1)]));
+}
+
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
 //===----------------------------------------------------------------------===//
@@ -200,15 +207,15 @@ foreach m = MxListNonFractional.m in {
 // Tuples.
 foreach tsize = 2 ... 8 in {
 
-defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+defvar TupleRegClass = !cast<RegisterClass>("VRN"#tsize#"M1");
 
 let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
     Uses = [VL, VTYPE] in
-def PseudoEPIVSPILL_M1T#tsize : Pseudo<(outs), (ins TupleRegClass:$rs1, GPR:$rs2), []>;
+def PseudoEPIVSPILL_VRN#tsize#M1 : Pseudo<(outs), (ins TupleRegClass:$rs1, GPR:$rs2), []>;
 
 let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
     Uses = [VL, VTYPE] in
-def PseudoEPIVRELOAD_M1T#tsize : Pseudo<(outs TupleRegClass:$rs1), (ins GPR:$rs2), []>;
+def PseudoEPIVRELOAD_VRN#tsize#M1 : Pseudo<(outs TupleRegClass:$rs1), (ins GPR:$rs2), []>;
 
 } // tsize
 
@@ -1397,7 +1404,7 @@ foreach tsize = 2 ... 8 in {
 foreach evr = [VR] in
 foreach eew = AllEEW in
 {
-  defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+  defvar TupleRegClass = !cast<RegisterClass>("VRN"#tsize#"M1");
 
   let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
       usesCustomInserter = 1, VLMul = 0 in
@@ -2000,7 +2007,7 @@ def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
               ToFPR64<VR, (op1_type VR:$rs2)>.ret,
               (mask_type zero_reg),
               (NoX0 GPR:$vl),
-              SourceSEW), sub_vrm2)>;
+              SourceSEW), sub_vrm1_0)>;
 
 def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
                         (op1_type VR:$rs1),
@@ -2013,7 +2020,7 @@ def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
               GPR:$rs2,
               (mask_type zero_reg),
               (NoX0 GPR:$vl),
-              SourceSEW), sub_vrm2)>;
+              SourceSEW), sub_vrm1_0)>;
 }
 
 multiclass pat_intrinsic_binary_int_v_wv_wx_wi_lmul1<string intrinsic_name,
@@ -2031,7 +2038,7 @@ def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
                         (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name # "_WV_M1")
               (result_type (IMPLICIT_DEF)),
-              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm1_0)),
               ToFPR64<VR, (op1_type VR:$rs2)>.ret,
               (mask_type zero_reg),
               (NoX0 GPR:$vl),
@@ -2043,7 +2050,7 @@ def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
                         (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name # "_WX_M1")
               (result_type (IMPLICIT_DEF)),
-              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm1_0)),
               GPR:$rs2,
               (mask_type zero_reg),
               (NoX0 GPR:$vl),
@@ -2055,7 +2062,7 @@ def : Pat<(result_type (!cast<Intrinsic>(intrinsic_name)
                         (i64 GPR:$vl))),
             (!cast<Instruction>(instruction_name # "_WI_M1")
               (result_type (IMPLICIT_DEF)),
-              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm2)),
+              (tmp_type (INSERT_SUBREG (IMPLICIT_DEF), VR:$rs1, sub_vrm1_0)),
               uimm5:$rs2,
               (mask_type zero_reg),
               (NoX0 GPR:$vl),
@@ -3302,10 +3309,10 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
                    (gvti.VectorM1 (IMPLICIT_DEF)),
                    X0,
                    VLMax, gvti.SEW),
-                  sub_vrm2),
+                  sub_vrm1_0),
                  (gvti.Mask zero_reg),
                  VLMax, gvti.SEW)),
-                sub_vrm2),
+                sub_vrm1_0),
                gvti.SEW)>;
   }
 }
@@ -3347,10 +3354,10 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
                     (gfvti.VectorM1 (IMPLICIT_DEF)),
                     ToFPR64<gfvti.ScalarRegClass, FPZero<gfvti.ScalarRegClass>.ret>.ret,
                     VLMax, gfvti.SEW),
-                   sub_vrm2),
+                   sub_vrm1_0),
                   (gfvti.Mask zero_reg),
                   VLMax, gfvti.SEW)),
-                 sub_vrm2),
+                 sub_vrm1_0),
                 gfvti.SEW)>.ret>;
   }
 }
@@ -3396,10 +3403,10 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                     ToFPR64<gfvti.ScalarRegClass,
                             (gfvti.Scalar gfvti.ScalarRegClass:$init)>.ret,
                     VLMax, gfvti.SEW),
-                   sub_vrm2),
+                   sub_vrm1_0),
                   (gfvti.Mask zero_reg),
                   VLMax, gfvti.SEW)),
-                 sub_vrm2),
+                 sub_vrm1_0),
                 gfvti.SEW)>.ret>;
   }
 }
@@ -3689,7 +3696,7 @@ foreach gvti = EPIGroupIntegerVectors in {
                (gvti.Mask zero_reg),
                VLMax,
                gvti.SEW),
-              sub_vrm2),
+              sub_vrm1_0),
              gvti.SEW)>;
 
   def : Pat<(i64 (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
@@ -3699,7 +3706,7 @@ foreach gvti = EPIGroupIntegerVectors in {
             (PseudoEPIVMV_X_S
              (EXTRACT_SUBREG
               (gvti.Vector gvti.MInfo.vrclass:$rs2),
-              sub_vrm2),
+              sub_vrm1_0),
              gvti.SEW)>;
 
   // Note: We use the (deprecated) node vector_insert when the input element
@@ -3713,11 +3720,11 @@ foreach gvti = EPIGroupIntegerVectors in {
              (PseudoEPIVMV_S_X
               (EXTRACT_SUBREG
                (gvti.Vector gvti.MInfo.vrclass:$merge),
-               sub_vrm2),
+               sub_vrm1_0),
               GPR:$rs1,
               VLMax,
               gvti.SEW),
-             sub_vrm2)>;
+             sub_vrm1_0)>;
 }
 
 foreach gfvti = EPIGroupFloatVectors in {
@@ -3733,7 +3740,7 @@ foreach gfvti = EPIGroupFloatVectors in {
                          (gfvti.Mask zero_reg),
                          VLMax,
                          gfvti.SEW),
-                        sub_vrm2),
+                        sub_vrm1_0),
                        gfvti.SEW)>.ret>;
 
   def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.MInfo.vrclass:$rs2), 0)),
@@ -3741,7 +3748,7 @@ foreach gfvti = EPIGroupFloatVectors in {
                       (PseudoEPIVFMV_F_S
                        (EXTRACT_SUBREG
                         (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                        sub_vrm2),
+                        sub_vrm1_0),
                        gfvti.SEW)>.ret>;
 
   def : Pat<(gfvti.Vector (insertelt (gfvti.Vector gfvti.MInfo.vrclass:$merge),
@@ -3750,12 +3757,12 @@ foreach gfvti = EPIGroupFloatVectors in {
              (PseudoEPIVFMV_S_F
               (EXTRACT_SUBREG
                (gfvti.Vector gfvti.MInfo.vrclass:$merge),
-               sub_vrm2),
+               sub_vrm1_0),
               ToFPR64<gfvti.ScalarRegClass,
                       (gfvti.Scalar gfvti.ScalarRegClass:$rs1)>.ret,
               VLMax,
               gfvti.SEW),
-             sub_vrm2)>;
+             sub_vrm1_0)>;
 }
 
 foreach vti = EPIAllIntegerVectors in {
@@ -4146,17 +4153,17 @@ let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
 
 foreach tsize = 2 ... 8 in {
 
-defvar TupleRegClass = !cast<RegisterClass>("VRM1T"#tsize);
+defvar TupleRegClass = !cast<RegisterClass>("VRN"#tsize#"M1");
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
-def PseudoEPIImplicitVRM1T#tsize : Pseudo<(outs TupleRegClass:$rd), (ins), []>;
+def PseudoEPIImplicitVRN#tsize#M1 : Pseudo<(outs TupleRegClass:$rd), (ins), []>;
 
 foreach vti = NoGroupVectors in {
   defvar ivti = GetIntVectorTypeInfo<vti>.Vti;
 
   def : Pat<(!cast<SDNode>("riscv_vlseg"#tsize) GPR:$rs1, GPR:$vl, (XLenVT vti.SEW)),
             (!cast<Instruction>("PseudoEPIVLSEG"#tsize#"E"#vti.SEW#"_V_M1")
-             (!cast<Instruction>("PseudoEPIImplicitVRM1T"#tsize)),
+             (!cast<Instruction>("PseudoEPIImplicitVRN"#tsize#"M1")),
              $rs1,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
@@ -4171,7 +4178,7 @@ foreach vti = NoGroupVectors in {
 
   def : Pat<(!cast<SDNode>("riscv_vlsseg"#tsize) GPR:$rs1, GPR:$rs2, GPR:$vl, (XLenVT vti.SEW)),
             (!cast<Instruction>("PseudoEPIVLSSEG"#tsize#"E"#vti.SEW#"_V_M1")
-             (!cast<Instruction>("PseudoEPIImplicitVRM1T"#tsize)),
+             (!cast<Instruction>("PseudoEPIImplicitVRN"#tsize#"M1")),
              $rs1, $rs2,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
@@ -4187,7 +4194,7 @@ foreach vti = NoGroupVectors in {
   def : Pat<(!cast<SDNode>("riscv_vlxseg"#tsize) GPR:$rs1,
                (ivti.Vector vti.MInfo.vrclass:$rs2), GPR:$vl, (XLenVT vti.SEW)),
             (!cast<Instruction>("PseudoEPIVLXSEG"#tsize#"EI"#vti.SEW#"_V_M1")
-             (!cast<Instruction>("PseudoEPIImplicitVRM1T"#tsize)),
+             (!cast<Instruction>("PseudoEPIImplicitVRN"#tsize#"M1")),
              $rs1, $rs2,
              (nxv1i1 zero_reg),
              (NoX0 GPR:$vl),
@@ -4204,7 +4211,7 @@ foreach vti = NoGroupVectors in {
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, usesCustomInserter = 1 in
 
-def PseudoEPIVBuildVRM1T#tsize :
+def PseudoEPIVBuildVRN#tsize#M1 :
      Pseudo<(outs TupleRegClass:$rd),
                !dag(ins,
                  !foreach(i, Iota<tsize>.Value, VR),
@@ -4223,9 +4230,9 @@ let Predicates = [HasStdExtV] in {
 let VLMul = 0, hasSideEffects = 0, mayLoad = 0, mayStore = 0,
     usesCustomInserter = 1 in {
 
-defm PseudoEPIVZIP2_VV : pseudo_binary<VRM1T2, VR, VR, V_M1, "">;
-defm PseudoEPIVUNZIP2_VV : pseudo_binary<VRM1T2, VR, VR, V_M1, "">;
-defm PseudoEPIVTRN_VV : pseudo_binary<VRM1T2, VR, VR, V_M1, "">;
+defm PseudoEPIVZIP2_VV : pseudo_binary<VRN2M1, VR, VR, V_M1, "">;
+defm PseudoEPIVUNZIP2_VV : pseudo_binary<VRN2M1, VR, VR, V_M1, "">;
+defm PseudoEPIVTRN_VV : pseudo_binary<VRN2M1, VR, VR, V_M1, "">;
 
 }
 
@@ -4234,19 +4241,19 @@ foreach vti = NoGroupVectors in {
     def : Pat<(riscv_vzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                            (i64 GPR:$vl)),
               (PseudoEPIVZIP2_VV_M1
-               (PseudoEPIImplicitVRM1T2), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
+               (PseudoEPIImplicitVRN2M1), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vunzip2 (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                              (i64 GPR:$vl)),
               (PseudoEPIVUNZIP2_VV_M1
-               (PseudoEPIImplicitVRM1T2), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
+               (PseudoEPIImplicitVRN2M1), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 
     def : Pat<(riscv_vtrn (vti.Vector VR:$rs1), (vti.Vector VR:$rs2),
                           (i64 GPR:$vl)),
               (PseudoEPIVTRN_VV_M1
-               (PseudoEPIImplicitVRM1T2), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
+               (PseudoEPIImplicitVRN2M1), vti.MInfo.vrclass:$rs1, vti.MInfo.vrclass:$rs2,
                (vti.Mask zero_reg), (NoX0 GPR:$vl), vti.SEW)>;
 }
 

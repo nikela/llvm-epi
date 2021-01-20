@@ -26,9 +26,9 @@ define void @vzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture r
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -51,9 +51,9 @@ define void @vunzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vunzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vunzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -76,9 +76,9 @@ define void @vtrn.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture re
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vtrn.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vtrn.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i64* %in_a0 to <vscale x 1 x i64>*
@@ -101,9 +101,9 @@ define void @vzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture r
 ; CHECK-NEXT:    vsetvli a4, a4, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
-; CHECK-NEXT:    vzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse32.v v1, (a2)
-; CHECK-NEXT:    vse32.v v2, (a3)
+; CHECK-NEXT:    vzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse32.v v0, (a2)
+; CHECK-NEXT:    vse32.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -126,9 +126,9 @@ define void @vunzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture
 ; CHECK-NEXT:    vsetvli a4, a4, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
-; CHECK-NEXT:    vunzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse32.v v1, (a2)
-; CHECK-NEXT:    vse32.v v2, (a3)
+; CHECK-NEXT:    vunzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse32.v v0, (a2)
+; CHECK-NEXT:    vse32.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -151,9 +151,9 @@ define void @vtrn.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture re
 ; CHECK-NEXT:    vsetvli a4, a4, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
-; CHECK-NEXT:    vtrn.vv v1, v25, v26
-; CHECK-NEXT:    vse32.v v1, (a2)
-; CHECK-NEXT:    vse32.v v2, (a3)
+; CHECK-NEXT:    vtrn.vv v0, v25, v26
+; CHECK-NEXT:    vse32.v v0, (a2)
+; CHECK-NEXT:    vse32.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast i32* %in_a0 to <vscale x 2 x i32>*
@@ -176,9 +176,9 @@ define void @vzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* nocap
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*
@@ -201,9 +201,9 @@ define void @vunzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* noc
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vunzip2.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vunzip2.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*
@@ -226,9 +226,9 @@ define void @vtrn.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapt
 ; CHECK-NEXT:    vsetvli a4, a4, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vtrn.vv v1, v25, v26
-; CHECK-NEXT:    vse64.v v1, (a2)
-; CHECK-NEXT:    vse64.v v2, (a3)
+; CHECK-NEXT:    vtrn.vv v0, v25, v26
+; CHECK-NEXT:    vse64.v v0, (a2)
+; CHECK-NEXT:    vse64.v v1, (a3)
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %in_a0 to <vscale x 1 x double>*
