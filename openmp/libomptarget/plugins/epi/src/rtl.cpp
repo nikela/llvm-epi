@@ -46,7 +46,7 @@ Device dev;
 // RISC-V ELF ID
 #define TARGET_ELF_ID 243
 
-#include "../../common/elf_common.c"
+#include "../../common/elf_common/elf_common.h"
 
 #define NUMBER_OF_DEVICES 1
 #define OFFLOADSECTIONNAME ".omp_offloading.entries"
