@@ -137,13 +137,13 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfnmsac.vv v23, v10, v12
 ; CHECK-NEXT:    vmv1r.v v16, v18
 ; CHECK-NEXT:    vfnmsac.vv v16, v20, v12
+; CHECK-NEXT:    vfmacc.vv v18, v20, v12
+; CHECK-NEXT:    add t6, a0, s9
+; CHECK-NEXT:    vle64.v v27, (t6)
+; CHECK-NEXT:    vfmacc.vv v11, v10, v12
 ; CHECK-NEXT:    vle64.v v28, (a0)
 ; CHECK-NEXT:    ld a2, -192(s0)
 ; CHECK-NEXT:    vs1r.v v28, (a2)
-; CHECK-NEXT:    add t6, a0, s9
-; CHECK-NEXT:    vle64.v v27, (t6)
-; CHECK-NEXT:    vfmacc.vv v18, v20, v12
-; CHECK-NEXT:    vfmacc.vv v11, v10, v12
 ; CHECK-NEXT:    vtrn.vv v12, v25, v25
 ; CHECK-NEXT:    vfmul.vv v29, v27, v12
 ; CHECK-NEXT:    vfsgnjn.vv v27, v27, v27, v0.t
