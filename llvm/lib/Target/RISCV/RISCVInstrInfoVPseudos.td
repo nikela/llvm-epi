@@ -1266,9 +1266,38 @@ multiclass VPseudoBinary<VReg RetClass,
   }
 }
 
+multiclass VPseudoBinaryEmul<VReg RetClass,
+                             VReg Op1Class,
+                             DAGOperand Op2Class,
+                             LMULInfo lmul,
+                             LMULInfo emul,
+                             string Constraint = ""> {
+  let VLMul = lmul.value in {
+    def "_" # lmul.MX # "_" # emul.MX : VPseudoBinaryNoMask<RetClass, Op1Class, Op2Class,
+                                                            Constraint>;
+    def "_" # lmul.MX # "_" # emul.MX # "_MASK" : VPseudoBinaryMask<RetClass, Op1Class, Op2Class,
+                                                                    Constraint>;
+  }
+}
+
 multiclass VPseudoBinaryV_VV<string Constraint = ""> {
   foreach m = MxList.m in
     defm _VV : VPseudoBinary<m.vrclass, m.vrclass, m.vrclass, m, Constraint>;
+}
+
+multiclass VPseudoBinaryV_VV_EEW<int eew, string Constraint = ""> {
+  foreach m = MxList.m in {
+    foreach sew = EEWList in {
+      defvar octuple_lmul = octuple_from_str<m.MX>.ret;
+      // emul = lmul * eew / sew
+      defvar octuple_emul = !srl(!mul(octuple_lmul, eew), shift_amount<sew>.val);
+      if !and(!ge(octuple_emul, 1), !le(octuple_emul, 64)) then {
+        defvar emulMX = octuple_to_str<octuple_emul>.ret;
+        defvar emul = !cast<LMULInfo>("V_" # emulMX);
+        defm _VV : VPseudoBinaryEmul<m.vrclass, m.vrclass, emul.vrclass, m, emul, Constraint>;
+      }
+    }
+  }
 }
 
 multiclass VPseudoBinaryV_VX<bit IsFloat, string Constraint = ""> {
@@ -1552,13 +1581,13 @@ multiclass VPseudoTernaryV_VX_AAXA<bit IsFloat, string Constraint = ""> {
 
 multiclass VPseudoTernaryW_VV {
   defvar constraint = "@earlyclobber $rd";
-  foreach m = MxList.m in
+  foreach m = MxList.m[0-5] in
     defm _VV : VPseudoTernary<m.wvrclass, m.vrclass, m.vrclass, m, constraint>;
 }
 
 multiclass VPseudoTernaryW_VX<bit IsFloat> {
   defvar constraint = "@earlyclobber $rd";
-  foreach m = MxList.m in
+  foreach m = MxList.m[0-5] in
     defm !if(IsFloat, "_VF", "_VX")  : VPseudoTernary<m.wvrclass,
                              !if(IsFloat, FPR32, GPR), m.vrclass, m, constraint>;
 }
@@ -2236,6 +2265,25 @@ multiclass VPatBinaryV_VV_INT<string intrinsic, string instruction,
   }
 }
 
+multiclass VPatBinaryV_VV_INT_EEW<string intrinsic, string instruction,
+                                  int eew, list<VTypeInfo> vtilist> {
+  foreach vti = vtilist in {
+    // emul = lmul * eew / sew
+    defvar vlmul = vti.LMul;
+    defvar octuple_lmul = octuple_from_str<vlmul.MX>.ret;
+    defvar octuple_emul = !srl(!mul(octuple_lmul, eew), shift_amount<vti.SEW>.val);
+    if !and(!ge(octuple_emul, 1), !le(octuple_emul, 64)) then {
+      defvar emul_str = octuple_to_str<octuple_emul>.ret;
+      defvar ivti = !cast<VTypeInfo>("VI" # eew # emul_str);
+      defvar inst = instruction # "_VV_" # vti.LMul.MX # "_" # emul_str;
+      defm : VPatBinary<intrinsic, inst,
+                        vti.Vector, vti.Vector, ivti.Vector, vti.Mask,
+                        vti.SEW, vti.RegClass,
+                        vti.RegClass, ivti.RegClass>;
+    }
+  }
+}
+
 multiclass VPatBinaryV_VX<string intrinsic, string instruction,
                           list<VTypeInfo> vtilist> {
   foreach vti = vtilist in {
@@ -2896,6 +2944,7 @@ foreach eew = EEWList in {
 
 // Vector Indexed Loads and Stores
 foreach eew = EEWList in {
+  defm PseudoVLUXEI # eew : VPseudoILoad;
   defm PseudoVLOXEI # eew : VPseudoILoad;
   defm PseudoVSOXEI # eew : VPseudoIStore;
   defm PseudoVSUXEI # eew : VPseudoIStore;
@@ -3164,6 +3213,16 @@ defm PseudoVFWNMSAC    : VPseudoTernaryW_VV_VX</*IsFloat*/true>;
 defm PseudoVFSQRT      : VPseudoUnaryV_V;
 
 //===----------------------------------------------------------------------===//
+// 14.9. Vector Floating-Point Reciprocal Square-Root Estimate Instruction
+//===----------------------------------------------------------------------===//
+defm PseudoVFRSQRTE7   : VPseudoUnaryV_V;
+
+//===----------------------------------------------------------------------===//
+// 14.10. Vector Floating-Point Reciprocal Estimate Instruction
+//===----------------------------------------------------------------------===//
+defm PseudoVFRECE7     : VPseudoUnaryV_V;
+
+//===----------------------------------------------------------------------===//
 // 14.11. Vector Floating-Point Min/Max Instructions
 //===----------------------------------------------------------------------===//
 defm PseudoVFMIN       : VPseudoBinaryV_VV_VX</*IsFloat=*/1>;
@@ -3403,6 +3462,7 @@ let Predicates = [HasStdExtV, HasStdExtF] in {
 // 17.4. Vector Register Gather Instructions
 //===----------------------------------------------------------------------===//
 defm PseudoVRGATHER    : VPseudoBinaryV_VV_VX_VI<uimm5, "@earlyclobber $rd">;
+defm PseudoVRGATHEREI16 : VPseudoBinaryV_VV_EEW</* eew */ 16, "@earlyclobber $rd">;
 
 //===----------------------------------------------------------------------===//
 // 17.5. Vector Compress Instruction
@@ -3468,6 +3528,10 @@ foreach eew = EEWList in {
        defvar elmul =!cast<LMULInfo>("V_" # elmul_str);
        defvar idx_vti = !cast<VTypeInfo>("VI" # eew # elmul_str);
 
+       defm : VPatILoad<"int_riscv_vluxei",
+                        "PseudoVLUXEI"#eew,
+                         vti.Vector, idx_vti.Vector, vti.Mask, vti.SEW,
+                         vlmul, elmul, vti.RegClass, idx_vti.RegClass>;
        defm : VPatILoad<"int_riscv_vloxei",
                         "PseudoVLOXEI"#eew,
                          vti.Vector, idx_vti.Vector, vti.Mask, vti.SEW,
@@ -3818,6 +3882,16 @@ defm "" : VPatTernaryW_VV_VX<"int_riscv_vfwnmsac", "PseudoVFWNMSAC", AllWidenabl
 defm "" : VPatUnaryV_V<"int_riscv_vfsqrt", "PseudoVFSQRT", AllFloatVectors>;
 
 //===----------------------------------------------------------------------===//
+// 14.9. Vector Floating-Point Reciprocal Square-Root Estimate Instruction
+//===----------------------------------------------------------------------===//
+defm "" : VPatUnaryV_V<"int_riscv_vfrsqrte7", "PseudoVFRSQRTE7", AllFloatVectors>;
+
+//===----------------------------------------------------------------------===//
+// 14.10. Vector Floating-Point Reciprocal Estimate Instruction
+//===----------------------------------------------------------------------===//
+defm "" : VPatUnaryV_V<"int_riscv_vfrece7", "PseudoVFRECE7", AllFloatVectors>;
+
+//===----------------------------------------------------------------------===//
 // 14.11. Vector Floating-Point Min/Max Instructions
 //===----------------------------------------------------------------------===//
 defm "" : VPatBinaryV_VV_VX<"int_riscv_vfmin", "PseudoVFMIN", AllFloatVectors>;
@@ -4081,11 +4155,15 @@ let Predicates = [HasStdExtV, HasStdExtF] in {
 let Predicates = [HasStdExtV] in {
   defm "" : VPatBinaryV_VV_VX_VI_INT<"int_riscv_vrgather", "PseudoVRGATHER",
                                      AllIntegerVectors, uimm5>;
+  defm "" : VPatBinaryV_VV_INT_EEW<"int_riscv_vrgatherei16", "PseudoVRGATHEREI16",
+                                   /* eew */ 16, AllIntegerVectors>;
 } // Predicates = [HasStdExtV]
 
 let Predicates = [HasStdExtV, HasStdExtF] in {
   defm "" : VPatBinaryV_VV_VX_VI_INT<"int_riscv_vrgather", "PseudoVRGATHER",
                                      AllFloatVectors, uimm5>;
+  defm "" : VPatBinaryV_VV_INT_EEW<"int_riscv_vrgatherei16", "PseudoVRGATHEREI16",
+                                   /* eew */ 16, AllFloatVectors>;
 } // Predicates = [HasStdExtV, HasStdExtF]
 
 //===----------------------------------------------------------------------===//

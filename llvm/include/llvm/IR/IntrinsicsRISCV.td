@@ -710,9 +710,10 @@ let TargetPrefix = "riscv" in {
   defm vse : RISCVUSStore;
   defm vlse: RISCVSLoad;
   defm vsse: RISCVSStore;
-  defm vloxei: RISCVILoad;
-  defm vsoxei: RISCVIStore;
-  defm vsuxei: RISCVIStore;
+  defm vluxei : RISCVILoad;
+  defm vloxei : RISCVILoad;
+  defm vsoxei : RISCVIStore;
+  defm vsuxei : RISCVIStore;
 
   defm vamoswap : RISCVAMO;
   defm vamoadd : RISCVAMO;
@@ -864,6 +865,8 @@ let TargetPrefix = "riscv" in {
   defm vfwnmsac : RISCVTernaryWide;
 
   defm vfsqrt : RISCVUnaryAA;
+  defm vfrsqrte7 : RISCVUnaryAA;
+  defm vfrece7 : RISCVUnaryAA;
 
   defm vfmin : RISCVBinaryAAX;
   defm vfmax : RISCVBinaryAAX;
@@ -885,6 +888,7 @@ let TargetPrefix = "riscv" in {
   defm vfslide1down : RISCVBinaryAAX;
 
   defm vrgather : RISCVBinaryAAX;
+  defm vrgatherei16 : RISCVBinaryAAX;
 
   def "int_riscv_vcompress" : RISCVBinaryAAAMask;
 
