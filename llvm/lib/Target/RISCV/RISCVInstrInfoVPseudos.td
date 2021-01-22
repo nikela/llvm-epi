@@ -20,6 +20,23 @@ def riscv_vmv_x_s : SDNode<"RISCVISD::VMV_X_S",
 def riscv_read_vlenb : SDNode<"RISCVISD::READ_VLENB",
                               SDTypeProfile<1, 0, [SDTCisVT<0, XLenVT>]>>;
 
+def riscv_vleff : SDNode<"RISCVISD::VLEFF",
+                         SDTypeProfile<1, 2, [SDTCisVec<0>, SDTCisPtrTy<1>,
+                                              SDTCisVT<2, XLenVT>]>,
+                         [SDNPHasChain, SDNPOutGlue, SDNPMayLoad,
+                          SDNPSideEffect]>;
+def riscv_vleff_mask : SDNode<"RISCVISD::VLEFF_MASK",
+                              SDTypeProfile<1, 4, [SDTCisVec<0>,
+                                                   SDTCisSameAs<0, 1>,
+                                                   SDTCisPtrTy<2>,
+                                                   SDTCVecEltisVT<3, i1>,
+                                                   SDTCisVT<4, XLenVT>]>,
+                              [SDNPHasChain, SDNPOutGlue, SDNPMayLoad,
+                               SDNPSideEffect]>;
+def riscv_read_vl : SDNode<"RISCVISD::READ_VL",
+                           SDTypeProfile<1, 0, [SDTCisVT<0, XLenVT>]>,
+                           [SDNPInGlue]>;
+
 // X0 has special meaning for vsetvl/vsetvli.
 //  rd | rs1 |   AVL value | Effect on vl
 //--------------------------------------------------------------
@@ -1903,6 +1920,23 @@ multiclass VPatUSLoad<string intrinsic,
                                 $rs1, (mask_type V0), (NoX0 GPR:$vl), sew)>;
 }
 
+multiclass VPatUSLoadFF<string inst,
+                        LLVMType type,
+                        LLVMType mask_type,
+                        int sew,
+                        LMULInfo vlmul,
+                        VReg reg_class>
+{
+    defvar Pseudo = !cast<Instruction>(inst#"_V_"#vlmul.MX);
+    def : Pat<(type (riscv_vleff GPR:$rs1, GPR:$vl)),
+                    (Pseudo $rs1, (NoX0 GPR:$vl), sew)>;
+    defvar PseudoMask = !cast<Instruction>(inst#"_V_"#vlmul.MX#"_MASK");
+    def : Pat<(type (riscv_vleff_mask (type GetVRegNoV0<reg_class>.R:$merge),
+                                      GPR:$rs1, (mask_type V0), GPR:$vl)),
+                    (PseudoMask $merge,
+                                $rs1, (mask_type V0), (NoX0 GPR:$vl), sew)>;
+}
+
 multiclass VPatSLoad<string intrinsic,
                      string inst,
                      LLVMType type,
@@ -2817,6 +2851,11 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1 in {
                                [(set GPR:$rd, (riscv_read_vlenb))]>;
 }
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
+    Uses = [VL] in
+def PseudoReadVL : Pseudo<(outs GPR:$rd), (ins),
+                          [(set GPR:$rd, (riscv_read_vl))]>;
+
 //===----------------------------------------------------------------------===//
 // 6. Configuration-Setting Instructions
 //===----------------------------------------------------------------------===//
@@ -2857,8 +2896,8 @@ foreach eew = EEWList in {
 
 // Vector Indexed Loads and Stores
 foreach eew = EEWList in {
-  defm PseudoVLXEI # eew : VPseudoILoad;
-  defm PseudoVSXEI # eew : VPseudoIStore;
+  defm PseudoVLOXEI # eew : VPseudoILoad;
+  defm PseudoVSOXEI # eew : VPseudoIStore;
   defm PseudoVSUXEI # eew : VPseudoIStore;
 }
 
@@ -3388,9 +3427,8 @@ foreach vti = AllVectors in
   defm : VPatUSLoad<"int_riscv_vle",
                     "PseudoVLE" # vti.SEW,
                     vti.Vector, vti.Mask, vti.SEW, vti.LMul, vti.RegClass>;
-  defm : VPatUSLoad<"int_riscv_vleff",
-                    "PseudoVLE" # vti.SEW # "FF",
-                    vti.Vector, vti.Mask, vti.SEW, vti.LMul, vti.RegClass>;
+  defm : VPatUSLoadFF<"PseudoVLE" # vti.SEW # "FF",
+                      vti.Vector, vti.Mask, vti.SEW, vti.LMul, vti.RegClass>;
   defm : VPatUSStore<"int_riscv_vse",
                      "PseudoVSE" # vti.SEW,
                      vti.Vector, vti.Mask, vti.SEW, vti.LMul, vti.RegClass>;
@@ -3430,15 +3468,15 @@ foreach eew = EEWList in {
        defvar elmul =!cast<LMULInfo>("V_" # elmul_str);
        defvar idx_vti = !cast<VTypeInfo>("VI" # eew # elmul_str);
 
-       defm : VPatILoad<"int_riscv_vlxe",
-                        "PseudoVLXEI"#eew,
+       defm : VPatILoad<"int_riscv_vloxei",
+                        "PseudoVLOXEI"#eew,
                          vti.Vector, idx_vti.Vector, vti.Mask, vti.SEW,
                          vlmul, elmul, vti.RegClass, idx_vti.RegClass>;
-       defm : VPatIStore<"int_riscv_vsxe",
-                          "PseudoVSXEI"#eew,
+       defm : VPatIStore<"int_riscv_vsoxei",
+                          "PseudoVSOXEI"#eew,
                           vti.Vector, idx_vti.Vector, vti.Mask, vti.SEW,
                           vlmul, elmul, vti.RegClass, idx_vti.RegClass>;
-       defm : VPatIStore<"int_riscv_vsuxe",
+       defm : VPatIStore<"int_riscv_vsuxei",
                           "PseudoVSUXEI"#eew,
                           vti.Vector, idx_vti.Vector, vti.Mask, vti.SEW,
                           vlmul, elmul, vti.RegClass, idx_vti.RegClass>;
