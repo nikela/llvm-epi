@@ -5,9 +5,9 @@ define dso_local void @foo(i32 signext %n) nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -64
-; CHECK-NEXT:    sd ra, 56(sp)
-; CHECK-NEXT:    sd s0, 48(sp)
-; CHECK-NEXT:    sd s1, 40(sp)
+; CHECK-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s1, 40(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi s0, sp, 64
 ; CHECK-NEXT:    andi sp, sp, -32
 ; CHECK-NEXT:    mv s1, sp
@@ -15,10 +15,7 @@ define dso_local void @foo(i32 signext %n) nounwind {
 ; CHECK-NEXT:    srli a0, a0, 32
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    addi a0, a0, 15
-; CHECK-NEXT:    addi a1, zero, 1
-; CHECK-NEXT:    slli a1, a1, 35
-; CHECK-NEXT:    addi a1, a1, -16
-; CHECK-NEXT:    and a0, a0, a1
+; CHECK-NEXT:    andi a0, a0, -16
 ; CHECK-NEXT:    sub a0, sp, a0
 ; CHECK-NEXT:    mv sp, a0
 ; CHECK-NEXT:    lw a1, 4(a0)
@@ -31,9 +28,9 @@ define dso_local void @foo(i32 signext %n) nounwind {
 ; CHECK-NEXT:    addi a0, a0, 1
 ; CHECK-NEXT:    sw a0, 28(s1)
 ; CHECK-NEXT:    addi sp, s0, -64
-; CHECK-NEXT:    ld s1, 40(sp)
-; CHECK-NEXT:    ld s0, 48(sp)
-; CHECK-NEXT:    ld ra, 56(sp)
+; CHECK-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 64
 ; CHECK-NEXT:    ret
 entry:

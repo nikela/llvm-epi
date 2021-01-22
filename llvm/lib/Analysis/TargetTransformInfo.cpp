@@ -83,7 +83,6 @@ IntrinsicCostAttributes::IntrinsicCostAttributes(Intrinsic::ID Id,
                                                  ElementCount Factor)
     : RetTy(CI.getType()), IID(Id), VF(Factor) {
 
-  assert(!Factor.isScalable() && "Scalable vectors are not yet supported");
   if (auto *FPMO = dyn_cast<FPMathOperator>(&CI))
     FMF = FPMO->getFastMathFlags();
 
@@ -966,6 +965,13 @@ int TargetTransformInfo::getMinMaxReductionCost(
                                       CostKind);
   assert(Cost >= 0 && "TTI should not produce negative costs!");
   return Cost;
+}
+
+InstructionCost TargetTransformInfo::getExtendedAddReductionCost(
+    bool IsMLA, bool IsUnsigned, Type *ResTy, VectorType *Ty,
+    TTI::TargetCostKind CostKind) const {
+  return TTIImpl->getExtendedAddReductionCost(IsMLA, IsUnsigned, ResTy, Ty,
+                                              CostKind);
 }
 
 unsigned

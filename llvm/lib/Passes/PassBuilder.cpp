@@ -562,8 +562,6 @@ PassBuilder::buildO1FunctionSimplificationPipeline(OptimizationLevel Level,
   LPM1.addPass(LICMPass(PTO.LicmMssaOptCap, PTO.LicmMssaNoAccForPromotionCap));
   LPM1.addPass(SimpleLoopUnswitchPass());
 
-  if (EnableLoopFlatten)
-    FPM.addPass(LoopFlattenPass());
   LPM2.addPass(LoopIdiomRecognizePass());
   LPM2.addPass(IndVarSimplifyPass());
 
@@ -594,6 +592,8 @@ PassBuilder::buildO1FunctionSimplificationPipeline(OptimizationLevel Level,
       DebugLogging));
   FPM.addPass(SimplifyCFGPass());
   FPM.addPass(InstCombinePass());
+  if (EnableLoopFlatten)
+    FPM.addPass(LoopFlattenPass());
   // The loop passes in LPM2 (LoopFullUnrollPass) do not preserve MemorySSA.
   // *All* loop passes must preserve it, in order to be able to use it.
   FPM.addPass(createFunctionToLoopPassAdaptor(
@@ -756,6 +756,8 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
       DebugLogging));
   FPM.addPass(SimplifyCFGPass());
   FPM.addPass(InstCombinePass());
+  if (EnableLoopFlatten)
+    FPM.addPass(LoopFlattenPass());
   // The loop passes in LPM2 (LoopIdiomRecognizePass, IndVarSimplifyPass,
   // LoopDeletionPass and LoopFullUnrollPass) do not preserve MemorySSA.
   // *All* loop passes must preserve it, in order to be able to use it.
@@ -924,8 +926,9 @@ getInlineParamsFromOptLevel(PassBuilder::OptimizationLevel Level) {
   return getInlineParams(Level.getSpeedupLevel(), Level.getSizeLevel());
 }
 
-ModuleInlinerWrapperPass PassBuilder::buildInlinerPipeline(
-    OptimizationLevel Level, ThinOrFullLTOPhase Phase, bool MandatoryOnly) {
+ModuleInlinerWrapperPass
+PassBuilder::buildInlinerPipeline(OptimizationLevel Level,
+                                  ThinOrFullLTOPhase Phase) {
   InlineParams IP = getInlineParamsFromOptLevel(Level);
   if (Phase == ThinOrFullLTOPhase::ThinLTOPreLink && PGOOpt &&
       PGOOpt->Action == PGOOptions::SampleUse)
@@ -934,13 +937,9 @@ ModuleInlinerWrapperPass PassBuilder::buildInlinerPipeline(
   if (PGOOpt)
     IP.EnableDeferral = EnablePGOInlineDeferral;
 
-  ModuleInlinerWrapperPass MIWP(
-      IP, DebugLogging,
-      (MandatoryOnly ? InliningAdvisorMode::MandatoryOnly : UseInlineAdvisor),
-      MaxDevirtIterations);
-
-  if (MandatoryOnly)
-    return MIWP;
+  ModuleInlinerWrapperPass MIWP(IP, DebugLogging,
+                                PerformMandatoryInliningsFirst,
+                                UseInlineAdvisor, MaxDevirtIterations);
 
   // Require the GlobalsAA analysis for the module so we can query it within
   // the CGSCC pipeline.
@@ -1141,9 +1140,7 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   if (EnableSyntheticCounts && !PGOOpt)
     MPM.addPass(SyntheticCountsPropagation());
 
-  if (PerformMandatoryInliningsFirst)
-    MPM.addPass(buildInlinerPipeline(Level, Phase, /*MandatoryOnly=*/true));
-  MPM.addPass(buildInlinerPipeline(Level, Phase, /*MandatoryOnly=*/false));
+  MPM.addPass(buildInlinerPipeline(Level, Phase));
 
   if (EnableMemProfiler && Phase != ThinOrFullLTOPhase::ThinLTOPreLink) {
     MPM.addPass(createModuleToFunctionPassAdaptor(MemProfilerPass()));
@@ -1233,7 +1230,8 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // First rotate loops that may have been un-rotated by prior passes.
   // Disable header duplication at -Oz.
   OptimizePM.addPass(createFunctionToLoopPassAdaptor(
-      LoopRotatePass(Level != OptimizationLevel::Oz), EnableMSSALoopDependency,
+      LoopRotatePass(Level != OptimizationLevel::Oz, LTOPreLink),
+      EnableMSSALoopDependency,
       /*UseBlockFrequencyInfo=*/false, DebugLogging));
 
   // Distribute loops to allow partial vectorization.  I.e. isolate dependences
@@ -1637,9 +1635,6 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
 
   MPM.addPass(createModuleToFunctionPassAdaptor(std::move(PeepholeFPM)));
 
-  MPM.addPass(ModuleInlinerWrapperPass(getInlineParamsFromOptLevel(Level),
-                                       DebugLogging,
-                                       InliningAdvisorMode::MandatoryOnly));
   // Note: historically, the PruneEH pass was run first to deduce nounwind and
   // generally clean up exception handling overhead. It isn't clear this is
   // valuable as the inliner doesn't currently care whether it is inlining an

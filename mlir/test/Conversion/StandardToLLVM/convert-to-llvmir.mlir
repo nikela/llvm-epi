@@ -40,7 +40,7 @@ func @simple_loop() {
 // CHECK32-NEXT:  {{.*}} = llvm.icmp "slt" {{.*}}, {{.*}} : i32
 // CHECK32-NEXT:  llvm.cond_br {{.*}}, ^bb3, ^bb4
 ^bb2(%0: index):	// 2 preds: ^bb1, ^bb3
-  %1 = cmpi "slt", %0, %c42 : index
+  %1 = cmpi slt, %0, %c42 : index
   cond_br %1, ^bb3, ^bb4
 
 // CHECK:      ^bb3:	// pred: ^bb2
@@ -62,66 +62,6 @@ func @simple_loop() {
 // CHECK:      ^bb4:	// pred: ^bb2
 // CHECK-NEXT:  llvm.return
 ^bb4:	// pred: ^bb2
-  return
-}
-
-// CHECK-LABEL: llvm.func @complex_numbers()
-// CHECK-NEXT:    %[[REAL0:.*]] = llvm.mlir.constant(1.200000e+00 : f32) : f32
-// CHECK-NEXT:    %[[IMAG0:.*]] = llvm.mlir.constant(3.400000e+00 : f32) : f32
-// CHECK-NEXT:    %[[CPLX0:.*]] = llvm.mlir.undef : !llvm.struct<(f32, f32)>
-// CHECK-NEXT:    %[[CPLX1:.*]] = llvm.insertvalue %[[REAL0]], %[[CPLX0]][0] : !llvm.struct<(f32, f32)>
-// CHECK-NEXT:    %[[CPLX2:.*]] = llvm.insertvalue %[[IMAG0]], %[[CPLX1]][1] : !llvm.struct<(f32, f32)>
-// CHECK-NEXT:    %[[REAL1:.*]] = llvm.extractvalue %[[CPLX2:.*]][0] : !llvm.struct<(f32, f32)>
-// CHECK-NEXT:    %[[IMAG1:.*]] = llvm.extractvalue %[[CPLX2:.*]][1] : !llvm.struct<(f32, f32)>
-// CHECK-NEXT:    llvm.return
-func @complex_numbers() {
-  %real0 = constant 1.2 : f32
-  %imag0 = constant 3.4 : f32
-  %cplx2 = create_complex %real0, %imag0 : complex<f32>
-  %real1 = re %cplx2 : complex<f32>
-  %imag1 = im %cplx2 : complex<f32>
-  return
-}
-
-// CHECK-LABEL: llvm.func @complex_addition()
-// CHECK-DAG:     %[[A_REAL:.*]] = llvm.extractvalue %[[A:.*]][0] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[B_REAL:.*]] = llvm.extractvalue %[[B:.*]][0] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[A_IMAG:.*]] = llvm.extractvalue %[[A]][1] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[B_IMAG:.*]] = llvm.extractvalue %[[B]][1] : !llvm.struct<(f64, f64)>
-// CHECK:         %[[C0:.*]] = llvm.mlir.undef : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[C_REAL:.*]] = llvm.fadd %[[A_REAL]], %[[B_REAL]] : f64
-// CHECK-DAG:     %[[C_IMAG:.*]] = llvm.fadd %[[A_IMAG]], %[[B_IMAG]] : f64
-// CHECK:         %[[C1:.*]] = llvm.insertvalue %[[C_REAL]], %[[C0]][0] : !llvm.struct<(f64, f64)>
-// CHECK:         %[[C2:.*]] = llvm.insertvalue %[[C_IMAG]], %[[C1]][1] : !llvm.struct<(f64, f64)>
-func @complex_addition() {
-  %a_re = constant 1.2 : f64
-  %a_im = constant 3.4 : f64
-  %a = create_complex %a_re, %a_im : complex<f64>
-  %b_re = constant 5.6 : f64
-  %b_im = constant 7.8 : f64
-  %b = create_complex %b_re, %b_im : complex<f64>
-  %c = addcf %a, %b : complex<f64>
-  return
-}
-
-// CHECK-LABEL: llvm.func @complex_substraction()
-// CHECK-DAG:     %[[A_REAL:.*]] = llvm.extractvalue %[[A:.*]][0] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[B_REAL:.*]] = llvm.extractvalue %[[B:.*]][0] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[A_IMAG:.*]] = llvm.extractvalue %[[A]][1] : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[B_IMAG:.*]] = llvm.extractvalue %[[B]][1] : !llvm.struct<(f64, f64)>
-// CHECK:         %[[C0:.*]] = llvm.mlir.undef : !llvm.struct<(f64, f64)>
-// CHECK-DAG:     %[[C_REAL:.*]] = llvm.fsub %[[A_REAL]], %[[B_REAL]] : f64
-// CHECK-DAG:     %[[C_IMAG:.*]] = llvm.fsub %[[A_IMAG]], %[[B_IMAG]] : f64
-// CHECK:         %[[C1:.*]] = llvm.insertvalue %[[C_REAL]], %[[C0]][0] : !llvm.struct<(f64, f64)>
-// CHECK:         %[[C2:.*]] = llvm.insertvalue %[[C_IMAG]], %[[C1]][1] : !llvm.struct<(f64, f64)>
-func @complex_substraction() {
-  %a_re = constant 1.2 : f64
-  %a_im = constant 3.4 : f64
-  %a = create_complex %a_re, %a_im : complex<f64>
-  %b_re = constant 5.6 : f64
-  %b_im = constant 7.8 : f64
-  %b = create_complex %b_re, %b_im : complex<f64>
-  %c = subcf %a, %b : complex<f64>
   return
 }
 
@@ -193,7 +133,7 @@ func @func_args(i32, i32) -> i32 {
 // CHECK32-NEXT:  {{.*}} = llvm.icmp "slt" {{.*}}, {{.*}} : i32
 // CHECK32-NEXT:  llvm.cond_br {{.*}}, ^bb3, ^bb4
 ^bb2(%0: index):	// 2 preds: ^bb1, ^bb3
-  %1 = cmpi "slt", %0, %c42 : index
+  %1 = cmpi slt, %0, %c42 : index
   cond_br %1, ^bb3, ^bb4
 
 // CHECK-NEXT: ^bb3:	// pred: ^bb2
@@ -266,7 +206,7 @@ func @imperfectly_nested_loops() {
 // CHECK-NEXT:  {{.*}} = llvm.icmp "slt" {{.*}}, {{.*}} : i64
 // CHECK-NEXT:  llvm.cond_br {{.*}}, ^bb3, ^bb8
 ^bb2(%0: index):	// 2 preds: ^bb1, ^bb7
-  %1 = cmpi "slt", %0, %c42 : index
+  %1 = cmpi slt, %0, %c42 : index
   cond_br %1, ^bb3, ^bb8
 
 // CHECK-NEXT: ^bb3:
@@ -289,7 +229,7 @@ func @imperfectly_nested_loops() {
 // CHECK-NEXT:  {{.*}} = llvm.icmp "slt" {{.*}}, {{.*}} : i64
 // CHECK-NEXT:  llvm.cond_br {{.*}}, ^bb6, ^bb7
 ^bb5(%2: index):	// 2 preds: ^bb4, ^bb6
-  %3 = cmpi "slt", %2, %c56 : index
+  %3 = cmpi slt, %2, %c56 : index
   cond_br %3, ^bb6, ^bb7
 
 // CHECK-NEXT: ^bb6:	// pred: ^bb5
@@ -382,7 +322,7 @@ func @more_imperfectly_nested_loops() {
   %c42 = constant 42 : index
   br ^bb2(%c0 : index)
 ^bb2(%0: index):	// 2 preds: ^bb1, ^bb11
-  %1 = cmpi "slt", %0, %c42 : index
+  %1 = cmpi slt, %0, %c42 : index
   cond_br %1, ^bb3, ^bb12
 ^bb3:	// pred: ^bb2
   call @pre(%0) : (index) -> ()
@@ -392,7 +332,7 @@ func @more_imperfectly_nested_loops() {
   %c56 = constant 56 : index
   br ^bb5(%c7 : index)
 ^bb5(%2: index):	// 2 preds: ^bb4, ^bb6
-  %3 = cmpi "slt", %2, %c56 : index
+  %3 = cmpi slt, %2, %c56 : index
   cond_br %3, ^bb6, ^bb7
 ^bb6:	// pred: ^bb5
   call @body2(%0, %2) : (index, index) -> ()
@@ -407,7 +347,7 @@ func @more_imperfectly_nested_loops() {
   %c37 = constant 37 : index
   br ^bb9(%c18 : index)
 ^bb9(%5: index):	// 2 preds: ^bb8, ^bb10
-  %6 = cmpi "slt", %5, %c37 : index
+  %6 = cmpi slt, %5, %c37 : index
   cond_br %6, ^bb10, ^bb11
 ^bb10:	// pred: ^bb9
   call @body3(%0, %5) : (index, index) -> ()
@@ -528,7 +468,7 @@ func @ops(f32, f32, i32, i32, f64) -> (f32, i32) {
 // CHECK-NEXT:  %1 = llvm.sub %arg2, %arg3 : i32
   %1 = subi %arg2, %arg3: i32
 // CHECK-NEXT:  %2 = llvm.icmp "slt" %arg2, %1 : i32
-  %2 = cmpi "slt", %arg2, %1 : i32
+  %2 = cmpi slt, %arg2, %1 : i32
 // CHECK-NEXT:  %3 = llvm.sdiv %arg2, %arg3 : i32
   %3 = divi_signed %arg2, %arg3 : i32
 // CHECK-NEXT:  %4 = llvm.udiv %arg2, %arg3 : i32
@@ -808,20 +748,20 @@ func @fcmp(f32, f32) -> () {
   // CHECK-NEXT: llvm.fcmp "une" %arg0, %arg1 : f32
   // CHECK-NEXT: llvm.fcmp "uno" %arg0, %arg1 : f32
   // CHECK-NEXT: llvm.return
-  %1 = cmpf "oeq", %arg0, %arg1 : f32
-  %2 = cmpf "ogt", %arg0, %arg1 : f32
-  %3 = cmpf "oge", %arg0, %arg1 : f32
-  %4 = cmpf "olt", %arg0, %arg1 : f32
-  %5 = cmpf "ole", %arg0, %arg1 : f32
-  %6 = cmpf "one", %arg0, %arg1 : f32
-  %7 = cmpf "ord", %arg0, %arg1 : f32
-  %8 = cmpf "ueq", %arg0, %arg1 : f32
-  %9 = cmpf "ugt", %arg0, %arg1 : f32
-  %10 = cmpf "uge", %arg0, %arg1 : f32
-  %11 = cmpf "ult", %arg0, %arg1 : f32
-  %12 = cmpf "ule", %arg0, %arg1 : f32
-  %13 = cmpf "une", %arg0, %arg1 : f32
-  %14 = cmpf "uno", %arg0, %arg1 : f32
+  %1 = cmpf oeq, %arg0, %arg1 : f32
+  %2 = cmpf ogt, %arg0, %arg1 : f32
+  %3 = cmpf oge, %arg0, %arg1 : f32
+  %4 = cmpf olt, %arg0, %arg1 : f32
+  %5 = cmpf ole, %arg0, %arg1 : f32
+  %6 = cmpf one, %arg0, %arg1 : f32
+  %7 = cmpf ord, %arg0, %arg1 : f32
+  %8 = cmpf ueq, %arg0, %arg1 : f32
+  %9 = cmpf ugt, %arg0, %arg1 : f32
+  %10 = cmpf uge, %arg0, %arg1 : f32
+  %11 = cmpf ult, %arg0, %arg1 : f32
+  %12 = cmpf ule, %arg0, %arg1 : f32
+  %13 = cmpf une, %arg0, %arg1 : f32
+  %14 = cmpf uno, %arg0, %arg1 : f32
 
   return
 }
@@ -1296,19 +1236,19 @@ func @subview_mixed_static_dynamic(%0 : memref<64x4xf32, offset: 0, strides: [4,
 
 // CHECK-LABEL: func @atomic_rmw
 func @atomic_rmw(%I : memref<10xi32>, %ival : i32, %F : memref<10xf32>, %fval : f32, %i : index) {
-  atomic_rmw "assign" %fval, %F[%i] : (f32, memref<10xf32>) -> f32
+  atomic_rmw assign %fval, %F[%i] : (f32, memref<10xf32>) -> f32
   // CHECK: llvm.atomicrmw xchg %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "addi" %ival, %I[%i] : (i32, memref<10xi32>) -> i32
+  atomic_rmw addi %ival, %I[%i] : (i32, memref<10xi32>) -> i32
   // CHECK: llvm.atomicrmw add %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "maxs" %ival, %I[%i] : (i32, memref<10xi32>) -> i32
+  atomic_rmw maxs %ival, %I[%i] : (i32, memref<10xi32>) -> i32
   // CHECK: llvm.atomicrmw max %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "mins" %ival, %I[%i] : (i32, memref<10xi32>) -> i32
+  atomic_rmw mins %ival, %I[%i] : (i32, memref<10xi32>) -> i32
   // CHECK: llvm.atomicrmw min %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "maxu" %ival, %I[%i] : (i32, memref<10xi32>) -> i32
+  atomic_rmw maxu %ival, %I[%i] : (i32, memref<10xi32>) -> i32
   // CHECK: llvm.atomicrmw umax %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "minu" %ival, %I[%i] : (i32, memref<10xi32>) -> i32
+  atomic_rmw minu %ival, %I[%i] : (i32, memref<10xi32>) -> i32
   // CHECK: llvm.atomicrmw umin %{{.*}}, %{{.*}} acq_rel
-  atomic_rmw "addf" %fval, %F[%i] : (f32, memref<10xf32>) -> f32
+  atomic_rmw addf %fval, %F[%i] : (f32, memref<10xf32>) -> f32
   // CHECK: llvm.atomicrmw fadd %{{.*}}, %{{.*}} acq_rel
   return
 }

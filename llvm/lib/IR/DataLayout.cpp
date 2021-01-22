@@ -65,7 +65,15 @@ StructLayout::StructLayout(StructType *ST, const DataLayout &DL) {
     StructAlignment = std::max(TyAlign, StructAlignment);
 
     MemberOffsets[i] = StructSize;
-    StructSize += DL.getTypeAllocSize(Ty); // Consume space for this data item
+    // Consume space for this data item
+    // --------
+    // EPI: We know this is wrong but eventually we'll have enough polynomial
+    // support to make this meaningful. Also we only use those for a very
+    // specific set of cases (and eventually it will be overriden by a purely
+    // register based solution). However we have users that need their codes
+    // working, so trade-offs.
+    // --------
+    StructSize += DL.getTypeAllocSize(Ty).getKnownMinSize();
   }
 
   // Add padding to the end of the struct so that it could be put in an array

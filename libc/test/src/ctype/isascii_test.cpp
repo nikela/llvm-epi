@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "src/ctype/isascii.h"
-
 #include "utils/UnitTest/Test.h"
 
-TEST(IsAscii, DefaultLocale) {
+#include "src/ctype/isascii.h"
+
+TEST(LlvmLibcIsAscii, DefaultLocale) {
   // Loops through all characters, verifying that ascii characters
   //    (which are all 7 bit unsigned integers)
   // return a non-zero integer and everything else returns zero.

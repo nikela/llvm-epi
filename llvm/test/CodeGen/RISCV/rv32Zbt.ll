@@ -91,9 +91,8 @@ define i32 @cmov_sle_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    bge a2, a1, .LBB3_2
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    mv a3, a0
-; RV32I-NEXT:  .LBB3_2:
 ; RV32I-NEXT:    mv a0, a3
+; RV32I-NEXT:  .LBB3_2:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_sle_i32:
@@ -108,7 +107,7 @@ define i32 @cmov_sle_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32IBT-NEXT:    cmov a0, a1, a3, a0
 ; RV32IBT-NEXT:    ret
   %tobool = icmp sle i32 %b, %c
-  %cond = select i1 %tobool, i32 %d, i32 %a
+  %cond = select i1 %tobool, i32 %a, i32 %d
   ret i32 %cond
 }
 
@@ -117,9 +116,8 @@ define i32 @cmov_sge_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    bge a1, a2, .LBB4_2
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    mv a3, a0
-; RV32I-NEXT:  .LBB4_2:
 ; RV32I-NEXT:    mv a0, a3
+; RV32I-NEXT:  .LBB4_2:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_sge_i32:
@@ -134,7 +132,7 @@ define i32 @cmov_sge_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32IBT-NEXT:    cmov a0, a1, a3, a0
 ; RV32IBT-NEXT:    ret
   %tobool = icmp sge i32 %b, %c
-  %cond = select i1 %tobool, i32 %d, i32 %a
+  %cond = select i1 %tobool, i32 %a, i32 %d
   ret i32 %cond
 }
 
@@ -143,9 +141,8 @@ define i32 @cmov_ule_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    bgeu a2, a1, .LBB5_2
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    mv a3, a0
-; RV32I-NEXT:  .LBB5_2:
 ; RV32I-NEXT:    mv a0, a3
+; RV32I-NEXT:  .LBB5_2:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_ule_i32:
@@ -160,7 +157,7 @@ define i32 @cmov_ule_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32IBT-NEXT:    cmov a0, a1, a3, a0
 ; RV32IBT-NEXT:    ret
   %tobool = icmp ule i32 %b, %c
-  %cond = select i1 %tobool, i32 %d, i32 %a
+  %cond = select i1 %tobool, i32 %a, i32 %d
   ret i32 %cond
 }
 
@@ -169,9 +166,8 @@ define i32 @cmov_uge_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    bgeu a1, a2, .LBB6_2
 ; RV32I-NEXT:  # %bb.1:
-; RV32I-NEXT:    mv a3, a0
-; RV32I-NEXT:  .LBB6_2:
 ; RV32I-NEXT:    mv a0, a3
+; RV32I-NEXT:  .LBB6_2:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_uge_i32:
@@ -186,7 +182,7 @@ define i32 @cmov_uge_i32(i32 %a, i32 %b, i32 %c, i32 %d) nounwind {
 ; RV32IBT-NEXT:    cmov a0, a1, a3, a0
 ; RV32IBT-NEXT:    ret
   %tobool = icmp uge i32 %b, %c
-  %cond = select i1 %tobool, i32 %d, i32 %a
+  %cond = select i1 %tobool, i32 %a, i32 %d
   ret i32 %cond
 }
 
@@ -235,21 +231,19 @@ define i64 @cmov_sle_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32I-NEXT:    xori a2, a2, 1
 ; RV32I-NEXT:    bnez a2, .LBB8_4
 ; RV32I-NEXT:  .LBB8_3:
-; RV32I-NEXT:    mv a6, a0
-; RV32I-NEXT:    mv a7, a1
-; RV32I-NEXT:  .LBB8_4:
 ; RV32I-NEXT:    mv a0, a6
 ; RV32I-NEXT:    mv a1, a7
+; RV32I-NEXT:  .LBB8_4:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_sle_i64:
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    xor t0, a3, a5
-; RV32IB-NEXT:    slt a3, a5, a3
-; RV32IB-NEXT:    xori a3, a3, 1
 ; RV32IB-NEXT:    sltu a2, a4, a2
 ; RV32IB-NEXT:    xori a2, a2, 1
-; RV32IB-NEXT:    cmov a2, t0, a2, a3
+; RV32IB-NEXT:    slt a3, a5, a3
+; RV32IB-NEXT:    xori a3, a3, 1
+; RV32IB-NEXT:    cmov a2, t0, a3, a2
 ; RV32IB-NEXT:    cmov a0, a2, a0, a6
 ; RV32IB-NEXT:    cmov a1, a2, a1, a7
 ; RV32IB-NEXT:    ret
@@ -257,16 +251,16 @@ define i64 @cmov_sle_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32IBT-LABEL: cmov_sle_i64:
 ; RV32IBT:       # %bb.0:
 ; RV32IBT-NEXT:    xor t0, a3, a5
-; RV32IBT-NEXT:    slt a3, a5, a3
-; RV32IBT-NEXT:    xori a3, a3, 1
 ; RV32IBT-NEXT:    sltu a2, a4, a2
 ; RV32IBT-NEXT:    xori a2, a2, 1
-; RV32IBT-NEXT:    cmov a2, t0, a2, a3
+; RV32IBT-NEXT:    slt a3, a5, a3
+; RV32IBT-NEXT:    xori a3, a3, 1
+; RV32IBT-NEXT:    cmov a2, t0, a3, a2
 ; RV32IBT-NEXT:    cmov a0, a2, a0, a6
 ; RV32IBT-NEXT:    cmov a1, a2, a1, a7
 ; RV32IBT-NEXT:    ret
   %tobool = icmp sle i64 %b, %c
-  %cond = select i1 %tobool, i64 %d, i64 %a
+  %cond = select i1 %tobool, i64 %a, i64 %d
   ret i64 %cond
 }
 
@@ -284,21 +278,19 @@ define i64 @cmov_sge_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32I-NEXT:    xori a2, a2, 1
 ; RV32I-NEXT:    bnez a2, .LBB9_4
 ; RV32I-NEXT:  .LBB9_3:
-; RV32I-NEXT:    mv a6, a0
-; RV32I-NEXT:    mv a7, a1
-; RV32I-NEXT:  .LBB9_4:
 ; RV32I-NEXT:    mv a0, a6
 ; RV32I-NEXT:    mv a1, a7
+; RV32I-NEXT:  .LBB9_4:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_sge_i64:
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    xor t0, a3, a5
-; RV32IB-NEXT:    slt a3, a3, a5
-; RV32IB-NEXT:    xori a3, a3, 1
 ; RV32IB-NEXT:    sltu a2, a2, a4
 ; RV32IB-NEXT:    xori a2, a2, 1
-; RV32IB-NEXT:    cmov a2, t0, a2, a3
+; RV32IB-NEXT:    slt a3, a3, a5
+; RV32IB-NEXT:    xori a3, a3, 1
+; RV32IB-NEXT:    cmov a2, t0, a3, a2
 ; RV32IB-NEXT:    cmov a0, a2, a0, a6
 ; RV32IB-NEXT:    cmov a1, a2, a1, a7
 ; RV32IB-NEXT:    ret
@@ -306,16 +298,16 @@ define i64 @cmov_sge_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32IBT-LABEL: cmov_sge_i64:
 ; RV32IBT:       # %bb.0:
 ; RV32IBT-NEXT:    xor t0, a3, a5
-; RV32IBT-NEXT:    slt a3, a3, a5
-; RV32IBT-NEXT:    xori a3, a3, 1
 ; RV32IBT-NEXT:    sltu a2, a2, a4
 ; RV32IBT-NEXT:    xori a2, a2, 1
-; RV32IBT-NEXT:    cmov a2, t0, a2, a3
+; RV32IBT-NEXT:    slt a3, a3, a5
+; RV32IBT-NEXT:    xori a3, a3, 1
+; RV32IBT-NEXT:    cmov a2, t0, a3, a2
 ; RV32IBT-NEXT:    cmov a0, a2, a0, a6
 ; RV32IBT-NEXT:    cmov a1, a2, a1, a7
 ; RV32IBT-NEXT:    ret
   %tobool = icmp sge i64 %b, %c
-  %cond = select i1 %tobool, i64 %d, i64 %a
+  %cond = select i1 %tobool, i64 %a, i64 %d
   ret i64 %cond
 }
 
@@ -333,21 +325,19 @@ define i64 @cmov_ule_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32I-NEXT:    xori a2, a2, 1
 ; RV32I-NEXT:    bnez a2, .LBB10_4
 ; RV32I-NEXT:  .LBB10_3:
-; RV32I-NEXT:    mv a6, a0
-; RV32I-NEXT:    mv a7, a1
-; RV32I-NEXT:  .LBB10_4:
 ; RV32I-NEXT:    mv a0, a6
 ; RV32I-NEXT:    mv a1, a7
+; RV32I-NEXT:  .LBB10_4:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_ule_i64:
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    xor t0, a3, a5
-; RV32IB-NEXT:    sltu a3, a5, a3
-; RV32IB-NEXT:    xori a3, a3, 1
 ; RV32IB-NEXT:    sltu a2, a4, a2
 ; RV32IB-NEXT:    xori a2, a2, 1
-; RV32IB-NEXT:    cmov a2, t0, a2, a3
+; RV32IB-NEXT:    sltu a3, a5, a3
+; RV32IB-NEXT:    xori a3, a3, 1
+; RV32IB-NEXT:    cmov a2, t0, a3, a2
 ; RV32IB-NEXT:    cmov a0, a2, a0, a6
 ; RV32IB-NEXT:    cmov a1, a2, a1, a7
 ; RV32IB-NEXT:    ret
@@ -355,16 +345,16 @@ define i64 @cmov_ule_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32IBT-LABEL: cmov_ule_i64:
 ; RV32IBT:       # %bb.0:
 ; RV32IBT-NEXT:    xor t0, a3, a5
-; RV32IBT-NEXT:    sltu a3, a5, a3
-; RV32IBT-NEXT:    xori a3, a3, 1
 ; RV32IBT-NEXT:    sltu a2, a4, a2
 ; RV32IBT-NEXT:    xori a2, a2, 1
-; RV32IBT-NEXT:    cmov a2, t0, a2, a3
+; RV32IBT-NEXT:    sltu a3, a5, a3
+; RV32IBT-NEXT:    xori a3, a3, 1
+; RV32IBT-NEXT:    cmov a2, t0, a3, a2
 ; RV32IBT-NEXT:    cmov a0, a2, a0, a6
 ; RV32IBT-NEXT:    cmov a1, a2, a1, a7
 ; RV32IBT-NEXT:    ret
   %tobool = icmp ule i64 %b, %c
-  %cond = select i1 %tobool, i64 %d, i64 %a
+  %cond = select i1 %tobool, i64 %a, i64 %d
   ret i64 %cond
 }
 
@@ -382,21 +372,19 @@ define i64 @cmov_uge_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32I-NEXT:    xori a2, a2, 1
 ; RV32I-NEXT:    bnez a2, .LBB11_4
 ; RV32I-NEXT:  .LBB11_3:
-; RV32I-NEXT:    mv a6, a0
-; RV32I-NEXT:    mv a7, a1
-; RV32I-NEXT:  .LBB11_4:
 ; RV32I-NEXT:    mv a0, a6
 ; RV32I-NEXT:    mv a1, a7
+; RV32I-NEXT:  .LBB11_4:
 ; RV32I-NEXT:    ret
 ;
 ; RV32IB-LABEL: cmov_uge_i64:
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    xor t0, a3, a5
-; RV32IB-NEXT:    sltu a3, a3, a5
-; RV32IB-NEXT:    xori a3, a3, 1
 ; RV32IB-NEXT:    sltu a2, a2, a4
 ; RV32IB-NEXT:    xori a2, a2, 1
-; RV32IB-NEXT:    cmov a2, t0, a2, a3
+; RV32IB-NEXT:    sltu a3, a3, a5
+; RV32IB-NEXT:    xori a3, a3, 1
+; RV32IB-NEXT:    cmov a2, t0, a3, a2
 ; RV32IB-NEXT:    cmov a0, a2, a0, a6
 ; RV32IB-NEXT:    cmov a1, a2, a1, a7
 ; RV32IB-NEXT:    ret
@@ -404,16 +392,16 @@ define i64 @cmov_uge_i64(i64 %a, i64 %b, i64 %c, i64 %d) nounwind {
 ; RV32IBT-LABEL: cmov_uge_i64:
 ; RV32IBT:       # %bb.0:
 ; RV32IBT-NEXT:    xor t0, a3, a5
-; RV32IBT-NEXT:    sltu a3, a3, a5
-; RV32IBT-NEXT:    xori a3, a3, 1
 ; RV32IBT-NEXT:    sltu a2, a2, a4
 ; RV32IBT-NEXT:    xori a2, a2, 1
-; RV32IBT-NEXT:    cmov a2, t0, a2, a3
+; RV32IBT-NEXT:    sltu a3, a3, a5
+; RV32IBT-NEXT:    xori a3, a3, 1
+; RV32IBT-NEXT:    cmov a2, t0, a3, a2
 ; RV32IBT-NEXT:    cmov a0, a2, a0, a6
 ; RV32IBT-NEXT:    cmov a1, a2, a1, a7
 ; RV32IBT-NEXT:    ret
   %tobool = icmp uge i64 %b, %c
-  %cond = select i1 %tobool, i64 %d, i64 %a
+  %cond = select i1 %tobool, i64 %a, i64 %d
   ret i64 %cond
 }
 
@@ -515,7 +503,7 @@ define i64 @fshl_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IB-NEXT:    addi t1, a5, -32
 ; RV32IB-NEXT:    sll t0, a0, t1
 ; RV32IB-NEXT:    slti a1, t1, 0
-; RV32IB-NEXT:    cmov t0, a1, t0, a7
+; RV32IB-NEXT:    cmov t0, a1, a7, t0
 ; RV32IB-NEXT:    not a7, a4
 ; RV32IB-NEXT:    srli t4, a3, 1
 ; RV32IB-NEXT:    srl t2, t4, a7
@@ -533,7 +521,7 @@ define i64 @fshl_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IB-NEXT:    or a2, a7, a2
 ; RV32IB-NEXT:    srl a3, t4, a5
 ; RV32IB-NEXT:    slti a5, a5, 0
-; RV32IB-NEXT:    cmov a2, a5, a3, a2
+; RV32IB-NEXT:    cmov a2, a5, a2, a3
 ; RV32IB-NEXT:    sll a0, a0, a4
 ; RV32IB-NEXT:    srai a3, t1, 31
 ; RV32IB-NEXT:    and a0, a3, a0
@@ -552,7 +540,7 @@ define i64 @fshl_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IBT-NEXT:    addi t1, a5, -32
 ; RV32IBT-NEXT:    sll t0, a0, t1
 ; RV32IBT-NEXT:    slti a1, t1, 0
-; RV32IBT-NEXT:    cmov t0, a1, t0, a7
+; RV32IBT-NEXT:    cmov t0, a1, a7, t0
 ; RV32IBT-NEXT:    not a5, a4
 ; RV32IBT-NEXT:    srli a7, a3, 1
 ; RV32IBT-NEXT:    srl t4, a7, a5
@@ -569,7 +557,7 @@ define i64 @fshl_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IBT-NEXT:    or a2, a2, a3
 ; RV32IBT-NEXT:    srl a3, a7, t3
 ; RV32IBT-NEXT:    slti a5, t3, 0
-; RV32IBT-NEXT:    cmov a2, a5, a3, a2
+; RV32IBT-NEXT:    cmov a2, a5, a2, a3
 ; RV32IBT-NEXT:    sll a0, a0, a4
 ; RV32IBT-NEXT:    srai a3, t1, 31
 ; RV32IBT-NEXT:    and a0, a3, a0
@@ -679,7 +667,7 @@ define i64 @fshr_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IB-NEXT:    addi t2, a5, -32
 ; RV32IB-NEXT:    srl t0, a3, t2
 ; RV32IB-NEXT:    slti a2, t2, 0
-; RV32IB-NEXT:    cmov a7, a2, t0, a7
+; RV32IB-NEXT:    cmov a7, a2, a7, t0
 ; RV32IB-NEXT:    not t3, a4
 ; RV32IB-NEXT:    slli t0, a0, 1
 ; RV32IB-NEXT:    sll t1, t0, t3
@@ -697,7 +685,7 @@ define i64 @fshr_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IB-NEXT:    or a0, a1, a0
 ; RV32IB-NEXT:    sll a1, t0, a2
 ; RV32IB-NEXT:    slti a2, a2, 0
-; RV32IB-NEXT:    cmov a0, a2, a1, a0
+; RV32IB-NEXT:    cmov a0, a2, a0, a1
 ; RV32IB-NEXT:    srl a1, a3, a4
 ; RV32IB-NEXT:    srai a2, t2, 31
 ; RV32IB-NEXT:    and a1, a2, a1
@@ -717,7 +705,7 @@ define i64 @fshr_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IBT-NEXT:    addi t2, a5, -32
 ; RV32IBT-NEXT:    srl t0, a3, t2
 ; RV32IBT-NEXT:    slti a2, t2, 0
-; RV32IBT-NEXT:    cmov a7, a2, t0, a7
+; RV32IBT-NEXT:    cmov a7, a2, a7, t0
 ; RV32IBT-NEXT:    not t4, a4
 ; RV32IBT-NEXT:    slli t0, a0, 1
 ; RV32IBT-NEXT:    sll t1, t0, t4
@@ -736,7 +724,7 @@ define i64 @fshr_i64(i64 %a, i64 %b, i64 %c) nounwind {
 ; RV32IBT-NEXT:    or a0, a0, a2
 ; RV32IBT-NEXT:    sll a1, t0, a5
 ; RV32IBT-NEXT:    slti a2, a5, 0
-; RV32IBT-NEXT:    cmov a0, a2, a1, a0
+; RV32IBT-NEXT:    cmov a0, a2, a0, a1
 ; RV32IBT-NEXT:    srl a1, a3, a4
 ; RV32IBT-NEXT:    srai a2, t2, 31
 ; RV32IBT-NEXT:    and a1, a2, a1

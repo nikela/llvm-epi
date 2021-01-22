@@ -30,6 +30,7 @@
 #include "llvm/ADT/Twine.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Debug.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/ToolOutputFile.h"
 
@@ -85,6 +86,7 @@ public:
     // Tokens with no info.
     colon,
     comma,
+    doc_str,
     equal,
     gt,
     l_brace,
@@ -182,6 +184,9 @@ private:
 
   // Lex an integer.
   Token lexInteger(const char *tokStart);
+
+  // Lex a string.
+  Token lexString(const char *tokStart);
 
   // Skip a comment line, starting with a '//'.
   void skipComment();
@@ -287,6 +292,8 @@ Token Lexer::lexToken() {
       return formToken(Token::Kind::star, tokStart);
     case '?':
       return formToken(Token::Kind::question, tokStart);
+    case '"':
+      return lexString(tokStart);
     case '/':
       if (*curPtr == '/') {
         skipComment();
@@ -331,6 +338,36 @@ Token Lexer::lexInteger(const char *tokStart) {
 
   StringRef str(tokStart, curPtr - tokStart);
   return Token(Token::Kind::integer, str);
+}
+
+Token Lexer::lexString(const char *tokStart) {
+  assert(curPtr[-1] == '"');
+
+  if (*curPtr == '"' && *(curPtr + 1) == '"') {
+    curPtr += 2;
+    while (true) {
+      switch (*curPtr++) {
+      case '"':
+        if (*curPtr == '"' && *(curPtr + 1) == '"') {
+          Token token(Token::Kind::doc_str,
+                      StringRef(tokStart + 3, curPtr - tokStart - 4));
+          curPtr += 2;
+          return token;
+        }
+        continue;
+      case 0:
+        // If this is a random nul character in the middle of the doc string,
+        // just include it.  If it is the end of file, then it is an error.
+        if (curPtr - 1 != curBuffer.end())
+          continue;
+        return emitError(curPtr - 1, "expected '\"\"\"' to end doc string");
+      default:
+        continue;
+      }
+    }
+  }
+
+  return emitError(curPtr - 1, "expected '\"\"\"' to start doc string");
 }
 
 /// Skip a comment line, starting with a '//'.
@@ -1134,6 +1171,8 @@ private:
   /// Attributes are per TC def.
   std::map<std::string, RegisteredAttr> registeredAttrs;
 
+  StringRef docString;
+
   Parser &parser;
 };
 } // namespace
@@ -1655,6 +1694,14 @@ LogicalResult TCParser::parseAndEmitODSDef(llvm::raw_ostream &os) {
       return failure();
   }
 
+  // Parse optional doc string
+  if (parser.curToken.is(Token::Kind::doc_str)) {
+    docString = parser.curToken.getSpelling();
+    parser.consumeToken();
+    LLVM_DEBUG(llvm::dbgs()
+               << "parsed doc string: '''" << docString << "'''\n");
+  }
+
   // Since we don't declare symbols separately, we discover them eagerly: each
   // newly encountered id in a tensor shape expression is treated as a new
   // symbolic. At this point, all tensors have been parsed and all the symbols
@@ -1721,6 +1768,7 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
     std::string odsType = llvm::StringSwitch<std::string>(elementType)
                               .Case("f32", "F32")
                               .Case("i32", "I32")
+                              .Case("i64", "I64")
                               .Default("");
     if (odsType.empty()) {
       parser.emitError("unimplemented support for attribute element type: " +
@@ -1755,15 +1803,17 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
     AttrSizedOperandSegments,
     DeclareOpInterfaceMethods<MemoryEffectsOpInterface>,
     SingleBlockImplicitTerminator<"YieldOp">]> {
+      {2}
       let arguments = (ins
         Variadic<AnyShaped>:$inputs,
-        Variadic<AnyShaped>:$outputs{4}
+        Variadic<AnyShaped>:$outputs{3}
       );
       let results = (outs Variadic<AnyRankedTensor>:$result_tensors);
       let regions = (region AnyRegion:$region);
 
       let skipDefaultBuilders = 1;
-      let builders = [ OpBuilderDAG<
+      let builders = [
+        OpBuilderDAG<
         (ins "ValueRange":$inputs, "ValueRange":$outputs),
         [{{
           $_state.addOperands(inputs);
@@ -1778,7 +1828,8 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
             $_state,
             TypeRange(inputs),
             TypeRange(outputs));
-        }]>, OpBuilderDAG<
+        }]>,
+        OpBuilderDAG<
         (ins "TypeRange":$resultTensorTypes, "ValueRange":$inputs,
              "ValueRange":$outputs),
         [{{
@@ -1795,7 +1846,8 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
             $_state,
             TypeRange(inputs),
             TypeRange(outputs));
-        }]>, OpBuilderDAG<
+        }]>,
+        OpBuilderDAG<
         (ins "TypeRange":$resultTensorTypes, "ValueRange":$operands,
              CArg<"ArrayRef<NamedAttribute>", "{{}">:$attributes),
         [{{
@@ -1804,6 +1856,7 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
           $_state.addTypes(resultTensorTypes);
           (void)$_state.addRegion();
         }]>
+        {5}
       ];
       let printer = [{{ return ::printNamedStructuredOp(p, *this); }];
       let parser = [{{ return ::parseNamedStructuredOp<{0}>(parser, result); }];
@@ -1818,23 +1871,69 @@ void TCParser::printODS(llvm::raw_ostream &os, StringRef cppOpName,
         static std::function<void(Block &)> getRegionBuilder() {{ return regionBuilder; }
 
         // Generic methods.
-        static unsigned getNumRegionArgs() {{ return {5}; }
+        static unsigned getNumRegionArgs() {{ return {4}; }
         std::string getLibraryCallName() {{
           return generateLibraryCallName(getOperation());
         }
       }];
   })FMT";
 
-  unsigned nInputs = 0, nOutputs = 0;
-  for (auto &t : registeredTensors) {
-    if (t.getValue().isOutput)
-      nOutputs++;
-    else
-      nInputs++;
+  // Generate documentation.
+  std::string doc;
+  if (!docString.empty()) {
+    const char *docFmt = R"FMT(
+      let summary = [{ {0} }];
+      let description = [{
+        {1}
+      }];
+    )FMT";
+
+    StringRef summary, description;
+    std::tie(summary, description) = docString.trim().split('\n');
+    doc = llvm::formatv(docFmt, summary.trim(), description.trim());
   }
 
-  os << llvm::formatv(header, cppOpName, linalgOpName, nInputs, nOutputs,
-                      attrList, state.orderedTensorArgs.size());
+  // Generate an additional builder that has parameters for attributes.
+  std::string attrBuilder;
+  if (!registeredAttrs.empty()) {
+    SmallVector<std::string, 4> attrParams, attrStmts;
+    for (const auto &attr : registeredAttrs) {
+      llvm::StringRef name = attr.first;
+      attrParams.push_back(llvm::formatv("\"Attribute\":${0}", name));
+      attrStmts.push_back(
+          llvm::formatv("$_state.addAttribute(\"{0}\", {0});", name));
+    }
+    std::string attrParamsList = llvm::join(attrParams, ", ");
+    std::string attrStmtsList = llvm::join(attrStmts, "\n");
+
+    const char *builderFmt = R"FMT(
+      , OpBuilderDAG<
+      (ins "TypeRange":$resultTensorTypes, "ValueRange":$inputs,
+           "ValueRange":$outputs, {1}),
+      [{{
+        $_state.addOperands(inputs);
+        $_state.addOperands(outputs);
+        $_state.addTypes(resultTensorTypes);
+        $_state.addAttribute(
+          "operand_segment_sizes",
+          $_builder.getI32VectorAttr({{
+            static_cast<int32_t>(inputs.size()),
+            static_cast<int32_t>(outputs.size())}));
+        buildNamedStructuredOpRegionAndAttributes<{0}>(
+          $_builder,
+          $_state,
+          TypeRange(inputs),
+          TypeRange(outputs));
+        {2}
+      }]>
+    )FMT";
+    attrBuilder =
+        llvm::formatv(builderFmt, cppOpName, attrParamsList, attrStmtsList);
+  }
+
+  // Finally put everything together.
+  os << llvm::formatv(header, cppOpName, linalgOpName, doc, attrList,
+                      state.orderedTensorArgs.size(), attrBuilder);
 }
 
 /// Print the C++ StructuredOpsInterface impl of `iterator_types`.
@@ -2091,13 +2190,15 @@ TCParser::RegisteredAttr::getValueFn(ArrayRef<uint64_t> indices) const {
       return llvm::formatv("getValue<float>({ {0} })", indexList);
     if (elementType == "i32")
       return llvm::formatv("getValue<int>({ {0} })", indexList);
+    if (elementType == "i64")
+      return llvm::formatv("getValue<int64_t>({ {0} })", indexList);
 
     return "";
   }
 
   if (elementType == "f32")
     return "getValue().convertToFloat()";
-  if (elementType == "i32")
+  if (elementType == "i32" || elementType == "i64")
     return "getInt()";
   return "";
 }

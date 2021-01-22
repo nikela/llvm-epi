@@ -38,50 +38,48 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 [[TMP3]], [[N_MOD_VF]]
 ; CHECK-NEXT:    [[IND_END:%.*]] = add i64 [[CONV231]], [[N_VEC]]
 ; CHECK-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP7]], [[TMP6]]
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ insertelement (<vscale x 1 x double> zeroinitializer, double 0.000000e+00, i32 0), [[VECTOR_PH]] ], [ [[TMP14:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ insertelement (<vscale x 1 x double> zeroinitializer, double 0.000000e+00, i32 0), [[VECTOR_PH]] ], [ [[TMP13:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = add i64 [[CONV231]], [[INDEX]]
-; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, double* [[A:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[TMP9:%.*]] = bitcast double* [[TMP8]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP9]], align 8
-; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, i64* [[JA:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[TMP11:%.*]] = bitcast i64* [[TMP10]] to <vscale x 1 x i64>*
-; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, <vscale x 1 x i64>* [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds double, double* [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
-; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP12]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> undef)
-; CHECK-NEXT:    [[TMP13:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
-; CHECK-NEXT:    [[TMP14]] = fadd fast <vscale x 1 x double> [[TMP13]], [[VEC_PHI]]
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
-; CHECK-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP15]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, double* [[A:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[TMP8:%.*]] = bitcast double* [[TMP7]] to <vscale x 1 x double>*
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP8]], align 8
+; CHECK-NEXT:    [[TMP9:%.*]] = getelementptr inbounds i64, i64* [[JA:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[TMP10:%.*]] = bitcast i64* [[TMP9]] to <vscale x 1 x i64>*
+; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, <vscale x 1 x i64>* [[TMP10]], align 8
+; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds double, double* [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
+; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP11]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> undef)
+; CHECK-NEXT:    [[TMP12:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
+; CHECK-NEXT:    [[TMP13]] = fadd fast <vscale x 1 x double> [[TMP12]], [[VEC_PHI]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
+; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP16:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP14]])
+; CHECK-NEXT:    [[TMP15:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP13]])
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END]], label [[FOR_BODY7_PREHEADER4]]
 ; CHECK:       for.body7.preheader4:
 ; CHECK-NEXT:    [[INDVARS_IV_PH:%.*]] = phi i64 [ [[CONV231]], [[FOR_BODY7_PREHEADER]] ], [ [[IND_END]], [[MIDDLE_BLOCK]] ]
-; CHECK-NEXT:    [[SUM_034_PH:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY7_PREHEADER]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[SUM_034_PH:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY7_PREHEADER]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ]
 ; CHECK-NEXT:    br label [[FOR_BODY7:%.*]]
 ; CHECK:       for.body7:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY7]] ], [ [[INDVARS_IV_PH]], [[FOR_BODY7_PREHEADER4]] ]
 ; CHECK-NEXT:    [[SUM_034:%.*]] = phi double [ [[ADD13:%.*]], [[FOR_BODY7]] ], [ [[SUM_034_PH]], [[FOR_BODY7_PREHEADER4]] ]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds double, double* [[A]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP17:%.*]] = load double, double* [[ARRAYIDX9]], align 8
+; CHECK-NEXT:    [[TMP16:%.*]] = load double, double* [[ARRAYIDX9]], align 8
 ; CHECK-NEXT:    [[ARRAYIDX11:%.*]] = getelementptr inbounds i64, i64* [[JA]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP18:%.*]] = load i64, i64* [[ARRAYIDX11]], align 8
-; CHECK-NEXT:    [[ARRAYIDX12:%.*]] = getelementptr inbounds double, double* [[X]], i64 [[TMP18]]
-; CHECK-NEXT:    [[TMP19:%.*]] = load double, double* [[ARRAYIDX12]], align 8
-; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[TMP19]], [[TMP17]]
+; CHECK-NEXT:    [[TMP17:%.*]] = load i64, i64* [[ARRAYIDX11]], align 8
+; CHECK-NEXT:    [[ARRAYIDX12:%.*]] = getelementptr inbounds double, double* [[X]], i64 [[TMP17]]
+; CHECK-NEXT:    [[TMP18:%.*]] = load double, double* [[ARRAYIDX12]], align 8
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[TMP18]], [[TMP16]]
 ; CHECK-NEXT:    [[ADD13]] = fadd fast double [[MUL]], [[SUM_034]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT1:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], [[LOOP2:!llvm.loop !.*]]
 ; CHECK:       for.end:
-; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
+; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
 ; CHECK-NEXT:    [[ARRAYIDX15:%.*]] = getelementptr inbounds double, double* [[Y:%.*]], i64 [[INDVARS_IV39]]
 ; CHECK-NEXT:    store double [[SUM_0_LCSSA]], double* [[ARRAYIDX15]], align 8
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT40]], [[WIDE_TRIP_COUNT]]

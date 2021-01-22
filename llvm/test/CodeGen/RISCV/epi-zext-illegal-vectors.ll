@@ -23,12 +23,9 @@
 define <vscale x 1 x i64> @zext_nxv1i8(<vscale x 1 x i8> %v)
 ; CHECK-LABEL: zext_nxv1i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
-; CHECK-NEXT:    vsetvli a0, zero, e16,mf4,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v25
-; CHECK-NEXT:    vsetvli a0, zero, e32,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v16, v26
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vzext.vf8 v25, v16
+; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {
   %sv = zext <vscale x 1 x i8> %v to <vscale x 1 x i64>
@@ -37,10 +34,9 @@ define <vscale x 1 x i64> @zext_nxv1i8(<vscale x 1 x i8> %v)
 define <vscale x 2 x i32> @zext_nxv2i8(<vscale x 2 x i8> %v)
 ; CHECK-LABEL: zext_nxv2i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,mf4,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
-; CHECK-NEXT:    vsetvli a0, zero, e16,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v16, v25
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vzext.vf4 v25, v16
+; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {
   %sv = zext <vscale x 2 x i8> %v to <vscale x 2 x i32>
@@ -49,8 +45,8 @@ define <vscale x 2 x i32> @zext_nxv2i8(<vscale x 2 x i8> %v)
 define <vscale x 4 x i16> @zext_nxv4i8(<vscale x 4 x i8> %v)
 ; CHECK-LABEL: zext_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e8,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
+; CHECK-NEXT:    vsetvli a0, zero, e16,m1,ta,mu
+; CHECK-NEXT:    vzext.vf2 v25, v16
 ; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {
@@ -62,10 +58,9 @@ define <vscale x 4 x i16> @zext_nxv4i8(<vscale x 4 x i8> %v)
 define <vscale x 1 x i64> @zext_nxv1i16(<vscale x 1 x i16> %v)
 ; CHECK-LABEL: zext_nxv1i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,mf4,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
-; CHECK-NEXT:    vsetvli a0, zero, e32,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v16, v25
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vzext.vf4 v25, v16
+; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {
   %sv = zext <vscale x 1 x i16> %v to <vscale x 1 x i64>
@@ -74,8 +69,8 @@ define <vscale x 1 x i64> @zext_nxv1i16(<vscale x 1 x i16> %v)
 define <vscale x 2 x i32> @zext_nxv2i16(<vscale x 2 x i16> %v)
 ; CHECK-LABEL: zext_nxv2i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vzext.vf2 v25, v16
 ; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {
@@ -87,8 +82,8 @@ define <vscale x 2 x i32> @zext_nxv2i16(<vscale x 2 x i16> %v)
 define <vscale x 1 x i64> @zext_nxv1i32(<vscale x 1 x i32> %v)
 ; CHECK-LABEL: zext_nxv1i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,mf2,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v16
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vzext.vf2 v25, v16
 ; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 {

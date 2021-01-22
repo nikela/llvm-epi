@@ -539,6 +539,16 @@ def int_readcyclecounter : DefaultAttrsIntrinsic<[llvm_i64_ty]>;
 def int_assume        : DefaultAttrsIntrinsic<[], [llvm_i1_ty], [IntrWillReturn,
                                                      NoUndef<ArgIndex<0>>]>;
 
+// 'llvm.experimental.noalias.scope.decl' intrinsic: Inserted at the location of
+// noalias scope declaration. Makes it possible to identify that a noalias scope
+// is only valid inside the body of a loop.
+//
+// Purpose of the different arguments:
+// - arg0: id.scope: metadata representing the scope declaration.
+def int_experimental_noalias_scope_decl
+    : DefaultAttrsIntrinsic<[], [llvm_metadata_ty],
+        [IntrInaccessibleMemOnly]>; // blocks LICM and some more
+
 // Stack Protector Intrinsic - The stackprotector intrinsic writes the stack
 // guard to the correct place on the stack frame.
 def int_stackprotector : DefaultAttrsIntrinsic<[], [llvm_ptr_ty, llvm_ptrptr_ty], []>;
@@ -1871,9 +1881,9 @@ def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
 // these constraints, the intrinsic has undefined behaviour.
 //
 // Semantics:
-// Effectively, this intrinsic concatenates %v1[0..%evl-1] and %v2[0..%evl-1]
-// and selects the elements in a window of size %evl, starting at index %num of
-// the concatenated vector. Elements in the result vector beyond %evl are undef.
+// Effectively, this intrinsic concatenates %v1[0..%evl1-1] and %v2[0..%evl2-1]
+// and selects the elements in a window of size %evl2, starting at index %num of
+// the concatenated vector. Elements in the result vector beyond %evl2 are undef.
 // The result vector of length %evl2 contains %evl1 - %num elements from indices
 // [%num..%evl1 - 1] of %v1 followed by the first %evl2 - (%evl1 - %num)
 // elements of %v2. If %evl1 - %num >= %evl2, only the first %evl2 elements are

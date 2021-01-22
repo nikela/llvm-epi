@@ -274,7 +274,7 @@ define i64 @rol_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB-NEXT:    addi t1, a4, -32
 ; RV32IB-NEXT:    sll a5, a0, t1
 ; RV32IB-NEXT:    slti a3, t1, 0
-; RV32IB-NEXT:    cmov a7, a3, a5, a7
+; RV32IB-NEXT:    cmov a7, a3, a7, a5
 ; RV32IB-NEXT:    neg a5, a2
 ; RV32IB-NEXT:    srl t0, a1, a5
 ; RV32IB-NEXT:    andi t2, a5, 63
@@ -289,7 +289,7 @@ define i64 @rol_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB-NEXT:    or a3, t0, a3
 ; RV32IB-NEXT:    srl a1, a1, a4
 ; RV32IB-NEXT:    slti a4, a4, 0
-; RV32IB-NEXT:    cmov a1, a4, a1, a3
+; RV32IB-NEXT:    cmov a1, a4, a3, a1
 ; RV32IB-NEXT:    sll a0, a0, a2
 ; RV32IB-NEXT:    srai a2, t1, 31
 ; RV32IB-NEXT:    and a0, a2, a0
@@ -487,7 +487,7 @@ define i64 @ror_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB-NEXT:    addi t1, a4, -32
 ; RV32IB-NEXT:    srl a5, a1, t1
 ; RV32IB-NEXT:    slti a3, t1, 0
-; RV32IB-NEXT:    cmov a7, a3, a5, a7
+; RV32IB-NEXT:    cmov a7, a3, a7, a5
 ; RV32IB-NEXT:    neg a5, a2
 ; RV32IB-NEXT:    sll t0, a0, a5
 ; RV32IB-NEXT:    andi t2, a5, 63
@@ -502,7 +502,7 @@ define i64 @ror_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB-NEXT:    or a3, t0, a3
 ; RV32IB-NEXT:    sll a0, a0, a4
 ; RV32IB-NEXT:    slti a4, a4, 0
-; RV32IB-NEXT:    cmov a0, a4, a0, a3
+; RV32IB-NEXT:    cmov a0, a4, a3, a0
 ; RV32IB-NEXT:    srl a1, a1, a2
 ; RV32IB-NEXT:    srai a2, t1, 31
 ; RV32IB-NEXT:    and a1, a2, a1

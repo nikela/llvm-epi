@@ -80,9 +80,9 @@ define i64 @sbclr_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    andi a3, a2, 63
 ; RV32IB-NEXT:    addi a3, a3, -32
-; RV32IB-NEXT:    slti a4, a3, 0
-; RV32IB-NEXT:    sbset a5, zero, a3
-; RV32IB-NEXT:    cmov a4, a4, a5, zero
+; RV32IB-NEXT:    sbset a4, zero, a3
+; RV32IB-NEXT:    slti a5, a3, 0
+; RV32IB-NEXT:    cmov a4, a5, zero, a4
 ; RV32IB-NEXT:    sbset a2, zero, a2
 ; RV32IB-NEXT:    srai a3, a3, 31
 ; RV32IB-NEXT:    and a2, a3, a2
@@ -237,9 +237,9 @@ define signext i64 @sbset_i64_zero(i64 signext %a) nounwind {
 ; RV32IB-LABEL: sbset_i64_zero:
 ; RV32IB:       # %bb.0:
 ; RV32IB-NEXT:    addi a2, a0, -32
-; RV32IB-NEXT:    slti a1, a2, 0
-; RV32IB-NEXT:    sbset a3, zero, a2
-; RV32IB-NEXT:    cmov a1, a1, a3, zero
+; RV32IB-NEXT:    sbset a1, zero, a2
+; RV32IB-NEXT:    slti a3, a2, 0
+; RV32IB-NEXT:    cmov a1, a3, zero, a1
 ; RV32IB-NEXT:    sbset a0, zero, a0
 ; RV32IB-NEXT:    srai a2, a2, 31
 ; RV32IB-NEXT:    and a0, a2, a0
@@ -403,7 +403,7 @@ define i64 @sbext_i64(i64 %a, i64 %b) nounwind {
 ; RV32IB-NEXT:    addi a2, a2, -32
 ; RV32IB-NEXT:    srl a1, a1, a2
 ; RV32IB-NEXT:    slti a2, a2, 0
-; RV32IB-NEXT:    cmov a0, a2, a1, a0
+; RV32IB-NEXT:    cmov a0, a2, a0, a1
 ; RV32IB-NEXT:    andi a0, a0, 1
 ; RV32IB-NEXT:    mv a1, zero
 ; RV32IB-NEXT:    ret

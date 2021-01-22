@@ -358,10 +358,10 @@ static void runOldPMPasses(const Config &Conf, Module &Mod, TargetMachine *TM,
   passes.run(Mod);
 }
 
-static bool opt(const Config &Conf, TargetMachine *TM, unsigned Task,
-                Module &Mod, bool IsThinLTO, ModuleSummaryIndex *ExportSummary,
-                const ModuleSummaryIndex *ImportSummary,
-                const std::vector<uint8_t> &CmdArgs) {
+bool lto::opt(const Config &Conf, TargetMachine *TM, unsigned Task, Module &Mod,
+              bool IsThinLTO, ModuleSummaryIndex *ExportSummary,
+              const ModuleSummaryIndex *ImportSummary,
+              const std::vector<uint8_t> &CmdArgs) {
   if (EmbedBitcode == LTOBitcodeEmbedding::EmbedPostMergePreOptimized) {
     // FIXME: the motivation for capturing post-merge bitcode and command line
     // is replicating the compilation environment from bitcode, without needing
@@ -428,6 +428,8 @@ static void codegen(const Config &Conf, TargetMachine *TM,
   legacy::PassManager CodeGenPasses;
   CodeGenPasses.add(
       createImmutableModuleSummaryIndexWrapperPass(&CombinedIndex));
+  if (Conf.PreCodeGenPassesHook)
+    Conf.PreCodeGenPassesHook(CodeGenPasses);
   if (TM->addPassesToEmitFile(CodeGenPasses, *Stream->OS,
                               DwoOut ? &DwoOut->os() : nullptr,
                               Conf.CGFileType))

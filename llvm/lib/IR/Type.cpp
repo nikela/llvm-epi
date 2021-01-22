@@ -390,27 +390,16 @@ StructType *StructType::get(LLVMContext &Context, ArrayRef<Type*> ETypes,
   return ST;
 }
 
-void StructType::validateBody() const {
-  // Restrict as much as possible how scalable vectors can be used in LLVM IR
-  // struct types for now.
-  Type *ScalableVectorFieldTy = nullptr;
-  for (unsigned I = 0; I < NumContainedTys; I++) {
-    if (isa<ScalableVectorType>(ContainedTys[I])) {
-      assert((I == 0 || ScalableVectorFieldTy) &&
-             "Attempt to create a struct with scalable and "
-             "non-scalable types in it");
-      if (ScalableVectorFieldTy) {
-        // We might be able to relax this.
-        assert(ScalableVectorFieldTy == ContainedTys[I] &&
-               "Attempt to create a struct with different scalable types");
-      } else
-        ScalableVectorFieldTy = ContainedTys[I];
-    } else {
-      assert(!ScalableVectorFieldTy &&
-             "Attempt to create a struct with scalable and "
-             "non-scalable types in it");
-    }
+bool StructType::containsScalableVectorType() const {
+  for (Type *Ty : elements()) {
+    if (isa<ScalableVectorType>(Ty))
+      return true;
+    if (auto *STy = dyn_cast<StructType>(Ty))
+      if (STy->containsScalableVectorType())
+        return true;
   }
+
+  return false;
 }
 
 void StructType::setBody(ArrayRef<Type*> Elements, bool isPacked) {
@@ -428,8 +417,6 @@ void StructType::setBody(ArrayRef<Type*> Elements, bool isPacked) {
   }
 
   ContainedTys = Elements.copy(getContext().pImpl->Alloc).data();
-
-  validateBody();
 }
 
 void StructType::setName(StringRef Name) {
@@ -534,9 +521,18 @@ bool StructType::isSized(SmallPtrSetImpl<Type*> *Visited) const {
   // Okay, our struct is sized if all of the elements are, but if one of the
   // elements is opaque, the struct isn't sized *yet*, but may become sized in
   // the future, so just bail out without caching.
-  for (element_iterator I = element_begin(), E = element_end(); I != E; ++I)
-    if (!(*I)->isSized(Visited))
+  for (Type *Ty : elements()) {
+    // If the struct contains a scalable vector type, don't consider it sized.
+    // This prevents it from being used in loads/stores/allocas/GEPs.
+    // --------
+    // EPI: We need to have this sized as some of our infrastructure still
+    // depends on it. Eventually this can go away, but not yet.
+    // --------
+    // if (isa<ScalableVectorType>(Ty))
+    //   return false;
+    if (!Ty->isSized(Visited))
       return false;
+  }
 
   // Here we cheat a bit and cast away const-ness. The goal is to memoize when
   // we find a sized type, as types can only move from opaque to sized, not the

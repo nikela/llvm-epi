@@ -8,6 +8,7 @@
 
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/StringMap.h"
 #include "llvm/Support/raw_ostream.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
@@ -412,7 +413,7 @@ struct NonTCopy {
   int Val{0};
 };
 
-#if defined(_MSC_VER) && _MSC_VER >= 1927
+#if defined(_MSC_VER) && _MSC_VER >= 1927 && !defined(__clang__)
 // Currently only true on recent MSVC releases.
 static_assert(std::is_trivially_copyable<NonTCopy>::value,
               "Expect NonTCopy to be trivially copyable");
@@ -460,7 +461,7 @@ public:
   int A{0};
 };
 
-#if defined(_MSC_VER) && _MSC_VER >= 1927
+#if defined(_MSC_VER) && _MSC_VER >= 1927 && !defined(__clang__)
 // Currently only true on recent MSVC releases.
 static_assert(std::is_trivially_copyable<NonTAssign>::value,
               "Expect NonTAssign to be trivially copyable");
@@ -509,6 +510,22 @@ TEST(OptionalTest, DeletedMoveConstructor) {
       std::is_trivially_copyable<NoTMoveOptT>::value,
       "Expect Optional<NoTMove> to still use the trivial specialization "
       "of OptionalStorage despite the deleted move constructor / assignment.");
+}
+
+class NoCopyStringMap {
+public:
+  NoCopyStringMap() = default;
+
+private:
+  llvm::StringMap<std::unique_ptr<int>> Map;
+};
+
+TEST(OptionalTest, DeletedCopyStringMap) {
+  // Old versions of gcc (7.3 and prior) instantiate the copy constructor when
+  // std::is_trivially_copyable is instantiated.  This test will fail
+  // compilation if std::is_trivially_copyable is used in the OptionalStorage
+  // specialization condition by gcc <= 7.3.
+  Optional<NoCopyStringMap> TestInstantiation;
 }
 
 #if LLVM_HAS_RVALUE_REFERENCE_THIS

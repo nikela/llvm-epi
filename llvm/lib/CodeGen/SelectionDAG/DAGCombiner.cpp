@@ -4607,6 +4607,10 @@ SDValue DAGCombiner::visitIMINMAX(SDNode *N) {
       return DAG.getNode(AltOpcode, SDLoc(N), VT, N0, N1);
   }
 
+  // Simplify the operands using demanded-bits information.
+  if (SimplifyDemandedBits(SDValue(N, 0)))
+    return SDValue(N, 0);
+
   return SDValue();
 }
 
@@ -11948,8 +11952,7 @@ SDValue DAGCombiner::visitTRUNCATE(SDNode *N) {
   }
 
   // Simplify the operands using demanded-bits information.
-  if (!VT.isVector() &&
-      SimplifyDemandedBits(SDValue(N, 0)))
+  if (SimplifyDemandedBits(SDValue(N, 0)))
     return SDValue(N, 0);
 
   // (trunc adde(X, Y, Carry)) -> (adde trunc(X), trunc(Y), Carry)
@@ -14936,16 +14939,13 @@ bool DAGCombiner::CombineToPreIndexedLoadStore(SDNode *N) {
     // Therefore, we have:
     //   t0 = (x0 * offset0 - x1 * y0 * y1 *offset1) + (y0 * y1) * t1
 
-    ConstantSDNode *CN =
-      cast<ConstantSDNode>(OtherUses[i]->getOperand(OffsetIdx));
-    int X0, X1, Y0, Y1;
+    auto *CN = cast<ConstantSDNode>(OtherUses[i]->getOperand(OffsetIdx));
     const APInt &Offset0 = CN->getAPIntValue();
-    APInt Offset1 = cast<ConstantSDNode>(Offset)->getAPIntValue();
-
-    X0 = (OtherUses[i]->getOpcode() == ISD::SUB && OffsetIdx == 1) ? -1 : 1;
-    Y0 = (OtherUses[i]->getOpcode() == ISD::SUB && OffsetIdx == 0) ? -1 : 1;
-    X1 = (AM == ISD::PRE_DEC && !Swapped) ? -1 : 1;
-    Y1 = (AM == ISD::PRE_DEC && Swapped) ? -1 : 1;
+    const APInt &Offset1 = cast<ConstantSDNode>(Offset)->getAPIntValue();
+    int X0 = (OtherUses[i]->getOpcode() == ISD::SUB && OffsetIdx == 1) ? -1 : 1;
+    int Y0 = (OtherUses[i]->getOpcode() == ISD::SUB && OffsetIdx == 0) ? -1 : 1;
+    int X1 = (AM == ISD::PRE_DEC && !Swapped) ? -1 : 1;
+    int Y1 = (AM == ISD::PRE_DEC && Swapped) ? -1 : 1;
 
     unsigned Opcode = (Y0 * Y1 < 0) ? ISD::SUB : ISD::ADD;
 
@@ -18957,8 +18957,7 @@ SDValue DAGCombiner::reduceBuildVecToShuffle(SDNode *N) {
     // Have we seen this input vector before?
     // The vectors are expected to be tiny (usually 1 or 2 elements), so using
     // a map back from SDValues to numbers isn't worth it.
-    unsigned Idx = std::distance(
-        VecIn.begin(), std::find(VecIn.begin(), VecIn.end(), ExtractedFromVec));
+    unsigned Idx = std::distance(VecIn.begin(), find(VecIn, ExtractedFromVec));
     if (Idx == VecIn.size())
       VecIn.push_back(ExtractedFromVec);
 
@@ -19453,9 +19452,8 @@ SDValue DAGCombiner::visitCONCAT_VECTORS(SDNode *N) {
     return DAG.getUNDEF(VT);
 
   // Optimize concat_vectors where all but the first of the vectors are undef.
-  if (std::all_of(std::next(N->op_begin()), N->op_end(), [](const SDValue &Op) {
-        return Op.isUndef();
-      })) {
+  if (all_of(drop_begin(N->ops()),
+             [](const SDValue &Op) { return Op.isUndef(); })) {
     SDValue In = N->getOperand(0);
     assert(In.getValueType().isVector() && "Must concat vectors");
 
@@ -20831,31 +20829,21 @@ SDValue DAGCombiner::visitVECTOR_SHUFFLE(SDNode *N) {
       return DAG.getCommutedVectorShuffle(*SVN);
   }
 
-  // Try to fold according to rules:
-  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, B, M2)
-  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, C, M2)
-  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, C, M2)
-  // Don't try to fold shuffles with illegal type.
-  // Only fold if this shuffle is the only user of the other shuffle.
-  if (!VT.isScalableVector() && N0.getOpcode() == ISD::VECTOR_SHUFFLE &&
-      N->isOnlyUserOf(N0.getNode()) && Level < AfterLegalizeDAG &&
-      TLI.isTypeLegal(VT)) {
-    ShuffleVectorSDNode *OtherSV = cast<ShuffleVectorSDNode>(N0);
-
+  // Compute the combined shuffle mask for a shuffle with SV0 as the first
+  // operand, and SV1 as the second operand.
+  // i.e. Merge SVN(OtherSVN, N1) -> shuffle(SV0, SV1, Mask).
+  auto MergeInnerShuffle = [NumElts](ShuffleVectorSDNode *SVN,
+                                     ShuffleVectorSDNode *OtherSVN, SDValue N1,
+                                     SDValue &SV0, SDValue &SV1,
+                                     SmallVectorImpl<int> &Mask) -> bool {
     // Don't try to fold splats; they're likely to simplify somehow, or they
     // might be free.
-    if (OtherSV->isSplat())
-      return SDValue();
+    if (OtherSVN->isSplat())
+      return false;
 
-    // The incoming shuffle must be of the same type as the result of the
-    // current shuffle.
-    assert(OtherSV->getOperand(0).getValueType() == VT &&
-           "Shuffle types don't match");
+    SV0 = SV1 = SDValue();
+    Mask.clear();
 
-    SDValue SV0, SV1;
-    SmallVector<int, 4> Mask;
-    // Compute the combined shuffle mask for a shuffle with SV0 as the first
-    // operand, and SV1 as the second operand.
     for (unsigned i = 0; i != NumElts; ++i) {
       int Idx = SVN->getMaskElt(i);
       if (Idx < 0) {
@@ -20868,15 +20856,14 @@ SDValue DAGCombiner::visitVECTOR_SHUFFLE(SDNode *N) {
       if (Idx < (int)NumElts) {
         // This shuffle index refers to the inner shuffle N0. Lookup the inner
         // shuffle mask to identify which vector is actually referenced.
-        Idx = OtherSV->getMaskElt(Idx);
+        Idx = OtherSVN->getMaskElt(Idx);
         if (Idx < 0) {
           // Propagate Undef.
           Mask.push_back(Idx);
           continue;
         }
-
-        CurrentVec = (Idx < (int) NumElts) ? OtherSV->getOperand(0)
-                                           : OtherSV->getOperand(1);
+        CurrentVec = (Idx < (int)NumElts) ? OtherSVN->getOperand(0)
+                                          : OtherSVN->getOperand(1);
       } else {
         // This shuffle index references an element within N1.
         CurrentVec = N1;
@@ -20898,34 +20885,82 @@ SDValue DAGCombiner::visitVECTOR_SHUFFLE(SDNode *N) {
         Mask.push_back(Idx);
         continue;
       }
+      if (!SV1.getNode() || SV1 == CurrentVec) {
+        // Ok. CurrentVec is the right hand side.
+        // Update the mask accordingly.
+        SV1 = CurrentVec;
+        Mask.push_back(Idx + NumElts);
+        continue;
+      }
+
+      // Last chance - see if the vector is another shuffle and if it
+      // uses one of the existing candidate shuffle ops.
+      if (auto *CurrentSVN = dyn_cast<ShuffleVectorSDNode>(CurrentVec)) {
+        int InnerIdx = CurrentSVN->getMaskElt(Idx);
+        if (InnerIdx < 0) {
+          Mask.push_back(-1);
+          continue;
+        }
+        SDValue InnerVec = (InnerIdx < (int)NumElts)
+                               ? CurrentSVN->getOperand(0)
+                               : CurrentSVN->getOperand(1);
+        if (InnerVec.isUndef()) {
+          Mask.push_back(-1);
+          continue;
+        }
+        InnerIdx %= NumElts;
+        if (InnerVec == SV0) {
+          Mask.push_back(InnerIdx);
+          continue;
+        }
+        if (InnerVec == SV1) {
+          Mask.push_back(InnerIdx + NumElts);
+          continue;
+        }
+      }
 
       // Bail out if we cannot convert the shuffle pair into a single shuffle.
-      if (SV1.getNode() && SV1 != CurrentVec)
-        return SDValue();
-
-      // Ok. CurrentVec is the right hand side.
-      // Update the mask accordingly.
-      SV1 = CurrentVec;
-      Mask.push_back(Idx + NumElts);
+      return false;
     }
+    return true;
+  };
 
-    // Check if all indices in Mask are Undef. In case, propagate Undef.
-    if (llvm::all_of(Mask, [](int M) { return M < 0; }))
-      return DAG.getUNDEF(VT);
+  // Try to fold according to rules:
+  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, B, M2)
+  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, C, M2)
+  //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, C, M2)
+  // Don't try to fold shuffles with illegal type.
+  // Only fold if this shuffle is the only user of the other shuffle.
+  if (N0.getOpcode() == ISD::VECTOR_SHUFFLE && N->isOnlyUserOf(N0.getNode()) &&
+      Level < AfterLegalizeDAG && TLI.isTypeLegal(VT)) {
+    ShuffleVectorSDNode *OtherSV = cast<ShuffleVectorSDNode>(N0);
 
-    if (!SV0.getNode())
-      SV0 = DAG.getUNDEF(VT);
-    if (!SV1.getNode())
-      SV1 = DAG.getUNDEF(VT);
+    // The incoming shuffle must be of the same type as the result of the
+    // current shuffle.
+    assert(OtherSV->getOperand(0).getValueType() == VT &&
+           "Shuffle types don't match");
 
-    // Avoid introducing shuffles with illegal mask.
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, B, M2)
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, C, M2)
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, C, M2)
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, A, M2)
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(C, A, M2)
-    //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(C, B, M2)
-    return TLI.buildLegalVectorShuffle(VT, SDLoc(N), SV0, SV1, Mask, DAG);
+    SDValue SV0, SV1;
+    SmallVector<int, 4> Mask;
+    if (MergeInnerShuffle(SVN, OtherSV, N1, SV0, SV1, Mask)) {
+      // Check if all indices in Mask are Undef. In case, propagate Undef.
+      if (llvm::all_of(Mask, [](int M) { return M < 0; }))
+        return DAG.getUNDEF(VT);
+
+      if (!SV0.getNode())
+        SV0 = DAG.getUNDEF(VT);
+      if (!SV1.getNode())
+        SV1 = DAG.getUNDEF(VT);
+
+      // Avoid introducing shuffles with illegal mask.
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, B, M2)
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(A, C, M2)
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, C, M2)
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(B, A, M2)
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(C, A, M2)
+      //   shuffle(shuffle(A, B, M0), C, M1) -> shuffle(C, B, M2)
+      return TLI.buildLegalVectorShuffle(VT, SDLoc(N), SV0, SV1, Mask, DAG);
+    }
   }
 
   if (SDValue V = foldShuffleOfConcatUndefs(SVN, DAG))
@@ -21409,11 +21444,10 @@ SDValue DAGCombiner::SimplifyVBinOp(SDNode *N) {
   // Make sure all but the first op are undef or constant.
   auto ConcatWithConstantOrUndef = [](SDValue Concat) {
     return Concat.getOpcode() == ISD::CONCAT_VECTORS &&
-           std::all_of(std::next(Concat->op_begin()), Concat->op_end(),
-                     [](const SDValue &Op) {
-                       return Op.isUndef() ||
-                              ISD::isBuildVectorOfConstantSDNodes(Op.getNode());
-                     });
+           all_of(drop_begin(Concat->ops()), [](const SDValue &Op) {
+             return Op.isUndef() ||
+                    ISD::isBuildVectorOfConstantSDNodes(Op.getNode());
+           });
   };
 
   // The following pattern is likely to emerge with vector reduction ops. Moving

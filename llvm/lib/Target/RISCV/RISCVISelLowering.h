@@ -28,6 +28,12 @@ enum NodeType : unsigned {
   SRET_FLAG,
   MRET_FLAG,
   CALL,
+  /// Select with condition operator - This selects between a true value and
+  /// a false value (ops #3 and #4) based on the boolean result of comparing
+  /// the lhs and rhs (ops #0 and #1) of a conditional expression with the
+  /// condition code in op #2, a XLenVT constant from the ISD::CondCode enum.
+  /// The lhs and rhs are XLenVT integers. The true and false values can be
+  /// integer or floating point.
   SELECT_CC,
   BuildPairF64,
   SplitF64,
@@ -79,9 +85,6 @@ enum NodeType : unsigned {
   GORCIW,
   // EPI nodes
   EXTRACT_VECTOR_ELT,
-  SIGN_EXTEND_VECTOR,
-  ZERO_EXTEND_VECTOR,
-  TRUNCATE_VECTOR,
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
   ZERO_EXTEND_BITS_INREG,
@@ -140,6 +143,8 @@ enum NodeType : unsigned {
   SPLAT_VECTOR_I64,
   // Read VLENB CSR
   READ_VLENB,
+  // Truncates a RVV integer vector by one power-of-two.
+  TRUNCATE_VECTOR,
 };
 } // namespace RISCVISD
 
@@ -179,6 +184,10 @@ public:
                           SelectionDAG &DAG) const override;
 
   SDValue PerformDAGCombine(SDNode *N, DAGCombinerInfo &DCI) const override;
+
+  bool targetShrinkDemandedConstant(SDValue Op, const APInt &DemandedBits,
+                                    const APInt &DemandedElts,
+                                    TargetLoweringOpt &TLO) const override;
 
   void computeKnownBitsForTargetNode(const SDValue Op,
                                      KnownBits &Known,
@@ -342,14 +351,14 @@ private:
   SDValue lowerShiftLeftParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftRightParts(SDValue Op, SelectionDAG &DAG, bool IsSRA) const;
   SDValue lowerSPLATVECTOR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVectorMaskExt(SDValue Op, SelectionDAG &DAG,
+                             int64_t ExtTrueVal) const;
+  SDValue lowerVectorMaskTrunc(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerExtend(SDValue Op, SelectionDAG &DAG, int Opcode) const;
-  SDValue lowerSIGN_EXTEND(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerZERO_EXTEND(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
                                  int Opcode) const;
@@ -384,6 +393,22 @@ using namespace RISCV;
 #include "RISCVGenSearchableTables.inc"
 
 } // end namespace RISCVVIntrinsicsTable
+
+namespace RISCVZvlssegTable {
+
+struct RISCVZvlsseg {
+  unsigned int IntrinsicID;
+  unsigned int SEW;
+  unsigned int LMUL;
+  unsigned int Pseudo;
+};
+
+using namespace RISCV;
+
+#define GET_RISCVZvlssegTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // namespace RISCVZvlssegTable
 }
 
 #endif

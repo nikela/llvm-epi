@@ -48,12 +48,10 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    store <vscale x 8 x i64> [[TMP7]], <vscale x 8 x i64>* [[TMP13]], align 8, [[TBAA2:!tbaa !.*]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP15:%.*]] = mul i64 [[TMP14]], 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP16]], [[TMP15]]
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP15]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 8 x i64> [[VEC_IND]], [[DOTSPLAT2]]
-; CHECK-NEXT:    [[TMP17:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP17]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
+; CHECK-NEXT:    [[TMP16:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP16]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP:%.*]], label [[SCALAR_PH]]
@@ -63,8 +61,8 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK:       for.cond.cleanup:
 ; CHECK-NEXT:    [[IDXPROM:%.*]] = sext i32 [[ARGC:%.*]] to i64
 ; CHECK-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds [1024 x i64], [1024 x i64]* [[A]], i64 0, i64 [[IDXPROM]]
-; CHECK-NEXT:    [[TMP18:%.*]] = load i64, i64* [[ARRAYIDX1]], align 8, [[TBAA2]]
-; CHECK-NEXT:    [[CONV:%.*]] = trunc i64 [[TMP18]] to i32
+; CHECK-NEXT:    [[TMP17:%.*]] = load i64, i64* [[ARRAYIDX1]], align 8, [[TBAA2]]
+; CHECK-NEXT:    [[CONV:%.*]] = trunc i64 [[TMP17]] to i32
 ; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP0]]) [[ATTR4]]
 ; CHECK-NEXT:    ret i32 [[CONV]]
 ; CHECK:       for.body:
@@ -111,12 +109,10 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[TMP11:%.*]] = bitcast i64* [[TMP10]] to <vscale x 1 x i64>*
 ; CHECK1-NEXT:    store <vscale x 1 x i64> [[TMP5]], <vscale x 1 x i64>* [[TMP11]], align 8, [[TBAA2:!tbaa !.*]]
 ; CHECK1-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_VSCALE:%.*]] = mul i64 [[TMP13]], [[TMP12]]
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[INDEX_VSCALE]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP12]]
 ; CHECK1-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 1 x i64> [[VEC_IND]], [[DOTSPLAT2]]
-; CHECK1-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK1-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
+; CHECK1-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK1-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP6:!llvm.loop !.*]]
 ; CHECK1:       middle.block:
 ; CHECK1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP:%.*]], label [[SCALAR_PH]]
@@ -126,8 +122,8 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1:       for.cond.cleanup:
 ; CHECK1-NEXT:    [[IDXPROM:%.*]] = sext i32 [[ARGC:%.*]] to i64
 ; CHECK1-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds [1024 x i64], [1024 x i64]* [[A]], i64 0, i64 [[IDXPROM]]
-; CHECK1-NEXT:    [[TMP15:%.*]] = load i64, i64* [[ARRAYIDX1]], align 8, [[TBAA2]]
-; CHECK1-NEXT:    [[CONV:%.*]] = trunc i64 [[TMP15]] to i32
+; CHECK1-NEXT:    [[TMP14:%.*]] = load i64, i64* [[ARRAYIDX1]], align 8, [[TBAA2]]
+; CHECK1-NEXT:    [[CONV:%.*]] = trunc i64 [[TMP14]] to i32
 ; CHECK1-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull [[TMP0]]) [[ATTR4]]
 ; CHECK1-NEXT:    ret i32 [[CONV]]
 ; CHECK1:       for.body:
