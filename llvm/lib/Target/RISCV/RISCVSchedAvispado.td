@@ -240,6 +240,7 @@ def : ReadAdvance<ReadFClass64, 0>;
 
 // V-extension in Avispado
 def AvispadoVSETVL          : ProcResource<1>; // Vector configuration
+def AvispadoVPUInit         : ProcResource<1>; // VPU initiation
 def AvispadoVPUIALU         : ProcResource<1>; // Integer VPU ALU
 def AvispadoVPUFALU         : ProcResource<1>; // FP VPU ALU
 def AvispadoVPUMem          : ProcResource<1>; // VPU Load/Store
@@ -252,28 +253,28 @@ let Latency = 1 in
   def : WriteRes<WriteVTYPE, [AvispadoVSETVL]>;
 }
 
-let Latency = 20, ResourceCycles = [20] in
+let Latency = 80, ResourceCycles = [20, 60] in
 {
-  def : WriteRes<WriteVPULoad, [AvispadoVPUMem]>;
-  def : WriteRes<WriteVPULoadStrided, [AvispadoVPUMem]>;
-  def : WriteRes<WriteVPULoadIndexed, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPULoad, [AvispadoVPUInit, AvispadoVPUMem]>;
+  def : WriteRes<WriteVPULoadStrided, [AvispadoVPUInit, AvispadoVPUMem]>;
+  def : WriteRes<WriteVPULoadIndexed, [AvispadoVPUInit, AvispadoVPUMem]>;
 
-  def : WriteRes<WriteVPUStore, [AvispadoVPUMem]>;
-  def : WriteRes<WriteVPUStoreStrided, [AvispadoVPUMem]>;
-  def : WriteRes<WriteVPUStoreIndexed, [AvispadoVPUMem]>;
+  def : WriteRes<WriteVPUStore, [AvispadoVPUInit, AvispadoVPUMem]>;
+  def : WriteRes<WriteVPUStoreStrided, [AvispadoVPUInit, AvispadoVPUMem]>;
+  def : WriteRes<WriteVPUStoreIndexed, [AvispadoVPUInit, AvispadoVPUMem]>;
 
-  def : WriteRes<WriteVPUScalarIALU, [AvispadoVPUIALU]>;
-  def : WriteRes<WriteVPUScalarFALU, [AvispadoVPUFALU]>;
+  def : WriteRes<WriteVPUScalarIALU, [AvispadoVPUInit, AvispadoVPUIALU]>;
+  def : WriteRes<WriteVPUScalarFALU, [AvispadoVPUInit, AvispadoVPUFALU]>;
 }
 
-def : WriteRes<WriteVPUIALU, [AvispadoVPUIALU]> {
-  let Latency = 30;
-  let ResourceCycles = [30];
+def : WriteRes<WriteVPUIALU, [AvispadoVPUInit, AvispadoVPUIALU]> {
+  let Latency = 40;
+  let ResourceCycles = [10, 30];
 }
 
-def : WriteRes<WriteVPUFALU, [AvispadoVPUFALU]> {
+def : WriteRes<WriteVPUFALU, [AvispadoVPUInit, AvispadoVPUFALU]> {
   let Latency = 50;
-  let ResourceCycles = [50];
+  let ResourceCycles = [10, 40];
 }
 
 // By-passes and advanced (if any)
