@@ -223,7 +223,7 @@ define <vscale x 2 x i32> @test_narrow_int_to_int(<vscale x 2 x i64> %parm0, i64
 ; CHECK-LABEL: test_narrow_int_to_int:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vnsrl.wx v25, v16, zero
+; CHECK-NEXT:    vncvt.x.x.w v25, v16
 ; CHECK-NEXT:    vmv1r.v v16, v25
 ; CHECK-NEXT:    ret
 entry:

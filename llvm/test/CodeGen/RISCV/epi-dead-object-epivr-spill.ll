@@ -98,12 +98,12 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsub.vv v28, v8, v11
 ; CHECK-NEXT:    vfmacc.vv v27, v25, v28
 ; CHECK-NEXT:    vfmsac.vv v29, v25, v25
-; CHECK-NEXT:    vfsgnjn.vv v28, v29, v29
+; CHECK-NEXT:    vfneg.v v28, v29
 ; CHECK-NEXT:    vfadd.vv v31, v25, v12
 ; CHECK-NEXT:    vfadd.vv v8, v12, v12
 ; CHECK-NEXT:    vfadd.vv v11, v25, v25
 ; CHECK-NEXT:    vfmsac.vv v29, v25, v25
-; CHECK-NEXT:    vfsgnjn.vv v29, v29, v29
+; CHECK-NEXT:    vfneg.v v29, v29
 ; CHECK-NEXT:    vfadd.vv v13, v8, v11
 ; CHECK-NEXT:    lui a0, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a0)
@@ -112,7 +112,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsub.vv v8, v11, v8
 ; CHECK-NEXT:    vmv1r.v v11, v31
 ; CHECK-NEXT:    vfmsac.vf v11, ft0, v8
-; CHECK-NEXT:    vfsgnjn.vv v11, v11, v11
+; CHECK-NEXT:    vfneg.v v11, v11
 ; CHECK-NEXT:    addi a0, zero, 136
 ; CHECK-NEXT:    mul a0, s4, a0
 ; CHECK-NEXT:    add a0, s1, a0
@@ -129,12 +129,12 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfadd.vv v14, v14, v15
 ; CHECK-NEXT:    vfadd.vv v15, v25, v17
 ; CHECK-NEXT:    vfmsac.vv v31, v25, v15
-; CHECK-NEXT:    vfsgnjn.vv v31, v31, v31
+; CHECK-NEXT:    vfneg.v v31, v31
 ; CHECK-NEXT:    vfsub.vv v15, v13, v25
 ; CHECK-NEXT:    vfsub.vv v13, v25, v14
 ; CHECK-NEXT:    vmv1r.v v14, v15
 ; CHECK-NEXT:    vfmsac.vf v14, ft0, v13
-; CHECK-NEXT:    vfsgnjn.vv v14, v14, v14
+; CHECK-NEXT:    vfneg.v v14, v14
 ; CHECK-NEXT:    add a1, s1, a1
 ; CHECK-NEXT:    vlxei64.v v17, (a1), v21
 ; CHECK-NEXT:    addi a1, zero, 48
@@ -162,10 +162,10 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfadd.vv v21, v17, v20
 ; CHECK-NEXT:    vmv1r.v v12, v15
 ; CHECK-NEXT:    vfmsac.vf v12, ft0, v22
-; CHECK-NEXT:    vfsgnjn.vv v12, v12, v12
+; CHECK-NEXT:    vfneg.v v12, v12
 ; CHECK-NEXT:    vmv1r.v v24, v23
 ; CHECK-NEXT:    vfmsac.vf v24, ft0, v19
-; CHECK-NEXT:    vfsgnjn.vv v24, v24, v24
+; CHECK-NEXT:    vfneg.v v24, v24
 ; CHECK-NEXT:    vfsub.vv v12, v24, v12
 ; CHECK-NEXT:    vfmacc.vf v22, ft0, v15
 ; CHECK-NEXT:    vfmacc.vf v19, ft0, v23
@@ -175,15 +175,15 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsub.vv v17, v25, v17
 ; CHECK-NEXT:    vmv1r.v v20, v19
 ; CHECK-NEXT:    vfmsac.vv v20, v25, v25
-; CHECK-NEXT:    vfsgnjn.vv v20, v20, v20
+; CHECK-NEXT:    vfneg.v v20, v20
 ; CHECK-NEXT:    vfmacc.vv v19, v25, v25
 ; CHECK-NEXT:    vfsub.vv v22, v18, v21
 ; CHECK-NEXT:    vfsub.vv v16, v16, v25
 ; CHECK-NEXT:    vmv1r.v v23, v22
 ; CHECK-NEXT:    vfmsac.vv v23, v25, v16
-; CHECK-NEXT:    vfsgnjn.vv v23, v23, v23
+; CHECK-NEXT:    vfneg.v v23, v23
 ; CHECK-NEXT:    vfmacc.vv v22, v25, v16
-; CHECK-NEXT:    vfsgnjn.vv v23, v23, v23, v0.t
+; CHECK-NEXT:    vfneg.v v23, v23, v0.t
 ; CHECK-NEXT:    vrgather.vv v16, v23, v26
 ; CHECK-NEXT:    vfsub.vv v23, v20, v16
 ; CHECK-NEXT:    ld a1, -88(s0)
@@ -192,7 +192,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vsxei64.v v24, (a0), v25
 ; CHECK-NEXT:    slli a1, s2, 5
 ; CHECK-NEXT:    add a1, s3, a1
-; CHECK-NEXT:    vfsgnjn.vv v22, v22, v22, v0.t
+; CHECK-NEXT:    vfneg.v v22, v22, v0.t
 ; CHECK-NEXT:    vrgather.vv v23, v22, v26
 ; CHECK-NEXT:    vfadd.vv v22, v19, v23
 ; CHECK-NEXT:    vrgather.vv v24, v22, v1
@@ -221,7 +221,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vsxei64.v v10, (a1), v25
 ; CHECK-NEXT:    vfadd.vv v9, v14, v11
 ; CHECK-NEXT:    vfmsac.vf v9, ft0, v9
-; CHECK-NEXT:    vfsgnjn.vv v9, v9, v9
+; CHECK-NEXT:    vfneg.v v9, v9
 ; CHECK-NEXT:    vfmacc.vv v30, v25, v17
 ; CHECK-NEXT:    vfsub.vv v8, v8, v13
 ; CHECK-NEXT:    vfmacc.vf v30, ft0, v8
@@ -232,7 +232,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsub.vv v8, v9, v8
 ; CHECK-NEXT:    vrgather.vv v9, v8, v1
 ; CHECK-NEXT:    vsxei64.v v9, (a1), v25
-; CHECK-NEXT:    vfsgnjn.vv v30, v30, v30, v0.t
+; CHECK-NEXT:    vfneg.v v30, v30, v0.t
 ; CHECK-NEXT:    vrgather.vv v8, v30, v26
 ; CHECK-NEXT:    vfadd.vv v30, v25, v8
 ; CHECK-NEXT:    vrgather.vv v8, v30, v1
@@ -242,21 +242,21 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_2)(a1)
 ; CHECK-NEXT:    vsxei64.v v8, (a0), v25
 ; CHECK-NEXT:    vsxei64.v v25, (a0), v25
-; CHECK-NEXT:    vfsgnjn.vv v30, v25, v25
+; CHECK-NEXT:    vfneg.v v30, v25
 ; CHECK-NEXT:    vfmsac.vf v29, ft0, v25
 ; CHECK-NEXT:    vfmacc.vf v31, ft0, v25
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_3)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_3)(a1)
-; CHECK-NEXT:    vfsgnjn.vv v29, v29, v29
+; CHECK-NEXT:    vfneg.v v29, v29
 ; CHECK-NEXT:    vfsub.vv v29, v30, v29
 ; CHECK-NEXT:    vfadd.vv v30, v31, v25
 ; CHECK-NEXT:    vfmsac.vf v28, ft0, v30
-; CHECK-NEXT:    vfsgnjn.vv v28, v28, v28
+; CHECK-NEXT:    vfneg.v v28, v28
 ; CHECK-NEXT:    vfmsac.vf v27, ft0, v29
-; CHECK-NEXT:    vfsgnjn.vv v27, v27, v27
+; CHECK-NEXT:    vfneg.v v27, v27
 ; CHECK-NEXT:    mul a0, s2, a0
 ; CHECK-NEXT:    add a0, s3, a0
-; CHECK-NEXT:    vfsgnjn.vv v27, v27, v27, v0.t
+; CHECK-NEXT:    vfneg.v v27, v27, v0.t
 ; CHECK-NEXT:    vrgather.vv v29, v27, v26
 ; CHECK-NEXT:    vfsub.vv v26, v28, v29
 ; CHECK-NEXT:    vrgather.vv v27, v26, v1

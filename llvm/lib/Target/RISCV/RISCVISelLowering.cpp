@@ -4546,7 +4546,11 @@ static MachineBasicBlock *emitComputeVSCALE(MachineInstr &MI,
       *BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoVSETVLI), DestReg)
            .addReg(RISCV::X0)
            // FIXME - ELEN hardcoded to SEW=64.
-           .addImm(/* e64,m1 */ 3 << 2);
+           .addImm(RISCVVType::encodeVTYPE(RISCVVLMUL::LMUL_1,
+                                           RISCVVSEW::SEW_64,
+                                           /*TailAgnostic*/ true,
+                                           /*MaskAgnostic*/ false,
+                                           /*Nontemporal*/ false));
   // Set VTYPE and VL as dead.
   I.getOperand(3).setIsDead();
   I.getOperand(4).setIsDead();

@@ -61,7 +61,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O0-NEXT:    ld a1, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v26
-; CHECK-O0-NEXT:    vfsgnjn.vv v26, v25, v25, v0.t
+; CHECK-O0-NEXT:    vfneg.v v26, v25, v0.t
 ; CHECK-O0-NEXT:    ld a1, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -108,7 +108,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O2-NEXT:    vfdiv.vv v8, v25, v26, v0.t
 ; CHECK-O2-NEXT:    vmv1r.v v9, v25
 ; CHECK-O2-NEXT:    vfmadd.vv v9, v26, v27, v0.t
-; CHECK-O2-NEXT:    vfsgnjn.vv v25, v25, v25, v0.t
+; CHECK-O2-NEXT:    vfneg.v v25, v25, v0.t
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v26, v28, v0.t
 ; CHECK-O2-NEXT:    vse64.v v29, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v30, (a0), v0.t
@@ -174,7 +174,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O0-NEXT:    vmv1r.v v27, v25
 ; CHECK-O0-NEXT:    vfmadd.vv v27, v26, v9
 ; CHECK-O0-NEXT:    # implicit-def: $v26
-; CHECK-O0-NEXT:    vfsgnjn.vv v26, v25, v25
+; CHECK-O0-NEXT:    vfneg.v v26, v25
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vfcvt.f.x.v v25, v8
 ; CHECK-O0-NEXT:    vse32.v v31, (a0)
@@ -199,7 +199,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O2-NEXT:    vfsub.vv v30, v25, v26
 ; CHECK-O2-NEXT:    vfmul.vv v31, v25, v26
 ; CHECK-O2-NEXT:    vfdiv.vv v8, v25, v26
-; CHECK-O2-NEXT:    vfsgnjn.vv v9, v25, v25
+; CHECK-O2-NEXT:    vfneg.v v9, v25
 ; CHECK-O2-NEXT:    vfmadd.vv v25, v26, v27
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v26, v28
 ; CHECK-O2-NEXT:    vse32.v v29, (a0)
@@ -296,7 +296,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O0-NEXT:    ld a1, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v28m2
-; CHECK-O0-NEXT:    vfsgnjn.vv v28, v26, v26, v0.t
+; CHECK-O0-NEXT:    vfneg.v v28, v26, v0.t
 ; CHECK-O0-NEXT:    ld a1, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1)
 ; CHECK-O0-NEXT:    # implicit-def: $v26m2
@@ -343,7 +343,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O2-NEXT:    vfdiv.vv v16, v26, v28, v0.t
 ; CHECK-O2-NEXT:    vmv2r.v v18, v26
 ; CHECK-O2-NEXT:    vfmadd.vv v18, v28, v30, v0.t
-; CHECK-O2-NEXT:    vfsgnjn.vv v28, v26, v26, v0.t
+; CHECK-O2-NEXT:    vfneg.v v28, v26, v0.t
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v26, v8, v0.t
 ; CHECK-O2-NEXT:    vse64.v v10, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v12, (a0), v0.t

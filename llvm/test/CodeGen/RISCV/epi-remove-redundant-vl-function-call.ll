@@ -38,12 +38,12 @@ define void @foo(double*) nounwind {
 ; DISABLED-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; DISABLED-NEXT:    sd s1, 16(sp) # 8-byte Folded Spill
 ; DISABLED-NEXT:    sd s2, 8(sp) # 8-byte Folded Spill
-; DISABLED-NEXT:    add s2, zero, a0
+; DISABLED-NEXT:    mv s2, a0
 ; DISABLED-NEXT:    vsetvli s1, zero, e64,m1,tu,mu
 ; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
 ; DISABLED-NEXT:    vle64.v v16, (s2)
 ; DISABLED-NEXT:    srli a0, s1, 1
-; DISABLED-NEXT:    call add1
+; DISABLED-NEXT:    call add1@plt
 ; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
 ; DISABLED-NEXT:    vse64.v v16, (s2)
 ; DISABLED-NEXT:    ld s2, 8(sp) # 8-byte Folded Reload
@@ -57,11 +57,11 @@ define void @foo(double*) nounwind {
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    sd s1, 0(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    add s1, zero, a0
+; CHECK-NEXT:    mv s1, a0
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vle64.v v16, (s1)
 ; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    call add1
+; CHECK-NEXT:    call add1@plt
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vse64.v v16, (s1)
 ; CHECK-NEXT:    ld s1, 0(sp) # 8-byte Folded Reload

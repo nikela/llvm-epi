@@ -269,7 +269,7 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
     break;
   }
 
-  uint64_t VTypeI = (Log2_64(SEW / 8) << 2) | Log2_64(LMul);
+  uint64_t VTypeI = (Log2_64(SEW / 8) << 3) | Log2_64(LMul);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
   auto *VSETVLI = CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, MVT::i64,
@@ -626,9 +626,9 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
 
       uint64_t SEWBits = SEW->getZExtValue() & 0x7;
-      uint64_t VMulBits = VMul->getZExtValue() & 0x3;
+      uint64_t VMulBits = VMul->getZExtValue() & 0x7;
 
-      uint64_t VTypeI = (SEWBits << 2) | VMulBits;
+      uint64_t VTypeI = (SEWBits << 3) | VMulBits;
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
 
       SDValue VLOperand = Node->getOperand(1);
@@ -652,9 +652,9 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
 
       uint64_t SEWBits = SEW->getZExtValue() & 0x7;
-      uint64_t VMulBits = VMul->getZExtValue() & 0x3;
+      uint64_t VMulBits = VMul->getZExtValue() & 0x7;
 
-      uint64_t VTypeI = (SEWBits << 2) | VMulBits;
+      uint64_t VTypeI = (SEWBits << 3) | VMulBits;
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
 
       // FIXME DstReg for VLMAX must be != X0

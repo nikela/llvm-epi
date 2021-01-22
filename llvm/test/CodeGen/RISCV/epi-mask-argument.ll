@@ -28,12 +28,12 @@ define void @indirect_register_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1>
 ; CHECK-NEXT:    rdvlenb a1
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    sd sp, -40(s0)
-; CHECK-NEXT:    add a1, zero, a0
+; CHECK-NEXT:    mv a1, a0
 ; CHECK-NEXT:    ld a0, -40(s0)
 ; CHECK-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vse8.v v0, (a0)
 ; CHECK-NEXT:    vmv4r.v v20, v16
-; CHECK-NEXT:    call indirect_register_param
+; CHECK-NEXT:    call indirect_register_param@plt
 ; CHECK-NEXT:    addi sp, s0, -48
 ; CHECK-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -85,7 +85,7 @@ define void @indirect_stack_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1> %m
 ; CHECK-NEXT:    addi a7, zero, 8
 ; CHECK-NEXT:    vse8.v v0, (t0)
 ; CHECK-NEXT:    vmv4r.v v20, v16
-; CHECK-NEXT:    call indirect_stack_param
+; CHECK-NEXT:    call indirect_stack_param@plt
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    addi sp, s0, -48
 ; CHECK-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
