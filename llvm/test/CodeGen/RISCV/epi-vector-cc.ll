@@ -11,7 +11,7 @@ define <vscale x 1 x double> @basic_callee(
 ; CHECK-LABEL: basic_callee:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v16, v16, v17
+; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,
                                  <vscale x 1 x double> %v2,
@@ -29,12 +29,12 @@ define <vscale x 1 x double> @max_registers(
 ; CHECK-LABEL: max_registers:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v25, v16, v17
-; CHECK-NEXT:    vfadd.vv v25, v25, v19
-; CHECK-NEXT:    vfadd.vv v25, v25, v20
-; CHECK-NEXT:    vfadd.vv v25, v25, v21
-; CHECK-NEXT:    vfadd.vv v25, v25, v22
-; CHECK-NEXT:    vfadd.vv v16, v25, v23
+; CHECK-NEXT:    vfadd.vv v25, v8, v9
+; CHECK-NEXT:    vfadd.vv v25, v25, v11
+; CHECK-NEXT:    vfadd.vv v25, v25, v12
+; CHECK-NEXT:    vfadd.vv v25, v25, v13
+; CHECK-NEXT:    vfadd.vv v25, v25, v14
+; CHECK-NEXT:    vfadd.vv v8, v25, v15
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v0,
                                  <vscale x 1 x double> %v1,
@@ -76,10 +76,8 @@ define <vscale x 1 x double> @max_registers(
 define <vscale x 1 x double> @too_many_registers_1(
 ; CHECK-LABEL: too_many_registers_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vle64.v v25, (a2)
-; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vfadd.vv v16, v26, v25
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  i64 %gvl,
                                  <vscale x 1 x double> %v0,
@@ -103,10 +101,8 @@ define <vscale x 1 x double> @too_many_registers_1(
 define <vscale x 1 x double> @too_many_registers_2(
 ; CHECK-LABEL: too_many_registers_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
-; CHECK-NEXT:    vle64.v v25, (a1)
-; CHECK-NEXT:    vle64.v v26, (a0)
-; CHECK-NEXT:    vfadd.vv v16, v26, v25
+; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v0,
                                  <vscale x 1 x double> %v1,
@@ -130,12 +126,8 @@ define <vscale x 1 x double> @too_many_registers_2(
 define <vscale x 1 x double> @too_many_registers_3(
 ; CHECK-LABEL: too_many_registers_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a7, e64,m1,ta,mu
-; CHECK-NEXT:    addi a0, zero, 8
-; CHECK-NEXT:    add a0, a0, sp
-; CHECK-NEXT:    vle64.v v25, (a0)
-; CHECK-NEXT:    vle64.v v26, (sp)
-; CHECK-NEXT:    vfadd.vv v16, v26, v25
+; CHECK-NEXT:    vsetvli a0, a7, e64,m1,ta,mu
+; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  i64 %i0,
                                  i64 %i1,
@@ -174,7 +166,7 @@ define <vscale x 1 x double> @first_mask_0(
 ; CHECK-LABEL: first_mask_0:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v16, v16, v17, v0.t
+; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x i1> %mask,
                                  <vscale x 1 x double> %v1,
@@ -194,7 +186,7 @@ define <vscale x 1 x double> @first_mask_2(
 ; CHECK-LABEL: first_mask_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v16, v16, v17, v0.t
+; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,
                                  <vscale x 1 x double> %v2,
@@ -213,9 +205,9 @@ define <vscale x 1 x double> @first_mask_2(
 define <vscale x 1 x double> @second_mask_1(
 ; CHECK-LABEL: second_mask_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vmv1r.v v0, v18
+; CHECK-NEXT:    vmv1r.v v0, v10
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v16, v16, v17, v0.t
+; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,
                                  <vscale x 1 x double> %v2,
@@ -243,7 +235,7 @@ define <vscale x 1 x i1> @return_mask_1(<vscale x 1 x i1> %mask1) nounwind
 define <vscale x 1 x i1> @return_mask_2(<vscale x 1 x i1> %mask1,
 ; CHECK-LABEL: return_mask_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    ret
                                       <vscale x 1 x i1> %mask2) nounwind
 {

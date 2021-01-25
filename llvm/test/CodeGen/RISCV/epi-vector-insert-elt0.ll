@@ -6,7 +6,7 @@ define <vscale x 1 x i64> @insert_nxv1i64(<vscale x 1 x i64> %merge, i64 %e)
 ; CHECK-LABEL: insert_nxv1i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 1 x i64> %merge, i64 %e, i64 0
@@ -17,7 +17,7 @@ define <vscale x 2 x i32> @insert_nxv2i32(<vscale x 2 x i32> %merge, i32 %e)
 ; CHECK-LABEL: insert_nxv2i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 2 x i32> %merge, i32 %e, i64 0
@@ -28,7 +28,7 @@ define <vscale x 4 x i16> @insert_nxv4i16(<vscale x 4 x i16> %merge, i16 %e)
 ; CHECK-LABEL: insert_nxv4i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 4 x i16> %merge, i16 %e, i64 0
@@ -39,7 +39,7 @@ define <vscale x 8 x i8> @insert_nxv8i8(<vscale x 8 x i8> %merge, i8 %e)
 ; CHECK-LABEL: insert_nxv8i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x i8> %merge, i8 %e, i64 0
@@ -50,7 +50,7 @@ define <vscale x 2 x i64> @insert_nxv2i64(<vscale x 2 x i64> %merge, i64 %e)
 ; CHECK-LABEL: insert_nxv2i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 2 x i64> %merge, i64 %e, i64 0
@@ -61,7 +61,7 @@ define <vscale x 4 x i32> @insert_nxv4i32(<vscale x 4 x i32> %merge, i32 %e)
 ; CHECK-LABEL: insert_nxv4i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 4 x i32> %merge, i32 %e, i64 0
@@ -72,7 +72,7 @@ define <vscale x 8 x i16> @insert_nxv8i16(<vscale x 8 x i16> %merge, i16 %e)
 ; CHECK-LABEL: insert_nxv8i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x i16> %merge, i16 %e, i64 0
@@ -83,7 +83,7 @@ define <vscale x 16 x i8> @insert_nxv16i8(<vscale x 16 x i8> %merge, i8 %e)
 ; CHECK-LABEL: insert_nxv16i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 16 x i8> %merge, i8 %e, i64 0
@@ -94,7 +94,7 @@ define <vscale x 4 x i64> @insert_nxv4i64(<vscale x 4 x i64> %merge, i64 %e)
 ; CHECK-LABEL: insert_nxv4i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 4 x i64> %merge, i64 %e, i64 0
@@ -105,7 +105,7 @@ define <vscale x 8 x i32> @insert_nxv8i32(<vscale x 8 x i32> %merge, i32 %e)
 ; CHECK-LABEL: insert_nxv8i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x i32> %merge, i32 %e, i64 0
@@ -116,7 +116,7 @@ define <vscale x 16 x i16> @insert_nxv16i16(<vscale x 16 x i16> %merge, i16 %e)
 ; CHECK-LABEL: insert_nxv16i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 16 x i16> %merge, i16 %e, i64 0
@@ -127,7 +127,7 @@ define <vscale x 32 x i8> @insert_nxv32i8(<vscale x 32 x i8> %merge, i8 %e)
 ; CHECK-LABEL: insert_nxv32i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 32 x i8> %merge, i8 %e, i64 0
@@ -138,7 +138,7 @@ define <vscale x 8 x i64> @insert_nxv8i64(<vscale x 8 x i64> %merge, i64 %e)
 ; CHECK-LABEL: insert_nxv8i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x i64> %merge, i64 %e, i64 0
@@ -149,7 +149,7 @@ define <vscale x 16 x i32> @insert_nxv16i32(<vscale x 16 x i32> %merge, i32 %e)
 ; CHECK-LABEL: insert_nxv16i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 16 x i32> %merge, i32 %e, i64 0
@@ -160,7 +160,7 @@ define <vscale x 32 x i16> @insert_nxv32i16(<vscale x 32 x i16> %merge, i16 %e)
 ; CHECK-LABEL: insert_nxv32i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m1,ta,mu
-; CHECK-NEXT:    vmv.s.x v16, a0
+; CHECK-NEXT:    vmv.s.x v8, a0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 32 x i16> %merge, i16 %e, i64 0
@@ -178,7 +178,7 @@ define <vscale x 1 x double> @insert_nxv1f64(<vscale x 1 x double> %merge, doubl
 ; CHECK-LABEL: insert_nxv1f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 1 x double> %merge, double %e, i64 0
@@ -190,7 +190,7 @@ define <vscale x 2 x float> @insert_nxv2f32(<vscale x 2 x float> %merge, float %
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 2 x float> %merge, float %e, i64 0
@@ -201,7 +201,7 @@ define <vscale x 2 x double> @insert_nxv2f64(<vscale x 2 x double> %merge, doubl
 ; CHECK-LABEL: insert_nxv2f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 2 x double> %merge, double %e, i64 0
@@ -213,7 +213,7 @@ define <vscale x 4 x float> @insert_nxv4f32(<vscale x 4 x float> %merge, float %
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 4 x float> %merge, float %e, i64 0
@@ -224,7 +224,7 @@ define <vscale x 4 x double> @insert_nxv4f64(<vscale x 4 x double> %merge, doubl
 ; CHECK-LABEL: insert_nxv4f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 4 x double> %merge, double %e, i64 0
@@ -236,7 +236,7 @@ define <vscale x 8 x float> @insert_nxv8f32(<vscale x 8 x float> %merge, float %
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x float> %merge, float %e, i64 0
@@ -247,7 +247,7 @@ define <vscale x 8 x double> @insert_nxv8f64(<vscale x 8 x double> %merge, doubl
 ; CHECK-LABEL: insert_nxv8f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 8 x double> %merge, double %e, i64 0
@@ -259,7 +259,7 @@ define <vscale x 16 x float> @insert_nxv16f32(<vscale x 16 x float> %merge, floa
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v16, fa0
+; CHECK-NEXT:    vfmv.s.f v8, fa0
 ; CHECK-NEXT:    ret
 {
   %v = insertelement <vscale x 16 x float> %merge, float %e, i64 0

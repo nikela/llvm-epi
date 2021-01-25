@@ -17681,8 +17681,7 @@ SDValue DAGCombiner::visitLIFETIME_END(SDNode *N) {
   // We walk up the chains to find stores.
   SmallVector<SDValue, 8> Chains = {N->getOperand(0)};
   while (!Chains.empty()) {
-    SDValue Chain = Chains.back();
-    Chains.pop_back();
+    SDValue Chain = Chains.pop_back_val();
     if (!Chain.hasOneUse())
       continue;
     switch (Chain.getOpcode()) {
@@ -20807,26 +20806,35 @@ SDValue DAGCombiner::visitVECTOR_SHUFFLE(SDNode *N) {
     }
   }
 
-  // Canonicalize shuffles according to rules:
-  //  shuffle(A, shuffle(A, B)) -> shuffle(shuffle(A,B), A)
-  //  shuffle(B, shuffle(A, B)) -> shuffle(shuffle(A,B), B)
-  //  shuffle(B, shuffle(A, Undef)) -> shuffle(shuffle(A, Undef), B)
-  if (N1.getOpcode() == ISD::VECTOR_SHUFFLE &&
-      N0.getOpcode() != ISD::VECTOR_SHUFFLE && Level < AfterLegalizeDAG &&
-      TLI.isTypeLegal(VT)) {
-    // The incoming shuffle must be of the same type as the result of the
-    // current shuffle.
-    assert(N1->getOperand(0).getValueType() == VT &&
-           "Shuffle types don't match");
+  if (Level < AfterLegalizeDAG && TLI.isTypeLegal(VT)) {
+    // Canonicalize shuffles according to rules:
+    //  shuffle(A, shuffle(A, B)) -> shuffle(shuffle(A,B), A)
+    //  shuffle(B, shuffle(A, B)) -> shuffle(shuffle(A,B), B)
+    //  shuffle(B, shuffle(A, Undef)) -> shuffle(shuffle(A, Undef), B)
+    if (N1.getOpcode() == ISD::VECTOR_SHUFFLE &&
+        N0.getOpcode() != ISD::VECTOR_SHUFFLE) {
+      // The incoming shuffle must be of the same type as the result of the
+      // current shuffle.
+      assert(N1->getOperand(0).getValueType() == VT &&
+             "Shuffle types don't match");
 
-    SDValue SV0 = N1->getOperand(0);
-    SDValue SV1 = N1->getOperand(1);
-    bool HasSameOp0 = N0 == SV0;
-    bool IsSV1Undef = SV1.isUndef();
-    if (HasSameOp0 || IsSV1Undef || N0 == SV1)
-      // Commute the operands of this shuffle so that next rule
-      // will trigger.
+      SDValue SV0 = N1->getOperand(0);
+      SDValue SV1 = N1->getOperand(1);
+      bool HasSameOp0 = N0 == SV0;
+      bool IsSV1Undef = SV1.isUndef();
+      if (HasSameOp0 || IsSV1Undef || N0 == SV1)
+        // Commute the operands of this shuffle so merging below will trigger.
+        return DAG.getCommutedVectorShuffle(*SVN);
+    }
+
+    // Canonicalize splat shuffles to the RHS to improve merging below.
+    //  shuffle(splat(A,u), shuffle(C,D)) -> shuffle'(shuffle(C,D), splat(A,u))
+    if (N0.getOpcode() == ISD::VECTOR_SHUFFLE &&
+        N1.getOpcode() == ISD::VECTOR_SHUFFLE &&
+        cast<ShuffleVectorSDNode>(N0)->isSplat() &&
+        !cast<ShuffleVectorSDNode>(N1)->isSplat()) {
       return DAG.getCommutedVectorShuffle(*SVN);
+    }
   }
 
   // Compute the combined shuffle mask for a shuffle with SV0 as the first

@@ -25,7 +25,7 @@ define <vscale x 1 x i64> @foo(<vscale x 1 x i64> %v, <vscale x 2 x i64> %w, i64
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vsll.vi v25, v16, 0
+; CHECK-NEXT:    vsll.vi v25, v8, 0
 ; CHECK-NEXT:    vsll.vi v25, v25, 31
 ; CHECK-NEXT:    addi a0, zero, -1
 ; CHECK-NEXT:    vsll.vx v25, v25, a0
@@ -58,7 +58,7 @@ define <vscale x 1 x i64> @foo(<vscale x 1 x i64> %v, <vscale x 2 x i64> %w, i64
 ; CHECK-NEXT:    vrgather.vi v26, v25, 0
 ; CHECK-NEXT:    vrgather.vi v25, v26, 31
 ; CHECK-NEXT:    vrgather.vx v26, v25, a0
-; CHECK-NEXT:    vrgather.vx v16, v26, a1
+; CHECK-NEXT:    vrgather.vx v8, v26, a1
 ; CHECK-NEXT:    ret
 {
   %1 = call <vscale x 1 x i64> @llvm.epi.vsll.nxv1i64(<vscale x 1 x i64> %v, i64 0, i64 %gvl)

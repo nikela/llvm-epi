@@ -5,13 +5,11 @@
 define <vscale x 8 x i1> @indirect_register_param(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %merge, <vscale x 8 x i1> %m, i64 %gvl) nounwind {
 ; CHECK-LABEL: indirect_register_param:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vle8.v v25, (a0)
-; CHECK-NEXT:    vmv1r.v v26, v0
-; CHECK-NEXT:    vsetvli a0, a1, e32,m4,ta,mu
+; CHECK-NEXT:    vmv1r.v v25, v0
+; CHECK-NEXT:    vsetvli a0, a0, e32,m4,ta,mu
+; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v25
-; CHECK-NEXT:    vmseq.vv v26, v16, v20, v0.t
-; CHECK-NEXT:    vmv1r.v v0, v26
 ; CHECK-NEXT:    ret
 entry:
     %0 = tail call <vscale x 8 x i1> @llvm.epi.vmseq.mask.nxv8i1.nxv8i32.nxv8i32(<vscale x 8 x i1> %merge, <vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %m, i64 %gvl)
@@ -21,23 +19,13 @@ entry:
 define void @indirect_register_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1> %m, i64 %gvl) nounwind {
 ; CHECK-LABEL: indirect_register_argument:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 32(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 48
-; CHECK-NEXT:    rdvlenb a1
-; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -40(s0)
-; CHECK-NEXT:    mv a1, a0
-; CHECK-NEXT:    ld a0, -40(s0)
-; CHECK-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v0, (a0)
-; CHECK-NEXT:    vmv4r.v v20, v16
+; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    vmv4r.v v12, v8
+; CHECK-NEXT:    vmv1r.v v16, v0
 ; CHECK-NEXT:    call indirect_register_param@plt
-; CHECK-NEXT:    addi sp, s0, -48
-; CHECK-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
    %x = call <vscale x 8 x i1> @indirect_register_param(<vscale x 8 x i32> %a, <vscale x 8 x i32> %a, <vscale x 8 x i1> %m, <vscale x 8 x i1> %m, i64 %gvl)
    ret void
@@ -46,14 +34,11 @@ define void @indirect_register_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1>
 define <vscale x 8 x i1> @indirect_stack_param(
 ; CHECK-LABEL: indirect_stack_param:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    ld a1, 0(sp)
-; CHECK-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vle8.v v25, (a1)
-; CHECK-NEXT:    vmv1r.v v26, v0
+; CHECK-NEXT:    vmv1r.v v25, v0
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m4,ta,mu
+; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v25
-; CHECK-NEXT:    vmseq.vv v26, v16, v20, v0.t
-; CHECK-NEXT:    vmv1r.v v0, v26
 ; CHECK-NEXT:    ret
     i64 %gvl, i64 %_2, i64 %_3, i64 %_4, i64 %_5, i64 %_6, i64 %_7, i64 %_8,
     <vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %merge, <vscale x 8 x i1> %m) nounwind {
@@ -65,17 +50,8 @@ entry:
 define void @indirect_stack_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1> %m, i64 %gvl) nounwind {
 ; CHECK-LABEL: indirect_stack_argument:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 32(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 48
-; CHECK-NEXT:    rdvlenb a1
-; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    sd sp, -40(s0)
 ; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    ld t0, -40(s0)
-; CHECK-NEXT:    sd t0, 0(sp)
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi a1, zero, 2
 ; CHECK-NEXT:    addi a2, zero, 3
 ; CHECK-NEXT:    addi a3, zero, 4
@@ -83,14 +59,11 @@ define void @indirect_stack_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1> %m
 ; CHECK-NEXT:    addi a5, zero, 6
 ; CHECK-NEXT:    addi a6, zero, 7
 ; CHECK-NEXT:    addi a7, zero, 8
-; CHECK-NEXT:    vse8.v v0, (t0)
-; CHECK-NEXT:    vmv4r.v v20, v16
+; CHECK-NEXT:    vmv4r.v v12, v8
+; CHECK-NEXT:    vmv1r.v v16, v0
 ; CHECK-NEXT:    call indirect_stack_param@plt
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
-; CHECK-NEXT:    addi sp, s0, -48
-; CHECK-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
 ; CHECK-NEXT:    ret
    %x = call <vscale x 8 x i1> @indirect_stack_param(i64 %gvl, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7, i64 8, <vscale x 8 x i32> %a, <vscale x 8 x i32> %a, <vscale x 8 x i1> %m, <vscale x 8 x i1> %m)
    ret void

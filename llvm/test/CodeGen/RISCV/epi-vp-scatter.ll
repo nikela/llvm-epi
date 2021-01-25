@@ -6,8 +6,8 @@ define void @nxv1i64_1(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %
 ; CHECK-LABEL: nxv1i64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
-; CHECK-NEXT:    vsll.vi v25, v17, 3
-; CHECK-NEXT:    vsxei64.v v16, (a0), v25, v0.t
+; CHECK-NEXT:    vsll.vi v25, v9, 3
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v25, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
@@ -18,7 +18,7 @@ define void @nxv1i64_2(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vsc
 ; CHECK-LABEL: nxv1i64_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vsxei64.v v16, (zero), v17, v0.t
+; CHECK-NEXT:    vsuxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
   ret void
@@ -29,7 +29,7 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vsxei64.v v16, (a0), v25, v0.t
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v25, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
   %splat = shufflevector <vscale x 1 x i64*> %head, <vscale x 1 x i64*> undef, <vscale x 1 x i32> zeroinitializer
@@ -54,7 +54,7 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vsxei32.v v16, (a0), v25, v0.t
+; CHECK-NEXT:    vsuxei32.v v8, (a0), v25, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
   %splat = shufflevector <vscale x 2 x float*> %head, <vscale x 2 x float*> undef, <vscale x 2 x i32> zeroinitializer
@@ -103,10 +103,9 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 define void @nxv8f64_1(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv8f64_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e64,m8,ta,mu
-; CHECK-NEXT:    vle64.v v8, (a1)
-; CHECK-NEXT:    vsll.vi v8, v8, 3
-; CHECK-NEXT:    vsxei64.v v16, (a0), v8, v0.t
+; CHECK-NEXT:    vsetvli zero, a1, e64,m8,ta,mu
+; CHECK-NEXT:    vsll.vi v16, v16, 3
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
@@ -116,9 +115,8 @@ define void @nxv8f64_1(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x 
 define void @nxv8f64_2(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv8f64_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a1, e64,m8,ta,mu
-; CHECK-NEXT:    vle64.v v8, (a0)
-; CHECK-NEXT:    vsxei64.v v16, (zero), v8, v0.t
+; CHECK-NEXT:    vsetvli a0, a0, e64,m8,ta,mu
+; CHECK-NEXT:    vsuxei64.v v8, (zero), v16, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
   ret void
@@ -128,8 +126,8 @@ define void @nxv8f64_3(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x 
 ; CHECK-LABEL: nxv8f64_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64,m8,ta,mu
-; CHECK-NEXT:    vmv.v.i v8, 0
-; CHECK-NEXT:    vsxei64.v v16, (a0), v8, v0.t
+; CHECK-NEXT:    vmv.v.i v16, 0
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
   %splat = shufflevector <vscale x 8 x double*> %head, <vscale x 8 x double*> undef, <vscale x 8 x i32> zeroinitializer

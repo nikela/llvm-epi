@@ -1321,7 +1321,7 @@ foreach m = MxList.m in
             Sched<[WriteVPULoadStrided, ReadMemBase]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
-        BaseInstr = !cast<Instruction>("VLXEI" # eew #"_V") in
+        BaseInstr = !cast<Instruction>("VLUXEI" # eew #"_V") in
       def "PseudoEPIVLXEI" # eew # "_V_" # LInfo
           : Pseudo<(outs evr:$rd),
                    (ins evr:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
@@ -1362,7 +1362,7 @@ foreach m = MxList.m in
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
-        BaseInstr = !cast<Instruction>("VSXEI" # eew # "_V") in
+        BaseInstr = !cast<Instruction>("VSUXEI" # eew # "_V") in
       def "PseudoEPIVSXEI" # eew #"_V_" # LInfo
           : Pseudo<(outs),
                    (ins evr:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask, GPR:$vl,
@@ -1428,7 +1428,7 @@ foreach eew = AllEEW in
             EPIPseudo;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
-        BaseInstr = !cast<Instruction>("VLXSEG"#tsize#"EI"#eew#"_V") in
+        BaseInstr = !cast<Instruction>("VLUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVLXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs TupleRegClass:$rd),
                    (ins TupleRegClass:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
@@ -1462,7 +1462,7 @@ foreach eew = AllEEW in
 
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
-        BaseInstr = !cast<Instruction>("VSXSEG"#tsize#"EI"#eew#"_V") in
+        BaseInstr = !cast<Instruction>("VSUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVSXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs),
                    (ins TupleRegClass:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask,

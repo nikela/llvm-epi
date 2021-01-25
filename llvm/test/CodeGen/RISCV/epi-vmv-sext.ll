@@ -11,7 +11,7 @@ define signext i64 @sext_i64(<vscale x 1 x i64> %a)
 ; CHECK-LABEL: sext_i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %res = call i64 @llvm.epi.vmv.x.s.nxv2i64(<vscale x 1 x i64> %a)
@@ -24,7 +24,7 @@ define signext i32 @sext_i32(<vscale x 2 x i32> %a)
 ; CHECK-LABEL: sext_i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %res = call i32 @llvm.epi.vmv.x.s.nxv2i32(<vscale x 2 x i32> %a)
@@ -37,7 +37,7 @@ define signext i16 @sext_i16(<vscale x 4 x i16> %a)
 ; CHECK-LABEL: sext_i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %res = call i16 @llvm.epi.vmv.x.s.nxv4i16(<vscale x 4 x i16> %a)
@@ -50,7 +50,7 @@ define signext i8 @sext_i8(<vscale x 8 x i8> %a)
 ; CHECK-LABEL: sext_i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vmv.x.s a0, v16
+; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
   %res = call i8 @llvm.epi.vmv.x.s.nxv8i8(<vscale x 8 x i8> %a)

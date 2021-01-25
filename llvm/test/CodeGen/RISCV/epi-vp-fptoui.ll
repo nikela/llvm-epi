@@ -7,7 +7,7 @@ define <vscale x 2 x i32> @fptoui.i32.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-LABEL: fptoui.i32.f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfcvt.xu.f.v v16, v16
+; CHECK-NEXT:    vfcvt.xu.f.v v8, v8
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(<vscale x 2 x float> %a,
@@ -21,7 +21,7 @@ define <vscale x 2 x i32> @fptoui.i32.f32.mask(<vscale x 2 x float> %a, <vscale 
 ; CHECK-LABEL: fptoui.i32.f32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfcvt.xu.f.v v16, v16, v0.t
+; CHECK-NEXT:    vfcvt.xu.f.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(
@@ -38,8 +38,8 @@ define <vscale x 2 x i64> @fptoui.i64.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-LABEL: fptoui.i64.f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfwcvt.xu.f.v v26, v16
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vfwcvt.xu.f.v v26, v8
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(<vscale x 2 x float> %a,
@@ -53,8 +53,8 @@ define <vscale x 2 x i64> @fptoui.i64.f32.mask(<vscale x 2 x float> %a, <vscale 
 ; CHECK-LABEL: fptoui.i64.f32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfwcvt.xu.f.v v26, v16, v0.t
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vfwcvt.xu.f.v v26, v8, v0.t
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(
@@ -71,8 +71,8 @@ define <vscale x 2 x i32> @fptoui.i32.f64(<vscale x 2 x double> %a, i32 %gvl)
 ; CHECK-LABEL: fptoui.i32.f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfncvt.xu.f.w v25, v16
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vfncvt.xu.f.w v25, v8
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double> %a,
@@ -86,8 +86,8 @@ define <vscale x 2 x i32> @fptoui.i32.f64.mask(<vscale x 2 x double> %a, <vscale
 ; CHECK-LABEL: fptoui.i32.f64.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfncvt.xu.f.w v25, v16, v0.t
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vfncvt.xu.f.w v25, v8, v0.t
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(

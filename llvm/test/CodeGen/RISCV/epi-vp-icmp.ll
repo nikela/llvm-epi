@@ -24,70 +24,70 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale 
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vmseq.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmseq.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsne.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsne.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
@@ -101,43 +101,43 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale 
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmseq.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmseq.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsne.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsne.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -194,70 +194,70 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscal
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vsetvli a2, a1, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vmseq.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmseq.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsne.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsne.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v17, v16, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v9, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v16, v17, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v8, v9, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
@@ -271,43 +271,43 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscal
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmseq.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmseq.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsne.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsne.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v17, v16, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v16, v17, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -364,70 +364,70 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vsetvli a2, a1, e64,m2,ta,mu
-; CHECK-O0-NEXT:    vmseq.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmseq.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsne.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmsne.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v18, v16, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v10, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v18, v16, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v10, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsltu.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmsltu.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsleu.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmsleu.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v18, v16, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v10, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v18, v16, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v10, v8, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmslt.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmslt.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmsle.vv v25, v16, v18, v0.t
+; CHECK-O0-NEXT:    vmsle.vv v25, v8, v10, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vse8.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
@@ -441,43 +441,43 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmseq.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmseq.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsne.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmsne.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v18, v16, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v10, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v18, v16, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v10, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsltu.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmsltu.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsleu.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmsleu.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v18, v16, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v10, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v18, v16, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v10, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmslt.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmslt.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vmsle.vv v25, v16, v18, v0.t
+; CHECK-O2-NEXT:    vmsle.vv v25, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vse8.v v25, (a1)
 ; CHECK-O2-NEXT:    ret

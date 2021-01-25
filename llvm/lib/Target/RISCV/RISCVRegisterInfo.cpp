@@ -173,7 +173,7 @@ static Register computeVRSpillReloadInstructions(
   if (LMUL == 1) {
     if (!TupleSize) {
       if (IsReload)
-        BuildMI(MBB, II, DL, TII.get(RISCV::VL1R_V), VReg)
+        BuildMI(MBB, II, DL, TII.get(RISCV::VL1RE8_V), VReg)
             .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
       else
         BuildMI(MBB, II, DL, TII.get(RISCV::VS1R_V))

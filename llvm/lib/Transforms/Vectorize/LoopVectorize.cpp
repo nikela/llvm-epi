@@ -3125,10 +3125,9 @@ void InnerLoopVectorizer::scalarizeInstruction(Instruction *Instr, VPUser &User,
 
   // llvm.experimental.noalias.scope.decl intrinsics must only be duplicated for
   // the first lane and part.
-  if (auto *II = dyn_cast<IntrinsicInst>(Instr))
+  if (isa<NoAliasScopeDeclInst>(Instr))
     if (Instance.Lane != 0 || Instance.Part != 0)
-      if (II->getIntrinsicID() == Intrinsic::experimental_noalias_scope_decl)
-        return;
+      return;
 
   setDebugLocFromInst(Builder, Instr);
 
@@ -8349,9 +8348,8 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
     const SCEV *CondSCEV = SE->getSCEV(SI->getCondition());
     bool ScalarCond = (SE->isLoopInvariant(CondSCEV, TheLoop));
     Type *CondTy = SI->getCondition()->getType();
-    if (!ScalarCond) {
+    if (!ScalarCond)
       CondTy = VectorType::get(CondTy, VF);
-    }
     return TTI.getCmpSelInstrCost(I->getOpcode(), VectorTy, CondTy,
                                   CmpInst::BAD_ICMP_PREDICATE, CostKind, I);
   }

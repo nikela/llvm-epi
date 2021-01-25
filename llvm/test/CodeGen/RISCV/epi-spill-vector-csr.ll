@@ -20,10 +20,10 @@ define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double
 ; SPILL-O0-NEXT:    sd sp, -64(s0)
 ; SPILL-O0-NEXT:    sd a0, -40(s0) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    ld a1, -56(s0)
-; SPILL-O0-NEXT:    vs1r.v v16, (a1)
+; SPILL-O0-NEXT:    vs1r.v v8, (a1)
 ; SPILL-O0-NEXT:    # implicit-def: $v25
 ; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; SPILL-O0-NEXT:    vfadd.vv v25, v16, v17
+; SPILL-O0-NEXT:    vfadd.vv v25, v8, v9
 ; SPILL-O0-NEXT:    ld a0, -64(s0)
 ; SPILL-O0-NEXT:    vs1r.v v25, (a0)
 ; SPILL-O0-NEXT:    lui a0, %hi(.L.str)
@@ -35,9 +35,9 @@ define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double
 ; SPILL-O0-NEXT:    vl1r.v v25, (a1)
 ; SPILL-O0-NEXT:    # kill: def $x11 killed $x10
 ; SPILL-O0-NEXT:    ld a0, -40(s0) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    # implicit-def: $v16
+; SPILL-O0-NEXT:    # implicit-def: $v8
 ; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; SPILL-O0-NEXT:    vfadd.vv v16, v25, v26
+; SPILL-O0-NEXT:    vfadd.vv v8, v25, v26
 ; SPILL-O0-NEXT:    addi sp, s0, -64
 ; SPILL-O0-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
@@ -58,9 +58,9 @@ define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double
 ; SPILL-O2-NEXT:    sd sp, -64(s0)
 ; SPILL-O2-NEXT:    mv s1, a0
 ; SPILL-O2-NEXT:    ld a1, -64(s0)
-; SPILL-O2-NEXT:    vs1r.v v16, (a1)
+; SPILL-O2-NEXT:    vs1r.v v8, (a1)
 ; SPILL-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; SPILL-O2-NEXT:    vfadd.vv v25, v16, v17
+; SPILL-O2-NEXT:    vfadd.vv v25, v8, v9
 ; SPILL-O2-NEXT:    ld a0, -56(s0)
 ; SPILL-O2-NEXT:    vs1r.v v25, (a0)
 ; SPILL-O2-NEXT:    lui a0, %hi(.L.str)
@@ -71,7 +71,7 @@ define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double
 ; SPILL-O2-NEXT:    vl1r.v v25, (a0)
 ; SPILL-O2-NEXT:    ld a0, -64(s0)
 ; SPILL-O2-NEXT:    vl1r.v v26, (a0)
-; SPILL-O2-NEXT:    vfadd.vv v16, v26, v25
+; SPILL-O2-NEXT:    vfadd.vv v8, v26, v25
 ; SPILL-O2-NEXT:    addi sp, s0, -64
 ; SPILL-O2-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload

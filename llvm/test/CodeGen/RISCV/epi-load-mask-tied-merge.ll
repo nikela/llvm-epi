@@ -5,10 +5,10 @@
 define <vscale x 1 x double> @load_mask_tied_merge_operand(i64 %gvl, <vscale x 1 x i1> %vmask1, <vscale x 1 x i1> %vmask2, <vscale x 1 x double> %vmerge, double* nocapture readonly %c) nounwind {
 ; CHECK-LABEL: load_mask_tied_merge_operand:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vle64.v v17, (a1), v0.t
-; CHECK-NEXT:    vmv1r.v v16, v17
+; CHECK-NEXT:    vle64.v v9, (a1), v0.t
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
 entry:
   %0 = bitcast double* %c to <vscale x 1 x double>*

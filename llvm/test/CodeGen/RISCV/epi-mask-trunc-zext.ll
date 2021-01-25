@@ -9,9 +9,9 @@ define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b,
 ; CHECK-LABEL: mtrunc_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vand.vi v25, v16, 1
+; CHECK-NEXT:    vand.vi v25, v8, 1
 ; CHECK-NEXT:    vmsne.vi v25, v25, 0
-; CHECK-NEXT:    vand.vi v26, v17, 1
+; CHECK-NEXT:    vand.vi v26, v9, 1
 ; CHECK-NEXT:    vmsne.vi v26, v26, 0
 ; CHECK-NEXT:    vmand.mm v0, v25, v26
 ; CHECK-NEXT:    ret
@@ -32,9 +32,9 @@ define <vscale x 1 x i64> @mzext_1(<vscale x 1 x i1> %ma, <vscale x 1 x i1> %mb,
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
 ; CHECK-NEXT:    vmerge.vim v26, v25, 1, v0
-; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v25, v25, 1, v0
-; CHECK-NEXT:    vand.vv v16, v26, v25
+; CHECK-NEXT:    vand.vv v8, v26, v25
 ; CHECK-NEXT:    ret
 {
   %a = zext <vscale x 1 x i1> %ma to <vscale x 1 x i64>
@@ -51,9 +51,9 @@ define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b,
 ; CHECK-LABEL: mtrunc_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vand.vi v26, v16, 1
+; CHECK-NEXT:    vand.vi v26, v8, 1
 ; CHECK-NEXT:    vmsne.vi v25, v26, 0
-; CHECK-NEXT:    vand.vi v26, v18, 1
+; CHECK-NEXT:    vand.vi v26, v10, 1
 ; CHECK-NEXT:    vmsne.vi v28, v26, 0
 ; CHECK-NEXT:    vmand.mm v0, v25, v28
 ; CHECK-NEXT:    ret
@@ -74,9 +74,9 @@ define <vscale x 2 x i64> @mzext_2(<vscale x 2 x i1> %ma, <vscale x 2 x i1> %mb,
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m2,ta,mu
 ; CHECK-NEXT:    vmv.v.i v26, 0
 ; CHECK-NEXT:    vmerge.vim v28, v26, 1, v0
-; CHECK-NEXT:    vmv1r.v v0, v16
+; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v26, v26, 1, v0
-; CHECK-NEXT:    vand.vv v16, v28, v26
+; CHECK-NEXT:    vand.vv v8, v28, v26
 ; CHECK-NEXT:    ret
 {
   %a = zext <vscale x 2 x i1> %ma to <vscale x 2 x i64>

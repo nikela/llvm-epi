@@ -6,7 +6,7 @@ define <vscale x 1 x i1> @test_1xi1(<vscale x 1 x i1> %in, <vscale x 1 x i1> %in
 ; CHECK-LABEL: test_1xi1:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vmand.mm v0, v0, v16
+; CHECK-NEXT:    vmand.mm v0, v0, v8
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -18,7 +18,7 @@ define <vscale x 2 x i1> @test_2xi1(<vscale x 2 x i1> %in, <vscale x 2 x i1> %in
 ; CHECK-LABEL: test_2xi1:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vmand.mm v0, v0, v16
+; CHECK-NEXT:    vmand.mm v0, v0, v8
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -30,7 +30,7 @@ define <vscale x 1 x i64> @test_1xi64(<vscale x 1 x i64> %in, <vscale x 1 x i64>
 ; CHECK-LABEL: test_1xi64:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v17
+; CHECK-NEXT:    vadd.vv v8, v8, v9
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -42,7 +42,7 @@ define <vscale x 2 x i32> @test_2xi32(<vscale x 2 x i32> %in, <vscale x 2 x i32>
 ; CHECK-LABEL: test_2xi32:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v17
+; CHECK-NEXT:    vadd.vv v8, v8, v9
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -54,7 +54,7 @@ define <vscale x 2 x i64> @test_2xi64(<vscale x 2 x i64> %in, <vscale x 2 x i64>
 ; CHECK-LABEL: test_2xi64:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v18
+; CHECK-NEXT:    vadd.vv v8, v8, v10
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -66,7 +66,7 @@ define <vscale x 4 x i32> @test_4xi32(<vscale x 4 x i32> %in, <vscale x 4 x i32>
 ; CHECK-LABEL: test_4xi32:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v18
+; CHECK-NEXT:    vadd.vv v8, v8, v10
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -78,7 +78,7 @@ define <vscale x 4 x i64> @test_4xi64(<vscale x 4 x i64> %in, <vscale x 4 x i64>
 ; CHECK-LABEL: test_4xi64:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v20
+; CHECK-NEXT:    vadd.vv v8, v8, v12
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -90,7 +90,7 @@ define <vscale x 8 x i32> @test_8xi32(<vscale x 8 x i32> %in, <vscale x 8 x i32>
 ; CHECK-LABEL: test_8xi32:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v20
+; CHECK-NEXT:    vadd.vv v8, v8, v12
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -101,10 +101,8 @@ entry:
 define <vscale x 8 x i64> @test_8xi64(<vscale x 8 x i64> %in, <vscale x 8 x i64> %in2) nounwind {
 ; CHECK-LABEL: test_8xi64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a1, zero, e8,m8,ta,mu
-; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v8
+; CHECK-NEXT:    vadd.vv v8, v8, v16
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:
@@ -115,10 +113,8 @@ entry:
 define <vscale x 16 x i32> @test_16xi32(<vscale x 16 x i32> %in, <vscale x 16 x i32> %in2) nounwind {
 ; CHECK-LABEL: test_16xi32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a1, zero, e8,m8,ta,mu
-; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    #APP
-; CHECK-NEXT:    vadd.vv v16, v16, v8
+; CHECK-NEXT:    vadd.vv v8, v8, v16
 ; CHECK-NEXT:    #NO_APP
 ; CHECK-NEXT:    ret
 entry:

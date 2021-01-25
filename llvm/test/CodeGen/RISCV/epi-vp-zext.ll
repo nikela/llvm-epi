@@ -6,8 +6,8 @@ define <vscale x 2 x i64> @zext.i64.i32(<vscale x 2 x i32> %a, i32 %gvl)
 ; CHECK-LABEL: zext.i64.i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v16
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vwcvtu.x.x.v v26, v8
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i64> @llvm.vp.zext.nxv2i64.nxv2i32(<vscale x 2 x i32> %a,
@@ -20,8 +20,8 @@ define <vscale x 2 x i64> @zext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 
 ; CHECK-LABEL: zext.i64.i32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v16, v0.t
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vwcvtu.x.x.v v26, v8, v0.t
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i64> @llvm.vp.zext.nxv2i64.nxv2i32(

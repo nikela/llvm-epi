@@ -15,11 +15,11 @@ define <vscale x 1 x i64> @spill_lmul_1(<vscale x 1 x i64> %va) nounwind {
 ; SPILL-O0-NEXT:    sub sp, sp, a0
 ; SPILL-O0-NEXT:    sd sp, -40(s0)
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
-; SPILL-O0-NEXT:    vs1r.v v16, (a0)
+; SPILL-O0-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O0-NEXT:    #APP
 ; SPILL-O0-NEXT:    #NO_APP
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
-; SPILL-O0-NEXT:    vl1r.v v16, (a0)
+; SPILL-O0-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -48
 ; SPILL-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -36,11 +36,11 @@ define <vscale x 1 x i64> @spill_lmul_1(<vscale x 1 x i64> %va) nounwind {
 ; SPILL-O2-NEXT:    sub sp, sp, a0
 ; SPILL-O2-NEXT:    sd sp, -40(s0)
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
-; SPILL-O2-NEXT:    vs1r.v v16, (a0)
+; SPILL-O2-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O2-NEXT:    #APP
 ; SPILL-O2-NEXT:    #NO_APP
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
-; SPILL-O2-NEXT:    vl1r.v v16, (a0)
+; SPILL-O2-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O2-NEXT:    addi sp, s0, -48
 ; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -66,16 +66,16 @@ define <vscale x 2 x i64> @spill_lmul_2(<vscale x 2 x i64> %va) nounwind {
 ; SPILL-O0-NEXT:    sd sp, -40(s0)
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vs1r.v v16, (a0)
+; SPILL-O0-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v17, (a0)
+; SPILL-O0-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O0-NEXT:    #APP
 ; SPILL-O0-NEXT:    #NO_APP
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vl1r.v v16, (a0)
+; SPILL-O0-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v17, (a0)
+; SPILL-O0-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -48
 ; SPILL-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -94,16 +94,16 @@ define <vscale x 2 x i64> @spill_lmul_2(<vscale x 2 x i64> %va) nounwind {
 ; SPILL-O2-NEXT:    sd sp, -40(s0)
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vs1r.v v16, (a0)
+; SPILL-O2-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v17, (a0)
+; SPILL-O2-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O2-NEXT:    #APP
 ; SPILL-O2-NEXT:    #NO_APP
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vl1r.v v16, (a0)
+; SPILL-O2-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v17, (a0)
+; SPILL-O2-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O2-NEXT:    addi sp, s0, -48
 ; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -129,24 +129,24 @@ define <vscale x 4 x i64> @spill_lmul_4(<vscale x 4 x i64> %va) nounwind {
 ; SPILL-O0-NEXT:    sd sp, -40(s0)
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vs1r.v v16, (a0)
+; SPILL-O0-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v17, (a0)
+; SPILL-O0-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v18, (a0)
+; SPILL-O0-NEXT:    vs1r.v v10, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v19, (a0)
+; SPILL-O0-NEXT:    vs1r.v v11, (a0)
 ; SPILL-O0-NEXT:    #APP
 ; SPILL-O0-NEXT:    #NO_APP
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vl1r.v v16, (a0)
+; SPILL-O0-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v17, (a0)
+; SPILL-O0-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v18, (a0)
+; SPILL-O0-NEXT:    vl1r.v v10, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v19, (a0)
+; SPILL-O0-NEXT:    vl1r.v v11, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -48
 ; SPILL-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -165,24 +165,24 @@ define <vscale x 4 x i64> @spill_lmul_4(<vscale x 4 x i64> %va) nounwind {
 ; SPILL-O2-NEXT:    sd sp, -40(s0)
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vs1r.v v16, (a0)
+; SPILL-O2-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v17, (a0)
+; SPILL-O2-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v18, (a0)
+; SPILL-O2-NEXT:    vs1r.v v10, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v19, (a0)
+; SPILL-O2-NEXT:    vs1r.v v11, (a0)
 ; SPILL-O2-NEXT:    #APP
 ; SPILL-O2-NEXT:    #NO_APP
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vl1r.v v16, (a0)
+; SPILL-O2-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v17, (a0)
+; SPILL-O2-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v18, (a0)
+; SPILL-O2-NEXT:    vl1r.v v10, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v19, (a0)
+; SPILL-O2-NEXT:    vl1r.v v11, (a0)
 ; SPILL-O2-NEXT:    addi sp, s0, -48
 ; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -208,40 +208,40 @@ define <vscale x 8 x i64> @spill_lmul_8(<vscale x 8 x i64> %va) nounwind {
 ; SPILL-O0-NEXT:    sd sp, -40(s0)
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vs1r.v v16, (a0)
+; SPILL-O0-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v17, (a0)
+; SPILL-O0-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v18, (a0)
+; SPILL-O0-NEXT:    vs1r.v v10, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v19, (a0)
+; SPILL-O0-NEXT:    vs1r.v v11, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v20, (a0)
+; SPILL-O0-NEXT:    vs1r.v v12, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v21, (a0)
+; SPILL-O0-NEXT:    vs1r.v v13, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v22, (a0)
+; SPILL-O0-NEXT:    vs1r.v v14, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vs1r.v v23, (a0)
+; SPILL-O0-NEXT:    vs1r.v v15, (a0)
 ; SPILL-O0-NEXT:    #APP
 ; SPILL-O0-NEXT:    #NO_APP
 ; SPILL-O0-NEXT:    ld a0, -40(s0)
 ; SPILL-O0-NEXT:    rdvlenb a1
-; SPILL-O0-NEXT:    vl1r.v v16, (a0)
+; SPILL-O0-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v17, (a0)
+; SPILL-O0-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v18, (a0)
+; SPILL-O0-NEXT:    vl1r.v v10, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v19, (a0)
+; SPILL-O0-NEXT:    vl1r.v v11, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v20, (a0)
+; SPILL-O0-NEXT:    vl1r.v v12, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v21, (a0)
+; SPILL-O0-NEXT:    vl1r.v v13, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v22, (a0)
+; SPILL-O0-NEXT:    vl1r.v v14, (a0)
 ; SPILL-O0-NEXT:    add a0, a0, a1
-; SPILL-O0-NEXT:    vl1r.v v23, (a0)
+; SPILL-O0-NEXT:    vl1r.v v15, (a0)
 ; SPILL-O0-NEXT:    addi sp, s0, -48
 ; SPILL-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -260,40 +260,40 @@ define <vscale x 8 x i64> @spill_lmul_8(<vscale x 8 x i64> %va) nounwind {
 ; SPILL-O2-NEXT:    sd sp, -40(s0)
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vs1r.v v16, (a0)
+; SPILL-O2-NEXT:    vs1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v17, (a0)
+; SPILL-O2-NEXT:    vs1r.v v9, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v18, (a0)
+; SPILL-O2-NEXT:    vs1r.v v10, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v19, (a0)
+; SPILL-O2-NEXT:    vs1r.v v11, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v20, (a0)
+; SPILL-O2-NEXT:    vs1r.v v12, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v21, (a0)
+; SPILL-O2-NEXT:    vs1r.v v13, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v22, (a0)
+; SPILL-O2-NEXT:    vs1r.v v14, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v23, (a0)
+; SPILL-O2-NEXT:    vs1r.v v15, (a0)
 ; SPILL-O2-NEXT:    #APP
 ; SPILL-O2-NEXT:    #NO_APP
 ; SPILL-O2-NEXT:    ld a0, -40(s0)
 ; SPILL-O2-NEXT:    rdvlenb a1
-; SPILL-O2-NEXT:    vl1r.v v16, (a0)
+; SPILL-O2-NEXT:    vl1r.v v8, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v17, (a0)
+; SPILL-O2-NEXT:    vl1r.v v9, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v18, (a0)
+; SPILL-O2-NEXT:    vl1r.v v10, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v19, (a0)
+; SPILL-O2-NEXT:    vl1r.v v11, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v20, (a0)
+; SPILL-O2-NEXT:    vl1r.v v12, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v21, (a0)
+; SPILL-O2-NEXT:    vl1r.v v13, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v22, (a0)
+; SPILL-O2-NEXT:    vl1r.v v14, (a0)
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v23, (a0)
+; SPILL-O2-NEXT:    vl1r.v v15, (a0)
 ; SPILL-O2-NEXT:    addi sp, s0, -48
 ; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
