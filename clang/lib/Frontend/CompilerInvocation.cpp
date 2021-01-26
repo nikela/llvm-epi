@@ -1038,6 +1038,9 @@ bool CompilerInvocation::ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args,
       Args.hasFlag(OPT_funroll_loops, OPT_fno_unroll_loops,
                    (Opts.OptimizationLevel > 1));
 
+  Opts.BinutilsVersion =
+      std::string(Args.getLastArgValue(OPT_fbinutils_version_EQ));
+
   Opts.DebugNameTable = static_cast<unsigned>(
       Args.hasArg(OPT_ggnu_pubnames)
           ? llvm::DICompileUnit::DebugNameTableKind::GNU
@@ -1354,10 +1357,6 @@ static void ParseDependencyOutputArgs(DependencyOutputOptions &Opts,
       }
     }
   }
-
-  // -fprofile-list= dependencies.
-  for (const auto &Filename : Args.getAllArgValues(OPT_fprofile_list_EQ))
-    Opts.ExtraDeps.push_back(Filename);
 
   // Propagate the extra dependencies.
   for (const auto *A : Args.filtered(OPT_fdepfile_entry)) {
