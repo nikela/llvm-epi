@@ -44,7 +44,8 @@ enum NodeType : unsigned {
   SRAW,
   SRLW,
   // 32-bit operations from RV64M that can't be simply matched with a pattern
-  // at instruction selection time.
+  // at instruction selection time. These have undefined behavior for division
+  // by 0 or overflow (divw) like their target independent counterparts.
   DIVW,
   DIVUW,
   REMUW,
@@ -84,7 +85,6 @@ enum NodeType : unsigned {
   GORCI,
   GORCIW,
   // EPI nodes
-  EXTRACT_VECTOR_ELT,
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
   ZERO_EXTEND_BITS_INREG,
@@ -148,8 +148,18 @@ enum NodeType : unsigned {
   // Unit-stride fault-only-first load
   VLEFF,
   VLEFF_MASK,
+  // Unit-stride fault-only-first segment load
+  VLSEGFF,
+  VLSEGFF_MASK,
   // read vl CSR
   READ_VL,
+  // Matches the semantics of vslideup/vslidedown. The first operand is the
+  // pass-thru operand, the second is the source vector, and the third is the
+  // XLenVT index (either constant or non-constant).
+  VSLIDEUP,
+  VSLIDEDOWN,
+  // Matches the semantics of the unmasked vid.v instruction.
+  VID,
 };
 } // namespace RISCVISD
 
@@ -360,6 +370,8 @@ private:
   SDValue lowerVectorMaskExt(SDValue Op, SelectionDAG &DAG,
                              int64_t ExtTrueVal) const;
   SDValue lowerVectorMaskTrunc(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerINSERT_VECTOR_ELT(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerEXTRACT_VECTOR_ELT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
@@ -372,7 +384,6 @@ private:
   SDValue lowerZERO_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerEXTRACT_VECTOR_ELT(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
 
   bool isEligibleForTailCallOptimization(

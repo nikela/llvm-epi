@@ -979,10 +979,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    sd a6, -264(s0) # 8-byte Folded Spill
 ; CHECK-NEXT:    j .LBB0_8
 ; CHECK-NEXT:  .LBB0_18: # %for.cond225.preheader
-; CHECK-NEXT:    slli a0, a7, 32
-; CHECK-NEXT:    srli a0, a0, 32
 ; CHECK-NEXT:    ld s1, -264(s0) # 8-byte Folded Reload
-; CHECK-NEXT:    beqz a0, .LBB0_21
+; CHECK-NEXT:    beqz a3, .LBB0_21
 ; CHECK-NEXT:  # %bb.19: # %for.body228.preheader
 ; CHECK-NEXT:    mv a0, zero
 ; CHECK-NEXT:    addi a3, s0, -248
