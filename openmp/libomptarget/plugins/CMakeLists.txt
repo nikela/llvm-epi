@@ -74,6 +74,7 @@ add_subdirectory(ppc64)
 add_subdirectory(ppc64le)
 add_subdirectory(ve)
 add_subdirectory(x86_64)
+add_subdirectory(remote)
 add_subdirectory(epi)
 
 # Make sure the parent scope can see the plugins that will be created.

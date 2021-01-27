@@ -2268,17 +2268,6 @@ programs using the same instrumentation method as ``-fprofile-generate``.
   This option currently works with ``-fprofile-arcs`` and ``-fprofile-instr-generate``,
   but not with ``-fprofile-generate``.
 
-.. option:: -fprofile-list=<pathname>
-
-  This option can be used to apply profile instrumentation only to selected
-  files or functions. ``pathname`` specifies a file in the sanitizer special
-  case list format which selects which files and functions to instrument.
-
-  .. code-block:: console
-
-    $ echo "fun:test" > fun.list
-    $ clang++ -O2 -fprofile-instr-generate -fprofile-list=fun.list code.cc -o code
-
 Disabling Instrumentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2292,6 +2281,63 @@ In these cases, you can use the flag ``-fno-profile-instr-generate`` (or
 
 Note that these flags should appear after the corresponding profile
 flags to have an effect.
+
+Instrumenting only selected files or functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sometimes it's useful to only instrument certain files or functions.  For
+example in automated testing infrastructure, it may be desirable to only
+instrument files or functions that were modified by a patch to reduce the
+overhead of instrumenting a full system.
+
+This can be done using the ``-fprofile-list`` option.
+
+.. option:: -fprofile-list=<pathname>
+
+  This option can be used to apply profile instrumentation only to selected
+  files or functions. ``pathname`` should point to a file in the
+  :doc:`SanitizerSpecialCaseList` format which selects which files and
+  functions to instrument.
+
+  .. code-block:: console
+
+    $ echo "fun:test" > fun.list
+    $ clang++ -O2 -fprofile-instr-generate -fprofile-list=fun.list code.cc -o code
+
+The option can be specified multiple times to pass multiple files.
+
+.. code-block:: console
+
+    $ echo "!fun:*test*" > fun.list
+    $ echo "src:code.cc" > src.list
+    % clang++ -O2 -fprofile-instr-generate -fcoverage-mapping -fprofile-list=fun.list -fprofile-list=code.list code.cc -o code
+
+To filter individual functions or entire source files using ``fun:<name>`` or
+``src:<file>`` respectively. To exclude a function or a source file, use
+``!fun:<name>`` or ``!src:<file>`` respectively. The format also supports
+wildcard expansion. The compiler generated functions are assumed to be located
+in the main source file.  It is also possible to restrict the filter to a
+particular instrumentation type by using a named section.
+
+.. code-block:: none
+
+  # all functions whose name starts with foo will be instrumented.
+  fun:foo*
+
+  # except for foo1 which will be excluded from instrumentation.
+  !fun:foo1
+
+  # every function in path/to/foo.cc will be instrumented.
+  src:path/to/foo.cc
+
+  # bar will be instrumented only when using backend instrumentation.
+  # Recognized section names are clang, llvm and csllvm.
+  [llvm]
+  fun:bar
+
+When the file contains only excludes, all files and functions except for the
+excluded ones will be instrumented. Otherwise, only the files and functions
+specified will be instrumented.
 
 Profile remapping
 ^^^^^^^^^^^^^^^^^

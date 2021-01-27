@@ -3,16 +3,16 @@
 // RUN: echo "fun:test1" > %t-func.list
 // RUN: %clang_cc1 -fprofile-instrument=clang -fprofile-list=%t-func.list -emit-llvm %s -o - | FileCheck %s --check-prefix=FUNC
 
-// RUN: echo -e "src:%s" | sed -e 's/\\/\\\\/g' > %t-file.list
+// RUN: echo "src:%s" | sed -e 's/\\/\\\\/g' > %t-file.list
 // RUN: %clang_cc1 -fprofile-instrument=clang -fprofile-list=%t-file.list -emit-llvm %s -o - | FileCheck %s --check-prefix=FILE
 
 // RUN: echo -e "[clang]\nfun:test1\n[llvm]\nfun:test2" > %t-section.list
 // RUN: %clang_cc1 -fprofile-instrument=llvm -fprofile-list=%t-section.list -emit-llvm %s -o - | FileCheck %s --check-prefix=SECTION
 
-// RUN: echo -e "fun:test*\n!fun:test1" | sed -e 's/\\/\\\\/g' > %t-exclude.list
+// RUN: echo -e "fun:test*\n!fun:test1" > %t-exclude.list
 // RUN: %clang_cc1 -fprofile-instrument=clang -fprofile-list=%t-exclude.list -emit-llvm %s -o - | FileCheck %s --check-prefix=EXCLUDE
 
-// RUN: echo -e "!fun:test1" | sed -e 's/\\/\\\\/g' > %t-exclude-only.list
+// RUN: echo "!fun:test1" > %t-exclude-only.list
 // RUN: %clang_cc1 -fprofile-instrument=clang -fprofile-list=%t-exclude-only.list -emit-llvm %s -o - | FileCheck %s --check-prefix=EXCLUDE
 
 unsigned i;
