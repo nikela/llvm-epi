@@ -638,8 +638,8 @@ void IntrinsicEmitter::EmitAttributes(const CodeGenIntrinsicTable &Ints,
       std::max(maxArgAttrs, unsigned(intrinsic.ArgumentAttributes.size()));
     unsigned &N = UniqAttributes[&intrinsic];
     if (N) continue;
-    assert(AttrNum < 65536 && "Too many unique attributes for table!");
     N = ++AttrNum;
+    assert(N < 65536 && "Too many unique attributes for table!");
   }
 
   // Emit an array of AttributeList.  Most intrinsics will have at least one

@@ -2593,7 +2593,7 @@ void CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
       else if (Major <= 9)
         Opts.setClangABICompat(LangOptions::ClangABI::Ver9);
       else if (Major <= 11)
-
+        Opts.setClangABICompat(LangOptions::ClangABI::Ver11);
     } else if (Ver != "latest") {
       Diags.Report(diag::err_drv_invalid_value)
           << A->getAsString(Args) << A->getValue();

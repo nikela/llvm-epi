@@ -3476,9 +3476,10 @@ void InnerLoopVectorizer::emitMemRuntimeChecks(Loop *L, BasicBlock *Bypass) {
 
   Instruction *FirstCheckInst;
   Instruction *MemRuntimeCheck;
-  std::tie(FirstCheckInst, MemRuntimeCheck) =
-      addRuntimeChecks(MemCheckBlock->getTerminator(), OrigLoop,
-                       RtPtrChecking.getChecks(), RtPtrChecking.getSE());
+  SCEVExpander Exp(*PSE.getSE(), MemCheckBlock->getModule()->getDataLayout(),
+                   "induction");
+  std::tie(FirstCheckInst, MemRuntimeCheck) = addRuntimeChecks(
+      MemCheckBlock->getTerminator(), OrigLoop, RtPtrChecking.getChecks(), Exp);
   assert(MemRuntimeCheck && "no RT checks generated although RtPtrChecking "
                             "claimed checks are required");
   CondBranch->setCondition(MemRuntimeCheck);
@@ -4643,13 +4644,12 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   // Create the reduction after the loop. Note that inloop reductions create the
   // target reduction in the loop using a Reduction recipe.
   if (VF.isVector() && !IsInLoopReductionPhi) {
-    bool NoNaN = Legal->hasFunNoNaNAttr();
-
     // For certain backends like RISC-V it is hard to lower some reduction
     // operations like multiply effectively. In such cases we can generate a
     // reduction loop in the loop vectorizer.
     TargetTransformInfo::ReductionFlags Flags;
-    Flags.NoNaN = NoNaN;
+    // FIXME.
+    // Flags.NoNaN = NoNaN;
     if (VF.isScalable() &&
         !TTI->useReductionIntrinsic(Op, ReducedPartRdx->getType(), Flags))
     {
@@ -9998,7 +9998,7 @@ void LoopVectorizationPlanner::adjustRecipesForInLoopReductions(
                          ? RecipeBuilder.createBlockInMask(R->getParent(), Plan)
                          : nullptr;
       VPReductionRecipe *RedRecipe = new VPReductionRecipe(
-          &RdxDesc, R, ChainOp, VecOp, CondOp, Legal->hasFunNoNaNAttr(), TTI);
+          &RdxDesc, R, ChainOp, VecOp, CondOp, TTI);
       WidenRecipe->getVPValue()->replaceAllUsesWith(RedRecipe);
       Plan->removeVPValueFor(R);
       Plan->addVPValue(R, RedRecipe);

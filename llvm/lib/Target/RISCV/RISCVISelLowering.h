@@ -148,11 +148,6 @@ enum NodeType : unsigned {
   // Unit-stride fault-only-first load
   VLEFF,
   VLEFF_MASK,
-  // Unit-stride fault-only-first segment load
-  VLSEGFF,
-  VLSEGFF_MASK,
-  // read vl CSR
-  READ_VL,
   // Matches the semantics of vslideup/vslidedown. The first operand is the
   // pass-thru operand, the second is the source vector, and the third is the
   // XLenVT index (either constant or non-constant).
@@ -400,8 +395,8 @@ private:
 namespace RISCVVIntrinsicsTable {
 
 struct RISCVVIntrinsicInfo {
-  unsigned int IntrinsicID;
-  unsigned int ExtendedOperand;
+  unsigned IntrinsicID;
+  uint8_t ExtendedOperand;
 };
 
 using namespace RISCV;
@@ -414,11 +409,11 @@ using namespace RISCV;
 namespace RISCVZvlssegTable {
 
 struct RISCVZvlsseg {
-  unsigned int IntrinsicID;
-  unsigned int SEW;
-  unsigned int LMUL;
-  unsigned int IndexLMUL;
-  unsigned int Pseudo;
+  unsigned IntrinsicID;
+  uint8_t SEW;
+  uint8_t LMUL;
+  uint8_t IndexLMUL;
+  uint16_t Pseudo;
 };
 
 using namespace RISCV;

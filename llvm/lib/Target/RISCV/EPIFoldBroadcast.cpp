@@ -35,6 +35,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "RISCV.h"
+#include "RISCVInstrInfo.h"
 
 #include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/DenseMap.h"
