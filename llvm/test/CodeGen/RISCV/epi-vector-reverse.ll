@@ -9,8 +9,8 @@ define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v25
 ; CHECK-NEXT:    vrsub.vx v26, v25, a0
-; CHECK-NEXT:    vrgather.vv v25, v16, v26
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vrgather.vv v25, v8, v26
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
   %b = call <vscale x 1 x i64> @llvm.experimental.vector.reverse.nxv1i64(<vscale x 1 x i64> %a)
   ret <vscale x 1 x i64> %b
@@ -23,8 +23,8 @@ define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v25
 ; CHECK-NEXT:    vrsub.vx v26, v25, a0
-; CHECK-NEXT:    vrgather.vv v25, v16, v26
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vrgather.vv v25, v8, v26
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
   %b = call <vscale x 2 x i32> @llvm.experimental.vector.reverse.nxv2i32(<vscale x 2 x i32> %a)
   ret <vscale x 2 x i32> %b
@@ -37,8 +37,8 @@ define <vscale x 2 x i64> @nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vid.v v26
 ; CHECK-NEXT:    vrsub.vx v28, v26, a0
-; CHECK-NEXT:    vrgather.vv v26, v16, v28
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vrgather.vv v26, v8, v28
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
   %b = call <vscale x 2 x i64> @llvm.experimental.vector.reverse.nxv2i64(<vscale x 2 x i64> %a)
   ret <vscale x 2 x i64> %b

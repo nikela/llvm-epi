@@ -1758,6 +1758,80 @@ LegalizerHelper::widenScalarInsert(MachineInstr &MI, unsigned TypeIdx,
 }
 
 LegalizerHelper::LegalizeResult
+LegalizerHelper::widenScalarAddSubOverflow(MachineInstr &MI, unsigned TypeIdx,
+                                           LLT WideTy) {
+  if (TypeIdx == 1)
+    return UnableToLegalize; // TODO
+
+  unsigned Opcode;
+  unsigned ExtOpcode;
+  Optional<Register> CarryIn = None;
+  switch (MI.getOpcode()) {
+  default:
+    llvm_unreachable("Unexpected opcode!");
+  case TargetOpcode::G_SADDO:
+    Opcode = TargetOpcode::G_ADD;
+    ExtOpcode = TargetOpcode::G_SEXT;
+    break;
+  case TargetOpcode::G_SSUBO:
+    Opcode = TargetOpcode::G_SUB;
+    ExtOpcode = TargetOpcode::G_SEXT;
+    break;
+  case TargetOpcode::G_UADDO:
+    Opcode = TargetOpcode::G_ADD;
+    ExtOpcode = TargetOpcode::G_ZEXT;
+    break;
+  case TargetOpcode::G_USUBO:
+    Opcode = TargetOpcode::G_SUB;
+    ExtOpcode = TargetOpcode::G_ZEXT;
+    break;
+  case TargetOpcode::G_SADDE:
+    Opcode = TargetOpcode::G_UADDE;
+    ExtOpcode = TargetOpcode::G_SEXT;
+    CarryIn = MI.getOperand(4).getReg();
+    break;
+  case TargetOpcode::G_SSUBE:
+    Opcode = TargetOpcode::G_USUBE;
+    ExtOpcode = TargetOpcode::G_SEXT;
+    CarryIn = MI.getOperand(4).getReg();
+    break;
+  case TargetOpcode::G_UADDE:
+    Opcode = TargetOpcode::G_UADDE;
+    ExtOpcode = TargetOpcode::G_ZEXT;
+    CarryIn = MI.getOperand(4).getReg();
+    break;
+  case TargetOpcode::G_USUBE:
+    Opcode = TargetOpcode::G_USUBE;
+    ExtOpcode = TargetOpcode::G_ZEXT;
+    CarryIn = MI.getOperand(4).getReg();
+    break;
+  }
+
+  auto LHSExt = MIRBuilder.buildInstr(ExtOpcode, {WideTy}, {MI.getOperand(2)});
+  auto RHSExt = MIRBuilder.buildInstr(ExtOpcode, {WideTy}, {MI.getOperand(3)});
+  // Do the arithmetic in the larger type.
+  Register NewOp;
+  if (CarryIn) {
+    LLT CarryOutTy = MRI.getType(MI.getOperand(1).getReg());
+    NewOp = MIRBuilder
+                .buildInstr(Opcode, {WideTy, CarryOutTy},
+                            {LHSExt, RHSExt, *CarryIn})
+                .getReg(0);
+  } else {
+    NewOp = MIRBuilder.buildInstr(Opcode, {WideTy}, {LHSExt, RHSExt}).getReg(0);
+  }
+  LLT OrigTy = MRI.getType(MI.getOperand(0).getReg());
+  auto TruncOp = MIRBuilder.buildTrunc(OrigTy, NewOp);
+  auto ExtOp = MIRBuilder.buildInstr(ExtOpcode, {WideTy}, {TruncOp});
+  // There is no overflow if the ExtOp is the same as NewOp.
+  MIRBuilder.buildICmp(CmpInst::ICMP_NE, MI.getOperand(1), NewOp, ExtOp);
+  // Now trunc the NewOp to the original result.
+  MIRBuilder.buildTrunc(MI.getOperand(0), NewOp);
+  MI.eraseFromParent();
+  return Legalized;
+}
+
+LegalizerHelper::LegalizeResult
 LegalizerHelper::widenScalarAddSubShlSat(MachineInstr &MI, unsigned TypeIdx,
                                          LLT WideTy) {
   bool IsSigned = MI.getOpcode() == TargetOpcode::G_SADDSAT ||
@@ -1814,29 +1888,15 @@ LegalizerHelper::widenScalar(MachineInstr &MI, unsigned TypeIdx, LLT WideTy) {
     return widenScalarMergeValues(MI, TypeIdx, WideTy);
   case TargetOpcode::G_UNMERGE_VALUES:
     return widenScalarUnmergeValues(MI, TypeIdx, WideTy);
+  case TargetOpcode::G_SADDO:
+  case TargetOpcode::G_SSUBO:
   case TargetOpcode::G_UADDO:
-  case TargetOpcode::G_USUBO: {
-    if (TypeIdx == 1)
-      return UnableToLegalize; // TODO
-    auto LHSZext = MIRBuilder.buildZExt(WideTy, MI.getOperand(2));
-    auto RHSZext = MIRBuilder.buildZExt(WideTy, MI.getOperand(3));
-    unsigned Opcode = MI.getOpcode() == TargetOpcode::G_UADDO
-                          ? TargetOpcode::G_ADD
-                          : TargetOpcode::G_SUB;
-    // Do the arithmetic in the larger type.
-    auto NewOp = MIRBuilder.buildInstr(Opcode, {WideTy}, {LHSZext, RHSZext});
-    LLT OrigTy = MRI.getType(MI.getOperand(0).getReg());
-    APInt Mask =
-        APInt::getLowBitsSet(WideTy.getSizeInBits(), OrigTy.getSizeInBits());
-    auto AndOp = MIRBuilder.buildAnd(
-        WideTy, NewOp, MIRBuilder.buildConstant(WideTy, Mask));
-    // There is no overflow if the AndOp is the same as NewOp.
-    MIRBuilder.buildICmp(CmpInst::ICMP_NE, MI.getOperand(1), NewOp, AndOp);
-    // Now trunc the NewOp to the original result.
-    MIRBuilder.buildTrunc(MI.getOperand(0), NewOp);
-    MI.eraseFromParent();
-    return Legalized;
-  }
+  case TargetOpcode::G_USUBO:
+  case TargetOpcode::G_SADDE:
+  case TargetOpcode::G_SSUBE:
+  case TargetOpcode::G_UADDE:
+  case TargetOpcode::G_USUBE:
+    return widenScalarAddSubOverflow(MI, TypeIdx, WideTy);
   case TargetOpcode::G_SADDSAT:
   case TargetOpcode::G_SSUBSAT:
   case TargetOpcode::G_SSHLSAT:

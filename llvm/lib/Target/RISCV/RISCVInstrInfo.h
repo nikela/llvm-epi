@@ -136,5 +136,57 @@ protected:
   const RISCVSubtarget &STI;
 };
 
+namespace RISCVEPIIntrinsicsTable {
+
+struct EPIIntrinsicInfo {
+  unsigned int IntrinsicID;
+  unsigned int ClassID;
+  unsigned int ExtendedOperand;
+  unsigned int MaskOperand;
+  unsigned int GVLOperand;
+};
+
+#define GET_EPIIntrClassID_DECL
+#define GET_EPIIntrinsicsTable_DECL
+using namespace RISCV;
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVEPIIntrinsicsTable
+
+namespace RISCVEPIPseudosTable {
+
+struct EPIPseudoInfo {
+  unsigned int Pseudo;
+  unsigned int BaseInstr;
+  uint8_t VLIndex;
+  uint8_t SEWIndex;
+  uint8_t MergeOpIndex;
+  uint8_t VLMul;
+
+  int getVLIndex() const { return static_cast<int8_t>(VLIndex); }
+
+  int getSEWIndex() const { return static_cast<int8_t>(SEWIndex); }
+
+  int getMergeOpIndex() const { return static_cast<int8_t>(MergeOpIndex); }
+};
+
+#define GET_EPIPseudosTable_DECL
+using namespace RISCV;
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVEPIPseudosTable
+
+namespace RISCVVPseudosTable {
+
+struct PseudoInfo {
+  uint16_t Pseudo;
+  uint16_t BaseInstr;
+};
+
+#define GET_RISCVVPseudosTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVVPseudosTable
+
 } // end namespace llvm
 #endif

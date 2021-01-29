@@ -46,6 +46,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "${tmachine}$")
         ${LIBOMPTARGET_DEP_LIBFFI_LIBRARIES}
         ${LIBOMPTARGET_DEP_LIBELF_LIBRARIES}
         dl
+        ${OPENMP_PTHREAD_LIB}
         "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../exports")
 
       list(APPEND LIBOMPTARGET_TESTED_PLUGINS
@@ -74,6 +75,7 @@ add_subdirectory(ppc64)
 add_subdirectory(ppc64le)
 add_subdirectory(ve)
 add_subdirectory(x86_64)
+add_subdirectory(remote)
 add_subdirectory(epi)
 
 # Make sure the parent scope can see the plugins that will be created.

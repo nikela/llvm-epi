@@ -420,6 +420,14 @@ bool llvm::wouldInstructionBeTriviallyDead(Instruction *I,
     return true;
   }
 
+  if (auto *CB = dyn_cast<CallBase>(I)) {
+    // Treat calls that may not return as alive.
+    // TODO: Remove the intrinsic escape hatch once all intrinsics set
+    // willreturn properly.
+    if (!CB->willReturn() && !isa<IntrinsicInst>(I))
+      return false;
+  }
+
   if (!I->mayHaveSideEffects())
     return true;
 
@@ -1351,6 +1359,10 @@ static bool valueCoversEntireFragment(Type *ValTy, DbgVariableIntrinsic *DII) {
   const DataLayout &DL = DII->getModule()->getDataLayout();
   TypeSize ValueSize = DL.getTypeAllocSizeInBits(ValTy);
   if (Optional<uint64_t> FragmentSize = DII->getFragmentSizeInBits()) {
+    if (ValueSize.isScalable()) {
+      // FIXME: This is likely too conservative but avoids a crash.
+      return false;
+    }
     assert(!ValueSize.isScalable() &&
            "Fragments don't work on scalable types.");
     return ValueSize.getFixedSize() >= *FragmentSize;

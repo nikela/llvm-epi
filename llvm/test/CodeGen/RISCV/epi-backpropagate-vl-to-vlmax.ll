@@ -9,16 +9,16 @@ define <vscale x 1 x i64> @test.1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; ENABLED-LABEL: test.1:
 ; ENABLED:       # %bb.0:
 ; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; ENABLED-NEXT:    vadd.vv v25, v16, v17
-; ENABLED-NEXT:    vadd.vv v16, v25, v18
+; ENABLED-NEXT:    vadd.vv v25, v8, v9
+; ENABLED-NEXT:    vadd.vv v8, v25, v10
 ; ENABLED-NEXT:    ret
 ;
 ; DISABLED-LABEL: test.1:
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v25, v16, v17
+; DISABLED-NEXT:    vadd.vv v25, v8, v9
 ; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v16, v25, v18
+; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {
   %x1 = add <vscale x 1 x i64> %a, %b
@@ -33,19 +33,19 @@ define <vscale x 1 x i64> @test.2(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; ENABLED-LABEL: test.2:
 ; ENABLED:       # %bb.0:
 ; ENABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; ENABLED-NEXT:    vadd.vv v25, v16, v17
+; ENABLED-NEXT:    vadd.vv v25, v8, v9
 ; ENABLED-NEXT:    addi a0, a0, 1
 ; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; ENABLED-NEXT:    vadd.vv v16, v25, v18
+; ENABLED-NEXT:    vadd.vv v8, v25, v10
 ; ENABLED-NEXT:    ret
 ;
 ; DISABLED-LABEL: test.2:
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v25, v16, v17
+; DISABLED-NEXT:    vadd.vv v25, v8, v9
 ; DISABLED-NEXT:    addi a0, a0, 1
 ; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v16, v25, v18
+; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {
   %x1 = add <vscale x 1 x i64> %a, %b
@@ -62,17 +62,17 @@ define <vscale x 1 x i64> @test.3(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; ENABLED:       # %bb.0:
 ; ENABLED-NEXT:    addi a0, a0, 1
 ; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
-; ENABLED-NEXT:    vadd.vv v25, v16, v17
-; ENABLED-NEXT:    vadd.vv v16, v25, v18
+; ENABLED-NEXT:    vadd.vv v25, v8, v9
+; ENABLED-NEXT:    vadd.vv v8, v25, v10
 ; ENABLED-NEXT:    ret
 ;
 ; DISABLED-LABEL: test.3:
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    addi a0, a0, 1
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v25, v16, v17
+; DISABLED-NEXT:    vadd.vv v25, v8, v9
 ; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; DISABLED-NEXT:    vadd.vv v16, v25, v18
+; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {
   %evl2 = add i32 %evl, 1

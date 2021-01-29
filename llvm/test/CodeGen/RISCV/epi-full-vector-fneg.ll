@@ -5,7 +5,7 @@ define <vscale x 1 x double> @test_fneg.f64m1(<vscale x 1 x double> %x) {
 ; CHECK-LABEL: test_fneg.f64m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfsgnjn.vv v16, v16, v16
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    ret
   %x.neg = fneg <vscale x 1 x double>  %x
   ret <vscale x 1 x double> %x.neg
@@ -15,8 +15,8 @@ define <vscale x 2 x double> @test_fneg.f64m2(<vscale x 2 x double> %x) {
 ; CHECK-LABEL: test_fneg.f64m2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
-; CHECK-NEXT:    vfsgnjn.vv v26, v16, v16
-; CHECK-NEXT:    vmv2r.v v16, v26
+; CHECK-NEXT:    vfneg.v v26, v8
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
   %x.neg = fneg <vscale x 2 x double>  %x
   ret <vscale x 2 x double> %x.neg
@@ -26,7 +26,7 @@ define <vscale x 2 x float> @test_fneg.f32m1(<vscale x 2 x float> %x) {
 ; CHECK-LABEL: test_fneg.f32m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfsgnjn.vv v16, v16, v16
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    ret
   %x.neg = fneg <vscale x 2 x float>  %x
   ret <vscale x 2 x float> %x.neg

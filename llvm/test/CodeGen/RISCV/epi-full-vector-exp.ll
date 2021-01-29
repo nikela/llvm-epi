@@ -6,7 +6,7 @@ define <vscale x 1 x double> @exp_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv1r.v v16, v17
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    call __epi_exp_nxv1f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -20,7 +20,7 @@ define <vscale x 2 x double> @exp_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv2r.v v16, v18
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    call __epi_exp_nxv2f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -34,7 +34,7 @@ define <vscale x 4 x double> @exp_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv4r.v v16, v20
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    call __epi_exp_nxv4f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -48,8 +48,7 @@ define <vscale x 8 x double> @exp_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-NEXT:    vle64.v v16, (a0)
+; CHECK-NEXT:    vmv8r.v v8, v16
 ; CHECK-NEXT:    call __epi_exp_nxv8f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -63,7 +62,7 @@ define <vscale x 2 x float> @exp_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv1r.v v16, v17
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    call __epi_exp_nxv2f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -77,7 +76,7 @@ define <vscale x 4 x float> @exp_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv2r.v v16, v18
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    call __epi_exp_nxv4f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -91,7 +90,7 @@ define <vscale x 8 x float> @exp_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vmv4r.v v16, v20
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    call __epi_exp_nxv8f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -105,8 +104,7 @@ define <vscale x 16 x float> @exp_nxv16f32(<vscale x 16 x float> %a, <vscale x 1
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
-; CHECK-NEXT:    vle32.v v16, (a0)
+; CHECK-NEXT:    vmv8r.v v8, v16
 ; CHECK-NEXT:    call __epi_exp_nxv16f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16

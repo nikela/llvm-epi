@@ -178,6 +178,12 @@ static bool lowerRISCVVMachineInstrToMCInst(const MachineInstr *MI,
           RISCV::VRM8RegClass.contains(Reg)) {
         Reg = TRI->getSubReg(Reg, RISCV::sub_vrm1_0);
         assert(Reg && "Subregister does not exist");
+      } else if (RISCV::FPR16RegClass.contains(Reg)) {
+        Reg = TRI->getMatchingSuperReg(Reg, RISCV::sub_16, &RISCV::FPR32RegClass);
+        assert(Reg && "Subregister does not exist");
+      } else if (RISCV::FPR64RegClass.contains(Reg)) {
+        Reg = TRI->getSubReg(Reg, RISCV::sub_32);
+        assert(Reg && "Superregister does not exist");
       }
 
       MCOp = MCOperand::createReg(Reg);
@@ -222,6 +228,13 @@ void llvm::LowerRISCVMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
     return;
   }
 
+  if (OutMI.getOpcode() == RISCV::PseudoReadVL) {
+    OutMI.setOpcode(RISCV::CSRRS);
+    OutMI.addOperand(MCOperand::createImm(
+        RISCVSysReg::lookupSysRegByName("VL")->Encoding));
+    OutMI.addOperand(MCOperand::createReg(RISCV::X0));
+    return;
+  }
 }
 
 bool llvm::LowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {

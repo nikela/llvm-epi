@@ -6848,7 +6848,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     // specific calling convention, and only for x86_64.
     // FIXME: Support other platforms later.
     const auto &Triple = DAG.getTarget().getTargetTriple();
-    if (Triple.getArch() != Triple::x86_64 || !Triple.isOSLinux())
+    if (Triple.getArch() != Triple::x86_64)
       return;
 
     SDLoc DL = getCurSDLoc();
@@ -6879,7 +6879,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     // specific calling convention, and only for x86_64.
     // FIXME: Support other platforms later.
     const auto &Triple = DAG.getTarget().getTargetTriple();
-    if (Triple.getArch() != Triple::x86_64 || !Triple.isOSLinux())
+    if (Triple.getArch() != Triple::x86_64)
       return;
 
     SDLoc DL = getCurSDLoc();
@@ -10869,8 +10869,7 @@ void SelectionDAGBuilder::visitSwitch(const SwitchInst &SI) {
       {PeeledSwitchMBB, First, Last, nullptr, nullptr, DefaultProb});
 
   while (!WorkList.empty()) {
-    SwitchWorkListItem W = WorkList.back();
-    WorkList.pop_back();
+    SwitchWorkListItem W = WorkList.pop_back_val();
     unsigned NumClusters = W.LastCluster - W.FirstCluster + 1;
 
     if (NumClusters > 3 && TM.getOptLevel() != CodeGenOpt::None &&

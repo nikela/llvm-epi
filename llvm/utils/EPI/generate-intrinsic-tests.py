@@ -2135,8 +2135,8 @@ intrinsics = [
         UnaryIntrinsic("vload.strided", type_generator = generate_unary_integer_float_types, variants = ["vload.strided"], instruction = "vlse"),
         UnaryIntrinsic("vstore.strided", type_generator = generate_unary_integer_float_types, variants = ["vstore.strided"], instruction = "vsse"),
 
-        UnaryIntrinsic("vload.indexed", type_generator = generate_unary_integer_float_types, variants = ["vload.indexed"], instruction = "vlxe"),
-        UnaryIntrinsic("vstore.indexed", type_generator = generate_unary_integer_float_types, variants = ["vstore.indexed"], instruction = "vsxe"),
+        UnaryIntrinsic("vload.indexed", type_generator = generate_unary_integer_float_types, variants = ["vload.indexed"], instruction = "vluxe"),
+        UnaryIntrinsic("vstore.indexed", type_generator = generate_unary_integer_float_types, variants = ["vstore.indexed"], instruction = "vsuxe"),
 
         UnaryIntrinsic("vload.nt", type_generator = generate_unary_integer_float_types, variants = ["vload"], instruction = "vle", nontemporal = True),
         UnaryIntrinsic("vstore.nt", type_generator = generate_unary_integer_float_types, variants = ["vstore"], instruction = "vse", nontemporal = True),
@@ -2144,8 +2144,8 @@ intrinsics = [
         UnaryIntrinsic("vload.nt.strided", type_generator = generate_unary_integer_float_types, variants = ["vload.strided"], instruction = "vlse", nontemporal = True),
         UnaryIntrinsic("vstore.nt.strided", type_generator = generate_unary_integer_float_types, variants = ["vstore.strided"], instruction = "vsse", nontemporal = True),
 
-        UnaryIntrinsic("vload.nt.indexed", type_generator = generate_unary_integer_float_types, variants = ["vload.indexed"], instruction = "vlxe", nontemporal = True),
-        UnaryIntrinsic("vstore.nt.indexed", type_generator = generate_unary_integer_float_types, variants = ["vstore.indexed"], instruction = "vsxe", nontemporal = True),
+        UnaryIntrinsic("vload.nt.indexed", type_generator = generate_unary_integer_float_types, variants = ["vload.indexed"], instruction = "vluxe", nontemporal = True),
+        UnaryIntrinsic("vstore.nt.indexed", type_generator = generate_unary_integer_float_types, variants = ["vstore.indexed"], instruction = "vsuxe", nontemporal = True),
 
         UnaryIntrinsic("vfsqrt", type_generator = generate_unary_float_types, variants = v),
         # This is a very special one

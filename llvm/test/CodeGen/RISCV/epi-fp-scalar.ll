@@ -9,7 +9,7 @@ define float @test_fp_ret_f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-LABEL: test_fp_ret_f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v25, v16, v16
+; CHECK-NEXT:    vfadd.vv v25, v8, v8
 ; CHECK-NEXT:    vfmv.f.s fa0, v25
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f killed $f10_d
 ; CHECK-NEXT:    ret
@@ -22,7 +22,7 @@ define double @test_fp_ret_f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK-LABEL: test_fp_ret_f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vv v25, v16, v16
+; CHECK-NEXT:    vfadd.vv v25, v8, v8
 ; CHECK-NEXT:    vfmv.f.s fa0, v25
 ; CHECK-NEXT:    ret
   %add = fadd <vscale x 1 x double> %a, %a
@@ -35,7 +35,7 @@ define <vscale x 2 x float> @test_fp_op_f32(<vscale x 2 x float> %a, float %b, i
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vfadd.vf v16, v16, fa0
+; CHECK-NEXT:    vfadd.vf v8, v8, fa0
 ; CHECK-NEXT:    ret
   %add = call <vscale x 2 x float> @llvm.epi.vfadd.nxv2f32.f32(<vscale x 2 x float> %a, float %b, i64 %gvl)
   ret <vscale x 2 x float> %add
@@ -45,7 +45,7 @@ define <vscale x 1 x double> @test_fp_op_f64(<vscale x 1 x double> %a, double %b
 ; CHECK-LABEL: test_fp_op_f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-NEXT:    vfadd.vf v16, v16, fa0
+; CHECK-NEXT:    vfadd.vf v8, v8, fa0
 ; CHECK-NEXT:    ret
   %add = call <vscale x 1 x double> @llvm.epi.vfadd.nxv1f64.f64(<vscale x 1 x double> %a, double %b, i64 %gvl)
   ret <vscale x 1 x double> %add

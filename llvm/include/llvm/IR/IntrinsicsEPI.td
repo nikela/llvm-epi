@@ -550,7 +550,7 @@ def int_epi_vfmv_v_f : EPIUnary;
 
 // Loads
 multiclass epi_load {
-
+  let Properties = [SDNPMemOperand] in {
   def ""              : Intrinsic<[ llvm_anyvector_ty ],
                                   [ LLVMPointerType<LLVMMatchType<0>>,
                                     llvm_i64_ty ],
@@ -622,6 +622,7 @@ multiclass epi_load {
                                        llvm_i64_ty ],
                                      [ NoCapture<ArgIndex<1>>, IntrReadMem ]>,
                                      EPIIntrinsic<EPICIDload>;
+  } // Properties = [SDNPMemOperand]
 }
 
 defm int_epi_vload : epi_load;
@@ -665,6 +666,7 @@ foreach i = 2 ... 8 in {
 
 // Stores
 multiclass epi_store {
+  let Properties = [SDNPMemOperand] in {
   def ""              : Intrinsic<[],
                                   [ llvm_anyvector_ty,
                                     LLVMPointerType<LLVMMatchType<0>>,
@@ -742,6 +744,7 @@ multiclass epi_store {
                                        llvm_i64_ty ],
                                      [ NoCapture<ArgIndex<1>>, IntrWriteMem ]>,
                                      EPIIntrinsic<EPICIDstore>;
+  } // Properties = [SDNPMemOperand]
 }
 
 defm int_epi_vstore : epi_store;

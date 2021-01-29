@@ -24,6 +24,7 @@
 #include "llvm/CodeGen/RegisterScavenging.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TargetRegistry.h"
+#include "llvm/IR/IntrinsicsEPI.h"
 
 using namespace llvm;
 
@@ -32,6 +33,35 @@ using namespace llvm;
 
 #define GET_INSTRINFO_CTOR_DTOR
 #include "RISCVGenInstrInfo.inc"
+
+namespace llvm {
+namespace RISCVEPIIntrinsicsTable {
+
+using namespace RISCV;
+
+#define GET_EPIIntrinsicsTable_IMPL
+#include "RISCVGenSearchableTables.inc"
+
+} // namespace RISCVEPIIntrinsicsTable
+
+namespace RISCVEPIPseudosTable {
+
+using namespace RISCV;
+
+#define GET_EPIPseudosTable_IMPL
+#include "RISCVGenSearchableTables.inc"
+
+} // namespace RISCVEPIPseudosTable
+
+namespace RISCVVPseudosTable {
+
+using namespace RISCV;
+
+#define GET_RISCVVPseudosTable_IMPL
+#include "RISCVGenSearchableTables.inc"
+
+} // namespace RISCVVPseudosTable
+} // namespace llvm
 
 RISCVInstrInfo::RISCVInstrInfo(RISCVSubtarget &STI)
     : RISCVGenInstrInfo(RISCV::ADJCALLSTACKDOWN, RISCV::ADJCALLSTACKUP),

@@ -11,11 +11,6 @@
 // Target Specific DAG nodes
 //===----------------------------------------------------------------------===//
 
-def riscv_extract_vector_elt : SDNode<"RISCVISD::EXTRACT_VECTOR_ELT",
-                                      SDTypeProfile<1, 2,
-                                       [SDTCisInt<0>, SDTCisVec<1>,
-                                       SDTCisInt<1>, SDTCisPtrTy<2>]>>;
-
 def riscv_shuffle_extend : SDNode<"RISCVISD::SHUFFLE_EXTEND",
                                      SDTypeProfile<1, 2,
                                       [SDTCisSameAs<0, 1>,
@@ -1321,7 +1316,7 @@ foreach m = MxList.m in
             Sched<[WriteVPULoadStrided, ReadMemBase]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
-        BaseInstr = !cast<Instruction>("VLXEI" # eew #"_V") in
+        BaseInstr = !cast<Instruction>("VLUXEI" # eew #"_V") in
       def "PseudoEPIVLXEI" # eew # "_V_" # LInfo
           : Pseudo<(outs evr:$rd),
                    (ins evr:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
@@ -1362,7 +1357,7 @@ foreach m = MxList.m in
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
-        BaseInstr = !cast<Instruction>("VSXEI" # eew # "_V") in
+        BaseInstr = !cast<Instruction>("VSUXEI" # eew # "_V") in
       def "PseudoEPIVSXEI" # eew #"_V_" # LInfo
           : Pseudo<(outs),
                    (ins evr:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask, GPR:$vl,
@@ -1428,7 +1423,7 @@ foreach eew = AllEEW in
             EPIPseudo;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
-        BaseInstr = !cast<Instruction>("VLXSEG"#tsize#"EI"#eew#"_V") in
+        BaseInstr = !cast<Instruction>("VLUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVLXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs TupleRegClass:$rd),
                    (ins TupleRegClass:$merge, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
@@ -1462,7 +1457,7 @@ foreach eew = AllEEW in
 
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
-        BaseInstr = !cast<Instruction>("VSXSEG"#tsize#"EI"#eew#"_V") in
+        BaseInstr = !cast<Instruction>("VSUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVSXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs),
                    (ins TupleRegClass:$rd, GPR:$rs1, evr:$rs2, VMaskOp:$mask,
@@ -3608,161 +3603,6 @@ foreach vti = EPIAllIntegerVectors in
              (vti.Vector (IMPLICIT_DEF)),
              (vti.Mask zero_reg),
              VLMax, vti.SEW)>;
-}
-
-foreach vti = EPINoGroupIntegerVectors in {
-  // Note: It is not valid in extractelt to have a return type that is different
-  // to the vector element type. For those cases (EltTy != i64) we use a custom
-  // node. There is another (deprecated) node vector_extract that won't fail in
-  // tablegen, but it won't emit a matcher, so it is not usable either.
-  def : Pat<(i64 (!cast<SDNode>(!if(!eq(vti.SEW, 64),
-                                 extractelt, riscv_extract_vector_elt))
-                   (vti.Vector vti.MInfo.vrclass:$rs2),
-                   GPR:$rs1)),
-            (PseudoEPIVMV_X_S
-             (PseudoEPIVSLIDEDOWN_VX_M1
-              (vti.Vector (IMPLICIT_DEF)),
-              (vti.Vector vti.MInfo.vrclass:$rs2),
-              GPR:$rs1,
-              (vti.Mask zero_reg),
-              VLMax,
-              vti.SEW),
-             vti.SEW)>;
-
-  def : Pat<(i64 (!cast<SDNode>(!if(!eq(vti.SEW, 64),
-                                 extractelt, riscv_extract_vector_elt))
-                  (vti.Vector vti.MInfo.vrclass:$rs2), 0)),
-            (PseudoEPIVMV_X_S
-             (vti.Vector vti.MInfo.vrclass:$rs2),
-             vti.SEW)>;
-
-  // Note: We use the (deprecated) node vector_insert when the input element
-  // type is different to the result vector element type, since this is invalid
-  // for insertelt.
-  def : Pat<(vti.Vector (!cast<SDNode>(!if(!eq(vti.SEW, 64),
-                                        insertelt, vector_insert))
-                         (vti.Vector vti.MInfo.vrclass:$merge),
-                         GPR:$rs1, 0)),
-            (PseudoEPIVMV_S_X
-             (vti.Vector vti.MInfo.vrclass:$merge),
-             GPR:$rs1,
-             VLMax,
-             vti.SEW)>;
-}
-
-foreach fvti = EPINoGroupFloatVectors in {
-  def : Pat<(fvti.Scalar (extractelt (fvti.Vector fvti.MInfo.vrclass:$rs2),
-                          GPR:$rs1)),
-            FromFPR64<fvti.ScalarRegClass,
-                      (PseudoEPIVFMV_F_S
-                       (PseudoEPIVSLIDEDOWN_VX_M1
-                        (fvti.Vector (IMPLICIT_DEF)),
-                        (fvti.Vector fvti.MInfo.vrclass:$rs2),
-                        GPR:$rs1,
-                        (fvti.Mask zero_reg),
-                        VLMax,
-                        fvti.SEW),
-                       fvti.SEW)>.ret>;
-
-  def : Pat<(fvti.Scalar (extractelt (fvti.Vector fvti.MInfo.vrclass:$rs2), 0)),
-            FromFPR64<fvti.ScalarRegClass,
-                      (PseudoEPIVFMV_F_S $rs2, fvti.SEW)>.ret>;
-
-  def : Pat<(fvti.Vector (insertelt (fvti.Vector fvti.MInfo.vrclass:$merge),
-                         (fvti.Scalar fvti.ScalarRegClass:$rs1), 0)),
-            (PseudoEPIVFMV_S_F
-             (fvti.Vector fvti.MInfo.vrclass:$merge),
-             ToFPR64<fvti.ScalarRegClass,
-                     (fvti.Scalar fvti.ScalarRegClass:$rs1)>.ret,
-             VLMax, fvti.SEW)>;
-}
-
-foreach gvti = EPIGroupIntegerVectors in {
-  // Note: It is not valid in extractelt to have a return type that is different
-  // to the vector element type. For those cases (EltTy != i64) we use a custom
-  // node. There is another (deprecated) node vector_extract that won't fail in
-  // tablegen, but it won't emit a matcher, so it is not usable either.
-  def : Pat<(i64 (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
-                                 extractelt,
-                                 riscv_extract_vector_elt))
-                   (gvti.Vector gvti.MInfo.vrclass:$rs2),
-                   GPR:$rs1)),
-            (PseudoEPIVMV_X_S
-             (EXTRACT_SUBREG
-              (!cast<Instruction>("PseudoEPIVSLIDEDOWN_VX_" # gvti.MInfo.MX)
-               (gvti.Vector (IMPLICIT_DEF)),
-               (gvti.Vector gvti.MInfo.vrclass:$rs2),
-               GPR:$rs1,
-               (gvti.Mask zero_reg),
-               VLMax,
-               gvti.SEW),
-              sub_vrm1_0),
-             gvti.SEW)>;
-
-  def : Pat<(i64 (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
-                                 extractelt,
-                                 riscv_extract_vector_elt))
-                   (gvti.Vector gvti.MInfo.vrclass:$rs2), 0)),
-            (PseudoEPIVMV_X_S
-             (EXTRACT_SUBREG
-              (gvti.Vector gvti.MInfo.vrclass:$rs2),
-              sub_vrm1_0),
-             gvti.SEW)>;
-
-  // Note: We use the (deprecated) node vector_insert when the input element
-  // type is different to the result vector element type, since this is invalid
-  // for insertelt.
-  def : Pat<(gvti.Vector (!cast<SDNode>(!if(!eq(gvti.SEW, 64),
-                                         insertelt, vector_insert))
-                         (gvti.Vector gvti.MInfo.vrclass:$merge),
-                         GPR:$rs1, 0)),
-            (INSERT_SUBREG (IMPLICIT_DEF),
-             (PseudoEPIVMV_S_X
-              (EXTRACT_SUBREG
-               (gvti.Vector gvti.MInfo.vrclass:$merge),
-               sub_vrm1_0),
-              GPR:$rs1,
-              VLMax,
-              gvti.SEW),
-             sub_vrm1_0)>;
-}
-
-foreach gfvti = EPIGroupFloatVectors in {
-  def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                           GPR:$rs1)),
-            FromFPR64<gfvti.ScalarRegClass,
-                      (PseudoEPIVFMV_F_S
-                       (EXTRACT_SUBREG
-                        (!cast<Instruction>("PseudoEPIVSLIDEDOWN_VX_" # gfvti.MInfo.MX)
-                         (gfvti.Vector (IMPLICIT_DEF)),
-                         (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                         GPR:$rs1,
-                         (gfvti.Mask zero_reg),
-                         VLMax,
-                         gfvti.SEW),
-                        sub_vrm1_0),
-                       gfvti.SEW)>.ret>;
-
-  def : Pat<(gfvti.Scalar (extractelt (gfvti.Vector gfvti.MInfo.vrclass:$rs2), 0)),
-            FromFPR64<gfvti.ScalarRegClass,
-                      (PseudoEPIVFMV_F_S
-                       (EXTRACT_SUBREG
-                        (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                        sub_vrm1_0),
-                       gfvti.SEW)>.ret>;
-
-  def : Pat<(gfvti.Vector (insertelt (gfvti.Vector gfvti.MInfo.vrclass:$merge),
-                          (gfvti.Scalar gfvti.ScalarRegClass:$rs1), 0)),
-            (INSERT_SUBREG (IMPLICIT_DEF),
-             (PseudoEPIVFMV_S_F
-              (EXTRACT_SUBREG
-               (gfvti.Vector gfvti.MInfo.vrclass:$merge),
-               sub_vrm1_0),
-              ToFPR64<gfvti.ScalarRegClass,
-                      (gfvti.Scalar gfvti.ScalarRegClass:$rs1)>.ret,
-              VLMax,
-              gfvti.SEW),
-             sub_vrm1_0)>;
 }
 
 foreach vti = EPIAllIntegerVectors in {

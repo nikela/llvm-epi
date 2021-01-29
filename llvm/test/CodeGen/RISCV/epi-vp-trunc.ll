@@ -6,8 +6,8 @@ define <vscale x 2 x i32> @trunc.i32.i64(<vscale x 2 x i64> %a, i32 %gvl)
 ; CHECK-LABEL: trunc.i32.i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vnsrl.wi v25, v16, 0
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vnsrl.wi v25, v8, 0
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(<vscale x 2 x i64> %a,
@@ -20,8 +20,8 @@ define <vscale x 2 x i32> @trunc.i32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2
 ; CHECK-LABEL: trunc.i32.i64.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vnsrl.wi v25, v16, 0, v0.t
-; CHECK-NEXT:    vmv1r.v v16, v25
+; CHECK-NEXT:    vnsrl.wi v25, v8, 0, v0.t
+; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(
