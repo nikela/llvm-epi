@@ -516,9 +516,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::MGATHER, VT, Custom);
       setOperationAction(ISD::MSCATTER, VT, Custom);
       setOperationAction(ISD::SELECT, VT, Custom);
-      setOperationAction(ISD::SIGN_EXTEND, VT, Custom);
-      setOperationAction(ISD::ZERO_EXTEND, VT, Custom);
-      setOperationAction(ISD::TRUNCATE, VT, Custom);
     }
 
     // Register libcalls for fp EXP functions.
