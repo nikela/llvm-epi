@@ -977,6 +977,7 @@ ARMTargetLowering::ARMTargetLowering(const TargetMachine &TM,
     setTargetDAGCombine(ISD::VECTOR_SHUFFLE);
     setTargetDAGCombine(ISD::INSERT_VECTOR_ELT);
     setTargetDAGCombine(ISD::EXTRACT_VECTOR_ELT);
+    setTargetDAGCombine(ISD::SIGN_EXTEND_INREG);
     setTargetDAGCombine(ISD::STORE);
     setTargetDAGCombine(ISD::SIGN_EXTEND);
     setTargetDAGCombine(ISD::ZERO_EXTEND);
@@ -13595,6 +13596,25 @@ static SDValue PerformVMOVRRDCombine(SDNode *N,
     return Result;
   }
 
+  // VMOVRRD(extract(..(build_vector(a, b, c, d)))) -> a,b or c,d
+  if (InDouble.getOpcode() == ISD::EXTRACT_VECTOR_ELT &&
+      isa<ConstantSDNode>(InDouble.getOperand(1))) {
+    SDValue BV = InDouble.getOperand(0);
+    // Look up through any nop bitcasts
+    while (BV.getOpcode() == ISD::BITCAST &&
+           (BV.getValueType() == MVT::v2f64 || BV.getValueType() == MVT::v2i64))
+      BV = BV.getOperand(0);
+    if (BV.getValueType() != MVT::v4i32 || BV.getOpcode() != ISD::BUILD_VECTOR)
+      return SDValue();
+    unsigned Offset = InDouble.getConstantOperandVal(1) == 1 ? 2 : 0;
+    if (Subtarget->isLittle())
+      return DCI.DAG.getMergeValues(
+          {BV.getOperand(Offset), BV.getOperand(Offset + 1)}, SDLoc(N));
+    else
+      return DCI.DAG.getMergeValues(
+          {BV.getOperand(Offset + 1), BV.getOperand(Offset)}, SDLoc(N));
+  }
+
   return SDValue();
 }
 
@@ -13981,6 +14001,20 @@ static SDValue PerformExtractEltCombine(SDNode *N,
     if (MOV.getOpcode() == ARMISD::VMOVDRR)
       return MOV.getOperand(ST->isLittle() ? Offset % 2 : 1 - Offset % 2);
   }
+
+  return SDValue();
+}
+
+static SDValue PerformSignExtendInregCombine(SDNode *N, SelectionDAG &DAG) {
+  SDValue Op = N->getOperand(0);
+  EVT VT = N->getValueType(0);
+
+  // sext_inreg(VGETLANEu) -> VGETLANEs
+  if (Op.getOpcode() == ARMISD::VGETLANEu &&
+      cast<VTSDNode>(N->getOperand(1))->getVT() ==
+          Op.getOperand(0).getValueType().getScalarType())
+    return DAG.getNode(ARMISD::VGETLANEs, SDLoc(N), VT, Op.getOperand(0),
+                       Op.getOperand(1));
 
   return SDValue();
 }
@@ -16356,6 +16390,7 @@ SDValue ARMTargetLowering::PerformDAGCombine(SDNode *N,
   case ISD::INSERT_VECTOR_ELT: return PerformInsertEltCombine(N, DCI);
   case ISD::EXTRACT_VECTOR_ELT:
     return PerformExtractEltCombine(N, DCI, Subtarget);
+  case ISD::SIGN_EXTEND_INREG: return PerformSignExtendInregCombine(N, DCI.DAG);
   case ISD::VECTOR_SHUFFLE: return PerformVECTOR_SHUFFLECombine(N, DCI.DAG);
   case ARMISD::VDUPLANE: return PerformVDUPLANECombine(N, DCI, Subtarget);
   case ARMISD::VDUP: return PerformVDUPCombine(N, DCI, Subtarget);
