@@ -513,6 +513,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                     MVT::nxv1i64, MVT::nxv2i64, MVT::nxv4i64, MVT::nxv8i64,
                     MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+      setOperationAction(ISD::MLOAD, VT, Custom);
+      setOperationAction(ISD::MSTORE, VT, Custom);
       setOperationAction(ISD::MGATHER, VT, Custom);
       setOperationAction(ISD::MSCATTER, VT, Custom);
       setOperationAction(ISD::SELECT, VT, Custom);
@@ -853,6 +855,64 @@ RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
   return lowerExtendVectorInReg(Op, DAG, RISCVISD::ZERO_EXTEND_BITS_INREG);
 }
 
+SDValue RISCVTargetLowering::lowerMLOAD(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT VT = Op.getValueType();
+  assert(VT.isScalableVector() && "Unexpected type");
+
+  auto *MaskedLoad = cast<MaskedLoadSDNode>(Op.getNode());
+
+  SDValue InChain = MaskedLoad->getOperand(0);
+  SDValue BasePtr = MaskedLoad->getBasePtr();
+  SDValue Offset = MaskedLoad->getOffset();
+  SDValue Mask = MaskedLoad->getMask();
+  SDValue MaskedOff = MaskedLoad->getPassThru();
+
+  assert(BasePtr.getValueType() == Offset.getValueType() &&
+         "BasePtr and Offset should have the same VT");
+  SDValue Addr =
+      DAG.getNode(ISD::ADD, DL, BasePtr.getValueType(), BasePtr, Offset);
+
+  SDValue VLEOperands[] = {
+      InChain,
+      DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL, MVT::i64),
+      MaskedOff,
+      Addr,
+      Mask,
+      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+  };
+
+  return DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLEOperands);
+}
+
+SDValue RISCVTargetLowering::lowerMSTORE(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+
+  auto *MaskedStore = cast<MaskedStoreSDNode>(Op.getNode());
+
+  SDValue InChain = MaskedStore->getOperand(0);
+  SDValue Value = MaskedStore->getValue();
+  SDValue BasePtr = MaskedStore->getBasePtr();
+  SDValue Offset = MaskedStore->getOffset();
+  SDValue Mask = MaskedStore->getMask();
+
+  assert(BasePtr.getValueType() == Offset.getValueType() &&
+         "BasePtr and Offset should have the same VT");
+  SDValue Addr =
+      DAG.getNode(ISD::ADD, DL, BasePtr.getValueType(), BasePtr, Offset);
+
+  SDValue VSEOperands[] = {
+      InChain,
+      DAG.getTargetConstant(Intrinsic::epi_vstore_mask, DL, MVT::i64),
+      Value,
+      Addr,
+      Mask,
+      DAG.getRegister(RISCV::X0, MVT::i64) // VLMAX.
+  };
+
+  return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSEOperands);
+}
+
 SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
@@ -1048,6 +1108,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerSIGN_EXTEND_VECTOR_INREG(Op, DAG);
   case ISD::ZERO_EXTEND_VECTOR_INREG:
     return lowerZERO_EXTEND_VECTOR_INREG(Op, DAG);
+  case ISD::MLOAD:
+    return lowerMLOAD(Op, DAG);
+  case ISD::MSTORE:
+    return lowerMSTORE(Op, DAG);
   case ISD::MGATHER:
     return lowerMGATHER(Op, DAG);
   case ISD::MSCATTER:
