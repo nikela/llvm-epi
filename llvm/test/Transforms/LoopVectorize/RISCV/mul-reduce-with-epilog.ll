@@ -50,11 +50,11 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP18]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK:       reduction.loop.ph:
-; CHECK-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 16, [[TMP19]]
+; CHECK-NEXT:    [[VSCALE_X_VF:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-NEXT:    [[TMP19:%.*]] = mul i32 [[VSCALE_X_VF]], 16
 ; CHECK-NEXT:    br label [[REDUCTION_LOOP_BODY:%.*]]
 ; CHECK:       reduction.loop.body:
-; CHECK-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[VSCALE_X_VF]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
+; CHECK-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[TMP19]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
 ; CHECK-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 16 x i32> [ [[TMP15]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
 ; CHECK-NEXT:    [[TMP20:%.*]] = udiv i32 [[CURRENT_LEN]], 2
 ; CHECK-NEXT:    [[TMP21:%.*]] = urem i32 [[CURRENT_LEN]], 2
@@ -130,11 +130,11 @@ define dso_local signext i32 @mul_reduce(i32 signext %N, i32 signext %c, i32* no
 ; CHECK1-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[TMP18]], label [[REDUCTION_LOOP_PH:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
 ; CHECK1:       reduction.loop.ph:
-; CHECK1-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK1-NEXT:    [[VSCALE_X_VF:%.*]] = mul i32 2, [[TMP19]]
+; CHECK1-NEXT:    [[VSCALE_X_VF:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK1-NEXT:    [[TMP19:%.*]] = mul i32 [[VSCALE_X_VF]], 2
 ; CHECK1-NEXT:    br label [[REDUCTION_LOOP_BODY:%.*]]
 ; CHECK1:       reduction.loop.body:
-; CHECK1-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[VSCALE_X_VF]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
+; CHECK1-NEXT:    [[CURRENT_LEN:%.*]] = phi i32 [ [[TMP19]], [[REDUCTION_LOOP_PH]] ], [ [[HALFLEN:%.*]], [[REDUCTION_LOOP_BODY]] ]
 ; CHECK1-NEXT:    [[CURRENT_VEC:%.*]] = phi <vscale x 2 x i32> [ [[TMP15]], [[REDUCTION_LOOP_PH]] ], [ [[REDUCTION_VEC:%.*]], [[REDUCTION_LOOP_BODY]] ]
 ; CHECK1-NEXT:    [[TMP20:%.*]] = udiv i32 [[CURRENT_LEN]], 2
 ; CHECK1-NEXT:    [[TMP21:%.*]] = urem i32 [[CURRENT_LEN]], 2

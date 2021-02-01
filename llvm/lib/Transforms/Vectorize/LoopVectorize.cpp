@@ -827,10 +827,6 @@ protected:
   /// vector of instructions.
   void addMetadata(ArrayRef<Value *> To, Instruction *From);
 
-  /// Create a call to Vscale intrinsic that returns the valuse of vscale at
-  /// runtime. ALso insert declaration if required. jj
-  CallInst *emitVscaleCall(IRBuilder<> &Builder, Module *M, Type *Ty);
-
   /// Allow subclasses to override and print debug traces before/after vplan
   /// execution, when trace information is requested.
   virtual void printDebugTracesAtStart(){};
@@ -1246,14 +1242,6 @@ void InnerLoopVectorizer::addMetadata(ArrayRef<Value *> To, Instruction *From) {
     if (Instruction *I = dyn_cast<Instruction>(V))
       addMetadata(I, From);
   }
-}
-
-CallInst *InnerLoopVectorizer::emitVscaleCall(IRBuilder<> &Builder, Module *M,
-                                              Type *Ty) {
-  Function *VscaleFunc =
-      Intrinsic::getDeclaration(M, Intrinsic::vscale, Ty);
-  CallInst *VscaleFuncCall = Builder.CreateCall(VscaleFunc, {});
-  return VscaleFuncCall;
 }
 
 namespace llvm {
@@ -2149,11 +2137,7 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
                   : Builder.CreateVectorSplat(VF, Mul);
   } else {
     SplatVF = Builder.CreateVectorSplat(
-        VF,
-        Builder.CreateMul(
-            Mul, emitVscaleCall(Builder, OrigLoop->getHeader()->getModule(),
-                                Mul->getType())),
-        "");
+        VF, Builder.CreateVScale(cast<Constant>(Mul)), "");
   }
   Builder.restoreIP(CurrIP);
 
@@ -2363,10 +2347,8 @@ Value *InnerLoopVectorizer::getStepVector(Value *Val, int StartIdx, Value *Step,
       if (StartIdx) {
         // here VF = k in <vscale x k x type>. We need to scale StartIdx by
         // vscale, since StartIdx = VF * Part.
-        CallInst *Vscale =
-            emitVscaleCall(Builder, LoopVectorPreHeader->getModule(), STy);
-        Value *ScaledStartIdx = Builder.CreateMul(
-            Vscale, ConstantInt::get(STy, StartIdx), "startidx.vscale");
+        Value *ScaledStartIdx = Builder.CreateVScale(
+            ConstantInt::get(STy, StartIdx), "startidx.vscale");
         Value *StartIdxSplat = Builder.CreateVectorSplat(
             VLen, ScaledStartIdx, "stepvec.start");
         Indices = Builder.CreateAdd(Indices, StartIdxSplat);
@@ -2928,10 +2910,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
       // wide store needs to start at the last vector element.
       Value *ScaledVF = nullptr;
       if (VF.isScalable()) {
-        CallInst *Vscale =
-            emitVscaleCall(Builder, Instr->getModule(),
-                           Type::getInt32Ty(ScalarDataTy->getContext()));
-        ScaledVF = Builder.CreateMul(Builder.getInt32(VF.getKnownMinValue()), Vscale);
+        ScaledVF =
+            Builder.CreateVScale(Builder.getInt32(VF.getKnownMinValue()));
       }
 
       Value *Index = VF.isScalable()
@@ -3267,11 +3247,6 @@ Value *InnerLoopVectorizer::getOrCreateVectorTripCount(Loop *L) {
     // TODO: Fix for scalable vectors.
     assert(isPowerOf2_32(VF.getKnownMinValue() * UF) &&
            "VF*UF must be a power of 2 when folding tail by masking");
-    if (VF.isScalable()) {
-      CallInst *VscaleFuncCall =
-          emitVscaleCall(Builder, L->getLoopPreheader()->getModule(), Ty);
-      Step = Builder.CreateMul(VscaleFuncCall, Step, "step.vscale");
-    }
     Value *Stepm = Builder.CreateSub(Step, ConstantInt::get(Ty, 1));
     TC = Builder.CreateAdd(TC, Stepm, "n.rnd.up");
   }
@@ -4321,10 +4296,8 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
     Builder.SetInsertPoint(LoopVectorPreHeader->getTerminator());
     if (VF.isScalable() && preferPredicatedVectorOps()) {
       Value *EVLInstr = State.get(EVL, 0);
-      CallInst *Vscale =
-          emitVscaleCall(Builder, Preheader->getModule(), EVLInstr->getType());
-      InitLen = Builder.CreateMul(
-          ConstantInt::get(EVLInstr->getType(), VF.getKnownMinValue()), Vscale,
+      InitLen = Builder.CreateVScale(
+          ConstantInt::get(EVLInstr->getType(), VF.getKnownMinValue()),
           "vscale.x.vf");
       Value *LastIndex =
           Builder.CreateSub(InitLen, ConstantInt::get(EVLInstr->getType(), 1));
@@ -4403,10 +4376,8 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
     Value *Shuffle;
     if (VF.isScalable()) {
       Type *Int32Ty = Type::getInt32Ty(Phi->getContext());
-      Module *M = OrigLoop->getHeader()->getModule();
-      CallInst *Vscale = emitVscaleCall(Builder, M, Int32Ty);
-      Value *Vlen = Builder.CreateMul(
-          Vscale, ConstantInt::get(Int32Ty, VF.getKnownMinValue()));
+      Value *Vlen = Builder.CreateVScale(
+          ConstantInt::get(Int32Ty, VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(Int32Ty, 1));
       if (preferPredicatedVectorOps())
         Shuffle = Builder.CreateIntrinsic(
@@ -4742,10 +4713,8 @@ Value *InnerLoopVectorizer::generateReductionLoop(Value *ReducedPartRdx,
 
   // Insert instruction to get runtime vector length in reduction preheader.
   Builder.SetInsertPoint(&*RdxBlockPH->getFirstInsertionPt());
-  CallInst *Vscale = emitVscaleCall(Builder, RdxBlockPH->getModule(),
-                                    Type::getInt32Ty(RdxBlockPH->getContext()));
-  Value *InitLen = Builder.CreateMul(Builder.getInt32(VF.getKnownMinValue()),
-                                     Vscale, "vscale.x.vf");
+  Value *InitLen = Builder.CreateVScale(Builder.getInt32(VF.getKnownMinValue()),
+                                        "vscale.x.vf");
 
   // Insert loop in the reduction loop body.
   Builder.SetInsertPoint(&*RdxBlock->getFirstInsertionPt());
