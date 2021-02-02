@@ -3530,8 +3530,6 @@ defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoEPIVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoEPIVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoEPIVFREDMIN">;
 
-defm "" : pat_vop_ternary_fp_v_vv_vf<fma, "PseudoEPIVFMADD">;
-
 defm "" : pat_vop_unary_fp_v_v<fsqrt, "PseudoEPIVFSQRT">;
 
 foreach fvti = EPIAllFloatVectors in
