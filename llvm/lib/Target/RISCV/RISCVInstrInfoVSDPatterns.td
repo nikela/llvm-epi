@@ -45,8 +45,8 @@ class SwapHelper<dag Prefix, dag A, dag B, dag Suffix, bit swap> {
    dag Value = !con(Prefix, !if(swap, B, A), !if(swap, A, B), Suffix);
 }
 
-multiclass VPatUSLoadStoreSDNode<LLVMType type,
-                                 LLVMType mask_type,
+multiclass VPatUSLoadStoreSDNode<ValueType type,
+                                 ValueType mask_type,
                                  int sew,
                                  LMULInfo vlmul,
                                  OutPatFrag avl,
@@ -438,8 +438,8 @@ defm "" : VPatBinarySDNode_VV_VX<mulhs, "PseudoVMULH">;
 defm "" : VPatBinarySDNode_VV_VX<mulhu, "PseudoVMULHU">;
 
 // 12.11. Vector Integer Divide Instructions
-defm "" : VPatBinarySDNode_VV_VX<sdiv, "PseudoVDIVU">;
-defm "" : VPatBinarySDNode_VV_VX<udiv, "PseudoVDIV">;
+defm "" : VPatBinarySDNode_VV_VX<udiv, "PseudoVDIVU">;
+defm "" : VPatBinarySDNode_VV_VX<sdiv, "PseudoVDIV">;
 defm "" : VPatBinarySDNode_VV_VX<urem, "PseudoVREMU">;
 defm "" : VPatBinarySDNode_VV_VX<srem, "PseudoVREM">;
 
