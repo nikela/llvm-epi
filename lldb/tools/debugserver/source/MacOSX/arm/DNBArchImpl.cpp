@@ -105,6 +105,7 @@ static uint32_t LoHi[16] = {0};
 #define MNEMONIC_STRING_SIZE 32
 #define OPERAND_STRING_SIZE 128
 
+#if !defined(__arm64__) && !defined(__aarch64__)
 // Returns true if the first 16 bit opcode of a thumb instruction indicates
 // the instruction will be a 32 bit thumb opcode
 static bool IsThumb32Opcode(uint16_t opcode) {
@@ -112,6 +113,7 @@ static bool IsThumb32Opcode(uint16_t opcode) {
     return true;
   return false;
 }
+#endif
 
 void DNBArchMachARM::Initialize() {
   DNBArchPluginInfo arch_plugin_info = {
@@ -315,6 +317,7 @@ kern_return_t DNBArchMachARM::GetEXCState(bool force) {
   return kret;
 }
 
+#if 0
 static void DumpDBGState(const DNBArchMachARM::DBG &dbg) {
   uint32_t i = 0;
   for (i = 0; i < 16; i++) {
@@ -324,6 +327,7 @@ static void DumpDBGState(const DNBArchMachARM::DBG &dbg) {
                      dbg.__wcr[i]);
   }
 }
+#endif
 
 kern_return_t DNBArchMachARM::GetDBGState(bool force) {
   int set = e_regSetDBG;
@@ -643,8 +647,8 @@ bool DNBArchMachARM::NotifyException(MachException::Data &exc) {
                                         "watchpoint %d was hit on address "
                                         "0x%llx",
                        hw_index, (uint64_t)addr);
-      const int num_watchpoints = NumSupportedHardwareWatchpoints();
-      for (int i = 0; i < num_watchpoints; i++) {
+      const uint32_t num_watchpoints = NumSupportedHardwareWatchpoints();
+      for (uint32_t i = 0; i < num_watchpoints; i++) {
         if (LoHi[i] != 0 && LoHi[i] == hw_index && LoHi[i] != i &&
             GetWatchpointAddressByIndex(i) != INVALID_NUB_ADDRESS) {
           addr = GetWatchpointAddressByIndex(i);

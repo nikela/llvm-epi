@@ -318,7 +318,7 @@ def MVE_v2f64 : MVEVectorVTInfo<v2f64, ?,     v4i1,  ?,    0b11, "f", ?>;
 def MVE_v16p8 : MVEVectorVTInfo<v16i8, v8i16, v16i1, v8i1, 0b11, "p", 0b0>;
 def MVE_v8p16 : MVEVectorVTInfo<v8i16, v4i32, v8i1,  v4i1, 0b11, "p", 0b1>;
 
-multiclass MVE_TwoOpPattern<MVEVectorVTInfo VTI, PatFrag Op, Intrinsic PredInt,
+multiclass MVE_TwoOpPattern<MVEVectorVTInfo VTI, SDPatternOperator Op, Intrinsic PredInt,
                             dag PredOperands, Instruction Inst,
                             SDPatternOperator IdentityVec = null_frag> {
   // Unpredicated
@@ -354,7 +354,7 @@ multiclass MVE_TwoOpPattern<MVEVectorVTInfo VTI, PatFrag Op, Intrinsic PredInt,
                             (VTI.Vec MQPR:$inactive)))>;
 }
 
-multiclass MVE_TwoOpPatternDup<MVEVectorVTInfo VTI, PatFrag Op, Intrinsic PredInt,
+multiclass MVE_TwoOpPatternDup<MVEVectorVTInfo VTI, SDPatternOperator Op, Intrinsic PredInt,
                                dag PredOperands, Instruction Inst,
                                SDPatternOperator IdentityVec = null_frag> {
   // Unpredicated
@@ -1825,12 +1825,13 @@ class MVE_VMOV_lane_8<string suffix, bit U, MVE_VMOV_lane_direction dir>
 }
 
 def MVE_VMOV_from_lane_32  : MVE_VMOV_lane_32<            MVE_VMOV_from_lane>;
-def MVE_VMOV_to_lane_32    : MVE_VMOV_lane_32<            MVE_VMOV_to_lane>;
 def MVE_VMOV_from_lane_s16 : MVE_VMOV_lane_16<"s16", 0b0, MVE_VMOV_from_lane>;
 def MVE_VMOV_from_lane_u16 : MVE_VMOV_lane_16<"u16", 0b1, MVE_VMOV_from_lane>;
-def MVE_VMOV_to_lane_16    : MVE_VMOV_lane_16< "16", 0b0, MVE_VMOV_to_lane>;
 def MVE_VMOV_from_lane_s8  : MVE_VMOV_lane_8 < "s8", 0b0, MVE_VMOV_from_lane>;
 def MVE_VMOV_from_lane_u8  : MVE_VMOV_lane_8 < "u8", 0b1, MVE_VMOV_from_lane>;
+let isInsertSubreg = 1 in
+def MVE_VMOV_to_lane_32    : MVE_VMOV_lane_32<            MVE_VMOV_to_lane>;
+def MVE_VMOV_to_lane_16    : MVE_VMOV_lane_16< "16", 0b0, MVE_VMOV_to_lane>;
 def MVE_VMOV_to_lane_8     : MVE_VMOV_lane_8 <  "8", 0b0, MVE_VMOV_to_lane>;
 
 // This is the same as insertelt but allows the inserted value to be an i32 as
@@ -1851,6 +1852,14 @@ let Predicates = [HasMVEInt] in {
               (i32 (EXTRACT_SUBREG MQPR:$src, (SSubReg_f32_reg imm:$lane))), rGPR)>;
   def : Pat<(insertelt (v4i32 MQPR:$src1), rGPR:$src2, imm:$lane),
             (MVE_VMOV_to_lane_32 MQPR:$src1, rGPR:$src2, imm:$lane)>;
+  // This tries to copy from one lane to another, without going via GPR regs
+  def : Pat<(insertelt (v4i32 MQPR:$src1), (extractelt (v4i32 MQPR:$src2), imm:$extlane), imm:$inslane),
+            (v4i32 (COPY_TO_REGCLASS
+                     (INSERT_SUBREG (v4f32 (COPY_TO_REGCLASS (v4i32 MQPR:$src1), MQPR)),
+                                    (f32 (EXTRACT_SUBREG (v4f32 (COPY_TO_REGCLASS (v4i32 MQPR:$src2), MQPR)),
+                                                         (SSubReg_f32_reg imm:$extlane))),
+                                    (SSubReg_f32_reg imm:$inslane)),
+                      MQPR))>;
 
   def : Pat<(vector_insert (v16i8 MQPR:$src1), rGPR:$src2, imm:$lane),
             (MVE_VMOV_to_lane_8  MQPR:$src1, rGPR:$src2, imm:$lane)>;
@@ -2467,7 +2476,7 @@ class MVE_VCLSCLZ<string iname, string suffix, bits<2> size,
 }
 
 multiclass MVE_VCLSCLZ_p<string opname, bit opcode, MVEVectorVTInfo VTI,
-                         SDNode unpred_op> {
+                         SDPatternOperator unpred_op> {
   def "": MVE_VCLSCLZ<"v"#opname, VTI.Suffix, VTI.Size, opcode>;
 
   defvar Inst     = !cast<Instruction>(NAME);
@@ -2511,7 +2520,7 @@ class MVE_VABSNEG_int<string iname, string suffix, bits<2> size, bit negate,
 }
 
 multiclass MVE_VABSNEG_int_m<string iname, bit negate, bit saturate,
-                             SDNode unpred_op, Intrinsic pred_int,
+                             SDPatternOperator unpred_op, Intrinsic pred_int,
                              MVEVectorVTInfo VTI> {
   def "" : MVE_VABSNEG_int<iname, VTI.Suffix, VTI.Size, negate, saturate>;
   defvar Inst = !cast<Instruction>(NAME);
@@ -3576,7 +3585,7 @@ class MVE_VRINT<string rmode, bits<3> op, string suffix, bits<2> size,
 }
 
 multiclass MVE_VRINT_m<MVEVectorVTInfo VTI, string suffix, bits<3> opcode,
-                       SDNode unpred_op> {
+                       SDPatternOperator unpred_op> {
   def "": MVE_VRINT<suffix, opcode, VTI.Suffix, VTI.Size>;
   defvar Inst = !cast<Instruction>(NAME);
   defvar pred_int = !cast<Intrinsic>("int_arm_mve_vrint"#suffix#"_predicated");
@@ -4365,7 +4374,7 @@ multiclass unpred_vcmpf_z<PatLeaf fc> {
             (v4i1 (MVE_VCMPf32r (v4f32 MQPR:$v1), ZR, fc, ARMVCCThen, VCCR:$p1))>;
 }
 
-multiclass unpred_vcmpf_r<int fc> {
+multiclass unpred_vcmpf_r<PatLeaf fc> {
   def : Pat<(v8i1 (ARMvcmp (v8f16 MQPR:$v1), (v8f16 MQPR:$v2), fc)),
             (v8i1 (MVE_VCMPf16 (v8f16 MQPR:$v1), (v8f16 MQPR:$v2), fc))>;
   def : Pat<(v4i1 (ARMvcmp (v4f32 MQPR:$v1), (v4f32 MQPR:$v2), fc)),
@@ -4632,7 +4641,7 @@ class MVE_VMULL<string iname, string suffix, bit bit_28, bits<2> bits_21_20,
 }
 
 multiclass MVE_VMULL_m<MVEVectorVTInfo VTI,
-                       SDNode unpred_op, Intrinsic pred_int,
+                       SDPatternOperator unpred_op, Intrinsic pred_int,
                        bit Top, string cstr=""> {
   def "" : MVE_VMULL<"vmull" # !if(Top, "t", "b"), VTI.Suffix, VTI.Unsigned,
                      VTI.Size, Top, cstr>;
@@ -5179,7 +5188,8 @@ class MVE_qDest_single_rSrc<string iname, string suffix, list<dag> pattern=[]>
 
 // Patterns for vector-scalar instructions with integer operands
 multiclass MVE_vec_scalar_int_pat_m<Instruction inst, MVEVectorVTInfo VTI,
-                                    SDNode unpred_op, SDNode pred_op,
+                                    SDPatternOperator unpred_op,
+                                    SDPatternOperator pred_op,
                                     bit unpred_has_sign = 0,
                                     bit pred_has_sign = 0> {
   defvar UnpredSign = !if(unpred_has_sign, (? (i32 VTI.Unsigned)), (?));
