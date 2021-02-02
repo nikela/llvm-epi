@@ -1646,6 +1646,23 @@ def : Pat<(vscale (i64 GPR:$imm)),
 
 }
 
+// X0 has special meaning for vsetvl/vsetvli.
+//  rd | rs1 |   AVL value | Effect on vl
+//--------------------------------------------------------------
+// !X0 |  X0 |       VLMAX | Set vl to VLMAX
+//  X0 |  X0 | Value in vl | Keep current vl, just change vtype.
+def NoX0 : SDNodeXForm<undef,
+[{
+  auto *C = dyn_cast<ConstantSDNode>(N);
+  if (C && C->isNullValue()) {
+    SDLoc DL(N);
+    return SDValue(CurDAG->getMachineNode(RISCV::ADDI, DL, Subtarget->getXLenVT(),
+                   CurDAG->getRegister(RISCV::X0, Subtarget->getXLenVT()),
+                   CurDAG->getTargetConstant(0, DL, Subtarget->getXLenVT())), 0);
+  }
+  return SDValue(N, 0);
+}]>;
+
 //===----------------------------------------------------------------------===//
 // Patterns. Arithmetic
 //===----------------------------------------------------------------------===//
