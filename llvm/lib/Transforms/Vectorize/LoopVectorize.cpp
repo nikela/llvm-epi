@@ -6638,7 +6638,7 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     // Ignore scalar width, because the user explicitly wants vectorization.
     // Initialize cost to max so that VF = 2 for fixed vectors and VF = 1 x
     // vscale for scalable vectors is, at least, chosen during cost evaluation.
-    Cost = std::numeric_limits<InstructionCost::CostType>::max();
+    Cost = std::numeric_limits<float>::max();
   }
 
   // FIXME: Move MinVF to TTI. A target may have a different MinVF than the
