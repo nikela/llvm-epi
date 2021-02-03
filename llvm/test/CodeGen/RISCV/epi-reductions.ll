@@ -109,39 +109,23 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-LABEL: red_nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmv.s.x v26, zero
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredsum.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a6, v28
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredmax.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a7, v28
-; CHECK-NEXT:    vsetvli a2, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredmin.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s t0, v28
-; CHECK-NEXT:    vsetvli a3, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredmaxu.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a3, v28
-; CHECK-NEXT:    vsetvli a4, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredminu.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a4, v28
-; CHECK-NEXT:    vsetvli a5, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredand.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a5, v28
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredor.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a0, v28
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vredxor.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.x.s a1, v28
 ; CHECK-NEXT:    add a2, a6, a7
 ; CHECK-NEXT:    add a2, a2, t0
@@ -255,26 +239,18 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI5_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vfmv.s.f v26, ft0
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vfmv.s.f v26, ft0
 ; CHECK-NEXT:    vfredosum.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft1, v28
 ; CHECK-NEXT:    fmv.d.x ft2, zero
 ; CHECK-NEXT:    vfmv.s.f v26, ft2
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vfredsum.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft2, v28
 ; CHECK-NEXT:    fadd.d ft0, ft2, ft0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vfredmax.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft2, v28
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vfredmin.vs v28, v8, v26
-; CHECK-NEXT:    vsetvli zero, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft3, v28
 ; CHECK-NEXT:    fadd.d ft0, ft1, ft0
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft2
