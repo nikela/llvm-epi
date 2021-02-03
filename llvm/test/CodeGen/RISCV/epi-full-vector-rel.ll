@@ -10,44 +10,44 @@ define void @lmul_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v9, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v9, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v9, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v9, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v9
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -91,44 +91,44 @@ define void @lmul_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) nounwind {
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v10, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v10, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v10, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v10, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v10
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
@@ -172,44 +172,44 @@ define void @lmul_4(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) nounwind {
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v12, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v12, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v12, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v12, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m4,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v12
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,mf2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 4 x i1>*
 
@@ -254,43 +254,43 @@ define void @lmul_8(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) nounwind {
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v16, v8
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v16, v8
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v16, v8
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v16, v8
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v16
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 8 x i1>*
 
@@ -334,44 +334,44 @@ define void @lmul_8_i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) nounwind
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m2,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 16 x i1>*
 
@@ -415,44 +415,44 @@ define void @lmul_8_i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) nounwind
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmseq.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsne.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsltu.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsleu.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v16, v8
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmslt.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    vsetvli a1, zero, e16,m8,ta,mu
 ; CHECK-NEXT:    vmsle.vv v25, v8, v16
-; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vsetvli a1, zero, e8,m4,ta,mu
+; CHECK-NEXT:    vse1.v v25, (a0)
 ; CHECK-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 32 x i1>*
   %store_addr_2 = bitcast i8* @scratch to <vscale x 32 x i1>*

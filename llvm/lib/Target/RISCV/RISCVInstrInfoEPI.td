@@ -1540,52 +1540,11 @@ multiclass epi_pat_load_store<LLVMType type,
              VLMax, eew)>;
 }
 
-// Extra patterns for truncating loads and extending stores of mask types
-multiclass pat_load_store_mask<LLVMType type,
-                               int eew,
-                               LMULInfo MInfo,
-                               VReg reg_class>
-{
-  // Load
-  defvar load_instr_name = "PseudoEPIVLE" # eew #"_V";
-  def : Pat<(type (load GPR:$rs1)),
-            (!cast<Instruction>(load_instr_name # "_" # MInfo.MX)
-             (type (IMPLICIT_DEF)),
-             GPR:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-  def : Pat<(type (load AddrFI:$rs1)),
-            (!cast<Instruction>(load_instr_name # "_" # MInfo.MX)
-             (type (IMPLICIT_DEF)),
-             AddrFI:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-
-  // Store
-  defvar store_instr_name = "PseudoEPIVSE" # eew # "_V";
-  def : Pat<(store type:$rs2, GPR:$rs1),
-            (!cast<Instruction>(store_instr_name # "_" # MInfo.MX)
-             reg_class:$rs2, GPR:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-  def : Pat<(store type:$rs2, AddrFI:$rs1),
-            (!cast<Instruction>(store_instr_name # "_" # MInfo.MX)
-             reg_class:$rs2, AddrFI:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-}
-
 let Predicates = [HasStdExtV] in {
   foreach vti = EPIAllVectors in
   {
     defm : epi_pat_load_store<vti.Vector, vti.Mask, vti.SEW, vti.MInfo,
                               vti.MInfo.vrclass>;
-  }
-
-  foreach mti = EPIAllMasks in
-  {
-    // Mask values are stored as vectors of bytes
-    defm : pat_load_store_mask<mti.Mask, /* eew */ 8, V_M1, VR>;
   }
 
   foreach vti = EPIAllIntegerVectors in {
