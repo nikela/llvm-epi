@@ -791,6 +791,9 @@ let TargetPrefix = "riscv" in {
   defm vsoxei : RISCVIStore;
   defm vsuxei : RISCVIStore;
 
+  def int_riscv_vle1 : RISCVUSLoad;
+  def int_riscv_vse1 : RISCVUSStore;
+
   defm vamoswap : RISCVAMO;
   defm vamoadd : RISCVAMO;
   defm vamoxor : RISCVAMO;
@@ -941,8 +944,8 @@ let TargetPrefix = "riscv" in {
   defm vfwnmsac : RISCVTernaryWide;
 
   defm vfsqrt : RISCVUnaryAA;
-  defm vfrsqrte7 : RISCVUnaryAA;
-  defm vfrece7 : RISCVUnaryAA;
+  defm vfrsqrt7 : RISCVUnaryAA;
+  defm vfrec7 : RISCVUnaryAA;
 
   defm vfmin : RISCVBinaryAAX;
   defm vfmax : RISCVBinaryAAX;
