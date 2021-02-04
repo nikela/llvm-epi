@@ -604,11 +604,13 @@ class TensorOf<list<Type> allowedTypes> :
   ShapedContainerType<allowedTypes, IsTensorTypePred, "tensor",
                       "::mlir::TensorType">;
 
+class RankedTensorOf<list<Type> allowedTypes> :
+  ShapedContainerType<allowedTypes, And<[IsTensorTypePred, HasRankPred]>,
+  "ranked tensor", "::mlir::TensorType">;
+
 def AnyTensor : TensorOf<[AnyType]>;
 
-def AnyRankedTensor :
-  ShapedContainerType<[AnyType], And<[IsTensorTypePred, HasRankPred]>,
-  "ranked tensor", "::mlir::TensorType">;
+def AnyRankedTensor : RankedTensorOf<[AnyType]>;
 
 // TODO: Have an easy way to add another constraint to a type.
 class StaticShapeTensorOf<list<Type> allowedTypes>
@@ -675,11 +677,13 @@ def F64MemRef  : MemRefOf<[F64]>;
 class MemRefRankOf<list<Type> allowedTypes, list<int> ranks> :
     Type<And<[MemRefOf<allowedTypes>.predicate, HasAnyRankOfPred<ranks>]>,
          !interleave(!foreach(rank, ranks, rank # "D"), "/") # " " #
-         MemRefOf<allowedTypes>.summary>;
+         MemRefOf<allowedTypes>.summary,
+         "::mlir::MemRefType">;
 
 class StaticShapeMemRefOf<list<Type> allowedTypes>
     : Type<And<[MemRefOf<allowedTypes>.predicate, HasStaticShapePred]>,
-           "statically shaped " # MemRefOf<allowedTypes>.summary>;
+           "statically shaped " # MemRefOf<allowedTypes>.summary,
+           "::mlir::MemRefType">;
 
 def AnyStaticShapeMemRef : StaticShapeMemRefOf<[AnyType]>;
 
@@ -1173,7 +1177,7 @@ class EnumAttrInfo<string name, list<EnumAttrCaseInfo> cases> {
   // <return-type> <fn-name>(<qualified-enum-class-name>);
   // ```
   string symbolToStringFnName = "stringify" # name;
-  string symbolToStringFnRetType = "::llvm::StringRef";
+  string symbolToStringFnRetType = "::llvm::StringLiteral";
 
   // The name of the utility function that returns the max enum value used
   // within the enum class. It will have the following signature:
