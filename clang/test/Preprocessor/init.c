@@ -2268,6 +2268,7 @@
 // RISCV32: #define __SIG_ATOMIC_WIDTH__ 32
 // RISCV32: #define __SIZEOF_DOUBLE__ 8
 // RISCV32: #define __SIZEOF_FLOAT__ 4
+// RISCV32-INT128: #define __SIZEOF_INT128__ 16
 // RISCV32: #define __SIZEOF_INT__ 4
 // RISCV32: #define __SIZEOF_LONG_DOUBLE__ 16
 // RISCV32: #define __SIZEOF_LONG_LONG__ 8
@@ -2548,19 +2549,3 @@
 // RISCV64-LINUX: #define __unix__ 1
 // RISCV64-LINUX: #define linux 1
 // RISCV64-LINUX: #define unix 1
-
-// RUN: %clang_cc1 -E -dM -ffreestanding -triple riscv32 -target-abi ilp32f < /dev/null \
-// RUN:   | FileCheck -match-full-lines -check-prefixes=RISCV32-ILP32F %s
-// RISCV32-ILP32F: #define __riscv_float_abi_single 1
-
-// RUN: %clang_cc1 -E -dM -ffreestanding -triple riscv32 -target-abi ilp32d < /dev/null \
-// RUN:   | FileCheck -match-full-lines -check-prefixes=RISCV32-ILP32D %s
-// RISCV32-ILP32D: #define __riscv_float_abi_double 1
-
-// RUN: %clang_cc1 -E -dM -ffreestanding -triple riscv64 -target-abi lp64f < /dev/null \
-// RUN:   | FileCheck -match-full-lines -check-prefixes=RISCV64-LP64F %s
-// RISCV64-LP64F: #define __riscv_float_abi_single 1
-
-// RUN: %clang_cc1 -E -dM -ffreestanding -triple riscv64 -target-abi lp64d < /dev/null \
-// RUN:   | FileCheck -match-full-lines -check-prefixes=RISCV64-LP64D %s
-// RISCV64-LP64D: #define __riscv_float_abi_double 1
