@@ -148,9 +148,9 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsetvli s7, s11, e32,m1,ta,mu
 ; CHECK-NEXT:    vid.v v27
 ; CHECK-NEXT:    vmxor.mm v0, v25, v25
-; CHECK-NEXT:    vmv.v.x v26, a4
-; CHECK-NEXT:    vadc.vvm v18, v26, v27, v0
-; CHECK-NEXT:    vmadc.vvm v25, v26, v27, v0
+; CHECK-NEXT:    vmv.v.x v25, a4
+; CHECK-NEXT:    vadc.vvm v18, v25, v27, v0
+; CHECK-NEXT:    vmadc.vvm v25, v25, v27, v0
 ; CHECK-NEXT:    vmv.v.x v26, a3
 ; CHECK-NEXT:    vmv1r.v v0, v25
 ; CHECK-NEXT:    vadc.vim v19, v26, 0, v0

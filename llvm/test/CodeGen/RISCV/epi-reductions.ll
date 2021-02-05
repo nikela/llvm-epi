@@ -291,8 +291,8 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK-NEXT:    vfmv.s.f v26, ft2
 ; CHECK-NEXT:    vfredmax.vs v28, v8, v26
 ; CHECK-NEXT:    vfmv.f.s ft2, v28
-; CHECK-NEXT:    vfredmin.vs v28, v8, v26
-; CHECK-NEXT:    vfmv.f.s ft3, v28
+; CHECK-NEXT:    vfredmin.vs v26, v8, v26
+; CHECK-NEXT:    vfmv.f.s ft3, v26
 ; CHECK-NEXT:    fadd.d ft0, ft1, ft0
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft2
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft3

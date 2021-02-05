@@ -39,8 +39,8 @@ define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices,
 ; CHECK-LABEL: nxv8f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-NEXT:    vsll.vi v24, v8, 3
-; CHECK-NEXT:    vluxei64.v v16, (a0), v24, v0.t
+; CHECK-NEXT:    vsll.vi v8, v8, 3
+; CHECK-NEXT:    vluxei64.v v16, (a0), v8, v0.t
 ; CHECK-NEXT:    vmv8r.v v8, v16
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices

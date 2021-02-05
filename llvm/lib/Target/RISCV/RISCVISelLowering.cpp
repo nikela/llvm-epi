@@ -5435,7 +5435,7 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
 
 static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
                                       int VLIndex, unsigned SEWIndex,
-                                      unsigned VLMul) {
+                                      int MaskOpIdx, unsigned VLMul) {
   MachineFunction &MF = *BB->getParent();
   DebugLoc DL = MI.getDebugLoc();
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
@@ -5469,6 +5469,34 @@ static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
                                      /*TailAgnostic*/ true,
                                      /*MaskAgnostic*/ false,
                                      Nontemporal));
+
+  // Masked instructions under LMUL > 1 are a bit problematic as we don't want
+  // the destination to overlap the mask. So if they are VR register classes,
+  // make sure we use one that does not include V0.
+  bool LMULOver1 = Multiplier == RISCVVLMUL::LMUL_2 ||
+                   Multiplier == RISCVVLMUL::LMUL_4 ||
+                   Multiplier == RISCVVLMUL::LMUL_8;
+  if (LMULOver1 && MaskOpIdx >= 0 && MI.getOperand(MaskOpIdx).isReg() &&
+      MI.getOperand(MaskOpIdx).getReg() != RISCV::NoRegister &&
+      MI.getNumExplicitDefs() != 0) {
+    assert(MI.getNumExplicitDefs() == 1 && "Too many explicit definitions!");
+    assert(MI.getOperand(0).isDef() && "Expecting a def here");
+    if (MI.getOperand(0).isReg()) {
+      Register Def = MI.getOperand(0).getReg();
+      assert(Register::isVirtualRegister(Def) && "Def should be virtual here");
+      const TargetRegisterClass *RC = MRI.getRegClass(Def);
+       // FIXME: what about tuples?
+      if (RC->hasSuperClassEq(&RISCV::VRRegClass)) {
+        MRI.setRegClass(Def, &RISCV::VRNoV0RegClass);
+      } else if (RC->hasSuperClassEq(&RISCV::VRM2RegClass)) {
+        MRI.setRegClass(Def, &RISCV::VRM2NoV0RegClass);
+      } else if (RC->hasSuperClassEq(&RISCV::VRM4RegClass)) {
+        MRI.setRegClass(Def, &RISCV::VRM4NoV0RegClass);
+      } else if (RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
+        MRI.setRegClass(Def, &RISCV::VRM8NoV0RegClass);
+      }
+    }
+  }
 
   // Remove (now) redundant operands from pseudo
   MI.getOperand(SEWIndex).setImm(-1);
@@ -5545,7 +5573,8 @@ static MachineBasicBlock *emitComputeEPIVMSET(MachineInstr &MI,
   // The pseudo instruction is gone now.
   MI.eraseFromParent();
 
-  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4, VLMul);
+  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4,
+                     /* MaskOpIdx */ -1, VLMul);
 }
 
 static MachineBasicBlock *emitComputeEPIVMCLR(MachineInstr &MI,
@@ -5585,7 +5614,8 @@ static MachineBasicBlock *emitComputeEPIVMCLR(MachineInstr &MI,
   // The pseudo instruction is gone now.
   MI.eraseFromParent();
 
-  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4, VLMul);
+  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4,
+                     /* MaskOpIdx */ -1, VLMul);
 }
 
 static MachineBasicBlock *emitImplicitVRM1Tuple(MachineInstr &MI,
@@ -5639,9 +5669,10 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
           RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode())) {
     int VLIndex = EPI->getVLIndex();
     int SEWIndex = EPI->getSEWIndex();
+    int MaskOpIndex = EPI->getMaskOpIndex();
 
     assert(SEWIndex >= 0 && "SEWIndex must be >= 0");
-    return addEPISetVL(MI, BB, VLIndex, SEWIndex, EPI->VLMul);
+    return addEPISetVL(MI, BB, VLIndex, SEWIndex, MaskOpIndex, EPI->VLMul);
   }
 
   // Other EPI pseudo-instructions.

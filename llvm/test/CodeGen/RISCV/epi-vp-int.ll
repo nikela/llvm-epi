@@ -464,7 +464,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O2-NEXT:    vxor.vv v24, v26, v28, v0.t
 ; CHECK-O2-NEXT:    vsra.vv v2, v26, v28, v0.t
 ; CHECK-O2-NEXT:    vsrl.vv v4, v26, v28, v0.t
-; CHECK-O2-NEXT:    vsll.vv v6, v26, v28, v0.t
+; CHECK-O2-NEXT:    vsll.vv v26, v26, v28, v0.t
 ; CHECK-O2-NEXT:    vse64.v v30, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v8, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v10, (a0), v0.t
@@ -477,7 +477,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O2-NEXT:    vse64.v v24, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v2, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v4, (a0), v0.t
-; CHECK-O2-NEXT:    vse64.v v6, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v26, (a0), v0.t
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 

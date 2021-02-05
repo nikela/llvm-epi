@@ -38,8 +38,8 @@ define void @nxv8f64(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i6
 ; CHECK-LABEL: nxv8f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
-; CHECK-NEXT:    vsll.vi v24, v16, 3
-; CHECK-NEXT:    vsuxei64.v v8, (a0), v24, v0.t
+; CHECK-NEXT:    vsll.vi v16, v16, 3
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   call void @llvm.masked.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask)

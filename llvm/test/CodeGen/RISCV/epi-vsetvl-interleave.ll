@@ -165,13 +165,13 @@ define void @test_vsetvl_interleave_vlmul(<vscale x 1 x double>* %vm1, <vscale x
 ; CHECK-O2-NEXT:    vsetvli a0, a2, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    vsetvli a0, a2, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vfadd.vv v28, v26, v26
+; CHECK-O2-NEXT:    vfadd.vv v26, v26, v26
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a1, a2, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-NEXT:    vsetvli a1, a2, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vse64.v v28, (a0)
+; CHECK-O2-NEXT:    vse64.v v26, (a0)
 ; CHECK-O2-NEXT:    ret
 {
   %gvl_m1 = call i64 @llvm.epi.vsetvl(

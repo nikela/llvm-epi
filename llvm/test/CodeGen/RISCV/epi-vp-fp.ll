@@ -343,15 +343,15 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O2-NEXT:    vfdiv.vv v16, v26, v28, v0.t
 ; CHECK-O2-NEXT:    vmv2r.v v18, v26
 ; CHECK-O2-NEXT:    vfmadd.vv v18, v28, v30, v0.t
-; CHECK-O2-NEXT:    vfneg.v v28, v26, v0.t
-; CHECK-O2-NEXT:    vfcvt.f.x.v v26, v8, v0.t
+; CHECK-O2-NEXT:    vfneg.v v26, v26, v0.t
+; CHECK-O2-NEXT:    vfcvt.f.x.v v28, v8, v0.t
 ; CHECK-O2-NEXT:    vse64.v v10, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v12, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v14, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v16, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v18, (a0), v0.t
-; CHECK-O2-NEXT:    vse64.v v28, (a0), v0.t
 ; CHECK-O2-NEXT:    vse64.v v26, (a0), v0.t
+; CHECK-O2-NEXT:    vse64.v v28, (a0), v0.t
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x double>*
 

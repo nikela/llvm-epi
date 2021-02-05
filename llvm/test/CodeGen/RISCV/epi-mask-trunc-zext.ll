@@ -54,8 +54,8 @@ define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b,
 ; CHECK-NEXT:    vand.vi v26, v8, 1
 ; CHECK-NEXT:    vmsne.vi v25, v26, 0
 ; CHECK-NEXT:    vand.vi v26, v10, 1
-; CHECK-NEXT:    vmsne.vi v28, v26, 0
-; CHECK-NEXT:    vmand.mm v0, v25, v28
+; CHECK-NEXT:    vmsne.vi v26, v26, 0
+; CHECK-NEXT:    vmand.mm v0, v25, v26
 ; CHECK-NEXT:    ret
 {
   %ma = trunc <vscale x 2 x i64> %a to <vscale x 2 x i1>
