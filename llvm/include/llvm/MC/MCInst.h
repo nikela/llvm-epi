@@ -61,6 +61,7 @@ public:
   bool isImm() const { return Kind == kImmediate; }
   bool isSFPImm() const { return Kind == kSFPImmediate; }
   bool isDFPImm() const { return Kind == kDFPImmediate; }
+  bool isFPImm() const { return Kind == kDFPImmediate; }
   bool isExpr() const { return Kind == kExpr; }
   bool isInst() const { return Kind == kInst; }
 
@@ -100,10 +101,18 @@ public:
     assert(isDFPImm() && "This is not an FP immediate");
     return FPImmVal;
   }
+  double getFPImm() const {
+    assert(isDFPImm() && "This is not an FP immediate");
+    return bit_cast<double>(FPImmVal);
+  }
 
   void setDFPImm(uint64_t Val) {
     assert(isDFPImm() && "This is not an FP immediate");
     FPImmVal = Val;
+  }
+  void setFPImm(double Val) {
+    assert(isDFPImm() && "This is not an FP immediate");
+    FPImmVal = bit_cast<uint64_t>(Val);
   }
 
   const MCExpr *getExpr() const {
@@ -151,6 +160,12 @@ public:
     MCOperand Op;
     Op.Kind = kDFPImmediate;
     Op.FPImmVal = Val;
+    return Op;
+  }
+  static MCOperand createFPImm(double Val) {
+    MCOperand Op;
+    Op.Kind = kDFPImmediate;
+    Op.FPImmVal = bit_cast<uint64_t>(Val);
     return Op;
   }
 
