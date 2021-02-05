@@ -197,8 +197,8 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask:
@@ -209,8 +209,8 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a1)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -231,8 +231,8 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_2:
@@ -243,8 +243,8 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a1)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf4,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
@@ -265,8 +265,8 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf4,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
@@ -277,8 +277,8 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a1)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf4,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 

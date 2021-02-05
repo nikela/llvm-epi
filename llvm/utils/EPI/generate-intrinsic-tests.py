@@ -2154,10 +2154,10 @@ intrinsics = [
         UnaryIntrinsicScalarInput("vmv.v.x", type_generator = generate_unary_integer_types, variants = x, instruction = "vmv.v", scalar_register = "a0", mask = False),
         UnaryIntrinsicScalarInput("vfmv.v.f", type_generator = generate_unary_float_types, variants = f, instruction = "vfmv.v", scalar_register = "ft0", mask = False),
 
-        UnaryIntrinsicScalarResultNoVL("vmv.x.s", type_generator = generate_unary_integer_types, variants = s, instruction = "vmv.x", scalar_register = "a0", mask = False, vlmul_values = [1]),
+        UnaryIntrinsicScalarResultNoVL("vmv.x.s", type_generator = generate_unary_integer_types, variants = s, instruction = "vmv.x", scalar_register = "a0", mask = False),
 
-        UnaryIntrinsicScalarInputMerge("vmv.s.x", type_generator = generate_unary_integer_types, variants = x, instruction = "vmv.s", scalar_register = "a0", mask = False, vlmul_values = [1]),
-        UnaryIntrinsicScalarInputMerge("vfmv.s.f", type_generator = generate_unary_float_types, variants = f, instruction = "vfmv.s", scalar_register = "ft0", mask = False, vlmul_values = [1]),
+        UnaryIntrinsicScalarInputMerge("vmv.s.x", type_generator = generate_unary_integer_types, variants = x, instruction = "vmv.s", scalar_register = "a0", mask = False),
+        UnaryIntrinsicScalarInputMerge("vfmv.s.f", type_generator = generate_unary_float_types, variants = f, instruction = "vfmv.s", scalar_register = "ft0", mask = False),
 
         #UnaryIntrinsicMask("vmsbf", type_generator = generate_unary_mask_types, variants = m),
         #UnaryIntrinsicMask("vmsof", type_generator = generate_unary_mask_types, variants = m),
@@ -2165,7 +2165,7 @@ intrinsics = [
 
         UnaryIntrinsic("viota", type_generator = generate_unary_mask_to_integer_types, variants = m),
 
-        UnaryIntrinsicScalarResultNoVL("vfmv.f.s", type_generator = generate_unary_float_types, variants = s, instruction = "vfmv.f", scalar_register = "ft0", mask = False, vlmul_values = [1]),
+        UnaryIntrinsicScalarResultNoVL("vfmv.f.s", type_generator = generate_unary_float_types, variants = s, instruction = "vfmv.f", scalar_register = "ft0", mask = False),
 
         NullaryIntrinsic("vid", type_generator = generate_nullary_integer_types, variants = v),
 

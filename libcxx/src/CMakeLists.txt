@@ -92,6 +92,7 @@ if (LIBCXX_ENABLE_FILESYSTEM)
     filesystem/filesystem_common.h
     filesystem/operations.cpp
     filesystem/directory_iterator.cpp
+    filesystem/posix_compat.h
     )
   # Filesystem uses __int128_t, which requires a definition of __muloi4 when
   # compiled with UBSAN. This definition is not provided by libgcc_s, but is
@@ -108,7 +109,7 @@ endif()
 if (LIBCXX_CONFIGURE_IDE)
   file(GLOB_RECURSE LIBCXX_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/../include/*)
   if(WIN32)
-    file( GLOB LIBCXX_WIN32_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/../include/support/win32/*.h)
+    file( GLOB LIBCXX_WIN32_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/../include/__support/win32/*.h)
     list(APPEND LIBCXX_HEADERS ${LIBCXX_WIN32_HEADERS})
   endif()
   # Force them all into the headers dir on MSVC, otherwise they end up at

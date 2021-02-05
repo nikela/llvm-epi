@@ -523,13 +523,14 @@ CallInst *IRBuilderBase::CreateMaskedIntrinsic(Intrinsic::ID Id,
 CallInst *IRBuilderBase::CreateMaskedGather(Value *Ptrs, Align Alignment,
                                             Value *Mask, Value *PassThru,
                                             const Twine &Name) {
-  auto PtrsTy = cast<VectorType>(Ptrs->getType());
-  auto PtrTy = cast<PointerType>(PtrsTy->getElementType());
+  auto *PtrsTy = cast<VectorType>(Ptrs->getType());
+  auto *PtrTy = cast<PointerType>(PtrsTy->getElementType());
   ElementCount NumElts = PtrsTy->getElementCount();
-  Type *DataTy = VectorType::get(PtrTy->getElementType(), NumElts);
+  auto *DataTy = VectorType::get(PtrTy->getElementType(), NumElts);
 
   if (!Mask)
-    Mask = getTrueVector(NumElts);
+    Mask = Constant::getAllOnesValue(
+        VectorType::get(Type::getInt1Ty(Context), NumElts));
 
   if (isa<ScalableVectorType>(DataTy))
     assert(isa<ScalableVectorType>(Mask->getType()) &&
@@ -556,8 +557,8 @@ CallInst *IRBuilderBase::CreateMaskedGather(Value *Ptrs, Align Alignment,
 ///            be accessed in memory
 CallInst *IRBuilderBase::CreateMaskedScatter(Value *Data, Value *Ptrs,
                                              Align Alignment, Value *Mask) {
-  auto PtrsTy = cast<VectorType>(Ptrs->getType());
-  auto DataTy = cast<VectorType>(Data->getType());
+  auto *PtrsTy = cast<VectorType>(Ptrs->getType());
+  auto *DataTy = cast<VectorType>(Data->getType());
   ElementCount NumElts = PtrsTy->getElementCount();
 
 #ifndef NDEBUG
@@ -568,7 +569,8 @@ CallInst *IRBuilderBase::CreateMaskedScatter(Value *Data, Value *Ptrs,
 #endif
 
   if (!Mask)
-    Mask = getTrueVector(NumElts);
+    Mask = Constant::getAllOnesValue(
+        VectorType::get(Type::getInt1Ty(Context), NumElts));
 
   if (isa<ScalableVectorType>(DataTy))
     assert(isa<ScalableVectorType>(Mask->getType()) &&

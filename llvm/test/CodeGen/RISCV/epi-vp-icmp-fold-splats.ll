@@ -29,27 +29,27 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0-NEXT:    vmsgtu.vx v25, v8, a1, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsltu.vx v25, v8, a1, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsleu.vv v25, v26, v8, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsleu.vx v25, v8, a1, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -63,20 +63,20 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v25, a0
 ; CHECK-O2-NEXT:    vmsgtu.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsltu.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsleu.vv v25, v25, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsleu.vx v25, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -124,27 +124,27 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vmsltu.vx v25, v8, a2, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsgtu.vx v25, v8, a2, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsleu.vx v25, v8, a2, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsleu.vv v25, v26, v8, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -158,20 +158,20 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v25, a0
 ; CHECK-O2-NEXT:    vmsltu.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsgtu.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsleu.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsleu.vv v25, v25, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -220,27 +220,27 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vmsgt.vx v25, v8, a1, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmslt.vx v25, v8, a1, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsle.vv v25, v26, v8, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsle.vx v25, v8, a1, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -254,20 +254,20 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v25, a0
 ; CHECK-O2-NEXT:    vmsgt.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmslt.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsle.vv v25, v25, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsle.vx v25, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -315,27 +315,27 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O0-NEXT:    vmslt.vx v25, v8, a2, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmslt.vv v25, v26, v8, v0.t
 ; CHECK-O0-NEXT:    ld a3, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3)
-; CHECK-O0-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsle.vx v25, v8, a2, v0.t
 ; CHECK-O0-NEXT:    ld a2, -40(s0)
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2)
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vmsle.vv v25, v26, v8, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vse8.v v25, (a0)
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8,mf8,ta,mu
+; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    addi sp, s0, -48
 ; CHECK-O0-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
@@ -349,20 +349,20 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v25, a0
 ; CHECK-O2-NEXT:    vmslt.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmslt.vv v26, v25, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a3, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsle.vx v26, v8, a0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v26, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v26, (a2)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vmsle.vv v25, v25, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vse8.v v25, (a2)
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
+; CHECK-O2-NEXT:    vse1.v v25, (a2)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 

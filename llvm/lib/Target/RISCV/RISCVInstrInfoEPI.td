@@ -1125,22 +1125,25 @@ defm PseudoEPIVREDMIN     : pseudo_binary_v_vs;
 defm PseudoEPIVREDMAXU    : pseudo_binary_v_vs;
 defm PseudoEPIVREDMAX     : pseudo_binary_v_vs;
 
-// FIXME: We should extend this to LMUL>1
 let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
     Uses = [VL, VTYPE], VLMul = 0b000 in
+foreach m = MxList.m in
 {
-  let VLIndex = -1, SEWIndex = 2, MergeOpIndex = -1, BaseInstr = VMV_X_S in
-    def PseudoEPIVMV_X_S : Pseudo<(outs GPR:$rd),
-                               (ins VR:$rs2, ixlenimm:$sew),
-                               []>,
-                        EPIPseudo;
-  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
-      MergeOpIndex = -1, BaseInstr = VMV_S_X in
-    def PseudoEPIVMV_S_X : Pseudo<(outs VR:$rd),
-                               (ins VR:$merge, GPR:$rs1, GPR:$vl,
-                                    ixlenimm:$sew),
-                               []>,
-                        EPIPseudo;
+  let VLMul = m.value in
+  {
+    let VLIndex = -1, SEWIndex = 2, MergeOpIndex = -1, BaseInstr = VMV_X_S in
+      def PseudoEPIVMV_X_S_ # m.MX : Pseudo<(outs GPR:$rd),
+                                 (ins m.vrclass:$rs2, ixlenimm:$sew),
+                                 []>,
+                          EPIPseudo;
+    let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
+        MergeOpIndex = -1, BaseInstr = VMV_S_X in
+      def PseudoEPIVMV_S_X_ # m.MX : Pseudo<(outs m.vrclass:$rd),
+                                 (ins m.vrclass:$merge, GPR:$rs1, GPR:$vl,
+                                      ixlenimm:$sew),
+                                 []>,
+                          EPIPseudo;
+  }
 }
 
 defm PseudoEPIVSLIDE1UP   : pseudo_binary_v_vx</* force_earlyclobber */ 1>;
@@ -1193,22 +1196,25 @@ defm PseudoEPIVFSGNJ      : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFSGNJN     : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFSGNJX     : pseudo_binary_v_vv_vf;
 
-// FIXME: We should extend this to LMUL>1
 let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
     Uses = [VL, VTYPE], VLMul = 0b000, MergeOpIndex = -1 in
+foreach m = MxList.m in
 {
-  let VLIndex = -1, SEWIndex = 2, BaseInstr = VFMV_F_S in
-    def PseudoEPIVFMV_F_S : Pseudo<(outs FPR64:$rd),
-                                (ins VR:$rs2, ixlenimm:$sew),
-                                []>,
-                         EPIPseudo;
-  let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
-      MergeOpIndex = -1, BaseInstr = VFMV_S_F in
-    def PseudoEPIVFMV_S_F : Pseudo<(outs VR:$rd),
-                                (ins VR:$merge, FPR64:$rs2, GPR:$vl,
-                                     ixlenimm:$sew),
-                                []>,
-                         EPIPseudo;
+  let VLMul = m.value in
+  {
+    let VLIndex = -1, SEWIndex = 2, BaseInstr = VFMV_F_S in
+      def PseudoEPIVFMV_F_S_ # m.MX : Pseudo<(outs FPR64:$rd),
+                                  (ins m.vrclass:$rs2, ixlenimm:$sew),
+                                  []>,
+                           EPIPseudo;
+    let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
+        MergeOpIndex = -1, BaseInstr = VFMV_S_F in
+      def PseudoEPIVFMV_S_F_ # m.MX : Pseudo<(outs m.vrclass:$rd),
+                                  (ins m.vrclass:$merge, FPR64:$rs2, GPR:$vl,
+                                       ixlenimm:$sew),
+                                  []>,
+                           EPIPseudo;
+  }
 }
 
 defm PseudoEPIVMFEQ       : pseudo_binary_m_vv_vf;
@@ -1540,52 +1546,11 @@ multiclass epi_pat_load_store<LLVMType type,
              VLMax, eew)>;
 }
 
-// Extra patterns for truncating loads and extending stores of mask types
-multiclass pat_load_store_mask<LLVMType type,
-                               int eew,
-                               LMULInfo MInfo,
-                               VReg reg_class>
-{
-  // Load
-  defvar load_instr_name = "PseudoEPIVLE" # eew #"_V";
-  def : Pat<(type (load GPR:$rs1)),
-            (!cast<Instruction>(load_instr_name # "_" # MInfo.MX)
-             (type (IMPLICIT_DEF)),
-             GPR:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-  def : Pat<(type (load AddrFI:$rs1)),
-            (!cast<Instruction>(load_instr_name # "_" # MInfo.MX)
-             (type (IMPLICIT_DEF)),
-             AddrFI:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-
-  // Store
-  defvar store_instr_name = "PseudoEPIVSE" # eew # "_V";
-  def : Pat<(store type:$rs2, GPR:$rs1),
-            (!cast<Instruction>(store_instr_name # "_" # MInfo.MX)
-             reg_class:$rs2, GPR:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-  def : Pat<(store type:$rs2, AddrFI:$rs1),
-            (!cast<Instruction>(store_instr_name # "_" # MInfo.MX)
-             reg_class:$rs2, AddrFI:$rs1,
-             (type zero_reg),
-             VLMax, eew)>;
-}
-
 let Predicates = [HasStdExtV] in {
   foreach vti = EPIAllVectors in
   {
     defm : epi_pat_load_store<vti.Vector, vti.Mask, vti.SEW, vti.MInfo,
                               vti.MInfo.vrclass>;
-  }
-
-  foreach mti = EPIAllMasks in
-  {
-    // Mask values are stored as vectors of bytes
-    defm : pat_load_store_mask<mti.Mask, /* eew */ 8, V_M1, VR>;
   }
 
   foreach vti = EPIAllIntegerVectors in {
@@ -1645,6 +1610,23 @@ def : Pat<(vscale (i64 GPR:$imm)),
           (MUL (PseudoEPIVSCALE), $imm)>;
 
 }
+
+// X0 has special meaning for vsetvl/vsetvli.
+//  rd | rs1 |   AVL value | Effect on vl
+//--------------------------------------------------------------
+// !X0 |  X0 |       VLMAX | Set vl to VLMAX
+//  X0 |  X0 | Value in vl | Keep current vl, just change vtype.
+def NoX0 : SDNodeXForm<undef,
+[{
+  auto *C = dyn_cast<ConstantSDNode>(N);
+  if (C && C->isNullValue()) {
+    SDLoc DL(N);
+    return SDValue(CurDAG->getMachineNode(RISCV::ADDI, DL, Subtarget->getXLenVT(),
+                   CurDAG->getRegister(RISCV::X0, Subtarget->getXLenVT()),
+                   CurDAG->getTargetConstant(0, DL, Subtarget->getXLenVT())), 0);
+  }
+  return SDValue(N, 0);
+}]>;
 
 //===----------------------------------------------------------------------===//
 // Patterns. Arithmetic
@@ -2752,16 +2734,20 @@ defm "" : pat_intrinsic_binary_int_v_vs<"int_epi_vredmax", "PseudoEPIVREDMAX">;
 // i32) whenever the operand type is nxv8i8, nxv4i16 or nxv2i32. In such cases,
 // the intrinsic is legalized programatically using the RISCVISD::VMV_X_S custom
 // node, which is then selected using a pattern as usual.
-foreach vti = [Vtype1xi64] in
+foreach vti = [Vtype1xi64, Vtype2xi64, Vtype4xi64, Vtype8xi64] in
   def : Pat<(int_epi_vmv_x_s (vti.Vector vti.MInfo.vrclass:$rs2)),
-            (PseudoEPIVMV_X_S $rs2, vti.SEW)>;
-foreach vti = [Vtype2xi32, Vtype4xi16, Vtype8xi8] in
+            (!cast<Instruction>("PseudoEPIVMV_X_S_" # vti.MInfo.MX) $rs2, vti.SEW)>;
+foreach vti = [Vtype2xi32, Vtype4xi16, Vtype8xi8,
+               Vtype4xi32,  Vtype8xi16,  Vtype16xi8,
+               Vtype8xi32,  Vtype16xi16, Vtype32xi8,
+               Vtype16xi32, Vtype32xi16, Vtype64xi8] in
   def : Pat<(riscv_vmv_x_s (vti.Vector vti.MInfo.vrclass:$rs2)),
-            (PseudoEPIVMV_X_S $rs2, vti.SEW)>;
+            (!cast<Instruction>("PseudoEPIVMV_X_S_" # vti.MInfo.MX) $rs2, vti.SEW)>;
 
-foreach vti = EPINoGroupIntegerVectors in
-  def : Pat<(vti.Vector (int_epi_vmv_s_x (vti.Vector VR:$merge), GPR:$rs1, GPR:$vl)),
-            (PseudoEPIVMV_S_X $merge, $rs1, (NoX0 GPR:$vl), vti.SEW)>;
+foreach vti = EPIAllIntegerVectors in {
+  def : Pat<(vti.Vector (int_epi_vmv_s_x (vti.Vector vti.MInfo.vrclass:$merge), GPR:$rs1, GPR:$vl)),
+            (!cast<Instruction>("PseudoEPIVMV_S_X_" # vti.MInfo.MX) $merge, $rs1, (NoX0 GPR:$vl), vti.SEW)>;
+}
 
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1up", "PseudoEPIVSLIDE1UP">;
 defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1down", "PseudoEPIVSLIDE1DOWN">;
@@ -2855,15 +2841,16 @@ defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnj", "PseudoEPIVFSGNJ">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnjn", "PseudoEPIVFSGNJN">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsgnjx", "PseudoEPIVFSGNJX">;
 
-foreach fvti = EPINoGroupFloatVectors in
+foreach fvti = EPIAllFloatVectors in
 {
   def : Pat<(fvti.Scalar (int_epi_vfmv_f_s (fvti.Vector fvti.MInfo.vrclass:$rs2))),
-             FromFPR64<fvti.ScalarRegClass, (PseudoEPIVFMV_F_S $rs2, fvti.SEW)>.ret>;
+             FromFPR64<fvti.ScalarRegClass,
+             (!cast<Instruction>("PseudoEPIVFMV_F_S_" # fvti.MInfo.MX) $rs2, fvti.SEW)>.ret>;
 
-  def : Pat<(fvti.Vector (int_epi_vfmv_s_f (fvti.Vector VR:$merge),
+  def : Pat<(fvti.Vector (int_epi_vfmv_s_f (fvti.Vector fvti.MInfo.vrclass:$merge),
                           (fvti.Scalar fvti.ScalarRegClass:$rs2), GPR:$vl)),
-            (PseudoEPIVFMV_S_F
-             $merge,
+            (!cast<Instruction>("PseudoEPIVFMV_S_F_" # fvti.MInfo.MX)
+             fvti.MInfo.vrclass:$merge,
              ToFPR64<fvti.ScalarRegClass,
                      (fvti.Scalar fvti.ScalarRegClass:$rs2)>.ret,
              (NoX0 GPR:$vl), fvti.SEW)>;
@@ -3273,15 +3260,15 @@ multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
 multiclass pat_vop_binary_reduction_int<SDNode vop,
                                         string instruction_name>
 {
-  foreach vti = EPINoGroupIntegerVectors in {
+  foreach vti = EPIAllIntegerVectors in {
     defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_M1");
+      !cast<Instruction>(instruction_name#"_VS_" # vti.MInfo.MX);
     def : Pat<(vop (vti.Vector vti.MInfo.vrclass:$rs2)),
-              (PseudoEPIVMV_X_S
+              (!cast<Instruction>("PseudoEPIVMV_X_S_" # vti.MInfo.MX)
                (vti.Vector (instruction
                 (vti.Vector (IMPLICIT_DEF)),
                 (vti.Vector vti.MInfo.vrclass:$rs2),
-                (PseudoEPIVMV_S_X
+                (!cast<Instruction>("PseudoEPIVMV_S_X_" # vti.MInfo.MX)
                  (vti.Vector (IMPLICIT_DEF)),
                  X0,
                  VLMax, vti.SEW),
@@ -3289,43 +3276,22 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
                 VLMax, vti.SEW)),
                vti.SEW)>;
   }
-  foreach gvti = EPIGroupIntegerVectors in {
-    defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_" # gvti.MInfo.MX);
-    def : Pat<(vop (gvti.Vector gvti.MInfo.vrclass:$rs2)),
-              (PseudoEPIVMV_X_S
-               (EXTRACT_SUBREG
-                (gvti.Vector (instruction
-                 (gvti.Vector (IMPLICIT_DEF)),
-                 (gvti.Vector gvti.MInfo.vrclass:$rs2),
-                 (INSERT_SUBREG
-                  (IMPLICIT_DEF),
-                  (PseudoEPIVMV_S_X
-                   (gvti.VectorM1 (IMPLICIT_DEF)),
-                   X0,
-                   VLMax, gvti.SEW),
-                  sub_vrm1_0),
-                 (gvti.Mask zero_reg),
-                 VLMax, gvti.SEW)),
-                sub_vrm1_0),
-               gvti.SEW)>;
-  }
 }
 
 // FIXME: Add patterns that can select masked versions
 multiclass pat_vop_binary_reduction_fp<SDNode vop,
                                        string instruction_name>
 {
-  foreach fvti = EPINoGroupFloatVectors in {
+  foreach fvti = EPIAllFloatVectors in {
     defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_M1");
+      !cast<Instruction>(instruction_name#"_VS_" # fvti.MInfo.MX);
     def : Pat<(vop (fvti.Vector fvti.MInfo.vrclass:$rs2)),
               FromFPR64<fvti.ScalarRegClass,
-               (PseudoEPIVFMV_F_S
+               (!cast<Instruction>("PseudoEPIVFMV_F_S_" # fvti.MInfo.MX)
                 (fvti.Vector (instruction
                  (fvti.Vector (IMPLICIT_DEF)),
                  (fvti.Vector fvti.MInfo.vrclass:$rs2),
-                 (PseudoEPIVFMV_S_F
+                 (!cast<Instruction>("PseudoEPIVFMV_S_F_" # fvti.MInfo.MX)
                   (fvti.Vector (IMPLICIT_DEF)),
                   ToFPR64<fvti.ScalarRegClass, FPZero<fvti.ScalarRegClass>.ret>.ret,
                   VLMax, fvti.SEW),
@@ -3333,45 +3299,23 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
                  VLMax, fvti.SEW)),
                 fvti.SEW)>.ret>;
   }
-  foreach gfvti = EPIGroupFloatVectors in {
-    defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_" # gfvti.MInfo.MX);
-    def : Pat<(vop (gfvti.Vector gfvti.MInfo.vrclass:$rs2)),
-              FromFPR64<gfvti.ScalarRegClass,
-               (PseudoEPIVFMV_F_S
-                (EXTRACT_SUBREG
-                 (gfvti.Vector (instruction
-                  (gfvti.Vector (IMPLICIT_DEF)),
-                  (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                  (INSERT_SUBREG
-                   (IMPLICIT_DEF),
-                   (PseudoEPIVFMV_S_F
-                    (gfvti.VectorM1 (IMPLICIT_DEF)),
-                    ToFPR64<gfvti.ScalarRegClass, FPZero<gfvti.ScalarRegClass>.ret>.ret,
-                    VLMax, gfvti.SEW),
-                   sub_vrm1_0),
-                  (gfvti.Mask zero_reg),
-                  VLMax, gfvti.SEW)),
-                 sub_vrm1_0),
-                gfvti.SEW)>.ret>;
-  }
 }
 
 // FIXME: Add patterns that can select masked versions
 multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                                           string instruction_name>
 {
-  foreach fvti = EPINoGroupFloatVectors in {
+  foreach fvti = EPIAllFloatVectors in {
     defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_M1");
+      !cast<Instruction>(instruction_name#"_VS_" # fvti.MInfo.MX);
     def : Pat<(vop (fvti.Scalar fvti.ScalarRegClass:$init),
                    (fvti.Vector fvti.MInfo.vrclass:$rs2)),
               FromFPR64<fvti.ScalarRegClass,
-               (PseudoEPIVFMV_F_S
+               (!cast<Instruction>("PseudoEPIVFMV_F_S_" # fvti.MInfo.MX)
                 (fvti.Vector (instruction
                  (fvti.Vector (IMPLICIT_DEF)),
                  (fvti.Vector fvti.MInfo.vrclass:$rs2),
-                 (PseudoEPIVFMV_S_F
+                 (!cast<Instruction>("PseudoEPIVFMV_S_F_" # fvti.MInfo.MX)
                   (fvti.Vector (IMPLICIT_DEF)),
                   ToFPR64<fvti.ScalarRegClass,
                           (fvti.Scalar fvti.ScalarRegClass:$init)>.ret,
@@ -3379,30 +3323,6 @@ multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
                  (fvti.Mask zero_reg),
                  VLMax, fvti.SEW)),
                 fvti.SEW)>.ret>;
-  }
-  foreach gfvti = EPIGroupFloatVectors in {
-    defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_" # gfvti.MInfo.MX);
-    def : Pat<(vop (gfvti.Scalar gfvti.ScalarRegClass:$init),
-                   (gfvti.Vector gfvti.MInfo.vrclass:$rs2)),
-              FromFPR64<gfvti.ScalarRegClass,
-               (PseudoEPIVFMV_F_S
-                (EXTRACT_SUBREG
-                 (gfvti.Vector (instruction
-                  (gfvti.Vector (IMPLICIT_DEF)),
-                  (gfvti.Vector gfvti.MInfo.vrclass:$rs2),
-                  (INSERT_SUBREG
-                   (IMPLICIT_DEF),
-                   (PseudoEPIVFMV_S_F
-                    (gfvti.VectorM1 (IMPLICIT_DEF)),
-                    ToFPR64<gfvti.ScalarRegClass,
-                            (gfvti.Scalar gfvti.ScalarRegClass:$init)>.ret,
-                    VLMax, gfvti.SEW),
-                   sub_vrm1_0),
-                  (gfvti.Mask zero_reg),
-                  VLMax, gfvti.SEW)),
-                 sub_vrm1_0),
-                gfvti.SEW)>.ret>;
   }
 }
 
@@ -3529,8 +3449,6 @@ defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_seq_fadd, "PseudoEPIVFREDOSUM
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoEPIVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoEPIVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoEPIVFREDMIN">;
-
-defm "" : pat_vop_ternary_fp_v_vv_vf<fma, "PseudoEPIVFMADD">;
 
 defm "" : pat_vop_unary_fp_v_v<fsqrt, "PseudoEPIVFSQRT">;
 

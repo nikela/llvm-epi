@@ -2519,6 +2519,120 @@ template<> bool timesTwo<bool>(bool){
     EXPECT_TRUE(matches(Code, traverse(TK_AsIs, M)));
     EXPECT_TRUE(matches(Code, traverse(TK_IgnoreUnlessSpelledInSource, M)));
   }
+
+  Code = R"cpp(
+struct B {
+  B(int);
+};
+
+B func1() { return 42; }
+  )cpp";
+  {
+    auto M = expr(ignoringImplicit(integerLiteral(equals(42)).bind("intLit")));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M = expr(unless(integerLiteral(equals(24)))).bind("intLit");
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 7)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M =
+        expr(anyOf(integerLiteral(equals(42)).bind("intLit"), unless(expr())));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M = expr(allOf(integerLiteral(equals(42)).bind("intLit"), expr()));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M = expr(integerLiteral(equals(42)).bind("intLit"), expr());
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M = expr(optionally(integerLiteral(equals(42)).bind("intLit")));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("intLit", 1)));
+  }
+  {
+    auto M = expr().bind("allExprs");
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_AsIs, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("allExprs", 7)));
+    EXPECT_TRUE(matchAndVerifyResultTrue(
+        Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+        std::make_unique<VerifyIdIsBoundTo<Expr>>("allExprs", 1)));
+  }
+
+  Code = R"cpp(
+void foo()
+{
+    int arr[3];
+    auto &[f, s, t] = arr;
+
+    f = 42;
+}
+  )cpp";
+  {
+    auto M = bindingDecl(hasName("f"));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++17"}));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++17"}));
+  }
+  {
+    auto M = bindingDecl(hasName("f"), has(expr()));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++17"}));
+    EXPECT_FALSE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++17"}));
+  }
+  {
+    auto M = integerLiteral(hasAncestor(bindingDecl(hasName("f"))));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++17"}));
+    EXPECT_FALSE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++17"}));
+  }
+  {
+    auto M = declRefExpr(hasAncestor(bindingDecl(hasName("f"))));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++17"}));
+    EXPECT_FALSE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++17"}));
+  }
 }
 
 TEST(Traversal, traverseNoImplicit) {
@@ -2821,6 +2935,36 @@ struct CtorInitsNonTrivial : NonTrivial
   }
 
   Code = R"cpp(
+  struct Range {
+    int* begin() const;
+    int* end() const;
+  };
+  Range getRange(int);
+
+  void rangeFor()
+  {
+    for (auto i : getRange(42))
+    {
+    }
+  }
+  )cpp";
+  {
+    auto M = integerLiteral(equals(42));
+    EXPECT_TRUE(matches(Code, traverse(TK_AsIs, M)));
+    EXPECT_TRUE(matches(Code, traverse(TK_IgnoreUnlessSpelledInSource, M)));
+  }
+  {
+    auto M = callExpr(hasDescendant(integerLiteral(equals(42))));
+    EXPECT_TRUE(matches(Code, traverse(TK_AsIs, M)));
+    EXPECT_TRUE(matches(Code, traverse(TK_IgnoreUnlessSpelledInSource, M)));
+  }
+  {
+    auto M = compoundStmt(hasDescendant(integerLiteral(equals(42))));
+    EXPECT_TRUE(matches(Code, traverse(TK_AsIs, M)));
+    EXPECT_TRUE(matches(Code, traverse(TK_IgnoreUnlessSpelledInSource, M)));
+  }
+
+  Code = R"cpp(
   void rangeFor()
   {
     int arr[2];
@@ -2891,6 +3035,40 @@ struct CtorInitsNonTrivial : NonTrivial
         matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
                              true, {"-std=c++20"}));
   }
+
+  Code = R"cpp(
+  struct Range {
+    int* begin() const;
+    int* end() const;
+  };
+  Range getRange(int);
+
+  int getNum(int);
+
+  void rangeFor()
+  {
+    for (auto j = getNum(42); auto i : getRange(j))
+    {
+    }
+  }
+  )cpp";
+  {
+    auto M = integerLiteral(equals(42));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++20"}));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++20"}));
+  }
+  {
+    auto M = compoundStmt(hasDescendant(integerLiteral(equals(42))));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_AsIs, M), true, {"-std=c++20"}));
+    EXPECT_TRUE(
+        matchesConditionally(Code, traverse(TK_IgnoreUnlessSpelledInSource, M),
+                             true, {"-std=c++20"}));
+  }
+
   Code = R"cpp(
 void hasDefaultArg(int i, int j = 0)
 {
@@ -3156,6 +3334,12 @@ void func14() {
   float i = 42.0;
 }
 
+void func15() {
+  int count = 0;
+  auto l = [&] { ++count; };
+  (void)l;
+}
+
 )cpp";
 
   EXPECT_TRUE(
@@ -3338,6 +3522,15 @@ void func14() {
       Code,
       traverse(TK_IgnoreUnlessSpelledInSource,
                functionDecl(hasName("func14"), hasDescendant(floatLiteral()))),
+      langCxx20OrLater()));
+
+  EXPECT_TRUE(matches(
+      Code,
+      traverse(TK_IgnoreUnlessSpelledInSource,
+               compoundStmt(
+                   hasDescendant(varDecl(hasName("count")).bind("countVar")),
+                   hasDescendant(
+                       declRefExpr(to(varDecl(equalsBoundNode("countVar"))))))),
       langCxx20OrLater()));
 
   Code = R"cpp(

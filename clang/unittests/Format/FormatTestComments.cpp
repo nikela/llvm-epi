@@ -3360,7 +3360,12 @@ TEST_F(FormatTestComments, SpaceAtLineCommentBegin) {
       "//  @but this\n"
       "\n"
       "//Comment to move to the right\n"
-      "//@ this stays\n";
+      "//@ this stays\n"
+      "\n"
+      "//} will not move\n"
+      "\n"
+      "//vv will only move\n"
+      "//} if the line above does\n";
 
   EXPECT_EQ("// Free comment without space\n"
             "\n"
@@ -3414,7 +3419,12 @@ TEST_F(FormatTestComments, SpaceAtLineCommentBegin) {
             "//  @but this\n"
             "\n"
             "// Comment to move to the right\n"
-            "//@ this stays\n",
+            "//@ this stays\n"
+            "\n"
+            "//} will not move\n"
+            "\n"
+            "// vv will only move\n"
+            "// } if the line above does\n",
             format(Code, Style));
 
   Style.SpacesInLineCommentPrefix = {0, 0};
@@ -3470,7 +3480,12 @@ TEST_F(FormatTestComments, SpaceAtLineCommentBegin) {
             "//@but this\n"
             "\n"
             "//Comment to move to the right\n"
-            "//@ this stays\n",
+            "//@ this stays\n"
+            "\n"
+            "//} will not move\n"
+            "\n"
+            "//vv will only move\n"
+            "//} if the line above does\n",
             format(Code, Style));
 
   Style.SpacesInLineCommentPrefix = {2, -1u};
@@ -3526,7 +3541,12 @@ TEST_F(FormatTestComments, SpaceAtLineCommentBegin) {
             "//  @but this\n"
             "\n"
             "//  Comment to move to the right\n"
-            "//@ this stays\n",
+            "//@ this stays\n"
+            "\n"
+            "//} will not move\n"
+            "\n"
+            "//  vv will only move\n"
+            "//  } if the line above does\n",
             format(Code, Style));
 
   Style = getLLVMStyleWithColumns(20);

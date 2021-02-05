@@ -155,7 +155,7 @@ define <vscale x 2 x float> @binary_nxv1f32_imm(<vscale x 2 x float> %a) nounwin
 define <vscale x 1 x double> @ternary_nxv1f64(<vscale x 1 x double> %a, double %b, <vscale x 1 x double> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %b, i32 0
@@ -167,7 +167,7 @@ define <vscale x 1 x double> @ternary_nxv1f64(<vscale x 1 x double> %a, double %
 define <vscale x 1 x double> @ternary_nxv1f64_rev(double %a, <vscale x 1 x double> %b, <vscale x 1 x double> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv1f64_rev:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %a, i32 0
@@ -179,8 +179,7 @@ define <vscale x 1 x double> @ternary_nxv1f64_rev(double %a, <vscale x 1 x doubl
 define <vscale x 2 x float> @ternary_nxv2f32(<vscale x 2 x float> %a, float %b, <vscale x 2 x float> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,tu,mu
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float> undef, float %b, i32 0

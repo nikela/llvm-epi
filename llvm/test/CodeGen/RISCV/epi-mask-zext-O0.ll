@@ -14,11 +14,10 @@ define <vscale x 8 x i1> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone
 ; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vse8.v v0, (a0)
-; CHECK-NEXT:    # implicit-def: $v0
+; CHECK-NEXT:    vse1.v v0, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vle8.v v0, (a0)
+; CHECK-NEXT:    vle1.v v0, (a0)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
@@ -43,7 +42,7 @@ define <vscale x 8 x i1> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vse8.v v0, (a0)
+; CHECK-NEXT:    vse1.v v0, (a0)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload

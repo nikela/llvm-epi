@@ -815,7 +815,8 @@ BreakableLineCommentSection::BreakableLineCommentSection(
         const auto FirstNonSpace = Lines[i][IndentPrefix.size()];
         const auto AllowsSpaceChange =
             SpacesInPrefix != 0 ||
-            (isAlphanumeric(FirstNonSpace) || FirstNonSpace == '}');
+            (isAlphanumeric(FirstNonSpace) ||
+             (FirstNonSpace == '}' && FirstLineSpaceChange != 0));
 
         if (PrefixSpaceChange[i] > 0 && AllowsSpaceChange) {
           Prefix[i] = IndentPrefix.str();
@@ -998,7 +999,7 @@ void BreakableLineCommentSection::adaptStartOfLine(
     const auto SpacesToAdd = std::max(PrefixSpaceChange[LineIndex], 0);
     Whitespaces.replaceWhitespaceInToken(
         tokenAt(LineIndex), OriginalPrefix[LineIndex].size() - SpacesToRemove,
-        /*ReplaceChars=*/SpacesToRemove, "", "", -/*InPPDirective=*/false,
+        /*ReplaceChars=*/SpacesToRemove, "", "", /*InPPDirective=*/false,
         /*Newlines=*/0, /*Spaces=*/SpacesToAdd);
   }
 }

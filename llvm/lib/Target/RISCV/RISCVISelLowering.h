@@ -53,6 +53,10 @@ enum NodeType : unsigned {
   // instructions.
   ROLW,
   RORW,
+  // RV64IB/RV32IB funnel shifts, with the semantics of the named RISC-V
+  // instructions, but the same operand order as fshl/fshr intrinsics.
+  FSR,
+  FSL,
   // RV64IB funnel shifts, with the semantics of the named RISC-V instructions,
   // but the same operand order as fshl/fshr intrinsics.
   FSRW,
@@ -381,6 +385,8 @@ private:
                                  int Opcode) const;
   SDValue lowerSIGN_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerZERO_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerMLOAD(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerMSTORE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
