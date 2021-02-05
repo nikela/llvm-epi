@@ -6874,7 +6874,7 @@ Register RISCVTargetLowering::getExceptionSelectorRegister(
 }
 
 bool RISCVTargetLowering::allowsMisalignedMemoryAccesses(
-    EVT E, unsigned AddrSpace, unsigned Align, MachineMemOperand::Flags Flags,
+    EVT E, unsigned AddrSpace, Align Alignment, MachineMemOperand::Flags Flags,
     bool *Fast) const {
   if (!E.isScalableVector())
     return false;
@@ -6885,7 +6885,7 @@ bool RISCVTargetLowering::allowsMisalignedMemoryAccesses(
     *Fast = true;
 
   EVT ElementType = E.getVectorElementType();
-  return Align >= ElementType.getStoreSize();
+  return Alignment >= ElementType.getStoreSize();
 }
 
 bool RISCVTargetLowering::shouldExtendTypeInLibCall(EVT Type) const {

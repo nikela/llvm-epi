@@ -281,8 +281,8 @@ public:
   Register
   getExceptionSelectorRegister(const Constant *PersonalityFn) const override;
 
-
-  bool allowsMisalignedMemoryAccesses(EVT E, unsigned AddrSpace, unsigned Align,
+  bool allowsMisalignedMemoryAccesses(EVT E, unsigned AddrSpace,
+                                      Align Alignment,
                                       MachineMemOperand::Flags Flags,
                                       bool *Fast) const override;
 
