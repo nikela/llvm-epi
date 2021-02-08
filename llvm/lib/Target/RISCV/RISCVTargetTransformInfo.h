@@ -140,13 +140,13 @@ public:
                         Instruction *Inst = nullptr);
   int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
                           Type *Ty, TTI::TargetCostKind CostKind);
+
   unsigned getNumberOfRegisters(unsigned ClassID) const;
   unsigned getMaxElementWidth() const;
   bool useScalableVectorType() const;
   bool preferPredicatedVectorOps() const;
   bool useReductionIntrinsic(unsigned Opcode, Type *Ty,
                              TTI::ReductionFlags Flags) const;
-  bool shouldExpandReduction(const IntrinsicInst *II) const { return false; }
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
@@ -187,6 +187,8 @@ public:
                                   const Value *Ptr, bool VariableMask,
                                   Align Alignment, TTI::TargetCostKind CostKind,
                                   const Instruction *I = nullptr);
+
+  bool shouldExpandReduction(const IntrinsicInst *II) const;
 };
 
 } // end namespace llvm

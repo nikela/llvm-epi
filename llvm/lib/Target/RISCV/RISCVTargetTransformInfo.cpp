@@ -432,3 +432,18 @@ unsigned RISCVTTIImpl::getGatherScatterOpCost(
                                        Alignment, CostKind, I);
 }
 
+bool RISCVTTIImpl::shouldExpandReduction(const IntrinsicInst *II) const {
+  // Currently, the ExpandReductions pass can't expand scalable-vector
+  // reductions, but we still request expansion as RVV doesn't support certain
+  // reductions and the SelectionDAG can't legalize them either.
+  switch (II->getIntrinsicID()) {
+  default:
+    return false;
+  case Intrinsic::vector_reduce_mul:
+  case Intrinsic::vector_reduce_fadd:
+  case Intrinsic::vector_reduce_fmul:
+  case Intrinsic::vector_reduce_fmax:
+  case Intrinsic::vector_reduce_fmin:
+    return true;
+  }
+}

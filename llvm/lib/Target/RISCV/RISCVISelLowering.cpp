@@ -378,6 +378,15 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SPLAT_VECTOR, MVT::i64, Custom);
       setOperationAction(ISD::INSERT_VECTOR_ELT, MVT::i64, Custom);
       setOperationAction(ISD::EXTRACT_VECTOR_ELT, MVT::i64, Custom);
+
+      setOperationAction(ISD::VECREDUCE_ADD, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_AND, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_OR, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_XOR, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_SMAX, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_SMIN, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_UMAX, MVT::i64, Custom);
+      setOperationAction(ISD::VECREDUCE_UMIN, MVT::i64, Custom);
     }
 
     for (MVT VT : BoolVecVTs) {
@@ -420,6 +429,17 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       // Custom-lower insert/extract operations to simplify patterns.
       setOperationAction(ISD::INSERT_VECTOR_ELT, VT, Custom);
       setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
+
+      // Custom-lower reduction operations to set up the corresponding custom
+      // nodes' operands.
+      setOperationAction(ISD::VECREDUCE_ADD, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_AND, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_OR, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_XOR, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_SMAX, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_SMIN, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_UMAX, VT, Custom);
+      setOperationAction(ISD::VECREDUCE_UMIN, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -534,21 +554,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::FEXP, VT, Custom);
-    }
-
-    // Vector integer reductions.
-    for (auto VT : {MVT::nxv8i8, MVT::nxv16i8, MVT::nxv32i8, MVT::nxv64i8,
-                    MVT::nxv4i16, MVT::nxv8i16, MVT::nxv16i16, MVT::nxv32i16,
-                    MVT::nxv2i32, MVT::nxv4i32, MVT::nxv8i32, MVT::nxv16i32,
-                    MVT::nxv1i64, MVT::nxv2i64, MVT::nxv4i64, MVT::nxv8i64}) {
-      setOperationAction(ISD::VECREDUCE_ADD, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_AND, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_OR, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_XOR, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_SMAX, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_SMIN, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_UMAX, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_UMIN, VT, Legal);
     }
 
     // Vector fp reductions.
@@ -1296,6 +1301,15 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
 
     return Op;
   }
+  case ISD::VECREDUCE_ADD:
+  case ISD::VECREDUCE_UMAX:
+  case ISD::VECREDUCE_SMAX:
+  case ISD::VECREDUCE_UMIN:
+  case ISD::VECREDUCE_SMIN:
+  case ISD::VECREDUCE_AND:
+  case ISD::VECREDUCE_OR:
+  case ISD::VECREDUCE_XOR:
+    return lowerVECREDUCE(Op, DAG);
   }
 }
 
@@ -3048,23 +3062,32 @@ SDValue RISCVTargetLowering::lowerINSERT_VECTOR_ELT(SDValue Op,
 }
 
 // Custom-lower EXTRACT_VECTOR_ELT operations to slide the vector down, then
-// extract the first element: (extractelt (slidedown vec, idx), 0). This is
-// done to maintain partity with the legalization of RV32 vXi64 legalization.
+// extract the first element: (extractelt (slidedown vec, idx), 0). For integer
+// types this is done using VMV_X_S to allow us to glean information about the
+// sign bits of the result.
 SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
                                                      SelectionDAG &DAG) const {
   SDLoc DL(Op);
   SDValue Idx = Op.getOperand(1);
-  if (isNullConstant(Idx))
-    return Op;
-
   SDValue Vec = Op.getOperand(0);
   EVT EltVT = Op.getValueType();
   EVT VecVT = Vec.getValueType();
-  SDValue Slidedown = DAG.getNode(RISCVISD::VSLIDEDOWN, DL, VecVT,
-                                  DAG.getUNDEF(VecVT), Vec, Idx);
+  MVT XLenVT = Subtarget.getXLenVT();
 
-  return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, EltVT, Slidedown,
-                     DAG.getConstant(0, DL, Subtarget.getXLenVT()));
+  // If the index is 0, the vector is already in the right position.
+  if (!isNullConstant(Idx)) {
+    Vec = DAG.getNode(RISCVISD::VSLIDEDOWN, DL, VecVT, DAG.getUNDEF(VecVT), Vec,
+                      Idx);
+  }
+
+  if (!EltVT.isInteger()) {
+    // Floating-point extracts are handled in TableGen.
+    return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, EltVT, Vec,
+                       DAG.getConstant(0, DL, XLenVT));
+  }
+
+  SDValue Elt0 = DAG.getNode(RISCVISD::VMV_X_S, DL, XLenVT, Vec);
+  return DAG.getNode(ISD::TRUNCATE, DL, EltVT, Elt0);
 }
 
 SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
@@ -3476,6 +3499,60 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
   return SDValue();
 }
 
+static std::pair<unsigned, uint64_t>
+getRVVReductionOpAndIdentityVal(unsigned ISDOpcode, unsigned EltSizeBits) {
+  switch (ISDOpcode) {
+  default:
+    llvm_unreachable("Unhandled reduction");
+  case ISD::VECREDUCE_ADD:
+    return {RISCVISD::VECREDUCE_ADD, 0};
+  case ISD::VECREDUCE_UMAX:
+    return {RISCVISD::VECREDUCE_UMAX, 0};
+  case ISD::VECREDUCE_SMAX:
+    return {RISCVISD::VECREDUCE_SMAX, minIntN(EltSizeBits)};
+  case ISD::VECREDUCE_UMIN:
+    return {RISCVISD::VECREDUCE_UMIN, maxUIntN(EltSizeBits)};
+  case ISD::VECREDUCE_SMIN:
+    return {RISCVISD::VECREDUCE_SMIN, maxIntN(EltSizeBits)};
+  case ISD::VECREDUCE_AND:
+    return {RISCVISD::VECREDUCE_AND, -1};
+  case ISD::VECREDUCE_OR:
+    return {RISCVISD::VECREDUCE_OR, 0};
+  case ISD::VECREDUCE_XOR:
+    return {RISCVISD::VECREDUCE_XOR, 0};
+  }
+}
+
+// Take a (supported) standard ISD reduction opcode and transform it to a RISCV
+// reduction opcode. Note that this returns a vector type, which must be
+// further processed to access the scalar result in element 0.
+SDValue RISCVTargetLowering::lowerVECREDUCE(SDValue Op,
+                                            SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  assert(Op.getValueType().isSimple() &&
+         Op.getOperand(0).getValueType().isSimple() &&
+         "Unexpected vector-reduce lowering");
+  MVT VecEltVT = Op.getOperand(0).getSimpleValueType().getVectorElementType();
+  unsigned RVVOpcode;
+  uint64_t IdentityVal;
+  std::tie(RVVOpcode, IdentityVal) =
+      getRVVReductionOpAndIdentityVal(Op.getOpcode(), VecEltVT.getSizeInBits());
+  // We have to perform a bit of a dance to get from our vector type to the
+  // correct LMUL=1 vector type. We divide our minimum VLEN (64) by the vector
+  // element type to find the type which fills a single register. Be careful to
+  // use the operand's vector element type rather than the reduction's value
+  // type, as that has likely been extended to XLEN.
+  unsigned NumElts = 64 / VecEltVT.getSizeInBits();
+  MVT M1VT = MVT::getScalableVectorVT(VecEltVT, NumElts);
+  SDValue IdentitySplat =
+      DAG.getSplatVector(M1VT, DL, DAG.getConstant(IdentityVal, DL, VecEltVT));
+  SDValue Reduction =
+      DAG.getNode(RVVOpcode, DL, M1VT, Op.getOperand(0), IdentitySplat);
+  SDValue Elt0 = DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, VecEltVT, Reduction,
+                             DAG.getConstant(0, DL, Subtarget.getXLenVT()));
+  return DAG.getSExtOrTrunc(Elt0, DL, Op.getValueType());
+}
+
 // Returns the opcode of the target-specific SDNode that implements the 32-bit
 // form of the given Opcode.
 static RISCVISD::NodeType getRISCVWOpcode(unsigned Opcode) {
@@ -3863,6 +3940,19 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
     }
     break;
   }
+  case ISD::VECREDUCE_ADD:
+  case ISD::VECREDUCE_AND:
+  case ISD::VECREDUCE_OR:
+  case ISD::VECREDUCE_XOR:
+  case ISD::VECREDUCE_SMAX:
+  case ISD::VECREDUCE_UMAX:
+  case ISD::VECREDUCE_SMIN:
+  case ISD::VECREDUCE_UMIN:
+    // The custom-lowering for these nodes returns a vector whose first element
+    // is the result of the reduction. Extract its first element and let the
+    // legalization for EXTRACT_VECTOR_ELT do the rest of the job.
+    Results.push_back(lowerVECREDUCE(SDValue(N, 0), DAG));
+    break;
   }
 }
 
@@ -6477,6 +6567,14 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(VSLIDEDOWN)
   NODE_NAME_CASE(VID)
   NODE_NAME_CASE(VFNCVT_ROD)
+  NODE_NAME_CASE(VECREDUCE_ADD)
+  NODE_NAME_CASE(VECREDUCE_UMAX)
+  NODE_NAME_CASE(VECREDUCE_SMAX)
+  NODE_NAME_CASE(VECREDUCE_UMIN)
+  NODE_NAME_CASE(VECREDUCE_SMIN)
+  NODE_NAME_CASE(VECREDUCE_AND)
+  NODE_NAME_CASE(VECREDUCE_OR)
+  NODE_NAME_CASE(VECREDUCE_XOR)
   }
   // clang-format on
   return nullptr;

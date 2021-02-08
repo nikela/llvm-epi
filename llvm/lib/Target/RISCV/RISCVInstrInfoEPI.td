@@ -3436,21 +3436,10 @@ defm "" : pat_vop_binary_fp_v_vv_vf<fmul, "PseudoEPIVFMUL">;
 defm "" : pat_vop_binary_fp_v_vv_vf<fminnum, "PseudoEPIVFMIN">;
 defm "" : pat_vop_binary_fp_v_vv_vf<fmaxnum, "PseudoEPIVFMAX">;
 
-defm "" : pat_vop_binary_reduction_int<vecreduce_add, "PseudoEPIVREDSUM">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_and, "PseudoEPIVREDAND">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_or, "PseudoEPIVREDOR">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_xor, "PseudoEPIVREDXOR">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_smax, "PseudoEPIVREDMAX">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_smin, "PseudoEPIVREDMIN">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_umax, "PseudoEPIVREDMAXU">;
-defm "" : pat_vop_binary_reduction_int<vecreduce_umin, "PseudoEPIVREDMINU">;
-
 defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_seq_fadd, "PseudoEPIVFREDOSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoEPIVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoEPIVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoEPIVFREDMIN">;
-
-defm "" : pat_vop_unary_fp_v_v<fsqrt, "PseudoEPIVFSQRT">;
 
 foreach fvti = EPIAllFloatVectors in
 {
