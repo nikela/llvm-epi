@@ -85,12 +85,6 @@ def SDTVecReduceFP : SDTypeProfile<1, 1, [SDTCisFP<0>, SDTCisVec<1>,
 def vecreduce_fmax : SDNode<"ISD::VECREDUCE_FMAX", SDTVecReduceFP>;
 def vecreduce_fmin : SDNode<"ISD::VECREDUCE_FMIN", SDTVecReduceFP>;
 
-// Vector fp reduction with initial accumulator value (v2).
-def SDTVecReduceFPV2 : SDTypeProfile<1, 2, [SDTCisFP<0>, SDTCisFP<1>,
-                                            SDTCisVec<2>, SDTCisFP<2>]>;
-
-def vecreduce_seq_fadd : SDNode<"ISD::VECREDUCE_SEQ_FADD", SDTVecReduceFPV2>;
-
 //===----------------------------------------------------------------------===//
 // Additional definitions complementing those of RISCVInstrInfoVPseudos.td
 //===----------------------------------------------------------------------===//
@@ -3302,31 +3296,6 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_binary_reduction_v2_fp<SDNode vop,
-                                          string instruction_name>
-{
-  foreach fvti = EPIAllFloatVectors in {
-    defvar instruction =
-      !cast<Instruction>(instruction_name#"_VS_" # fvti.MInfo.MX);
-    def : Pat<(vop (fvti.Scalar fvti.ScalarRegClass:$init),
-                   (fvti.Vector fvti.MInfo.vrclass:$rs2)),
-              FromFPR64<fvti.ScalarRegClass,
-               (!cast<Instruction>("PseudoEPIVFMV_F_S_" # fvti.MInfo.MX)
-                (fvti.Vector (instruction
-                 (fvti.Vector (IMPLICIT_DEF)),
-                 (fvti.Vector fvti.MInfo.vrclass:$rs2),
-                 (!cast<Instruction>("PseudoEPIVFMV_S_F_" # fvti.MInfo.MX)
-                  (fvti.Vector (IMPLICIT_DEF)),
-                  ToFPR64<fvti.ScalarRegClass,
-                          (fvti.Scalar fvti.ScalarRegClass:$init)>.ret,
-                  VLMax, fvti.SEW),
-                 (fvti.Mask zero_reg),
-                 VLMax, fvti.SEW)),
-                fvti.SEW)>.ret>;
-  }
-}
-
-// FIXME: Add patterns that can select masked versions
 multiclass pat_vop_ternary_v<SDNode vop,
                              string instruction_name,
                              ValueType vector_type,
@@ -3436,8 +3405,6 @@ defm "" : pat_vop_binary_fp_v_vv_vf<fmul, "PseudoEPIVFMUL">;
 defm "" : pat_vop_binary_fp_v_vv_vf<fminnum, "PseudoEPIVFMIN">;
 defm "" : pat_vop_binary_fp_v_vv_vf<fmaxnum, "PseudoEPIVFMAX">;
 
-defm "" : pat_vop_binary_reduction_v2_fp<vecreduce_seq_fadd, "PseudoEPIVFREDOSUM">;
-defm "" : pat_vop_binary_reduction_fp<vecreduce_fadd, "PseudoEPIVFREDSUM">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmax, "PseudoEPIVFREDMAX">;
 defm "" : pat_vop_binary_reduction_fp<vecreduce_fmin, "PseudoEPIVFREDMIN">;
 
