@@ -2642,10 +2642,12 @@ static void GenerateLangArgs(const LangOptions &Opts,
     GenerateArg(Args, OPT_fdeclare_opencl_builtins, SA);
 }
 
-void CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
+bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
                                        InputKind IK, const llvm::Triple &T,
                                        std::vector<std::string> &Includes,
                                        DiagnosticsEngine &Diags) {
+  unsigned NumErrorsBefore = Diags.getNumErrors();
+
   // FIXME: Cleanup per-file based stuff.
   LangStandard::Kind LangStd = LangStandard::lang_unspecified;
   if (const Arg *A = Args.getLastArg(OPT_std_EQ)) {
@@ -2737,6 +2739,11 @@ void CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
     if (Name == "full" || Name == "branch") {
       Opts.CFProtectionBranch = 1;
     }
+  }
+
+
+  if (auto *A = Args.getLastArg(OPT_cuid_EQ)) {
+    Opts.CUID = std::string(A->getValue());
   }
 
   if (Opts.ObjC) {
@@ -3080,6 +3087,8 @@ void CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
 
   // -mepi.
   Opts.EPI = Args.hasArg(OPT_mepi);
+
+  return Success && Diags.getNumErrors() == NumErrorsBefore;
 }
 
 static bool isStrictlyPreprocessorAction(frontend::ActionKind Action) {
@@ -3420,8 +3429,8 @@ bool CompilerInvocation::CreateFromArgs(CompilerInvocation &Res,
   } else {
     // Other LangOpts are only initialized when the input is not AST or LLVM IR.
     // FIXME: Should we really be calling this for an Language::Asm input?
-    ParseLangArgs(LangOpts, Args, DashX, T, Res.getPreprocessorOpts().Includes,
-                  Diags);
+    Success &= ParseLangArgs(LangOpts, Args, DashX, T,
+                             Res.getPreprocessorOpts().Includes, Diags);
     if (Res.getFrontendOpts().ProgramAction == frontend::RewriteObjC)
       LangOpts.ObjCExceptions = 1;
     if (T.isOSDarwin() && DashX.isPreprocessed()) {

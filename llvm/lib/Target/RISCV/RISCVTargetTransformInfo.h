@@ -189,6 +189,8 @@ public:
                                   const Instruction *I = nullptr);
 
   bool shouldExpandReduction(const IntrinsicInst *II) const;
+  bool supportsScalableVectors() const { return ST->hasStdExtV(); }
+  Optional<unsigned> getMaxVScale() const;
 };
 
 } // end namespace llvm
