@@ -409,8 +409,10 @@ class VPBlockBase {
   /// List of successor blocks.
   SmallVector<VPBlockBase *, 1> Successors;
 
-  /// Successor selector, null for zero or single successor blocks.
-  VPValue *CondBit = nullptr;
+  /// Successor selector managed by a VPUser. For blocks with zero or one
+  /// successors, there is no operand. Otherwise there is exactly one operand
+  /// which is the branch condition.
+  VPUser CondBitUser;
 
   /// Current block predicate - null if the block does not need a predicate.
   VPValue *Predicate = nullptr;
@@ -559,11 +561,29 @@ public:
   }
 
   /// \return the condition bit selecting the successor.
-  VPValue *getCondBit() { return CondBit; }
+  VPValue *getCondBit() {
+    if (CondBitUser.getNumOperands())
+      return CondBitUser.getOperand(0);
+    return nullptr;
+  }
 
-  const VPValue *getCondBit() const { return CondBit; }
+  const VPValue *getCondBit() const {
+    if (CondBitUser.getNumOperands())
+      return CondBitUser.getOperand(0);
+    return nullptr;
+  }
 
-  void setCondBit(VPValue *CV) { CondBit = CV; }
+  void setCondBit(VPValue *CV) {
+    if (!CV) {
+      if (CondBitUser.getNumOperands() == 1)
+        CondBitUser.removeLastOperand();
+      return;
+    }
+    if (CondBitUser.getNumOperands() == 1)
+      CondBitUser.setOperand(0, CV);
+    else
+      CondBitUser.addOperand(CV);
+  }
 
   VPValue *getPredicate() { return Predicate; }
 
@@ -587,7 +607,7 @@ public:
                         VPValue *Condition) {
     assert(Successors.empty() && "Setting two successors when others exist.");
     assert(Condition && "Setting two successors without condition!");
-    CondBit = Condition;
+    setCondBit(Condition);
     appendSuccessor(IfTrue);
     appendSuccessor(IfFalse);
   }
@@ -607,7 +627,7 @@ public:
   /// Remove all the successors of this block and set to null its condition bit
   void clearSuccessors() {
     Successors.clear();
-    CondBit = nullptr;
+    setCondBit(nullptr);
   }
 
   /// The method which generates the output IR that correspond to this
@@ -1934,9 +1954,6 @@ class VPlan {
   /// Holds the VPLoopInfo analysis for this VPlan.
   VPLoopInfo VPLInfo;
 
-  /// Holds the condition bit values built during VPInstruction to VPRecipe transformation.
-  SmallVector<VPValue *, 4> VPCBVs;
-
 public:
   VPlan(VPBlockBase *Entry = nullptr) : Entry(Entry) {
     if (Entry)
@@ -1959,8 +1976,6 @@ public:
       delete TripCount;
     for (VPValue *Def : VPExternalDefs)
       delete Def;
-    for (VPValue *CBV : VPCBVs)
-      delete CBV;
   }
 
   /// Generate the IR code for this VPlan.
@@ -2001,11 +2016,6 @@ public:
   /// in the pool.
   void addExternalDef(VPValue *VPVal) {
     VPExternalDefs.insert(VPVal);
-  }
-
-  /// Add \p CBV to the vector of condition bit values.
-  void addCBV(VPValue *CBV) {
-    VPCBVs.push_back(CBV);
   }
 
   void addVPValue(Value *V) {
