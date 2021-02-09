@@ -58,8 +58,8 @@ std::vector<HighlightingToken> getExpectedTokens(Annotations &Test) {
       {HighlightingKind::Method, "Method"},
       {HighlightingKind::StaticMethod, "StaticMethod"},
       {HighlightingKind::Typedef, "Typedef"},
-      {HighlightingKind::DependentType, "DependentType"},
-      {HighlightingKind::DependentName, "DependentName"},
+      {HighlightingKind::Type, "Type"},
+      {HighlightingKind::Unknown, "Unknown"},
       {HighlightingKind::TemplateParameter, "TemplateParameter"},
       {HighlightingKind::Concept, "Concept"},
       {HighlightingKind::Primitive, "Primitive"},
@@ -113,7 +113,8 @@ std::string annotate(llvm::StringRef Input,
 void checkHighlightings(llvm::StringRef Code,
                         std::vector<std::pair</*FileName*/ llvm::StringRef,
                                               /*FileContent*/ llvm::StringRef>>
-                            AdditionalFiles = {}) {
+                            AdditionalFiles = {},
+                        uint32_t ModifierMask = -1) {
   Annotations Test(Code);
   TestTU TU;
   TU.Code = std::string(Test.code());
@@ -126,8 +127,11 @@ void checkHighlightings(llvm::StringRef Code,
   for (auto File : AdditionalFiles)
     TU.AdditionalFiles.insert({File.first, std::string(File.second)});
   auto AST = TU.build();
+  auto Actual = getSemanticHighlightings(AST);
+  for (auto &Token : Actual)
+    Token.Modifiers &= ModifierMask;
 
-  EXPECT_EQ(Code, annotate(Test.code(), getSemanticHighlightings(AST)));
+  EXPECT_EQ(Code, annotate(Test.code(), Actual));
 }
 
 // Any annotations in OldCode and NewCode are converted into their corresponding
@@ -162,6 +166,12 @@ void checkDiffedHighlights(llvm::StringRef OldCode, llvm::StringRef NewCode) {
               testing::UnorderedElementsAreArray(ExpectedLinePairHighlighting))
       << OldCode;
 }
+
+constexpr static uint32_t ScopeModifierMask =
+    1 << unsigned(HighlightingModifier::FunctionScope) |
+    1 << unsigned(HighlightingModifier::ClassScope) |
+    1 << unsigned(HighlightingModifier::FileScope) |
+    1 << unsigned(HighlightingModifier::GlobalScope);
 
 TEST(SemanticHighlighting, GetsCorrectTokens) {
   const char *TestCases[] = {
@@ -198,7 +208,7 @@ TEST(SemanticHighlighting, GetsCorrectTokens) {
       }
       template<typename $TemplateParameter_decl[[T]]>
       struct $Class_decl[[C]] : $Namespace[[abc]]::$Class[[A]]<$TemplateParameter[[T]]> {
-        typename $TemplateParameter[[T]]::$DependentType[[A]]* $Field_decl[[D]];
+        typename $TemplateParameter[[T]]::$Type_dependentName[[A]]* $Field_decl[[D]];
       };
       $Namespace[[abc]]::$Class[[A]]<int> $Variable_decl[[AA]];
       typedef $Namespace[[abc]]::$Class[[A]]<int> $Class_decl[[AAA]];
@@ -332,11 +342,8 @@ TEST(SemanticHighlighting, GetsCorrectTokens) {
       R"cpp(
       template <class $TemplateParameter_decl[[T]]>
       struct $Class_decl[[Tmpl]] {$TemplateParameter[[T]] $Field_decl[[x]] = 0;};
-      // FIXME: highlights dropped due to conflicts.
-      // explicitReferenceTargets reports ClassTemplateSpecializationDecl twice
-      // at its location, calling it a declaration/non-declaration once each.
-      extern template struct Tmpl<float>;
-      template struct Tmpl<double>;
+      extern template struct $Class_decl[[Tmpl]]<float>;
+      template struct $Class_decl[[Tmpl]]<double>;
     )cpp",
       // This test is to guard against highlightings disappearing when using
       // conversion operators as their behaviour in the clang AST differ from
@@ -559,7 +566,7 @@ $InactiveCode[[#endif]]
       template <class $TemplateParameter_decl[[T]]>
       void $Function_decl[[foo]]($TemplateParameter[[T]] $Parameter_decl[[P]]) {
         $Function[[phase1]]($Parameter[[P]]);
-        $DependentName[[phase2]]($Parameter[[P]]);
+        $Unknown_dependentName[[phase2]]($Parameter[[P]]);
       }
     )cpp",
       R"cpp(
@@ -588,20 +595,20 @@ $InactiveCode[[#endif]]
     )cpp",
       R"cpp(
       template <class $TemplateParameter_decl[[T]]>
-      void $Function_decl[[foo]](typename $TemplateParameter[[T]]::$DependentType[[Type]]
-                                            = $TemplateParameter[[T]]::$DependentName[[val]]);
+      void $Function_decl[[foo]](typename $TemplateParameter[[T]]::$Type_dependentName[[Type]]
+                                            = $TemplateParameter[[T]]::$Unknown_dependentName[[val]]);
     )cpp",
       R"cpp(
       template <class $TemplateParameter_decl[[T]]>
       void $Function_decl[[foo]]($TemplateParameter[[T]] $Parameter_decl[[P]]) {
-        $Parameter[[P]].$DependentName[[Field]];
+        $Parameter[[P]].$Unknown_dependentName[[Field]];
       }
     )cpp",
       R"cpp(
       template <class $TemplateParameter_decl[[T]]>
       class $Class_decl[[A]] {
         int $Method_decl[[foo]]() {
-          return $TemplateParameter[[T]]::$DependentName[[Field]];
+          return $TemplateParameter[[T]]::$Unknown_dependentName[[Field]];
         }
       };
     )cpp",
@@ -664,15 +671,15 @@ sizeof...($TemplateParameter[[Elements]]);
       template <typename $TemplateParameter_decl[[T]]>
       struct $Class_decl[[Waldo]] {
         using $Typedef_decl[[Location1]] = typename $TemplateParameter[[T]]
-            ::$DependentType[[Resolver]]::$DependentType[[Location]];
+            ::$Type_dependentName[[Resolver]]::$Type_dependentName[[Location]];
         using $Typedef_decl[[Location2]] = typename $TemplateParameter[[T]]
-            ::template $DependentType[[Resolver]]<$TemplateParameter[[T]]>
-            ::$DependentType[[Location]];
+            ::template $Type_dependentName[[Resolver]]<$TemplateParameter[[T]]>
+            ::$Type_dependentName[[Location]];
         using $Typedef_decl[[Location3]] = typename $TemplateParameter[[T]]
-            ::$DependentType[[Resolver]]
-            ::template $DependentType[[Location]]<$TemplateParameter[[T]]>;
+            ::$Type_dependentName[[Resolver]]
+            ::template $Type_dependentName[[Location]]<$TemplateParameter[[T]]>;
         static const int $StaticField_decl_readonly_static[[Value]] = $TemplateParameter[[T]]
-            ::$DependentType[[Resolver]]::$DependentName[[Value]];
+            ::$Type_dependentName[[Resolver]]::$Unknown_dependentName[[Value]];
       };
     )cpp",
       // Dependent name with heuristic target
@@ -681,11 +688,11 @@ sizeof...($TemplateParameter[[Elements]]);
       struct $Class_decl[[Foo]] {
         int $Field_decl[[Waldo]];
         void $Method_decl[[bar]]() {
-          $Class[[Foo]]().$Field[[Waldo]];
+          $Class[[Foo]]().$Field_dependentName[[Waldo]];
         }
         template <typename $TemplateParameter_decl[[U]]>
         void $Method_decl[[bar1]]() {
-          $Class[[Foo]]<$TemplateParameter[[U]]>().$Field[[Waldo]];
+          $Class[[Foo]]<$TemplateParameter[[U]]>().$Field_dependentName[[Waldo]];
         }
       };
     )cpp",
@@ -694,12 +701,12 @@ sizeof...($TemplateParameter[[Elements]]);
       template <typename $TemplateParameter_decl[[T]]>
       concept $Concept_decl[[Fooable]] = 
           requires($TemplateParameter[[T]] $Parameter_decl[[F]]) {
-            $Parameter[[F]].$DependentName[[foo]]();
+            $Parameter[[F]].$Unknown_dependentName[[foo]]();
           };
       template <typename $TemplateParameter_decl[[T]]>
           requires $Concept[[Fooable]]<$TemplateParameter[[T]]>
       void $Function_decl[[bar]]($TemplateParameter[[T]] $Parameter_decl[[F]]) {
-        $Parameter[[F]].$DependentName[[foo]]();
+        $Parameter[[F]].$Unknown_dependentName[[foo]]();
       }
     )cpp",
       // Dependent template name
@@ -707,7 +714,7 @@ sizeof...($TemplateParameter[[Elements]]);
       template <template <typename> class> struct $Class_decl[[A]] {};
       template <typename $TemplateParameter_decl[[T]]>
       using $Typedef_decl[[W]] = $Class[[A]]<
-        $TemplateParameter[[T]]::template $DependentType[[Waldo]]
+        $TemplateParameter[[T]]::template $Class_dependentName[[Waldo]]
       >;
     )cpp",
       R"cpp(
@@ -720,9 +727,10 @@ sizeof...($TemplateParameter[[Elements]]);
       <:[deprecated]:> int $Variable_decl_deprecated[[x]];
       )cpp",
   };
-  for (const auto &TestCase : TestCases) {
-    checkHighlightings(TestCase);
-  }
+  for (const auto &TestCase : TestCases)
+    // Mask off scope modifiers to keep the tests manageable.
+    // They're tested separately.
+    checkHighlightings(TestCase, {}, ~ScopeModifierMask);
 
   checkHighlightings(R"cpp(
     class $Class_decl[[A]] {
@@ -732,7 +740,8 @@ sizeof...($TemplateParameter[[Elements]]);
                      {{"imp.h", R"cpp(
     int someMethod();
     void otherMethod();
-  )cpp"}});
+  )cpp"}},
+                     ~ScopeModifierMask);
 
   // A separate test for macros in headers.
   checkHighlightings(R"cpp(
@@ -745,7 +754,59 @@ sizeof...($TemplateParameter[[Elements]]);
     #define DXYZ_Y(Y) DXYZ(x##Y)
     #define DEFINE(X) int X;
     #define DEFINE_Y DEFINE(Y)
-  )cpp"}});
+  )cpp"}},
+                     ~ScopeModifierMask);
+}
+
+TEST(SemanticHighlighting, ScopeModifiers) {
+  const char *TestCases[] = {
+      R"cpp(
+        static int $Variable_fileScope[[x]];
+        namespace $Namespace_globalScope[[ns]] {
+          class $Class_globalScope[[x]];
+        }
+        namespace {
+          void $Function_fileScope[[foo]]();
+        }
+      )cpp",
+      R"cpp(
+        void $Function_globalScope[[foo]](int $Parameter_functionScope[[y]]) {
+          int $LocalVariable_functionScope[[z]];
+        }
+      )cpp",
+      R"cpp(
+        // Lambdas are considered functions, not classes.
+        auto $Variable_fileScope[[x]] = [m(42)] { // FIXME: annotate capture
+          return $LocalVariable_functionScope[[m]];
+        };
+      )cpp",
+      R"cpp(
+        // Classes in functions are classes.
+        void $Function_globalScope[[foo]]() {
+          class $Class_functionScope[[X]] {
+            int $Field_classScope[[x]];
+          };
+        };
+      )cpp",
+      R"cpp(
+        template <int $TemplateParameter_classScope[[T]]>
+        class $Class_globalScope[[X]] {
+        };
+      )cpp",
+      R"cpp(
+        // No useful scope for template parameters of variable templates.
+        template <typename $TemplateParameter[[A]]>
+        unsigned $Variable_globalScope[[X]] =
+          $TemplateParameter[[A]]::$Unknown_classScope[[x]];
+      )cpp",
+      R"cpp(
+        #define $Macro_globalScope[[X]] 1
+        int $Variable_globalScope[[Y]] = $Macro_globalScope[[X]];
+      )cpp",
+  };
+
+  for (const char *Test : TestCases)
+    checkHighlightings(Test, {}, ScopeModifierMask);
 }
 
 TEST(SemanticHighlighting, GeneratesHighlightsWhenFileChange) {

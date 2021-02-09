@@ -50,8 +50,8 @@ enum class HighlightingKind {
   Enum,
   EnumConstant,
   Typedef,
-  DependentType,
-  DependentName,
+  Type,
+  Unknown,
   Namespace,
   TemplateParameter,
   Concept,
@@ -75,8 +75,14 @@ enum class HighlightingModifier {
   Readonly,
   Static,
   Abstract,
+  DependentName,
 
-  LastModifier = Abstract
+  FunctionScope,
+  ClassScope,
+  FileScope,
+  GlobalScope,
+
+  LastModifier = GlobalScope
 };
 static_assert(static_cast<unsigned>(HighlightingModifier::LastModifier) < 32,
               "Increase width of modifiers bitfield!");
