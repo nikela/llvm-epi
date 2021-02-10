@@ -246,13 +246,13 @@ class DiagnosticOpts<string base>
 class LangOpts<string base>
   : KeyPathAndMacro<"LangOpts->", base, "LANG_"> {}
 class TargetOpts<string base>
-  : KeyPathAndMacro<"TargetOpts->", base> {}
+  : KeyPathAndMacro<"TargetOpts->", base, "TARGET_"> {}
 class FrontendOpts<string base>
   : KeyPathAndMacro<"FrontendOpts.", base, "FRONTEND_"> {}
 class PreprocessorOutputOpts<string base>
-  : KeyPathAndMacro<"PreprocessorOutputOpts.", base> {}
+  : KeyPathAndMacro<"PreprocessorOutputOpts.", base, "PREPROCESSOR_OUTPUT_"> {}
 class DependencyOutputOpts<string base>
-  : KeyPathAndMacro<"DependencyOutputOpts.", base> {}
+  : KeyPathAndMacro<"DependencyOutputOpts.", base, "DEPENDENCY_OUTPUT_"> {}
 class CodeGenOpts<string base>
   : KeyPathAndMacro<"CodeGenOpts.", base, "CODEGEN_"> {}
 class HeaderSearchOpts<string base>
@@ -260,11 +260,11 @@ class HeaderSearchOpts<string base>
 class PreprocessorOpts<string base>
   : KeyPathAndMacro<"PreprocessorOpts->", base, "PREPROCESSOR_"> {}
 class FileSystemOpts<string base>
-  : KeyPathAndMacro<"FileSystemOpts.", base> {}
+  : KeyPathAndMacro<"FileSystemOpts.", base, "FILE_SYSTEM_"> {}
 class AnalyzerOpts<string base>
   : KeyPathAndMacro<"AnalyzerOpts->", base, "ANALYZER_"> {}
 class MigratorOpts<string base>
-  : KeyPathAndMacro<"MigratorOpts.", base> {}
+  : KeyPathAndMacro<"MigratorOpts.", base, "MIGRATOR_"> {}
 
 // A boolean option which is opt-in in CC1. The positive option exists in CC1 and
 // Args.hasArg(OPT_ffoo) is used to check that the flag is enabled.
@@ -4816,8 +4816,7 @@ def fcaret_diagnostics_max_lines :
 def verify_EQ : CommaJoined<["-"], "verify=">,
   MetaVarName<"<prefixes>">,
   HelpText<"Verify diagnostic output using comment directives that start with"
-           " prefixes in the comma-separated sequence <prefixes>">,
-  MarshallingInfoStringVector<DiagnosticOpts<"VerifyPrefixes">>;
+           " prefixes in the comma-separated sequence <prefixes>">;
 def verify : Flag<["-"], "verify">,
   HelpText<"Equivalent to -verify=expected">;
 def verify_ignore_unexpected : Flag<["-"], "verify-ignore-unexpected">,
