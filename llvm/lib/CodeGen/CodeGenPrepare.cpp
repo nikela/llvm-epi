@@ -1291,7 +1291,8 @@ bool CodeGenPrepare::replaceMathCmpWithIntrinsic(BinaryOperator *BO,
     const Loop *L = LI->getLoopFor(BO->getParent());
     if (!L || L->getHeader() != PN->getParent() || !L->getLoopLatch())
       return false;
-    if (PN->getIncomingValueForBlock(L->getLoopLatch()) != BO)
+    const BasicBlock *Latch = L->getLoopLatch();
+    if (PN->getIncomingValueForBlock(Latch) != BO)
       return false;
     if (auto *Step = dyn_cast<Instruction>(BO->getOperand(1)))
       if (L->contains(Step->getParent()))
@@ -1304,7 +1305,11 @@ bool CodeGenPrepare::replaceMathCmpWithIntrinsic(BinaryOperator *BO,
     // Do not risk on moving increment into a child loop.
     if (LI->getLoopFor(Cmp->getParent()) != L)
       return false;
-    return true;
+    // Ultimately, the insertion point must dominate latch. This should be a
+    // cheap check because no CFG changes & dom tree recomputation happens
+    // during the transform.
+    Function *F = BO->getParent()->getParent();
+    return getDT(*F).dominates(Cmp->getParent(), Latch);
   };
   if (BO->getParent() != Cmp->getParent() && !isIVIncrement(BO)) {
     // We used to use a dominator tree here to allow multi-block optimization.
@@ -1327,6 +1332,7 @@ bool CodeGenPrepare::replaceMathCmpWithIntrinsic(BinaryOperator *BO,
     //   to the cmp point does not really increase register pressure.
     return false;
   }
+
   // We allow matching the canonical IR (add X, C) back to (usubo X, -C).
   if (BO->getOpcode() == Instruction::Add &&
       IID == Intrinsic::usub_with_overflow) {
