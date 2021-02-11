@@ -422,10 +422,6 @@ private:
                             SmallPtrSetImpl<Instruction *> &ConditionalAssumes,
                             bool PreserveGuards = false) const;
 
-  /// Record all the operations that need to be masked other than the load and
-  //store instructions. 
-  void addMaskedVectorOps(BasicBlock *BB);
-
   /// Updates the vectorization state by adding \p Phi to the inductions list.
   /// This can set \p Phi as the main induction of the loop if \p Phi is a
   /// better choice for the main induction than the existing one.
