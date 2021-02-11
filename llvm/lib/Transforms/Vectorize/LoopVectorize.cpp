@@ -6407,8 +6407,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
   ElementCount MaxVF = UserVF;
   if (MaxVF.isZero()) {
-    Optional<ElementCount> FeasibleMaxVF = computeFeasibleMaxVF(TC, UserVF);
-    if (!FeasibleMaxVF) {
+    if (!MaxVFOpt) {
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6416,25 +6415,30 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
       return None;
     }
 
-    MaxVF = FeasibleMaxVF.getValue();
+    MaxVF = MaxVFOpt.getValue();
   }
 
-  assert((UserVF.isNonZero() || isPowerOf2_32(MaxVF.getKnownMinValue())) &&
+  assert(isPowerOf2_32(MaxVF.getKnownMinValue()) &&
          "MaxVF must be a power of 2");
-  unsigned MaxVFtimesIC =
-      UserIC ? MaxVF.getKnownMinValue() * UserIC : MaxVF.getKnownMinValue();
-  // Avoid tail folding if the trip count is known to be a multiple of any VF we
-  // chose.
-  ScalarEvolution *SE = PSE.getSE();
-  const SCEV *BackedgeTakenCount = PSE.getBackedgeTakenCount();
-  const SCEV *ExitCount = SE->getAddExpr(
-      BackedgeTakenCount, SE->getOne(BackedgeTakenCount->getType()));
-  const SCEV *Rem = SE->getURemExpr(
-      ExitCount, SE->getConstant(BackedgeTakenCount->getType(), MaxVFtimesIC));
-  if (Rem->isZero() && MaxVF.getKnownMinValue() > 1) {
-    // Accept MaxVF if we do not have a tail.
-    LLVM_DEBUG(dbgs() << "LV: No tail will remain for any chosen VF.\n");
-    return MaxVF;
+  if (!MaxVF.isScalable()) {
+    unsigned MaxVFtimesIC =
+        UserIC ? MaxVF.getKnownMinValue() * UserIC : MaxVF.getKnownMinValue();
+    // Avoid tail folding if the trip count is known to be a multiple of any VF
+    // we chose.
+    // However, if VF is scalable we cannot compute if TC is divisible by it. We
+    // will always have a tail if it is not folded.
+    ScalarEvolution *SE = PSE.getSE();
+    const SCEV *BackedgeTakenCount = PSE.getBackedgeTakenCount();
+    const SCEV *ExitCount = SE->getAddExpr(
+        BackedgeTakenCount, SE->getOne(BackedgeTakenCount->getType()));
+    const SCEV *Rem = SE->getURemExpr(
+        ExitCount,
+        SE->getConstant(BackedgeTakenCount->getType(), MaxVFtimesIC));
+    if (Rem->isZero()) {
+      // Accept MaxVF if we do not have a tail.
+      LLVM_DEBUG(dbgs() << "LV: No tail will remain for any chosen VF.\n");
+      return MaxVF;
+    }
   }
 
   // If we don't know the precise trip count, or if the trip count that we
