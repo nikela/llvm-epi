@@ -37,17 +37,28 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
   ret void
 }
 
-; FIXME: Unsupported.
-;define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
-;  %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
-;  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %1, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
-;  ret void
-;}
+define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv2f32_1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
+; CHECK-NEXT:    vsext.vf2 v26, v9
+; CHECK-NEXT:    vsll.vi v26, v26, 2
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v26, v0.t
+; CHECK-NEXT:    ret
+  %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
+  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %1, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  ret void
+}
 
-;define void @nxv2f32_2(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
-;  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
-;  ret void
-;}
+define void @nxv2f32_2(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
+; CHECK-LABEL: nxv2f32_2:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsuxei64.v v8, (zero), v10, v0.t
+; CHECK-NEXT:    ret
+  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  ret void
+}
 
 define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv2f32_3:

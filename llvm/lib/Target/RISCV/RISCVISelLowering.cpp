@@ -1007,8 +1007,6 @@ SDValue RISCVTargetLowering::lowerMGATHER(SDValue Op, SelectionDAG &DAG) const {
 
   SDValue Indices = Op.getOperand(4);
   EVT IndexVT = Indices.getValueType();
-  assert(IndexVT == VT.changeVectorElementTypeToInteger() &&
-         "Unexpected type for indices");
 
   SDValue Offsets;
   if (Op.getConstantOperandVal(5) == 1) {
@@ -1046,8 +1044,6 @@ SDValue RISCVTargetLowering::lowerMSCATTER(SDValue Op,
 
   SDValue Indices = Op.getOperand(4);
   EVT IndexVT = Indices.getValueType();
-  assert(IndexVT == VT.changeVectorElementTypeToInteger() &&
-         "Unexpected type for indices");
 
   SDValue Offsets;
   if (Op.getConstantOperandVal(5) == 1) {
@@ -2751,16 +2747,12 @@ static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
         BaseAddr = Op1.getOperand(0);
         Offsets = Op0;
       }
-      assert(OffsetsVT == Offsets.getValueType() &&
-             "Unexpected type for the offsets vector");
       return;
     }
   }
 
   // Fallback to setting the base address to zero and the offsets to the
   // Addresses vector.
-  assert(OffsetsVT == Addresses.getValueType() &&
-         "Unexpected type for the offsets vector");
   BaseAddr = DAG.getConstant(0, DL, MVT::i64);
   Offsets = Addresses;
 }

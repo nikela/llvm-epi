@@ -46,8 +46,32 @@ define void @nxv8f64(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i6
   ret void
 }
 
+define void @nxv2i32(<vscale x 2 x i32> %data, i32* %ptr, <vscale x 2 x i64> %indices, <vscale x 2 x i1> %mask) {
+; CHECK-LABEL: nxv2i32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsll.vi v26, v10, 2
+; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v26, v0.t
+; CHECK-NEXT:    ret
+  %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices
+  call void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %1, i32 4, <vscale x 2 x i1> %mask)
+  ret void
+}
+
+define void @nxv2i32_full(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %ptr, <vscale x 2 x i1> %mask) {
+; CHECK-LABEL: nxv2i32_full:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsuxei64.v v8, (zero), v10, v0.t
+; CHECK-NEXT:    ret
+  call void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %ptr, i32 4, <vscale x 2 x i1> %mask)
+  ret void
+}
+
 ; LMUL=1
 declare void @llvm.masked.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64>, <vscale x 1 x i64*>, i32, <vscale x 1 x i1>)
+declare void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32>, <vscale x 2 x i32*>, i32, <vscale x 2 x i1>)
 declare void @llvm.masked.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float>, <vscale x 2 x float*>, i32, <vscale x 2 x i1>)
 
 ; LMUL>1
