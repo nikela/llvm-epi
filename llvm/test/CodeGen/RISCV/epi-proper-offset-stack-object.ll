@@ -9,10 +9,9 @@ define void @foo(<vscale x 1 x i64> %x) optnone noinline nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -1040
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    addi a0, zero, 16
 ; CHECK-NEXT:    add a0, sp, a0
-; CHECK-NEXT:    vse64.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (a0)
 ; CHECK-NEXT:    addi sp, sp, 1040
 ; CHECK-NEXT:    ret
 entry:

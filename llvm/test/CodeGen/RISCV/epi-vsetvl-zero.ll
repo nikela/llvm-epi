@@ -267,30 +267,26 @@ define void @test_gvl_zero(<vscale x 1 x double>* %v) nounwind
 define void @test_implicit_vlmax(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0-LABEL: test_implicit_vlmax:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vle64.v v25, (a0)
+; CHECK-O0-NEXT:    vl1re64.v v25, (a0)
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse64.v v25, (a0)
+; CHECK-O0-NEXT:    vs1r.v v25, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-DISABLED-LABEL: test_implicit_vlmax:
 ; CHECK-O2-DISABLED:       # %bb.0:
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-O2-DISABLED-NEXT:    vle64.v v25, (a0)
+; CHECK-O2-DISABLED-NEXT:    vl1re64.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-DISABLED-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-O2-DISABLED-NEXT:    vse64.v v25, (a0)
+; CHECK-O2-DISABLED-NEXT:    vs1r.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_implicit_vlmax:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vle64.v v25, (a0)
+; CHECK-O2-NEXT:    vl1re64.v v25, (a0)
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-NEXT:    vse64.v v25, (a0)
+; CHECK-O2-NEXT:    vs1r.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
 {
   %vec = load <vscale x 1 x double>, <vscale x 1 x double>* %v

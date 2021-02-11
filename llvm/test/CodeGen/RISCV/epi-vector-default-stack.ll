@@ -6,8 +6,7 @@ define void @store(<vscale x 1 x i64> %v1) nounwind
 ; CHECK-LABEL: store:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -512
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vse64.v v8, (sp)
+; CHECK-NEXT:    vs1r.v v8, (sp)
 ; CHECK-NEXT:    addi sp, sp, 512
 ; CHECK-NEXT:    ret
 {
