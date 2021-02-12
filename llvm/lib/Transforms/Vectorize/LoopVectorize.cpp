@@ -8117,7 +8117,9 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
           InterleaveCost < ScalarizationCost) {
         Decision = CM_Interleave;
         Cost = InterleaveCost;
-      } else if (GatherScatterCost < ScalarizationCost) {
+      } else if (VF.isScalable() || GatherScatterCost < ScalarizationCost) {
+        // We cannot scalarise (yet) with scalable vectors so default to
+        // gather/scatter in those cases.
         Decision = CM_GatherScatter;
         Cost = GatherScatterCost;
       } else {
