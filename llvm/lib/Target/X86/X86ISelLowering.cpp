@@ -21900,7 +21900,8 @@ static SDValue LowerFCOPYSIGN(SDValue Op, SelectionDAG &DAG) {
 
   // And if it is bigger, shrink it first.
   if (Sign.getSimpleValueType().bitsGT(VT))
-    Sign = DAG.getNode(ISD::FP_ROUND, dl, VT, Sign, DAG.getIntPtrConstant(1, dl));
+    Sign =
+        DAG.getNode(ISD::FP_ROUND, dl, VT, Sign, DAG.getIntPtrConstant(0, dl));
 
   // At this point the operands and the result should have the same
   // type, and that won't be f80 since that is not custom lowered.
@@ -36946,11 +36947,27 @@ static SDValue canonicalizeLaneShuffleWithRepeatedOps(SDValue V,
     return DAG.getBitcast(VT, Res);
   }
   case X86ISD::VPERMILPI:
-    // TODO: Handle v4f64 permutes with different low/high lane masks.
+    // Handle v4f64 permutes with different low/high lane masks by permuting
+    // the permute mask on a lane-by-lane basis.
     if (SrcVT0 == MVT::v4f64) {
-      uint64_t Mask = Src0.getConstantOperandVal(1);
-      if ((Mask & 0x3) != ((Mask >> 2) & 0x3))
-        break;
+      if (Src1.isUndef() || Src0.getOperand(1) == Src1.getOperand(1)) {
+        uint64_t LaneMask = V.getConstantOperandVal(2);
+        uint64_t Mask = Src0.getConstantOperandVal(1);
+        uint64_t LoMask = Mask & 0x3;
+        uint64_t HiMask = (Mask >> 2) & 0x3;
+        uint64_t NewMask = 0;
+        NewMask |= ((LaneMask & 0x02) ? HiMask : LoMask);
+        NewMask |= ((LaneMask & 0x02) ? HiMask : LoMask) << 2;
+        SDValue LHS = Src0.getOperand(0);
+        SDValue RHS =
+            Src1.isUndef() ? DAG.getUNDEF(SrcVT0) : Src1.getOperand(0);
+        SDValue Res = DAG.getNode(X86ISD::VPERM2X128, DL, SrcVT0, LHS, RHS,
+                                  V.getOperand(2));
+        Res = DAG.getNode(SrcOpc0, DL, SrcVT0, Res,
+                          DAG.getTargetConstant(NewMask, DL, MVT::i8));
+        return DAG.getBitcast(VT, Res);
+      }
+      break;
     }
     LLVM_FALLTHROUGH;
   case X86ISD::VSHLI:
@@ -37844,8 +37861,9 @@ static SDValue foldShuffleOfHorizOp(SDNode *N, SelectionDAG &DAG) {
   unsigned Opcode = N->getOpcode();
   if (Opcode != X86ISD::MOVDDUP && Opcode != X86ISD::VBROADCAST)
     if (Opcode != X86ISD::UNPCKL && Opcode != X86ISD::UNPCKH)
-      if (Opcode != ISD::VECTOR_SHUFFLE || !N->getOperand(1).isUndef())
-        return SDValue();
+      if (Opcode != X86ISD::SHUFP)
+        if (Opcode != ISD::VECTOR_SHUFFLE || !N->getOperand(1).isUndef())
+          return SDValue();
 
   // For a broadcast, peek through an extract element of index 0 to find the
   // horizontal op: broadcast (ext_vec_elt HOp, 0)
@@ -37884,6 +37902,32 @@ static SDValue foldShuffleOfHorizOp(SDNode *N, SelectionDAG &DAG) {
     Res = DAG.getNode(X86ISD::SHUFP, DL, ShuffleVT, Res, Res,
                       getV4X86ShuffleImm8ForMask({0, 2, 1, 3}, DL, DAG));
     return DAG.getBitcast(VT, Res);
+  }
+
+  // shufps(hop(x,y),hop(z,w)) -> permute(hop(x,z)) etc.
+  // Don't fold if hop(x,y) == hop(z,w).
+  if (Opcode == X86ISD::SHUFP) {
+    SDValue HOp2 = N->getOperand(1);
+    if (HOp.getOpcode() != HOp2.getOpcode() || VT != MVT::v4f32 || HOp == HOp2)
+      return SDValue();
+    SmallVector<int> RepeatedMask;
+    DecodeSHUFPMask(4, 32, N->getConstantOperandVal(2), RepeatedMask);
+    SDValue Op0 = HOp.getOperand(RepeatedMask[0] >= 2 ? 1 : 0);
+    SDValue Op1 = HOp.getOperand(RepeatedMask[1] >= 2 ? 1 : 0);
+    SDValue Op2 = HOp2.getOperand(RepeatedMask[2] >= 6 ? 1 : 0);
+    SDValue Op3 = HOp2.getOperand(RepeatedMask[3] >= 6 ? 1 : 0);
+    if ((Op0 == Op1) && (Op2 == Op3)) {
+      int NewMask[4] = {RepeatedMask[0] % 2, RepeatedMask[1] % 2,
+                        ((RepeatedMask[2] - 4) % 2) + 2,
+                        ((RepeatedMask[3] - 4) % 2) + 2};
+      SDLoc DL(HOp);
+      SDValue Res = DAG.getNode(HOp.getOpcode(), DL, VT, Op0, Op2);
+      // Use SHUFPS for the permute so this will work on SSE3 targets, shuffle
+      // combining and domain handling will simplify this later on.
+      return DAG.getNode(X86ISD::SHUFP, DL, VT, Res, Res,
+                         getV4X86ShuffleImm8ForMask(NewMask, DL, DAG));
+    }
+    return SDValue();
   }
 
   // 128-bit horizontal math instructions are defined to operate on adjacent
@@ -49835,7 +49879,8 @@ static SDValue combineExtractSubvector(SDNode *N, SelectionDAG &DAG,
   // extract the lowest subvector instead which should allow
   // SimplifyDemandedVectorElts do more simplifications.
   if (IdxVal != 0 && (InVec.getOpcode() == X86ISD::VBROADCAST ||
-                      InVec.getOpcode() == X86ISD::VBROADCAST_LOAD))
+                      InVec.getOpcode() == X86ISD::VBROADCAST_LOAD ||
+                      DAG.isSplatValue(InVec, /*AllowUndefs*/ false)))
     return extractSubVector(InVec, 0, DAG, SDLoc(N), SizeInBits);
 
   // If we're extracting a broadcasted subvector, just use the lowest subvector.

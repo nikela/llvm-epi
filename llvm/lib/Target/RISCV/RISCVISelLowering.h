@@ -138,9 +138,14 @@ enum NodeType : unsigned {
   VUNZIP2,
   VTRN,
   // Vector Extension
-  // VMV_X_S matches the semantics of vmv.x.s. The result is always XLenVT
-  // sign extended from the vector element size. NOTE: The result size will
-  // never be less than the vector element size.
+  // VMV_V_X_VL matches the semantics of vmv.v.x but includes an extra operand
+  // for the VL value to be used for the operation.
+  VMV_V_X_VL,
+  // VFMV_V_F_VL matches the semantics of vfmv.v.f but includes an extra operand
+  // for the VL value to be used for the operation.
+  VFMV_V_F_VL,
+  // VMV_X_S matches the semantics of vmv.x.s. The result is always XLenVT sign
+  // extended from the vector element size.
   VMV_X_S,
   // Splats an i64 scalar to a vector type (with element type i64) where the
   // scalar is a sign-extended i32.
@@ -163,6 +168,60 @@ enum NodeType : unsigned {
   // float to single-width float, rounding towards odd). Takes a double-width
   // float vector and produces a single-width float vector.
   VFNCVT_ROD,
+  // These nodes match the semantics of the corresponding RVV vector reduction
+  // instructions. They produce a vector result which is the reduction
+  // performed over the first vector operand plus the first element of the
+  // second vector operand. The first operand is an unconstrained vector type,
+  // and the result and second operand's types are expected to be the
+  // corresponding full-width LMUL=1 type for the first operand:
+  //   nxv8i8 = vecreduce_add nxv32i8, nxv8i8
+  //   nxv2i32 = vecreduce_add nxv8i32, nxv2i32
+  // The different in types does introduce extra vsetvli instructions but
+  // similarly it reduces the number of registers consumed per reduction.
+  VECREDUCE_ADD,
+  VECREDUCE_UMAX,
+  VECREDUCE_SMAX,
+  VECREDUCE_UMIN,
+  VECREDUCE_SMIN,
+  VECREDUCE_AND,
+  VECREDUCE_OR,
+  VECREDUCE_XOR,
+  VECREDUCE_FADD,
+  VECREDUCE_SEQ_FADD,
+
+  // Vector binary and unary ops with VL as a third operand.
+  // FIXME: Can we replace these with ISD::VP_*?
+  ADD_VL,
+  AND_VL,
+  MUL_VL,
+  OR_VL,
+  SDIV_VL,
+  SHL_VL,
+  SREM_VL,
+  SRA_VL,
+  SRL_VL,
+  SUB_VL,
+  UDIV_VL,
+  UREM_VL,
+  XOR_VL,
+  FADD_VL,
+  FSUB_VL,
+  FMUL_VL,
+  FDIV_VL,
+  FNEG_VL,
+  FMA_VL,
+
+  // Set mask vector to all zeros or ones.
+  VMCLR_VL,
+  VMSET_VL,
+
+  // Memory opcodes start here.
+  VLE_VL = ISD::FIRST_TARGET_MEMORY_OPCODE,
+  VSE_VL,
+
+  // WARNING: Do not add anything in the end unless you want the node to
+  // have memop! In fact, starting from FIRST_TARGET_MEMORY_OPCODE all
+  // opcodes will be thought as target memory ops!
 };
 } // namespace RISCVISD
 
@@ -281,11 +340,6 @@ public:
   Register
   getExceptionSelectorRegister(const Constant *PersonalityFn) const override;
 
-
-  bool allowsMisalignedMemoryAccesses(EVT E, unsigned AddrSpace, unsigned Align,
-                                      MachineMemOperand::Flags Flags,
-                                      bool *Fast) const override;
-
   bool shouldExtendTypeInLibCall(EVT Type) const override;
   bool shouldSignExtendTypeInLibCall(EVT Type, bool IsSigned) const override;
 
@@ -337,11 +391,19 @@ public:
                                           Value *NewVal, Value *Mask,
                                           AtomicOrdering Ord) const override;
 
+
   bool shouldSinkOperands(Instruction *I,
                           SmallVectorImpl<Use *> &Ops) const override;
 
   TargetLoweringBase::LegalizeTypeAction
   getPreferredVectorAction(MVT VT) const override;
+
+  /// Returns true if the target allows unaligned memory accesses of the
+  /// specified type.
+  bool allowsMisalignedMemoryAccesses(
+      EVT VT, unsigned AddrSpace = 0, Align Alignment = Align(1),
+      MachineMemOperand::Flags Flags = MachineMemOperand::MONone,
+      bool *Fast = nullptr) const override;
 
 private:
   void analyzeInputArgs(MachineFunction &MF, CCState &CCInfo,
@@ -390,6 +452,12 @@ private:
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFPVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFixedLengthVectorLoadToRVV(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFixedLengthVectorStoreToRVV(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerToScalableOp(SDValue Op, SelectionDAG &DAG,
+                            unsigned NewOpc) const;
 
   bool isEligibleForTailCallOptimization(
       CCState &CCInfo, CallLoweringInfo &CLI, MachineFunction &MF,
@@ -400,7 +468,14 @@ private:
   void validateCCReservedRegs(
       const SmallVectorImpl<std::pair<llvm::Register, llvm::SDValue>> &Regs,
       MachineFunction &MF) const;
+
+  bool useRVVForFixedLengthVectorVT(MVT VT) const;
 };
+
+namespace RISCV {
+// We use 64 bits as the known part in the scalable vector types.
+static constexpr unsigned RVVBitsPerBlock = 64;
+}; // namespace RISCV
 
 namespace RISCVVIntrinsicsTable {
 

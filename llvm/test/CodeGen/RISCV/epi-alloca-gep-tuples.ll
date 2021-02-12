@@ -19,13 +19,12 @@ define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vse64.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (a0)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    ld a1, -32(s0)
 ; CHECK-NEXT:    add a0, a0, a1
-; CHECK-NEXT:    vse64.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (a0)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
@@ -61,23 +60,22 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v25, a1
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vse64.v v25, (a0)
+; CHECK-NEXT:    vs1r.v v25, (a0)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    slli a1, a0, 3
 ; CHECK-NEXT:    ld a2, -32(s0)
 ; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vse64.v v25, (a1)
+; CHECK-NEXT:    vs1r.v v25, (a1)
 ; CHECK-NEXT:    slli a1, a0, 4
 ; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    vse64.v v25, (a1)
+; CHECK-NEXT:    vs1r.v v25, (a1)
 ; CHECK-NEXT:    addi a3, zero, 24
 ; CHECK-NEXT:    mul a0, a0, a3
 ; CHECK-NEXT:    add a0, a0, a2
-; CHECK-NEXT:    vse64.v v25, (a0)
-; CHECK-NEXT:    vle64.v v8, (a1)
+; CHECK-NEXT:    vs1r.v v25, (a0)
+; CHECK-NEXT:    vl1re64.v v8, (a1)
 ; CHECK-NEXT:    addi sp, s0, -32
 ; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload

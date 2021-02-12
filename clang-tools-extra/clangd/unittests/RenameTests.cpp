@@ -1083,11 +1083,22 @@ TEST(RenameTest, Renameable) {
        "conflict", !HeaderFile, nullptr, "Conflict"},
 
       {R"cpp(
+        void func(int Var);
+
         void func(int V^ar) {
           bool Conflict;
         }
       )cpp",
        "conflict", !HeaderFile, nullptr, "Conflict"},
+
+      {R"cpp(// No conflict: only forward declaration's argument is renamed.
+        void func(int [[V^ar]]);
+
+        void func(int Var) {
+          bool Conflict;
+        }
+      )cpp",
+       nullptr, !HeaderFile, nullptr, "Conflict"},
 
       {R"cpp(
         void func(int V^ar, int Conflict) {
@@ -1290,7 +1301,7 @@ TEST(CrossFileRenameTests, DirtyBuffer) {
   std::string BarPath = testPath("bar.cc");
   // Build the index, the index has "Foo" references from foo.cc and "Bar"
   // references from bar.cc.
-  FileSymbols FSymbols;
+  FileSymbols FSymbols(IndexContents::All);
   FSymbols.update(FooPath, nullptr, buildRefSlab(FooCode, "Foo", FooPath),
                   nullptr, false);
   FSymbols.update(BarPath, nullptr, buildRefSlab(BarCode, "Bar", BarPath),
@@ -1367,9 +1378,9 @@ TEST(CrossFileRenameTests, DirtyBuffer) {
                    llvm::function_ref<void(const SymbolID &, const Symbol &)>
                        Callback) const override {}
 
-    llvm::unique_function<bool(llvm::StringRef) const>
+    llvm::unique_function<IndexContents(llvm::StringRef) const>
     indexedFiles() const override {
-      return [](llvm::StringRef) { return false; };
+      return [](llvm::StringRef) { return IndexContents::None; };
     }
 
     size_t estimateMemoryUsage() const override { return 0; }
@@ -1421,9 +1432,9 @@ TEST(CrossFileRenameTests, DeduplicateRefsFromIndex) {
                    llvm::function_ref<void(const SymbolID &, const Symbol &)>)
         const override {}
 
-    llvm::unique_function<bool(llvm::StringRef) const>
+    llvm::unique_function<IndexContents(llvm::StringRef) const>
     indexedFiles() const override {
-      return [](llvm::StringRef) { return false; };
+      return [](llvm::StringRef) { return IndexContents::None; };
     }
 
     size_t estimateMemoryUsage() const override { return 0; }

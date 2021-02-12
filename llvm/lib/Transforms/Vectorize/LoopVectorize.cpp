@@ -575,6 +575,10 @@ public:
     VectorLoopValueMap.setVectorValue(Scalar, Part, Vector);
   }
 
+  void resetVectorValue(Value *Scalar, unsigned Part, Value *Vector) {
+    VectorLoopValueMap.resetVectorValue(Scalar, Part, Vector);
+  }
+
   void setScalarValue(Value *Scalar, const VPIteration &Instance, Value *V) {
     VectorLoopValueMap.setScalarValue(Scalar, Instance, V);
   }
@@ -615,7 +619,7 @@ public:
   void setDebugLocFromInst(IRBuilder<> &B, const Value *Ptr);
 
   /// Fix the non-induction PHIs in the OrigPHIsToFix vector.
-  void fixNonInductionPHIs(void);
+  void fixNonInductionPHIs(VPTransformState &State);
 
   /// Generate instructions to compute EVL.
   Value *createEVL();
@@ -677,7 +681,7 @@ protected:
 
   /// Fix a reduction cross-iteration phi. This is the second phase of
   /// vectorizing this phi node.
-  void fixReduction(PHINode *Phi);
+  void fixReduction(PHINode *Phi, VPTransformState &State);
 
   /// Generate a reduction loop in the loop vectorizer for when the backend
   /// prefers not to lower the call to reduction intrinsic.
@@ -692,7 +696,7 @@ protected:
   /// block as exiting edges from the scalar epilogue loop (if present) are
   /// already in place, and we exit the vector loop exclusively to the middle
   /// block.
-  void fixLCSSAPHIs();
+  void fixLCSSAPHIs(VPTransformState &State);
 
   /// Iteratively sink the scalarized operands of a predicated instruction into
   /// the block that was created for it.
@@ -900,7 +904,7 @@ protected:
   /// Middle Block between the vector and the scalar.
   BasicBlock *LoopMiddleBlock;
 
-  /// The unique ExitBlock of the scalar loop if one exists.  Note that
+  /// The (unique) ExitBlock of the scalar loop.  Note that
   /// there can be multiple exiting edges reaching this block.
   BasicBlock *LoopExitBlock;
 
@@ -1122,8 +1126,8 @@ static Instruction *getDebugLocFromInstOrOperands(Instruction *I) {
   if (I->getDebugLoc() != Empty)
     return I;
 
-  for (User::op_iterator OI = I->op_begin(), OE = I->op_end(); OI != OE; ++OI) {
-    if (Instruction *OpInst = dyn_cast<Instruction>(*OI))
+  for (Use &Op : I->operands()) {
+    if (Instruction *OpInst = dyn_cast<Instruction>(Op))
       if (OpInst->getDebugLoc() != Empty)
         return OpInst;
   }
@@ -3374,13 +3378,9 @@ void InnerLoopVectorizer::emitMinimumIterationCountCheck(Loop *L,
                                DT->getNode(Bypass)->getIDom()) &&
          "TC check is expected to dominate Bypass");
 
-  // Update dominator for Bypass & LoopExit (if needed).
+  // Update dominator for Bypass & LoopExit.
   DT->changeImmediateDominator(Bypass, TCCheckBlock);
-  if (!Cost->requiresScalarEpilogue())
-    // If there is an epilogue which must run, there's no edge from the
-    // middle block to exit blocks  and thus no need to update the immediate
-    // dominator of the exit blocks.
-    DT->changeImmediateDominator(LoopExitBlock, TCCheckBlock);
+  DT->changeImmediateDominator(LoopExitBlock, TCCheckBlock);
 
   ReplaceInstWithInst(
       TCCheckBlock->getTerminator(),
@@ -3419,11 +3419,7 @@ void InnerLoopVectorizer::emitSCEVChecks(Loop *L, BasicBlock *Bypass) {
   // Update dominator only if this is first RT check.
   if (LoopBypassBlocks.empty()) {
     DT->changeImmediateDominator(Bypass, SCEVCheckBlock);
-    if (!Cost->requiresScalarEpilogue())
-      // If there is an epilogue which must run, there's no edge from the
-      // middle block to exit blocks  and thus no need to update the immediate
-      // dominator of the exit blocks.
-      DT->changeImmediateDominator(LoopExitBlock, SCEVCheckBlock);
+    DT->changeImmediateDominator(LoopExitBlock, SCEVCheckBlock);
   }
 
   ReplaceInstWithInst(
@@ -3479,11 +3475,7 @@ void InnerLoopVectorizer::emitMemRuntimeChecks(Loop *L, BasicBlock *Bypass) {
   // Update dominator only if this is first RT check.
   if (LoopBypassBlocks.empty()) {
     DT->changeImmediateDominator(Bypass, MemCheckBlock);
-    if (!Cost->requiresScalarEpilogue())
-      // If there is an epilogue which must run, there's no edge from the
-      // middle block to exit blocks  and thus no need to update the immediate
-      // dominator of the exit blocks.
-      DT->changeImmediateDominator(LoopExitBlock, MemCheckBlock);
+    DT->changeImmediateDominator(LoopExitBlock, MemCheckBlock);
   }
 
   Instruction *FirstCheckInst;
@@ -3608,10 +3600,9 @@ Value *InnerLoopVectorizer::emitTransformedIndex(
 Loop *InnerLoopVectorizer::createVectorLoopSkeleton(StringRef Prefix) {
   LoopScalarBody = OrigLoop->getHeader();
   LoopVectorPreHeader = OrigLoop->getLoopPreheader();
+  LoopExitBlock = OrigLoop->getUniqueExitBlock();
+  assert(LoopExitBlock && "Must have an exit block");
   assert(LoopVectorPreHeader && "Invalid loop structure");
-  LoopExitBlock = OrigLoop->getUniqueExitBlock(); // may be nullptr
-  assert((LoopExitBlock || Cost->requiresScalarEpilogue()) &&
-         "multiple exit loop without required epilogue?");
 
   LoopMiddleBlock =
       SplitBlock(LoopVectorPreHeader, LoopVectorPreHeader->getTerminator(), DT,
@@ -3620,20 +3611,12 @@ Loop *InnerLoopVectorizer::createVectorLoopSkeleton(StringRef Prefix) {
       SplitBlock(LoopMiddleBlock, LoopMiddleBlock->getTerminator(), DT, LI,
                  nullptr, Twine(Prefix) + "scalar.ph");
 
+  // Set up branch from middle block to the exit and scalar preheader blocks.
+  // completeLoopSkeleton will update the condition to use an iteration check,
+  // if required to decide whether to execute the remainder.
+  BranchInst *BrInst =
+      BranchInst::Create(LoopExitBlock, LoopScalarPreHeader, Builder.getTrue());
   auto *ScalarLatchTerm = OrigLoop->getLoopLatch()->getTerminator();
-
-  // Set up the middle block terminator.  Two cases:
-  // 1) If we know that we must execute the scalar epilogue, emit an
-  //    unconditional branch.
-  // 2) Otherwise, we must have a single unique exit block (due to how we
-  //    implement the multiple exit case).  In this case, set up a conditonal
-  //    branch from the middle block to the loop scalar preheader, and the
-  //    exit block.  completeLoopSkeleton will update the condition to use an
-  //    iteration check, if required to decide whether to execute the remainder.
-  BranchInst *BrInst = Cost->requiresScalarEpilogue() ?
-    BranchInst::Create(LoopScalarPreHeader) :
-    BranchInst::Create(LoopExitBlock, LoopScalarPreHeader,
-                       Builder.getTrue());
   BrInst->setDebugLoc(ScalarLatchTerm->getDebugLoc());
   ReplaceInstWithInst(LoopMiddleBlock->getTerminator(), BrInst);
 
@@ -3645,11 +3628,7 @@ Loop *InnerLoopVectorizer::createVectorLoopSkeleton(StringRef Prefix) {
                  nullptr, nullptr, Twine(Prefix) + "vector.body");
 
   // Update dominator for loop exit.
-  if (!Cost->requiresScalarEpilogue())
-    // If there is an epilogue which must run, there's no edge from the
-    // middle block to exit blocks  and thus no need to update the immediate
-    // dominator of the exit blocks.
-    DT->changeImmediateDominator(LoopExitBlock, LoopMiddleBlock);
+  DT->changeImmediateDominator(LoopExitBlock, LoopMiddleBlock);
 
   // Create and register the new vector loop.
   Loop *Lp = LI->AllocateLoop();
@@ -3746,14 +3725,10 @@ BasicBlock *InnerLoopVectorizer::completeLoopSkeleton(Loop *L,
   auto *ScalarLatchTerm = OrigLoop->getLoopLatch()->getTerminator();
 
   // Add a check in the middle block to see if we have completed
-  // all of the iterations in the first vector loop.  Three cases:
-  // 1) If we require a scalar epilogue, there is no conditional branch as
-  //    we unconditionally branch to the scalar preheader.  Do nothing.
-  // 2) If (N - N%VF) == N, then we *don't* need to run the remainder.
-  //    Thus if tail is to be folded, we know we don't need to run the
-  //    remainder and we can use the previous value for the condition (true).
-  // 3) Otherwise, construct a runtime check.
-  if (!Cost->requiresScalarEpilogue() && !Cost->foldTailByMasking()) {
+  // all of the iterations in the first vector loop.
+  // If (N - N%VF) == N, then we *don't* need to run the remainder.
+  // If tail is to be folded, we know we don't need to run the remainder.
+  if (!Cost->foldTailByMasking()) {
     Instruction *CmpN = CmpInst::Create(Instruction::ICmp, CmpInst::ICMP_EQ,
                                         Count, VectorTripCount, "cmp.n",
                                         LoopMiddleBlock->getTerminator());
@@ -3817,17 +3792,17 @@ BasicBlock *InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   |    [  ]_|   <-- vector loop.
   |     |
   |     v
-  \   -[ ]   <--- middle-block.
-   \/   |
-   /\   v
-   | ->[ ]     <--- new preheader.
+  |   -[ ]   <--- middle-block.
+  |  /  |
+  | /   v
+  -|- >[ ]     <--- new preheader.
    |    |
- (opt)  v      <-- edge from middle to exit iff epilogue is not required.
+   |    v
    |   [ ] \
-   |   [ ]_|   <-- old scalar loop to handle remainder (scalar epilogue).
+   |   [ ]_|   <-- old scalar loop to handle remainder.
     \   |
      \  v
-      >[ ]     <-- exit block(s).
+      >[ ]     <-- exit block.
    ...
    */
 
@@ -4219,7 +4194,7 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
   if (OrigPHIsToFix.size()) {
     assert(EnableVPlanNativePath &&
            "Unexpected non-induction PHIs for fixup in non VPlan-native path");
-    fixNonInductionPHIs();
+    fixNonInductionPHIs(State);
   }
 
   // At this point every instruction in the original loop is widened to a
@@ -4231,18 +4206,13 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
   // Forget the original basic block.
   PSE.getSE()->forgetLoop(OrigLoop);
 
-  // If we inserted an edge from the middle block to the unique exit block,
-  // update uses outside the loop (phis) to account for the newly inserted
-  // edge.
-  if (!Cost->requiresScalarEpilogue()) {
-    // Fix-up external users of the induction variables.
-    for (auto &Entry : Legal->getInductionVars())
-      fixupIVUsers(Entry.first, Entry.second,
-                   getOrCreateVectorTripCount(LI->getLoopFor(LoopVectorBody)),
-                   IVEndValues[Entry.first], LoopMiddleBlock);
+  // Fix-up external users of the induction variables.
+  for (auto &Entry : Legal->getInductionVars())
+    fixupIVUsers(Entry.first, Entry.second,
+                 getOrCreateVectorTripCount(LI->getLoopFor(LoopVectorBody)),
+                 IVEndValues[Entry.first], LoopMiddleBlock);
 
-    fixLCSSAPHIs();
-  }
+  fixLCSSAPHIs(State);
   for (Instruction *PI : PredicatedInstructions)
     sinkScalarOperands(&*PI);
 
@@ -4291,7 +4261,7 @@ void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {
     if (Legal->isFirstOrderRecurrence(&Phi))
       fixFirstOrderRecurrence(&Phi, State);
     else if (Legal->isReductionVariable(&Phi))
-      fixReduction(&Phi);
+      fixReduction(&Phi, State);
   }
 }
 
@@ -4375,10 +4345,11 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
           Builder.getInt32(VF.getKnownMinValue() - 1), "vector.recur.init");
   }
 
+  VPValue *PhiDef = State.Plan->getVPValue(Phi);
+  VPValue *PreviousDef = State.Plan->getVPValue(Previous);
   // We constructed a temporary phi node in the first phase of vectorization.
   // This phi node will eventually be deleted.
-  Builder.SetInsertPoint(
-      cast<Instruction>(VectorLoopValueMap.getVectorValue(Phi, 0)));
+  Builder.SetInsertPoint(cast<Instruction>(State.get(PhiDef, 0)));
 
   // Create a phi node for the new recurrence. The current value will either be
   // the initial value inserted into a vector or loop-varying vector value.
@@ -4399,7 +4370,7 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
 
   // Get the vectorized previous value of the last part UF - 1. It appears last
   // among all unrolled iterations, due to the order of their construction.
-  Value *PreviousLastPart = getOrCreateVectorValue(Previous, UF - 1);
+  Value *PreviousLastPart = State.get(PreviousDef, UF - 1);
 
   // Find and set the insertion point after the previous value if it is an
   // instruction.
@@ -4436,8 +4407,8 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
 
   // Shuffle the current and previous vector and update the vector parts.
   for (unsigned Part = 0; Part < UF; ++Part) {
-    Value *PreviousPart = getOrCreateVectorValue(Previous, Part);
-    Value *PhiPart = VectorLoopValueMap.getVectorValue(Phi, Part);
+    Value *PreviousPart = State.get(PreviousDef, Part);
+    Value *PhiPart = State.get(PhiDef, Part);
     Value *Shuffle;
     if (VF.isScalable()) {
       Type *Int32Ty = Type::getInt32Ty(Phi->getContext());
@@ -4458,13 +4429,13 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
             {Incoming, PreviousPart, Shift}, nullptr);
     } else {
       Shuffle =
-          VF.getKnownMinValue() > 1
+        VF.isVector()
               ? Builder.CreateShuffleVector(Incoming, PreviousPart, ShuffleMask)
               : Incoming;
     }
     PhiPart->replaceAllUsesWith(Shuffle);
     cast<Instruction>(PhiPart)->eraseFromParent();
-    VectorLoopValueMap.resetVectorValue(Phi, Part, Shuffle);
+    State.reset(PhiDef, Phi, Shuffle, Part);
     Incoming = PreviousPart;
   }
 
@@ -4495,7 +4466,7 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   // `Incoming`. This is analogous to the vectorized case above: extracting the
   // second last element when VF > 1.
   else if (UF > 1)
-    ExtractForPhiUsedOutsideLoop = getOrCreateVectorValue(Previous, UF - 2);
+    ExtractForPhiUsedOutsideLoop = State.get(PreviousDef, UF - 2);
 
   // Fix the initial value of the original recurrence in the scalar loop.
   Builder.SetInsertPoint(&*LoopScalarPreHeader->begin());
@@ -4515,16 +4486,15 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   // recurrence in the exit block, and then add an edge for the middle block.
   // Note that LCSSA does not imply single entry when the original scalar loop
   // had multiple exiting edges (as we always run the last iteration in the
-  // scalar epilogue); in that case, there is no edge from middle to exit and
-  // and thus no phis which needed updated.
-  if (!Cost->requiresScalarEpilogue())
-    for (PHINode &LCSSAPhi : LoopExitBlock->phis())
-      if (any_of(LCSSAPhi.incoming_values(),
-                 [Phi](Value *V) { return V == Phi; }))
-        LCSSAPhi.addIncoming(ExtractForPhiUsedOutsideLoop, LoopMiddleBlock);
+  // scalar epilogue); in that case, the exiting path through middle will be
+  // dynamically dead and the value picked for the phi doesn't matter.
+  for (PHINode &LCSSAPhi : LoopExitBlock->phis())
+    if (any_of(LCSSAPhi.incoming_values(),
+               [Phi](Value *V) { return V == Phi; }))
+      LCSSAPhi.addIncoming(ExtractForPhiUsedOutsideLoop, LoopMiddleBlock);
 }
 
-void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
+void InnerLoopVectorizer::fixReduction(PHINode *Phi, VPTransformState &State) {
   // Get it's reduction variable descriptor.
   assert(Legal->isReductionVariable(Phi) &&
          "Unable to find the reduction variable");
@@ -4536,8 +4506,9 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   setDebugLocFromInst(Builder, ReductionStartValue);
   bool IsInLoopReductionPhi = Cost->isInLoopReduction(Phi);
 
+  VPValue *LoopExitInstDef = State.Plan->getVPValue(LoopExitInst);
   // This is the vector-clone of the value that leaves the loop.
-  Type *VecTy = getOrCreateVectorValue(LoopExitInst, 0)->getType();
+  Type *VecTy = State.get(LoopExitInstDef, 0)->getType();
 
   // Wrap flags are in general invalid after vectorization, clear them.
   clearReductionWrapFlags(RdxDesc);
@@ -4550,8 +4521,8 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   Value *LoopVal = Phi->getIncomingValueForBlock(Latch);
 
   for (unsigned Part = 0; Part < UF; ++Part) {
-    Value *VecRdxPhi = getOrCreateVectorValue(Phi, Part);
-    Value *Val = getOrCreateVectorValue(LoopVal, Part);
+    Value *VecRdxPhi = State.get(State.Plan->getVPValue(Phi), Part);
+    Value *Val = State.get(State.Plan->getVPValue(LoopVal), Part);
     cast<PHINode>(VecRdxPhi)
       ->addIncoming(Val, LI->getLoopFor(LoopVectorBody)->getLoopLatch());
   }
@@ -4570,8 +4541,7 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   // be predicated, and does not need to be handled here.
   if (Cost->foldTailByMasking() && !IsInLoopReductionPhi) {
     for (unsigned Part = 0; Part < UF; ++Part) {
-      Value *VecLoopExitInst =
-          VectorLoopValueMap.getVectorValue(LoopExitInst, Part);
+      Value *VecLoopExitInst = State.get(LoopExitInstDef, Part);
       Value *Sel = nullptr;
       for (User *U : VecLoopExitInst->users()) {
         if (isa<SelectInst>(U)) {
@@ -4581,7 +4551,7 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
           assert(isa<PHINode>(U) && "Reduction exit must feed Phi's or select");
       }
       assert(Sel && "Reduction exit feeds no select");
-      VectorLoopValueMap.resetVectorValue(LoopExitInst, Part, Sel);
+      State.reset(LoopExitInstDef, LoopExitInst, Sel, Part);
 
       // If the target can create a predicated operator for the reduction at no
       // extra cost in the loop (for example a predicated vadd), it can be
@@ -4593,7 +4563,8 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
           TTI->preferPredicatedReductionSelect(
               RdxDesc.getOpcode(), Phi->getType(),
               TargetTransformInfo::ReductionFlags())) {
-        auto *VecRdxPhi = cast<PHINode>(getOrCreateVectorValue(Phi, Part));
+        auto *VecRdxPhi =
+            cast<PHINode>(State.get(State.Plan->getVPValue(Phi), Part));
         VecRdxPhi->setIncomingValueForBlock(
             LI->getLoopFor(LoopVectorBody)->getLoopLatch(), Sel);
       }
@@ -4628,7 +4599,7 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
         LI->getLoopFor(LoopVectorBody)->getLoopLatch()->getTerminator());
     VectorParts RdxParts(UF);
     for (unsigned Part = 0; Part < UF; ++Part) {
-      RdxParts[Part] = VectorLoopValueMap.getVectorValue(LoopExitInst, Part);
+      RdxParts[Part] = State.get(LoopExitInstDef, Part);
       Value *Trunc = Builder.CreateTrunc(RdxParts[Part], RdxVecTy);
       Value *Extnd = RdxDesc.isSigned() ? Builder.CreateSExt(Trunc, VecTy)
                                         : Builder.CreateZExt(Trunc, VecTy);
@@ -4644,12 +4615,12 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
     Builder.SetInsertPoint(&*LoopMiddleBlock->getFirstInsertionPt());
     for (unsigned Part = 0; Part < UF; ++Part) {
       RdxParts[Part] = Builder.CreateTrunc(RdxParts[Part], RdxVecTy);
-      VectorLoopValueMap.resetVectorValue(LoopExitInst, Part, RdxParts[Part]);
+      State.reset(LoopExitInstDef, LoopExitInst, RdxParts[Part], Part);
     }
   }
 
   // Reduce all of the unrolled parts into a single vector.
-  Value *ReducedPartRdx = VectorLoopValueMap.getVectorValue(LoopExitInst, 0);
+  Value *ReducedPartRdx = State.get(LoopExitInstDef, 0);
   unsigned Op = RecurrenceDescriptor::getOpcode(RK);
 
   // The middle block terminator has already been assigned a DebugLoc here (the
@@ -4665,7 +4636,7 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
     IRBuilderBase::FastMathFlagGuard FMFG(Builder);
     Builder.setFastMathFlags(RdxDesc.getFastMathFlags());
     for (unsigned Part = 1; Part < UF; ++Part) {
-      Value *RdxPart = VectorLoopValueMap.getVectorValue(LoopExitInst, Part);
+      Value *RdxPart = State.get(LoopExitInstDef, Part);
       if (Op != Instruction::ICmp && Op != Instruction::FCmp) {
         ReducedPartRdx = Builder.CreateBinOp(
             (Instruction::BinaryOps)Op, RdxPart, ReducedPartRdx, "bin.rdx");
@@ -4738,11 +4709,10 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi) {
   // We know that the loop is in LCSSA form. We need to update the PHI nodes
   // in the exit blocks.  See comment on analogous loop in
   // fixFirstOrderRecurrence for a more complete explaination of the logic.
-  if (!Cost->requiresScalarEpilogue())
-    for (PHINode &LCSSAPhi : LoopExitBlock->phis())
-      if (any_of(LCSSAPhi.incoming_values(),
-                 [LoopExitInst](Value *V) { return V == LoopExitInst; }))
-        LCSSAPhi.addIncoming(ReducedPartRdx, LoopMiddleBlock);
+  for (PHINode &LCSSAPhi : LoopExitBlock->phis())
+    if (any_of(LCSSAPhi.incoming_values(),
+               [LoopExitInst](Value *V) { return V == LoopExitInst; }))
+      LCSSAPhi.addIncoming(ReducedPartRdx, LoopMiddleBlock);
 
   // Fix the scalar loop reduction variable with the incoming reduction sum
   // from the vector body and from the backedge value.
@@ -4922,7 +4892,7 @@ void InnerLoopVectorizer::clearReductionWrapFlags(
   }
 }
 
-void InnerLoopVectorizer::fixLCSSAPHIs() {
+void InnerLoopVectorizer::fixLCSSAPHIs(VPTransformState &State) {
   for (PHINode &LCSSAPhi : LoopExitBlock->phis()) {
     if (LCSSAPhi.getBasicBlockIndex(LoopMiddleBlock) != -1)
       // Some phis were already hand updated by the reduction and recurrence
@@ -4943,7 +4913,10 @@ void InnerLoopVectorizer::fixLCSSAPHIs() {
     // extracted from the vectorized loop.
     Builder.SetInsertPoint(LoopMiddleBlock->getTerminator());
     Value *lastIncomingValue =
-        getOrCreateScalarValue(IncomingValue, VPIteration(UF - 1, LastLane));
+        OrigLoop->isLoopInvariant(IncomingValue)
+            ? IncomingValue
+            : State.get(State.Plan->getVPValue(IncomingValue),
+                        VPIteration(UF - 1, LastLane));
     LCSSAPhi.addIncoming(lastIncomingValue, LoopMiddleBlock);
   }
 }
@@ -5012,10 +4985,10 @@ void InnerLoopVectorizer::sinkScalarOperands(Instruction *PredInst) {
   } while (Changed);
 }
 
-void InnerLoopVectorizer::fixNonInductionPHIs() {
+void InnerLoopVectorizer::fixNonInductionPHIs(VPTransformState &State) {
   for (PHINode *OrigPhi : OrigPHIsToFix) {
     PHINode *NewPhi =
-        cast<PHINode>(VectorLoopValueMap.getVectorValue(OrigPhi, 0));
+        cast<PHINode>(State.get(State.Plan->getVPValue(OrigPhi), 0));
     unsigned NumIncomingValues = OrigPhi->getNumIncomingValues();
 
     SmallVector<BasicBlock *, 2> ScalarBBPredecessors(
@@ -8778,14 +8751,12 @@ void LoopVectorizationPlanner::executePlan(InnerLoopVectorizer &ILV,
   VPCallbackILV CallbackILV(ILV);
 
   assert(BestVF.hasValue() && "Vectorization Factor is missing");
+  assert(VPlans.size() == 1 && "Not a single VPlan to execute.");
 
-  VPTransformState State{*BestVF,
-                         BestUF,
-                         LI,
-                         DT,
-                         ILV.Builder,
-                         ILV.VectorLoopValueMap,
-                         &ILV,
+  VPTransformState State{*BestVF,     BestUF,
+                         LI,          DT,
+                         ILV.Builder, ILV.VectorLoopValueMap,
+                         &ILV,        VPlans.front().get(),
                          CallbackILV};
   State.CFG.PrevBB = ILV.createVectorizedLoopSkeleton();
   State.TripCount = ILV.getOrCreateTripCount(nullptr);
@@ -8803,12 +8774,12 @@ void LoopVectorizationPlanner::executePlan(InnerLoopVectorizer &ILV,
   //===------------------------------------------------===//
 
   // 2. Copy and widen instructions from the old loop into the new loop.
-  assert(VPlans.size() == 1 && "Not a single VPlan to execute.");
   VPlans.front()->execute(&State);
 
   // 3. Fix the vectorized code: take care of header phi's, live-outs,
   //    predication, updating analyses.
   ILV.fixVectorizedLoop(State);
+
   ILV.printDebugTracesAtEnd();
 }
 
@@ -9040,11 +9011,7 @@ BasicBlock *EpilogueVectorizerMainLoop::emitMinimumIterationCountCheck(
 
     // Update dominator for Bypass & LoopExit.
     DT->changeImmediateDominator(Bypass, TCCheckBlock);
-    if (!Cost->requiresScalarEpilogue())
-      // For loops with multiple exits, there's no edge from the middle block
-      // to exit blocks (as the epilogue must run) and thus no need to update
-      // the immediate dominator of the exit blocks.
-      DT->changeImmediateDominator(LoopExitBlock, TCCheckBlock);
+    DT->changeImmediateDominator(LoopExitBlock, TCCheckBlock);
 
     LoopBypassBlocks.push_back(TCCheckBlock);
 
@@ -9108,12 +9075,7 @@ EpilogueVectorizerEpilogueLoop::createEpilogueVectorizedLoopSkeleton() {
 
   DT->changeImmediateDominator(LoopScalarPreHeader,
                                EPI.EpilogueIterationCountCheck);
-  if (!Cost->requiresScalarEpilogue())
-    // If there is an epilogue which must run, there's no edge from the
-    // middle block to exit blocks  and thus no need to update the immediate
-    // dominator of the exit blocks.
-    DT->changeImmediateDominator(LoopExitBlock,
-                                 EPI.EpilogueIterationCountCheck);
+  DT->changeImmediateDominator(LoopExitBlock, EPI.EpilogueIterationCountCheck);
 
   // Keep track of bypass blocks, as they feed start values to the induction
   // phis in the scalar loop preheader.
@@ -10449,6 +10411,12 @@ void VPTransformState::set(VPValue *Def, Value *IRDef, Value *V,
                            unsigned Part) {
   set(Def, V, Part);
   ILV->setVectorValue(IRDef, Part, V);
+}
+
+void VPTransformState::reset(VPValue *Def, Value *IRDef, Value *V,
+                             unsigned Part) {
+  set(Def, V, Part);
+  ILV->resetVectorValue(IRDef, Part, V);
 }
 
 Value *VPTransformState::get(VPValue *Def, unsigned Part) {
