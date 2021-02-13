@@ -724,9 +724,6 @@ void ELFWriter::computeSymbolTable(
 
   StrTabBuilder.finalize();
 
-  // Symbols are required to be in lexicographic order.
-  array_pod_sort(ExternalSymbolData.begin(), ExternalSymbolData.end());
-
   // Make the first STT_FILE precede previous local symbols.
   unsigned Index = 1;
   auto FileNameIt = FileNames.begin();
@@ -1122,7 +1119,6 @@ uint64_t ELFWriter::writeObject(MCAssembler &Asm, const MCAsmLayout &Layout) {
     MCSectionELF *RelSection = createRelocationSection(Ctx, Section);
 
     if (SignatureSymbol) {
-      Asm.registerSymbol(*SignatureSymbol);
       unsigned &GroupIdx = RevGroupMap[SignatureSymbol];
       if (!GroupIdx) {
         MCSectionELF *Group = Ctx.createELFGroupSection(SignatureSymbol);
