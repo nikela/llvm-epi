@@ -36947,27 +36947,11 @@ static SDValue canonicalizeLaneShuffleWithRepeatedOps(SDValue V,
     return DAG.getBitcast(VT, Res);
   }
   case X86ISD::VPERMILPI:
-    // Handle v4f64 permutes with different low/high lane masks by permuting
-    // the permute mask on a lane-by-lane basis.
+    // TODO: Handle v4f64 permutes with different low/high lane masks.
     if (SrcVT0 == MVT::v4f64) {
-      if (Src1.isUndef() || Src0.getOperand(1) == Src1.getOperand(1)) {
-        uint64_t LaneMask = V.getConstantOperandVal(2);
-        uint64_t Mask = Src0.getConstantOperandVal(1);
-        uint64_t LoMask = Mask & 0x3;
-        uint64_t HiMask = (Mask >> 2) & 0x3;
-        uint64_t NewMask = 0;
-        NewMask |= ((LaneMask & 0x02) ? HiMask : LoMask);
-        NewMask |= ((LaneMask & 0x02) ? HiMask : LoMask) << 2;
-        SDValue LHS = Src0.getOperand(0);
-        SDValue RHS =
-            Src1.isUndef() ? DAG.getUNDEF(SrcVT0) : Src1.getOperand(0);
-        SDValue Res = DAG.getNode(X86ISD::VPERM2X128, DL, SrcVT0, LHS, RHS,
-                                  V.getOperand(2));
-        Res = DAG.getNode(SrcOpc0, DL, SrcVT0, Res,
-                          DAG.getTargetConstant(NewMask, DL, MVT::i8));
-        return DAG.getBitcast(VT, Res);
-      }
-      break;
+      uint64_t Mask = Src0.getConstantOperandVal(1);
+      if ((Mask & 0x3) != ((Mask >> 2) & 0x3))
+        break;
     }
     LLVM_FALLTHROUGH;
   case X86ISD::VSHLI:
@@ -49164,32 +49148,9 @@ static SDValue combineSubToSubus(SDNode *N, SelectionDAG &DAG,
     return SDValue();
 
   SDValue SubusLHS, SubusRHS;
-  // Try to find umax(a,b) - b or a - umin(a,b) patterns
-  // they may be converted to subus(a,b).
-  // TODO: Need to add IR canonicalization for this code.
-  if (Op0.getOpcode() == ISD::UMAX) {
-    SubusRHS = Op1;
-    SDValue MaxLHS = Op0.getOperand(0);
-    SDValue MaxRHS = Op0.getOperand(1);
-    if (MaxLHS == Op1)
-      SubusLHS = MaxRHS;
-    else if (MaxRHS == Op1)
-      SubusLHS = MaxLHS;
-    else
-      return SDValue();
-  } else if (Op1.getOpcode() == ISD::UMIN) {
-    SubusLHS = Op0;
-    SDValue MinLHS = Op1.getOperand(0);
-    SDValue MinRHS = Op1.getOperand(1);
-    if (MinLHS == Op0)
-      SubusRHS = MinRHS;
-    else if (MinRHS == Op0)
-      SubusRHS = MinLHS;
-    else
-      return SDValue();
-  } else if (Op1.getOpcode() == ISD::TRUNCATE &&
-             Op1.getOperand(0).getOpcode() == ISD::UMIN &&
-             (EltVT == MVT::i8 || EltVT == MVT::i16)) {
+  if (Op1.getOpcode() == ISD::TRUNCATE &&
+      Op1.getOperand(0).getOpcode() == ISD::UMIN &&
+      (EltVT == MVT::i8 || EltVT == MVT::i16)) {
     // Special case where the UMIN has been truncated. Try to push the truncate
     // further up. This is similar to the i32/i64 special processing.
     SubusLHS = Op0;

@@ -1560,92 +1560,95 @@ OperandMatchResultTy RISCVAsmParser::parseJALOffset(OperandVector &Operands) {
 
 OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
   SMLoc S = getLoc();
-  if (getLexer().getKind() != AsmToken::Identifier)
+  if (getLexer().isNot(AsmToken::Identifier))
     return MatchOperand_NoMatch;
 
-  // Parse "e8,m1,t[a|u],m[a|u]"
-  StringRef Name = getLexer().getTok().getIdentifier();
-  if (!Name.consume_front("e"))
-    return MatchOperand_NoMatch;
-  unsigned Sew;
-  if (Name.getAsInteger(10, Sew))
-    return MatchOperand_NoMatch;
-  if (!RISCVVType::isValidSEW(Sew))
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  if (!getLexer().is(AsmToken::Comma))
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  Name = getLexer().getTok().getIdentifier();
-  if (!Name.consume_front("m"))
-    return MatchOperand_NoMatch;
-  // "m" or "mf"
-  bool Fractional = Name.consume_front("f");
-  unsigned Lmul;
-  if (Name.getAsInteger(10, Lmul))
-    return MatchOperand_NoMatch;
-  if (!RISCVVType::isValidLMUL(Lmul, Fractional))
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  if (!getLexer().is(AsmToken::Comma))
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  Name = getLexer().getTok().getIdentifier();
-  // ta or tu
-  bool TailAgnostic;
-  if (Name == "ta")
-    TailAgnostic = true;
-  else if (Name == "tu")
-    TailAgnostic = false;
-  else
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  if (!getLexer().is(AsmToken::Comma))
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  Name = getLexer().getTok().getIdentifier();
-  // ma or mu
-  bool MaskAgnostic;
-  if (Name == "ma")
-    MaskAgnostic = true;
-  else if (Name == "mu")
-    MaskAgnostic = false;
-  else
-    return MatchOperand_NoMatch;
-  getLexer().Lex();
-
-  // Optional ",nt"
-  bool Nontemporal = false;
-  if (getLexer().is(AsmToken::Comma)) {
+  SmallVector<AsmToken, 7> VTypeIElements;
+  // Put all the tokens for vtypei operand into VTypeIElements vector.
+  while (getLexer().isNot(AsmToken::EndOfStatement)) {
+    VTypeIElements.push_back(getLexer().getTok());
     getLexer().Lex();
-    Name = getLexer().getTok().getIdentifier();
-    if (Name == "nt") {
-      Nontemporal = true;
-    } else
-      return MatchOperand_NoMatch;
+    if (getLexer().is(AsmToken::EndOfStatement))
+      break;
+    if (getLexer().isNot(AsmToken::Comma))
+      goto MatchFail;
+    AsmToken Comma = getLexer().getTok();
+    VTypeIElements.push_back(Comma);
     getLexer().Lex();
   }
 
-  if (getLexer().getKind() != AsmToken::EndOfStatement)
-    return MatchOperand_NoMatch;
 
-  unsigned SewLog2 = Log2_32(Sew / 8);
-  unsigned LmulLog2 = Log2_32(Lmul);
-  RISCVVSEW VSEW = static_cast<RISCVVSEW>(SewLog2);
-  RISCVVLMUL VLMUL =
-      static_cast<RISCVVLMUL>(Fractional ? 8 - LmulLog2 : LmulLog2);
+  if (VTypeIElements.size() == 7 || VTypeIElements.size() == 9) {
+    // The VTypeIElements layout is:
+    // SEW comma LMUL comma TA comma MA [comma NT]
+    //  0    1    2     3    4   5    6  7     8
+    StringRef Name = VTypeIElements[0].getIdentifier();
+    if (!Name.consume_front("e"))
+      goto MatchFail;
+    unsigned Sew;
+    if (Name.getAsInteger(10, Sew))
+      goto MatchFail;
+    if (!RISCVVType::isValidSEW(Sew))
+      goto MatchFail;
 
-  unsigned VTypeI = RISCVVType::encodeVTYPE(VLMUL, VSEW, TailAgnostic,
-                                            MaskAgnostic, Nontemporal);
-  Operands.push_back(RISCVOperand::createVType(VTypeI, S, isRV64()));
+    Name = VTypeIElements[2].getIdentifier();
+    if (!Name.consume_front("m"))
+      goto MatchFail;
+    // "m" or "mf"
+    bool Fractional = Name.consume_front("f");
+    unsigned Lmul;
+    if (Name.getAsInteger(10, Lmul))
+      goto MatchFail;
+    if (!RISCVVType::isValidLMUL(Lmul, Fractional))
+      goto MatchFail;
 
-  return MatchOperand_Success;
+    // ta or tu
+    Name = VTypeIElements[4].getIdentifier();
+    bool TailAgnostic;
+    if (Name == "ta")
+      TailAgnostic = true;
+    else if (Name == "tu")
+      TailAgnostic = false;
+    else
+      goto MatchFail;
+
+    // ma or mu
+    Name = VTypeIElements[6].getIdentifier();
+    bool MaskAgnostic;
+    if (Name == "ma")
+      MaskAgnostic = true;
+    else if (Name == "mu")
+      MaskAgnostic = false;
+    else
+      goto MatchFail;
+
+    // Optional ",nt"
+    bool Nontemporal = false;
+    if (VTypeIElements.size() == 9) {
+      Name = VTypeIElements[8].getIdentifier();
+      if (Name == "nt") {
+        Nontemporal = true;
+      } else
+        goto MatchFail;
+    }
+
+    unsigned SewLog2 = Log2_32(Sew / 8);
+    unsigned LmulLog2 = Log2_32(Lmul);
+    RISCVVSEW VSEW = static_cast<RISCVVSEW>(SewLog2);
+    RISCVVLMUL VLMUL =
+        static_cast<RISCVVLMUL>(Fractional ? 8 - LmulLog2 : LmulLog2);
+
+    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMUL, VSEW, TailAgnostic,
+                                              MaskAgnostic, Nontemporal);
+    Operands.push_back(RISCVOperand::createVType(VTypeI, S, isRV64()));
+    return MatchOperand_Success;
+  }
+
+// If NoMatch, unlex all the tokens that comprise a vtypei operand
+MatchFail:
+  while (!VTypeIElements.empty())
+    getLexer().UnLex(VTypeIElements.pop_back_val());
+  return MatchOperand_NoMatch;
 }
 
 OperandMatchResultTy RISCVAsmParser::parseMaskReg(OperandVector &Operands) {

@@ -4649,50 +4649,15 @@ void InnerLoopVectorizer::fixReduction(PHINode *Phi, VPTransformState &State) {
   // Create the reduction after the loop. Note that inloop reductions create the
   // target reduction in the loop using a Reduction recipe.
   if (VF.isVector() && !IsInLoopReductionPhi) {
-    // For certain backends like RISC-V it is hard to lower some reduction
-    // operations like multiply effectively. In such cases we can generate a
-    // reduction loop in the loop vectorizer.
-    TargetTransformInfo::ReductionFlags Flags;
-    // FIXME.
-    // Flags.NoNaN = NoNaN;
-    if (VF.isScalable() &&
-        !TTI->useReductionIntrinsic(Op, ReducedPartRdx->getType(), Flags))
-    {
-      // FIXME: Integrate this in generateReductionLoop.
-      // Find the reduction identity variable. Zero for addition, or, xor,
-      // one for multiplication, -1 for And.
-      Value *Identity;
-      if (RecurrenceDescriptor::isMinMaxRecurrenceKind(RK)) {
-        // MinMax reduction have the start value as their identify.
-        if (VF.isScalar() || IsInLoopReductionPhi) {
-          Identity = ReductionStartValue;
-        } else {
-          Identity = Builder.CreateVectorSplat(VF, ReductionStartValue,
-                                               "minmax.ident");
-        }
-      } else {
-        // Handle other reduction kinds:
-        Constant *Iden = RecurrenceDescriptor::getRecurrenceIdentity(
-            RK, VecTy->getScalarType());
-        if (VF.isScalar() || IsInLoopReductionPhi) {
-          Identity = Iden;
-        } else {
-          Identity = ConstantVector::getSplat(VF, Iden);
-        }
-      }
-
-      ReducedPartRdx = generateReductionLoop(ReducedPartRdx, Identity, Op,
-                                             RdxDesc.getFastMathFlags());
-    }
-    else
-      ReducedPartRdx =
-          createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx);
+    ReducedPartRdx =
+        createTargetReduction(Builder, TTI, RdxDesc, ReducedPartRdx);
     // If the reduction can be performed in a smaller type, we need to extend
     // the reduction to the wider type before we branch to the original loop.
     if (Phi->getType() != RdxDesc.getRecurrenceType())
-      ReducedPartRdx = RdxDesc.isSigned()
-                           ? Builder.CreateSExt(ReducedPartRdx, Phi->getType())
-                           : Builder.CreateZExt(ReducedPartRdx, Phi->getType());
+      ReducedPartRdx =
+        RdxDesc.isSigned()
+        ? Builder.CreateSExt(ReducedPartRdx, Phi->getType())
+        : Builder.CreateZExt(ReducedPartRdx, Phi->getType());
   }
 
   // Create a phi node that merges control-flow from the backedge-taken check
@@ -5759,9 +5724,8 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
     if (UseVectorIntrinsic) {
       // Use vector version of the intrinsic.
       Type *TysForDecl[] = {CI->getType()};
-      if (VF.isVector()) {
+      if (VF.isVector())
         TysForDecl[0] = VectorType::get(CI->getType()->getScalarType(), VF);
-      }
       VectorF = Intrinsic::getDeclaration(M, ID, TysForDecl);
       assert(VectorF && "Can't retrieve vector intrinsic.");
     } else {
@@ -6625,11 +6589,10 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
   if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
-    // (i.e. MaxVectorSize).
+    // (i.e. FeasibleMaxVFUpperBound).
     SmallVector<ElementCount, 8> VFs;
     unsigned MaxVFKnownMinUpperBound =
         FeasibleMaxVFUpperBound.getKnownMinValue();
-
     for (unsigned VS = MaxVFKnownMinLowerBound * 2;
          VS <= MaxVFKnownMinUpperBound; VS *= 2)
       VFs.push_back(ElementCount::get(VS, TTI.useScalableVectorType()));
@@ -6644,7 +6607,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
     // ones.
     for (int i = RUs.size() - 1; i >= 0; --i) {
       bool Selected = true;
-      for (auto& pair : RUs[i].MaxLocalUsers) {
+      for (auto &pair : RUs[i].MaxLocalUsers) {
         unsigned TargetNumRegisters = TTI.getNumberOfRegisters(pair.first);
         if (pair.second > TargetNumRegisters)
           Selected = false;
@@ -6654,13 +6617,12 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
         break;
       }
     }
-    // FIXME: Update TTI to use ElementCount for methods that return VF values.
-    if (unsigned MinVFKnownMinValue = TTI.getMinimumVF(SmallestType)) {
-      if (MaxVF.getKnownMinValue() < MinVFKnownMinValue) {
+    if (ElementCount MinVF =
+            TTI.getMinimumVF(SmallestType, TTI.useScalableVectorType())) {
+      if (ElementCount::isKnownLT(MaxVF, MinVF)) {
         LLVM_DEBUG(dbgs() << "LV: Overriding calculated MaxVF(" << MaxVF
-                          << ") with target's minimum: " << MinVFKnownMinValue
-                          << '\n');
-        MaxVF = ElementCount::get(MinVFKnownMinValue, MaxVF.isScalable());
+                          << ") with target's minimum: " << MinVF << '\n');
+        MaxVF = MinVF;
       }
     }
   }
@@ -6676,7 +6638,7 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
   LLVM_DEBUG(dbgs() << "LV: Scalar loop costs: " << ExpectedCost << ".\n");
   assert(ExpectedCost.isValid() && "Unexpected invalid cost for scalar loop");
 
-  ElementCount Width = ElementCount::getFixed(1);
+  auto Width = ElementCount::getFixed(1);
   const float ScalarCost = *ExpectedCost.getValue();
   float Cost = ScalarCost;
 
@@ -6721,7 +6683,7 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     // This is used for epilogue vectorization.
     if (VectorCost < ScalarCost) {
       LLVM_DEBUG(dbgs() << "LV: Setting " << i << " as a profitable VF\n");
-      ProfitableVFs.push_back(VectorizationFactor({i, VectorCost}));
+      ProfitableVFs.push_back(VectorizationFactor({i, (unsigned)VectorCost}));
     }
 
     if (VectorCost < Cost) {
@@ -6739,7 +6701,6 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     Width = ElementCount::getFixed(1);
     Cost = ScalarCost;
   }
-
 
   if (Width.isScalable() && ScalarCost < Cost) {
     if (!ForceVectorization) {
@@ -6766,7 +6727,7 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
 
   LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << Width << ".\n");
   VectorizationFactor Factor = {Width,
-                                Width.getKnownMinValue() * Cost};
+                                (unsigned)(Width.getKnownMinValue() * Cost)};
   return Factor;
 }
 
@@ -8004,6 +7965,9 @@ InstructionCost
 LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
                                                      ElementCount VF) {
 
+  if (VF.isScalable())
+    return InstructionCost::getInvalid();
+
   if (VF.isScalar())
     return 0;
 
@@ -9234,8 +9198,15 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   if (BI->getSuccessor(0) != Dst)
     EdgeMask = Builder.createNot(EdgeMask);
 
-  if (SrcMask) // Otherwise block in-mask is all-one, no need to AND.
-    EdgeMask = Builder.createAnd(EdgeMask, SrcMask);
+  if (SrcMask) { // Otherwise block in-mask is all-one, no need to AND.
+    // The condition is 'SrcMask && EdgeMask', which is equivalent to
+    // 'select i1 SrcMask, i1 EdgeMask, i1 false'.
+    // The select version does not introduce new UB if SrcMask is false and
+    // EdgeMask is poison. Using 'and' here introduces undefined behavior.
+    VPValue *False = Plan->getOrAddVPValue(
+        ConstantInt::getFalse(BI->getCondition()->getType()));
+    EdgeMask = Builder.createSelect(SrcMask, EdgeMask, False);
+  }
 
   return EdgeMaskCache[Edge] = EdgeMask;
 }

@@ -145,8 +145,6 @@ public:
   unsigned getMaxElementWidth() const;
   bool useScalableVectorType() const;
   bool preferPredicatedVectorOps() const;
-  bool useReductionIntrinsic(unsigned Opcode, Type *Ty,
-                             TTI::ReductionFlags Flags) const;
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
@@ -170,7 +168,7 @@ public:
   bool shouldMaximizeVectorBandwidth(bool OptSize) const;
   unsigned getMinVectorRegisterBitWidth() const;
   unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const;
-  unsigned getMinimumVF(unsigned ElemWidth) const;
+  ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
                                   unsigned SafeDepDist) const;
   std::pair<ElementCount, ElementCount>
@@ -191,6 +189,12 @@ public:
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasStdExtV(); }
   Optional<unsigned> getMaxVScale() const;
+  int getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
+                                 bool IsPairwiseForm,
+                                 TTI::TargetCostKind CostKind);
+  int getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
+                             bool IsPairwise, bool IsUnsigned,
+                             TTI::TargetCostKind CostKind);
 };
 
 } // end namespace llvm
