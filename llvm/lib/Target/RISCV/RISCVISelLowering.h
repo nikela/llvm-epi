@@ -465,7 +465,12 @@ private:
   SDValue lowerMSTORE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
+  using VTToLibCall = std::pair<EVT, RTLIB::Libcall>;
+  SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
+                          ArrayRef<VTToLibCall> TypeToCall) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFSIN(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFCOS(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFPVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorLoadToRVV(SDValue Op, SelectionDAG &DAG) const;
