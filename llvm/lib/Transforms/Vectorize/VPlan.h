@@ -317,10 +317,21 @@ struct VPTransformState {
     }
     Data.PerPartOutput[Def][Part] = V;
   }
+  /// Reset an existing vector value for \p Def and a given \p Part.
+  void reset(VPValue *Def, Value *V, unsigned Part) {
+    auto Iter = Data.PerPartOutput.find(Def);
+    assert(Iter != Data.PerPartOutput.end() &&
+           "need to overwrite existing value");
+    Iter->second[Part] = V;
+  }
+
   void set(VPValue *Def, Value *IRDef, Value *V, unsigned Part);
   void reset(VPValue *Def, Value *IRDef, Value *V, unsigned Part);
-  void set(VPValue *Def, Value *IRDef, Value *V, const VPIteration &Instance);
 
+  /// Set the generated scalar \p V for \p Def and \p IRDef and the given \p
+  /// Instance.
+  void set(VPValue *Def, Value *IRDef, Value *V, const VPIteration &Instance);
+  /// Set the generated scalar \p V for \p Def and the given \p Instance.
   void set(VPValue *Def, Value *V, const VPIteration &Instance) {
     auto Iter = Data.PerPartScalars.insert({Def, {}});
     auto &PerPartVec = Iter.first->second;
@@ -329,7 +340,20 @@ struct VPTransformState {
     auto &Scalars = PerPartVec[Instance.Part];
     while (Scalars.size() <= Instance.Lane)
       Scalars.push_back(nullptr);
+    assert(!Scalars[Instance.Lane] && "should overwrite existing value");
     Scalars[Instance.Lane] = V;
+  }
+
+  /// Reset an existing scalar value for \p Def and a given \p Instance.
+  void reset(VPValue *Def, Value *V, const VPIteration &Instance) {
+    auto Iter = Data.PerPartScalars.find(Def);
+    assert(Iter != Data.PerPartScalars.end() &&
+           "need to overwrite existing value");
+    assert(Instance.Part < Iter->second.size() &&
+           "need to overwrite existing value");
+    assert(Instance.Lane < Iter->second[Instance.Part].size() &&
+           "need to overwrite existing value");
+    Iter->second[Instance.Part][Instance.Lane] = V;
   }
 
   /// Hold state information used when constructing the CFG of the output IR,
@@ -1073,7 +1097,7 @@ public:
 /// A recipe for handling all phi nodes except for integer and FP inductions.
 /// For reduction PHIs, RdxDesc must point to the corresponding recurrence
 /// descriptor and the start value is the first operand of the recipe.
-class VPWidenPHIRecipe : public VPRecipeBase {
+class VPWidenPHIRecipe : public VPRecipeBase, public VPValue {
   PHINode *Phi;
 
   /// Descriptor for a reduction PHI.
@@ -1089,10 +1113,9 @@ public:
   }
 
   /// Create a VPWidenPHIRecipe for \p Phi
-  VPWidenPHIRecipe(PHINode *Phi) : VPRecipeBase(VPWidenPHISC, {}), Phi(Phi) {
-    new VPValue(Phi, this);
-  }
-
+  VPWidenPHIRecipe(PHINode *Phi)
+      : VPRecipeBase(VPWidenPHISC, {}),
+        VPValue(VPValue::VPVWidenPHISC, Phi, this), Phi(Phi) {}
   ~VPWidenPHIRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
@@ -1115,7 +1138,7 @@ public:
 
 /// A recipe for vectorizing a phi-node as a sequence of mask-based select
 /// instructions.
-class VPBlendRecipe : public VPRecipeBase {
+class VPBlendRecipe : public VPRecipeBase, public VPValue {
   PHINode *Phi;
 
 public:
@@ -1123,8 +1146,8 @@ public:
   /// respective masks, ordered [I0, M0, I1, M1, ...]. Note that a single value
   /// might be incoming with a full mask for which there is no VPValue.
   VPBlendRecipe(PHINode *Phi, ArrayRef<VPValue *> Operands)
-      : VPRecipeBase(VPBlendSC, Operands), Phi(Phi) {
-    new VPValue(Phi, this);
+      : VPRecipeBase(VPBlendSC, Operands),
+        VPValue(VPValue::VPVBlendSC, Phi, this), Phi(Phi) {
     assert(Operands.size() > 0 &&
            ((Operands.size() == 1) || (Operands.size() % 2 == 0)) &&
            "Expected either a single incoming value or a positive even number "
@@ -1317,6 +1340,8 @@ public:
              VPSlotTracker &SlotTracker) const override;
 
   bool isUniform() const { return IsUniform; }
+
+  bool isPacked() const { return AlsoPack; }
 };
 
 /// A recipe for generating conditional branches on the bits of a mask.
@@ -1362,14 +1387,13 @@ public:
 /// order to merge values that are set under such a branch and feed their uses.
 /// The phi nodes can be scalar or vector depending on the users of the value.
 /// This recipe works in concert with VPBranchOnMaskRecipe.
-class VPPredInstPHIRecipe : public VPRecipeBase {
-
+class VPPredInstPHIRecipe : public VPRecipeBase, public VPValue {
 public:
   /// Construct a VPPredInstPHIRecipe given \p PredInst whose value needs a phi
   /// nodes after merging back from a Branch-on-Mask.
-  VPPredInstPHIRecipe(VPValue *PredV) : VPRecipeBase(VPPredInstPHISC, PredV) {
-    new VPValue(PredV->getUnderlyingValue(), this);
-  }
+  VPPredInstPHIRecipe(VPValue *PredV)
+      : VPRecipeBase(VPPredInstPHISC, PredV),
+        VPValue(VPValue::VPVPredInstPHI, nullptr, this) {}
   ~VPPredInstPHIRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.

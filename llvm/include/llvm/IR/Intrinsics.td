@@ -1861,6 +1861,12 @@ def int_preserve_struct_access_index : DefaultAttrsIntrinsic<[llvm_anyptr_ty],
                                                   ImmArg<ArgIndex<1>>,
                                                   ImmArg<ArgIndex<2>>]>;
 
+//===------------ Intrinsics to perform common vector shuffles ------------===//
+
+def int_experimental_vector_reverse : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
+                                   [LLVMMatchType<0>],
+                                   [IntrNoMem]>;
+
 //===---------- Intrinsics to query properties of scalable vectors --------===//
 def int_vscale : DefaultAttrsIntrinsic<[llvm_anyint_ty], [], [IntrNoMem]>;
 
@@ -1869,14 +1875,6 @@ def int_experimental_vector_stepvector : Intrinsic<[llvm_anyvector_ty],
                                                    [IntrNoMem]>;
 
 //===---------- Intrinsics to modify scalable vectors ---------------------===//
-// TODO: These intrinsics are placeholder until a decision is reached on
-// shufflevector for scalable vectors. They will be replaced eventually. Use
-// them with caution.
-
-def int_experimental_vector_reverse : Intrinsic<[llvm_anyvector_ty],
-                                                [LLVMMatchType<0>],
-                                                [IntrNoMem]>;
-
 // This intrinsic takes two vector arguments %v1 and %v2, an integer number
 // %num, and and integer Explicit Vector Length values %evl1 and %evl2 such that
 // 0 <= %num <= %evl1 <= W and 0 <= %evl2 <= W, where W is the runtime vector

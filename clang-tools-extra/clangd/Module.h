@@ -1,7 +1,9 @@
 #ifndef LLVM_CLANG_TOOLS_EXTRA_CLANGD_MODULE_H
 #define LLVM_CLANG_TOOLS_EXTRA_CLANGD_MODULE_H
 
+#include "LSPBinder.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/JSON.h"
 #include <memory>
 #include <vector>
 
@@ -10,14 +12,11 @@ namespace clangd {
 
 /// A Module contributes a vertical feature to clangd.
 ///
-/// FIXME: Extend this with LSP bindings to support reading/updating
-/// capabilities and implementing LSP endpoints.
+/// FIXME: Extend this to support outgoing LSP calls.
 ///
 /// The lifetime of a module is roughly:
 ///  - modules are created before the LSP server, in ClangdMain.cpp
 ///  - these modules are then passed to ClangdLSPServer and ClangdServer
-///    FIXME: LSP bindings should be registered at ClangdLSPServer
-///    initialization.
 ///  - module hooks can be called at this point.
 ///    FIXME: We should make some server facilities like TUScheduler and index
 ///    available to those modules after ClangdServer is initalized.
@@ -30,6 +29,16 @@ namespace clangd {
 class Module {
 public:
   virtual ~Module() = default;
+
+  /// Called by the server to connect this module to LSP.
+  /// The module should register the methods/notifications/commands it handles,
+  /// and update the server capabilities to advertise them.
+  ///
+  /// This is only called if the module is running in ClangdLSPServer!
+  /// Modules with a public interface should satisfy it without LSP bindings.
+  virtual void initializeLSP(LSPBinder &Bind,
+                             const llvm::json::Object &ClientCaps,
+                             llvm::json::Object &ServerCaps) {}
 };
 
 class ModuleSet {
