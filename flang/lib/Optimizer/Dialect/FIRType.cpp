@@ -58,16 +58,6 @@ TYPE parseTypeSingleton(mlir::DialectAsmParser &parser, mlir::Location) {
   return TYPE::get(ty);
 }
 
-// `boxproc` `<` return-type `>`
-BoxProcType parseBoxProc(mlir::DialectAsmParser &parser, mlir::Location loc) {
-  return parseTypeSingleton<BoxProcType>(parser, loc);
-}
-
-// `complex` `<` kind `>`
-fir::ComplexType parseComplex(mlir::DialectAsmParser &parser) {
-  return parseKindSingleton<fir::ComplexType>(parser);
-}
-
 // `slice` `<` rank `>`
 SliceType parseSlice(mlir::DialectAsmParser &parser) {
   return parseRankSingleton<SliceType>(parser);
@@ -310,11 +300,11 @@ mlir::Type fir::parseFirType(FIROpsDialect *dialect,
   if (typeNameLit == "boxchar")
     return generatedTypeParser(dialect->getContext(), parser, typeNameLit);
   if (typeNameLit == "boxproc")
-    return parseBoxProc(parser, loc);
+    return generatedTypeParser(dialect->getContext(), parser, typeNameLit);
   if (typeNameLit == "char")
     return generatedTypeParser(dialect->getContext(), parser, typeNameLit);
   if (typeNameLit == "complex")
-    return parseComplex(parser);
+    return generatedTypeParser(dialect->getContext(), parser, typeNameLit);
   if (typeNameLit == "field")
     return generatedTypeParser(dialect->getContext(), parser, typeNameLit);
   if (typeNameLit == "heap")
@@ -445,30 +435,6 @@ private:
   explicit IntegerTypeStorage(KindTy kind) : kind{kind} {}
 };
 
-/// `COMPLEX` storage
-struct ComplexTypeStorage : public mlir::TypeStorage {
-  using KeyTy = KindTy;
-
-  static unsigned hashKey(const KeyTy &key) { return llvm::hash_combine(key); }
-
-  bool operator==(const KeyTy &key) const { return key == getFKind(); }
-
-  static ComplexTypeStorage *construct(mlir::TypeStorageAllocator &allocator,
-                                       KindTy kind) {
-    auto *storage = allocator.allocate<ComplexTypeStorage>();
-    return new (storage) ComplexTypeStorage{kind};
-  }
-
-  KindTy getFKind() const { return kind; }
-
-protected:
-  KindTy kind;
-
-private:
-  ComplexTypeStorage() = delete;
-  explicit ComplexTypeStorage(KindTy kind) : kind{kind} {}
-};
-
 /// `REAL` storage (for reals of unsupported sizes)
 struct RealTypeStorage : public mlir::TypeStorage {
   using KeyTy = KindTy;
@@ -491,31 +457,6 @@ protected:
 private:
   RealTypeStorage() = delete;
   explicit RealTypeStorage(KindTy kind) : kind{kind} {}
-};
-
-/// Boxed PROCEDURE POINTER object type
-struct BoxProcTypeStorage : public mlir::TypeStorage {
-  using KeyTy = mlir::Type;
-
-  static unsigned hashKey(const KeyTy &key) { return llvm::hash_combine(key); }
-
-  bool operator==(const KeyTy &key) const { return key == getElementType(); }
-
-  static BoxProcTypeStorage *construct(mlir::TypeStorageAllocator &allocator,
-                                       mlir::Type eleTy) {
-    assert(eleTy && "element type is null");
-    auto *storage = allocator.allocate<BoxProcTypeStorage>();
-    return new (storage) BoxProcTypeStorage{eleTy};
-  }
-
-  mlir::Type getElementType() const { return eleTy; }
-
-protected:
-  mlir::Type eleTy;
-
-private:
-  BoxProcTypeStorage() = delete;
-  explicit BoxProcTypeStorage(mlir::Type eleTy) : eleTy{eleTy} {}
 };
 
 /// Pointer-like object storage
@@ -809,18 +750,6 @@ fir::IntegerType fir::IntegerType::get(mlir::MLIRContext *ctxt, KindTy kind) {
 
 KindTy fir::IntegerType::getFKind() const { return getImpl()->getFKind(); }
 
-// COMPLEX
-
-fir::ComplexType fir::ComplexType::get(mlir::MLIRContext *ctxt, KindTy kind) {
-  return Base::get(ctxt, kind);
-}
-
-mlir::Type fir::ComplexType::getElementType() const {
-  return fir::RealType::get(getContext(), getFKind());
-}
-
-KindTy fir::ComplexType::getFKind() const { return getImpl()->getFKind(); }
-
 // REAL
 
 RealType fir::RealType::get(mlir::MLIRContext *ctxt, KindTy kind) {
@@ -834,27 +763,6 @@ fir::BoxType::verifyConstructionInvariants(mlir::Location, mlir::Type eleTy,
                                            mlir::AffineMapAttr map) {
   // TODO
   return mlir::success();
-}
-
-// BoxProc<T>
-
-BoxProcType fir::BoxProcType::get(mlir::Type elementType) {
-  return Base::get(elementType.getContext(), elementType);
-}
-
-mlir::Type fir::BoxProcType::getEleTy() const {
-  return getImpl()->getElementType();
-}
-
-mlir::LogicalResult
-fir::BoxProcType::verifyConstructionInvariants(mlir::Location loc,
-                                               mlir::Type eleTy) {
-  if (eleTy.isa<mlir::FunctionType>())
-    return mlir::success();
-  if (auto refTy = eleTy.dyn_cast<ReferenceType>())
-    if (refTy.isa<mlir::FunctionType>())
-      return mlir::success();
-  return mlir::emitError(loc, "invalid type for boxproc") << eleTy << '\n';
 }
 
 // Reference<T>
@@ -1132,17 +1040,6 @@ void fir::verifyIntegralType(mlir::Type type) {
 void fir::printFirType(FIROpsDialect *, mlir::Type ty,
                        mlir::DialectAsmPrinter &p) {
   auto &os = p.getStream();
-  if (auto type = ty.dyn_cast<BoxProcType>()) {
-    os << "boxproc<";
-    p.printType(type.getEleTy());
-    os << '>';
-    return;
-  }
-  if (auto type = ty.dyn_cast<fir::ComplexType>()) {
-    // Fortran intrinsic type COMPLEX
-    os << "complex<" << type.getFKind() << '>';
-    return;
-  }
   if (auto type = ty.dyn_cast<RecordType>()) {
     // Fortran derived type
     os << "type<" << type.getName();
@@ -1261,6 +1158,32 @@ bool fir::isa_unknown_size_box(mlir::Type t) {
 }
 
 //===----------------------------------------------------------------------===//
+// BoxProcType
+//===----------------------------------------------------------------------===//
+
+// `boxproc` `<` return-type `>`
+mlir::Type BoxProcType::parse(mlir::MLIRContext *context,
+                              mlir::DialectAsmParser &parser) {
+  mlir::Type ty;
+  if (parser.parseLess() || parser.parseType(ty) || parser.parseGreater()) {
+    parser.emitError(parser.getCurrentLocation(), "type expected");
+    return Type();
+  }
+  return get(context, ty);
+}
+
+mlir::LogicalResult
+BoxProcType::verifyConstructionInvariants(mlir::Location loc,
+                                          mlir::Type eleTy) {
+  if (eleTy.isa<mlir::FunctionType>())
+    return mlir::success();
+  if (auto refTy = eleTy.dyn_cast<ReferenceType>())
+    if (refTy.isa<mlir::FunctionType>())
+      return mlir::success();
+  return mlir::emitError(loc, "invalid type for boxproc") << eleTy << '\n';
+}
+
+//===----------------------------------------------------------------------===//
 // BoxType
 //===----------------------------------------------------------------------===//
 
@@ -1358,4 +1281,17 @@ void fir::CharacterType::print(::mlir::DialectAsmPrinter &printer) const {
       printer << len;
   }
   printer << '>';
+}
+
+//===----------------------------------------------------------------------===//
+// ComplexType
+//===----------------------------------------------------------------------===//
+
+mlir::Type fir::ComplexType::parse(mlir::MLIRContext *context,
+                                   mlir::DialectAsmParser &parser) {
+  return parseKindSingleton<fir::ComplexType>(parser);
+}
+
+mlir::Type fir::ComplexType::getElementType() const {
+  return fir::RealType::get(getContext(), getFKind());
 }

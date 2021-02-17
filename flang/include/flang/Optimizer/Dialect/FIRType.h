@@ -42,8 +42,6 @@ class FIROpsDialect;
 using KindTy = unsigned;
 
 namespace detail {
-struct BoxProcTypeStorage;
-struct ComplexTypeStorage;
 struct HeapTypeStorage;
 struct IntegerTypeStorage;
 struct LenTypeStorage;
@@ -96,21 +94,6 @@ mlir::Type dyn_cast_ptrEleTy(mlir::Type t);
 
 // Intrinsic types
 
-/// Model of a Fortran COMPLEX intrinsic type, including the KIND type
-/// parameter. COMPLEX is a floating point type with a real and imaginary
-/// member.
-class ComplexType : public mlir::Type::TypeBase<fir::ComplexType, mlir::Type,
-                                                detail::ComplexTypeStorage> {
-public:
-  using Base::Base;
-  static fir::ComplexType get(mlir::MLIRContext *ctxt, KindTy kind);
-
-  /// Get the corresponding fir.real<k> type.
-  mlir::Type getElementType() const;
-
-  KindTy getFKind() const;
-};
-
 /// Model of a Fortran INTEGER intrinsic type, including the KIND type
 /// parameter.
 class IntegerType : public mlir::Type::TypeBase<fir::IntegerType, mlir::Type,
@@ -142,20 +125,6 @@ public:
 };
 
 // FIR support types
-
-/// The type of a pair that describes a PROCEDURE reference. Pointers to
-/// internal procedures must carry an additional reference to the host's
-/// variables that are referenced.
-class BoxProcType : public mlir::Type::TypeBase<BoxProcType, mlir::Type,
-                                                detail::BoxProcTypeStorage> {
-public:
-  using Base::Base;
-  static BoxProcType get(mlir::Type eleTy);
-  mlir::Type getEleTy() const;
-
-  static mlir::LogicalResult verifyConstructionInvariants(mlir::Location,
-                                                          mlir::Type eleTy);
-};
 
 /// Type of a vector that represents an array slice operation on an array.
 /// Fortran slices are triples of lower bound, upper bound, and stride. The rank
