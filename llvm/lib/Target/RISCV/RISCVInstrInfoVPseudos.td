@@ -413,7 +413,7 @@ def RISCVVIntrinsicsTable : GenericTable {
   let PrimaryKeyName = "getRISCVVIntrinsicInfo";
 }
 
-class RISCVVLX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> {
+class RISCVVLX_VSX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> {
   bits<1> Masked = M;
   bits<1> Ordered = O;
   bits<7> SEW = S;
@@ -422,28 +422,24 @@ class RISCVVLX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> {
   Pseudo Pseudo = !cast<Pseudo>(NAME);
 }
 
-def RISCVVLXTable : GenericTable {
-  let FilterClass = "RISCVVLX";
+class RISCVVLX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> :
+  RISCVVLX_VSX<M, O, S, L, IL>;
+class RISCVVSX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> :
+  RISCVVLX_VSX<M, O, S, L, IL>;
+
+class RISCVVLX_VSXTable : GenericTable {
   let CppTypeName = "VLX_VSXPseudo";
   let Fields = ["Masked", "Ordered", "SEW", "LMUL", "IndexLMUL", "Pseudo"];
   let PrimaryKey = ["Masked", "Ordered", "SEW", "LMUL", "IndexLMUL"];
+}
+
+def RISCVVLXTable : RISCVVLX_VSXTable {
+  let FilterClass = "RISCVVLX";
   let PrimaryKeyName = "getVLXPseudo";
 }
 
-class RISCVVSX<bit M, bit O, bits<7> S, bits<3> L, bits<3> IL> {
-  bits<1> Masked = M;
-  bits<1> Ordered = O;
-  bits<7> SEW = S;
-  bits<3> LMUL = L;
-  bits<3> IndexLMUL = IL;
-  Pseudo Pseudo = !cast<Pseudo>(NAME);
-}
-
-def RISCVVSXTable : GenericTable {
+def RISCVVSXTable : RISCVVLX_VSXTable {
   let FilterClass = "RISCVVSX";
-  let CppTypeName = "VLX_VSXPseudo";
-  let Fields = ["Masked", "Ordered", "SEW", "LMUL", "IndexLMUL", "Pseudo"];
-  let PrimaryKey = ["Masked", "Ordered", "SEW", "LMUL", "IndexLMUL"];
   let PrimaryKeyName = "getVSXPseudo";
 }
 
@@ -2004,19 +2000,28 @@ multiclass VPseudoSSegLoad {
 }
 
 multiclass VPseudoISegLoad<bit Ordered> {
-  foreach idx_eew = EEWList in {  // EEW for index argument.
-    foreach idx_lmul = MxSet<idx_eew>.m in {  // LMUL for index argument.
-      foreach val_lmul = MxList.m in {  // LMUL for the value.
-        defvar IdxLInfo = idx_lmul.MX;
-        defvar IdxVreg = idx_lmul.vrclass;
-        defvar ValLInfo = val_lmul.MX;
-        let VLMul = val_lmul.value in {
-          foreach nf = NFSet<val_lmul>.L in {
-            defvar ValVreg = SegRegClass<val_lmul, nf>.RC;
-            def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo :
-              VPseudoISegLoadNoMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value, nf, Ordered>;
-            def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo # "_MASK" :
-              VPseudoISegLoadMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value, nf, Ordered>;
+  foreach idx_eew = EEWList in {
+    foreach sew = EEWList in {
+      foreach val_lmul = MxSet<sew>.m in {
+        defvar octuple_lmul = octuple_from_str<val_lmul.MX>.ret;
+        // Calculate emul = eew * lmul / sew
+        defvar octuple_emul = !srl(!mul(idx_eew, octuple_lmul), shift_amount<sew>.val);
+        if !and(!ge(octuple_emul, 1), !le(octuple_emul, 64)) then {
+          defvar ValLInfo = val_lmul.MX;
+          defvar IdxLInfo = octuple_to_str<octuple_emul>.ret;
+          defvar idx_lmul = !cast<LMULInfo>("V_" # IdxLInfo);
+          defvar Vreg = val_lmul.vrclass;
+          defvar IdxVreg = idx_lmul.vrclass;
+          let VLMul = val_lmul.value in {
+            foreach nf = NFSet<val_lmul>.L in {
+              defvar ValVreg = SegRegClass<val_lmul, nf>.RC;
+              def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo :
+                VPseudoISegLoadNoMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value,
+                                      nf, Ordered>;
+              def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo # "_MASK" :
+                VPseudoISegLoadMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value,
+                                    nf, Ordered>;
+            }
           }
         }
       }
@@ -2055,19 +2060,28 @@ multiclass VPseudoSSegStore {
 }
 
 multiclass VPseudoISegStore<bit Ordered> {
-  foreach idx_eew = EEWList in {  // EEW for index argument.
-    foreach idx_lmul = MxSet<idx_eew>.m in {  // LMUL for index argument.
-      foreach val_lmul = MxList.m in {  // LMUL for the value.
-        defvar IdxLInfo = idx_lmul.MX;
-        defvar IdxVreg = idx_lmul.vrclass;
-        defvar ValLInfo = val_lmul.MX;
-        let VLMul = val_lmul.value in {
-          foreach nf = NFSet<val_lmul>.L in {
-            defvar ValVreg = SegRegClass<val_lmul, nf>.RC;
-            def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo :
-              VPseudoISegStoreNoMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value, nf, Ordered>;
-            def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo # "_MASK" :
-              VPseudoISegStoreMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value, nf, Ordered>;
+  foreach idx_eew = EEWList in {
+    foreach sew = EEWList in {
+      foreach val_lmul = MxSet<sew>.m in {
+        defvar octuple_lmul = octuple_from_str<val_lmul.MX>.ret;
+        // Calculate emul = eew * lmul / sew
+        defvar octuple_emul = !srl(!mul(idx_eew, octuple_lmul), shift_amount<sew>.val);
+        if !and(!ge(octuple_emul, 1), !le(octuple_emul, 64)) then {
+          defvar ValLInfo = val_lmul.MX;
+          defvar IdxLInfo = octuple_to_str<octuple_emul>.ret;
+          defvar idx_lmul = !cast<LMULInfo>("V_" # IdxLInfo);
+          defvar Vreg = val_lmul.vrclass;
+          defvar IdxVreg = idx_lmul.vrclass;
+          let VLMul = val_lmul.value in {
+            foreach nf = NFSet<val_lmul>.L in {
+              defvar ValVreg = SegRegClass<val_lmul, nf>.RC;
+              def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo :
+                VPseudoISegStoreNoMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value,
+                                       nf, Ordered>;
+              def nf # "EI" # idx_eew # "_V_" # IdxLInfo # "_" # ValLInfo # "_MASK" :
+                VPseudoISegStoreMask<ValVreg, IdxVreg, idx_eew, idx_lmul.value,
+                                     nf, Ordered>;
+            }
           }
         }
       }
@@ -2338,31 +2352,6 @@ multiclass VPatSLoad<string intrinsic,
                                 $rs1, $rs2, (mask_type V0), GPR:$vl, sew)>;
 }
 
-multiclass VPatILoad<string intrinsic,
-                     string inst,
-                     ValueType type,
-                     ValueType idx_type,
-                     ValueType mask_type,
-                     int sew,
-                     LMULInfo vlmul,
-                     LMULInfo idx_vlmul,
-                     VReg reg_class,
-                     VReg idx_reg_class>
-{
-    defvar Intr = !cast<Intrinsic>(intrinsic);
-    defvar Pseudo = !cast<Instruction>(inst#"_V_"#idx_vlmul.MX#"_"#vlmul.MX);
-    def : Pat<(type (Intr GPR:$rs1, (idx_type idx_reg_class:$rs2), (XLenVT (VLOp GPR:$vl)))),
-                    (Pseudo $rs1, $rs2, GPR:$vl, sew)>;
-
-    defvar IntrMask = !cast<Intrinsic>(intrinsic # "_mask");
-    defvar PseudoMask = !cast<Instruction>(inst#"_V_"#idx_vlmul.MX#"_"#vlmul.MX#"_MASK");
-    def : Pat<(type (IntrMask (type GetVRegNoV0<reg_class>.R:$merge),
-                               GPR:$rs1, (idx_type idx_reg_class:$rs2),
-                               (mask_type V0), (XLenVT (VLOp GPR:$vl)))),
-                    (PseudoMask $merge,
-                                $rs1, $rs2, (mask_type V0), GPR:$vl, sew)>;
-}
-
 multiclass VPatUSStore<string intrinsic,
                        string inst,
                        ValueType type,
@@ -2396,29 +2385,6 @@ multiclass VPatSStore<string intrinsic,
     defvar IntrMask = !cast<Intrinsic>(intrinsic # "_mask");
     defvar PseudoMask = !cast<Instruction>(inst#"_V_"#vlmul.MX#"_MASK");
     def : Pat<(IntrMask (type reg_class:$rs3), GPR:$rs1, GPR:$rs2, (mask_type V0), (XLenVT (VLOp GPR:$vl))),
-              (PseudoMask $rs3, $rs1, $rs2, (mask_type V0), GPR:$vl, sew)>;
-}
-
-multiclass VPatIStore<string intrinsic,
-                      string inst,
-                      ValueType type,
-                      ValueType idx_type,
-                      ValueType mask_type,
-                      int sew,
-                      LMULInfo vlmul,
-                      LMULInfo idx_vlmul,
-                      VReg reg_class,
-                      VReg idx_reg_class>
-{
-    defvar Intr = !cast<Intrinsic>(intrinsic);
-    defvar Pseudo = !cast<Instruction>(inst#"_V_"#idx_vlmul.MX#"_"#vlmul.MX);
-    def : Pat<(Intr (type reg_class:$rs3), GPR:$rs1,
-                    (idx_type idx_reg_class:$rs2), (XLenVT (VLOp GPR:$vl))),
-              (Pseudo $rs3, $rs1, $rs2, GPR:$vl, sew)>;
-    defvar IntrMask = !cast<Intrinsic>(intrinsic # "_mask");
-    defvar PseudoMask = !cast<Instruction>(inst#"_V_"#idx_vlmul.MX#"_"#vlmul.MX#"_MASK");
-    def : Pat<(IntrMask (type reg_class:$rs3), GPR:$rs1,
-                        (idx_type idx_reg_class:$rs2), (mask_type V0), (XLenVT (VLOp GPR:$vl))),
               (PseudoMask $rs3, $rs1, $rs2, (mask_type V0), GPR:$vl, sew)>;
 }
 
