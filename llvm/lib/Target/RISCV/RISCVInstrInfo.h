@@ -168,6 +168,7 @@ struct EPIPseudoInfo {
   uint8_t VLIndex;
   uint8_t SEWIndex;
   uint8_t MergeOpIndex;
+  uint8_t MaskOpIndex;
   uint8_t VLMul;
 
   int getVLIndex() const { return static_cast<int8_t>(VLIndex); }
@@ -175,6 +176,8 @@ struct EPIPseudoInfo {
   int getSEWIndex() const { return static_cast<int8_t>(SEWIndex); }
 
   int getMergeOpIndex() const { return static_cast<int8_t>(MergeOpIndex); }
+
+  int getMaskOpIndex() const { return static_cast<int8_t>(MaskOpIndex); }
 };
 
 #define GET_EPIPseudosTable_DECL

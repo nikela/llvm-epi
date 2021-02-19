@@ -246,13 +246,13 @@ class DiagnosticOpts<string base>
 class LangOpts<string base>
   : KeyPathAndMacro<"LangOpts->", base, "LANG_"> {}
 class TargetOpts<string base>
-  : KeyPathAndMacro<"TargetOpts->", base> {}
+  : KeyPathAndMacro<"TargetOpts->", base, "TARGET_"> {}
 class FrontendOpts<string base>
   : KeyPathAndMacro<"FrontendOpts.", base, "FRONTEND_"> {}
 class PreprocessorOutputOpts<string base>
-  : KeyPathAndMacro<"PreprocessorOutputOpts.", base> {}
+  : KeyPathAndMacro<"PreprocessorOutputOpts.", base, "PREPROCESSOR_OUTPUT_"> {}
 class DependencyOutputOpts<string base>
-  : KeyPathAndMacro<"DependencyOutputOpts.", base> {}
+  : KeyPathAndMacro<"DependencyOutputOpts.", base, "DEPENDENCY_OUTPUT_"> {}
 class CodeGenOpts<string base>
   : KeyPathAndMacro<"CodeGenOpts.", base, "CODEGEN_"> {}
 class HeaderSearchOpts<string base>
@@ -260,11 +260,11 @@ class HeaderSearchOpts<string base>
 class PreprocessorOpts<string base>
   : KeyPathAndMacro<"PreprocessorOpts->", base, "PREPROCESSOR_"> {}
 class FileSystemOpts<string base>
-  : KeyPathAndMacro<"FileSystemOpts.", base> {}
+  : KeyPathAndMacro<"FileSystemOpts.", base, "FILE_SYSTEM_"> {}
 class AnalyzerOpts<string base>
   : KeyPathAndMacro<"AnalyzerOpts->", base, "ANALYZER_"> {}
 class MigratorOpts<string base>
-  : KeyPathAndMacro<"MigratorOpts.", base> {}
+  : KeyPathAndMacro<"MigratorOpts.", base, "MIGRATOR_"> {}
 
 // A boolean option which is opt-in in CC1. The positive option exists in CC1 and
 // Args.hasArg(OPT_ffoo) is used to check that the flag is enabled.
@@ -925,7 +925,7 @@ defm gpu_exclude_wrong_side_overloads : BoolFOption<"gpu-exclude-wrong-side-over
 def gpu_max_threads_per_block_EQ : Joined<["--"], "gpu-max-threads-per-block=">,
   Flags<[CC1Option]>,
   HelpText<"Default max threads per block for kernel launch bounds for HIP">,
-  MarshallingInfoStringInt<LangOpts<"GPUMaxThreadsPerBlock">, "256">,
+  MarshallingInfoStringInt<LangOpts<"GPUMaxThreadsPerBlock">, "1024">,
   ShouldParseIf<hip.KeyPath>;
 def gpu_instrument_lib_EQ : Joined<["--"], "gpu-instrument-lib=">,
   HelpText<"Instrument device library for HIP, which is a LLVM bitcode containing "
@@ -942,6 +942,8 @@ def fuse_cuid_EQ : Joined<["-"], "fuse-cuid=">,
            "file path and command line options) | 'random' (ID's generated as "
            "random numbers) | 'none' (disabled). Default is 'hash'. This option "
            "will be overriden by option '-cuid=[ID]' if it is specified." >;
+def libomptarget_amdgcn_bc_path_EQ : Joined<["--"], "libomptarget-amdgcn-bc-path=">, Group<i_Group>,
+  HelpText<"Path to libomptarget-amdgcn bitcode library">;
 def libomptarget_nvptx_bc_path_EQ : Joined<["--"], "libomptarget-nvptx-bc-path=">, Group<i_Group>,
   HelpText<"Path to libomptarget-nvptx bitcode library">;
 def dD : Flag<["-"], "dD">, Group<d_Group>, Flags<[CC1Option]>,
@@ -2157,7 +2159,7 @@ def fno_objc_nonfragile_abi : Flag<["-"], "fno-objc-nonfragile-abi">, Group<f_Gr
 
 def fobjc_sender_dependent_dispatch : Flag<["-"], "fobjc-sender-dependent-dispatch">, Group<f_Group>;
 def fomit_frame_pointer : Flag<["-"], "fomit-frame-pointer">, Group<f_Group>;
-def fopenmp : Flag<["-"], "fopenmp">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused]>,
+def fopenmp : Flag<["-"], "fopenmp">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused, FlangOption, FC1Option]>,
   HelpText<"Parse OpenMP pragmas and generate parallel code.">;
 def fno_openmp : Flag<["-"], "fno-openmp">, Group<f_Group>, Flags<[NoArgumentUnused]>;
 def fopenmp_version_EQ : Joined<["-"], "fopenmp-version=">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused]>;
@@ -2467,6 +2469,11 @@ def fno_unroll_loops : Flag<["-"], "fno-unroll-loops">, Group<f_Group>,
 defm reroll_loops : BoolFOption<"reroll-loops",
   CodeGenOpts<"RerollLoops">, DefaultFalse,
   PosFlag<SetTrue, [CC1Option], "Turn on loop reroller">, NegFlag<SetFalse>>;
+def ffinite_loops: Flag<["-"],  "ffinite-loops">, Group<f_Group>,
+  HelpText<"Assume all loops are finite.">, Flags<[CC1Option]>;
+def fno_finite_loops: Flag<["-"], "fno-finite-loops">, Group<f_Group>,
+  HelpText<"Do not assume that any loop is finite.">, Flags<[CC1Option]>;
+
 def ftrigraphs : Flag<["-"], "ftrigraphs">, Group<f_Group>,
   HelpText<"Process trigraph sequences">, Flags<[CC1Option]>;
 def fno_trigraphs : Flag<["-"], "fno-trigraphs">, Group<f_Group>,
@@ -3672,7 +3679,7 @@ def _CLASSPATH : Separate<["--"], "CLASSPATH">, Alias<fclasspath_EQ>;
 def _all_warnings : Flag<["--"], "all-warnings">, Alias<Wall>;
 def _analyzer_no_default_checks : Flag<["--"], "analyzer-no-default-checks">, Flags<[NoXarchOption]>;
 def _analyzer_output : JoinedOrSeparate<["--"], "analyzer-output">, Flags<[NoXarchOption]>,
-  HelpText<"Static analyzer report output format (html|plist|plist-multi-file|plist-html|sarif|text).">;
+  HelpText<"Static analyzer report output format (html|plist|plist-multi-file|plist-html|sarif|sarif-html|text).">;
 def _analyze : Flag<["--"], "analyze">, Flags<[NoXarchOption, CoreOption]>,
   HelpText<"Run the static analyzer">;
 def _assemble : Flag<["--"], "assemble">, Alias<S>;
@@ -4237,6 +4244,20 @@ def ffixed_line_length_EQ : Joined<["-"], "ffixed-line-length=">, Group<f_Group>
   DocBrief<[{Set column after which characters are ignored in typical fixed-form lines in the source
 file}]>;
 def ffixed_line_length_VALUE : Joined<["-"], "ffixed-line-length-">, Group<f_Group>, Alias<ffixed_line_length_EQ>;
+def fopenacc : Flag<["-"], "fopenacc">, Group<f_Group>,
+  HelpText<"Enable OpenACC">;
+
+}
+
+//===----------------------------------------------------------------------===//
+// FC1 Options
+//===----------------------------------------------------------------------===//
+let Flags = [FC1Option, FlangOnlyOption] in {
+
+def fdebug_unparse : Flag<["-"], "fdebug-unparse">, Group<Action_Group>,
+  HelpText<"Unparse and stop.">;
+def fdebug_unparse_with_symbols : Flag<["-"], "fdebug-unparse-with-symbols">, Group<Action_Group>,
+  HelpText<"Unparse and stop.">;
 
 }
 
@@ -4819,8 +4840,7 @@ def fcaret_diagnostics_max_lines :
 def verify_EQ : CommaJoined<["-"], "verify=">,
   MetaVarName<"<prefixes>">,
   HelpText<"Verify diagnostic output using comment directives that start with"
-           " prefixes in the comma-separated sequence <prefixes>">,
-  MarshallingInfoStringVector<DiagnosticOpts<"VerifyPrefixes">>;
+           " prefixes in the comma-separated sequence <prefixes>">;
 def verify : Flag<["-"], "verify">,
   HelpText<"Equivalent to -verify=expected">;
 def verify_ignore_unexpected : Flag<["-"], "verify-ignore-unexpected">,

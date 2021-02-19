@@ -115,8 +115,8 @@ define <vscale x 8 x double> @nxv8f64_1(double* %ptr, <vscale x 8 x i64> %indice
 ; CHECK-LABEL: nxv8f64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64,m8,ta,mu
-; CHECK-NEXT:    vsll.vi v16, v8, 3
-; CHECK-NEXT:    vluxei64.v v8, (a0), v16, v0.t
+; CHECK-NEXT:    vsll.vi v8, v8, 3
+; CHECK-NEXT:    vluxei64.v v8, (a0), v8, v0.t
 ; CHECK-NEXT:    ret
   %ptrs = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   %data = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
@@ -127,8 +127,7 @@ define <vscale x 8 x double> @nxv8f64_2(<vscale x 8 x double*> %ptrs, <vscale x 
 ; CHECK-LABEL: nxv8f64_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m8,ta,mu
-; CHECK-NEXT:    vluxei64.v v16, (zero), v8, v0.t
-; CHECK-NEXT:    vmv8r.v v8, v16
+; CHECK-NEXT:    vluxei64.v v8, (zero), v8, v0.t
 ; CHECK-NEXT:    ret
   %data = call <vscale x 8 x double> @llvm.vp.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x double> %data
@@ -138,8 +137,8 @@ define <vscale x 8 x double> @nxv8f64_3(double* %ptr, <vscale x 8 x i1> %mask, i
 ; CHECK-LABEL: nxv8f64_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64,m8,ta,mu
-; CHECK-NEXT:    vmv.v.i v16, 0
-; CHECK-NEXT:    vluxei64.v v8, (a0), v16, v0.t
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vluxei64.v v8, (a0), v8, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
   %splat = shufflevector <vscale x 8 x double*> %head, <vscale x 8 x double*> undef, <vscale x 8 x i32> zeroinitializer

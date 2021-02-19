@@ -595,11 +595,18 @@ static bool isTLIScalarize(const TargetLibraryInfo &TLI, const CallInst &CI) {
   bool Scalarize = TLI.isFunctionVectorizable(ScalarName);
   // Check that all known VFs are not associated to a vector
   // function, i.e. the vector name is emty.
-  if (Scalarize)
-    for (unsigned VF = 2, WidestVF = TLI.getWidestVF(ScalarName);
-         VF <= WidestVF; VF *= 2) {
+  if (Scalarize) {
+    ElementCount WidestFixedVF, WidestScalableVF;
+    TLI.getWidestVF(ScalarName, WidestFixedVF, WidestScalableVF);
+    for (ElementCount VF = ElementCount::getFixed(2);
+         ElementCount::isKnownLE(VF, WidestFixedVF); VF *= 2)
       Scalarize &= !TLI.isFunctionVectorizable(ScalarName, VF);
-    }
+    for (ElementCount VF = ElementCount::getScalable(1);
+         ElementCount::isKnownLE(VF, WidestScalableVF); VF *= 2)
+      Scalarize &= !TLI.isFunctionVectorizable(ScalarName, VF);
+    assert((WidestScalableVF.isZero() || !Scalarize) &&
+           "Caller may decide to scalarize a variant using a scalable VF");
+  }
   return Scalarize;
 }
 
@@ -979,62 +986,6 @@ bool LoopVectorizationLegality::blockCanBePredicated(
   return true;
 }
 
-void LoopVectorizationLegality::addMaskedVectorOps(BasicBlock *BB) {
-    // FIXME: This is awful. We are just making all operations masked. Some
-    // might need careful reconsideration.
-    auto IsVectorizableOpcode = [](unsigned Opcode) {
-      switch (Opcode) {
-      case Instruction::Add:
-      case Instruction::And:
-      case Instruction::AShr:
-      case Instruction::BitCast:
-      case Instruction::Br:
-      case Instruction::Call:
-      case Instruction::FAdd:
-      case Instruction::FCmp:
-      case Instruction::FDiv:
-      case Instruction::FMul:
-      case Instruction::FNeg:
-      case Instruction::FPExt:
-      case Instruction::FPToSI:
-      case Instruction::FPToUI:
-      case Instruction::FPTrunc:
-      case Instruction::FRem:
-      case Instruction::FSub:
-      case Instruction::ICmp:
-      case Instruction::IntToPtr:
-      case Instruction::Load:
-      case Instruction::LShr:
-      case Instruction::Mul:
-      case Instruction::Or:
-      case Instruction::PHI:
-      case Instruction::PtrToInt:
-      case Instruction::SDiv:
-      case Instruction::Select:
-      case Instruction::SExt:
-      case Instruction::Shl:
-      case Instruction::SIToFP:
-      case Instruction::SRem:
-      case Instruction::Store:
-      case Instruction::Sub:
-      case Instruction::Trunc:
-      case Instruction::UDiv:
-      case Instruction::UIToFP:
-      case Instruction::URem:
-      case Instruction::Xor:
-      case Instruction::ZExt:
-        return true;
-      }
-      return false;
-    };
-
-    for (Instruction &I : *BB) {
-      if (IsVectorizableOpcode(I.getOpcode())) {
-        MaskedOp.insert(&I);
-      }
-    }
-}
-
 bool LoopVectorizationLegality::canVectorizeWithIfConvert() {
   if (!EnableIfConversion) {
     reportVectorizationFailure("If-conversion is disabled",
@@ -1332,12 +1283,6 @@ bool LoopVectorizationLegality::prepareToFoldTailByMasking() {
       LLVM_DEBUG(dbgs() << "LV: Cannot fold tail by masking as requested.\n");
       return false;
     }
-    // To use vector predication intrinsics, we need to add mask to all
-    // operations.
-    // Unlike memory ops, mask on other ops guarantees preference for predicated
-    // vectorization.
-    if (preferPredicatedVectorOps())
-      addMaskedVectorOps(BB);
   }
 
   LLVM_DEBUG(dbgs() << "LV: can fold tail by masking.\n");

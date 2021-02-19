@@ -474,20 +474,20 @@ define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1,
 ; CHECK-O2-NEXT:    vle8.v v28, (a1)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vand.vi v26, v26, 1
-; CHECK-O2-NEXT:    vmsne.vi v30, v26, 0
-; CHECK-O2-NEXT:    vand.vi v26, v28, 1
-; CHECK-O2-NEXT:    vmsne.vi v28, v26, 0
-; CHECK-O2-NEXT:    vmv.v.i v8, 0
-; CHECK-O2-NEXT:    vmand.mm v0, v30, v28
-; CHECK-O2-NEXT:    vmor.mm v25, v30, v28
-; CHECK-O2-NEXT:    vmxor.mm v26, v30, v28
-; CHECK-O2-NEXT:    vmerge.vim v28, v8, 1, v0
+; CHECK-O2-NEXT:    vmsne.vi v26, v26, 0
+; CHECK-O2-NEXT:    vand.vi v28, v28, 1
+; CHECK-O2-NEXT:    vmsne.vi v27, v28, 0
+; CHECK-O2-NEXT:    vmv.v.i v28, 0
+; CHECK-O2-NEXT:    vmand.mm v0, v26, v27
+; CHECK-O2-NEXT:    vmor.mm v25, v26, v27
+; CHECK-O2-NEXT:    vmxor.mm v26, v26, v27
+; CHECK-O2-NEXT:    vmerge.vim v30, v28, 1, v0
 ; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v30, v8, 1, v0
+; CHECK-O2-NEXT:    vmerge.vim v8, v28, 1, v0
 ; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v8, 1, v0
-; CHECK-O2-NEXT:    vse8.v v28, (a0)
+; CHECK-O2-NEXT:    vmerge.vim v26, v28, 1, v0
 ; CHECK-O2-NEXT:    vse8.v v30, (a0)
+; CHECK-O2-NEXT:    vse8.v v8, (a0)
 ; CHECK-O2-NEXT:    vse8.v v26, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 16 x i1> undef, i1 1, i32 0

@@ -357,10 +357,14 @@ OpFoldResult BroadcastOp::fold(ArrayRef<Attribute> operands) {
   if (!operands[1])
     return nullptr;
 
+  // TODO: Support folding with more than 2 input shapes
+  if (operands.size() > 2 && !operands[2].isa<StringAttr>())
+    return nullptr;
+
   auto rhsShape = llvm::to_vector<6>(
       operands[1].cast<DenseIntElementsAttr>().getValues<int64_t>());
   if (rhsShape.empty())
-    return lhs();
+    return shapes()[0];
 
   if (!operands[0])
     return nullptr;
@@ -368,7 +372,7 @@ OpFoldResult BroadcastOp::fold(ArrayRef<Attribute> operands) {
   auto lhsShape = llvm::to_vector<6>(
       operands[0].cast<DenseIntElementsAttr>().getValues<int64_t>());
   if (lhsShape.empty())
-    return rhs();
+    return shapes()[1];
 
   SmallVector<int64_t, 6> resultShape;
   // If the shapes are not compatible, we can't fold it.
@@ -377,6 +381,14 @@ OpFoldResult BroadcastOp::fold(ArrayRef<Attribute> operands) {
     return nullptr;
   Builder builder(getContext());
   return builder.getIndexTensorAttr(resultShape);
+}
+
+static LogicalResult verify(BroadcastOp op) {
+  // Ensure that AssumingAllOp contains at least one operand
+  if (op.getNumOperands() < 2)
+    return op.emitOpError("required at least 2 input shapes");
+
+  return verifyShapeOrExtentTensorOp(op);
 }
 
 //===----------------------------------------------------------------------===//
@@ -479,6 +491,10 @@ void CstrBroadcastableOp::getCanonicalizationPatterns(
 }
 
 OpFoldResult CstrBroadcastableOp::fold(ArrayRef<Attribute> operands) {
+  // TODO: Add folding for the nary case
+  if (operands.size() != 2)
+    return nullptr;
+
   // Both operands are not needed if one is a scalar.
   if (operands[0] &&
       operands[0].cast<DenseIntElementsAttr>().getNumElements() == 0)
@@ -500,9 +516,9 @@ OpFoldResult CstrBroadcastableOp::fold(ArrayRef<Attribute> operands) {
   // Lastly, see if folding can be completed based on what constraints are known
   // on the input shapes.
   SmallVector<int64_t, 6> lhsShape, rhsShape;
-  if (failed(getShapeVec(lhs(), lhsShape)))
+  if (failed(getShapeVec(shapes()[0], lhsShape)))
     return nullptr;
-  if (failed(getShapeVec(rhs(), rhsShape)))
+  if (failed(getShapeVec(shapes()[1], rhsShape)))
     return nullptr;
 
   if (OpTrait::util::staticallyKnownBroadcastable(lhsShape, rhsShape))
@@ -511,6 +527,13 @@ OpFoldResult CstrBroadcastableOp::fold(ArrayRef<Attribute> operands) {
   // Because a failing witness result here represents an eventual assertion
   // failure, we do not replace it with a constant witness.
   return nullptr;
+}
+
+static LogicalResult verify(CstrBroadcastableOp op) {
+  // Ensure that AssumingAllOp contains at least one operand
+  if (op.getNumOperands() < 2)
+    return op.emitOpError("required at least 2 input shapes");
+  return success();
 }
 
 //===----------------------------------------------------------------------===//
@@ -709,6 +732,17 @@ void GetExtentOp::build(OpBuilder &builder, OperationState &result, Value shape,
         builder.create<ConstantOp>(loc, builder.getIndexType(), dimAttr);
     build(builder, result, builder.getIndexType(), shape, dim);
   }
+}
+
+//===----------------------------------------------------------------------===//
+// IsBroadcastableOp
+//===----------------------------------------------------------------------===//
+
+static LogicalResult verify(IsBroadcastableOp op) {
+  // Ensure that AssumingAllOp contains at least one operand
+  if (op.getNumOperands() < 2)
+    return op.emitOpError("required at least 2 input shapes");
+  return success();
 }
 
 //===----------------------------------------------------------------------===//

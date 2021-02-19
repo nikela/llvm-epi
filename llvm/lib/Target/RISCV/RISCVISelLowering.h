@@ -158,12 +158,14 @@ enum NodeType : unsigned {
   VLEFF,
   VLEFF_MASK,
   // Matches the semantics of vslideup/vslidedown. The first operand is the
-  // pass-thru operand, the second is the source vector, and the third is the
-  // XLenVT index (either constant or non-constant).
-  VSLIDEUP,
-  VSLIDEDOWN,
-  // Matches the semantics of the unmasked vid.v instruction.
-  VID,
+  // pass-thru operand, the second is the source vector, the third is the
+  // XLenVT index (either constant or non-constant), the fourth is the mask
+  // and the fifth the VL.
+  VSLIDEUP_VL,
+  VSLIDEDOWN_VL,
+  // Matches the semantics of the vid.v instruction, with a mask and VL
+  // operand.
+  VID_VL,
   // Matches the semantics of the vfcnvt.rod function (Convert double-width
   // float to single-width float, rounding towards odd). Takes a double-width
   // float vector and produces a single-width float vector.
@@ -189,7 +191,8 @@ enum NodeType : unsigned {
   VECREDUCE_FADD,
   VECREDUCE_SEQ_FADD,
 
-  // Vector binary and unary ops with VL as a third operand.
+  // Vector binary and unary ops with a mask as a third operand, and VL as a
+  // fourth operand.
   // FIXME: Can we replace these with ISD::VP_*?
   ADD_VL,
   AND_VL,
@@ -209,11 +212,29 @@ enum NodeType : unsigned {
   FMUL_VL,
   FDIV_VL,
   FNEG_VL,
+  FABS_VL,
+  FSQRT_VL,
   FMA_VL,
+  SMIN_VL,
+  SMAX_VL,
+  UMIN_VL,
+  UMAX_VL,
+
+  // Vector compare producing a mask. Fourth operand is input mask. Fifth
+  // operand is VL.
+  SETCC_VL,
+
+  // Mask binary operators.
+  VMAND_VL,
+  VMOR_VL,
+  VMXOR_VL,
 
   // Set mask vector to all zeros or ones.
   VMCLR_VL,
   VMSET_VL,
+
+  // Matches the semantics of vrgather.vx with an extra operand for VL.
+  VRGATHER_VX_VL,
 
   // Memory opcodes start here.
   VLE_VL = ISD::FIRST_TARGET_MEMORY_OPCODE,
@@ -440,7 +461,6 @@ private:
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
@@ -451,11 +471,17 @@ private:
   SDValue lowerMSTORE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMGATHER(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSCATTER(SDValue Op, SelectionDAG &DAG) const;
+  using VTToLibCall = std::pair<EVT, RTLIB::Libcall>;
+  SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
+                          ArrayRef<VTToLibCall> TypeToCall) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFSIN(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFCOS(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFPVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorLoadToRVV(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorStoreToRVV(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFixedLengthVectorSetccToRVV(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerToScalableOp(SDValue Op, SelectionDAG &DAG,
                             unsigned NewOpc) const;
 
@@ -475,7 +501,7 @@ private:
 namespace RISCV {
 // We use 64 bits as the known part in the scalable vector types.
 static constexpr unsigned RVVBitsPerBlock = 64;
-}; // namespace RISCV
+} // namespace RISCV
 
 namespace RISCVVIntrinsicsTable {
 

@@ -437,13 +437,15 @@ class EPIPseudo {
   bits<8> VLIndex;
   bits<8> SEWIndex;
   bits<8> MergeOpIndex;
+  bits<8> MaskOpIndex;
   bits<3> VLMul;
 }
 
 def EPIPseudosTable : GenericTable {
   let FilterClass = "EPIPseudo";
   let CppTypeName = "EPIPseudoInfo";
-  let Fields = [ "Pseudo", "BaseInstr", "VLIndex", "SEWIndex", "MergeOpIndex", "VLMul" ];
+  let Fields = [ "Pseudo", "BaseInstr", "VLIndex", "SEWIndex",
+                 "MergeOpIndex", "MaskOpIndex", "VLMul" ];
   let PrimaryKey = [ "Pseudo" ];
   let PrimaryKeyName = "getEPIPseudoInfo";
 }
@@ -454,6 +456,7 @@ multiclass pseudo_nullary<VReg result_reg_class,
                           string constraints> {
   let Constraints = Join<[constraints, "$rd = $merge"], ",">.ret,
       Uses = [VL, VTYPE], VLIndex = 3, SEWIndex = 4, MergeOpIndex = 1,
+      MaskOpIndex = 2,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                               (ins result_reg_class:$merge,
@@ -467,10 +470,9 @@ multiclass pseudo_nullary_v {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _V : pseudo_nullary<m.vrclass, m, constraints>;
+      defm _V : pseudo_nullary<m.vrclass, m, "">;
     }
   }
 }
@@ -481,6 +483,7 @@ multiclass pseudo_unary<VReg result_reg_class,
                         string constraints> {
   let Constraints = Join<[constraints, "$rd = $merge"], ",">.ret,
       Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
+      MaskOpIndex = 3,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins result_reg_class:$merge,
@@ -497,6 +500,7 @@ multiclass pseudo_unary_nomerge<VReg result_reg_class,
                                 string constraints = ""> {
   let Constraints = constraints,
       Uses = [VL, VTYPE], VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
+      MaskOpIndex = 2,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins op_reg_class:$rs2, VMaskOp:$vm,
@@ -512,6 +516,7 @@ multiclass pseudo_unary_nomask<VReg result_reg_class,
                                string constraints = ""> {
   let Constraints = constraints,
       Uses = [VL, VTYPE], VLIndex = 2, SEWIndex = 3, MergeOpIndex = -1,
+      MaskOpIndex = -1,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                             (ins op_kind:$rs2,
@@ -524,10 +529,9 @@ multiclass pseudo_unary_v_m {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = "@earlyclobber $rd";
     let VLMul = m.value in
     {
-      defm _M : pseudo_unary<m.vrclass, VR, m, constraints>;
+      defm _M : pseudo_unary<m.vrclass, VR, m, "">;
     }
   }
 }
@@ -536,10 +540,9 @@ multiclass pseudo_unary_v_v {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _V : pseudo_unary<m.vrclass, m.vrclass, m, constraints>;
+      defm _V : pseudo_unary<m.vrclass, m.vrclass, m, "">;
     }
   }
 }
@@ -601,6 +604,7 @@ multiclass pseudo_binary<VReg result_reg_class,
                          list<SchedReadWrite> sched = []> {
   let Constraints = Join<[constraints, "$rd = $merge"], ",">.ret,
       Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+      MaskOpIndex = 4,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins result_reg_class:$merge,
@@ -619,6 +623,7 @@ multiclass pseudo_binary_nomask<VReg result_reg_class,
                                 string constraints = ""> {
   let Constraints = constraints,
       Uses = [VL, VTYPE], VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
+      MaskOpIndex = -1,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins op1_reg_class:$rs2, op2_kind:$rs1,
@@ -634,6 +639,7 @@ multiclass pseudo_binary_mask_in<VReg result_reg_class,
                                  string constraints> {
   let Constraints = constraints,
       Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+      MaskOpIndex = 3,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins op1_reg_class:$rs2, op2_kind:$rs1,
@@ -646,10 +652,9 @@ multiclass pseudo_binary_v_vv {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
+      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, "">;
     }
   }
 }
@@ -658,8 +663,7 @@ multiclass pseudo_binary_v_vx<bit force_earlyclobber = 0> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!or(force_earlyclobber, !ne(m.value, 0)),
-                             "@earlyclobber $rd", "");
+    defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
       defm _VX : pseudo_binary<m.vrclass, m.vrclass, GPR, m, constraints>;
@@ -671,10 +675,9 @@ multiclass pseudo_binary_v_vs {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VS : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
+      defm _VS : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, "">;
     }
   }
 }
@@ -683,11 +686,10 @@ multiclass pseudo_binary_v_vv_vx {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
-      defm _VX : pseudo_binary<m.vrclass, m.vrclass, GPR, m, constraints>;
+      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, "">;
+      defm _VX : pseudo_binary<m.vrclass, m.vrclass, GPR, m, "">;
     }
   }
 }
@@ -697,8 +699,7 @@ multiclass pseudo_binary_v_vx_vi<DAGOperand imm_kind = simm5,
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!or(force_earlyclobber, !ne(m.value, 0)),
-                             "@earlyclobber $rd", "");
+    defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
       defm _VX : pseudo_binary<m.vrclass, m.vrclass, GPR, m, constraints>;
@@ -715,8 +716,7 @@ multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!or(force_earlyclobber, !ne(m.value, 0)),
-                             "@earlyclobber $rd", "");
+    defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
       defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, constraints, sched_vv>;
@@ -747,11 +747,10 @@ multiclass pseudo_binary_v_vvm_vxm {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VVM : pseudo_binary_mask_in<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
-      defm _VXM : pseudo_binary_mask_in<m.vrclass, m.vrclass, GPR, m, constraints>;
+      defm _VVM : pseudo_binary_mask_in<m.vrclass, m.vrclass, m.vrclass, m, "">;
+      defm _VXM : pseudo_binary_mask_in<m.vrclass, m.vrclass, GPR, m, "">;
     }
   }
 }
@@ -760,12 +759,11 @@ multiclass pseudo_binary_v_vvm_vxm_vim {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VVM : pseudo_binary_mask_in<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
-      defm _VXM : pseudo_binary_mask_in<m.vrclass, m.vrclass, GPR, m, constraints>;
-      defm _VIM : pseudo_binary_mask_in<m.vrclass, m.vrclass, simm5, m, constraints>;
+      defm _VVM : pseudo_binary_mask_in<m.vrclass, m.vrclass, m.vrclass, m, "">;
+      defm _VXM : pseudo_binary_mask_in<m.vrclass, m.vrclass, GPR, m, "">;
+      defm _VIM : pseudo_binary_mask_in<m.vrclass, m.vrclass, simm5, m, "">;
     }
   }
 }
@@ -774,12 +772,11 @@ multiclass pseudo_binary_m_vvm_vxm {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = "@earlyclobber $rd";
     let VLMul = m.value in
     {
       // These instructions generate a mask register so their result is a VR.
-      defm _VVM : pseudo_binary_mask_in<VR, m.vrclass, m.vrclass, m, constraints>;
-      defm _VXM : pseudo_binary_mask_in<VR, m.vrclass, GPR, m, constraints>;
+      defm _VVM : pseudo_binary_mask_in<VR, m.vrclass, m.vrclass, m, "">;
+      defm _VXM : pseudo_binary_mask_in<VR, m.vrclass, GPR, m, "">;
     }
   }
 }
@@ -788,13 +785,12 @@ multiclass pseudo_binary_m_vvm_vxm_vim {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = "@earlyclobber $rd";
     let VLMul = m.value in
     {
       // These instructions generate a mask register so their result is a VR.
-      defm _VVM : pseudo_binary_mask_in<VR, m.vrclass, m.vrclass, m, constraints>;
-      defm _VXM : pseudo_binary_mask_in<VR, m.vrclass, GPR, m, constraints>;
-      defm _VIM : pseudo_binary_mask_in<VR, m.vrclass, simm5, m, constraints>;
+      defm _VVM : pseudo_binary_mask_in<VR, m.vrclass, m.vrclass, m, "">;
+      defm _VXM : pseudo_binary_mask_in<VR, m.vrclass, GPR, m, "">;
+      defm _VIM : pseudo_binary_mask_in<VR, m.vrclass, simm5, m, "">;
     }
   }
 }
@@ -833,11 +829,10 @@ multiclass pseudo_binary_m_vv_vx {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, constraints>;
-      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, constraints>;
+      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, "">;
+      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, "">;
     }
   }
 }
@@ -859,11 +854,10 @@ multiclass pseudo_binary_m_vx_vi {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, constraints>;
-      defm _VI : pseudo_binary<VR, m.vrclass, simm5, m, constraints>;
+      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, "">;
+      defm _VI : pseudo_binary<VR, m.vrclass, simm5, m, "">;
     }
   }
 }
@@ -872,12 +866,11 @@ multiclass pseudo_binary_m_vv_vx_vi {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, constraints>;
-      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, constraints>;
-      defm _VI : pseudo_binary<VR, m.vrclass, simm5, m, constraints>;
+      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, "">;
+      defm _VX : pseudo_binary<VR, m.vrclass, GPR, m, "">;
+      defm _VI : pseudo_binary<VR, m.vrclass, simm5, m, "">;
     }
   }
 }
@@ -900,10 +893,9 @@ multiclass pseudo_binary_v_vf {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VF : pseudo_binary<m.vrclass, m.vrclass, FPR64, m, constraints>;
+      defm _VF : pseudo_binary<m.vrclass, m.vrclass, FPR64, m, "">;
     }
   }
 }
@@ -912,10 +904,9 @@ multiclass pseudo_binary_v_vfm {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VFM : pseudo_binary_mask_in<m.vrclass, m.vrclass, FPR64, m, constraints>;
+      defm _VFM : pseudo_binary_mask_in<m.vrclass, m.vrclass, FPR64, m, "">;
     }
   }
 }
@@ -925,11 +916,10 @@ multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, 
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, constraints, sched_vv>;
-      defm _VF : pseudo_binary<m.vrclass, m.vrclass, FPR64, m, constraints, sched_vf>;
+      defm _VV : pseudo_binary<m.vrclass, m.vrclass, m.vrclass, m, "", sched_vv>;
+      defm _VF : pseudo_binary<m.vrclass, m.vrclass, FPR64, m, "", sched_vf>;
     }
   }
 }
@@ -968,10 +958,9 @@ multiclass pseudo_binary_m_vf {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VF : pseudo_binary<VR, m.vrclass, FPR64, m, constraints>;
+      defm _VF : pseudo_binary<VR, m.vrclass, FPR64, m, "">;
     }
   }
 }
@@ -980,11 +969,10 @@ multiclass pseudo_binary_m_vv_vf {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, constraints>;
-      defm _VF : pseudo_binary<VR, m.vrclass, FPR64, m, constraints>;
+      defm _VV : pseudo_binary<VR, m.vrclass, m.vrclass, m, "">;
+      defm _VF : pseudo_binary<VR, m.vrclass, FPR64, m, "">;
     }
   }
 }
@@ -998,6 +986,7 @@ multiclass pseudo_ternary<VReg result_reg_class,
   let Constraints = Join<["$rd = $rs3", constraints], ",">.ret,
       Uses = [VL, VTYPE],
       VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+      MaskOpIndex = 4,
       BaseInstr = !cast<Instruction>(!subst("PseudoEPI", "", NAME)) in
     def "_" # MInfo.MX : Pseudo<(outs result_reg_class:$rd),
                                 (ins result_reg_class:$rs3, op1_reg_class:$rs1,
@@ -1012,11 +1001,10 @@ multiclass pseudo_ternary_v_vv_vx {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_ternary<m.vrclass, m.vrclass, m.vrclass, m, constraints>;
-      defm _VX : pseudo_ternary<m.vrclass, GPR, m.vrclass, m, constraints>;
+      defm _VV : pseudo_ternary<m.vrclass, m.vrclass, m.vrclass, m, "">;
+      defm _VX : pseudo_ternary<m.vrclass, GPR, m.vrclass, m, "">;
     }
   }
 }
@@ -1026,11 +1014,10 @@ multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU,
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
-    defvar constraints = !if(!ne(m.value, 0), "@earlyclobber $rd", "");
     let VLMul = m.value in
     {
-      defm _VV : pseudo_ternary<m.vrclass, m.vrclass, m.vrclass, m, constraints, sched_vv>;
-      defm _VF : pseudo_ternary<m.vrclass, FPR64, m.vrclass, m, constraints, sched_vf>;
+      defm _VV : pseudo_ternary<m.vrclass, m.vrclass, m.vrclass, m, "", sched_vv>;
+      defm _VF : pseudo_ternary<m.vrclass, FPR64, m.vrclass, m, "", sched_vf>;
     }
   }
 }
@@ -1238,13 +1225,14 @@ foreach m = MxList.m in
 {
   let VLMul = m.value in
   {
-    let VLIndex = -1, SEWIndex = 2, MergeOpIndex = -1, BaseInstr = VMV_X_S in
+    let VLIndex = -1, SEWIndex = 2, MergeOpIndex = -1, BaseInstr = VMV_X_S, 
+        MaskOpIndex = -1 in
       def PseudoEPIVMV_X_S_ # m.MX : Pseudo<(outs GPR:$rd),
                                  (ins m.vrclass:$rs2, ixlenimm:$sew),
                                  []>,
                           EPIPseudo;
     let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
-        MergeOpIndex = -1, BaseInstr = VMV_S_X in
+        MergeOpIndex = -1, BaseInstr = VMV_S_X, MaskOpIndex = -1 in
       def PseudoEPIVMV_S_X_ # m.MX : Pseudo<(outs m.vrclass:$rd),
                                  (ins m.vrclass:$merge, GPR:$rs1, GPR:$vl,
                                       ixlenimm:$sew),
@@ -1309,13 +1297,13 @@ foreach m = MxList.m in
 {
   let VLMul = m.value in
   {
-    let VLIndex = -1, SEWIndex = 2, BaseInstr = VFMV_F_S in
+    let VLIndex = -1, SEWIndex = 2, BaseInstr = VFMV_F_S, MaskOpIndex = -1 in
       def PseudoEPIVFMV_F_S_ # m.MX : Pseudo<(outs FPR64:$rd),
                                   (ins m.vrclass:$rs2, ixlenimm:$sew),
                                   []>,
                            EPIPseudo;
     let Constraints = "$rd = $merge", VLIndex = 3, SEWIndex = 4,
-        MergeOpIndex = -1, BaseInstr = VFMV_S_F in
+        MergeOpIndex = -1, BaseInstr = VFMV_S_F, MaskOpIndex = -1 in
       def PseudoEPIVFMV_S_F_ # m.MX : Pseudo<(outs m.vrclass:$rd),
                                   (ins m.vrclass:$merge, FPR64:$rs2, GPR:$vl,
                                        ixlenimm:$sew),
@@ -1405,10 +1393,10 @@ foreach m = MxList.m in
   let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
       usesCustomInserter = 1,
       VLMul = vlmul,
-      Constraints = Join<[!if(!gt(vlmul, 1), "@earlyclobber $rd", ""),
-                          "$rd = $merge"], ",">.ret in
+      Constraints = "$rd = $merge" in
   {
     let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
+        MaskOpIndex = 3,
         BaseInstr = !cast<Instruction>("VLE" # eew # "_V") in
       def "PseudoEPIVLE" # eew # "_V_" # LInfo
           : Pseudo<(outs evr:$rd),
@@ -1419,6 +1407,7 @@ foreach m = MxList.m in
             Sched<[WriteVPULoad, ReadMemBase]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        MaskOpIndex = 4,
         BaseInstr = !cast<Instruction>("VLSE" # eew # "_V") in
       def "PseudoEPIVLSE" # eew # "_V_" # LInfo
           : Pseudo<(outs evr:$rd),
@@ -1431,6 +1420,7 @@ foreach m = MxList.m in
     foreach ieew = AllowedEEW<vlmul, /* sew= */ eew>.allowed_sew in {
       defvar ievr = RegisterClassForIndex<vlmul, /* sew= */ eew, /* eew */ ieew, evr>.r;
       let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+          MaskOpIndex = 4,
           BaseInstr = !cast<Instruction>("VLUXEI" # ieew #"_V") in
         def "PseudoEPIVLXE" # eew # "I" # ieew # "_V_" # LInfo
             : Pseudo<(outs evr:$rd),
@@ -1449,6 +1439,7 @@ foreach m = MxList.m in
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
         VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
+        MaskOpIndex = 2,
         BaseInstr = !cast<Instruction>("VSE" # eew #"_V") in
       def "PseudoEPIVSE" # eew # "_V_" # LInfo
           : Pseudo<(outs),
@@ -1461,6 +1452,7 @@ foreach m = MxList.m in
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        MaskOpIndex = 3,
         BaseInstr = !cast<Instruction>("VSSE" # eew # "_V") in
       def "PseudoEPIVSSE" # eew # "_V_" # LInfo
           : Pseudo<(outs),
@@ -1475,6 +1467,7 @@ foreach m = MxList.m in
       // Masked stores do not have a merge operand as merge is done in memory
       let Uses = [VL, VTYPE],
           VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+          MaskOpIndex = 3,
           BaseInstr = !cast<Instruction>("VSUXEI" # ieew # "_V") in
         def "PseudoEPIVSXE" # eew # "I" # ieew #"_V_" # LInfo
             : Pseudo<(outs),
@@ -1492,7 +1485,7 @@ foreach m = MxList.m in
 //===----------------------------------------------------------------------===//
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
-    MergeOpIndex = -1, VLIndex = -1, SEWIndex = -1 in
+    MergeOpIndex = -1, VLIndex = -1, SEWIndex = -1, MaskOpIndex = -1 in
 {
   let BaseInstr = VMV2R_V, VLMul = 1 in
   def PseudoEPIVMV2R_M2 : Pseudo<(outs VRM2:$rdest), (ins VRM2:$rs1), []>,
@@ -1524,6 +1517,7 @@ foreach eew = AllEEW in
       usesCustomInserter = 1, VLMul = 0 in
   {
     let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
+        MaskOpIndex = 3,
         BaseInstr = !cast<Instruction>("VLSEG"#tsize#"E"#eew#"_V") in
       def PseudoEPIVLSEG#tsize#E#eew#_V_M1
           : Pseudo<(outs TupleRegClass:$rd),
@@ -1533,6 +1527,7 @@ foreach eew = AllEEW in
             EPIPseudo;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        MaskOpIndex = 4,
         BaseInstr = !cast<Instruction>("VLSSEG"#tsize#"E"#eew#"_V") in
       def PseudoEPIVLSSEG#tsize#E#eew#_V_M1
           : Pseudo<(outs TupleRegClass:$rd),
@@ -1542,6 +1537,7 @@ foreach eew = AllEEW in
             EPIPseudo;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        MaskOpIndex = 4,
         BaseInstr = !cast<Instruction>("VLUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVLXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs TupleRegClass:$rd),
@@ -1556,6 +1552,7 @@ foreach eew = AllEEW in
   {
     let Uses = [VL, VTYPE],
         VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
+        MaskOpIndex = 2,
         BaseInstr = !cast<Instruction>("VSSEG"#tsize#"E"#eew#"_V") in
       def PseudoEPIVSSEG#tsize#E#eew#_V_M1
           : Pseudo<(outs),
@@ -1566,6 +1563,7 @@ foreach eew = AllEEW in
 
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        MaskOpIndex = 3,
         BaseInstr = !cast<Instruction>("VSSSEG"#tsize#"E"#eew#"_V") in
       def PseudoEPIVSSSEG#tsize#E#eew#_V_M1
           : Pseudo<(outs),
@@ -1576,6 +1574,7 @@ foreach eew = AllEEW in
 
     let Uses = [VL, VTYPE],
         VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        MaskOpIndex = 3,
         BaseInstr = !cast<Instruction>("VSUXSEG"#tsize#"EI"#eew#"_V") in
       def PseudoEPIVSXSEG#tsize#EI#eew#_V_M1
           : Pseudo<(outs),

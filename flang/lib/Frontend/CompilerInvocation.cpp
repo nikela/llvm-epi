@@ -7,7 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "flang/Frontend/CompilerInvocation.h"
+#include "flang/Common/Fortran-features.h"
 #include "flang/Frontend/PreprocessorOptions.h"
+#include "flang/Semantics/semantics.h"
 #include "flang/Version.inc"
 #include "clang/Basic/AllDiagnostics.h"
 #include "clang/Basic/DiagnosticDriver.h"
@@ -21,6 +23,7 @@
 #include "llvm/Option/OptTable.h"
 #include "llvm/Support/Process.h"
 #include "llvm/Support/raw_ostream.h"
+#include <memory>
 
 using namespace Fortran::frontend;
 
@@ -106,6 +109,12 @@ static InputKind ParseFrontendArgs(FrontendOptions &opts,
       break;
     case clang::driver::options::OPT_emit_obj:
       opts.programAction_ = EmitObj;
+      break;
+    case clang::driver::options::OPT_fdebug_unparse:
+      opts.programAction_ = DebugUnparse;
+      break;
+    case clang::driver::options::OPT_fdebug_unparse_with_symbols:
+      opts.programAction_ = DebugUnparseWithSymbols;
       break;
 
       // TODO:
@@ -195,6 +204,14 @@ static InputKind ParseFrontendArgs(FrontendOptions &opts,
     } else {
       opts.fixedFormColumns_ = columns;
     }
+  }
+
+  // Extensions
+  if (args.hasArg(clang::driver::options::OPT_fopenacc)) {
+    opts.features_.Enable(Fortran::common::LanguageFeature::OpenACC);
+  }
+  if (args.hasArg(clang::driver::options::OPT_fopenmp)) {
+    opts.features_.Enable(Fortran::common::LanguageFeature::OpenMP);
   }
   return dashX;
 }
@@ -317,11 +334,16 @@ void CompilerInvocation::SetDefaultFortranOpts() {
   std::vector<std::string> searchDirectories{"."s};
   fortranOptions.searchDirectories = searchDirectories;
   fortranOptions.isFixedForm = false;
+}
+
+// TODO: When expanding this method, consider creating a dedicated API for
+// this. Also at some point we will need to differentiate between different
+// targets and add dedicated predefines for each.
+void CompilerInvocation::setDefaultPredefinitions() {
+  auto &fortranOptions = fortranOpts();
+  const auto &frontendOptions = frontendOpts();
 
   // Populate the macro list with version numbers and other predefinitions.
-  // TODO: When expanding this list of standard predefinitions, consider
-  // creating a dedicated API for this. Also at some point we will need to
-  // differentiate between different targets.
   fortranOptions.predefinitions.emplace_back("__flang__", "1");
   fortranOptions.predefinitions.emplace_back(
       "__flang_major__", FLANG_VERSION_MAJOR_STRING);
@@ -329,6 +351,16 @@ void CompilerInvocation::SetDefaultFortranOpts() {
       "__flang_minor__", FLANG_VERSION_MINOR_STRING);
   fortranOptions.predefinitions.emplace_back(
       "__flang_patchlevel__", FLANG_VERSION_PATCHLEVEL_STRING);
+
+  // Add predefinitions based on extensions enabled
+  if (frontendOptions.features_.IsEnabled(
+          Fortran::common::LanguageFeature::OpenACC)) {
+    fortranOptions.predefinitions.emplace_back("_OPENACC", "202011");
+  }
+  if (frontendOptions.features_.IsEnabled(
+          Fortran::common::LanguageFeature::OpenMP)) {
+    fortranOptions.predefinitions.emplace_back("_OPENMP", "201511");
+  }
 }
 
 void CompilerInvocation::setFortranOpts() {
@@ -342,6 +374,8 @@ void CompilerInvocation::setFortranOpts() {
         frontendOptions.fortranForm_ == FortranForm::FixedForm;
   }
   fortranOptions.fixedFormColumns = frontendOptions.fixedFormColumns_;
+
+  fortranOptions.features = frontendOptions.features_;
 
   collectMacroDefinitions(preprocessorOptions, fortranOptions);
 
@@ -357,10 +391,14 @@ void CompilerInvocation::setFortranOpts() {
 }
 
 void CompilerInvocation::setSemanticsOpts(
-    Fortran::semantics::SemanticsContext &semaCtxt) {
-  auto &fortranOptions = fortranOpts();
+    Fortran::parser::AllCookedSources &allCookedSources) {
+  const auto &fortranOptions = fortranOpts();
+
+  semanticsContext_ = std::make_unique<semantics::SemanticsContext>(
+      *(new Fortran::common::IntrinsicTypeDefaultKinds()),
+      fortranOptions.features, allCookedSources);
+
   auto &moduleDirJ = moduleDir();
-  semaCtxt.set_moduleDirectory(moduleDirJ)
+  semanticsContext_->set_moduleDirectory(moduleDirJ)
       .set_searchDirectories(fortranOptions.searchDirectories);
-  return;
 }
