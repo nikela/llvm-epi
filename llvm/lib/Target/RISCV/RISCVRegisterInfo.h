@@ -60,7 +60,9 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
     return &RISCV::GPRRegClass;
   }
 
-  bool hasBasePointer(const MachineFunction &MF) const;
+  const TargetRegisterClass *
+  getLargestLegalSuperClass(const TargetRegisterClass *RC,
+                            const MachineFunction &) const override;
 };
 }
 

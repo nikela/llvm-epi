@@ -297,11 +297,10 @@ RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
   }
 }
 
-bool RISCVRegisterInfo::hasBasePointer(const MachineFunction &MF) const {
-  // We use a BP when all of the following are true:
-  // - the stack needs realignment (due to overaligned local objects)
-  // - the stack has VLAs
-  // Note that when we need a BP the conditions also imply a FP.
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  return needsStackRealignment(MF) && MFI.hasVarSizedObjects();
+const TargetRegisterClass *
+RISCVRegisterInfo::getLargestLegalSuperClass(const TargetRegisterClass *RC,
+                                             const MachineFunction &) const {
+  if (RC == &RISCV::VMV0RegClass)
+    return &RISCV::VRRegClass;
+  return RC;
 }
