@@ -139,6 +139,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/InjectTLIMappings.h"
+#include "llvm/Transforms/Utils/Local.h"
 #include "llvm/Transforms/Utils/LoopSimplify.h"
 #include "llvm/Transforms/Utils/LoopUtils.h"
 #include "llvm/Transforms/Utils/LoopVersioning.h"
@@ -944,6 +945,15 @@ protected:
 
   /// EVL of the widened loop using vector predication (vsetvl())
   VPValue *EVL = nullptr;
+
+  /// A vector of pairs of value and part that should be replaced with EVL once
+  /// the EVL is available
+  struct {
+    SmallVector<std::pair<Value *, unsigned>, 4> NextInduction;
+    Value *Step;
+    Instruction::BinaryOps MulOp;
+    ElementCount VF;
+  } NextInductionInfo;
 
   /// The legality analysis.
   LoopVectorizationLegality *Legal;
@@ -2137,15 +2147,23 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
 
   // Multiply the vectorization factor by the step using integer or
   // floating-point arithmetic as appropriate.
-  Value *ScaledVF = nullptr;
-  if (VF.isScalable())
-    ScaledVF = Builder.CreateVScale(Builder.getInt32(VF.getKnownMinValue()));
+  Value *ConstVF = nullptr;
+  if (VF.isScalable()) {
+    if (Step->getType()->isIntegerTy()) {
+      ConstVF = Builder.CreateVScale(
+          ConstantInt::get(Step->getType(), VF.getKnownMinValue()));
+    } else {
+      Value *ScaledVF =
+          Builder.CreateVScale(Builder.getInt32(VF.getKnownMinValue()));
+      ConstVF = Builder.CreateUIToFP(ScaledVF, Step->getType());
+    }
+  } else {
+    ConstVF = getSignedIntOrFpConstant(Step->getType(), VF.getKnownMinValue());
+  }
 
-  Value *ConstVF =
-      VF.isScalable()
-          ? Builder.CreateUIToFP(ScaledVF, Step->getType())
-          : getSignedIntOrFpConstant(Step->getType(), VF.getKnownMinValue());
-  Value *Mul = addFastMathFlag(Builder.CreateBinOp(MulOp, Step, ConstVF));
+  Value *Mul = isa<Constant>(Step) && cast<Constant>(Step)->isOneValue()
+                   ? ConstVF
+                   : addFastMathFlag(Builder.CreateBinOp(MulOp, Step, ConstVF));
 
   // Create a vector splat to use in the induction update.
   //
@@ -2163,6 +2181,11 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
                                     &*LoopVectorBody->getFirstInsertionPt());
   VecInd->setDebugLoc(EntryVal->getDebugLoc());
   Instruction *LastInduction = VecInd;
+
+  NextInductionInfo.NextInduction.clear();
+  NextInductionInfo.Step = Step;
+  NextInductionInfo.MulOp = MulOp;
+  NextInductionInfo.VF = VF;
   for (unsigned Part = 0; Part < UF; ++Part) {
     State.set(Def, EntryVal, LastInduction, Part);
 
@@ -2170,10 +2193,13 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
       addMetadata(LastInduction, EntryVal);
     recordVectorLoopValueForInductionCast(II, EntryVal, LastInduction, CastDef,
                                           State, Part);
-
     LastInduction = cast<Instruction>(addFastMathFlag(
         Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add")));
     LastInduction->setDebugLoc(EntryVal->getDebugLoc());
+
+    if (preferPredicatedVectorOps())
+      NextInductionInfo.NextInduction.push_back(
+          std::make_pair(LastInduction, Part));
   }
 
   // Move the last step to the end of the latch block. This ensures consistent
@@ -4275,6 +4301,27 @@ void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
   ReplaceInstWithInst(NextIndex, BinaryOperator::Create(
                                      Instruction::Add, NextIndex->getOperand(0),
                                      State.get(EVL, 0)));
+
+  // Fix instructions that need EVL value
+  if (NextInductionInfo.NextInduction.size() > 0) {
+    auto CurrIP = Builder.saveIP();
+    Type *StepTy = NextInductionInfo.Step->getType();
+    for (auto InstToFix : NextInductionInfo.NextInduction) {
+      Instruction *InstToReplace = cast<Instruction>(InstToFix.first);
+      Builder.SetInsertPoint(InstToReplace);
+      Value *EVLPart = State.get(EVL, InstToFix.second);
+      Value *EVLPartCast = nullptr;
+      if (StepTy->isIntegerTy())
+        EVLPartCast = Builder.CreateSExtOrTrunc(EVLPart, StepTy);
+      else
+        EVLPartCast = Builder.CreateUIToFP(EVLPart, StepTy);
+      Value *Mul = addFastMathFlag(Builder.CreateBinOp(
+          NextInductionInfo.MulOp, NextInductionInfo.Step, EVLPartCast));
+      Value *MulSplat = Builder.CreateVectorSplat(NextInductionInfo.VF, Mul);
+      InstToReplace->setOperand(1, MulSplat);
+    }
+    Builder.restoreIP(CurrIP);
+  }
 }
 
 void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {
