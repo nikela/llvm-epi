@@ -93,7 +93,8 @@ class VUnitStrideLoad<RISCVLSUMOP lumop, RISCVWidth width,
                       string opcodestr>
     : RVInstVLU<0b000, width.Value{3}, lumop, width.Value{2-0},
                 (outs VR:$vd),
-                (ins GPR:$rs1, VMaskOp:$vm), opcodestr, "$vd, (${rs1})$vm">;
+                (ins GPR:$rs1, VMaskOp:$vm), opcodestr, "$vd, (${rs1})$vm">,
+                Sched<[WriteVPULoad, ReadMemBase, ReadVL, ReadVTYPE]>;
 
 // load vd, (rs1), rs2, vm
 class VStridedLoad<RISCVWidth width, string opcodestr>
@@ -154,7 +155,8 @@ class VUnitStrideStore<RISCVLSUMOP sumop, RISCVWidth width,
                          string opcodestr>
     : RVInstVSU<0b000, width.Value{3}, sumop, width.Value{2-0},
                 (outs), (ins VR:$vs3, GPR:$rs1, VMaskOp:$vm), opcodestr,
-                "$vs3, (${rs1})$vm">;
+                "$vs3, (${rs1})$vm">,
+      Sched<[WriteVPUStore, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
 
 // store vd, vs3, (rs1), rs2, vm
 class VStridedStore<RISCVWidth width, string opcodestr>
@@ -404,7 +406,8 @@ multiclass VALUNoVm_IV_V_X<string opcodestr, bits<6> funct6> {
 }
 
 multiclass VALU_FV_V_F<string opcodestr, bits<6> funct6, string vw = "v"> {
-  def V : VALUVV<funct6, OPFVV, opcodestr # "." # vw # "v">;
+  def V : VALUVV<funct6, OPFVV, opcodestr # "." # vw # "v">, 
+      Sched<[WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE]>;
   def F : VALUVF<funct6, OPFVF, opcodestr # "." # vw # "f">;
 }
 
@@ -444,7 +447,7 @@ multiclass VWholeLoad<bits<3> nf, string opcodestr, RegisterClass VRC> {
 let Predicates = [HasStdExtV] in {
 let hasSideEffects = 1, mayLoad = 0, mayStore = 0 in {
 def VSETVLI : RVInstSetVLi<(outs GPR:$rd), (ins GPR:$rs1, VTypeIOp:$vtypei),
-                           "vsetvli", "$rd, $rs1, $vtypei">;
+                           "vsetvli", "$rd, $rs1, $vtypei">, Sched<[WriteVL]>;
 
 def VSETIVLI : RVInstSetiVLi<(outs GPR:$rd), (ins uimm5:$uimm, VTypeIOp:$vtypei),
                              "vsetivli", "$rd, $uimm, $vtypei">;
