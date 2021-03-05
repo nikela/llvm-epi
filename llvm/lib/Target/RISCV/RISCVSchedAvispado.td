@@ -12,8 +12,11 @@
 
 // Avispado machine model for scheduling and other instruction cost heuristics.
 def AvispadoModel : SchedMachineModel {
-  let MicroOpBufferSize = 0; // Avispado is in-order.
-  let IssueWidth = 1;        // 1 micro-op is dispatched per cycle.
+  let MicroOpBufferSize = 8; // This is a decoupled design,
+                             // so the instruction buffer is large.
+                             // FIXME: This is for the VPU but what about the
+                             // scalar core.
+  let IssueWidth = 1;        // One instruction per cycle can be dispatched.
   let LoadLatency = 3;
   let MispredictPenalty = 3;
   let UnsupportedFeatures = [HasStdExtZvamo, HasStdExtZvlsseg];
@@ -239,42 +242,47 @@ def : ReadAdvance<ReadFClass64, 0>;
 }
 
 // V-extension in Avispado
-def AvispadoVSETVL          : ProcResource<1>; // Vector configuration
-def AvispadoVPUInit         : ProcResource<1>; // VPU initiation
-def AvispadoVPUIALU         : ProcResource<1>; // Integer VPU ALU
-def AvispadoVPUFALU         : ProcResource<1>; // FP VPU ALU
-def AvispadoVPUMem          : ProcResource<1>; // VPU Load/Store
+def AvispadoVSETVL          : ProcResource<1>;  // Vector configuration
+
+let BufferSize = 8 in {
+  def AvispadoVPUArith      : ProcResource<1>; // Arithmetic VPU ALU
+  def AvispadoVPUMemLoad    : ProcResource<1>;  // VPU Load
+  def AvispadoVPUMemStore   : ProcResource<1>;  // VPU Store
+}
 
 let SchedModel = AvispadoModel in {
 
 let Latency = 1 in
 {
-  def : WriteRes<WriteVL, [AvispadoVSETVL]>;
-  def : WriteRes<WriteVTYPE, [AvispadoVSETVL]>;
+    def : WriteRes<WriteVL, [AvispadoVSETVL]>;
+    def : WriteRes<WriteVTYPE, [AvispadoVSETVL]>;
 }
 
-let Latency = 80, ResourceCycles = [20, 60] in
+let Latency = 16, ResourceCycles = [8] in
 {
-  def : WriteRes<WriteVPULoad, [AvispadoVPUInit, AvispadoVPUMem]>;
-  def : WriteRes<WriteVPULoadStrided, [AvispadoVPUInit, AvispadoVPUMem]>;
-  def : WriteRes<WriteVPULoadIndexed, [AvispadoVPUInit, AvispadoVPUMem]>;
-
-  def : WriteRes<WriteVPUStore, [AvispadoVPUInit, AvispadoVPUMem]>;
-  def : WriteRes<WriteVPUStoreStrided, [AvispadoVPUInit, AvispadoVPUMem]>;
-  def : WriteRes<WriteVPUStoreIndexed, [AvispadoVPUInit, AvispadoVPUMem]>;
-
-  def : WriteRes<WriteVPUScalarIALU, [AvispadoVPUInit, AvispadoVPUIALU]>;
-  def : WriteRes<WriteVPUScalarFALU, [AvispadoVPUInit, AvispadoVPUFALU]>;
+  def : WriteRes<WriteVPULoad, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVPULoadStrided, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVPULoadIndexed, [AvispadoVPUMemLoad]>;
 }
 
-def : WriteRes<WriteVPUIALU, [AvispadoVPUInit, AvispadoVPUIALU]> {
-  let Latency = 40;
-  let ResourceCycles = [10, 30];
+let Latency = 16, ResourceCycles = [16] in
+{
+  def : WriteRes<WriteVPUStore, [AvispadoVPUMemStore]>;
+  def : WriteRes<WriteVPUStoreStrided, [AvispadoVPUMemStore]>;
+  def : WriteRes<WriteVPUStoreIndexed, [AvispadoVPUMemStore]>;
+
+  def : WriteRes<WriteVPUScalarIALU, [AvispadoVPUArith]>;
+  def : WriteRes<WriteVPUScalarFALU, [AvispadoVPUArith]>;
 }
 
-def : WriteRes<WriteVPUFALU, [AvispadoVPUInit, AvispadoVPUFALU]> {
-  let Latency = 50;
-  let ResourceCycles = [10, 40];
+def : WriteRes<WriteVPUIALU, [AvispadoVPUArith]> {
+  let Latency = 8;
+  let ResourceCycles = [8];
+}
+
+def : WriteRes<WriteVPUFALU, [AvispadoVPUArith]> {
+  let Latency = 10;
+  let ResourceCycles = [10];
 }
 
 // By-passes and advanced (if any)

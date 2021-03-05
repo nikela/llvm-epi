@@ -139,6 +139,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/InjectTLIMappings.h"
+#include "llvm/Transforms/Utils/Local.h"
 #include "llvm/Transforms/Utils/LoopSimplify.h"
 #include "llvm/Transforms/Utils/LoopUtils.h"
 #include "llvm/Transforms/Utils/LoopVersioning.h"
@@ -944,6 +945,15 @@ protected:
 
   /// EVL of the widened loop using vector predication (vsetvl())
   VPValue *EVL = nullptr;
+
+  /// A vector of pairs of value and part that should be replaced with EVL once
+  /// the EVL is available
+  struct {
+    SmallVector<std::pair<Value *, unsigned>, 4> NextInduction;
+    Value *Step;
+    Instruction::BinaryOps MulOp;
+    ElementCount VF;
+  } NextInductionInfo;
 
   /// The legality analysis.
   LoopVectorizationLegality *Legal;
@@ -2137,24 +2147,32 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
 
   // Multiply the vectorization factor by the step using integer or
   // floating-point arithmetic as appropriate.
-  Value *ConstVF =
-      getSignedIntOrFpConstant(Step->getType(), VF.getKnownMinValue());
-  Value *Mul = addFastMathFlag(Builder.CreateBinOp(MulOp, Step, ConstVF));
+  Value *ConstVF = nullptr;
+  if (VF.isScalable()) {
+    if (Step->getType()->isIntegerTy()) {
+      ConstVF = Builder.CreateVScale(
+          ConstantInt::get(Step->getType(), VF.getKnownMinValue()));
+    } else {
+      Value *ScaledVF =
+          Builder.CreateVScale(Builder.getInt32(VF.getKnownMinValue()));
+      ConstVF = Builder.CreateUIToFP(ScaledVF, Step->getType());
+    }
+  } else {
+    ConstVF = getSignedIntOrFpConstant(Step->getType(), VF.getKnownMinValue());
+  }
+
+  Value *Mul = isa<Constant>(Step) && cast<Constant>(Step)->isOneValue()
+                   ? ConstVF
+                   : addFastMathFlag(Builder.CreateBinOp(MulOp, Step, ConstVF));
 
   // Create a vector splat to use in the induction update.
   //
   // FIXME: If the step is non-constant, we create the vector splat with
   //        IRBuilder. IRBuilder can constant-fold the multiply, but it doesn't
   //        handle a constant vector splat.
-  Value *SplatVF;
-  if (!VF.isScalable()) {
-    SplatVF = isa<Constant>(Mul)
-                  ? ConstantVector::getSplat(VF, cast<Constant>(Mul))
-                  : Builder.CreateVectorSplat(VF, Mul);
-  } else {
-    SplatVF = Builder.CreateVectorSplat(
-        VF, Builder.CreateVScale(cast<Constant>(Mul)), "");
-  }
+  Value *SplatVF = isa<Constant>(Mul)
+                       ? ConstantVector::getSplat(VF, cast<Constant>(Mul))
+                       : Builder.CreateVectorSplat(VF, Mul);
   Builder.restoreIP(CurrIP);
 
   // We may need to add the step a number of times, depending on the unroll
@@ -2163,6 +2181,11 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
                                     &*LoopVectorBody->getFirstInsertionPt());
   VecInd->setDebugLoc(EntryVal->getDebugLoc());
   Instruction *LastInduction = VecInd;
+
+  NextInductionInfo.NextInduction.clear();
+  NextInductionInfo.Step = Step;
+  NextInductionInfo.MulOp = MulOp;
+  NextInductionInfo.VF = VF;
   for (unsigned Part = 0; Part < UF; ++Part) {
     State.set(Def, EntryVal, LastInduction, Part);
 
@@ -2170,10 +2193,13 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
       addMetadata(LastInduction, EntryVal);
     recordVectorLoopValueForInductionCast(II, EntryVal, LastInduction, CastDef,
                                           State, Part);
-
     LastInduction = cast<Instruction>(addFastMathFlag(
         Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add")));
     LastInduction->setDebugLoc(EntryVal->getDebugLoc());
+
+    if (preferPredicatedVectorOps())
+      NextInductionInfo.NextInduction.push_back(
+          std::make_pair(LastInduction, Part));
   }
 
   // Move the last step to the end of the latch block. This ensures consistent
@@ -2360,10 +2386,9 @@ Value *InnerLoopVectorizer::getStepVector(Value *Val, int StartIdx, Value *Step,
     // Create a vector of consecutive numbers from zero to VF.
     if (VF.isScalable()) {
       // Get the stepvector from intrinsic - <0, 1, 2 ... vscale*VF-1>
-      Function *StepVector = Intrinsic::getDeclaration(
-          LoopVectorPreHeader->getModule(),
-          Intrinsic::experimental_vector_stepvector, Val->getType());
-      Value *Indices = Builder.CreateCall(StepVector, {}, "stepvec.base");
+      Value *Indices =
+          Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector,
+                                  Val->getType(), {}, nullptr, "stepvec.base");
       assert(Indices->getType() == Val->getType() && "Invalid consecutive vec");
 
       if (StartIdx) {
@@ -2404,36 +2429,64 @@ Value *InnerLoopVectorizer::getStepVector(Value *Val, int StartIdx, Value *Step,
     // the step vector for each part.
     return Builder.CreateAdd(Val, Step, "induction");
   } else {
-    assert(!VF.isScalable() &&
-           "Scalable floating induction variable not implemented yet");
-
-    // Floating point induction.
-    SmallVector<Constant *, 8> Indices;
-
     assert((BinOp == Instruction::FAdd || BinOp == Instruction::FSub) &&
            "Binary Opcode should be specified for FP induction");
-    // Create a vector of consecutive numbers from zero to VF.
-    for (unsigned i = 0; i < VLen.getKnownMinValue(); ++i)
-      Indices.push_back(ConstantFP::get(STy, (double)(StartIdx + i)));
 
-    // Add the consecutive indices to the vector value.
-    Constant *Cv = ConstantVector::get(Indices);
+    if (VF.isScalable()) {
+      auto *IntVTy = VectorType::get(Builder.getInt32Ty(), VLen);
+      Value *Indices =
+          Builder.CreateIntrinsic(Intrinsic::experimental_vector_stepvector,
+                                  IntVTy, {}, nullptr, "stepvec.base");
+      if (StartIdx) {
+        // here VF = k in <vscale x k x type>. We need to scale StartIdx by
+        // vscale, since StartIdx = VF * Part.
+        Value *ScaledStartIdx =
+            Builder.CreateVScale(Builder.getInt32(StartIdx), "startidx.vscale");
+        Value *StartIdxSplat =
+            Builder.CreateVectorSplat(VLen, ScaledStartIdx, "stepvec.start");
+        Indices = Builder.CreateAdd(Indices, StartIdxSplat);
+      }
 
-    Step = Builder.CreateVectorSplat(VLen, Step, "");
+      Indices = Builder.CreateUIToFP(Indices, Val->getType());
 
-    // Floating point operations had to be 'fast' to enable the induction.
-    FastMathFlags Flags;
-    Flags.setFast();
+      Step = Builder.CreateVectorSplat(VLen, Step, "splat.step");
+      Value *StepxInd = Builder.CreateFMul(Indices, Step, "stepvec.scaled");
+      FastMathFlags Flags;
+      Flags.setFast();
+      if (isa<Instruction>(StepxInd))
+        cast<Instruction>(StepxInd)->setFastMathFlags(Flags);
 
-    Value *MulOp = Builder.CreateFMul(Cv, Step);
-    if (isa<Instruction>(MulOp))
-      // Have to check, MulOp may be a constant
-      cast<Instruction>(MulOp)->setFastMathFlags(Flags);
+      Value *BOp = Builder.CreateBinOp(BinOp, Val, StepxInd, "induction");
+      if (isa<Instruction>(BOp))
+        cast<Instruction>(BOp)->setFastMathFlags(Flags);
+      return BOp;
+    } else {
+      // Floating point induction.
+      SmallVector<Constant *, 8> Indices;
 
-    Value *BOp = Builder.CreateBinOp(BinOp, Val, MulOp, "induction");
-    if (isa<Instruction>(BOp))
-      cast<Instruction>(BOp)->setFastMathFlags(Flags);
-    return BOp;
+      // Create a vector of consecutive numbers from zero to VF.
+      for (unsigned i = 0; i < VLen.getKnownMinValue(); ++i)
+        Indices.push_back(ConstantFP::get(STy, (double)(StartIdx + i)));
+
+      // Add the consecutive indices to the vector value.
+      Constant *Cv = ConstantVector::get(Indices);
+
+      Step = Builder.CreateVectorSplat(VLen, Step, "");
+
+      // Floating point operations had to be 'fast' to enable the induction.
+      FastMathFlags Flags;
+      Flags.setFast();
+
+      Value *MulOp = Builder.CreateFMul(Cv, Step);
+      if (isa<Instruction>(MulOp))
+        // Have to check, MulOp may be a constant
+        cast<Instruction>(MulOp)->setFastMathFlags(Flags);
+
+      Value *BOp = Builder.CreateBinOp(BinOp, Val, MulOp, "induction");
+      if (isa<Instruction>(BOp))
+        cast<Instruction>(BOp)->setFastMathFlags(Flags);
+      return BOp;
+    }
   }
 }
 
@@ -4248,6 +4301,27 @@ void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
   ReplaceInstWithInst(NextIndex, BinaryOperator::Create(
                                      Instruction::Add, NextIndex->getOperand(0),
                                      State.get(EVL, 0)));
+
+  // Fix instructions that need EVL value
+  if (NextInductionInfo.NextInduction.size() > 0) {
+    auto CurrIP = Builder.saveIP();
+    Type *StepTy = NextInductionInfo.Step->getType();
+    for (auto InstToFix : NextInductionInfo.NextInduction) {
+      Instruction *InstToReplace = cast<Instruction>(InstToFix.first);
+      Builder.SetInsertPoint(InstToReplace);
+      Value *EVLPart = State.get(EVL, InstToFix.second);
+      Value *EVLPartCast = nullptr;
+      if (StepTy->isIntegerTy())
+        EVLPartCast = Builder.CreateSExtOrTrunc(EVLPart, StepTy);
+      else
+        EVLPartCast = Builder.CreateUIToFP(EVLPart, StepTy);
+      Value *Mul = addFastMathFlag(Builder.CreateBinOp(
+          NextInductionInfo.MulOp, NextInductionInfo.Step, EVLPartCast));
+      Value *MulSplat = Builder.CreateVectorSplat(NextInductionInfo.VF, Mul);
+      InstToReplace->setOperand(1, MulSplat);
+    }
+    Builder.restoreIP(CurrIP);
+  }
 }
 
 void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {

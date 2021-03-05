@@ -2,12 +2,16 @@
 // undisturbed as possible.
 
 
+def : ReadAdvance<ReadVL,       0>;
+def : ReadAdvance<ReadVTYPE,       0>;
 def : ReadAdvance<ReadVPUFALU,       0>;
 def : ReadAdvance<ReadVPUIALU,       0>;
 def : ReadAdvance<ReadVPUScalarFALU,       0>;
 def : ReadAdvance<ReadVPUScalarIALU,       0>;
 def : ReadAdvance<ReadVPUStoreData,       0>;
 
+def : WriteRes<WriteVL, []> { let Unsupported = 1; }
+def : WriteRes<WriteVTYPE, []> { let Unsupported = 1; }
 def : WriteRes<WriteVPUFALU, []>  { let Unsupported = 1; }
 def : WriteRes<WriteVPUIALU, []>  { let Unsupported = 1; }
 def : WriteRes<WriteVPULoadIndexed, []>  { let Unsupported = 1; }
