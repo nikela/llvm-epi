@@ -4304,7 +4304,6 @@ void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
 
   // Fix instructions that need EVL value
   if (NextInductionInfo.NextInduction.size() > 0) {
-    auto CurrIP = Builder.saveIP();
     Type *StepTy = NextInductionInfo.Step->getType();
     for (auto InstToFix : NextInductionInfo.NextInduction) {
       Instruction *InstToReplace = cast<Instruction>(InstToFix.first);
@@ -4320,7 +4319,6 @@ void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
       Value *MulSplat = Builder.CreateVectorSplat(NextInductionInfo.VF, Mul);
       InstToReplace->setOperand(1, MulSplat);
     }
-    Builder.restoreIP(CurrIP);
   }
 }
 
