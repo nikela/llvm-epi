@@ -40,9 +40,10 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv2f32_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a1, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a2, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vsext.vf2 v26, v9
 ; CHECK-NEXT:    vsll.vi v26, v26, 2
+; CHECK-NEXT:    vsetvli a1, a1, e32,m1,ta,mu
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v26, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices

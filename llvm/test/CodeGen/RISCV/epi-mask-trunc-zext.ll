@@ -50,11 +50,12 @@ declare <vscale x 1 x i64> @llvm.epi.vand.nxv1i64.nxv1i64(<vscale x 1 x i64> %a,
 define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vand.vi v26, v8, 1
 ; CHECK-NEXT:    vmsne.vi v25, v26, 0
 ; CHECK-NEXT:    vand.vi v26, v10, 1
 ; CHECK-NEXT:    vmsne.vi v26, v26, 0
+; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vmand.mm v0, v25, v26
 ; CHECK-NEXT:    ret
 {

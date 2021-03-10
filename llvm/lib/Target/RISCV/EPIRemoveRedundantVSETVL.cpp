@@ -145,8 +145,8 @@ struct VSETVLInfo {
     return sameOpKind(other) && (SEW / VLMul) > (other.SEW / other.VLMul);
   }
 
-  bool hasMoreRestrictiveOrEqualVType(const VSETVLInfo &other) const {
-    return sameOpKind(other) && ((SEW / VLMul) >= (other.SEW / other.VLMul));
+  bool hasSameVType(const VSETVLInfo &other) const {
+    return sameOpKind(other) && SEW == other.SEW && VLMul == other.VLMul;
   }
 
   bool computesSameGVL(const VSETVLInfo &other) const {
@@ -582,7 +582,7 @@ bool backpropagateVLMax(MachineBasicBlock &MBB, MachineRegisterInfo &MRI,
 
       // If the VL of the use computes less or equal number of VL we can use
       // this.
-      if (!UseMIVLInfo.hasMoreRestrictiveOrEqualVType(CurrentVLInfo)) {
+      if (!UseMIVLInfo.hasSameVType(CurrentVLInfo)) {
         RefUseMIVL = nullptr;
         break;
       }
