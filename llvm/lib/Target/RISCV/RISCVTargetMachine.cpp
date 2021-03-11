@@ -196,7 +196,7 @@ bool RISCVPassConfig::addRegBankSelect() {
 }
 
 bool RISCVPassConfig::addGlobalInstructionSelect() {
-  addPass(new InstructionSelect());
+  addPass(new InstructionSelect(getOptLevel()));
   return false;
 }
 

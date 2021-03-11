@@ -629,15 +629,15 @@ OpFoldResult DivOp::fold(ArrayRef<Attribute> operands) {
 //===----------------------------------------------------------------------===//
 
 OpFoldResult ShapeEqOp::fold(ArrayRef<Attribute> operands) {
-  if (lhs() == rhs())
-    return BoolAttr::get(getContext(), true);
-  auto lhs = operands[0].dyn_cast_or_null<DenseIntElementsAttr>();
-  if (lhs == nullptr)
+  bool allSame = true;
+  if (!operands.empty() && !operands[0])
     return {};
-  auto rhs = operands[1].dyn_cast_or_null<DenseIntElementsAttr>();
-  if (rhs == nullptr)
-    return {};
-  return BoolAttr::get(getContext(), lhs == rhs);
+  for (Attribute operand : operands.drop_front(1)) {
+    if (!operand)
+      return {};
+    allSame = allSame && operand == operands[0];
+  }
+  return BoolAttr::get(getContext(), allSame);
 }
 
 //===----------------------------------------------------------------------===//
@@ -777,6 +777,44 @@ static LogicalResult verify(IsBroadcastableOp op) {
   if (op.getNumOperands() < 2)
     return op.emitOpError("required at least 2 input shapes");
   return success();
+}
+
+namespace {
+struct IsBroadcastableCanonicalizationPattern
+    : public OpRewritePattern<IsBroadcastableOp> {
+  using OpRewritePattern<IsBroadcastableOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(IsBroadcastableOp op,
+                                PatternRewriter &rewriter) const override {
+    // Find unique operands.
+    SmallVector<Value, 2> unique;
+    for (Value v : op.getOperands()) {
+      if (!llvm::is_contained(unique, v))
+        unique.push_back(v);
+    }
+
+    // Can always broadcast fewer than two shapes.
+    if (unique.size() < 2) {
+      rewriter.replaceOpWithNewOp<mlir::ConstantOp>(op,
+                                                    rewriter.getBoolAttr(true));
+      return success();
+    }
+
+    // Reduce op to equivalent with unique operands.
+    if (unique.size() < op.getNumOperands()) {
+      rewriter.replaceOpWithNewOp<IsBroadcastableOp>(op, rewriter.getI1Type(),
+                                                     unique);
+      return success();
+    }
+
+    return failure();
+  }
+};
+} // namespace
+
+void IsBroadcastableOp::getCanonicalizationPatterns(
+    OwningRewritePatternList &patterns, MLIRContext *context) {
+  patterns.insert<IsBroadcastableCanonicalizationPattern>(context);
 }
 
 //===----------------------------------------------------------------------===//

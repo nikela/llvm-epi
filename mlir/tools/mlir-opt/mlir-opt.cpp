@@ -64,7 +64,7 @@ void registerTestAliasAnalysisPass();
 void registerTestCallGraphPass();
 void registerTestConstantFold();
 void registerTestConvVectorization();
-void registerTestConvertGPUKernelToCubinPass();
+void registerTestGpuSerializeToCubinPass();
 void registerTestConvertGPUKernelToHsacoPass();
 void registerTestDecomposeCallGraphTypes();
 void registerTestDialect(DialectRegistry &);
@@ -72,6 +72,7 @@ void registerTestDominancePass();
 void registerTestDynamicPipelinePass();
 void registerTestExpandTanhPass();
 void registerTestGpuParallelLoopMappingPass();
+void registerTestIRVisitorsPass();
 void registerTestInterfaces();
 void registerTestLinalgCodegenStrategy();
 void registerTestLinalgFusionTransforms();
@@ -135,7 +136,7 @@ void registerTestPasses() {
   test::registerTestCallGraphPass();
   test::registerTestConstantFold();
 #if MLIR_CUDA_CONVERSIONS_ENABLED
-  test::registerTestConvertGPUKernelToCubinPass();
+  test::registerTestGpuSerializeToCubinPass();
 #endif
 #if MLIR_ROCM_CONVERSIONS_ENABLED
   test::registerTestConvertGPUKernelToHsacoPass();
@@ -146,6 +147,7 @@ void registerTestPasses() {
   test::registerTestDynamicPipelinePass();
   test::registerTestExpandTanhPass();
   test::registerTestGpuParallelLoopMappingPass();
+  test::registerTestIRVisitorsPass();
   test::registerTestInterfaces();
   test::registerTestLinalgCodegenStrategy();
   test::registerTestLinalgFusionTransforms();

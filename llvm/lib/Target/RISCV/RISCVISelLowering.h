@@ -100,6 +100,9 @@ enum NodeType : unsigned {
   // VMV_X_S matches the semantics of vmv.x.s. The result is always XLenVT sign
   // extended from the vector element size.
   VMV_X_S,
+  // VMV_S_XF_VL matches the semantics of vmv.s.x/vmv.s.f, depending on the
+  // types of its operands. It carries a VL operand.
+  VMV_S_XF_VL,
   // Splats an i64 scalar to a vector type (with element type i64) where the
   // scalar is a sign-extended i32.
   SPLAT_VECTOR_I64,
@@ -135,16 +138,17 @@ enum NodeType : unsigned {
   //   nxv2i32 = vecreduce_add nxv8i32, nxv2i32
   // The different in types does introduce extra vsetvli instructions but
   // similarly it reduces the number of registers consumed per reduction.
-  VECREDUCE_ADD,
-  VECREDUCE_UMAX,
-  VECREDUCE_SMAX,
-  VECREDUCE_UMIN,
-  VECREDUCE_SMIN,
-  VECREDUCE_AND,
-  VECREDUCE_OR,
-  VECREDUCE_XOR,
-  VECREDUCE_FADD,
-  VECREDUCE_SEQ_FADD,
+  // Also has a mask and VL operand.
+  VECREDUCE_ADD_VL,
+  VECREDUCE_UMAX_VL,
+  VECREDUCE_SMAX_VL,
+  VECREDUCE_UMIN_VL,
+  VECREDUCE_SMIN_VL,
+  VECREDUCE_AND_VL,
+  VECREDUCE_OR_VL,
+  VECREDUCE_XOR_VL,
+  VECREDUCE_FADD_VL,
+  VECREDUCE_SEQ_FADD_VL,
 
   // Vector binary and unary ops with a mask as a third operand, and VL as a
   // fourth operand.
@@ -199,8 +203,11 @@ enum NodeType : unsigned {
   VMCLR_VL,
   VMSET_VL,
 
-  // Matches the semantics of vrgather.vx with an extra operand for VL.
+  // Matches the semantics of vrgather.vx and vrgather.vv with an extra operand
+  // for VL.
   VRGATHER_VX_VL,
+  VRGATHER_VV_VL,
+  VRGATHEREI16_VV_VL,
 
   // Vector sign/zero extend with additional mask & VL operands.
   VSEXT_VL,
@@ -243,6 +250,9 @@ public:
                     bool ForCodeSize) const override;
 
   bool hasBitPreservingFPLogic(EVT VT) const override;
+  bool
+  shouldExpandBuildVectorWithShuffles(EVT VT,
+                                      unsigned DefinedValues) const override;
 
   // Provide custom lowering hooks for some operations.
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
@@ -395,6 +405,9 @@ public:
   decomposeSubvectorInsertExtractToSubRegs(MVT VecVT, MVT SubVecVT,
                                            unsigned InsertExtractIdx,
                                            const RISCVRegisterInfo *TRI);
+  MVT getContainerForFixedLengthVector(MVT VT) const;
+  static MVT getContainerForFixedLengthVector(const TargetLowering &TLI, MVT VT,
+                                              const RISCVSubtarget &Subtarget);
   static MVT getContainerForFixedLengthVector(SelectionDAG &DAG, MVT VT,
                                               const RISCVSubtarget &Subtarget);
 
@@ -424,7 +437,7 @@ private:
   SDValue lowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftLeftParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerShiftRightParts(SDValue Op, SelectionDAG &DAG, bool IsSRA) const;
-  SDValue lowerSPLATVECTOR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerSPLAT_VECTOR_PARTS(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVectorMaskExt(SDValue Op, SelectionDAG &DAG,
                              int64_t ExtTrueVal) const;
   SDValue lowerVectorMaskTrunc(SDValue Op, SelectionDAG &DAG) const;
@@ -436,6 +449,8 @@ private:
   SDValue lowerFPVECREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerINSERT_SUBVECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerEXTRACT_SUBVECTOR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVECTOR_REVERSE(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerABS(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorLoadToRVV(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorStoreToRVV(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorSetccToRVV(SDValue Op, SelectionDAG &DAG) const;
@@ -471,7 +486,7 @@ namespace RISCVVIntrinsicsTable {
 
 struct RISCVVIntrinsicInfo {
   unsigned IntrinsicID;
-  uint8_t ExtendedOperand;
+  uint8_t SplatOperand;
 };
 
 using namespace RISCV;
