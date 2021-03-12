@@ -419,6 +419,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::TRUNCATE, VT, Custom);
       setOperationAction(ISD::INSERT_SUBVECTOR, VT, Custom);
       setOperationAction(ISD::EXTRACT_SUBVECTOR, VT, Custom);
+
+      setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
     }
 
     for (MVT VT : IntVecVTs) {
@@ -541,6 +543,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setOperationAction(ISD::BUILD_VECTOR, VT, Custom);
         setOperationAction(ISD::CONCAT_VECTORS, VT, Custom);
 
+        setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
+
         setOperationAction(ISD::LOAD, VT, Custom);
         setOperationAction(ISD::STORE, VT, Custom);
 
@@ -558,7 +562,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
         setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
         setOperationAction(ISD::INSERT_VECTOR_ELT, VT, Custom);
-        setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
 
         setOperationAction(ISD::ADD, VT, Custom);
         setOperationAction(ISD::MUL, VT, Custom);
@@ -637,6 +640,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setOperationAction(ISD::FDIV, VT, Custom);
         setOperationAction(ISD::FNEG, VT, Custom);
         setOperationAction(ISD::FABS, VT, Custom);
+        setOperationAction(ISD::FCOPYSIGN, VT, Custom);
         setOperationAction(ISD::FSQRT, VT, Custom);
         setOperationAction(ISD::FMA, VT, Custom);
 
@@ -1061,6 +1065,14 @@ getDefaultScalableVLOps(MVT VecVT, SDLoc DL, SelectionDAG &DAG,
 // which is not desirable.
 bool RISCVTargetLowering::shouldExpandBuildVectorWithShuffles(
     EVT VT, unsigned DefinedValues) const {
+  return false;
+}
+
+bool RISCVTargetLowering::isShuffleMaskLegal(ArrayRef<int> M, EVT VT) const {
+  // Only splats are currently supported.
+  if (ShuffleVectorSDNode::isSplatMask(M.data(), VT))
+    return true;
+
   return false;
 }
 
@@ -1615,6 +1627,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerABS(Op, DAG);
   case ISD::VSELECT:
     return lowerFixedLengthVectorSelectToRVV(Op, DAG);
+  case ISD::FCOPYSIGN:
+    return lowerFixedLengthVectorFCOPYSIGNToRVV(Op, DAG);
   }
 }
 
@@ -2204,6 +2218,12 @@ SDValue RISCVTargetLowering::lowerVectorMaskTrunc(SDValue Op,
   return convertFromScalableVector(MaskVT, Trunc, DAG, Subtarget);
 }
 
+// Custom-legalize INSERT_VECTOR_ELT so that the value is inserted into the
+// first position of a vector, and that vector is slid up to the insert index.
+// By limiting the active vector length to index+1 and merging with the
+// original vector (with an undisturbed tail policy for elements >= VL), we
+// achieve the desired result of leaving all elements untouched except the one
+// at VL-1, which is replaced with the desired value.
 SDValue RISCVTargetLowering::lowerINSERT_VECTOR_ELT(SDValue Op,
                                                     SelectionDAG &DAG) const {
   SDLoc DL(Op);
@@ -2219,51 +2239,67 @@ SDValue RISCVTargetLowering::lowerINSERT_VECTOR_ELT(SDValue Op,
     Vec = convertToScalableVector(ContainerVT, Vec, DAG, Subtarget);
   }
 
+  MVT XLenVT = Subtarget.getXLenVT();
+
+  SDValue Zero = DAG.getConstant(0, DL, XLenVT);
+  bool IsLegalInsert = Subtarget.is64Bit() || Val.getValueType() != MVT::i64;
+  // Even i64-element vectors on RV32 can be lowered without scalar
+  // legalization if the most-significant 32 bits of the value are not affected
+  // by the sign-extension of the lower 32 bits.
+  // TODO: We could also catch sign extensions of a 32-bit value.
+  if (!IsLegalInsert && isa<ConstantSDNode>(Val)) {
+    const auto *CVal = cast<ConstantSDNode>(Val);
+    if (isInt<32>(CVal->getSExtValue())) {
+      IsLegalInsert = true;
+      Val = DAG.getConstant(CVal->getSExtValue(), DL, MVT::i32);
+    }
+  }
+
   SDValue Mask, VL;
   std::tie(Mask, VL) = getDefaultVLOps(VecVT, ContainerVT, DL, DAG, Subtarget);
 
-  // Custom-legalize INSERT_VECTOR_ELT where XLEN>=SEW, so that the vector is
-  // first slid down into position, the value is inserted into the first
-  // position, and the vector is slid back up. We do this to simplify patterns.
-  //   (slideup vec, (insertelt (slidedown impdef, vec, idx), val, 0), idx),
-  if (Subtarget.is64Bit() || Val.getValueType() != MVT::i64) {
+  SDValue ValInVec;
+
+  if (IsLegalInsert) {
     if (isNullConstant(Idx))
       return DAG.getNode(RISCVISD::VMV_S_XF_VL, DL, ContainerVT, Vec, Val, VL);
-    SDValue Slidedown =
-        DAG.getNode(RISCVISD::VSLIDEDOWN_VL, DL, ContainerVT,
-                    DAG.getUNDEF(ContainerVT), Vec, Idx, Mask, VL);
-    SDValue InsertElt0 =
-        DAG.getNode(RISCVISD::VMV_S_XF_VL, DL, ContainerVT, Slidedown, Val, VL);
-    return DAG.getNode(RISCVISD::VSLIDEUP_VL, DL, ContainerVT, Vec, InsertElt0,
-                       Idx, Mask, VL);
+    ValInVec = DAG.getNode(RISCVISD::VMV_S_XF_VL, DL, ContainerVT,
+                           DAG.getUNDEF(ContainerVT), Val, VL);
+  } else {
+    // On RV32, i64-element vectors must be specially handled to place the
+    // value at element 0, by using two vslide1up instructions in sequence on
+    // the i32 split lo/hi value. Use an equivalently-sized i32 vector for
+    // this.
+    SDValue One = DAG.getConstant(1, DL, XLenVT);
+    SDValue ValLo = DAG.getNode(ISD::EXTRACT_ELEMENT, DL, MVT::i32, Val, Zero);
+    SDValue ValHi = DAG.getNode(ISD::EXTRACT_ELEMENT, DL, MVT::i32, Val, One);
+    MVT I32ContainerVT =
+        MVT::getVectorVT(MVT::i32, ContainerVT.getVectorElementCount() * 2);
+    SDValue I32Mask =
+        getDefaultScalableVLOps(I32ContainerVT, DL, DAG, Subtarget).first;
+    // Limit the active VL to two.
+    SDValue InsertI64VL = DAG.getConstant(2, DL, XLenVT);
+    // Note: We can't pass a UNDEF to the first VSLIDE1UP_VL since an untied
+    // undef doesn't obey the earlyclobber constraint. Just splat a zero value.
+    ValInVec = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, I32ContainerVT, Zero,
+                           InsertI64VL);
+    // First slide in the hi value, then the lo in underneath it.
+    ValInVec = DAG.getNode(RISCVISD::VSLIDE1UP_VL, DL, I32ContainerVT, ValInVec,
+                           ValHi, I32Mask, InsertI64VL);
+    ValInVec = DAG.getNode(RISCVISD::VSLIDE1UP_VL, DL, I32ContainerVT, ValInVec,
+                           ValLo, I32Mask, InsertI64VL);
+    // Bitcast back to the right container type.
+    ValInVec = DAG.getBitcast(ContainerVT, ValInVec);
   }
 
-  // Custom-legalize INSERT_VECTOR_ELT where XLEN<SEW, as the SEW element type
-  // is illegal (currently only vXi64 RV32).
-  // Since there is no easy way of getting a single element into a vector when
-  // XLEN<SEW, we lower the operation to the following sequence:
-  //   splat      vVal, rVal
-  //   vid.v      vVid
-  //   vmseq.vx   mMask, vVid, rIdx
-  //   vmerge.vvm vDest, vSrc, vVal, mMask
-  // This essentially merges the original vector with the inserted element by
-  // using a mask whose only set bit is that corresponding to the insert
-  // index.
-  SDValue SplattedVal = DAG.getSplatVector(ContainerVT, DL, Val);
-  SDValue SplattedIdx =
-      DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT, Idx, VL);
-
-  SDValue VID = DAG.getNode(RISCVISD::VID_VL, DL, ContainerVT, Mask, VL);
-  auto SetCCVT =
-      getSetCCResultType(DAG.getDataLayout(), *DAG.getContext(), ContainerVT);
-  SDValue SelectCond =
-      DAG.getNode(RISCVISD::SETCC_VL, DL, SetCCVT, VID, SplattedIdx,
-                  DAG.getCondCode(ISD::SETEQ), Mask, VL);
-  SDValue Select = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT,
-                               SelectCond, SplattedVal, Vec, VL);
+  // Now that the value is in a vector, slide it into position.
+  SDValue InsertVL =
+      DAG.getNode(ISD::ADD, DL, XLenVT, Idx, DAG.getConstant(1, DL, XLenVT));
+  SDValue Slideup = DAG.getNode(RISCVISD::VSLIDEUP_VL, DL, ContainerVT, Vec,
+                                ValInVec, Idx, Mask, InsertVL);
   if (!VecVT.isFixedLengthVector())
-    return Select;
-  return convertFromScalableVector(VecVT, Select, DAG, Subtarget);
+    return Slideup;
+  return convertFromScalableVector(VecVT, Slideup, DAG, Subtarget);
 }
 
 // Custom-lower EXTRACT_VECTOR_ELT operations to slide the vector down, then
@@ -2278,6 +2314,14 @@ SDValue RISCVTargetLowering::lowerEXTRACT_VECTOR_ELT(SDValue Op,
   EVT EltVT = Op.getValueType();
   MVT VecVT = Vec.getSimpleValueType();
   MVT XLenVT = Subtarget.getXLenVT();
+
+  if (VecVT.getVectorElementType() == MVT::i1) {
+    // FIXME: For now we just promote to an i8 vector and extract from that,
+    // but this is probably not optimal.
+    MVT WideVT = MVT::getVectorVT(MVT::i8, VecVT.getVectorElementCount());
+    Vec = DAG.getNode(ISD::ZERO_EXTEND, DL, WideVT, Vec);
+    return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, EltVT, Vec, Idx);
+  }
 
   // If this is a fixed vector, we need to convert it to a scalable vector.
   MVT ContainerVT = VecVT;
@@ -2535,9 +2579,6 @@ static unsigned getRVVReductionOp(unsigned ISDOpcode) {
   }
 }
 
-// Take a (supported) standard ISD reduction opcode and transform it to a RISCV
-// reduction opcode. Note that this returns a vector type, which must be
-// further processed to access the scalar result in element 0.
 SDValue RISCVTargetLowering::lowerVECREDUCE(SDValue Op,
                                             SelectionDAG &DAG) const {
   SDLoc DL(Op);
@@ -3155,8 +3196,7 @@ SDValue RISCVTargetLowering::lowerABS(SDValue Op, SelectionDAG &DAG) const {
 
   assert(VT.isFixedLengthVector() && "Unexpected type");
 
-  MVT ContainerVT =
-      RISCVTargetLowering::getContainerForFixedLengthVector(DAG, VT, Subtarget);
+  MVT ContainerVT = getContainerForFixedLengthVector(VT);
   X = convertToScalableVector(ContainerVT, X, DAG, Subtarget);
 
   SDValue Mask, VL;
@@ -3171,6 +3211,28 @@ SDValue RISCVTargetLowering::lowerABS(SDValue Op, SelectionDAG &DAG) const {
       DAG.getNode(RISCVISD::SMAX_VL, DL, ContainerVT, X, NegX, Mask, VL);
 
   return convertFromScalableVector(VT, Max, DAG, Subtarget);
+}
+
+SDValue RISCVTargetLowering::lowerFixedLengthVectorFCOPYSIGNToRVV(
+    SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  SDValue Mag = Op.getOperand(0);
+  SDValue Sign = Op.getOperand(1);
+  assert(Mag.getValueType() == Sign.getValueType() &&
+         "Can only handle COPYSIGN with matching types.");
+
+  MVT ContainerVT = getContainerForFixedLengthVector(VT);
+  Mag = convertToScalableVector(ContainerVT, Mag, DAG, Subtarget);
+  Sign = convertToScalableVector(ContainerVT, Sign, DAG, Subtarget);
+
+  SDValue Mask, VL;
+  std::tie(Mask, VL) = getDefaultVLOps(VT, ContainerVT, DL, DAG, Subtarget);
+
+  SDValue CopySign =
+      DAG.getNode(RISCVISD::FCOPYSIGN_VL, DL, ContainerVT, Mag, Sign, Mask, VL);
+
+  return convertFromScalableVector(VT, CopySign, DAG, Subtarget);
 }
 
 SDValue RISCVTargetLowering::lowerFixedLengthVectorSelectToRVV(
@@ -3546,12 +3608,38 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
           "Don't know how to custom type legalize this intrinsic!");
     case Intrinsic::riscv_vmv_x_s: {
       EVT VT = N->getValueType(0);
-      assert((VT == MVT::i8 || VT == MVT::i16 ||
-              (Subtarget.is64Bit() && VT == MVT::i32)) &&
-             "Unexpected custom legalisation!");
-      SDValue Extract = DAG.getNode(RISCVISD::VMV_X_S, DL,
-                                    Subtarget.getXLenVT(), N->getOperand(1));
-      Results.push_back(DAG.getNode(ISD::TRUNCATE, DL, VT, Extract));
+      MVT XLenVT = Subtarget.getXLenVT();
+      if (VT.bitsLT(XLenVT)) {
+        // Simple case just extract using vmv.x.s and truncate.
+        SDValue Extract = DAG.getNode(RISCVISD::VMV_X_S, DL,
+                                      Subtarget.getXLenVT(), N->getOperand(1));
+        Results.push_back(DAG.getNode(ISD::TRUNCATE, DL, VT, Extract));
+        return;
+      }
+
+      assert(VT == MVT::i64 && !Subtarget.is64Bit() &&
+             "Unexpected custom legalization");
+
+      // We need to do the move in two steps.
+      SDValue Vec = N->getOperand(1);
+      MVT VecVT = Vec.getSimpleValueType();
+
+      // First extract the lower XLEN bits of the element.
+      SDValue EltLo = DAG.getNode(RISCVISD::VMV_X_S, DL, XLenVT, Vec);
+
+      // To extract the upper XLEN bits of the vector element, shift the first
+      // element right by 32 bits and re-extract the lower XLEN bits.
+      SDValue VL = DAG.getConstant(1, DL, XLenVT);
+      MVT MaskVT = MVT::getVectorVT(MVT::i1, VecVT.getVectorElementCount());
+      SDValue Mask = DAG.getNode(RISCVISD::VMSET_VL, DL, MaskVT, VL);
+      SDValue ThirtyTwoV = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, VecVT,
+                                       DAG.getConstant(32, DL, XLenVT), VL);
+      SDValue LShr32 =
+          DAG.getNode(RISCVISD::SRL_VL, DL, VecVT, Vec, ThirtyTwoV, Mask, VL);
+      SDValue EltHi = DAG.getNode(RISCVISD::VMV_X_S, DL, XLenVT, LShr32);
+
+      Results.push_back(
+          DAG.getNode(ISD::BUILD_PAIR, DL, MVT::i64, EltLo, EltHi));
       break;
     }
     }
@@ -3565,9 +3653,6 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
   case ISD::VECREDUCE_UMAX:
   case ISD::VECREDUCE_SMIN:
   case ISD::VECREDUCE_UMIN:
-    // The custom-lowering for these nodes returns a vector whose first element
-    // is the result of the reduction. Extract its first element and let the
-    // legalization for EXTRACT_VECTOR_ELT do the rest of the job.
     if (SDValue V = lowerVECREDUCE(SDValue(N, 0), DAG))
       Results.push_back(V);
     break;
@@ -6038,6 +6123,7 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(VLEFF)
   NODE_NAME_CASE(VLEFF_MASK)
   NODE_NAME_CASE(VSLIDEUP_VL)
+  NODE_NAME_CASE(VSLIDE1UP_VL)
   NODE_NAME_CASE(VSLIDEDOWN_VL)
   NODE_NAME_CASE(VID_VL)
   NODE_NAME_CASE(VFNCVT_ROD_VL)
@@ -6072,6 +6158,7 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(FABS_VL)
   NODE_NAME_CASE(FSQRT_VL)
   NODE_NAME_CASE(FMA_VL)
+  NODE_NAME_CASE(FCOPYSIGN_VL)
   NODE_NAME_CASE(SMIN_VL)
   NODE_NAME_CASE(SMAX_VL)
   NODE_NAME_CASE(UMIN_VL)
