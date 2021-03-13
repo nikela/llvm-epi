@@ -85,22 +85,6 @@ namespace clang {
     };
   }
 
-  /// RISCV builtins
-  namespace RISCV {
-  enum {
-    LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
-#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
-#include "clang/Basic/BuiltinsRISCV.def"
-#define BUILTIN(ID, TYPE, ATTRS) BI__builtin_epi_##ID,
-#include "clang/Basic/BuiltinsEPI.def"
-    LastTSBuiltin
-  };
-  enum EPIBuiltins {
-#define BUILTIN(ID, TYPE, ATTRS) EPI_BI_##ID = BI__builtin_epi_##ID,
-#include "clang/Basic/BuiltinsEPI.def"
-  };
-  }
-
   /// NVPTX builtins
   namespace NVPTX {
     enum {
@@ -139,6 +123,22 @@ namespace clang {
   namespace VE {
   enum { LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1, LastTSBuiltin };
   }
+
+  /// RISCV builtins
+  namespace RISCV {
+  enum {
+    LastTIBuiltin = clang::Builtin::FirstTSBuiltin - 1,
+#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
+#include "clang/Basic/BuiltinsRISCV.def"
+#define BUILTIN(ID, TYPE, ATTRS) BI__builtin_epi_##ID,
+#include "clang/Basic/BuiltinsEPI.def"
+    LastTSBuiltin
+  };
+  enum EPIBuiltins {
+#define BUILTIN(ID, TYPE, ATTRS) EPI_BI_##ID = BI__builtin_epi_##ID,
+#include "clang/Basic/BuiltinsEPI.def"
+  };
+  } // namespace RISCV
 
   /// Flags to identify the types for overloaded Neon builtins.
   ///

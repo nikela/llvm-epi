@@ -152,8 +152,12 @@ endif()
 set(EXEEXT ${CMAKE_EXECUTABLE_SUFFIX})
 set(LTDL_SHLIB_EXT ${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-# We use *.dylib rather than *.so on darwin.
-set(LLVM_PLUGIN_EXT ${CMAKE_SHARED_LIBRARY_SUFFIX})
+# We use *.dylib rather than *.so on darwin, but we stick with *.so on AIX.
+if(${CMAKE_SYSTEM_NAME} MATCHES "AIX")
+  set(LLVM_PLUGIN_EXT ${CMAKE_SHARED_MODULE_SUFFIX})
+else()
+  set(LLVM_PLUGIN_EXT ${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
 
 if(APPLE)
   if(LLVM_ENABLE_LLD AND LLVM_ENABLE_LTO)
@@ -430,6 +434,16 @@ if( MSVC )
     -DUNICODE
     -D_UNICODE
   )
+
+  # Allow setting clang-cl's /winsysroot flag.
+  set(LLVM_WINSYSROOT "" CACHE STRING
+    "If set, argument to clang-cl's /winsysroot")
+  if (LLVM_WINSYSROOT)
+    if (NOT CLANG_CL)
+      message(ERROR "LLVM_WINSYSROOT requires clang-cl")
+    endif()
+    append("/winsysroot${LLVM_WINSYSROOT}" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+  endif()
 
   if (LLVM_ENABLE_WERROR)
     append("/WX" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)

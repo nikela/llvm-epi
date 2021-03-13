@@ -43,6 +43,24 @@ static std::unique_ptr<FrontendAction> CreateFrontendBaseAction(
   case DebugUnparseWithSymbols:
     return std::make_unique<DebugUnparseWithSymbolsAction>();
     break;
+  case DebugDumpSymbols:
+    return std::make_unique<DebugDumpSymbolsAction>();
+    break;
+  case DebugDumpParseTree:
+    return std::make_unique<DebugDumpParseTreeAction>();
+    break;
+  case DebugDumpProvenance:
+    return std::make_unique<DebugDumpProvenanceAction>();
+    break;
+  case DebugDumpParsingLog:
+    return std::make_unique<DebugDumpParsingLogAction>();
+    break;
+  case DebugMeasureParseTree:
+    return std::make_unique<DebugMeasureParseTreeAction>();
+    break;
+  case DebugPreFIRTree:
+    return std::make_unique<DebugPreFIRTreeAction>();
+    break;
   default:
     break;
     // TODO:

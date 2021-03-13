@@ -62,6 +62,7 @@ add_clang_library(clangDaemon
   DraftStore.cpp
   DumpAST.cpp
   ExpectedTypes.cpp
+  FeatureModule.cpp
   FindSymbols.cpp
   FindTarget.cpp
   FileDistance.cpp

@@ -74,7 +74,6 @@ RISCVRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
 }
 
 BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
-  const RISCVSubtarget &Subtarget = MF.getSubtarget<RISCVSubtarget>();
   const RISCVFrameLowering *TFI = getFrameLowering(MF);
   BitVector Reserved(getNumRegs());
 
@@ -89,12 +88,7 @@ BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   markSuperRegs(Reserved, RISCV::X2); // sp
   markSuperRegs(Reserved, RISCV::X3); // gp
   markSuperRegs(Reserved, RISCV::X4); // tp
-  // When using EPI we need to reserve FP tentatively just in case there is a
-  // spill.  Unfortunately we know there are spills _after_ the Register
-  // Allocator has queried the reserved registers.
-  //
-  // TODO: Add a pass that undoes this.
-  if (TFI->hasFP(MF) || Subtarget.hasStdExtV())
+  if (TFI->hasFP(MF))
     markSuperRegs(Reserved, RISCV::X8); // fp
   // Reserve the base register if we need to realign the stack and allocate
   // variable-sized objects at runtime.
@@ -158,9 +152,9 @@ bool RISCVRegisterInfo::hasReservedSpillSlot(const MachineFunction &MF,
 }
 
 static Register computeVRSpillReloadInstructions(
-    MachineBasicBlock::iterator II, const Register &VReg,
-    const Register &HandleReg, unsigned LMUL, bool IsReload, unsigned TupleSize,
-    bool KillVReg, Register VLenBReg = 0, bool KillHandle = false) {
+    MachineBasicBlock::iterator II, const Register &ValueReg,
+    const Register &AddrReg, unsigned LMUL, bool IsReload, unsigned TupleSize,
+    bool KillVReg, Register VLenBReg = 0, bool KillAddr = false) {
   MachineBasicBlock &MBB = *II->getParent();
   MachineFunction &MF = *MBB.getParent();
   MachineRegisterInfo &MRI = MF.getRegInfo();
@@ -172,19 +166,21 @@ static Register computeVRSpillReloadInstructions(
 
   if (LMUL == 1) {
     if (!TupleSize) {
+      // This is the same as a single register and we only get there now
+      // via tuples. Individual vector registers are handled elsewhere.
       if (IsReload)
-        BuildMI(MBB, II, DL, TII.get(RISCV::VL1RE8_V), VReg)
-            .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
+        BuildMI(MBB, II, DL, TII.get(RISCV::VL1RE8_V), ValueReg)
+            .addReg(AddrReg, getKillRegState(KillAddr || !VLenBReg));
       else
         BuildMI(MBB, II, DL, TII.get(RISCV::VS1R_V))
-            .addReg(VReg, getKillRegState(KillVReg))
-            .addReg(HandleReg, getKillRegState(KillHandle || !VLenBReg));
+            .addReg(ValueReg, getKillRegState(KillVReg))
+            .addReg(AddrReg, getKillRegState(KillAddr || !VLenBReg));
 
-      return HandleReg;
+      return AddrReg;
     } else {
       assert(TupleSize == 2 && "Unexpected tuple size");
-      Register VRegFirst = RI.getSubReg(VReg, RISCV::sub_vrm1_0);
-      Register VRegSecond = RI.getSubReg(VReg, RISCV::sub_vrm1_1);
+      Register VRegFirst = RI.getSubReg(ValueReg, RISCV::sub_vrm1_0);
+      Register VRegSecond = RI.getSubReg(ValueReg, RISCV::sub_vrm1_1);
 
       // Compute the second handle already so we can kill the first handle
       // when spilling the first register.
@@ -192,16 +188,16 @@ static Register computeVRSpillReloadInstructions(
       VLenBReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
       BuildMI(MBB, II, DL, TII.get(RISCV::PseudoEPIReadVLENB), VLenBReg);
 
-      Register HandleRegSecond = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-      BuildMI(MBB, II, DL, TII.get(RISCV::ADD), HandleRegSecond)
-          .addReg(HandleReg)
+      Register AddrRegSecond = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+      BuildMI(MBB, II, DL, TII.get(RISCV::ADD), AddrRegSecond)
+          .addReg(AddrReg)
           .addReg(VLenBReg);
 
       // First part.
-      computeVRSpillReloadInstructions(II, VRegFirst, HandleReg, LMUL, IsReload,
+      computeVRSpillReloadInstructions(II, VRegFirst, AddrReg, LMUL, IsReload,
                                        /* TupleSize */ 0, KillVReg);
       // Second part.
-      computeVRSpillReloadInstructions(II, VRegSecond, HandleRegSecond, LMUL,
+      computeVRSpillReloadInstructions(II, VRegSecond, AddrRegSecond, LMUL,
                                        IsReload, /* TupleSize */ 0, KillVReg);
       // We're done. Return zero_reg to make sure nobody attempts to use this
       // for now.
@@ -216,16 +212,16 @@ static Register computeVRSpillReloadInstructions(
   default:
     llvm_unreachable("Unexpected LMUL value");
   case 2:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm1_0);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm1_1);
+    VRegEven = RI.getSubReg(ValueReg, RISCV::sub_vrm1_0);
+    VRegOdd = RI.getSubReg(ValueReg, RISCV::sub_vrm1_1);
     break;
   case 4:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm2_0);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm2_1);
+    VRegEven = RI.getSubReg(ValueReg, RISCV::sub_vrm2_0);
+    VRegOdd = RI.getSubReg(ValueReg, RISCV::sub_vrm2_1);
     break;
   case 8:
-    VRegEven = RI.getSubReg(VReg, RISCV::sub_vrm4_0);
-    VRegOdd = RI.getSubReg(VReg, RISCV::sub_vrm4_1);
+    VRegEven = RI.getSubReg(ValueReg, RISCV::sub_vrm4_0);
+    VRegOdd = RI.getSubReg(ValueReg, RISCV::sub_vrm4_1);
     break;
   }
 
@@ -239,30 +235,80 @@ static Register computeVRSpillReloadInstructions(
     // recursive calls only.
     // Since VLENB hasn't been computed this must be the toplevel recursive
     // call.
-    KillHandle = true;
+    KillAddr = true;
   }
 
   // Recursive call on the even subregister. The handle corresponding to the
   // latest spill/reload in the recursion is returned as a result.
-  Register LastHandleReg =
-      computeVRSpillReloadInstructions(II, VRegEven, HandleReg, LMUL / 2,
+  Register LastAddrReg =
+      computeVRSpillReloadInstructions(II, VRegEven, AddrReg, LMUL / 2,
                                        IsReload, TupleSize, KillVReg, VLenBReg);
 
-  Register HandleRegOdd = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-  BuildMI(MBB, II, DL, TII.get(RISCV::ADD), HandleRegOdd)
-      .addReg(LastHandleReg, RegState::Kill)
+  Register AddrRegOdd = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+  BuildMI(MBB, II, DL, TII.get(RISCV::ADD), AddrRegOdd)
+      .addReg(LastAddrReg, RegState::Kill)
       .addReg(VLenBReg);
 
   // Recursive call on the odd subregister. Return latest spill/reload handle.
-  return computeVRSpillReloadInstructions(II, VRegOdd, HandleRegOdd, LMUL / 2,
+  return computeVRSpillReloadInstructions(II, VRegOdd, AddrRegOdd, LMUL / 2,
                                           IsReload, TupleSize, KillVReg, VLenBReg,
-                                          KillHandle);
+                                          KillAddr);
 }
 
-void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
-    MachineBasicBlock::iterator II, int SPAdj, unsigned FIOperandNum,
-    RegScavenger *RS) const {
+static bool isRVVWholeLoadStore(unsigned Opcode) {
+  switch (Opcode) {
+  default:
+    return false;
+  case RISCV::VS1R_V:
+  case RISCV::VS2R_V:
+  case RISCV::VS4R_V:
+  case RISCV::VS8R_V:
+  case RISCV::VL1RE8_V:
+  case RISCV::VL2RE8_V:
+  case RISCV::VL4RE8_V:
+  case RISCV::VL8RE8_V:
+  case RISCV::VL1RE16_V:
+  case RISCV::VL2RE16_V:
+  case RISCV::VL4RE16_V:
+  case RISCV::VL8RE16_V:
+  case RISCV::VL1RE32_V:
+  case RISCV::VL2RE32_V:
+  case RISCV::VL4RE32_V:
+  case RISCV::VL8RE32_V:
+  case RISCV::VL1RE64_V:
+  case RISCV::VL2RE64_V:
+  case RISCV::VL4RE64_V:
+  case RISCV::VL8RE64_V:
+    return true;
+  }
+}
 
+static bool isEPISpillReload(unsigned Opcode) {
+  switch (Opcode) {
+  default:
+    return false;
+  case RISCV::PseudoEPIVRELOAD_VRN2M1:
+  case RISCV::PseudoEPIVRELOAD_VRN3M1:
+  case RISCV::PseudoEPIVRELOAD_VRN4M1:
+  case RISCV::PseudoEPIVRELOAD_VRN5M1:
+  case RISCV::PseudoEPIVRELOAD_VRN6M1:
+  case RISCV::PseudoEPIVRELOAD_VRN7M1:
+  case RISCV::PseudoEPIVRELOAD_VRN8M1:
+
+  case RISCV::PseudoEPIVSPILL_VRN2M1:
+  case RISCV::PseudoEPIVSPILL_VRN3M1:
+  case RISCV::PseudoEPIVSPILL_VRN4M1:
+  case RISCV::PseudoEPIVSPILL_VRN5M1:
+  case RISCV::PseudoEPIVSPILL_VRN6M1:
+  case RISCV::PseudoEPIVSPILL_VRN7M1:
+  case RISCV::PseudoEPIVSPILL_VRN8M1:
+    return true;
+  }
+}
+
+void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
+                                            int SPAdj, unsigned FIOperandNum,
+                                            RegScavenger *RS) const {
   assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
 
   MachineInstr &MI = *II;
@@ -272,49 +318,90 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
   DebugLoc DL = MI.getDebugLoc();
 
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+  Register FrameReg;
+  StackOffset Offset =
+      getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg);
+  bool isRVV = RISCVVPseudosTable::getPseudoInfo(MI.getOpcode()) ||
+               isRVVWholeLoadStore(MI.getOpcode()) ||
+               // EPI remaining cases.
+               RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode()) ||
+               isEPISpillReload(MI.getOpcode());
+  if (!isRVV)
+    Offset += StackOffset::getFixed(MI.getOperand(FIOperandNum + 1).getImm());
 
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  assert(MFI.getStackID(FrameIndex) == TargetStackID::ScalableVector &&
-         "Unexpected stack ID");
-
-  MachineOperand SlotAddr = MI.getOperand(FIOperandNum);
-  MachineBasicBlock &MBB = *MI.getParent();
-
-  // TODO: Consider using loadRegFromStackSlot but this has to be before
-  // replacing the FI above.
-  unsigned LoadHandleOpcode =
-      getRegSizeInBits(RISCV::GPRRegClass) == 32 ? RISCV::LW : RISCV::LD;
-
-  bool RemoveInstruction = false;
-  Register HandleReg = 0;
-
-  // Some cases can be folded in the instruction.
-  if (MI.getOpcode() == RISCV::ADDI &&
-      MI.getOperand(FIOperandNum + 1).getImm() == 0) {
-    HandleReg = MI.getOperand(0).getReg();
-    RemoveInstruction = true;
+  if (!isInt<32>(Offset.getFixed())) {
+    report_fatal_error(
+        "Frame offsets outside of the signed 32-bit range not supported");
   }
 
+  MachineBasicBlock &MBB = *MI.getParent();
+  bool FrameRegIsKill = false;
 
-  if (!HandleReg)
-    HandleReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+  if (!isInt<12>(Offset.getFixed())) {
+    // The offset won't fit in an immediate, so use a scratch register instead
+    // Modify Offset and FrameReg appropriately
+    Register ScratchReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+    TII->movImm(MBB, II, DL, ScratchReg, Offset.getFixed());
+    BuildMI(MBB, II, DL, TII->get(RISCV::ADD), ScratchReg)
+        .addReg(FrameReg)
+        .addReg(ScratchReg, RegState::Kill);
+    Offset = StackOffset::get(0, Offset.getScalable());
+    FrameReg = ScratchReg;
+    FrameRegIsKill = true;
+  }
 
-  MachineInstr *LoadHandle =
-      BuildMI(MBB, II, DL, TII->get(LoadHandleOpcode), HandleReg)
-          .add(SlotAddr)
-          .addImm(0);
+  if (!Offset.getScalable()) {
+    // Offset = (fixed offset, 0)
+    MI.getOperand(FIOperandNum)
+        .ChangeToRegister(FrameReg, false, false, FrameRegIsKill);
+    if (!isRVV)
+      MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset.getFixed());
+    else {
+      if (Offset.getFixed()) {
+        Register ScratchReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+        BuildMI(MBB, II, DL, TII->get(RISCV::ADDI), ScratchReg)
+          .addReg(FrameReg, getKillRegState(FrameRegIsKill))
+          .addImm(Offset.getFixed());
+        MI.getOperand(FIOperandNum)
+          .ChangeToRegister(ScratchReg, false, false, true);
+      }
+    }
+  } else {
+    // Offset = (fixed offset, scalable offset)
+    unsigned Opc = RISCV::ADD;
+    int64_t ScalableValue = Offset.getScalable();
+    if (ScalableValue < 0) {
+      ScalableValue = -ScalableValue;
+      Opc = RISCV::SUB;
+    }
 
-  // Handle vector spills here.
-  if (MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM1 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM1 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM2 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM4 ||
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRM8 ||
-      MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRM8 ||
-      // Vector tuples.
-      MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN2M1 ||
+    // 1. Get vlenb && multiply vlen with number of vector register.
+    Register FactorRegister =
+        TII->getVLENFactoredAmount(MF, MBB, II, ScalableValue);
+
+    // 2. Calculate address: FrameReg + result of multiply
+    Register VL = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+    BuildMI(MBB, II, DL, TII->get(Opc), VL)
+        .addReg(FrameReg, getKillRegState(FrameRegIsKill))
+        .addReg(FactorRegister, RegState::Kill);
+
+    if (isRVV && Offset.getFixed()) {
+      // Scalable load/store has no immediate argument. We need to add the
+      // fixed part into the load/store base address.
+      BuildMI(MBB, II, DL, TII->get(RISCV::ADDI), VL)
+          .addReg(VL)
+          .addImm(Offset.getFixed());
+    }
+
+    // 3. Replace address register with calculated address register
+    MI.getOperand(FIOperandNum).ChangeToRegister(VL, false, false, true);
+    if (!isRVV)
+      MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset.getFixed());
+
+  }
+
+  // Lower EPI spill/reload for tuples with the actual instructions.
+  if (MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN2M1 ||
       MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN2M1 ||
       MI.getOpcode() == RISCV::PseudoEPIVSPILL_VRN3M1 ||
       MI.getOpcode() == RISCV::PseudoEPIVRELOAD_VRN3M1 ||
@@ -331,45 +418,14 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
 
     // Make sure we spill/reload all the bits using whole register
     // instructions.
-    MachineOperand &OpReg = MI.getOperand(0);
+    MachineOperand &ValueReg = MI.getOperand(0);
+    MachineOperand &AddrReg = MI.getOperand(FIOperandNum);
     bool IsReload;
     unsigned LMUL;
     unsigned TupleSize = 0;
     switch (MI.getOpcode()) {
     default:
       llvm_unreachable("Unexpected instruction");
-    case RISCV::PseudoEPIVSPILL_VRM1:
-      IsReload = false;
-      LMUL = 1;
-      break;
-    case RISCV::PseudoEPIVRELOAD_VRM1:
-      IsReload = true;
-      LMUL = 1;
-      break;
-    case RISCV::PseudoEPIVSPILL_VRM2:
-      IsReload = false;
-      LMUL = 2;
-      break;
-    case RISCV::PseudoEPIVRELOAD_VRM2:
-      IsReload = true;
-      LMUL = 2;
-      break;
-    case RISCV::PseudoEPIVSPILL_VRM4:
-      IsReload = false;
-      LMUL = 4;
-      break;
-    case RISCV::PseudoEPIVRELOAD_VRM4:
-      IsReload = true;
-      LMUL = 4;
-      break;
-    case RISCV::PseudoEPIVSPILL_VRM8:
-      IsReload = false;
-      LMUL = 8;
-      break;
-    case RISCV::PseudoEPIVRELOAD_VRM8:
-      IsReload = true;
-      LMUL = 8;
-      break;
 #define TUPLE_SPILL_RELOAD(N)                                                  \
   case RISCV::PseudoEPIVSPILL_VRN##N##M1:                                      \
     IsReload = false;                                                          \
@@ -389,89 +445,13 @@ void RISCVRegisterInfo::eliminateFrameIndexEPIVector(
       TUPLE_SPILL_RELOAD(7)
       TUPLE_SPILL_RELOAD(8)
     }
-    computeVRSpillReloadInstructions(II, OpReg.getReg(), HandleReg, LMUL,
-                                     IsReload, TupleSize,
-                                     /* KillVReg */ OpReg.isKill());
+    computeVRSpillReloadInstructions(II, ValueReg.getReg(), AddrReg.getReg(),
+                                     LMUL, IsReload, TupleSize,
+                                     /* KillVReg */ ValueReg.isKill());
 
     // Remove the pseudo.
     MI.eraseFromParent();
-  } else {
-    // Use the handle as address
-    MI.getOperand(FIOperandNum)
-        .ChangeToRegister(HandleReg, false, false, /* isKill */ true);
-    if (RemoveInstruction)
-      MI.eraseFromParent();
   }
-
-  // Now remove the FI of the handle load.
-  return eliminateFrameIndex(LoadHandle, /* SPAdj */ 0, 1, RS,
-                             /* IsHandle */ true);
-}
-
-void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
-                                            int SPAdj, unsigned FIOperandNum,
-                                            RegScavenger *RS,
-                                            bool IsHandle) const {
-  assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
-
-  MachineInstr &MI = *II;
-  MachineFunction &MF = *MI.getParent()->getParent();
-  MachineRegisterInfo &MRI = MF.getRegInfo();
-  const RISCVInstrInfo *TII = MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
-  DebugLoc DL = MI.getDebugLoc();
-
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
-  if (!IsHandle && MFI.getStackID(FrameIndex) == TargetStackID::ScalableVector
-      // FIXME: This is a quirk caused by the way we use handles. If we don't
-      // do this, we emit an incorrect load.
-      // FIXME: Stop using handles.
-      && MI.getOpcode() != RISCV::SW && MI.getOpcode() != RISCV::SD
-      && MI.getOpcode() != RISCV::LW && MI.getOpcode() != RISCV::LD) {
-    return eliminateFrameIndexEPIVector(II, SPAdj, FIOperandNum, RS);
-  }
-
-  Register FrameReg;
-  int Offset = getFrameLowering(MF)
-                   ->getFrameIndexReference(MF, FrameIndex, FrameReg)
-                   .getFixed();
-
-  // FIXME: PseudoVSE / PseudoVLE don't have an offset operand and in some
-  // cases we don't use the EPIVector stack (e.g. a bitcast from
-  // statically-sized storage).
-  bool HasOffsetOperand = false;
-  if (FIOperandNum + 1 < MI.getNumOperands() &&
-      MI.getOperand(FIOperandNum + 1).isImm()) {
-    HasOffsetOperand = true;
-    Offset += MI.getOperand(FIOperandNum + 1).getImm();
-  }
-
-  if (!isInt<32>(Offset)) {
-    report_fatal_error(
-        "Frame offsets outside of the signed 32-bit range not supported");
-  }
-
-  MachineBasicBlock &MBB = *MI.getParent();
-  bool FrameRegIsKill = false;
-
-  if (Offset && (!isInt<12>(Offset) || !HasOffsetOperand)) {
-    assert(isInt<32>(Offset) && "Int32 expected");
-    // The offset won't fit in an immediate, so use a scratch register instead
-    // Modify Offset and FrameReg appropriately
-    Register ScratchReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-    TII->movImm(MBB, II, DL, ScratchReg, Offset);
-    BuildMI(MBB, II, DL, TII->get(RISCV::ADD), ScratchReg)
-        .addReg(FrameReg)
-        .addReg(ScratchReg, RegState::Kill);
-    Offset = 0;
-    FrameReg = ScratchReg;
-    FrameRegIsKill = true;
-  }
-
-  MI.getOperand(FIOperandNum)
-      .ChangeToRegister(FrameReg, false, false, FrameRegIsKill);
-  if (HasOffsetOperand)
-    MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 }
 
 Register RISCVRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
@@ -501,13 +481,10 @@ RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
   }
 }
 
-bool RISCVRegisterInfo::hasBasePointer(const MachineFunction &MF) const {
-  // We use a BP when all of the following are true:
-  // - the stack needs realignment (due to overaligned local objects)
-  // - the stack has VLAs
-  // Note that when we need a BP the conditions also imply a FP.
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  auto *RVFI = MF.getInfo<RISCVMachineFunctionInfo>();
-  return needsStackRealignment(MF) &&
-         (MFI.hasVarSizedObjects() || RVFI->hasSpilledVR());
+const TargetRegisterClass *
+RISCVRegisterInfo::getLargestLegalSuperClass(const TargetRegisterClass *RC,
+                                             const MachineFunction &) const {
+  if (RC == &RISCV::VMV0RegClass)
+    return &RISCV::VRRegClass;
+  return RC;
 }

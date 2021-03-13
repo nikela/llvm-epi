@@ -195,25 +195,8 @@ unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
 /// scalar, in which case the costs are multiplied with VF.
 unsigned
 RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
-                                               unsigned MinNumElts) {
-  unsigned MinCost = 0;
-  SmallPtrSet<const Value *, 4> UniqueOperands;
-  for (const Value *A : Args) {
-    if (!isa<Constant>(A) && UniqueOperands.insert(A).second) {
-      auto *VecTy = dyn_cast<VectorType>(A->getType());
-      if (VecTy) {
-        // If A is a vector operand, VF should correspond to A.
-        assert(MinNumElts == cast<ScalableVectorType>(VecTy)
-                                 ->getElementCount()
-                                 .getKnownMinValue() &&
-               "Vector argument does not match VF");
-      } else
-        VecTy = ScalableVectorType::get(A->getType(), MinNumElts);
-
-      MinCost += getScalarizationOverhead(VecTy, false, true);
-    }
-  }
-  return MinCost;
+                                               ArrayRef<Type *> Tys) {
+  return BaseT::getOperandsScalarizationOverhead(Args, Tys);
 }
 
 unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
@@ -239,36 +222,6 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
   }
 
   return MinCost;
-}
-
-/// Helper wrapper for the DemandedElts variant of getScalarizationOverhead.
-unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy, bool Insert,
-                                                bool Extract) {
-  // FIXME: DemandedElts represents active lanes using the number of elements.
-  // For scalable vectors it represents min number of elements (vscale = 1).
-  // This works fine as long as the cost model is based on the same model of
-  // vscale = 1. Once the cost model is changed to represent scalability, we
-  // would need a different ADT capable of representing scalable number of
-  // elements.
-  APInt MinDemandedElts =
-      APInt::getAllOnesValue(InTy->getElementCount().getKnownMinValue());
-  return getScalarizationOverhead(InTy, MinDemandedElts, Insert, Extract);
-}
-
-unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
-                                                ArrayRef<const Value *> Args) {
-  unsigned Cost = 0;
-
-  Cost += getScalarizationOverhead(InTy, true, false);
-  if (!Args.empty())
-    Cost += getOperandsScalarizationOverhead(
-        Args, InTy->getElementCount().getKnownMinValue());
-  else
-    // When no information on arguments is provided, we add the cost
-    // associated with one argument as a heuristic.
-    Cost += getScalarizationOverhead(InTy, false, true);
-
-  return Cost;
 }
 
 unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,

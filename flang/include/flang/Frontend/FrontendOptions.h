@@ -9,6 +9,7 @@
 #define LLVM_FLANG_FRONTEND_FRONTENDOPTIONS_H
 
 #include "flang/Common/Fortran-features.h"
+#include "flang/Parser/characters.h"
 #include "flang/Parser/unparse.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -39,6 +40,25 @@ enum ActionKind {
   /// Parse, resolve the sybmols, unparse the parse-tree and then output a
   /// Fortran source file
   DebugUnparseWithSymbols,
+
+  /// Parse, run semantics and then output symbols from semantics
+  DebugDumpSymbols,
+
+  /// Parse, run semantics and then output the parse tree
+  DebugDumpParseTree,
+
+  /// Dump provenance
+  DebugDumpProvenance,
+
+  /// Parse then output the parsing log
+  DebugDumpParsingLog,
+
+  /// Parse then output the number of objects in the parse tree and the overall
+  /// size
+  DebugMeasureParseTree,
+
+  /// Parse, run semantics and then output the pre-FIR tree
+  DebugPreFIRTree
 
   /// TODO: RunPreprocessor, EmitLLVM, EmitLLVMOnly,
   /// EmitCodeGenOnly, EmitAssembly, (...)
@@ -155,6 +175,9 @@ public:
   /// Show the -version text.
   unsigned showVersion_ : 1;
 
+  /// Instrument the parse to get a more verbose log
+  unsigned instrumentedParse_ : 1;
+
   /// The input files and their types.
   std::vector<FrontendInputFile> inputs_;
 
@@ -173,6 +196,9 @@ public:
 
   // Language features
   common::LanguageFeatureControl features_;
+
+  // Source file encoding
+  Fortran::parser::Encoding encoding_{Fortran::parser::Encoding::UTF_8};
 
 public:
   FrontendOptions() : showHelp_(false), showVersion_(false) {}

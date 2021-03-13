@@ -36,18 +36,18 @@ define void @foo(double*) nounwind {
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    addi sp, sp, -32
 ; DISABLED-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; DISABLED-NEXT:    sd s1, 16(sp) # 8-byte Folded Spill
-; DISABLED-NEXT:    sd s2, 8(sp) # 8-byte Folded Spill
-; DISABLED-NEXT:    mv s2, a0
+; DISABLED-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
+; DISABLED-NEXT:    sd s1, 8(sp) # 8-byte Folded Spill
+; DISABLED-NEXT:    mv s0, a0
 ; DISABLED-NEXT:    vsetvli s1, zero, e64,m1,tu,mu
 ; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
-; DISABLED-NEXT:    vle64.v v8, (s2)
+; DISABLED-NEXT:    vle64.v v8, (s0)
 ; DISABLED-NEXT:    srli a0, s1, 1
 ; DISABLED-NEXT:    call add1@plt
 ; DISABLED-NEXT:    vsetvli a0, s1, e64,m1,ta,mu
-; DISABLED-NEXT:    vse64.v v8, (s2)
-; DISABLED-NEXT:    ld s2, 8(sp) # 8-byte Folded Reload
-; DISABLED-NEXT:    ld s1, 16(sp) # 8-byte Folded Reload
+; DISABLED-NEXT:    vse64.v v8, (s0)
+; DISABLED-NEXT:    ld s1, 8(sp) # 8-byte Folded Reload
+; DISABLED-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; DISABLED-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
 ; DISABLED-NEXT:    addi sp, sp, 32
 ; DISABLED-NEXT:    ret
@@ -56,15 +56,15 @@ define void @foo(double*) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s1, 0(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    mv s1, a0
+; CHECK-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    mv s0, a0
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,tu,mu
-; CHECK-NEXT:    vle64.v v8, (s1)
+; CHECK-NEXT:    vle64.v v8, (s0)
 ; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call add1@plt
 ; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
-; CHECK-NEXT:    vse64.v v8, (s1)
-; CHECK-NEXT:    ld s1, 0(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    vse64.v v8, (s0)
+; CHECK-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret

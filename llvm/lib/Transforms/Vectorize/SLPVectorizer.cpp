@@ -2575,6 +2575,7 @@ void BoUpSLP::buildTree(ArrayRef<Value *> Roots,
           // instructions. If that is the case, the one in Lane 0 will
           // be used.
           if (UseScalar != U ||
+              UseEntry->State == TreeEntry::ScatterVectorize ||
               !InTreeUserNeedToExtract(Scalar, UserInst, TLI)) {
             LLVM_DEBUG(dbgs() << "SLP: \tInternal user will be removed:" << *U
                               << ".\n");
@@ -3419,7 +3420,16 @@ getVectorCallCosts(CallInst *CI, FixedVectorType *VecTy,
   Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
 
   // Calculate the cost of the scalar and vector calls.
-  IntrinsicCostAttributes CostAttrs(ID, *CI, VecTy->getElementCount());
+  SmallVector<Type *, 4> VecTys;
+  for (Use &Arg : CI->args())
+    VecTys.push_back(
+        FixedVectorType::get(Arg->getType(), VecTy->getNumElements()));
+  FastMathFlags FMF;
+  if (auto *FPCI = dyn_cast<FPMathOperator>(CI))
+    FMF = FPCI->getFastMathFlags();
+  SmallVector<const Value *> Arguments(CI->arg_begin(), CI->arg_end());
+  IntrinsicCostAttributes CostAttrs(ID, VecTy, Arguments, VecTys, FMF,
+                                    dyn_cast<IntrinsicInst>(CI));
   auto IntrinsicCost =
     TTI->getIntrinsicInstrCost(CostAttrs, TTI::TCK_RecipThroughput);
 
@@ -3430,11 +3440,6 @@ getVectorCallCosts(CallInst *CI, FixedVectorType *VecTy,
   auto LibCost = IntrinsicCost;
   if (!CI->isNoBuiltin() && VecFunc) {
     // Calculate the cost of the vector library call.
-    SmallVector<Type *, 4> VecTys;
-    for (Use &Arg : CI->args())
-      VecTys.push_back(
-          FixedVectorType::get(Arg->getType(), VecTy->getNumElements()));
-
     // If the corresponding vector call is cheaper, return its cost.
     LibCost = TTI->getCallInstrCost(nullptr, VecTy, VecTys,
                                     TTI::TCK_RecipThroughput);
@@ -3510,6 +3515,9 @@ InstructionCost BoUpSLP::getEntryCost(TreeEntry *E) {
 
     case Instruction::ExtractValue:
     case Instruction::ExtractElement: {
+      // The common cost of removal ExtractElement/ExtractValue instructions +
+      // the cost of shuffles, if required to resuffle the original vector.
+      InstructionCost CommonCost = 0;
       if (NeedToShuffleReuses) {
         unsigned Idx = 0;
         for (unsigned I : E->ReuseShuffleIndices) {
@@ -3537,11 +3545,9 @@ InstructionCost BoUpSLP::getEntryCost(TreeEntry *E) {
           ReuseShuffleCost +=
               TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy, Idx);
         }
-      }
-      InstructionCost DeadCost = ReuseShuffleCost;
-      if (!E->ReorderIndices.empty()) {
-        // TODO: Merge this shuffle with the ReuseShuffleCost.
-        DeadCost += TTI->getShuffleCost(
+        CommonCost = ReuseShuffleCost;
+      } else if (!E->ReorderIndices.empty()) {
+        CommonCost = TTI->getShuffleCost(
             TargetTransformInfo::SK_PermuteSingleSrc, VecTy);
       }
       for (unsigned I = 0, E = VL.size(); I < E; ++I) {
@@ -3558,20 +3564,20 @@ InstructionCost BoUpSLP::getEntryCost(TreeEntry *E) {
                        [](User *U) { return isa<GetElementPtrInst>(U); })) {
               // Use getExtractWithExtendCost() to calculate the cost of
               // extractelement/ext pair.
-              DeadCost -= TTI->getExtractWithExtendCost(
+              CommonCost -= TTI->getExtractWithExtendCost(
                   Ext->getOpcode(), Ext->getType(), VecTy, I);
               // Add back the cost of s|zext which is subtracted separately.
-              DeadCost += TTI->getCastInstrCost(
+              CommonCost += TTI->getCastInstrCost(
                   Ext->getOpcode(), Ext->getType(), EI->getType(),
                   TTI::getCastContextHint(Ext), CostKind, Ext);
               continue;
             }
           }
-          DeadCost -=
+          CommonCost -=
               TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy, I);
         }
       }
-      return DeadCost;
+      return CommonCost;
     }
     case Instruction::ZExt:
     case Instruction::SExt:
@@ -3766,11 +3772,9 @@ InstructionCost BoUpSLP::getEntryCost(TreeEntry *E) {
             Instruction::Load, VecTy, cast<LoadInst>(VL0)->getPointerOperand(),
             /*VariableMask=*/false, alignment, CostKind, VL0);
       }
-      if (!E->ReorderIndices.empty()) {
-        // TODO: Merge this shuffle with the ReuseShuffleCost.
+      if (!NeedToShuffleReuses && !E->ReorderIndices.empty())
         VecLdCost += TTI->getShuffleCost(
             TargetTransformInfo::SK_PermuteSingleSrc, VecTy);
-      }
       LLVM_DEBUG(dumpTreeCosts(E, ReuseShuffleCost, VecLdCost, ScalarLdCost));
       return ReuseShuffleCost + VecLdCost - ScalarLdCost;
     }
@@ -3782,25 +3786,21 @@ InstructionCost BoUpSLP::getEntryCost(TreeEntry *E) {
       Align Alignment = SI->getAlign();
       InstructionCost ScalarEltCost = TTI->getMemoryOpCost(
           Instruction::Store, ScalarTy, Alignment, 0, CostKind, VL0);
-      if (NeedToShuffleReuses)
-        ReuseShuffleCost = -(ReuseShuffleNumbers - VL.size()) * ScalarEltCost;
       InstructionCost ScalarStCost = VecTy->getNumElements() * ScalarEltCost;
       InstructionCost VecStCost = TTI->getMemoryOpCost(
           Instruction::Store, VecTy, Alignment, 0, CostKind, VL0);
-      if (IsReorder) {
-        // TODO: Merge this shuffle with the ReuseShuffleCost.
+      if (IsReorder)
         VecStCost += TTI->getShuffleCost(
             TargetTransformInfo::SK_PermuteSingleSrc, VecTy);
-      }
       LLVM_DEBUG(dumpTreeCosts(E, ReuseShuffleCost, VecStCost, ScalarStCost));
-      return ReuseShuffleCost + VecStCost - ScalarStCost;
+      return VecStCost - ScalarStCost;
     }
     case Instruction::Call: {
       CallInst *CI = cast<CallInst>(VL0);
       Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
 
       // Calculate the cost of the scalar and vector calls.
-      IntrinsicCostAttributes CostAttrs(ID, *CI, ElementCount::getFixed(1), 1);
+      IntrinsicCostAttributes CostAttrs(ID, *CI, 1);
       InstructionCost ScalarEltCost =
           TTI->getIntrinsicInstrCost(CostAttrs, CostKind);
       if (NeedToShuffleReuses) {
@@ -4291,18 +4291,31 @@ Value *BoUpSLP::vectorizeTree(ArrayRef<Value *> VL) {
       if (E->isSame(VL)) {
         Value *V = vectorizeTree(E);
         if (VL.size() == E->Scalars.size() && !E->ReuseShuffleIndices.empty()) {
-          // We need to get the vectorized value but without shuffle.
-          if (auto *SV = dyn_cast<ShuffleVectorInst>(V)) {
-            V = SV->getOperand(0);
-          } else {
-            // Reshuffle to get only unique values.
-            SmallVector<int, 4> UniqueIdxs;
-            SmallSet<int, 4> UsedIdxs;
-            for (int Idx : E->ReuseShuffleIndices)
-              if (UsedIdxs.insert(Idx).second)
-                UniqueIdxs.emplace_back(Idx);
-            V = Builder.CreateShuffleVector(V, UniqueIdxs);
+          // Reshuffle to get only unique values.
+          // If some of the scalars are duplicated in the vectorization tree
+          // entry, we do not vectorize them but instead generate a mask for the
+          // reuses. But if there are several users of the same entry, they may
+          // have different vectorization factors. This is especially important
+          // for PHI nodes. In this case, we need to adapt the resulting
+          // instruction for the user vectorization factor and have to reshuffle
+          // it again to take only unique elements of the vector. Without this
+          // code the function incorrectly returns reduced vector instruction
+          // with the same elements, not with the unique ones.
+          // block:
+          // %phi = phi <2 x > { .., %entry} {%shuffle, %block}
+          // %2 = shuffle <2 x > %phi, %poison, <4 x > <0, 0, 1, 1>
+          // ... (use %2)
+          // %shuffle = shuffle <2 x> %2, poison, <2 x> {0, 2}
+          // br %block
+          SmallVector<int, 4> UniqueIdxs;
+          SmallSet<int, 4> UsedIdxs;
+          int Pos = 0;
+          for (int Idx : E->ReuseShuffleIndices) {
+            if (UsedIdxs.insert(Idx).second)
+              UniqueIdxs.emplace_back(Pos);
+            ++Pos;
           }
+          V = Builder.CreateShuffleVector(V, UniqueIdxs, "shrink.shuffle");
         }
         return V;
       }
@@ -4340,6 +4353,64 @@ Value *BoUpSLP::vectorizeTree(ArrayRef<Value *> VL) {
   return Vec;
 }
 
+namespace {
+/// Merges shuffle masks and emits final shuffle instruction, if required.
+class ShuffleInstructionBuilder {
+  IRBuilderBase &Builder;
+  bool IsFinalized = false;
+  SmallVector<int, 4> Mask;
+
+public:
+  ShuffleInstructionBuilder(IRBuilderBase &Builder) : Builder(Builder) {}
+
+  /// Adds a mask, inverting it before applying.
+  void addInversedMask(ArrayRef<unsigned> SubMask) {
+    if (SubMask.empty())
+      return;
+    SmallVector<int, 4> NewMask;
+    inversePermutation(SubMask, NewMask);
+    addMask(NewMask);
+  }
+
+  /// Functions adds masks, merging them into  single one.
+  void addMask(ArrayRef<unsigned> SubMask) {
+    SmallVector<int, 4> NewMask(SubMask.begin(), SubMask.end());
+    addMask(NewMask);
+  }
+
+  void addMask(ArrayRef<int> SubMask) {
+    if (SubMask.empty())
+      return;
+    if (Mask.empty()) {
+      Mask.append(SubMask.begin(), SubMask.end());
+      return;
+    }
+    SmallVector<int, 4> NewMask(SubMask.size(), SubMask.size());
+    int TermValue = std::min(Mask.size(), SubMask.size());
+    for (int I = 0, E = SubMask.size(); I < E; ++I) {
+      if (SubMask[I] >= TermValue || Mask[SubMask[I]] >= TermValue) {
+        NewMask[I] = E;
+        continue;
+      }
+      NewMask[I] = Mask[SubMask[I]];
+    }
+    Mask.swap(NewMask);
+  }
+
+  Value *finalize(Value *V) {
+    IsFinalized = true;
+    if (Mask.empty())
+      return V;
+    return Builder.CreateShuffleVector(V, Mask, "shuffle");
+  }
+
+  ~ShuffleInstructionBuilder() {
+    assert((IsFinalized || Mask.empty()) &&
+           "Shuffle construction must be finalized.");
+  }
+};
+} // namespace
+
 Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
   IRBuilder<>::InsertPointGuard Guard(Builder);
 
@@ -4348,12 +4419,14 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
     return E->VectorizedValue;
   }
 
+  ShuffleInstructionBuilder ShuffleBuilder(Builder);
   bool NeedToShuffleReuses = !E->ReuseShuffleIndices.empty();
   if (E->State == TreeEntry::NeedToGather) {
     setInsertPointAfterBundle(E);
     Value *Vec = gather(E->Scalars);
     if (NeedToShuffleReuses) {
-      Vec = Builder.CreateShuffleVector(Vec, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      Vec = ShuffleBuilder.finalize(Vec);
       if (auto *I = dyn_cast<Instruction>(Vec)) {
         GatherSeq.insert(I);
         CSEBlocks.insert(I->getParent());
@@ -4411,18 +4484,10 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
 
     case Instruction::ExtractElement: {
       Value *V = E->getSingleOperand(0);
-      if (!E->ReorderIndices.empty()) {
-        SmallVector<int, 4> Mask;
-        inversePermutation(E->ReorderIndices, Mask);
-        Builder.SetInsertPoint(VL0);
-        V = Builder.CreateShuffleVector(V, Mask, "reorder_shuffle");
-      }
-      if (NeedToShuffleReuses) {
-        // TODO: Merge this shuffle with the ReorderShuffleMask.
-        if (E->ReorderIndices.empty())
-          Builder.SetInsertPoint(VL0);
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
-      }
+      Builder.SetInsertPoint(VL0);
+      ShuffleBuilder.addInversedMask(E->ReorderIndices);
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
       E->VectorizedValue = V;
       return V;
     }
@@ -4433,16 +4498,9 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       Value *Ptr = Builder.CreateBitCast(LI->getOperand(0), PtrTy);
       LoadInst *V = Builder.CreateAlignedLoad(VecTy, Ptr, LI->getAlign());
       Value *NewV = propagateMetadata(V, E->Scalars);
-      if (!E->ReorderIndices.empty()) {
-        SmallVector<int, 4> Mask;
-        inversePermutation(E->ReorderIndices, Mask);
-        NewV = Builder.CreateShuffleVector(NewV, Mask, "reorder_shuffle");
-      }
-      if (NeedToShuffleReuses) {
-        // TODO: Merge this shuffle with the ReorderShuffleMask.
-        NewV = Builder.CreateShuffleVector(NewV, E->ReuseShuffleIndices,
-                                           "shuffle");
-      }
+      ShuffleBuilder.addInversedMask(E->ReorderIndices);
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      NewV = ShuffleBuilder.finalize(NewV);
       E->VectorizedValue = NewV;
       return NewV;
     }
@@ -4469,8 +4527,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
 
       auto *CI = cast<CastInst>(VL0);
       Value *V = Builder.CreateCast(CI->getOpcode(), InVec, VecTy);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4491,8 +4549,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       CmpInst::Predicate P0 = cast<CmpInst>(VL0)->getPredicate();
       Value *V = Builder.CreateCmp(P0, L, R);
       propagateIRFlags(V, E->Scalars, VL0);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4511,8 +4569,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       }
 
       Value *V = Builder.CreateSelect(Cond, True, False);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4534,8 +4592,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       if (auto *I = dyn_cast<Instruction>(V))
         V = propagateMetadata(I, E->Scalars);
 
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4577,8 +4635,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       if (auto *I = dyn_cast<Instruction>(V))
         V = propagateMetadata(I, E->Scalars);
 
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4620,15 +4678,9 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       }
       Value *V = propagateMetadata(NewLI, E->Scalars);
 
-      if (IsReorder) {
-        SmallVector<int, 4> Mask;
-        inversePermutation(E->ReorderIndices, Mask);
-        V = Builder.CreateShuffleVector(V, Mask, "reorder_shuffle");
-      }
-      if (NeedToShuffleReuses) {
-        // TODO: Merge this shuffle with the ReorderShuffleMask.
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
-      }
+      ShuffleBuilder.addInversedMask(E->ReorderIndices);
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
       E->VectorizedValue = V;
       ++NumVectorInstructions;
       return V;
@@ -4642,11 +4694,9 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       setInsertPointAfterBundle(E);
 
       Value *VecValue = vectorizeTree(E->getOperand(0));
-      if (IsReorder) {
-        SmallVector<int, 4> Mask(E->ReorderIndices.begin(),
-                                 E->ReorderIndices.end());
-        VecValue = Builder.CreateShuffleVector(VecValue, Mask, "reorder_shuf");
-      }
+      ShuffleBuilder.addMask(E->ReorderIndices);
+      VecValue = ShuffleBuilder.finalize(VecValue);
+
       Value *ScalarPtr = SI->getPointerOperand();
       Value *VecPtr = Builder.CreateBitCast(
           ScalarPtr, VecValue->getType()->getPointerTo(AS));
@@ -4660,8 +4710,6 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
         ExternalUses.push_back(ExternalUser(ScalarPtr, cast<User>(VecPtr), 0));
 
       Value *V = propagateMetadata(ST, E->Scalars);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4699,8 +4747,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       if (Instruction *I = dyn_cast<Instruction>(V))
         V = propagateMetadata(I, E->Scalars);
 
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4762,8 +4810,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
         ExternalUses.push_back(ExternalUser(ScalarArg, cast<User>(V), 0));
 
       propagateIRFlags(V, E->Scalars, VL0);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -4829,8 +4877,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       Value *V = Builder.CreateShuffleVector(V0, V1, Mask);
       if (Instruction *I = dyn_cast<Instruction>(V))
         V = propagateMetadata(I, E->Scalars);
-      if (NeedToShuffleReuses)
-        V = Builder.CreateShuffleVector(V, E->ReuseShuffleIndices, "shuffle");
+      ShuffleBuilder.addMask(E->ReuseShuffleIndices);
+      V = ShuffleBuilder.finalize(V);
 
       E->VectorizedValue = V;
       ++NumVectorInstructions;
@@ -6548,16 +6596,18 @@ class HorizontalReduction {
     if (match(I, m_Intrinsic<Intrinsic::minnum>(m_Value(), m_Value())))
       return RecurKind::FMin;
 
-    if (match(I, m_SMax(m_Value(), m_Value())))
-      return RecurKind::SMax;
-    if (match(I, m_SMin(m_Value(), m_Value())))
-      return RecurKind::SMin;
-    if (match(I, m_UMax(m_Value(), m_Value())))
-      return RecurKind::UMax;
-    if (match(I, m_UMin(m_Value(), m_Value())))
-      return RecurKind::UMin;
 
     if (auto *Select = dyn_cast<SelectInst>(I)) {
+      // These would also match llvm.{u,s}{min,max} intrinsic call
+      // if were not guarded by the SelectInst check above.
+      if (match(I, m_SMax(m_Value(), m_Value())))
+        return RecurKind::SMax;
+      if (match(I, m_SMin(m_Value(), m_Value())))
+        return RecurKind::SMin;
+      if (match(I, m_UMax(m_Value(), m_Value())))
+        return RecurKind::UMax;
+      if (match(I, m_UMin(m_Value(), m_Value())))
+        return RecurKind::UMin;
       // Try harder: look for min/max pattern based on instructions producing
       // same values such as: select ((cmp Inst1, Inst2), Inst1, Inst2).
       // During the intermediate stages of SLP, it's very common to have
@@ -6640,7 +6690,7 @@ class HorizontalReduction {
                             bool IsRedOp) {
     if (IsRedOp && isCmpSel(Kind)) {
       auto *Cmp = cast<Instruction>(cast<SelectInst>(I)->getCondition());
-      return I->getParent() == BB && Cmp && Cmp->getParent() == BB;
+      return I->getParent() == BB && Cmp->getParent() == BB;
     }
     return I->getParent() == BB;
   }

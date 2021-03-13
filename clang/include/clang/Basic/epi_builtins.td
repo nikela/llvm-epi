@@ -352,7 +352,7 @@ let Name = "vload", IntrinsicName = "", HasVL = 0, HasMask = 0, LMUL = [1],
         llvm::Type *MemType = ConvertTypeForMem(E->getType());
         Ops[0] = Builder.CreateBitCast(Ops[0],
                                        llvm::PointerType::getUnqual(MemType));
-        llvm::Value *Load = Builder.CreateAlignedLoad(Ops[0], Align);
+        llvm::Value *Load = Builder.CreateAlignedLoad(ResultType, Ops[0], Align);
         return Load;
     } }] in
 def vload_mask : EPIBuiltin<"m", "mPCUe", "csil">;

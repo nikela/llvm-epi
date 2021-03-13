@@ -293,6 +293,9 @@ def err_anyx86_interrupt_attribute : Error<
   "a pointer as the first parameter|a %2 type as the second parameter}1">;
 def err_anyx86_interrupt_called : Error<
   "interrupt service routine cannot be called directly">;
+def err_anyx86_interrupt_regsave : Error<
+  "interrupt service routine may only call a function"
+  " with attribute 'no_caller_saved_registers'">;
 def warn_arm_interrupt_calling_convention : Warning<
    "call to function without interrupt attribute could clobber interruptee's VFP registers">,
    InGroup<Extra>;
@@ -425,7 +428,8 @@ def warn_decl_shadow :
           "static data member of %2|"
           "field of %2|"
           "typedef in %2|"
-          "type alias in %2}1">,
+          "type alias in %2|"
+          "structured binding}1">,
   InGroup<Shadow>, DefaultIgnore;
 def warn_decl_shadow_uncaptured_local :
   Warning<warn_decl_shadow.Text>,
@@ -3090,6 +3094,8 @@ def err_only_annotate_after_access_spec : Error<
 
 def err_attribute_section_invalid_for_target : Error<
   "argument to %select{'code_seg'|'section'}1 attribute is not valid for this target: %0">;
+def err_pragma_section_invalid_for_target : Error<
+  "argument to #pragma section is not valid for this target: %0">;
 def warn_attribute_section_drectve : Warning<
   "#pragma %0(\".drectve\") has undefined behavior, "
   "use #pragma comment(linker, ...) instead">, InGroup<MicrosoftDrectveSection>;
@@ -3158,6 +3164,9 @@ def warn_attribute_ignored : Warning<"%0 attribute ignored">,
   InGroup<IgnoredAttributes>;
 def warn_nothrow_attribute_ignored : Warning<"'nothrow' attribute conflicts with"
   " exception specification; attribute ignored">,
+  InGroup<IgnoredAttributes>;
+def warn_attribute_ignored_on_non_definition :
+  Warning<"%0 attribute ignored on a non-definition declaration">,
   InGroup<IgnoredAttributes>;
 def warn_attribute_ignored_on_inline :
   Warning<"%0 attribute ignored on inline function">,
@@ -6370,13 +6379,6 @@ def warn_return_std_move : Warning<
   InGroup<ReturnStdMove>, DefaultIgnore;
 def note_add_std_move : Note<
   "call 'std::move' explicitly to avoid copying">;
-def warn_return_std_move_in_cxx11 : Warning<
-  "prior to the resolution of a defect report against ISO C++11, "
-  "local variable %0 would have been copied despite being returned by name, "
-  "due to its not matching the function return type%diff{ ($ vs $)|}1,2">,
-  InGroup<ReturnStdMoveInCXX11>, DefaultIgnore;
-def note_add_std_move_in_cxx11 : Note<
-  "call 'std::move' explicitly to avoid copying on older compilers">;
 
 def warn_string_plus_int : Warning<
   "adding %0 to a string does not append to the string">,
@@ -6651,6 +6653,9 @@ def warn_pointer_indirection_from_incompatible_type : Warning<
 def warn_taking_address_of_packed_member : Warning<
   "taking address of packed member %0 of class or structure %q1 may result in an unaligned pointer value">,
   InGroup<DiagGroup<"address-of-packed-member">>;
+def warn_param_mismatched_alignment : Warning<
+  "passing %0-byte aligned argument to %1-byte aligned parameter %2 of %3 may result in an unaligned pointer access">,
+  InGroup<DiagGroup<"align-mismatch">>;
 
 def err_objc_object_assignment : Error<
   "cannot assign to class object (%0 invalid)">;
@@ -7186,6 +7191,9 @@ def err_need_header_before_typeid : Error<
   "you need to include <typeinfo> before using the 'typeid' operator">;
 def err_need_header_before_ms_uuidof : Error<
   "you need to include <guiddef.h> before using the '__uuidof' operator">;
+def err_need_header_before_placement_new : Error<
+  "no matching %0 function for non-allocating placement new expression; "
+  "include <new>">;
 def err_ms___leave_not_in___try : Error<
   "'__leave' statement not in __try block">;
 def err_uuidof_without_guid : Error<
@@ -7415,9 +7423,10 @@ def err_conditional_vector_element_size : Error<
 def err_conditional_vector_has_void : Error<
   "GNU vector conditional operand cannot be %select{void|a throw expression}0">;
 def err_conditional_vector_operand_type
-    : Error<"%select{enumeration|extended vector}0 type %1 is not allowed in a "
-            "vector conditional">;
-def err_conditional_vector_mismatched_vectors
+    : Error<"enumeration type %0 is not allowed in a vector conditional">;
+def err_conditional_vector_cond_result_mismatch
+    : Error<"cannot mix vectors and extended vectors in a vector conditional">;
+def err_conditional_vector_mismatched
     : Error<"vector operands to the vector conditional must be the same type "
             "%diff{($ and $)|}0,1}">;
 
@@ -7453,6 +7462,8 @@ let CategoryName = "Lambda Issue" in {
     "duration">;
   def err_this_capture : Error<
     "'this' cannot be %select{implicitly |}0captured in this context">;
+  def note_lambda_this_capture_fixit : Note<
+    "explicitly capture 'this'">;
   def err_lambda_capture_anonymous_var : Error<
     "unnamed variable cannot be implicitly captured in a lambda expression">;
   def err_lambda_capture_flexarray_type : Error<
@@ -7461,6 +7472,10 @@ let CategoryName = "Lambda Issue" in {
   def err_lambda_impcap : Error<
     "variable %0 cannot be implicitly captured in a lambda with no "
     "capture-default specified">;
+  def note_lambda_variable_capture_fixit : Note<
+    "capture %0 by %select{value|reference}1">;
+  def note_lambda_default_capture_fixit : Note<
+    "default capture by %select{value|reference}0">;
   def note_lambda_decl : Note<"lambda expression begins here">;
   def err_lambda_unevaluated_operand : Error<
     "lambda expression in an unevaluated operand">;
@@ -7638,7 +7653,7 @@ def warn_condition_is_assignment : Warning<"using the result of an "
   "assignment as a condition without parentheses">,
   InGroup<Parentheses>;
 def warn_free_nonheap_object
-  : Warning<"attempt to call %0 on non-heap object %1">,
+  : Warning<"attempt to call %0 on non-heap %select{object %2|object: block expression|object: lambda-to-function-pointer conversion}1">,
     InGroup<FreeNonHeapObject>;
 
 // Completely identical except off by default.
@@ -9900,13 +9915,15 @@ def err_opencl_pointer_to_type : Error<
   "pointer to type %0 is invalid in OpenCL">;
 def err_opencl_type_can_only_be_used_as_function_parameter : Error <
   "type %0 can only be used as a function parameter in OpenCL">;
+def err_opencl_type_not_found : Error<
+  "%0 type %1 not found; include the base header with -finclude-default-header">;
 def warn_opencl_attr_deprecated_ignored : Warning <
   "%0 attribute is deprecated and ignored in OpenCL version %1">,
   InGroup<IgnoredAttributes>;
 def err_opencl_variadic_function : Error<
   "invalid prototype, variadic arguments are not allowed in OpenCL">;
 def err_opencl_requires_extension : Error<
-  "use of %select{type|declaration}0 %1 requires %2 extension to be enabled">;
+  "use of %select{type|declaration}0 %1 requires %2 support">;
 def warn_opencl_generic_address_space_arg : Warning<
   "passing non-generic address space pointer to %0"
   " may cause dynamic conversion affecting performance">,
@@ -10479,6 +10496,8 @@ def err_omp_expected_private_copy_for_allocate : Error<
   "the referenced item is not found in any private clause on the same directive">;
 def err_omp_stmt_depends_on_loop_counter : Error<
   "the loop %select{initializer|condition}0 expression depends on the current loop control variable">;
+def err_omp_invariant_dependency : Error<
+  "expected loop invariant expression">;
 def err_omp_invariant_or_linear_dependency : Error<
   "expected loop invariant expression or '<invariant1> * %0 + <invariant2>' kind of expression">;
 def err_omp_wrong_dependency_iterator_type : Error<
@@ -11159,4 +11178,8 @@ def err_tcb_conflicting_attributes : Error<
 def warn_tcb_enforcement_violation : Warning<
   "calling %0 is a violation of trusted computing base '%1'">,
   InGroup<DiagGroup<"tcb-enforcement">>;
+
+// RISC-V V-extension
+def err_riscvv_builtin_requires_v : Error<
+   "builtin requires 'V' extension support to be enabled">;
 } // end of sema component.

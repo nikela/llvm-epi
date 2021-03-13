@@ -5,23 +5,18 @@
 define <vscale x 8 x i1> @foo_O0(<vscale x 8 x i1> %a) nounwind noinline optnone {
 ; CHECK-LABEL: foo_O0:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 32
-; CHECK-NEXT:    rdvlenb a0
+; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    sub sp, sp, a0
-; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-NEXT:    ld a0, -32(s0)
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vse1.v v0, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-NEXT:    ld a0, -32(s0)
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vle1.v v0, (a0)
-; CHECK-NEXT:    addi sp, s0, -32
-; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
 entry:
   %a.addr = alloca <vscale x 8 x i1>, align 1
@@ -33,20 +28,15 @@ entry:
 define <vscale x 8 x i1> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 32
-; CHECK-NEXT:    rdvlenb a0
+; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    sub sp, sp, a0
-; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
-; CHECK-NEXT:    ld a0, -32(s0)
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vse1.v v0, (a0)
-; CHECK-NEXT:    addi sp, s0, -32
-; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
 entry:
   %a.addr = alloca <vscale x 8 x i1>, align 1

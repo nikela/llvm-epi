@@ -2598,6 +2598,8 @@ public:
   NamedDecl *getShadowedDeclaration(const TypedefNameDecl *D,
                                     const LookupResult &R);
   NamedDecl *getShadowedDeclaration(const VarDecl *D, const LookupResult &R);
+  NamedDecl *getShadowedDeclaration(const BindingDecl *D,
+                                    const LookupResult &R);
   void CheckShadow(NamedDecl *D, NamedDecl *ShadowedDecl,
                    const LookupResult &R);
   void CheckShadow(Scope *S, VarDecl *D);
@@ -4724,10 +4726,12 @@ public:
     CES_AllowParameters = 1,
     CES_AllowDifferentTypes = 2,
     CES_AllowExceptionVariables = 4,
-    CES_FormerDefault = (CES_AllowParameters),
-    CES_Default = (CES_AllowParameters | CES_AllowDifferentTypes),
-    CES_AsIfByStdMove = (CES_AllowParameters | CES_AllowDifferentTypes |
-                         CES_AllowExceptionVariables),
+    CES_AllowRValueReferenceType = 8,
+    CES_ImplicitlyMovableCXX11CXX14CXX17 =
+        (CES_AllowParameters | CES_AllowDifferentTypes),
+    CES_ImplicitlyMovableCXX20 =
+        (CES_AllowParameters | CES_AllowDifferentTypes |
+         CES_AllowExceptionVariables | CES_AllowRValueReferenceType),
   };
 
   VarDecl *getCopyElisionCandidate(QualType ReturnType, Expr *E,
@@ -5981,9 +5985,9 @@ public:
   ExprResult CheckForImmediateInvocation(ExprResult E, FunctionDecl *Decl);
 
   bool CompleteConstructorCall(CXXConstructorDecl *Constructor,
-                               MultiExprArg ArgsPtr,
+                               QualType DeclInitType, MultiExprArg ArgsPtr,
                                SourceLocation Loc,
-                               SmallVectorImpl<Expr*> &ConvertedArgs,
+                               SmallVectorImpl<Expr *> &ConvertedArgs,
                                bool AllowExplicit = false,
                                bool IsListInitialization = false);
 
@@ -10482,6 +10486,11 @@ public:
 
   /// Initialization of captured region for OpenMP region.
   void ActOnOpenMPRegionStart(OpenMPDirectiveKind DKind, Scope *CurScope);
+
+  /// Called for syntactical loops (ForStmt or CXXForRangeStmt) associated to
+  /// an OpenMP loop directive.
+  StmtResult ActOnOpenMPCanonicalLoop(Stmt *AStmt);
+
   /// End of OpenMP region.
   ///
   /// \param S Statement associated with the current OpenMP region.
@@ -10507,6 +10516,11 @@ public:
   ActOnOpenMPSimdDirective(ArrayRef<OMPClause *> Clauses, Stmt *AStmt,
                            SourceLocation StartLoc, SourceLocation EndLoc,
                            VarsWithInheritedDSAType &VarsWithImplicitDSA);
+  /// Called on well-formed '#pragma omp tile' after parsing of its clauses and
+  /// the associated statement.
+  StmtResult ActOnOpenMPTileDirective(ArrayRef<OMPClause *> Clauses,
+                                      Stmt *AStmt, SourceLocation StartLoc,
+                                      SourceLocation EndLoc);
   /// Called on well-formed '\#pragma omp for' after parsing
   /// of the associated statement.
   StmtResult
@@ -10843,6 +10857,11 @@ public:
   OMPClause *ActOnOpenMPSimdlenClause(Expr *Length, SourceLocation StartLoc,
                                       SourceLocation LParenLoc,
                                       SourceLocation EndLoc);
+  /// Called on well-form 'sizes' clause.
+  OMPClause *ActOnOpenMPSizesClause(ArrayRef<Expr *> SizeExprs,
+                                    SourceLocation StartLoc,
+                                    SourceLocation LParenLoc,
+                                    SourceLocation EndLoc);
   /// Called on well-formed 'collapse' clause.
   OMPClause *ActOnOpenMPCollapseClause(Expr *NumForLoops,
                                        SourceLocation StartLoc,
@@ -11538,9 +11557,9 @@ public:
   QualType CXXCheckConditionalOperands( // C++ 5.16
     ExprResult &cond, ExprResult &lhs, ExprResult &rhs,
     ExprValueKind &VK, ExprObjectKind &OK, SourceLocation questionLoc);
-  QualType CheckGNUVectorConditionalTypes(ExprResult &Cond, ExprResult &LHS,
-                                          ExprResult &RHS,
-                                          SourceLocation QuestionLoc);
+  QualType CheckVectorConditionalTypes(ExprResult &Cond, ExprResult &LHS,
+                                       ExprResult &RHS,
+                                       SourceLocation QuestionLoc);
   QualType FindCompositePointerType(SourceLocation Loc, Expr *&E1, Expr *&E2,
                                     bool ConvertArgs = true);
   QualType FindCompositePointerType(SourceLocation Loc,
@@ -12333,10 +12352,12 @@ private:
   bool CheckPointerCall(NamedDecl *NDecl, CallExpr *TheCall,
                         const FunctionProtoType *Proto);
   bool CheckOtherCall(CallExpr *TheCall, const FunctionProtoType *Proto);
-  void CheckConstructorCall(FunctionDecl *FDecl,
+  void CheckConstructorCall(FunctionDecl *FDecl, QualType ThisType,
                             ArrayRef<const Expr *> Args,
-                            const FunctionProtoType *Proto,
-                            SourceLocation Loc);
+                            const FunctionProtoType *Proto, SourceLocation Loc);
+
+  void CheckArgAlignment(SourceLocation Loc, NamedDecl *FDecl,
+                         StringRef ParamName, QualType ArgTy, QualType ParamTy);
 
   void checkCall(NamedDecl *FDecl, const FunctionProtoType *Proto,
                  const Expr *ThisArg, ArrayRef<const Expr *> Args,
@@ -12391,7 +12412,8 @@ private:
   bool CheckPPCBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
                                    CallExpr *TheCall);
   bool CheckAMDGCNBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
-  bool CheckRISCVBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
+  bool CheckRISCVBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
+                                     CallExpr *TheCall);
 
   bool SemaBuiltinVAStart(unsigned BuiltinID, CallExpr *TheCall);
   bool SemaBuiltinVAStartARMMicrosoft(CallExpr *Call);

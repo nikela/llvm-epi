@@ -21,6 +21,7 @@
 #include "clang/AST/RecordLayout.h"
 #include "clang/Basic/CodeGenOptions.h"
 #include "clang/Basic/DiagnosticFrontend.h"
+#include "clang/Basic/Builtins.h"
 #include "clang/CodeGen/CGFunctionInfo.h"
 #include "clang/CodeGen/SwiftCallingConv.h"
 #include "llvm/ADT/SmallBitVector.h"
@@ -30,6 +31,7 @@
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/IntrinsicsNVPTX.h"
+#include "llvm/IR/IntrinsicsS390.h"
 #include "llvm/IR/Type.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm> // std::sort
@@ -4561,10 +4563,6 @@ Address AIXABIInfo::EmitVAArg(CodeGenFunction &CGF, Address VAListAddr,
   if (Ty->isAnyComplexType())
     llvm::report_fatal_error("complex type is not supported on AIX yet");
 
-  if (Ty->isVectorType())
-    llvm::report_fatal_error(
-        "vector types are not yet supported for variadic functions on AIX");
-
   auto TypeInfo = getContext().getTypeInfoInChars(Ty);
   TypeInfo.Align = getParamTypeAlignment(Ty);
 
@@ -7200,8 +7198,37 @@ public:
   SystemZTargetCodeGenInfo(CodeGenTypes &CGT, bool HasVector, bool SoftFloatABI)
       : TargetCodeGenInfo(
             std::make_unique<SystemZABIInfo>(CGT, HasVector, SoftFloatABI)) {}
-};
 
+  llvm::Value *testFPKind(llvm::Value *V, unsigned BuiltinID,
+                          CGBuilderTy &Builder,
+                          CodeGenModule &CGM) const override {
+    assert(V->getType()->isFloatingPointTy() && "V should have an FP type.");
+    // Only use TDC in constrained FP mode.
+    if (!Builder.getIsFPConstrained())
+      return nullptr;
+
+    llvm::Type *Ty = V->getType();
+    if (Ty->isFloatTy() || Ty->isDoubleTy() || Ty->isFP128Ty()) {
+      llvm::Module &M = CGM.getModule();
+      auto &Ctx = M.getContext();
+      llvm::Function *TDCFunc =
+          llvm::Intrinsic::getDeclaration(&M, llvm::Intrinsic::s390_tdc, Ty);
+      unsigned TDCBits = 0;
+      switch (BuiltinID) {
+      case Builtin::BI__builtin_isnan:
+        TDCBits = 0xf;
+        break;
+      default:
+        break;
+      }
+      if (TDCBits)
+        return Builder.CreateCall(
+            TDCFunc,
+            {V, llvm::ConstantInt::get(llvm::Type::getInt64Ty(Ctx), TDCBits)});
+    }
+    return nullptr;
+  }
+};
 }
 
 bool SystemZABIInfo::isPromotableIntegerTypeForABI(QualType Ty) const {
@@ -8020,6 +8047,43 @@ MIPSTargetCodeGenInfo::initDwarfEHRegSizeTable(CodeGen::CodeGenFunction &CGF,
   // 176-181 are the DSP accumulator registers.
   AssignToArrayRange(CGF.Builder, Address, Four8, 80, 181);
   return false;
+}
+
+//===----------------------------------------------------------------------===//
+// M68k ABI Implementation
+//===----------------------------------------------------------------------===//
+
+namespace {
+
+class M68kTargetCodeGenInfo : public TargetCodeGenInfo {
+public:
+  M68kTargetCodeGenInfo(CodeGenTypes &CGT)
+      : TargetCodeGenInfo(std::make_unique<DefaultABIInfo>(CGT)) {}
+  void setTargetAttributes(const Decl *D, llvm::GlobalValue *GV,
+                           CodeGen::CodeGenModule &M) const override;
+};
+
+} // namespace
+
+void M68kTargetCodeGenInfo::setTargetAttributes(
+    const Decl *D, llvm::GlobalValue *GV, CodeGen::CodeGenModule &M) const {
+  if (const auto *FD = dyn_cast_or_null<FunctionDecl>(D)) {
+    if (const auto *attr = FD->getAttr<M68kInterruptAttr>()) {
+      // Handle 'interrupt' attribute:
+      llvm::Function *F = cast<llvm::Function>(GV);
+
+      // Step 1: Set ISR calling convention.
+      F->setCallingConv(llvm::CallingConv::M68k_INTR);
+
+      // Step 2: Add attributes goodness.
+      F->addFnAttr(llvm::Attribute::NoInline);
+
+      // Step 3: Emit ISR vector alias.
+      unsigned Num = attr->getNumber() / 2;
+      llvm::GlobalAlias::create(llvm::Function::ExternalLinkage,
+                                "__isr_" + Twine(Num), F);
+    }
+  }
 }
 
 //===----------------------------------------------------------------------===//
@@ -10864,6 +10928,8 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
 
   case llvm::Triple::le32:
     return SetCGInfo(new PNaClTargetCodeGenInfo(Types));
+  case llvm::Triple::m68k:
+    return SetCGInfo(new M68kTargetCodeGenInfo(Types));
   case llvm::Triple::mips:
   case llvm::Triple::mipsel:
     if (Triple.getOS() == llvm::Triple::NaCl)
