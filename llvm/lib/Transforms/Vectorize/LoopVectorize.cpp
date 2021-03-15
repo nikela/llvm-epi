@@ -9476,8 +9476,8 @@ VPWidenRecipe *VPRecipeBuilder::tryToWiden(Instruction *I, VPlan &Plan) const {
   return new VPWidenRecipe(*I, Plan.mapToVPValues(I->operands()));
 }
 
-VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
-                                                               VPlanPtr &Plan) {
+VPRecipeOrVPValueTy VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
+                                                          VPlanPtr &Plan) {
   if (!validateWiden(I))
     return nullptr;
 
