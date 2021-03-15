@@ -42,18 +42,7 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
 
   void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
                            unsigned FIOperandNum,
-                           RegScavenger *RS = nullptr) const override {
-    return eliminateFrameIndex(MI, SPAdj, FIOperandNum, RS,
-                               /* IsHandle */ false);
-  }
-
-  void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
-                           unsigned FIOperandNum, RegScavenger *RS,
-                           bool IsHandle) const;
-
-  void eliminateFrameIndexEPIVector(MachineBasicBlock::iterator II, int SPAdj,
-                                    unsigned FIOperandNum,
-                                    RegScavenger *RS) const;
+                           RegScavenger *RS = nullptr) const override;
 
   Register getFrameRegister(const MachineFunction &MF) const override;
 
@@ -71,7 +60,9 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
     return &RISCV::GPRRegClass;
   }
 
-  bool hasBasePointer(const MachineFunction &MF) const;
+  const TargetRegisterClass *
+  getLargestLegalSuperClass(const TargetRegisterClass *RC,
+                            const MachineFunction &) const override;
 };
 }
 

@@ -88,14 +88,6 @@ bool RISCVTargetInfo::validateAsmConstraint(
   }
 }
 
-const Builtin::Info RISCVTargetInfo::BuiltinInfo[] = {
-#define BUILTIN(ID, TYPE, ATTRS)                                               \
-  {#ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
-#include "clang/Basic/BuiltinsRISCV.def"
-#define BUILTIN(ID, TYPE, ATTRS)                                               \
-  {"__builtin_epi_" #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
-#include "clang/Basic/BuiltinsEPI.def"
-};
 
 void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
                                        MacroBuilder &Builder) const {
@@ -217,6 +209,17 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
   if (HasZvlsseg)
     Builder.defineMacro("__riscv_zvlsseg", "10000");
 }
+
+const Builtin::Info RISCVTargetInfo::BuiltinInfo[] = {
+#define BUILTIN(ID, TYPE, ATTRS)                                               \
+  {#ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
+#define TARGET_BUILTIN(ID, TYPE, ATTRS, FEATURE)                               \
+    {#ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, FEATURE},
+#include "clang/Basic/BuiltinsRISCV.def"
+#define BUILTIN(ID, TYPE, ATTRS)                                               \
+  {"__builtin_epi_" #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
+#include "clang/Basic/BuiltinsEPI.def"
+};
 
 ArrayRef<Builtin::Info> RISCVTargetInfo::getTargetBuiltins() const {
   return llvm::makeArrayRef(BuiltinInfo, clang::RISCV::LastTSBuiltin -

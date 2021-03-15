@@ -7,28 +7,17 @@
 define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-LABEL: n1fv6:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 32
-; CHECK-NEXT:    rdvlenb a0
-; CHECK-NEXT:    slli a0, a0, 1
-; CHECK-NEXT:    sub sp, sp, a0
-; CHECK-NEXT:    sd sp, -32(s0)
+; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
-; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vs1r.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (sp)
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    ld a1, -32(s0)
+; CHECK-NEXT:    mv a1, sp
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    vs1r.v v8, (a0)
-; CHECK-NEXT:    addi sp, s0, -32
-; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
 entry:
   %KP500000000 = alloca %struct.__epi_1xi64x2, align 8
@@ -49,23 +38,15 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-LABEL: n1fv6_1:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi s0, sp, 32
-; CHECK-NEXT:    rdvlenb a0
-; CHECK-NEXT:    slli a0, a0, 2
-; CHECK-NEXT:    sub sp, sp, a0
-; CHECK-NEXT:    sd sp, -32(s0)
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v25, a1
-; CHECK-NEXT:    ld a0, -32(s0)
-; CHECK-NEXT:    vs1r.v v25, (a0)
+; CHECK-NEXT:    vs1r.v v25, (sp)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    slli a1, a0, 3
-; CHECK-NEXT:    ld a2, -32(s0)
+; CHECK-NEXT:    mv a2, sp
 ; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    vs1r.v v25, (a1)
 ; CHECK-NEXT:    slli a1, a0, 4
@@ -76,9 +57,6 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    vs1r.v v25, (a0)
 ; CHECK-NEXT:    vl1re64.v v8, (a1)
-; CHECK-NEXT:    addi sp, s0, -32
-; CHECK-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
 entry:

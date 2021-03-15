@@ -771,22 +771,23 @@ void Parser::HandlePragmaOpenCLExtension() {
   // overriding all previously issued extension directives, but only if the
   // behavior is set to disable."
   if (Name == "all") {
-    if (State == Disable) {
+    if (State == Disable)
       Opt.disableAll();
-      Opt.enableSupportedCore(getLangOpts());
-    } else {
+    else
       PP.Diag(NameLoc, diag::warn_pragma_expected_predicate) << 1;
-    }
   } else if (State == Begin) {
     if (!Opt.isKnown(Name) || !Opt.isSupported(Name, getLangOpts())) {
       Opt.support(Name);
+      // FIXME: Default behavior of the extension pragma is not defined.
+      // Therefore, it should never be added by default.
+      Opt.acceptsPragma(Name);
     }
     Actions.setCurrentOpenCLExtension(Name);
   } else if (State == End) {
     if (Name != Actions.getCurrentOpenCLExtension())
       PP.Diag(NameLoc, diag::warn_pragma_begin_end_mismatch);
     Actions.setCurrentOpenCLExtension("");
-  } else if (!Opt.isKnown(Name))
+  } else if (!Opt.isKnown(Name) || !Opt.isWithPragma(Name))
     PP.Diag(NameLoc, diag::warn_pragma_unknown_extension) << Ident;
   else if (Opt.isSupportedExtension(Name, getLangOpts()))
     Opt.enable(Name, State == Enable);

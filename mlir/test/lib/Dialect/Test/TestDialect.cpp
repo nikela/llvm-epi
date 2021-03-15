@@ -7,7 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "TestDialect.h"
+#include "TestAttributes.h"
 #include "TestTypes.h"
+#include "mlir/Dialect/DLTI/DLTI.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/DialectImplementation.h"
@@ -164,16 +166,14 @@ struct TestInlinerInterface : public DialectInlinerInterface {
 //===----------------------------------------------------------------------===//
 
 void TestDialect::initialize() {
+  registerAttributes();
+  registerTypes();
   addOperations<
 #define GET_OP_LIST
 #include "TestOps.cpp.inc"
       >();
   addInterfaces<TestOpAsmInterface, TestDialectFoldInterface,
                 TestInlinerInterface>();
-  addTypes<TestType, TestRecursiveType,
-#define GET_TYPEDEF_LIST
-#include "TestTypeDefs.cpp.inc"
-           >();
   allowUnknownOperations();
 }
 
@@ -804,9 +804,9 @@ static void print(OpAsmPrinter &p, StringAttrPrettyNameOp op) {
   }
 
   if (namesDisagree)
-    p.printOptionalAttrDictWithKeyword(op.getAttrs());
+    p.printOptionalAttrDictWithKeyword(op->getAttrs());
   else
-    p.printOptionalAttrDictWithKeyword(op.getAttrs(), {"names"});
+    p.printOptionalAttrDictWithKeyword(op->getAttrs(), {"names"});
 }
 
 // We set the SSA name in the asm syntax to the contents of the name

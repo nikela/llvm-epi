@@ -1,5 +1,3 @@
-; XFAIL: *
-; Temporarily disabled until we can insert/extract from a mask.
 ; RUN: llc -mtriple=riscv64 -mattr=+experimental-v,+f,+d -target-abi lp64d \
 ; RUN:    -verify-machineinstrs < %s -epi-pipeline -o /dev/null
 

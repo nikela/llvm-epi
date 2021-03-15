@@ -39,7 +39,7 @@ struct ARM64 : TargetInfo {
                             uint64_t entryAddr) const override;
 
   void relaxGotLoad(uint8_t *loc, uint8_t type) const override;
-  const TargetInfo::RelocAttrs &getRelocAttrs(uint8_t type) const override;
+  const RelocAttrs &getRelocAttrs(uint8_t type) const override;
   uint64_t getPageSize() const override { return 16 * 1024; }
 };
 
@@ -47,39 +47,56 @@ struct ARM64 : TargetInfo {
 
 // Random notes on reloc types:
 // ADDEND always pairs with BRANCH26, PAGE21, or PAGEOFF12
-// SUBTRACTOR always pairs with UNSIGNED (a delta between two sections)
-// POINTER_TO_GOT: 4-byte is pc-relative, 8-byte is absolute
+// POINTER_TO_GOT: ld64 supports a 4-byte pc-relative form as well as an 8-byte
+// absolute version of this relocation. The semantics of the absolute relocation
+// are weird -- it results in the value of the GOT slot being written, instead
+// of the address. Let's not support it unless we find a real-world use case.
 
-const TargetInfo::RelocAttrs &ARM64::getRelocAttrs(uint8_t type) const {
-  static const std::array<TargetInfo::RelocAttrs, 11> relocAttrsArray{{
+const RelocAttrs &ARM64::getRelocAttrs(uint8_t type) const {
+  static const std::array<RelocAttrs, 11> relocAttrsArray{{
 #define B(x) RelocAttrBits::x
-      {"UNSIGNED", B(ABSOLUTE) | B(EXTERN) | B(LOCAL) | B(TLV) | B(DYSYM8) |
-                       B(BYTE4) | B(BYTE8)},
-      {"SUBTRACTOR", B(SUBTRAHEND) | B(BYTE8)},
+      {"UNSIGNED", B(UNSIGNED) | B(ABSOLUTE) | B(EXTERN) | B(LOCAL) |
+                       B(DYSYM8) | B(BYTE4) | B(BYTE8)},
+      {"SUBTRACTOR", B(SUBTRAHEND) | B(BYTE4) | B(BYTE8)},
       {"BRANCH26", B(PCREL) | B(EXTERN) | B(BRANCH) | B(BYTE4)},
       {"PAGE21", B(PCREL) | B(EXTERN) | B(BYTE4)},
       {"PAGEOFF12", B(ABSOLUTE) | B(EXTERN) | B(BYTE4)},
       {"GOT_LOAD_PAGE21", B(PCREL) | B(EXTERN) | B(GOT) | B(BYTE4)},
       {"GOT_LOAD_PAGEOFF12",
        B(ABSOLUTE) | B(EXTERN) | B(GOT) | B(LOAD) | B(BYTE4)},
-      {"POINTER_TO_GOT", B(PCREL) | B(EXTERN) | B(GOT) | B(BYTE4) | B(BYTE8)},
+      {"POINTER_TO_GOT", B(PCREL) | B(EXTERN) | B(GOT) | B(POINTER) | B(BYTE4)},
       {"TLVP_LOAD_PAGE21", B(PCREL) | B(EXTERN) | B(TLV) | B(BYTE4)},
       {"TLVP_LOAD_PAGEOFF12",
        B(ABSOLUTE) | B(EXTERN) | B(TLV) | B(LOAD) | B(BYTE4)},
       {"ADDEND", B(ADDEND)},
 #undef B
   }};
-  assert(type >= 0 && type < relocAttrsArray.size() &&
-         "invalid relocation type");
-  if (type < 0 || type >= relocAttrsArray.size())
-    return TargetInfo::invalidRelocAttrs;
+  assert(type < relocAttrsArray.size() && "invalid relocation type");
+  if (type >= relocAttrsArray.size())
+    return invalidRelocAttrs;
   return relocAttrsArray[type];
 }
 
 uint64_t ARM64::getEmbeddedAddend(MemoryBufferRef mb, const section_64 &sec,
                                   const relocation_info rel) const {
-  // TODO(gkm): extract embedded addend just so we can assert that it is 0
-  return 0;
+  if (rel.r_type != ARM64_RELOC_UNSIGNED &&
+      rel.r_type != ARM64_RELOC_SUBTRACTOR) {
+    // All other reloc types should use the ADDEND relocation to store their
+    // addends.
+    // TODO(gkm): extract embedded addend just so we can assert that it is 0
+    return 0;
+  }
+
+  auto *buf = reinterpret_cast<const uint8_t *>(mb.getBufferStart());
+  const uint8_t *loc = buf + sec.offset + rel.r_address;
+  switch (rel.r_length) {
+  case 2:
+    return read32le(loc);
+  case 3:
+    return read64le(loc);
+  default:
+    llvm_unreachable("invalid r_length");
+  }
 }
 
 inline uint64_t bitField(uint64_t value, int right, int width, int left) {
@@ -111,8 +128,14 @@ inline uint64_t encodePage21(uint64_t base, uint64_t va) {
 // |                   |         imm12         |                   |
 // +-------------------+-----------------------+-------------------+
 
-inline uint64_t encodePageOff12(uint64_t base, uint64_t va) {
-  int scale = ((base & 0x3b000000) == 0x39000000) ? base >> 30 : 0;
+inline uint64_t encodePageOff12(uint32_t base, uint64_t va) {
+  int scale = 0;
+  if ((base & 0x3b00'0000) == 0x3900'0000) { // load/store
+    scale = base >> 30;
+    if (scale == 0 && (base & 0x0480'0000) == 0x0480'0000) // 128-bit variant
+      scale = 4;
+  }
+
   // TODO(gkm): extract embedded addend and warn if != 0
   // uint64_t addend = ((base & 0x003FFC00) >> 10);
   return (base | bitField(va, scale, 12 - scale, 10));
@@ -137,6 +160,7 @@ void ARM64::relocateOne(uint8_t *loc, const Reloc &r, uint64_t value,
   case ARM64_RELOC_BRANCH26:
     value = encodeBranch26(base, value - pc);
     break;
+  case ARM64_RELOC_SUBTRACTOR:
   case ARM64_RELOC_UNSIGNED:
     break;
   case ARM64_RELOC_POINTER_TO_GOT:

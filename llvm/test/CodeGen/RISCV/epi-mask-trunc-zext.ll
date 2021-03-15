@@ -10,10 +10,10 @@ define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b,
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vand.vi v25, v8, 1
-; CHECK-NEXT:    vmsne.vi v25, v25, 0
-; CHECK-NEXT:    vand.vi v26, v9, 1
-; CHECK-NEXT:    vmsne.vi v26, v26, 0
-; CHECK-NEXT:    vmand.mm v0, v25, v26
+; CHECK-NEXT:    vmsne.vi v26, v25, 0
+; CHECK-NEXT:    vand.vi v25, v9, 1
+; CHECK-NEXT:    vmsne.vi v27, v25, 0
+; CHECK-NEXT:    vmand.mm v0, v26, v27
 ; CHECK-NEXT:    ret
 {
   %ma = trunc <vscale x 1 x i64> %a to <vscale x 1 x i1>
@@ -54,9 +54,9 @@ define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b,
 ; CHECK-NEXT:    vand.vi v26, v8, 1
 ; CHECK-NEXT:    vmsne.vi v25, v26, 0
 ; CHECK-NEXT:    vand.vi v26, v10, 1
-; CHECK-NEXT:    vmsne.vi v26, v26, 0
+; CHECK-NEXT:    vmsne.vi v28, v26, 0
 ; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-NEXT:    vmand.mm v0, v25, v26
+; CHECK-NEXT:    vmand.mm v0, v25, v28
 ; CHECK-NEXT:    ret
 {
   %ma = trunc <vscale x 2 x i64> %a to <vscale x 2 x i1>

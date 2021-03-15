@@ -15,6 +15,7 @@
 
 #include "RISCVRegisterInfo.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
+#include "llvm/IR/DiagnosticInfo.h"
 
 #define GET_INSTRINFO_HEADER
 #include "RISCVGenInstrInfo.inc"
@@ -138,6 +139,10 @@ public:
   MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
                                        unsigned OpIdx1,
                                        unsigned OpIdx2) const override;
+
+  Register getVLENFactoredAmount(MachineFunction &MF, MachineBasicBlock &MBB,
+                                 MachineBasicBlock::iterator II,
+                                 int64_t Amount) const;
 
 protected:
   const RISCVSubtarget &STI;

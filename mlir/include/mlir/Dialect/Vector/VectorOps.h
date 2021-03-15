@@ -45,6 +45,18 @@ void populateVectorToVectorCanonicalizationPatterns(
 void populateVectorToVectorTransformationPatterns(
     OwningRewritePatternList &patterns, MLIRContext *context);
 
+/// Collect a set of patterns to split transfer read/write ops.
+///
+/// These patterns unrolls transfer read/write ops if the vector consumers/
+/// producers are extract/insert slices op. Transfer ops can map to hardware
+/// load/store functionalities, where the vector size matters for bandwith
+/// considerations. So these patterns should be collected separately, instead
+/// of being generic canonicalization patterns. Also one can let the
+/// `ignoreFilter` to return true to fail matching for fine-grained control.
+void populateSplitVectorTransferPatterns(
+    OwningRewritePatternList &patterns, MLIRContext *context,
+    std::function<bool(Operation *)> ignoreFilter = nullptr);
+
 /// Collect a set of leading one dimension removal patterns.
 ///
 /// These patterns insert vector.shape_cast to remove leading one dimensions
@@ -72,6 +84,13 @@ void populateBubbleVectorBitCastOpPatterns(OwningRewritePatternList &patterns,
 /// "leak" coming in, however, some tuple related ops will remain.
 void populateVectorSlicesLoweringPatterns(OwningRewritePatternList &patterns,
                                           MLIRContext *context);
+
+/// Collect a set of transfer read/write lowering patterns.
+///
+/// These patterns lower transfer ops to simpler ops like `vector.load`,
+/// `vector.store` and `vector.broadcast`.
+void populateVectorTransferLoweringPatterns(OwningRewritePatternList &patterns,
+                                            MLIRContext *context);
 
 /// An attribute that specifies the combining function for `vector.contract`,
 /// and `vector.reduction`.
