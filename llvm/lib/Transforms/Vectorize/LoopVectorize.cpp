@@ -9476,7 +9476,7 @@ VPWidenRecipe *VPRecipeBuilder::tryToWiden(Instruction *I, VPlan &Plan) const {
   return new VPWidenRecipe(*I, Plan.mapToVPValues(I->operands()));
 }
 
-VPRecipeOrVPValueTy VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
+VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
                                                           VPlanPtr &Plan) {
   if (!validateWiden(I))
     return nullptr;
@@ -9612,7 +9612,7 @@ VPRecipeOrVPValueTy VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
   }
 
   if (preferPredicatedWiden())
-    return tryToPredicatedWiden(Instr, Plan);
+    return toVPRecipeResult(tryToPredicatedWiden(Instr, Plan));
   return toVPRecipeResult(tryToWiden(Instr, *Plan));
 }
 

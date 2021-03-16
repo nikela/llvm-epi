@@ -107,7 +107,7 @@ class VPRecipeBuilder {
 
   /// Similar to \p tryToWiden but widen instruction using vector predication
   /// intrinsics.
-  VPRecipeOrVPValueTy tryToPredicatedWiden(Instruction *I, VPlanPtr &Plan);
+  VPPredicatedWidenRecipe *tryToPredicatedWiden(Instruction *I, VPlanPtr &Plan);
 
   /// Check if we want to use vector predicated intrinsics for widening.
   bool preferPredicatedWiden();
