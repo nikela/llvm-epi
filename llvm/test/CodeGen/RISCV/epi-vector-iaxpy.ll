@@ -5,8 +5,7 @@
 define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias nocapture readonly %x, i16 signext %alpha) {
 ; CHECK-LABEL: s16axpy:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 1
-; CHECK-NEXT:    blt a0, a4, .LBB0_8
+; CHECK-NEXT:    blez a0, .LBB0_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    lui a4, 16
 ; CHECK-NEXT:    addiw a4, a4, -1
@@ -124,8 +123,7 @@ for.body:                                         ; preds = %for.body.preheader2
 define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias nocapture readonly %x, i32 signext %alpha) {
 ; CHECK-LABEL: s32axpy:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 1
-; CHECK-NEXT:    blt a0, a4, .LBB1_8
+; CHECK-NEXT:    blez a0, .LBB1_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a7, a0, 32
@@ -243,8 +241,7 @@ for.body:                                         ; preds = %for.body.preheader1
 define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture readonly %x, i64 %alpha) {
 ; CHECK-LABEL: s64axpy:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 1
-; CHECK-NEXT:    blt a0, a4, .LBB2_8
+; CHECK-NEXT:    blez a0, .LBB2_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    srli t0, a4, 3

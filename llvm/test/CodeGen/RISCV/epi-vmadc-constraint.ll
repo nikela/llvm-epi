@@ -983,11 +983,11 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    bne s1, t5, .LBB0_11
 ; CHECK-NEXT:  # %bb.12: # %salsa20_wordtobyte.exit
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
-; CHECK-NEXT:    addi a3, t0, 1
-; CHECK-NEXT:    slli a4, a3, 32
-; CHECK-NEXT:    srli a4, a4, 32
-; CHECK-NEXT:    sw a3, 48(a0)
-; CHECK-NEXT:    beq a4, a3, .LBB0_14
+; CHECK-NEXT:    sext.w a3, t0
+; CHECK-NEXT:    addiw a4, t0, 1
+; CHECK-NEXT:    addi a5, t0, 1
+; CHECK-NEXT:    sw a5, 48(a0)
+; CHECK-NEXT:    bgeu a4, a3, .LBB0_14
 ; CHECK-NEXT:  # %bb.13: # %if.then217
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    addi a3, a7, 1
