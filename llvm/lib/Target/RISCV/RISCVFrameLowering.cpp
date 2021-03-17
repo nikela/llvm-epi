@@ -307,7 +307,8 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
                                            MachineBasicBlock &MBB,
                                            MachineBasicBlock::iterator MBBI,
                                            const DebugLoc &DL,
-                                           int64_t Amount) const {
+                                           int64_t Amount,
+                                           int64_t Padding) const {
   assert(Amount != 0 && "Did not need to adjust stack pointer for RVV.");
 
   const RISCVInstrInfo *TII = STI.getInstrInfo();
@@ -316,6 +317,7 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
   if (Amount < 0) {
     Amount = -Amount;
     Opc = RISCV::SUB;
+    Padding = -Padding;
   }
 
   // 1. Multiply the number of v-slots to the length of registers
@@ -324,6 +326,13 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
   BuildMI(MBB, MBBI, DL, TII->get(Opc), SPReg)
       .addReg(SPReg)
       .addReg(FactorRegister, RegState::Kill);
+  // 3. Make sure we get enough padding for the alignment required by the
+  // RVV objects.
+  if (Padding) {
+    BuildMI(MBB, MBBI, DL, TII->get(RISCV::ADDI), SPReg)
+        .addReg(SPReg)
+        .addImm(Padding);
+  }
 }
 
 void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
@@ -483,8 +492,11 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
     }
   }
 
-  if (RVVStackSize)
-    adjustStackForRVV(MF, MBB, MBBI, DL, -RVVStackSize);
+  if (RVVStackSize) {
+    int64_t RVVPadding =
+        !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0) ? 8 : 0;
+    adjustStackForRVV(MF, MBB, MBBI, DL, -RVVStackSize, RVVPadding);
+  }
 
   if (hasFP(MF)) {
     // Realign Stack
@@ -577,7 +589,12 @@ void RISCVFrameLowering::emitEpilogue(MachineFunction &MF,
               MachineInstr::FrameDestroy);
   } else {
     if (RVVStackSize)
-      adjustStackForRVV(MF, MBB, LastFrameDestroy, DL, RVVStackSize);
+    {
+      int64_t RVVPadding =
+          !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0) ? 8 : 0;
+      adjustStackForRVV(MF, MBB, LastFrameDestroy, DL, RVVStackSize,
+                        RVVPadding);
+    }
   }
 
   uint64_t FirstSPAdjustAmount = getFirstSPAdjustAmount(MF);
@@ -679,9 +696,9 @@ RISCVFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
       if (FI < 0)
         Offset += StackOffset::getFixed(RVFI->getLibCallStackSize());
     } else if (MFI.getStackID(FI) == TargetStackID::ScalableVector) {
-      Offset +=
-          StackOffset::get(MFI.getStackSize() - RVFI->getCalleeSavedStackSize(),
-                           RVFI->getRVVStackSize());
+      Offset += StackOffset::get(
+          alignTo(MFI.getStackSize() - RVFI->getCalleeSavedStackSize(), 8),
+          RVFI->getRVVStackSize());
     }
   } else {
     FrameReg = RI->getFrameRegister(MF);
@@ -720,9 +737,9 @@ RISCVFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
         if (FI < 0)
           Offset += StackOffset::getFixed(RVFI->getLibCallStackSize());
       } else if (MFI.getStackID(FI) == TargetStackID::ScalableVector) {
-        Offset += StackOffset::get(MFI.getStackSize() -
-                                       RVFI->getCalleeSavedStackSize(),
-                                   RVFI->getRVVStackSize());
+        Offset += StackOffset::get(
+            alignTo(MFI.getStackSize() - RVFI->getCalleeSavedStackSize(), 8),
+            RVFI->getRVVStackSize());
       }
     }
   }
@@ -827,31 +844,20 @@ void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
                                           RegInfo->getSpillAlign(*RC), false);
     RS->addScavengingFrameIndex(RegScavFI);
   }
-}
 
-void RISCVFrameLowering::processFunctionBeforeFrameIndicesReplaced(
-    MachineFunction &MF, RegScavenger *RS) const {
-  auto *RVFI = MF.getInfo<RISCVMachineFunctionInfo>();
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
   if (MFI.getCalleeSavedInfo().empty() || RVFI->useSaveRestoreLibCalls(MF)) {
     RVFI->setCalleeSavedStackSize(0);
     return;
   }
 
-  int64_t MinOffset = std::numeric_limits<int64_t>::max();
-  int64_t MaxOffset = std::numeric_limits<int64_t>::min();
+  unsigned Size = 0;
   for (const auto &Info : MFI.getCalleeSavedInfo()) {
     int FrameIdx = Info.getFrameIdx();
     if (MFI.getStackID(FrameIdx) != TargetStackID::Default)
       continue;
 
-    int64_t Offset = MFI.getObjectOffset(FrameIdx);
-    int64_t ObjSize = MFI.getObjectSize(FrameIdx);
-    MinOffset = std::min<int64_t>(Offset, MinOffset);
-    MaxOffset = std::max<int64_t>(Offset + ObjSize, MaxOffset);
+    Size += MFI.getObjectSize(FrameIdx);
   }
-
-  unsigned Size = alignTo(MaxOffset - MinOffset, 16);
   RVFI->setCalleeSavedStackSize(Size);
 }
 

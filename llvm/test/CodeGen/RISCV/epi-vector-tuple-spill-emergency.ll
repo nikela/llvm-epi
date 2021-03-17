@@ -117,7 +117,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vmv1r.v v25, v31
 ; CHECK-NEXT:    vfnmsac.vv v25, v4, v12
 ; CHECK-NEXT:    vmv1r.v v14, v8
-; CHECK-NEXT:    addi a3, sp, 64
+; CHECK-NEXT:    addi a3, sp, 72
 ; CHECK-NEXT:    rdvlenb a2
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:    vs1r.v v1, (a3)
@@ -137,7 +137,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    slli a2, a2, 2
 ; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 64
+; CHECK-NEXT:    addi a2, a2, 72
 ; CHECK-NEXT:    vs1r.v v28, (a2) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vtrn.vv v12, v25, v25
 ; CHECK-NEXT:    vfmul.vv v29, v27, v12
@@ -234,14 +234,14 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    csrr a5, vlenb
 ; CHECK-NEXT:    slli a5, a5, 1
 ; CHECK-NEXT:    add a5, a5, sp
-; CHECK-NEXT:    addi a5, a5, 64
+; CHECK-NEXT:    addi a5, a5, 72
 ; CHECK-NEXT:    vs1r.v v11, (a5) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vfadd.vv v31, v25, v17
 ; CHECK-NEXT:    csrr a5, vlenb
 ; CHECK-NEXT:    addi t3, zero, 3
 ; CHECK-NEXT:    mul a5, a5, t3
 ; CHECK-NEXT:    add a5, a5, sp
-; CHECK-NEXT:    addi a5, a5, 64
+; CHECK-NEXT:    addi a5, a5, 72
 ; CHECK-NEXT:    vs1r.v v31, (a5) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vfsub.vv v21, v11, v31
 ; CHECK-NEXT:    vfmul.vv v22, v20, v5
@@ -271,7 +271,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v3, v4, v20
 ; CHECK-NEXT:    vfnmsac.vv v16, v2, v3
 ; CHECK-NEXT:    sd a1, 8(sp)
-; CHECK-NEXT:    addi a1, sp, 64
+; CHECK-NEXT:    addi a1, sp, 72
 ; CHECK-NEXT:    rdvlenb a5
 ; CHECK-NEXT:    add a5, a5, a1
 ; CHECK-NEXT:    vl1r.v v3, (a1)
@@ -316,7 +316,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    csrr a5, vlenb
 ; CHECK-NEXT:    slli a5, a5, 2
 ; CHECK-NEXT:    add a5, a5, sp
-; CHECK-NEXT:    addi a5, a5, 64
+; CHECK-NEXT:    addi a5, a5, 72
 ; CHECK-NEXT:    vl1r.v v27, (a5) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vfsub.vv v28, v27, v29
 ; CHECK-NEXT:    vfsub.vv v27, v30, v8
@@ -367,12 +367,12 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    addi a5, zero, 3
 ; CHECK-NEXT:    mul a2, a2, a5
 ; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 64
+; CHECK-NEXT:    addi a2, a2, 72
 ; CHECK-NEXT:    vl1r.v v11, (a2) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    slli a2, a2, 1
 ; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 64
+; CHECK-NEXT:    addi a2, a2, 72
 ; CHECK-NEXT:    vl1r.v v12, (a2) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vfadd.vv v11, v12, v11
 ; CHECK-NEXT:    vfadd.vv v12, v23, v24
