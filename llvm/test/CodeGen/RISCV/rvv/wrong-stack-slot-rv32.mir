@@ -10,14 +10,14 @@
   ; CHECK-NEXT:    csrr a1, vlenb
   ; CHECK-NEXT:    slli a1, a1, 1
   ; CHECK-NEXT:    sub sp, sp, a1
-  ; CHECK-NEXT:    addi sp, sp, -8
+  ; CHECK-NEXT:    addi sp, sp, -16
   ; CHECK-NEXT:    sw a0, 8(sp) # 4-byte Folded Spill
   ; CHECK-NEXT:    addi a0, sp, 16
   ; CHECK-NEXT:    vs2r.v v30, (a0) # Unknown-size Folded Spill
   ; CHECK-NEXT:    csrr a0, vlenb
   ; CHECK-NEXT:    slli a0, a0, 1
   ; CHECK-NEXT:    add sp, sp, a0
-  ; CHECK-NEXT:    addi sp, sp, 8
+  ; CHECK-NEXT:    addi sp, sp, 16
   ; CHECK-NEXT:    lw s9, 12(sp) # 4-byte Folded Reload
   ; CHECK-NEXT:    addi sp, sp, 16
   ; CHECK-NEXT:    ret

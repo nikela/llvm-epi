@@ -494,7 +494,9 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
 
   if (RVVStackSize) {
     int64_t RVVPadding =
-        !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0) ? 8 : 0;
+        !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0)
+            ? getStackAlign().value()
+            : 0;
     adjustStackForRVV(MF, MBB, MBBI, DL, -RVVStackSize, RVVPadding);
   }
 
@@ -588,10 +590,11 @@ void RISCVFrameLowering::emitEpilogue(MachineFunction &MF,
     adjustReg(MBB, LastFrameDestroy, DL, SPReg, FPReg, -FPOffset,
               MachineInstr::FrameDestroy);
   } else {
-    if (RVVStackSize)
-    {
+    if (RVVStackSize) {
       int64_t RVVPadding =
-          !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0) ? 8 : 0;
+          !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0)
+              ? getStackAlign().value()
+              : 0;
       adjustStackForRVV(MF, MBB, LastFrameDestroy, DL, RVVStackSize,
                         RVVPadding);
     }
