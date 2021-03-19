@@ -62,6 +62,8 @@ else()
     (pass -DLLVM_LIBC_ENABLE_LINTING=ON to cmake).")
 endif()
 
+option(LLVM_LIBC_FULL_BUILD "Build and test LLVM libc as if it is the full libc" OFF)
+
 include(CMakeParseArguments)
 include(LLVMLibCRules)
 include(LLVMLibCCheckCpuFeatures)
@@ -70,7 +72,7 @@ include("${LIBC_SOURCE_DIR}/config/${LIBC_TARGET_OS}/${LIBC_TARGET_MACHINE}/entr
 include("${LIBC_SOURCE_DIR}/config/${LIBC_TARGET_OS}/${LIBC_TARGET_MACHINE}/headers.txt")
 
 set(TARGET_ENTRYPOINT_NAME_LIST "")
-foreach(entrypoint IN LISTS TARGET_LIBC_ENTRYPOINTS TARGET_LIBM_ENTRYPOINTS)
+foreach(entrypoint IN LISTS TARGET_LLVMLIBC_ENTRYPOINTS)
   string(FIND ${entrypoint} "." last_dot_loc REVERSE)
   if(${last_dot_loc} EQUAL -1)
     message(FATAL "Invalid entrypoint target name ${entrypoint}; Expected a '.' "
@@ -81,18 +83,22 @@ foreach(entrypoint IN LISTS TARGET_LIBC_ENTRYPOINTS TARGET_LIBM_ENTRYPOINTS)
   list(APPEND TARGET_ENTRYPOINT_NAME_LIST ${entrypoint_name})
 endforeach()
 
-# We need to set up hdrgen first since other targets depend on it.
-add_subdirectory(utils/LibcTableGenUtil)
-add_subdirectory(utils/HdrGen)
+if(LLVM_LIBC_FULL_BUILD)
+  # We need to set up hdrgen first since other targets depend on it.
+  add_subdirectory(utils/LibcTableGenUtil)
+  add_subdirectory(utils/HdrGen)
+endif()
 
 add_subdirectory(include)
 add_subdirectory(config)
 add_subdirectory(src)
 add_subdirectory(utils)
 
-# The loader can potentially depend on the library components so add it
-# after the library implementation directories.
-add_subdirectory(loader)
+if(LLVM_LIBC_FULL_BUILD)
+  # The loader can potentially depend on the library components so add it
+  # after the library implementation directories.
+  add_subdirectory(loader)
+endif()
 
 # The lib and test directories are added at the very end as tests
 # and libraries potentially draw from the components present in all

@@ -5,8 +5,7 @@
 define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias nocapture readonly %x, float %alpha) nounwind {
 ; CHECK-LABEL: saxpy:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 1
-; CHECK-NEXT:    blt a0, a4, .LBB0_8
+; CHECK-NEXT:    blez a0, .LBB0_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a7, a0, 32
@@ -122,8 +121,7 @@ for.body:                                         ; preds = %for.body.preheader1
 define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias nocapture readonly %x, double %alpha) nounwind {
 ; CHECK-LABEL: daxpy:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 1
-; CHECK-NEXT:    blt a0, a4, .LBB1_8
+; CHECK-NEXT:    blez a0, .LBB1_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a7, a0, 32

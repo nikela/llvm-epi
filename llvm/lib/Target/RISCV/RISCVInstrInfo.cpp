@@ -18,6 +18,7 @@
 #include "RISCVTargetMachine.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/Analysis/MemoryLocation.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
@@ -72,10 +73,10 @@ unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
   switch (MI.getOpcode()) {
   default:
     return 0;
-  case RISCV::PseudoEPIVRELOAD_VRM1:
-  case RISCV::PseudoEPIVRELOAD_VRM2:
-  case RISCV::PseudoEPIVRELOAD_VRM4:
-  case RISCV::PseudoEPIVRELOAD_VRM8:
+  case RISCV::PseudoVRELOAD_M1:
+  case RISCV::PseudoVRELOAD_M2:
+  case RISCV::PseudoVRELOAD_M4:
+  case RISCV::PseudoVRELOAD_M8:
 
   case RISCV::PseudoEPIVRELOAD_VRN2M1:
   case RISCV::PseudoEPIVRELOAD_VRN3M1:
@@ -115,10 +116,10 @@ unsigned RISCVInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
   switch (MI.getOpcode()) {
   default:
     return 0;
-  case RISCV::PseudoEPIVSPILL_VRM1:
-  case RISCV::PseudoEPIVSPILL_VRM2:
-  case RISCV::PseudoEPIVSPILL_VRM4:
-  case RISCV::PseudoEPIVSPILL_VRM8:
+  case RISCV::PseudoVSPILL_M1:
+  case RISCV::PseudoVSPILL_M2:
+  case RISCV::PseudoVSPILL_M4:
+  case RISCV::PseudoVSPILL_M8:
 
   case RISCV::PseudoEPIVSPILL_VRN2M1:
   case RISCV::PseudoEPIVSPILL_VRN3M1:
@@ -268,19 +269,15 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
                                          Register SrcReg, bool IsKill, int FI,
                                          const TargetRegisterClass *RC,
                                          const TargetRegisterInfo *TRI) const {
-  MachineFunction *MF = MBB.getParent();
-  RISCVMachineFunctionInfo *RVFI = MF->getInfo<RISCVMachineFunctionInfo>();
-  MachineFrameInfo &MFI = MF->getFrameInfo();
-
   DebugLoc DL;
   if (I != MBB.end())
     DL = I->getDebugLoc();
 
-  MachineMemOperand *MMO = MF->getMachineMemOperand(
-      MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOStore,
-      MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
+  MachineFunction *MF = MBB.getParent();
+  MachineFrameInfo &MFI = MF->getFrameInfo();
 
   unsigned Opcode;
+  bool IsScalableVector = false;
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::SW : RISCV::SD;
@@ -291,77 +288,54 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
     Opcode = RISCV::FSD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRM1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVSPILL_M1;
+    IsScalableVector = true;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRM2))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVSPILL_M2;
+    IsScalableVector = true;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRM4))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVSPILL_M4;
+    IsScalableVector = true;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRM8))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVSPILL_M8;
+    IsScalableVector = true;
   } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN2M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN3M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN4M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN5M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN6M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN7M1))
         .addReg(SrcReg, getKillRegState(IsKill))
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN8M1))
         .addReg(SrcReg, getKillRegState(IsKill))
@@ -370,11 +344,27 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   } else
     llvm_unreachable("Can't store this register to stack slot");
 
-  BuildMI(MBB, I, DL, get(Opcode))
-      .addReg(SrcReg, getKillRegState(IsKill))
-      .addFrameIndex(FI)
-      .addImm(0)
-      .addMemOperand(MMO);
+  if (IsScalableVector) {
+    MachineMemOperand *MMO = MF->getMachineMemOperand(
+        MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOStore,
+        MemoryLocation::UnknownSize, MFI.getObjectAlign(FI));
+
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
+    BuildMI(MBB, I, DL, get(Opcode))
+        .addReg(SrcReg, getKillRegState(IsKill))
+        .addFrameIndex(FI)
+        .addMemOperand(MMO);
+  } else {
+    MachineMemOperand *MMO = MF->getMachineMemOperand(
+        MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOStore,
+        MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
+
+    BuildMI(MBB, I, DL, get(Opcode))
+        .addReg(SrcReg, getKillRegState(IsKill))
+        .addFrameIndex(FI)
+        .addImm(0)
+        .addMemOperand(MMO);
+  }
 }
 
 void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
@@ -382,19 +372,15 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
                                           Register DstReg, int FI,
                                           const TargetRegisterClass *RC,
                                           const TargetRegisterInfo *TRI) const {
-  MachineFunction *MF = MBB.getParent();
-  RISCVMachineFunctionInfo *RVFI = MF->getInfo<RISCVMachineFunctionInfo>();
-  MachineFrameInfo &MFI = MF->getFrameInfo();
-
   DebugLoc DL;
   if (I != MBB.end())
     DL = I->getDebugLoc();
 
-  MachineMemOperand *MMO = MF->getMachineMemOperand(
-      MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOLoad,
-      MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
+  MachineFunction *MF = MBB.getParent();
+  MachineFrameInfo &MFI = MF->getFrameInfo();
 
   unsigned Opcode;
+  bool IsScalableVector = false;
   if (RISCV::GPRRegClass.hasSubClassEq(RC))
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::LW : RISCV::LD;
@@ -405,67 +391,48 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
   else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
     Opcode = RISCV::FLD;
   else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRM1), DstReg)
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVRELOAD_M1;
+    IsScalableVector = true;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRM2), DstReg)
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVRELOAD_M2;
+    IsScalableVector = true;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRM4), DstReg)
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVRELOAD_M4;
+    IsScalableVector = true;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRM8), DstReg)
-        .addFrameIndex(FI);
-    return;
+    Opcode = RISCV::PseudoVRELOAD_M8;
+    IsScalableVector = true;
   } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN2M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN3M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN4M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN5M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN6M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN7M1), DstReg)
         .addFrameIndex(FI);
     return;
   } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
-    RVFI->setHasSpilledVR();
     MFI.setStackID(FI, TargetStackID::ScalableVector);
     BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN8M1), DstReg)
         .addFrameIndex(FI);
@@ -473,10 +440,25 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
   } else
     llvm_unreachable("Can't load this register from stack slot");
 
-  BuildMI(MBB, I, DL, get(Opcode), DstReg)
-    .addFrameIndex(FI)
-    .addImm(0)
-    .addMemOperand(MMO);
+  if (IsScalableVector) {
+    MachineMemOperand *MMO = MF->getMachineMemOperand(
+        MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOLoad,
+        MemoryLocation::UnknownSize, MFI.getObjectAlign(FI));
+
+    MFI.setStackID(FI, TargetStackID::ScalableVector);
+    BuildMI(MBB, I, DL, get(Opcode), DstReg)
+        .addFrameIndex(FI)
+        .addMemOperand(MMO);
+  } else {
+    MachineMemOperand *MMO = MF->getMachineMemOperand(
+        MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOLoad,
+        MFI.getObjectSize(FI), MFI.getObjectAlign(FI));
+
+    BuildMI(MBB, I, DL, get(Opcode), DstReg)
+        .addFrameIndex(FI)
+        .addImm(0)
+        .addMemOperand(MMO);
+  }
 }
 
 void RISCVInstrInfo::movImm(MachineBasicBlock &MBB,
@@ -1380,3 +1362,45 @@ MachineInstr *RISCVInstrInfo::commuteInstructionImpl(MachineInstr &MI,
 #undef CASE_VFMA_SPLATS
 #undef CASE_VFMA_OPCODE_LMULS
 #undef CASE_VFMA_OPCODE_COMMON
+
+Register RISCVInstrInfo::getVLENFactoredAmount(MachineFunction &MF,
+                                               MachineBasicBlock &MBB,
+                                               MachineBasicBlock::iterator II,
+                                               int64_t Amount) const {
+  assert(Amount > 0 && "There is no need to get VLEN scaled value.");
+  assert(Amount % 8 == 0 &&
+         "Reserve the stack by the multiple of one vector size.");
+
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const RISCVInstrInfo *TII = MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
+  DebugLoc DL = II->getDebugLoc();
+  int64_t NumOfVReg = Amount / 8;
+
+  Register SizeOfVector = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+  BuildMI(MBB, II, DL, TII->get(RISCV::PseudoReadVLENB), SizeOfVector);
+  Register FactorRegister = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+  assert(isInt<12>(NumOfVReg) &&
+         "Expect the number of vector registers within 12-bits.");
+  if (isPowerOf2_32(NumOfVReg)) {
+    uint32_t ShiftAmount = Log2_32(NumOfVReg);
+    if (ShiftAmount == 0)
+      return SizeOfVector;
+    BuildMI(MBB, II, DL, TII->get(RISCV::SLLI), FactorRegister)
+        .addReg(SizeOfVector, RegState::Kill)
+        .addImm(ShiftAmount);
+  } else {
+    Register VN = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+    BuildMI(MBB, II, DL, TII->get(RISCV::ADDI), VN)
+        .addReg(RISCV::X0)
+        .addImm(NumOfVReg);
+    if (!MF.getSubtarget<RISCVSubtarget>().hasStdExtM())
+      MF.getFunction().getContext().diagnose(DiagnosticInfoUnsupported{
+          MF.getFunction(),
+          "M-extension must be enabled to calculate the vscaled size/offset."});
+    BuildMI(MBB, II, DL, TII->get(RISCV::MUL), FactorRegister)
+        .addReg(SizeOfVector, RegState::Kill)
+        .addReg(VN, RegState::Kill);
+  }
+
+  return FactorRegister;
+}

@@ -5,8 +5,7 @@
 define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noalias nocapture readonly %a, double* noalias nocapture readonly %b, double* noalias nocapture %d) nounwind {
 ; CHECK-LABEL: vec_add:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a5, zero, 1
-; CHECK-NEXT:    blt a0, a5, .LBB0_3
+; CHECK-NEXT:    blez a0, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    lui a5, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a5)

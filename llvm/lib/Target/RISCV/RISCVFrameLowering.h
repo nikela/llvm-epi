@@ -27,8 +27,6 @@ public:
                             /*LocalAreaOffset=*/0),
         STI(STI) {}
 
-  bool isSupportedStackID(TargetStackID::Value ID) const override;
-
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
@@ -67,6 +65,9 @@ public:
   bool canUseAsPrologue(const MachineBasicBlock &MBB) const override;
   bool canUseAsEpilogue(const MachineBasicBlock &MBB) const override;
 
+  bool isSupportedStackID(TargetStackID::Value ID) const override;
+  TargetStackID::Value getStackIDForScalableVectors() const override;
+
 protected:
   const RISCVSubtarget &STI;
 
@@ -75,17 +76,10 @@ private:
   void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
                  const DebugLoc &DL, Register DestReg, Register SrcReg,
                  int64_t Val, MachineInstr::MIFlag Flag) const;
-  void alignSP(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
-               const DebugLoc &DL, int64_t Alignment) const;
-
-  void expandVectorSpillReload(MachineFunction& MF) const;
-
-  void prepareStorageSpilledVR(MachineFunction &MF, MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator MBBI,
-                                const MachineFrameInfo &MFI,
-                                MachineRegisterInfo &MRI,
-                                const TargetInstrInfo &TII,
-                                const DebugLoc &DL) const;
+  void adjustStackForRVV(MachineFunction &MF, MachineBasicBlock &MBB,
+                         MachineBasicBlock::iterator MBBI, const DebugLoc &DL,
+                         int64_t Amount, int64_t Padding) const;
+  int64_t assignRVVStackObjectOffsets(MachineFrameInfo &MFI) const;
 };
 }
 #endif

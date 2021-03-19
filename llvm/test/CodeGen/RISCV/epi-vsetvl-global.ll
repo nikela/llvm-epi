@@ -327,9 +327,8 @@ if.end10:                                         ; preds = %if.else5, %if.then4
 define <vscale x 1 x double> @test7(i64 %avl, i8 zeroext %cond, <vscale x 1 x double> %a, <vscale x 1 x double> %b, i64 %N) nounwind {
 ; CHECK-LABEL: test7:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a3, zero, 1
 ; CHECK-NEXT:    vsetvli a0, a0, e64,m1,tu,mu
-; CHECK-NEXT:    blt a2, a3, .LBB6_5
+; CHECK-NEXT:    blez a2, .LBB6_5
 ; CHECK-NEXT:  # %bb.1: # %for.body.lr.ph
 ; CHECK-NEXT:    mv a3, zero
 ; CHECK-NEXT:    seqz a1, a1

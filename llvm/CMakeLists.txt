@@ -507,6 +507,9 @@ if (MSVC_IDE OR XCODE)
 endif()
 set(LLVM_LIT_ARGS "${LIT_ARGS_DEFAULT}" CACHE STRING "Default options for lit")
 
+include(GetErrcMessages)
+get_errc_messages(LLVM_LIT_ERRC_MESSAGES)
+
 # On Win32 hosts, provide an option to specify the path to the GnuWin32 tools.
 if( WIN32 AND NOT CYGWIN )
   set(LLVM_LIT_TOOLS_DIR "" CACHE PATH "Path to GnuWin32 tools")
@@ -649,12 +652,6 @@ if (LLVM_BUILD_STATIC)
   endforeach()
 endif()
 
-include(CheckSymbolExists)
-check_symbol_exists(proc_pid_rusage "libproc.h" HAVE_PROC_PID_RUSAGE)
-if(HAVE_PROC_PID_RUSAGE)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES proc)
-endif()
-
 # Use libtool instead of ar if you are both on an Apple host, and targeting Apple.
 if(CMAKE_HOST_APPLE AND APPLE)
   include(UseLibtool)
@@ -699,7 +696,8 @@ set(ENABLE_EXPERIMENTAL_NEW_PASS_MANAGER FALSE CACHE BOOL
 
 include(HandleLLVMOptions)
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Python3 ${LLVM_MINIMUM_PYTHON_VERSION} REQUIRED
+    COMPONENTS Interpreter)
 
 ######
 

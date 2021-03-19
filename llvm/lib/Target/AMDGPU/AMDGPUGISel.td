@@ -219,6 +219,8 @@ def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_XOR, SIbuffer_atomic_xor>;
 def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_INC, SIbuffer_atomic_inc>;
 def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_DEC, SIbuffer_atomic_dec>;
 def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_FADD, SIbuffer_atomic_fadd>;
+def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_FMIN, SIbuffer_atomic_fmin>;
+def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_FMAX, SIbuffer_atomic_fmax>;
 def : GINodeEquiv<G_AMDGPU_BUFFER_ATOMIC_CMPSWAP, SIbuffer_atomic_cmpswap>;
 def : GINodeEquiv<G_AMDGPU_S_BUFFER_LOAD, SIsbuffer_load>;
 
@@ -326,17 +328,14 @@ def gi_bitcast_fpimm_to_i32 : GICustomOperandRenderer<"renderBitcastImm">,
 def gi_IMMPopCount : GICustomOperandRenderer<"renderPopcntImm">,
   GISDNodeXFormEquiv<IMMPopCount>;
 
-def gi_extract_glc : GICustomOperandRenderer<"renderExtractGLC">,
-  GISDNodeXFormEquiv<extract_glc>;
-
-def gi_extract_slc : GICustomOperandRenderer<"renderExtractSLC">,
-  GISDNodeXFormEquiv<extract_slc>;
-
-def gi_extract_dlc : GICustomOperandRenderer<"renderExtractDLC">,
-  GISDNodeXFormEquiv<extract_dlc>;
+def gi_extract_cpol : GICustomOperandRenderer<"renderExtractCPol">,
+  GISDNodeXFormEquiv<extract_cpol>;
 
 def gi_extract_swz : GICustomOperandRenderer<"renderExtractSWZ">,
   GISDNodeXFormEquiv<extract_swz>;
+
+def gi_set_glc : GICustomOperandRenderer<"renderSetGLC">,
+  GISDNodeXFormEquiv<set_glc>;
 
 def gi_frameindex_to_targetframeindex : GICustomOperandRenderer<"renderFrameIndex">,
   GISDNodeXFormEquiv<frameindex_to_targetframeindex>;

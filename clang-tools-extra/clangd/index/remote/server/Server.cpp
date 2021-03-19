@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "Features.inc"
 #include "Index.pb.h"
 #include "Service.grpc.pb.h"
 #include "index/Index.h"
@@ -34,6 +35,10 @@
 #include <grpc++/health_check_service_interface.h>
 #include <memory>
 #include <thread>
+
+#if ENABLE_GRPC_REFLECTION
+#include <grpc++/ext/proto_server_reflection_plugin.h>
+#endif
 
 namespace clang {
 namespace clangd {
@@ -79,6 +84,11 @@ llvm::cl::opt<bool> PrettyPrint{
 llvm::cl::opt<std::string> ServerAddress(
     "server-address", llvm::cl::init("0.0.0.0:50051"),
     llvm::cl::desc("Address of the invoked server. Defaults to 0.0.0.0:50051"));
+
+llvm::cl::opt<size_t> IdleTimeoutSeconds(
+    "idle-timeout", llvm::cl::init(8 * 60),
+    llvm::cl::desc("Maximum time a channel may stay idle until server closes "
+                   "the connection, in seconds. Defaults to 480."));
 
 static Key<grpc::ServerContext *> CurrentRequest;
 
@@ -308,9 +318,14 @@ void runServerAndWait(clangd::SymbolIndex &Index, llvm::StringRef ServerAddress,
   RemoteIndexServer Service(Index, IndexRoot);
 
   grpc::EnableDefaultHealthCheckService(true);
+#if ENABLE_GRPC_REFLECTION
+  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+#endif
   grpc::ServerBuilder Builder;
   Builder.AddListeningPort(ServerAddress.str(),
                            grpc::InsecureServerCredentials());
+  Builder.AddChannelArgument(GRPC_ARG_MAX_CONNECTION_IDLE_MS,
+                             IdleTimeoutSeconds * 1000);
   Builder.RegisterService(&Service);
   std::unique_ptr<grpc::Server> Server(Builder.BuildAndStart());
   log("Server listening on {0}", ServerAddress);

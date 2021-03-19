@@ -38,12 +38,12 @@ define dso_local void @induction_float(i32 signext %N, float* noalias nocapture 
 ; CHECK-NEXT:    call void @llvm.vp.store.nxv2f32.p0nxv2f32(<vscale x 2 x float> [[VP_OP16]], <vscale x 2 x float>* [[TMP8]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP9]])
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP2]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = uitofp i64 [[TMP2]] to float
-; CHECK-NEXT:    [[TMP11:%.*]] = fmul fast float [[TMP10]], 2.000000e+00
+; CHECK-NEXT:    [[TMP11:%.*]] = fmul float [[TMP10]], 2.000000e+00
 ; CHECK-NEXT:    [[DOTSPLATINSERT19:%.*]] = insertelement <vscale x 2 x float> poison, float [[TMP11]], i32 0
 ; CHECK-NEXT:    [[DOTSPLAT20:%.*]] = shufflevector <vscale x 2 x float> [[DOTSPLATINSERT19]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = fadd fast <vscale x 2 x float> [[VEC_IND]], [[DOTSPLAT20]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[TMP12]], label [[FOR_END]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK-NEXT:    br i1 [[TMP12]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
 ;

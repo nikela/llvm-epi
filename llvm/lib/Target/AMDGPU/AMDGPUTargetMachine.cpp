@@ -193,6 +193,11 @@ static cl::opt<bool> EnableStructurizerWorkarounds(
     cl::desc("Enable workarounds for the StructurizeCFG pass"), cl::init(true),
     cl::Hidden);
 
+static cl::opt<bool>
+    DisableLowerModuleLDS("amdgpu-disable-lower-module-lds", cl::Hidden,
+                          cl::desc("Disable lower module lds pass"),
+                          cl::init(false));
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeAMDGPUTarget() {
   // Register the target
   RegisterTargetMachine<R600TargetMachine> X(getTheAMDGPUTarget());
@@ -228,12 +233,14 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeAMDGPUTarget() {
   initializeAMDGPUOpenCLEnqueuedBlockLoweringPass(*PR);
   initializeAMDGPUPostLegalizerCombinerPass(*PR);
   initializeAMDGPUPreLegalizerCombinerPass(*PR);
+  initializeAMDGPURegBankCombinerPass(*PR);
   initializeAMDGPUPromoteAllocaPass(*PR);
   initializeAMDGPUPromoteAllocaToVectorPass(*PR);
   initializeAMDGPUCodeGenPreparePass(*PR);
   initializeAMDGPULateCodeGenPreparePass(*PR);
   initializeAMDGPUPropagateAttributesEarlyPass(*PR);
   initializeAMDGPUPropagateAttributesLatePass(*PR);
+  initializeAMDGPULowerModuleLDSPass(*PR);
   initializeAMDGPURewriteOutArgumentsPass(*PR);
   initializeAMDGPUUnifyMetadataPass(*PR);
   initializeSIAnnotateControlFlowPass(*PR);
@@ -383,6 +390,10 @@ AMDGPUTargetMachine::AMDGPUTargetMachine(const Target &T, const Triple &TT,
     else if (getMCSubtargetInfo()->checkFeatures("+wavefrontsize32"))
       MRI.reset(llvm::createGCNMCRegisterInfo(AMDGPUDwarfFlavour::Wave32));
   }
+  // Set -fixed-function-abi to true if not provided..
+  if (TT.getOS() == Triple::AMDHSA &&
+      EnableAMDGPUFixedFunctionABIOpt.getNumOccurrences() == 0)
+    EnableFixedFunctionABI = true;
 }
 
 bool AMDGPUTargetMachine::EnableLateStructurizeCFG = false;
@@ -501,6 +512,10 @@ void AMDGPUTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB,
           PM.addPass(AMDGPUAlwaysInlinePass());
           return true;
         }
+        if (PassName == "amdgpu-lower-module-lds") {
+          PM.addPass(AMDGPULowerModuleLDSPass());
+          return true;
+        }
         return false;
       });
   PB.registerPipelineParsingCallback(
@@ -530,7 +545,6 @@ void AMDGPUTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB,
           PM.addPass(AMDGPUPropagateAttributesEarlyPass(*this));
           return true;
         }
-
         return false;
       });
 
@@ -803,6 +817,7 @@ public:
   bool addLegalizeMachineIR() override;
   void addPreRegBankSelect() override;
   bool addRegBankSelect() override;
+  void addPreGlobalInstructionSelect() override;
   bool addGlobalInstructionSelect() override;
   void addFastRegAlloc() override;
   void addOptimizedRegAlloc() override;
@@ -877,6 +892,10 @@ void AMDGPUPassConfig::addIRPasses() {
 
   // Replace OpenCL enqueued block function pointers with global variables.
   addPass(createAMDGPUOpenCLEnqueuedBlockLoweringPass());
+
+  // Can increase LDS used by kernel so runs before PromoteAlloca
+  if (!DisableLowerModuleLDS)
+    addPass(createAMDGPULowerModuleLDSPass());
 
   if (TM.getOptLevel() > CodeGenOpt::None) {
     addPass(createInferAddressSpacesPass());
@@ -1109,8 +1128,13 @@ bool GCNPassConfig::addRegBankSelect() {
   return false;
 }
 
+void GCNPassConfig::addPreGlobalInstructionSelect() {
+  bool IsOptNone = getOptLevel() == CodeGenOpt::None;
+  addPass(createAMDGPURegBankCombiner(IsOptNone));
+}
+
 bool GCNPassConfig::addGlobalInstructionSelect() {
-  addPass(new InstructionSelect());
+  addPass(new InstructionSelect(getOptLevel()));
   // TODO: Fix instruction selection to do the right thing for image
   // instructions with tfe or lwe in the first place, instead of running a
   // separate pass to fix them up?

@@ -135,9 +135,7 @@ static void buildPrologSpill(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
         .addReg(SpillReg, RegState::Kill)
         .addReg(SPReg)
         .addImm(Offset)
-        .addImm(0) // glc
-        .addImm(0) // slc
-        .addImm(0) // dlc
+        .addImm(0) // cpol
         .addMemOperand(MMO);
       return;
     }
@@ -147,10 +145,8 @@ static void buildPrologSpill(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
       .addReg(ScratchRsrcReg)
       .addReg(SPReg)
       .addImm(Offset)
-      .addImm(0) // glc
-      .addImm(0) // slc
+      .addImm(0) // cpol
       .addImm(0) // tfe
-      .addImm(0) // dlc
       .addImm(0) // swz
       .addMemOperand(MMO);
     return;
@@ -178,9 +174,7 @@ static void buildPrologSpill(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
         .addReg(SpillReg, RegState::Kill)
         .addReg(OffsetReg, HasOffsetReg ? RegState::Kill : 0)
         .addImm(0) // offset
-        .addImm(0) // glc
-        .addImm(0) // slc
-        .addImm(0) // dlc
+        .addImm(0) // cpol
         .addMemOperand(MMO);
 
     if (!HasOffsetReg) {
@@ -202,10 +196,8 @@ static void buildPrologSpill(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
           .addReg(ScratchRsrcReg)
           .addReg(SPReg)
           .addImm(0) // offset
-          .addImm(0) // glc
-          .addImm(0) // slc
+          .addImm(0) // cpol
           .addImm(0) // tfe
-          .addImm(0) // dlc
           .addImm(0) // swz
           .addMemOperand(MMO);
     } else {
@@ -219,10 +211,8 @@ static void buildPrologSpill(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
           .addReg(ScratchRsrcReg)
           .addReg(SPReg)
           .addImm(0) // offset
-          .addImm(0) // glc
-          .addImm(0) // slc
+          .addImm(0) // cpol
           .addImm(0) // tfe
-          .addImm(0) // dlc
           .addImm(0) // swz
           .addMemOperand(MMO);
 
@@ -254,9 +244,7 @@ static void buildEpilogReload(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
               TII->get(AMDGPU::SCRATCH_LOAD_DWORD_SADDR), SpillReg)
         .addReg(SPReg)
         .addImm(Offset)
-        .addImm(0) // glc
-        .addImm(0) // slc
-        .addImm(0) // dlc
+        .addImm(0) // cpol
         .addMemOperand(MMO);
       return;
     }
@@ -272,9 +260,7 @@ static void buildEpilogReload(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
             SpillReg)
         .addReg(OffsetReg, RegState::Kill)
         .addImm(0)
-        .addImm(0) // glc
-        .addImm(0) // slc
-        .addImm(0) // dlc
+        .addImm(0) // cpol
         .addMemOperand(MMO);
     return;
   }
@@ -285,10 +271,8 @@ static void buildEpilogReload(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
       .addReg(ScratchRsrcReg)
       .addReg(SPReg)
       .addImm(Offset)
-      .addImm(0) // glc
-      .addImm(0) // slc
+      .addImm(0) // cpol
       .addImm(0) // tfe
-      .addImm(0) // dlc
       .addImm(0) // swz
       .addMemOperand(MMO);
     return;
@@ -308,10 +292,8 @@ static void buildEpilogReload(const GCNSubtarget &ST, LivePhysRegs &LiveRegs,
     .addReg(ScratchRsrcReg)
     .addReg(SPReg)
     .addImm(0)
-    .addImm(0) // glc
-    .addImm(0) // slc
+    .addImm(0) // cpol
     .addImm(0) // tfe
-    .addImm(0) // dlc
     .addImm(0) // swz
     .addMemOperand(MMO);
 }
@@ -407,8 +389,7 @@ void SIFrameLowering::emitEntryFunctionFlatScratchInit(
     BuildMI(MBB, I, DL, LoadDwordX2, FlatScrInit)
         .addReg(FlatScrInit)
         .addImm(EncodedOffset) // offset
-        .addImm(0)             // glc
-        .addImm(0)             // dlc
+        .addImm(0)             // cpol
         .addMemOperand(MMO);
 
     // Mask the offset in [47:0] of the descriptor
@@ -704,8 +685,7 @@ void SIFrameLowering::emitEntryFunctionScratchRsrcRegSetup(
     BuildMI(MBB, I, DL, LoadDwordX4, ScratchRsrcReg)
       .addReg(Rsrc01)
       .addImm(EncodedOffset) // offset
-      .addImm(0) // glc
-      .addImm(0) // dlc
+      .addImm(0) // cpol
       .addReg(ScratchRsrcReg, RegState::ImplicitDefine)
       .addMemOperand(MMO);
   } else if (ST.isMesaGfxShader(Fn) || !PreloadedScratchRsrcReg) {
@@ -739,8 +719,7 @@ void SIFrameLowering::emitEntryFunctionScratchRsrcRegSetup(
         BuildMI(MBB, I, DL, LoadDwordX2, Rsrc01)
           .addReg(MFI->getImplicitBufferPtrUserSGPR())
           .addImm(0) // offset
-          .addImm(0) // glc
-          .addImm(0) // dlc
+          .addImm(0) // cpol
           .addMemOperand(MMO)
           .addReg(ScratchRsrcReg, RegState::ImplicitDefine);
 
@@ -1311,7 +1290,13 @@ void SIFrameLowering::determineCalleeSaves(MachineFunction &MF,
   const SIRegisterInfo *TRI = ST.getRegisterInfo();
 
   // Ignore the SGPRs the default implementation found.
-  SavedVGPRs.clearBitsNotInMask(TRI->getAllVGPRRegMask());
+  SavedVGPRs.clearBitsNotInMask(TRI->getAllVectorRegMask());
+
+  // Do not save AGPRs prior to GFX90A because there was no easy way to do so.
+  // In gfx908 there was do AGPR loads and stores and thus spilling also
+  // require a temporary VGPR.
+  if (!ST.hasGFX90AInsts())
+    SavedVGPRs.clearBitsInMask(TRI->getAllAGPRRegMask());
 
   // hasFP only knows about stack objects that already exist. We're now
   // determining the stack slots that will be created, so we have to predict
@@ -1366,7 +1351,7 @@ void SIFrameLowering::determineCalleeSavesSGPR(MachineFunction &MF,
   SavedRegs.reset(MFI->getStackPtrOffsetReg());
 
   const BitVector AllSavedRegs = SavedRegs;
-  SavedRegs.clearBitsInMask(TRI->getAllVGPRRegMask());
+  SavedRegs.clearBitsInMask(TRI->getAllVectorRegMask());
 
   // If clearing VGPRs changed the mask, we will have some CSR VGPR spills.
   const bool HaveAnyCSRVGPR = SavedRegs != AllSavedRegs;

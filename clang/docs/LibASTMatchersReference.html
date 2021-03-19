@@ -7152,7 +7152,8 @@ void foo()
     f = 42;
 }
 The matcher:
-  decompositionDecl(hasBinding(0, bindingDecl(hasName("f").bind("fBinding"))))
+  decompositionDecl(hasBinding(0,
+  bindingDecl(hasName("f").bind("fBinding"))))
 matches the decomposition decl with 'f' bound to "fBinding".
 </pre></td></tr>
 
@@ -7508,7 +7509,7 @@ Given
   void f();
   void f() {}
   void g();
-hasAnyBody(functionDecl())
+functionDecl(hasAnyBody(compoundStmt()))
   matches both 'void f();'
   and 'void f() {}'
 with compoundStmt()

@@ -34,11 +34,11 @@ createLinalgPromotionPass(bool dynamicBuffers, bool useAlloca);
 std::unique_ptr<OperationPass<FuncOp>> createLinalgPromotionPass();
 
 /// Create a pass to convert Linalg operations to scf.for loops and
-/// std.load/std.store accesses.
+/// memref.load/memref.store accesses.
 std::unique_ptr<OperationPass<FuncOp>> createConvertLinalgToLoopsPass();
 
 /// Create a pass to convert Linalg operations to scf.parallel loops and
-/// std.load/std.store accesses.
+/// memref.load/memref.store accesses.
 std::unique_ptr<OperationPass<FuncOp>> createConvertLinalgToParallelLoopsPass();
 
 /// Create a pass to convert Linalg operations to affine.for loops and
@@ -58,6 +58,10 @@ void populateElementwiseToLinalgConversionPatterns(
 /// Create a pass to conver named Linalg operations to Linalg generic
 /// operations.
 std::unique_ptr<OperationPass<FuncOp>> createLinalgGeneralizationPass();
+
+/// Create a pass to convert Linalg operations to equivalent operations that
+/// work on primitive types, if possible.
+std::unique_ptr<Pass> createLinalgDetensorizePass();
 
 /// Patterns to fold an expanding (collapsing) tensor_reshape operation with its
 /// producer (consumer) generic operation by expanding the dimensionality of the

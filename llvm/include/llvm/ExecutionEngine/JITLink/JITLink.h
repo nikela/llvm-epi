@@ -251,6 +251,12 @@ public:
   /// Returns an iterator to the new next element.
   edge_iterator removeEdge(edge_iterator I) { return Edges.erase(I); }
 
+  /// Returns the address of the fixup for the given edge, which is equal to
+  /// this block's address plus the edge's offset.
+  JITTargetAddress getFixupAddress(const Edge &E) const {
+    return getAddress() + E.getOffset();
+  }
+
 private:
   static constexpr uint64_t MaxAlignmentOffset = (1ULL << 57) - 1;
 
@@ -786,14 +792,17 @@ public:
                                  Section::const_block_iterator, const Block *,
                                  getSectionConstBlocks>;
 
+  using GetEdgeKindNameFunction = const char *(*)(Edge::Kind);
+
   LinkGraph(std::string Name, const Triple &TT, unsigned PointerSize,
-            support::endianness Endianness)
+            support::endianness Endianness,
+            GetEdgeKindNameFunction GetEdgeKindName)
       : Name(std::move(Name)), TT(TT), PointerSize(PointerSize),
-        Endianness(Endianness) {}
+        Endianness(Endianness), GetEdgeKindName(std::move(GetEdgeKindName)) {}
 
   /// Returns the name of this graph (usually the name of the original
   /// underlying MemoryBuffer).
-  const std::string &getName() { return Name; }
+  const std::string &getName() const { return Name; }
 
   /// Returns the target triple for this Graph.
   const Triple &getTargetTriple() const { return TT; }
@@ -803,6 +812,8 @@ public:
 
   /// Returns the endianness of content in this graph.
   support::endianness getEndianness() const { return Endianness; }
+
+  const char *getEdgeKindName(Edge::Kind K) const { return GetEdgeKindName(K); }
 
   /// Allocate a copy of the given string using the LinkGraph's allocator.
   /// This can be useful when renaming symbols or adding new content to the
@@ -830,6 +841,11 @@ public:
 
   /// Create a section with the given name, protection flags, and alignment.
   Section &createSection(StringRef Name, sys::Memory::ProtectionFlags Prot) {
+    assert(llvm::find_if(Sections,
+                         [&](std::unique_ptr<Section> &Sec) {
+                           return Sec->getName() == Name;
+                         }) == Sections.end() &&
+           "Duplicate section name");
     std::unique_ptr<Section> Sec(new Section(Name, Prot, Sections.size()));
     Sections.push_back(std::move(Sec));
     return *Sections.back();
@@ -1001,6 +1017,10 @@ public:
     assert(ExternalSymbols.count(&Sym) && "Symbol is not in the externals set");
     ExternalSymbols.erase(&Sym);
     Addressable &Base = *Sym.Base;
+    assert(llvm::find_if(ExternalSymbols,
+                         [&](Symbol *AS) { return AS->Base == &Base; }) ==
+               ExternalSymbols.end() &&
+           "Base addressable still in use");
     destroySymbol(Sym);
     destroyAddressable(Base);
   }
@@ -1013,6 +1033,10 @@ public:
            "Symbol is not in the absolute symbols set");
     AbsoluteSymbols.erase(&Sym);
     Addressable &Base = *Sym.Base;
+    assert(llvm::find_if(ExternalSymbols,
+                         [&](Symbol *AS) { return AS->Base == &Base; }) ==
+               ExternalSymbols.end() &&
+           "Base addressable still in use");
     destroySymbol(Sym);
     destroyAddressable(Base);
   }
@@ -1036,13 +1060,7 @@ public:
   }
 
   /// Dump the graph.
-  ///
-  /// If supplied, the EdgeKindToName function will be used to name edge
-  /// kinds in the debug output. Otherwise raw edge kind numbers will be
-  /// displayed.
-  void dump(raw_ostream &OS,
-            std::function<StringRef(Edge::Kind)> EdegKindToName =
-                std::function<StringRef(Edge::Kind)>());
+  void dump(raw_ostream &OS);
 
 private:
   // Put the BumpPtrAllocator first so that we don't free any of the underlying
@@ -1053,6 +1071,7 @@ private:
   Triple TT;
   unsigned PointerSize;
   support::endianness Endianness;
+  GetEdgeKindNameFunction GetEdgeKindName = nullptr;
   SectionList Sections;
   ExternalSymbolSet ExternalSymbols;
   ExternalSymbolSet AbsoluteSymbols;
@@ -1252,8 +1271,8 @@ struct PassConfiguration {
   /// Post-fixup passes.
   ///
   /// These passes are called on the graph after block contents has been copied
-  /// to working memory, and fixups applied. Graph nodes have been updated to
-  /// their final target vmaddrs.
+  /// to working memory, and fixups applied. Blocks have been updated to point
+  /// to their fixed up content.
   ///
   /// Notable use cases: Testing and validation.
   LinkGraphPassList PostFixupPasses;
@@ -1358,7 +1377,7 @@ public:
 
   /// Called by JITLink to modify the pass pipeline prior to linking.
   /// The default version performs no modification.
-  virtual Error modifyPassConfig(const Triple &TT, PassConfiguration &Config);
+  virtual Error modifyPassConfig(LinkGraph &G, PassConfiguration &Config);
 
 private:
   const JITLinkDylib *JD = nullptr;
@@ -1367,6 +1386,10 @@ private:
 /// Marks all symbols in a graph live. This can be used as a default,
 /// conservative mark-live implementation.
 Error markAllSymbolsLive(LinkGraph &G);
+
+/// Create an out of range error for the given edge in the given block.
+Error makeTargetOutOfRangeError(const Block &B, const Edge &E,
+                                const char *(*getEdgeKindName)(Edge::Kind));
 
 /// Create a LinkGraph from the given object buffer.
 ///

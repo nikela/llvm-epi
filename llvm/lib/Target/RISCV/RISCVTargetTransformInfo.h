@@ -153,13 +153,9 @@ public:
   unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp, int Index,
                           VectorType *SubTp);
   unsigned getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
-                                            unsigned MinNumElts);
+                                            ArrayRef<Type *> Tys);
   unsigned getScalarizationOverhead(VectorType *InTy, const APInt &DemandedElts,
                                     bool Insert, bool Extract);
-  unsigned getScalarizationOverhead(VectorType *InTy, bool Insert,
-                                    bool Extract);
-  unsigned getScalarizationOverhead(VectorType *InTy,
-                                    ArrayRef<const Value *> Args);
   unsigned getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
                             TTI::CastContextHint CCH,
                             TTI::TargetCostKind CostKind,

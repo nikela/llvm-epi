@@ -113,6 +113,7 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
   include(TableGen)
   include(HandleLLVMOptions)
   include(VersionFromVCS)
+  include(GetErrcMessages)
   include(LLVMDistributionSupport)
 
   set(PACKAGE_VERSION "${LLVM_PACKAGE_VERSION}")
@@ -131,7 +132,8 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
   set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX} )
 
   if(LLVM_INCLUDE_TESTS)
-    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    find_package(Python3 ${LLVM_MINIMUM_PYTHON_VERSION} REQUIRED
+      COMPONENTS Interpreter)
 
     # Check prebuilt llvm/utils.
     if(EXISTS ${LLVM_TOOLS_BINARY_DIR}/FileCheck${CMAKE_EXECUTABLE_SUFFIX}
@@ -175,6 +177,8 @@ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
         set(LIT_ARGS_DEFAULT "${LIT_ARGS_DEFAULT} --no-progress-bar")
       endif()
       set(LLVM_LIT_ARGS "${LIT_ARGS_DEFAULT}" CACHE STRING "Default options for lit")
+
+      get_errc_messages(LLVM_LIT_ERRC_MESSAGES)
 
       # On Win32 hosts, provide an option to specify the path to the GnuWin32 tools.
       if( WIN32 AND NOT CYGWIN )
@@ -262,8 +266,6 @@ set(CLANG_DEFAULT_UNWINDLIB "" CACHE STRING
 if (CLANG_DEFAULT_UNWINDLIB STREQUAL "")
   if (CLANG_DEFAULT_RTLIB STREQUAL "libgcc")
     set (CLANG_DEFAULT_UNWINDLIB "libgcc" CACHE STRING "" FORCE)
-  elseif (CLANG_DEFAULT_RTLIBS STREQUAL "libunwind")
-    set (CLANG_DEFAULT_UNWINDLIB "none" CACHE STRING "" FORCE)
   endif()
 endif()
 
@@ -273,7 +275,7 @@ if (NOT(CLANG_DEFAULT_UNWINDLIB STREQUAL "" OR
         CLANG_DEFAULT_UNWINDLIB STREQUAL "libunwind"))
   message(WARNING "Resetting default unwindlib to use platform default")
   set(CLANG_DEFAULT_UNWINDLIB "" CACHE STRING
-    "Default unwind library to use (\"none\" \"libgcc\" or \"libunwind\", empty for none)" FORCE)
+    "Default unwind library to use (\"none\" \"libgcc\" or \"libunwind\", empty to match runtime library.)" FORCE)
 endif()
 
 set(CLANG_DEFAULT_OBJCOPY "objcopy" CACHE STRING

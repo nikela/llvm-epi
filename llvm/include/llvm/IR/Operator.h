@@ -572,6 +572,12 @@ public:
       const DataLayout &DL, APInt &Offset,
       function_ref<bool(Value &, APInt &)> ExternalAnalysis = nullptr,
       bool SkipScalableCheck = false) const;
+
+  static bool accumulateConstantOffset(
+      Type *SourceType, ArrayRef<const Value *> Index, const DataLayout &DL,
+      APInt &Offset,
+      function_ref<bool(Value &, APInt &)> ExternalAnalysis = nullptr,
+      bool SkipScalableCheck = false);
 };
 
 class PtrToIntOperator
