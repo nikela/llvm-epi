@@ -37,21 +37,17 @@ define <vscale x 64 x i8> @caller() {
 ; RV64IV-NEXT:    addi a1, zero, 24
 ; RV64IV-NEXT:    mul a0, a0, a1
 ; RV64IV-NEXT:    add a0, sp, a0
-; RV64IV-NEXT:    addi a0, a0, 8
 ; RV64IV-NEXT:    vl8r.v v8, (a0)
 ; RV64IV-NEXT:    csrr a0, vlenb
 ; RV64IV-NEXT:    slli a0, a0, 4
 ; RV64IV-NEXT:    add a0, sp, a0
-; RV64IV-NEXT:    addi a0, a0, 8
 ; RV64IV-NEXT:    vl8r.v v16, (a0)
 ; RV64IV-NEXT:    csrr a0, vlenb
 ; RV64IV-NEXT:    slli a0, a0, 3
 ; RV64IV-NEXT:    add a0, sp, a0
-; RV64IV-NEXT:    addi a0, a0, 8
 ; RV64IV-NEXT:    vl8r.v v24, (a0)
-; RV64IV-NEXT:    addi a0, sp, 8
-; RV64IV-NEXT:    addi a1, sp, 8
-; RV64IV-NEXT:    vs8r.v v24, (a1)
+; RV64IV-NEXT:    mv a0, sp
+; RV64IV-NEXT:    vs8r.v v24, (sp)
 ; RV64IV-NEXT:    call callee@plt
 ; RV64IV-NEXT:    csrr a0, vlenb
 ; RV64IV-NEXT:    slli a0, a0, 5

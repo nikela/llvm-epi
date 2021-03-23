@@ -76,7 +76,7 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    vle64.v v25, (a0)
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    sd s3, 8(sp)
-; SPILL-O0-NEXT:    addi s3, sp, 72
+; SPILL-O0-NEXT:    addi s3, sp, 64
 ; SPILL-O0-NEXT:    vs1r.v v25, (s3) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    ld s3, 8(sp)
 ; SPILL-O0-NEXT:    # implicit-def: $v7
@@ -151,15 +151,15 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    sd t4, 8(sp)
 ; SPILL-O0-NEXT:    csrr t4, vlenb
 ; SPILL-O0-NEXT:    add t4, sp, t4
-; SPILL-O0-NEXT:    addi t4, t4, 72
+; SPILL-O0-NEXT:    addi t4, t4, 64
 ; SPILL-O0-NEXT:    vs1r.v v25, (t4) # Unknown-size Folded Spill
-; SPILL-O0-NEXT:    addi t4, sp, 72
+; SPILL-O0-NEXT:    addi t4, sp, 64
 ; SPILL-O0-NEXT:    vl1r.v v25, (t4) # Unknown-size Folded Reload
 ; SPILL-O0-NEXT:    vse64.v v25, (a0)
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    csrr t4, vlenb
 ; SPILL-O0-NEXT:    add t4, sp, t4
-; SPILL-O0-NEXT:    addi t4, t4, 72
+; SPILL-O0-NEXT:    addi t4, t4, 64
 ; SPILL-O0-NEXT:    vl1r.v v25, (t4) # Unknown-size Folded Reload
 ; SPILL-O0-NEXT:    ld t4, 8(sp)
 ; SPILL-O0-NEXT:    vse64.v v7, (a0)
