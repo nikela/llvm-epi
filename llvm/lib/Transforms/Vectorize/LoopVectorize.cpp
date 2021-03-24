@@ -6426,6 +6426,20 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
   // -1U. See definition of Legal->getMaxSafeRegisterWidth().
   unsigned MaxSafeVectorWidthInBits = Legal->getMaxSafeRegisterWidth();
 
+  // Make sure we do not attempt to vectorize loops that we can't vectorize yet:
+  // it should be possible for us to clamp the EVL in this case, but this
+  // impacts other things like reductions, so conservatively disable these
+  // cases for now.
+  if (MaxSafeVectorWidthInBits == -1U &&
+      Legal->getMaxSafeDepDistBytes() != -1U && UserVF.isZero()) {
+    reportVectorizationFailure(
+        "LV: Scalable vectorization does not support non-infinite distance yet",
+        "Scalable vectorization does not support vectorizing loops that are "
+        "not parallel yet",
+        "ScalableVFUnfeasible", ORE, TheLoop);
+    return None;
+  }
+
   ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
   ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
   std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
