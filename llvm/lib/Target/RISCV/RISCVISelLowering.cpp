@@ -4049,7 +4049,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
     } else {
       llvm_unreachable("Unexpected intrinsic");
     }
-    // evl1, evl2, offset
+    // offset, evl1, evl2
     for (auto OpIdx : OpIdxs) {
       SDValue &ScalarOp = Operands[OpIdx];
       EVT OpVT = ScalarOp.getValueType();

@@ -117,7 +117,7 @@ static SDNode *SelectSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
     break;
   }
 
-  // slideleftfill(v1, v2, evl1, evl2, offset) is implemented like this
+  // slideleftfill(v1, v2, offset, evl1, evl2) is implemented like this
   //
   // t1 <- vslidedown v1, evl1, offset
   // diff  <- evl1 - offset
@@ -737,9 +737,9 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       return;
     }
     case Intrinsic::experimental_vector_vp_slideleftfill: {
-      SDValue EVL1 = Node->getOperand(3);
-      SDValue EVL2 = Node->getOperand(4);
-      SDValue Offset = Node->getOperand(5);
+      SDValue Offset = Node->getOperand(3);
+      SDValue EVL1 = Node->getOperand(4);
+      SDValue EVL2 = Node->getOperand(5);
       auto *Result =
           SelectSlideLeftFill(Node, CurDAG, EVL1, EVL2, Offset, XLenVT);
       ReplaceNode(Node, Result);
