@@ -307,8 +307,7 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
                                            MachineBasicBlock &MBB,
                                            MachineBasicBlock::iterator MBBI,
                                            const DebugLoc &DL,
-                                           int64_t Amount,
-                                           int64_t Padding) const {
+                                           int64_t Amount) const {
   assert(Amount != 0 && "Did not need to adjust stack pointer for RVV.");
 
   const RISCVInstrInfo *TII = STI.getInstrInfo();
@@ -317,7 +316,6 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
   if (Amount < 0) {
     Amount = -Amount;
     Opc = RISCV::SUB;
-    Padding = -Padding;
   }
 
   // 1. Multiply the number of v-slots to the length of registers
@@ -326,13 +324,6 @@ void RISCVFrameLowering::adjustStackForRVV(MachineFunction &MF,
   BuildMI(MBB, MBBI, DL, TII->get(Opc), SPReg)
       .addReg(SPReg)
       .addReg(FactorRegister, RegState::Kill);
-  // 3. Make sure we get enough padding for the alignment required by the
-  // RVV objects.
-  if (Padding) {
-    BuildMI(MBB, MBBI, DL, TII->get(RISCV::ADDI), SPReg)
-        .addReg(SPReg)
-        .addImm(Padding);
-  }
 }
 
 void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
@@ -394,7 +385,7 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
 
   // FIXME (note copied from Lanai): This appears to be overallocating.  Needs
   // investigation. Get the number of bytes to allocate from the FrameInfo.
-  uint64_t StackSize = MFI.getStackSize();
+  uint64_t StackSize = MFI.getStackSize() + RVFI->getRVVPadding();
   uint64_t RealStackSize = StackSize + RVFI->getLibCallStackSize();
   uint64_t RVVStackSize = RVFI->getRVVStackSize();
 
@@ -492,13 +483,8 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
     }
   }
 
-  if (RVVStackSize) {
-    int64_t RVVPadding =
-        !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0)
-            ? getStackAlign().value()
-            : 0;
-    adjustStackForRVV(MF, MBB, MBBI, DL, -RVVStackSize, RVVPadding);
-  }
+  if (RVVStackSize)
+    adjustStackForRVV(MF, MBB, MBBI, DL, -RVVStackSize);
 
   if (hasFP(MF)) {
     // Realign Stack
@@ -577,7 +563,7 @@ void RISCVFrameLowering::emitEpilogue(MachineFunction &MF,
   if (!CSI.empty())
     LastFrameDestroy = std::prev(MBBI, CSI.size());
 
-  uint64_t StackSize = MFI.getStackSize();
+  uint64_t StackSize = MFI.getStackSize() + RVFI->getRVVPadding();
   uint64_t RealStackSize = StackSize + RVFI->getLibCallStackSize();
   uint64_t FPOffset = RealStackSize - RVFI->getVarArgsSaveSize();
   uint64_t RVVStackSize = RVFI->getRVVStackSize();
@@ -590,14 +576,8 @@ void RISCVFrameLowering::emitEpilogue(MachineFunction &MF,
     adjustReg(MBB, LastFrameDestroy, DL, SPReg, FPReg, -FPOffset,
               MachineInstr::FrameDestroy);
   } else {
-    if (RVVStackSize) {
-      int64_t RVVPadding =
-          !hasFP(MF) && (RVFI->getCalleeSavedStackSize() % 8 != 0)
-              ? getStackAlign().value()
-              : 0;
-      adjustStackForRVV(MF, MBB, LastFrameDestroy, DL, RVVStackSize,
-                        RVVPadding);
-    }
+    if (RVVStackSize)
+      adjustStackForRVV(MF, MBB, LastFrameDestroy, DL, RVVStackSize);
   }
 
   uint64_t FirstSPAdjustAmount = getFirstSPAdjustAmount(MF);
@@ -660,7 +640,8 @@ RISCVFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
     if (FirstSPAdjustAmount)
       Offset += StackOffset::getFixed(FirstSPAdjustAmount);
     else
-      Offset += StackOffset::getFixed(MFI.getStackSize());
+      Offset +=
+          StackOffset::getFixed(MFI.getStackSize() + RVFI->getRVVPadding());
   } else if (RI->needsStackRealignment(MF) && !MFI.isFixedObjectIndex(FI)) {
     // If the stack was realigned, the frame pointer is set in order to allow
     // SP to be restored, so we need another base register to record the stack
@@ -668,32 +649,55 @@ RISCVFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
     if (hasBP(MF)) {
       FrameReg = RISCVABI::getBPReg();
       // |--------------------------| -- <-- FP
-      // | callee-saved registers   | | <---------.
-      // |--------------------------| --          |
-      // | realignment (the size of | |           |
-      // | this area is not counted | |           |
-      // | in MFI.getStackSize())   | |           |
-      // |--------------------------| --          |-- MFI.getStackSize()
-      // | RVV objects              | |           |
-      // |--------------------------| --          |
-      // | scalar local variables   | | <---------'
+      // | callee-saved registers   | | <----.
+      // |--------------------------| --     |
+      // | realignment (the size of | |      |
+      // | this area is not counted | |      |
+      // | in MFI.getStackSize())   | |      |
+      // |--------------------------| --     |
+      // | Padding after RVV        | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |-- MFI.getStackSize()
+      // | RVV objects              | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | Padding before RVV       | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | scalar local variables   | | <----'
       // |--------------------------| -- <-- BP
       // | VarSize objects          | |
       // |--------------------------| -- <-- SP
     } else {
       FrameReg = RISCV::X2;
       // |--------------------------| -- <-- FP
-      // | callee-saved registers   | | <---------.
-      // |--------------------------| --          |
-      // | realignment (the size of | |           |
-      // | this area is not counted | |           |
-      // | in MFI.getStackSize())   | |           |
-      // |--------------------------| --          |-- MFI.getStackSize()
-      // | RVV objects              | |           |
-      // |--------------------------| --          |
-      // | scalar local variables   | | <---------'
+      // | callee-saved registers   | | <----.
+      // |--------------------------| --     |
+      // | realignment (the size of | |      |
+      // | this area is not counted | |      |
+      // | in MFI.getStackSize())   | |      |
+      // |--------------------------| --     |
+      // | Padding after RVV        | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |-- MFI.getStackSize()
+      // | RVV objects              | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | Padding before RVV       | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | scalar local variables   | | <----'
       // |--------------------------| -- <-- SP
     }
+    // The total amount of padding surrounding RVV objects is described by
+    // RVV->getRVVPadding() and it can be zero. It allows us to align the RVV
+    // objects to 8 bytes.
     if (MFI.getStackID(FI) == TargetStackID::Default) {
       Offset += StackOffset::getFixed(MFI.getStackSize());
       if (FI < 0)
@@ -729,12 +733,26 @@ RISCVFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
       // as possible.
       //
       // |--------------------------| -- <-- FP
-      // | callee-saved registers   | |<--------.
-      // |--------------------------| --        |
-      // | RVV objects              | |         |-- MFI.getStackSize()
-      // |--------------------------| --        |
-      // | scalar local variables   | |<--------'
+      // | callee-saved registers   | | <----.
+      // |--------------------------| --     |
+      // | Padding after RVV        | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | RVV objects              | |      |-- MFI.getStackSize()
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | Padding before RVV       | |      |
+      // | (not counted in          | |      |
+      // | MFI.getStackSize()       | |      |
+      // |--------------------------| --     |
+      // | scalar local variables   | | <----'
       // |--------------------------| -- <-- SP
+      //
+      // The total amount of padding surrounding RVV objects is described by
+      // RVV->getRVVPadding() and it can be zero. It allows us to align the RVV
+      // objects to 8 bytes.
       if (MFI.getStackID(FI) == TargetStackID::Default) {
         Offset += StackOffset::getFixed(MFI.getStackSize());
         if (FI < 0)
@@ -862,6 +880,14 @@ void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
     Size += MFI.getObjectSize(FrameIdx);
   }
   RVFI->setCalleeSavedStackSize(Size);
+
+  // Padding required to keep the RVV stack aligned to 8 bytes
+  // within the main stack. We only need this when not using FP.
+  if (RVVStackSize && !hasFP(MF) && Size % 8 != 0) {
+    // Because we add the padding to the size of the stack, adding
+    // getStackAlign() will keep it aligned.
+    RVFI->setRVVPadding(getStackAlign().value());
+  }
 }
 
 // Not preserve stack space within prologue for outgoing variables when the

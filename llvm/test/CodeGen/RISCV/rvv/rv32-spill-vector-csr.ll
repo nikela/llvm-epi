@@ -9,12 +9,11 @@
 define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x double> %c, i32 %gvl) nounwind
 ; SPILL-O0-LABEL: foo:
 ; SPILL-O0:       # %bb.0:
-; SPILL-O0-NEXT:    addi sp, sp, -16
-; SPILL-O0-NEXT:    sw ra, 12(sp) # 4-byte Folded Spill
+; SPILL-O0-NEXT:    addi sp, sp, -32
+; SPILL-O0-NEXT:    sw ra, 28(sp) # 4-byte Folded Spill
 ; SPILL-O0-NEXT:    csrr a1, vlenb
 ; SPILL-O0-NEXT:    slli a1, a1, 1
 ; SPILL-O0-NEXT:    sub sp, sp, a1
-; SPILL-O0-NEXT:    addi sp, sp, -16
 ; SPILL-O0-NEXT:    sw a0, 8(sp) # 4-byte Folded Spill
 ; SPILL-O0-NEXT:    csrr a1, vlenb
 ; SPILL-O0-NEXT:    add a1, sp, a1
@@ -40,9 +39,8 @@ define <vscale x 1 x double> @foo(<vscale x 1 x double> %a, <vscale x 1 x double
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    slli a0, a0, 1
 ; SPILL-O0-NEXT:    add sp, sp, a0
-; SPILL-O0-NEXT:    addi sp, sp, 16
-; SPILL-O0-NEXT:    lw ra, 12(sp) # 4-byte Folded Reload
-; SPILL-O0-NEXT:    addi sp, sp, 16
+; SPILL-O0-NEXT:    lw ra, 28(sp) # 4-byte Folded Reload
+; SPILL-O0-NEXT:    addi sp, sp, 32
 ; SPILL-O0-NEXT:    ret
 ;
 ; SPILL-O2-LABEL: foo:

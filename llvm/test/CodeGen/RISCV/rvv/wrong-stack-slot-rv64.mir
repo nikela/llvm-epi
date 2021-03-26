@@ -2,7 +2,7 @@
 # RUN: llc -mtriple=riscv64 -mattr=+m,+experimental-v  -o - %s \
 # RUN:   -start-before=prologepilog | FileCheck %s
 --- |
-  define void @foo() #0
+  define void @foo() #0 {
   ; CHECK-LABEL: foo:
   ; CHECK:       # %bb.0: # %entry
   ; CHECK-NEXT:    addi sp, sp, -32
@@ -19,7 +19,6 @@
   ; CHECK-NEXT:    ld s9, 24(sp) # 8-byte Folded Reload
   ; CHECK-NEXT:    addi sp, sp, 32
   ; CHECK-NEXT:    ret
-  {
   entry:
     ret void
   }
