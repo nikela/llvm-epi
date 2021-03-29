@@ -670,7 +670,7 @@ class VPseudoSLoadMask<VReg RetClass, bits<7> EEW>:
 }
 
 class VPseudoILoadNoMask<VReg RetClass, VReg IdxClass, bits<7> EEW, bits<3> LMUL,
-                         bit Ordered>:
+                         bit Ordered, bit EarlyClobber>:
       Pseudo<(outs RetClass:$rd),
              (ins GPR:$rs1, IdxClass:$rs2, GPR:$vl, ixlenimm:$sew),[]>,
       RISCVVPseudo,
@@ -683,11 +683,12 @@ class VPseudoILoadNoMask<VReg RetClass, VReg IdxClass, bits<7> EEW, bits<3> LMUL
   let HasVLOp = 1;
   let HasSEWOp = 1;
   let HasDummyMask = 1;
+  let Constraints = !if(!eq(EarlyClobber, 1), "@earlyclobber $rd", "");
   let BaseInstr = !cast<Instruction>(PseudoToVInst<NAME>.VInst);
 }
 
 class VPseudoILoadMask<VReg RetClass, VReg IdxClass, bits<7> EEW, bits<3> LMUL,
-                       bit Ordered>:
+                       bit Ordered, bit EarlyClobber>:
       Pseudo<(outs GetVRegNoV0<RetClass>.R:$rd),
               (ins GetVRegNoV0<RetClass>.R:$merge,
                    GPR:$rs1, IdxClass:$rs2,
@@ -698,7 +699,7 @@ class VPseudoILoadMask<VReg RetClass, VReg IdxClass, bits<7> EEW, bits<3> LMUL,
   let mayStore = 0;
   let hasSideEffects = 0;
   let usesCustomInserter = 1;
-  let Constraints = "$rd = $merge";
+  let Constraints = !if(!eq(EarlyClobber, 1), "@earlyclobber $rd, $rd = $merge", "$rd = $merge");
   let Uses = [VL, VTYPE];
   let HasVLOp = 1;
   let HasSEWOp = 1;
@@ -1364,11 +1365,12 @@ multiclass VPseudoILoad<bit Ordered> {
           defvar idx_lmul = !cast<LMULInfo>("V_" # IdxLInfo);
           defvar Vreg = lmul.vrclass;
           defvar IdxVreg = idx_lmul.vrclass;
+          defvar HasConstraint = !ne(sew, eew);
           let VLMul = lmul.value in {
             def "EI" # eew # "_V_" # IdxLInfo # "_" # LInfo :
-              VPseudoILoadNoMask<Vreg, IdxVreg, eew, idx_lmul.value, Ordered>;
+              VPseudoILoadNoMask<Vreg, IdxVreg, eew, idx_lmul.value, Ordered, HasConstraint>;
             def "EI" # eew # "_V_" # IdxLInfo # "_" # LInfo # "_MASK" :
-              VPseudoILoadMask<Vreg, IdxVreg, eew, idx_lmul.value, Ordered>;
+              VPseudoILoadMask<Vreg, IdxVreg, eew, idx_lmul.value, Ordered, HasConstraint>;
           }
         }
       }
@@ -3169,6 +3171,20 @@ let hasSideEffects = 0, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1 in {
   def PseudoVRELOAD_M2 : VPseudo<VL2RE8_V, V_M2, (outs VRM2:$rs1), (ins GPR:$rs2)>;
   def PseudoVRELOAD_M4 : VPseudo<VL4RE8_V, V_M4, (outs VRM4:$rs1), (ins GPR:$rs2)>;
   def PseudoVRELOAD_M8 : VPseudo<VL8RE8_V, V_M8, (outs VRM8:$rs1), (ins GPR:$rs2)>;
+}
+
+foreach lmul = MxList.m in {
+  foreach nf = NFSet<lmul>.L in {
+    defvar vreg = SegRegClass<lmul, nf>.RC;
+    let hasSideEffects = 0, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1 in {
+      def "PseudoVSPILL" # nf # "_" # lmul.MX :
+        Pseudo<(outs), (ins vreg:$rs1, GPR:$rs2, GPR:$vlenb), []>;
+    }
+    let hasSideEffects = 0, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1 in {
+      def "PseudoVRELOAD" # nf # "_" # lmul.MX :
+        Pseudo<(outs vreg:$rs1), (ins GPR:$rs2, GPR:$vlenb), []>;
+    }
+  }
 }
 
 //===----------------------------------------------------------------------===//

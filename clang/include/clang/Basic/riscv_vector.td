@@ -84,6 +84,13 @@
 //      elements of the same width
 //   S: given a vector type, computes its equivalent one for LMUL=1. This is a
 //      no-op if the vector was already LMUL=1
+//   (Log2EEW:Value): Log2EEW value could be 3/4/5/6 (8/16/32/64), given a
+//      vector type (SEW and LMUL) and EEW (8/16/32/64), computes its
+//      equivalent integer vector type with EEW and corresponding ELMUL (elmul =
+//      (eew/sew) * lmul). For example, vector type is __rvv_float16m4
+//      (SEW=16, LMUL=4) and Log2EEW is 3 (EEW=8), and then equivalent vector
+//      type is __rvv_uint8m2_t (elmul=(8/16)*4 = 2). Ignore to define a new
+//      builtins if its equivalent type has illegal lmul.
 //
 // Following with the example above, if t is "i", then "Ue" will yield unsigned
 // int and "Fv" will yield __rvv_float32m1_t (again assuming LMUL=1), Fw would
@@ -150,8 +157,9 @@ class RVVBuiltin<string suffix, string prototype, string type_range,
   // This builtin has a granted vector length parameter in the last position.
   bit HasVL = true;
 
-  // This builtin supports function overloading and has a mangled name.
-  bit HasGeneric = true;
+  // This builtin supports non-masked function overloading api.
+  // All masked operations support overloading api.
+  bit HasNoMaskedOverloaded = true;
 
   // Reads or writes "memory" or has other side-effects.
   bit HasSideEffects = false;
@@ -210,6 +218,12 @@ multiclass RVVBinBuiltinSet<string intrinsic_name, string type_range,
   }
 }
 
+defvar TypeList = ["c","s","i","l","f","d"];
+defvar EEWList = [["8", "(Log2EEW:3)"],
+                  ["16", "(Log2EEW:4)"],
+                  ["32", "(Log2EEW:5)"],
+                  ["64", "(Log2EEW:6)"]];
+
 class IsFloat<string type> {
   bit val = !or(!eq(type, "h"), !eq(type, "f"), !eq(type, "d"));
 }
@@ -218,7 +232,7 @@ multiclass RVVVLEBuiltin<list<string> types> {
   let Name = NAME # "_v",
       IRName = "vle",
       IRNameMask ="vle_mask",
-      HasGeneric = false,
+      HasNoMaskedOverloaded = false,
       ManualCodegen = [{
         IntrinsicTypes = {ResultType, Ops[1]->getType()};
         Ops[0] = Builder.CreateBitCast(Ops[0], ResultType->getPointerTo());
@@ -236,13 +250,36 @@ multiclass RVVVLEBuiltin<list<string> types> {
   }
 }
 
+multiclass RVVIndexedLoad<string op> {
+  let ManualCodegen = [{
+        IntrinsicTypes = {ResultType, Ops[1]->getType(), Ops[2]->getType()};
+        Ops[0] = Builder.CreateBitCast(Ops[0], ResultType->getPointerTo());
+      }],
+      ManualCodegenMask = [{
+        IntrinsicTypes = {ResultType, Ops[2]->getType(), Ops[4]->getType()};
+        Ops[1] = Builder.CreateBitCast(Ops[1], ResultType->getPointerTo());
+      }] in {
+      foreach type = TypeList in {
+        foreach eew_list = EEWList in {
+          defvar eew = eew_list[0];
+          defvar eew_type = eew_list[1];
+          let Name = op # eew # "_v", IRName = op, IRNameMask = op # "_mask" in {
+            def: RVVBuiltin<"v", "vPCe" # eew_type # "Uv", type>;
+              if !not(IsFloat<type>.val) then {
+                def: RVVBuiltin<"Uv", "UvPCUe" # eew_type # "Uv", type>;
+              }
+          }
+        }
+      }
+  }
+}
+
 multiclass RVVVSEBuiltin<list<string> types> {
   let Name = NAME # "_v",
       IRName = "vse",
       IRNameMask = "vse_mask",
       HasMaskedOffOperand = false,
       PermuteOperands = [1, 0], // C/C++ Operand: (ptr, value, vl). Builtin: (value, ptr, vl)
-      HasGeneric = false,
       ManualCodegen = [{
         Ops[1] = Builder.CreateBitCast(Ops[1], Ops[0]->getType()->getPointerTo());
         IntrinsicTypes = {Ops[0]->getType(), Ops[2]->getType()};
@@ -265,7 +302,6 @@ multiclass RVVVSEBuiltin<list<string> types> {
 let HasVL = false,
     HasMask = false,
     HasSideEffects = true,
-    HasGeneric = false,
     Log2LMUL = [0],
     ManualCodegen = [{IntrinsicTypes = {ResultType};}] in // Set XLEN type
 {
@@ -344,6 +380,10 @@ defm vse8 : RVVVSEBuiltin<["c"]>;
 defm vse16: RVVVSEBuiltin<["s"]>;
 defm vse32: RVVVSEBuiltin<["i","f"]>;
 defm vse64: RVVVSEBuiltin<["l","d"]>;
+
+// 7.6. Vector Indexed Instructions
+defm : RVVIndexedLoad<"vluxei">;
+defm : RVVIndexedLoad<"vloxei">;
 
 // 12. Vector Integer Arithmetic Instructions
 // 12.1. Vector Single-Width Integer Add and Subtract
