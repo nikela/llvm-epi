@@ -19,7 +19,7 @@ def AvispadoModel : SchedMachineModel {
   let IssueWidth = 1;        // One instruction per cycle can be dispatched.
   let LoadLatency = 3;
   let MispredictPenalty = 3;
-  let UnsupportedFeatures = [HasStdExtZvamo, HasStdExtZvlsseg];
+  let UnsupportedFeatures = [HasStdExtZbb, HasStdExtZvamo, HasStdExtZvlsseg];
 
   // We should be able to remove this when all the instructions
   // have scheduling information.
@@ -60,8 +60,10 @@ def : WriteRes<WriteJmpReg, [AvispadoUnitB]>;
 // Integer arithmetic and logic
 def : WriteRes<WriteIALU32, [AvispadoUnitALU]>;
 def : WriteRes<WriteIALU, [AvispadoUnitALU]>;
-def : WriteRes<WriteShift32, [AvispadoUnitALU]>;
-def : WriteRes<WriteShift, [AvispadoUnitALU]>;
+def : WriteRes<WriteShiftReg32, [AvispadoUnitALU]>;
+def : WriteRes<WriteShiftImm32, [AvispadoUnitALU]>;
+def : WriteRes<WriteShiftReg, [AvispadoUnitALU]>;
+def : WriteRes<WriteShiftImm, [AvispadoUnitALU]>;
 
 // Integer multiplication
 let Latency = 4 in {
@@ -151,14 +153,12 @@ def : WriteRes<WriteFMovI64ToF64, [AvispadoUnitFPALU]>;
 // FP multiplication
 let Latency = 5 in {
 def : WriteRes<WriteFMul32, [AvispadoUnitFPALU]>;
-def : WriteRes<WriteFMulAdd32, [AvispadoUnitFPALU]>;
-def : WriteRes<WriteFMulSub32, [AvispadoUnitFPALU]>;
+def : WriteRes<WriteFMA32, [AvispadoUnitFPALU]>;
 }
 
 let Latency = 7 in {
 def : WriteRes<WriteFMul64, [AvispadoUnitFPALU]>;
-def : WriteRes<WriteFMulAdd64, [AvispadoUnitFPALU]>;
-def : WriteRes<WriteFMulSub64, [AvispadoUnitFPALU]>;
+def : WriteRes<WriteFMA64, [AvispadoUnitFPALU]>;
 }
 
 // FP division
@@ -189,8 +189,10 @@ def : ReadAdvance<ReadStoreData, 0>;
 def : ReadAdvance<ReadMemBase, 0>;
 def : ReadAdvance<ReadIALU, 0>;
 def : ReadAdvance<ReadIALU32, 0>;
-def : ReadAdvance<ReadShift, 0>;
-def : ReadAdvance<ReadShift32, 0>;
+def : ReadAdvance<ReadShiftReg, 0>;
+def : ReadAdvance<ReadShiftImm, 0>;
+def : ReadAdvance<ReadShiftReg32, 0>;
+def : ReadAdvance<ReadShiftImm32, 0>;
 def : ReadAdvance<ReadIDiv, 0>;
 def : ReadAdvance<ReadIDiv32, 0>;
 def : ReadAdvance<ReadIMul, 0>;
@@ -207,11 +209,9 @@ def : ReadAdvance<ReadFMemBase, 0>;
 def : ReadAdvance<ReadFALU32, 0>;
 def : ReadAdvance<ReadFALU64, 0>;
 def : ReadAdvance<ReadFMul32, 0>;
-def : ReadAdvance<ReadFMulAdd32, 0>;
-def : ReadAdvance<ReadFMulSub32, 0>;
+def : ReadAdvance<ReadFMA32, 0>;
 def : ReadAdvance<ReadFMul64, 0>;
-def : ReadAdvance<ReadFMulAdd64, 0>;
-def : ReadAdvance<ReadFMulSub64, 0>;
+def : ReadAdvance<ReadFMA64, 0>;
 def : ReadAdvance<ReadFDiv32, 0>;
 def : ReadAdvance<ReadFDiv64, 0>;
 def : ReadAdvance<ReadFSqrt32, 0>;
@@ -294,5 +294,54 @@ def : ReadAdvance<ReadVPUIALU, 0>;
 def : ReadAdvance<ReadVPUFALU, 0>;
 def : ReadAdvance<ReadVPUMem, 0>;
 def : ReadAdvance<ReadVPUStoreData,       0>;
+
+// Unsupported extensions
+defm : UnsupportedSchedZba;
+defm : UnsupportedSchedZbb;
+
+// Zfh is unsupported
+let Unsupported = true in {
+def : WriteRes<WriteFALU16, []>;
+def : WriteRes<WriteFClass16, []>;
+def : WriteRes<WriteFCvtF16ToF64, []>;
+def : WriteRes<WriteFCvtF64ToF16, []>;
+def : WriteRes<WriteFCvtI64ToF16, []>;
+def : WriteRes<WriteFCvtF32ToF16, []>;
+def : WriteRes<WriteFCvtI32ToF16, []>;
+def : WriteRes<WriteFCvtF16ToI64, []>;
+def : WriteRes<WriteFCvtF16ToF32, []>;
+def : WriteRes<WriteFCvtF16ToI32, []>;
+def : WriteRes<WriteFDiv16, []>;
+def : WriteRes<WriteFCmp16, []>;
+def : WriteRes<WriteFLD16, []>;
+def : WriteRes<WriteFMA16, []>;
+def : WriteRes<WriteFMinMax16, []>;
+def : WriteRes<WriteFMul16, []>;
+def : WriteRes<WriteFMovI16ToF16, []>;
+def : WriteRes<WriteFMovF16ToI16, []>;
+def : WriteRes<WriteFSGNJ16, []>;
+def : WriteRes<WriteFST16, []>;
+def : WriteRes<WriteFSqrt16, []>;
+
+def : ReadAdvance<ReadFALU16, 0>;
+def : ReadAdvance<ReadFClass16, 0>;
+def : ReadAdvance<ReadFCvtF16ToF64, 0>;
+def : ReadAdvance<ReadFCvtF64ToF16, 0>;
+def : ReadAdvance<ReadFCvtI64ToF16, 0>;
+def : ReadAdvance<ReadFCvtF32ToF16, 0>;
+def : ReadAdvance<ReadFCvtI32ToF16, 0>;
+def : ReadAdvance<ReadFCvtF16ToI64, 0>;
+def : ReadAdvance<ReadFCvtF16ToF32, 0>;
+def : ReadAdvance<ReadFCvtF16ToI32, 0>;
+def : ReadAdvance<ReadFDiv16, 0>;
+def : ReadAdvance<ReadFCmp16, 0>;
+def : ReadAdvance<ReadFMA16, 0>;
+def : ReadAdvance<ReadFMinMax16, 0>;
+def : ReadAdvance<ReadFMul16, 0>;
+def : ReadAdvance<ReadFMovI16ToF16, 0>;
+def : ReadAdvance<ReadFMovF16ToI16, 0>;
+def : ReadAdvance<ReadFSGNJ16, 0>;
+def : ReadAdvance<ReadFSqrt16, 0>;
+} // Unsupported = true
 
 }

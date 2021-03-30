@@ -29,6 +29,7 @@ def Test_Dialect : Dialect {
   let hasOperationAttrVerify = 1;
   let hasRegionArgAttrVerify = 1;
   let hasRegionResultAttrVerify = 1;
+  let hasOperationInterfaceFallback = 1;
   let dependentDialects = ["::mlir::DLTIDialect"];
 
   let extraClassDeclaration = [{
@@ -39,6 +40,18 @@ def Test_Dialect : Dialect {
                              Type type) const override;
     void printAttribute(Attribute attr,
                         DialectAsmPrinter &printer) const override;
+
+    // Provides a custom printing/parsing for some operations.
+    Optional<ParseOpHook>
+      getParseOperationHook(StringRef opName) const override;
+    LogicalResult printOperation(Operation *op,
+                                 OpAsmPrinter &printer) const override;
+
+    ~TestDialect();
+  private:
+    // Storage for a custom fallback interface.
+    void *fallbackEffectOpInterfaces;
+
   }];
 }
 
@@ -318,6 +331,22 @@ def TwoRegionOp : TEST_Op<"two_region_op", []> {
 
 def SizedRegionOp : TEST_Op<"sized_region_op", []> {
   let regions = (region SizedRegion<2>:$my_region, SizedRegion<1>);
+}
+
+//===----------------------------------------------------------------------===//
+// NoTerminator Operation
+//===----------------------------------------------------------------------===//
+
+def SingleNoTerminatorOp : TEST_Op<"single_no_terminator_op", GraphRegionNoTerminator.traits> {
+  let regions = (region SizedRegion<1>:$my_region);
+
+  let assemblyFormat = "attr-dict `:` $my_region";
+}
+
+def VariadicNoTerminatorOp : TEST_Op<"variadic_no_terminator_op", GraphRegionNoTerminator.traits> {
+  let regions = (region VariadicRegion<SizedRegion<1>>:$my_regions);
+
+  let assemblyFormat = "attr-dict `:` $my_regions";
 }
 
 //===----------------------------------------------------------------------===//
@@ -1052,39 +1081,39 @@ def OneResultOp3 : TEST_Op<"one_result3"> {
 }
 
 // Test using multi-result op as a whole
-def : Pat<(ThreeResultOp MultiResultOpKind1),
-          (AnotherThreeResultOp MultiResultOpKind1)>;
+def : Pat<(ThreeResultOp MultiResultOpKind1:$kind),
+          (AnotherThreeResultOp $kind)>;
 
 // Test using multi-result op as a whole for partial replacement
-def : Pattern<(ThreeResultOp MultiResultOpKind2),
-              [(TwoResultOp MultiResultOpKind2),
-               (OneResultOp1 MultiResultOpKind2)]>;
-def : Pattern<(ThreeResultOp MultiResultOpKind3),
-              [(OneResultOp2 MultiResultOpKind3),
-               (AnotherTwoResultOp MultiResultOpKind3)]>;
+def : Pattern<(ThreeResultOp MultiResultOpKind2:$kind),
+              [(TwoResultOp $kind),
+               (OneResultOp1 $kind)]>;
+def : Pattern<(ThreeResultOp MultiResultOpKind3:$kind),
+              [(OneResultOp2 $kind),
+               (AnotherTwoResultOp $kind)]>;
 
 // Test using results separately in a multi-result op
-def : Pattern<(ThreeResultOp MultiResultOpKind4),
-              [(TwoResultOp:$res1__0 MultiResultOpKind4),
-               (OneResultOp1 MultiResultOpKind4),
-               (TwoResultOp:$res2__1 MultiResultOpKind4)]>;
+def : Pattern<(ThreeResultOp MultiResultOpKind4:$kind),
+              [(TwoResultOp:$res1__0 $kind),
+               (OneResultOp1 $kind),
+               (TwoResultOp:$res2__1 $kind)]>;
 
 // Test referencing a single value in the value pack
 // This rule only matches TwoResultOp if its second result has no use.
-def : Pattern<(TwoResultOp:$res MultiResultOpKind5),
-              [(OneResultOp2 MultiResultOpKind5),
-               (OneResultOp1 MultiResultOpKind5)],
+def : Pattern<(TwoResultOp:$res MultiResultOpKind5:$kind),
+              [(OneResultOp2 $kind),
+               (OneResultOp1 $kind)],
               [(HasNoUseOf:$res__1)]>;
 
 // Test using auxiliary ops for replacing multi-result op
 def : Pattern<
-    (ThreeResultOp MultiResultOpKind6), [
+    (ThreeResultOp MultiResultOpKind6:$kind), [
         // Auxiliary op generated to help building the final result but not
         // directly used to replace the source op's results.
-        (TwoResultOp:$interm MultiResultOpKind6),
+        (TwoResultOp:$interm $kind),
 
         (OneResultOp3 $interm__1),
-        (AnotherTwoResultOp MultiResultOpKind6)
+        (AnotherTwoResultOp $kind)
     ]>;
 
 //===----------------------------------------------------------------------===//
@@ -1643,6 +1672,11 @@ def FormatOptionalUnitAttrNoElide
 def FormatOptionalEnumAttr : TEST_Op<"format_optional_enum_attr"> {
   let arguments = (ins OptionalAttr<SomeI64Enum>:$attr);
   let assemblyFormat = "($attr^)? attr-dict";
+}
+
+def FormatOptionalWithElse : TEST_Op<"format_optional_else"> {
+  let arguments = (ins UnitAttr:$isFirstBranchPresent);
+  let assemblyFormat = "(`then` $isFirstBranchPresent^):(`else`)? attr-dict";
 }
 
 //===----------------------------------------------------------------------===//

@@ -204,40 +204,7 @@ static bool lowerRISCVVMachineInstrToMCInst(const MachineInstr *MI,
   return true;
 }
 
-void llvm::LowerRISCVMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
-                                          const AsmPrinter &AP) {
-  if (LowerEPIMachineInstrToMCInst(MI, OutMI))
-    return;
-
-  if (lowerRISCVVMachineInstrToMCInst(MI, OutMI))
-    return;
-
-  OutMI.setOpcode(MI->getOpcode());
-
-  for (const MachineOperand &MO : MI->operands()) {
-    MCOperand MCOp;
-    if (LowerRISCVMachineOperandToMCOperand(MO, MCOp, AP))
-      OutMI.addOperand(MCOp);
-  }
-
-  if (OutMI.getOpcode() == RISCV::PseudoReadVLENB) {
-    OutMI.setOpcode(RISCV::CSRRS);
-    OutMI.addOperand(MCOperand::createImm(
-        RISCVSysReg::lookupSysRegByName("VLENB")->Encoding));
-    OutMI.addOperand(MCOperand::createReg(RISCV::X0));
-    return;
-  }
-
-  if (OutMI.getOpcode() == RISCV::PseudoReadVL) {
-    OutMI.setOpcode(RISCV::CSRRS);
-    OutMI.addOperand(MCOperand::createImm(
-        RISCVSysReg::lookupSysRegByName("VL")->Encoding));
-    OutMI.addOperand(MCOperand::createReg(RISCV::X0));
-    return;
-  }
-}
-
-bool llvm::LowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {
+static bool lowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {
   const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
       RISCVEPIPseudosTable::getEPIPseudoInfo(MI->getOpcode());
   if (!EPI)
@@ -266,7 +233,7 @@ bool llvm::LowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {
     MCOperand MCOp;
     switch (MO.getType()) {
     default:
-      report_fatal_error("LowerEPIMachineInstrToMCInst: unknown operand type");
+      report_fatal_error("lowerEPIMachineInstrToMCInst: unknown operand type");
     case MachineOperand::MO_Register: {
       // Ignore all implicit register operands.
       if (MO.isImplicit())
@@ -299,4 +266,50 @@ bool llvm::LowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) {
     OutMI.addOperand(MCOp);
   }
   return true;
+}
+
+bool llvm::lowerRISCVMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                          AsmPrinter &AP) {
+  if (lowerEPIMachineInstrToMCInst(MI, OutMI))
+    return false;
+
+  if (lowerRISCVVMachineInstrToMCInst(MI, OutMI))
+    return false;
+
+  OutMI.setOpcode(MI->getOpcode());
+
+  for (const MachineOperand &MO : MI->operands()) {
+    MCOperand MCOp;
+    if (LowerRISCVMachineOperandToMCOperand(MO, MCOp, AP))
+      OutMI.addOperand(MCOp);
+  }
+
+  switch (OutMI.getOpcode()) {
+  case TargetOpcode::PATCHABLE_FUNCTION_ENTER: {
+    const Function &F = MI->getParent()->getParent()->getFunction();
+    if (F.hasFnAttribute("patchable-function-entry")) {
+      unsigned Num;
+      if (F.getFnAttribute("patchable-function-entry")
+              .getValueAsString()
+              .getAsInteger(10, Num))
+        return false;
+      AP.emitNops(Num);
+      return true;
+    }
+    break;
+  }
+  case RISCV::PseudoReadVLENB:
+    OutMI.setOpcode(RISCV::CSRRS);
+    OutMI.addOperand(MCOperand::createImm(
+        RISCVSysReg::lookupSysRegByName("VLENB")->Encoding));
+    OutMI.addOperand(MCOperand::createReg(RISCV::X0));
+    break;
+  case RISCV::PseudoReadVL:
+    OutMI.setOpcode(RISCV::CSRRS);
+    OutMI.addOperand(
+        MCOperand::createImm(RISCVSysReg::lookupSysRegByName("VL")->Encoding));
+    OutMI.addOperand(MCOperand::createReg(RISCV::X0));
+    break;
+  }
+  return false;
 }

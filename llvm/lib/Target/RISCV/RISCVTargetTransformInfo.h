@@ -150,8 +150,8 @@ public:
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
   unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
-  unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp, int Index,
-                          VectorType *SubTp);
+  unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
+                          ArrayRef<int> Mask, int Index, VectorType *SubTp);
   unsigned getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                             ArrayRef<Type *> Tys);
   unsigned getScalarizationOverhead(VectorType *InTy, const APInt &DemandedElts,
@@ -160,15 +160,15 @@ public:
                             TTI::CastContextHint CCH,
                             TTI::TargetCostKind CostKind,
                             const Instruction *I = nullptr);
-  unsigned getRegisterBitWidth(bool Vector) const;
   bool shouldMaximizeVectorBandwidth(bool OptSize) const;
   unsigned getMinVectorRegisterBitWidth() const;
-  unsigned getVectorRegisterBitWidth(unsigned WidthFactor) const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
-  unsigned getVectorRegisterUsage(unsigned VFKnownMin, unsigned ElementTypeSize,
+  unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
+                                  unsigned VFKnownMin, unsigned ElementTypeSize,
                                   unsigned SafeDepDist) const;
   std::pair<ElementCount, ElementCount>
-  getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+  getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
+                        unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const;
   int getCmpSelInstrCost(
@@ -177,10 +177,7 @@ public:
       TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
       const Instruction *I = nullptr);
 
-  unsigned getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
-                                  const Value *Ptr, bool VariableMask,
-                                  Align Alignment, TTI::TargetCostKind CostKind,
-                                  const Instruction *I = nullptr);
+  TargetTransformInfo::PopcntSupportKind getPopcntSupport(unsigned TyWidth);
 
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasStdExtV(); }
@@ -191,6 +188,79 @@ public:
   int getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
                              bool IsPairwise, bool IsUnsigned,
                              TTI::TargetCostKind CostKind);
+  TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
+    switch (K) {
+    case TargetTransformInfo::RGK_Scalar:
+      return TypeSize::getFixed(ST->getXLen());
+    case TargetTransformInfo::RGK_FixedWidthVector:
+      return TypeSize::getFixed(
+          ST->hasStdExtV() ? ST->getMinRVVVectorSizeInBits() : 0);
+    case TargetTransformInfo::RGK_ScalableVector:
+      return TypeSize::getScalable(
+          ST->hasStdExtV() ? ST->getMinRVVVectorSizeInBits() : 0);
+    }
+
+    llvm_unreachable("Unsupported register kind");
+  }
+
+  unsigned getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
+                                  const Value *Ptr, bool VariableMask,
+                                  Align Alignment, TTI::TargetCostKind CostKind,
+                                  const Instruction *I);
+
+  bool isLegalElementTypeForRVV(Type *ScalarTy) {
+    if (ScalarTy->isPointerTy())
+      return true;
+
+    if (ScalarTy->isIntegerTy(8) || ScalarTy->isIntegerTy(16) ||
+        ScalarTy->isIntegerTy(32) || ScalarTy->isIntegerTy(64))
+      return true;
+
+    if (ScalarTy->isHalfTy())
+      return ST->hasStdExtZfh();
+    if (ScalarTy->isFloatTy())
+      return ST->hasStdExtF();
+    if (ScalarTy->isDoubleTy())
+      return ST->hasStdExtD();
+
+    return false;
+  }
+
+  bool isLegalMaskedLoadStore(Type *DataType, Align Alignment) {
+    if (!ST->hasStdExtV())
+      return false;
+
+    // Only support fixed vectors if we know the minimum vector size.
+    if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
+      return false;
+
+    return isLegalElementTypeForRVV(DataType->getScalarType());
+  }
+
+  bool isLegalMaskedLoad(Type *DataType, Align Alignment) {
+    return isLegalMaskedLoadStore(DataType, Alignment);
+  }
+  bool isLegalMaskedStore(Type *DataType, Align Alignment) {
+    return isLegalMaskedLoadStore(DataType, Alignment);
+  }
+
+  bool isLegalMaskedGatherScatter(Type *DataType, Align Alignment) {
+    if (!ST->hasStdExtV())
+      return false;
+
+    // Only support fixed vectors if we know the minimum vector size.
+    if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
+      return false;
+
+    return isLegalElementTypeForRVV(DataType->getScalarType());
+  }
+
+  bool isLegalMaskedGather(Type *DataType, Align Alignment) {
+    return isLegalMaskedGatherScatter(DataType, Alignment);
+  }
+  bool isLegalMaskedScatter(Type *DataType, Align Alignment) {
+    return isLegalMaskedGatherScatter(DataType, Alignment);
+  }
 };
 
 } // end namespace llvm

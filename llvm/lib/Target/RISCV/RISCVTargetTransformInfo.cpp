@@ -167,7 +167,7 @@ unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
 }
 
 unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
-                                      int Index, VectorType *SubTp) {
+                                      ArrayRef<int> Mask, int Index, VectorType *SubTp) {
   if (isa<ScalableVectorType>(Tp) &&
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
     switch (Kind) {
@@ -187,7 +187,7 @@ unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                         cast<ScalableVectorType>(SubTp));
     }
   }
-  return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
+  return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
 }
 
 /// Estimate the overhead of scalarizing an instructions unique
@@ -260,17 +260,6 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
   return LegalizationFactor * Log2_32(BitRatio);
 }
 
-unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
-  if (!Vector)
-    return ST->is64Bit() ? 64 : 32;
-
-  // Largest vector register type will be `vscale * 8 * 64` bits for LMUL = 8
-  // (largest LMUL value). Since vscale is unknown at compile time, the largest
-  // possible register (register-group to be precise) bit width will be at least
-  // `64 * 8`.
-  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * 8 : 0;
-}
-
 bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
   return (ST->hasStdExtV() && true);
 }
@@ -279,12 +268,6 @@ unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
   // Actual min vector register bitwidth is <vscale x ELEN>.
   // getMaxElementWidth() simply return ELEN.
   return ST->hasStdExtV() ? getMaxElementWidth() : 0;
-}
-
-unsigned RISCVTTIImpl::getVectorRegisterBitWidth(unsigned WidthFactor) const {
-  assert(WidthFactor <= 8 && isPowerOf2_32(WidthFactor) &&
-         "Possible RISC-V LMUL values are 1, 2, 4 and 8.");
-  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * WidthFactor : 0;
 }
 
 ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
@@ -297,10 +280,9 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
              : ElementCount::getNull();
 }
 
-unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
-                                              unsigned ElementTypeSize,
-                                              unsigned SafeDepDist) const {
-
+unsigned RISCVTTIImpl::getVectorRegisterUsage(
+    TargetTransformInfo::RegisterKind K, unsigned VFKnownMin,
+    unsigned ElementTypeSize, unsigned SafeDepDist) const {
   // FIXME: For the time being we assume dependency distance is always safe.
   // Once we have dependency distance computations for scalable vectors, we need
   // to figure out its relationship with register group usage;
@@ -309,7 +291,8 @@ unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
 }
 
 std::pair<ElementCount, ElementCount>
-RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
+                                    unsigned SmallestType, unsigned WidestType,
                                     unsigned MaxSafeRegisterWidth,
                                     unsigned RegWidthFactor) const {
   // check for SEW <= ELEN in the base ISA
@@ -319,8 +302,9 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
   // valid range of VFs.
   SmallestType = std::max<unsigned>(8, SmallestType);
   WidestType = std::max<unsigned>(8, WidestType);
-  unsigned WidestRegister =
-      std::min(getVectorRegisterBitWidth(RegWidthFactor), MaxSafeRegisterWidth);
+  unsigned WidestRegister = std::min<unsigned>(
+      getMinVectorRegisterBitWidth() * RegWidthFactor,
+      MaxSafeRegisterWidth);
   unsigned SmallestRegister =
       std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
   bool IsScalable = useScalableVectorType();
@@ -354,16 +338,10 @@ int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
   return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
 
-unsigned RISCVTTIImpl::getGatherScatterOpCost(
-    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
-    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
-  // We can do gather/scatter using a single instruction.
-  // FIXME: The actual cost is likely to be higher than that.
-  if (isa<ScalableVectorType>(DataTy))
-    return 1;
-
-  return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
-                                       Alignment, CostKind, I);
+TargetTransformInfo::PopcntSupportKind
+RISCVTTIImpl::getPopcntSupport(unsigned TyWidth) {
+  assert(isPowerOf2_32(TyWidth) && "Ty width must be power of 2");
+  return ST->hasStdExtZbb() ? TTI::PSK_FastHardware : TTI::PSK_Software;
 }
 
 bool RISCVTTIImpl::shouldExpandReduction(const IntrinsicInst *II) const {
@@ -470,4 +448,34 @@ int RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   }
 
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
+}
+
+unsigned RISCVTTIImpl::getGatherScatterOpCost(
+    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
+    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
+  // We can do gather/scatter using a single instruction.
+  // FIXME: The actual cost is likely to be higher than that.
+  if (isa<ScalableVectorType>(DataTy))
+    return 1;
+
+  if (CostKind != TTI::TCK_RecipThroughput)
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  if ((Opcode == Instruction::Load &&
+       !isLegalMaskedGather(DataTy, Align(Alignment))) ||
+      (Opcode == Instruction::Store &&
+       !isLegalMaskedScatter(DataTy, Align(Alignment))))
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  if (!isa<FixedVectorType>(DataTy))
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  auto *VTy = cast<FixedVectorType>(DataTy);
+  unsigned NumLoads = VTy->getNumElements();
+  unsigned MemOpCost =
+      getMemoryOpCost(Opcode, VTy->getElementType(), Alignment, 0, CostKind, I);
+  return NumLoads * MemOpCost;
 }

@@ -243,7 +243,7 @@ define void @fabs_v8f16(<8 x half>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
 ; CHECK-NEXT:    vle16.v v25, (a0)
-; CHECK-NEXT:    vfsgnjx.vv v25, v25, v25
+; CHECK-NEXT:    vfabs.v v25, v25
 ; CHECK-NEXT:    vse16.v v25, (a0)
 ; CHECK-NEXT:    ret
   %a = load <8 x half>, <8 x half>* %x
@@ -258,7 +258,7 @@ define void @fabs_v4f32(<4 x float>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
-; CHECK-NEXT:    vfsgnjx.vv v25, v25, v25
+; CHECK-NEXT:    vfabs.v v25, v25
 ; CHECK-NEXT:    vse32.v v25, (a0)
 ; CHECK-NEXT:    ret
   %a = load <4 x float>, <4 x float>* %x
@@ -273,7 +273,7 @@ define void @fabs_v2f64(<2 x double>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
-; CHECK-NEXT:    vfsgnjx.vv v25, v25, v25
+; CHECK-NEXT:    vfabs.v v25, v25
 ; CHECK-NEXT:    vse64.v v25, (a0)
 ; CHECK-NEXT:    ret
   %a = load <2 x double>, <2 x double>* %x
