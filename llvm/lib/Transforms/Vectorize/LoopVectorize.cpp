@@ -5019,8 +5019,6 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
   case InductionDescriptor::IK_PtrInduction: {
     // Handle the pointer induction variable case.
     assert(P->getType()->isPointerTy() && "Unexpected type.");
-    assert(!VF.isScalable() && "Currently unsupported for scalable vectors");
-
     if (Cost->isScalarAfterVectorization(P, State.VF)) {
       // This is the normalized GEP that starts counting at zero.
       Value *PtrInd =
