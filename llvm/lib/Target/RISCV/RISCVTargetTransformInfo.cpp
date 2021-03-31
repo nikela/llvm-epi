@@ -479,3 +479,28 @@ unsigned RISCVTTIImpl::getGatherScatterOpCost(
       getMemoryOpCost(Opcode, VTy->getElementType(), Alignment, 0, CostKind, I);
   return NumLoads * MemOpCost;
 }
+
+bool RISCVTTIImpl::isLegalToVectorizeReduction(RecurrenceDescriptor RdxDesc,
+                                               ElementCount VF) const {
+  if (!VF.isScalable())
+    return true;
+
+  // FIXME: Check legal types here.
+
+  switch (RdxDesc.getRecurrenceKind()) {
+  case RecurKind::Add:
+  case RecurKind::FAdd:
+  case RecurKind::And:
+  case RecurKind::Or:
+  case RecurKind::Xor:
+  case RecurKind::SMin:
+  case RecurKind::SMax:
+  case RecurKind::UMin:
+  case RecurKind::UMax:
+  case RecurKind::FMin:
+  case RecurKind::FMax:
+    return true;
+  default:
+    return false;
+  }
+}
