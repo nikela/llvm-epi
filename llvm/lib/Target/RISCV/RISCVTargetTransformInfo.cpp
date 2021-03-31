@@ -479,3 +479,78 @@ unsigned RISCVTTIImpl::getGatherScatterOpCost(
       getMemoryOpCost(Opcode, VTy->getElementType(), Alignment, 0, CostKind, I);
   return NumLoads * MemOpCost;
 }
+
+InstructionCost
+RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
+                                    TTI::TargetCostKind CostKind) {
+  // Taken from AArch64.
+  auto *RetTy = ICA.getReturnType();
+  switch (ICA.getID()) {
+  case Intrinsic::experimental_stepvector: {
+    unsigned Cost = 1; // Cost of the `index' instruction
+    auto LT = TLI->getTypeLegalizationCost(DL, RetTy);
+    // Legalisation of illegal vectors involves an `index' instruction plus
+    // (LT.first - 1) vector adds.
+    if (LT.first > 1) {
+      Type *LegalVTy = EVT(LT.second).getTypeForEVT(RetTy->getContext());
+      unsigned AddCost =
+          getArithmeticInstrCost(Instruction::Add, LegalVTy, CostKind);
+      Cost += AddCost * (LT.first - 1);
+    }
+    return Cost;
+  }
+  // This is not ideal but untill all VP intrinsics are in upstream we can't use
+  // the IsVPIntrinsic getter, so build the list manually from
+  // IntrinsicEnums.inc.
+#define VP_INTRINSIC_LIST                                                      \
+  VP_INTRINSIC(add)                                                            \
+  VP_INTRINSIC(and)                                                            \
+  VP_INTRINSIC(ashr)                                                           \
+  VP_INTRINSIC(bitcast)                                                        \
+  VP_INTRINSIC(fadd)                                                           \
+  VP_INTRINSIC(fcmp)                                                           \
+  VP_INTRINSIC(fdiv)                                                           \
+  VP_INTRINSIC(fma)                                                            \
+  VP_INTRINSIC(fmul)                                                           \
+  VP_INTRINSIC(fneg)                                                           \
+  VP_INTRINSIC(fpext)                                                          \
+  VP_INTRINSIC(fptosi)                                                         \
+  VP_INTRINSIC(fptoui)                                                         \
+  VP_INTRINSIC(fptrunc)                                                        \
+  VP_INTRINSIC(frem)                                                           \
+  VP_INTRINSIC(fsub)                                                           \
+  VP_INTRINSIC(gather)                                                         \
+  VP_INTRINSIC(icmp)                                                           \
+  VP_INTRINSIC(inttoptr)                                                       \
+  VP_INTRINSIC(load)                                                           \
+  VP_INTRINSIC(lshr)                                                           \
+  VP_INTRINSIC(mul)                                                            \
+  VP_INTRINSIC(or)                                                             \
+  VP_INTRINSIC(ptrtoint)                                                       \
+  VP_INTRINSIC(scatter)                                                        \
+  VP_INTRINSIC(sdiv)                                                           \
+  VP_INTRINSIC(select)                                                         \
+  VP_INTRINSIC(sext)                                                           \
+  VP_INTRINSIC(shl)                                                            \
+  VP_INTRINSIC(sitofp)                                                         \
+  VP_INTRINSIC(srem)                                                           \
+  VP_INTRINSIC(store)                                                          \
+  VP_INTRINSIC(sub)                                                            \
+  VP_INTRINSIC(trunc)                                                          \
+  VP_INTRINSIC(udiv)                                                           \
+  VP_INTRINSIC(uitofp)                                                         \
+  VP_INTRINSIC(urem)                                                           \
+  VP_INTRINSIC(xor)                                                            \
+  VP_INTRINSIC(zext)
+#define VP_INTRINSIC(name) case Intrinsic::vp_##name:
+    VP_INTRINSIC_LIST
+    // FIXME: Assume they can be affordably implemented.
+    // FIXME: This will swallow also fixed-vectors.
+    return 1;
+#undef VP_INTRINSIC
+  default:
+    break;
+  }
+
+  return BaseT::getIntrinsicInstrCost(ICA, CostKind);
+}
