@@ -262,6 +262,9 @@ public:
     return isLegalMaskedGatherScatter(DataType, Alignment);
   }
 
+  bool isLegalToVectorizeReduction(RecurrenceDescriptor RdxDesc,
+                                   ElementCount VF) const;
+
   InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                         TTI::TargetCostKind CostKind);
 };

@@ -6350,6 +6350,17 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
       return UserVF;
   }
 
+  if (TTI.useScalableVectorType() &&
+      !canVectorizeReductions(/* unused */ ElementCount::getScalable(1))) {
+    reportVectorizationFailure(
+        "LV: Scalable vectorization not supported for the reduction "
+        "operations found in this loop.",
+        "Scalable vectorization not supported for the reduction operations "
+        "found in this loop.",
+        "ScalableVFUnfeasible", ORE, TheLoop);
+    return None;
+  }
+
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
@@ -8623,7 +8634,8 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
 
   // Check if it is profitable to vectorize with runtime checks.
   unsigned NumRuntimePointerChecks = Requirements.getNumRuntimePointerChecks();
-  if (SelectedVF.getWidth().getKnownMinValue() > 1 && NumRuntimePointerChecks) {
+  if (SelectedVF != VectorizationFactor::Disabled() &&
+      SelectedVF.getWidth().isVector() && NumRuntimePointerChecks) {
     bool PragmaThresholdReached =
         NumRuntimePointerChecks > PragmaVectorizeMemoryCheckThreshold;
     bool ThresholdReached =
