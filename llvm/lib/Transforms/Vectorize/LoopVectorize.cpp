@@ -8621,7 +8621,8 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
 
   // Check if it is profitable to vectorize with runtime checks.
   unsigned NumRuntimePointerChecks = Requirements.getNumRuntimePointerChecks();
-  if (SelectedVF.getWidth().getKnownMinValue() > 1 && NumRuntimePointerChecks) {
+  if (SelectedVF != VectorizationFactor::Disabled() &&
+      SelectedVF.getWidth().isVector() && NumRuntimePointerChecks) {
     bool PragmaThresholdReached =
         NumRuntimePointerChecks > PragmaVectorizeMemoryCheckThreshold;
     bool ThresholdReached =
