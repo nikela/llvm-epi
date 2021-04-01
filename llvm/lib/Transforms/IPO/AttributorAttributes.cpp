@@ -155,27 +155,22 @@ getAssumedConstantInt(Attributor &A, const Value &V,
 /// is set to false and the instruction is volatile, return nullptr.
 static const Value *getPointerOperand(const Instruction *I,
                                       bool AllowVolatile) {
+  if (!AllowVolatile && I->isVolatile())
+    return nullptr;
+
   if (auto *LI = dyn_cast<LoadInst>(I)) {
-    if (!AllowVolatile && LI->isVolatile())
-      return nullptr;
     return LI->getPointerOperand();
   }
 
   if (auto *SI = dyn_cast<StoreInst>(I)) {
-    if (!AllowVolatile && SI->isVolatile())
-      return nullptr;
     return SI->getPointerOperand();
   }
 
   if (auto *CXI = dyn_cast<AtomicCmpXchgInst>(I)) {
-    if (!AllowVolatile && CXI->isVolatile())
-      return nullptr;
     return CXI->getPointerOperand();
   }
 
   if (auto *RMWI = dyn_cast<AtomicRMWInst>(I)) {
-    if (!AllowVolatile && RMWI->isVolatile())
-      return nullptr;
     return RMWI->getPointerOperand();
   }
 
@@ -1287,9 +1282,6 @@ struct AANoSyncImpl : AANoSync {
   /// or monotonic ordering
   static bool isNonRelaxedAtomic(Instruction *I);
 
-  /// Helper function used to determine whether an instruction is volatile.
-  static bool isVolatile(Instruction *I);
-
   /// Helper function uset to check if intrinsic is volatile (memcpy, memmove,
   /// memset).
   static bool isNoSyncIntrinsic(Instruction *I);
@@ -1347,12 +1339,6 @@ bool AANoSyncImpl::isNonRelaxedAtomic(Instruction *I) {
 bool AANoSyncImpl::isNoSyncIntrinsic(Instruction *I) {
   if (auto *II = dyn_cast<IntrinsicInst>(I)) {
     switch (II->getIntrinsicID()) {
-    /// Element wise atomic memory intrinsics are can only be unordered,
-    /// therefore nosync.
-    case Intrinsic::memset_element_unordered_atomic:
-    case Intrinsic::memmove_element_unordered_atomic:
-    case Intrinsic::memcpy_element_unordered_atomic:
-      return true;
     case Intrinsic::memset:
     case Intrinsic::memmove:
     case Intrinsic::memcpy:
@@ -1364,23 +1350,6 @@ bool AANoSyncImpl::isNoSyncIntrinsic(Instruction *I) {
     }
   }
   return false;
-}
-
-bool AANoSyncImpl::isVolatile(Instruction *I) {
-  assert(!isa<CallBase>(I) && "Calls should not be checked here");
-
-  switch (I->getOpcode()) {
-  case Instruction::AtomicRMW:
-    return cast<AtomicRMWInst>(I)->isVolatile();
-  case Instruction::Store:
-    return cast<StoreInst>(I)->isVolatile();
-  case Instruction::Load:
-    return cast<LoadInst>(I)->isVolatile();
-  case Instruction::AtomicCmpXchg:
-    return cast<AtomicCmpXchgInst>(I)->isVolatile();
-  default:
-    return false;
-  }
 }
 
 ChangeStatus AANoSyncImpl::updateImpl(Attributor &A) {
@@ -1401,7 +1370,7 @@ ChangeStatus AANoSyncImpl::updateImpl(Attributor &A) {
       return NoSyncAA.isAssumedNoSync();
     }
 
-    if (!isVolatile(&I) && !isNonRelaxedAtomic(&I))
+    if (!I.isVolatile() && !isNonRelaxedAtomic(&I))
       return true;
 
     return false;
