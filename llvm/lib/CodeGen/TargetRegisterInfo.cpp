@@ -623,7 +623,8 @@ Register TargetRegisterInfo::lookThruSingleUseCopyChain(
 
 void TargetRegisterInfo::getOffsetOpcodes(
     const StackOffset &Offset, SmallVectorImpl<uint64_t> &Ops) const {
-  assert(!Offset.getScalable() && "Scalable offsets are not handled");
+  // FIXME: Implement this.
+  // assert(!Offset.getScalable() && "Scalable offsets are not handled");
   DIExpression::appendOffset(Ops, Offset.getFixed());
 }
 
