@@ -569,6 +569,8 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(zext)
 #define VP_INTRINSIC(name) case Intrinsic::vp_##name:
     VP_INTRINSIC_LIST
+    // EPI-specific
+  case Intrinsic::experimental_vector_vp_slideleftfill:
     // FIXME: Assume they can be affordably implemented.
     // FIXME: This will swallow also fixed-vectors.
     return 1;
