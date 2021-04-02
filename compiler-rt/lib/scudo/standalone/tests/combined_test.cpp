@@ -18,10 +18,6 @@
 #include <thread>
 #include <vector>
 
-static std::mutex Mutex;
-static std::condition_variable Cv;
-static bool Ready;
-
 static constexpr scudo::Chunk::Origin Origin = scudo::Chunk::Origin::Malloc;
 
 template <class Config> struct UseQuarantineSetter {
@@ -84,7 +80,35 @@ template <typename Config> struct TestAllocator : scudo::Allocator<Config> {
   ~TestAllocator() { this->unmapTestOnly(); }
 };
 
-template <class Config> static void testAllocator() {
+namespace testing {
+namespace internal {
+#define SCUDO_DEFINE_GTEST_TYPE_NAME(TYPE)                                     \
+  template <> std::string GetTypeName<scudo::TYPE>() { return #TYPE; }
+SCUDO_DEFINE_GTEST_TYPE_NAME(AndroidSvelteConfig)
+#if SCUDO_FUCHSIA
+SCUDO_DEFINE_GTEST_TYPE_NAME(FuchsiaConfig)
+#else
+SCUDO_DEFINE_GTEST_TYPE_NAME(DefaultConfig)
+SCUDO_DEFINE_GTEST_TYPE_NAME(AndroidConfig)
+#endif
+#undef SCUDO_DEFINE_GTEST_TYPE_NAME
+} // namespace internal
+} // namespace testing
+
+template <class T> struct ScudoCombinedTest : public ::testing::Test {};
+
+using ScudoCombinedTestTypes = testing::Types<scudo::AndroidSvelteConfig,
+#if SCUDO_FUCHSIA
+                                              scudo::FuchsiaConfig,
+#else
+                                              scudo::DefaultConfig,
+                                              scudo::AndroidConfig
+#endif
+                                              >;
+TYPED_TEST_CASE(ScudoCombinedTest, ScudoCombinedTestTypes);
+
+TYPED_TEST(ScudoCombinedTest, BasicCombined) {
+  using Config = TypeParam;
   UseQuarantineSetter<Config> MUQ(
       std::is_same<Config, scudo::AndroidConfig>::value);
   using AllocatorT = TestAllocator<Config>;
@@ -321,56 +345,34 @@ template <class Config> static void testAllocator() {
     TSD->unlock();
 }
 
-// Test that multiple instantiations of the allocator have not messed up the
-// process's signal handlers (GWP-ASan used to do this).
-void testSEGV() {
-  const scudo::uptr Size = 4 * scudo::getPageSizeCached();
-  scudo::MapPlatformData Data = {};
-  void *P = scudo::map(nullptr, Size, "testSEGV", MAP_NOACCESS, &Data);
-  EXPECT_NE(P, nullptr);
-  EXPECT_DEATH(memset(P, 0xaa, Size), "");
-  scudo::unmap(P, Size, UNMAP_ALL, &Data);
-}
-
-TEST(ScudoCombinedTest, BasicCombined) {
-  testAllocator<scudo::AndroidSvelteConfig>();
-#if SCUDO_FUCHSIA
-  testAllocator<scudo::FuchsiaConfig>();
-#else
-  testAllocator<scudo::DefaultConfig>();
-  testAllocator<scudo::AndroidConfig>();
-  testSEGV();
-#endif
-}
-
-template <typename AllocatorT> static void stressAllocator(AllocatorT *A) {
-  {
-    std::unique_lock<std::mutex> Lock(Mutex);
-    while (!Ready)
-      Cv.wait(Lock);
-  }
-  std::vector<std::pair<void *, scudo::uptr>> V;
-  for (scudo::uptr I = 0; I < 256U; I++) {
-    const scudo::uptr Size = std::rand() % 4096U;
-    void *P = A->allocate(Size, Origin);
-    // A region could have ran out of memory, resulting in a null P.
-    if (P)
-      V.push_back(std::make_pair(P, Size));
-  }
-  while (!V.empty()) {
-    auto Pair = V.back();
-    A->deallocate(Pair.first, Origin, Pair.second);
-    V.pop_back();
-  }
-}
-
-template <class Config> static void testAllocatorThreaded() {
-  Ready = false;
-  using AllocatorT = TestAllocator<Config>;
+TYPED_TEST(ScudoCombinedTest, ThreadedCombined) {
+  std::mutex Mutex;
+  std::condition_variable Cv;
+  bool Ready = false;
+  using AllocatorT = TestAllocator<TypeParam>;
   auto Allocator = std::unique_ptr<AllocatorT>(new AllocatorT());
   std::thread Threads[32];
   for (scudo::uptr I = 0; I < ARRAY_SIZE(Threads); I++)
-    Threads[I] = std::thread(stressAllocator<AllocatorT>, Allocator.get());
+    Threads[I] = std::thread([&]() {
+      {
+        std::unique_lock<std::mutex> Lock(Mutex);
+        while (!Ready)
+          Cv.wait(Lock);
+      }
+      std::vector<std::pair<void *, scudo::uptr>> V;
+      for (scudo::uptr I = 0; I < 256U; I++) {
+        const scudo::uptr Size = std::rand() % 4096U;
+        void *P = Allocator->allocate(Size, Origin);
+        // A region could have ran out of memory, resulting in a null P.
+        if (P)
+          V.push_back(std::make_pair(P, Size));
+      }
+      while (!V.empty()) {
+        auto Pair = V.back();
+        Allocator->deallocate(Pair.first, Origin, Pair.second);
+        V.pop_back();
+      }
+    });
   {
     std::unique_lock<std::mutex> Lock(Mutex);
     Ready = true;
@@ -381,14 +383,21 @@ template <class Config> static void testAllocatorThreaded() {
   Allocator->releaseToOS();
 }
 
-TEST(ScudoCombinedTest, ThreadedCombined) {
-  testAllocatorThreaded<scudo::AndroidSvelteConfig>();
 #if SCUDO_FUCHSIA
-  testAllocatorThreaded<scudo::FuchsiaConfig>();
+#define SKIP_ON_FUCHSIA(T) DISABLED_##T
 #else
-  testAllocatorThreaded<scudo::DefaultConfig>();
-  testAllocatorThreaded<scudo::AndroidConfig>();
+#define SKIP_ON_FUCHSIA(T) T
 #endif
+
+// Test that multiple instantiations of the allocator have not messed up the
+// process's signal handlers (GWP-ASan used to do this).
+TEST(ScudoCombinedTest, SKIP_ON_FUCHSIA(testSEGV)) {
+  const scudo::uptr Size = 4 * scudo::getPageSizeCached();
+  scudo::MapPlatformData Data = {};
+  void *P = scudo::map(nullptr, Size, "testSEGV", MAP_NOACCESS, &Data);
+  EXPECT_NE(P, nullptr);
+  EXPECT_DEATH(memset(P, 0xaa, Size), "");
+  scudo::unmap(P, Size, UNMAP_ALL, &Data);
 }
 
 struct DeathSizeClassConfig {
