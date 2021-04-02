@@ -91,6 +91,7 @@
 #include <algorithm>
 #include <bitset>
 #include <cassert>
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -3424,7 +3425,7 @@ bool Sema::CheckRISCVBuiltinFunctionCall(const TargetInfo &TI,
   for (auto &I : ReqFeatures) {
     if (TI.hasFeature(I))
       continue;
-    // Make message like "experimental-zbr" to "Zbr"
+    // Convert features like "zbr" and "experimental-zbr" to "Zbr".
     I.consume_front("experimental-");
     std::string FeatureStr = I.str();
     FeatureStr[0] = std::toupper(FeatureStr[0]);
