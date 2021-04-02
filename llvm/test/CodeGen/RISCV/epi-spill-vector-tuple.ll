@@ -63,18 +63,18 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vle64.v v25, (s1)
 ; SPILL-O2-NEXT:    vle64.v v26, (a1)
 ; SPILL-O2-NEXT:    vzip2.vv v0, v25, v26
-; SPILL-O2-NEXT:    addi a1, sp, 8
-; SPILL-O2-NEXT:    rdvlenb a0
-; SPILL-O2-NEXT:    add a0, a1, a0
-; SPILL-O2-NEXT:    vs1r.v v0, (a1)
-; SPILL-O2-NEXT:    vs1r.v v1, (a0)
+; SPILL-O2-NEXT:    addi a0, sp, 8
+; SPILL-O2-NEXT:    csrr a1, vlenb
+; SPILL-O2-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
+; SPILL-O2-NEXT:    add a0, a0, a1
+; SPILL-O2-NEXT:    vs1r.v v1, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    call foo
 ; SPILL-O2-NEXT:    vsetvli a0, s0, e64,m1,ta,mu
-; SPILL-O2-NEXT:    addi a1, sp, 8
-; SPILL-O2-NEXT:    rdvlenb a0
-; SPILL-O2-NEXT:    add a0, a1, a0
-; SPILL-O2-NEXT:    vl1r.v v0, (a1)
-; SPILL-O2-NEXT:    vl1r.v v1, (a0)
+; SPILL-O2-NEXT:    addi a0, sp, 8
+; SPILL-O2-NEXT:    csrr a1, vlenb
+; SPILL-O2-NEXT:    vl1r.v v0, (a0) # Unknown-size Folded Reload
+; SPILL-O2-NEXT:    add a0, a0, a1
+; SPILL-O2-NEXT:    vl1r.v v1, (a0) # Unknown-size Folded Reload
 ; SPILL-O2-NEXT:    vse64.v v0, (s1)
 ; SPILL-O2-NEXT:    vse64.v v1, (s1)
 ; SPILL-O2-NEXT:    csrr a0, vlenb

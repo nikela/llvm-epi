@@ -95,8 +95,8 @@ void RISCVAsmPrinter::emitInstruction(const MachineInstr *MI) {
     return;
 
   MCInst TmpInst;
-  LowerRISCVMachineInstrToMCInst(MI, TmpInst, *this);
-  EmitToStreamer(*OutStreamer, TmpInst);
+  if (!lowerRISCVMachineInstrToMCInst(MI, TmpInst, *this))
+    EmitToStreamer(*OutStreamer, TmpInst);
 }
 
 bool RISCVAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,

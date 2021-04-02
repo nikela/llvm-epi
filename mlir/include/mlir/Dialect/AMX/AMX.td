@@ -71,7 +71,7 @@ def TileZeroOp : AMX_Op<"tile_zero", [NoSideEffect]> {
     Example:
 
     ```mlir
-      %0 = amx.tilezero : vector<16x16xbf16>
+      %0 = amx.tile_zero : vector<16x16xbf16>
     ```
   }];
   let verifier = [{ return ::verify(*this); }];
@@ -100,7 +100,7 @@ def TileLoadOp : AMX_Op<"tile_load", [NoSideEffect]> {
     Example:
 
     ```mlir
-      %0 = amx.tileload %arg0[%c0, %c0] : memref<?x?xi8> into vector<16x64xi8>
+      %0 = amx.tile_load %arg0[%c0, %c0] : memref<?x?xi8> into vector<16x64xi8>
     ```
   }];
   let verifier = [{ return ::verify(*this); }];
@@ -131,7 +131,7 @@ def TileStoreOp : AMX_Op<"tile_store"> {
     Example:
 
     ```mlir
-      amx.tilestore %arg1[%c0, %c0], %0 : memref<?x?xi8>, vector<16x64xi8>
+      amx.tile_store %arg1[%c0, %c0], %0 : memref<?x?xi8>, vector<16x64xi8>
     ```
   }];
   let verifier = [{ return ::verify(*this); }];
@@ -165,7 +165,7 @@ def TileMulFOp : AMX_Op<"tile_mulf", [NoSideEffect, AllTypesMatch<["acc", "res"]
     Example:
 
     ```mlir
-      %0 = amx.tilemulf %a, %b, %c
+      %0 = amx.tile_mulf %a, %b, %c
         : vector<16x32xbf16>, vector<16x32xbf16>, vector<16x16xf32>
     ```
   }];
@@ -196,14 +196,14 @@ def TileMulIOp : AMX_Op<"tile_muli", [NoSideEffect, AllTypesMatch<["acc", "res"]
     into a "m x n" destination tile. Supports all "si32 <- s/ui8 x s/ui8"
     combinations (4 bytes packed into dwords in the columns of both the
     source operand tiles; the zero or sign extension is specified with
-    the attributes). The operation is eventually lowered into one of
-    the "tdpbssd", "tdpbsud", "tdpbusd", or "tdpbuud" instructions with
-    the corresponding tile configuration.
+    the attributes and default to sign extended). The operation is eventually
+    lowered into one of the "tdpbssd", "tdpbsud", "tdpbusd", or "tdpbuud"
+    instructions with the corresponding tile configuration.
 
     Example:
 
     ```mlir
-      %0 = amx.tilemuli %a, %b, %c [true, true]
+      %0 = amx.tile_muli %a zext, %b zext, %c 
         : vector<16x64xi8>, vector<16x64xi8>, vector<16x16xi32>
     ```
   }];
@@ -211,7 +211,9 @@ def TileMulIOp : AMX_Op<"tile_muli", [NoSideEffect, AllTypesMatch<["acc", "res"]
   let arguments = (ins VectorOfRankAndType<[2], [I32, I8]>:$lhs,
                        VectorOfRankAndType<[2], [I32, I8]>:$rhs,
                        VectorOfRankAndType<[2], [I32, I8]>:$acc,
-                       BoolArrayAttr:$zext);
+                       UnitAttr:$isZextLhs,
+                       UnitAttr:$isZextRhs
+                       );
   let results = (outs VectorOfRankAndType<[2], [I32, I8]>:$res);
   let extraClassDeclaration = [{
     VectorType getLhsVectorType() {
@@ -224,7 +226,7 @@ def TileMulIOp : AMX_Op<"tile_muli", [NoSideEffect, AllTypesMatch<["acc", "res"]
       return res().getType().cast<VectorType>();
     }
   }];
-  let assemblyFormat = "$lhs `,` $rhs `,` $acc $zext attr-dict `:` "
+  let assemblyFormat = "$lhs (`zext` $isZextLhs^)? `,` $rhs (`zext` $isZextRhs^)? `,` $acc attr-dict `:` "
                        "type($lhs) `,` type($rhs) `,` type($acc) ";
 }
 

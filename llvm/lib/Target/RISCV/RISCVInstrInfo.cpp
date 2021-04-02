@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
 #include "llvm/CodeGen/RegisterScavenging.h"
+#include "llvm/MC/MCInstBuilder.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/IR/IntrinsicsEPI.h"
@@ -68,6 +69,15 @@ RISCVInstrInfo::RISCVInstrInfo(RISCVSubtarget &STI)
     : RISCVGenInstrInfo(RISCV::ADJCALLSTACKDOWN, RISCV::ADJCALLSTACKUP),
       STI(STI) {}
 
+MCInst RISCVInstrInfo::getNop() const {
+  if (STI.getFeatureBits()[RISCV::FeatureStdExtC])
+    return MCInstBuilder(RISCV::C_NOP);
+  return MCInstBuilder(RISCV::ADDI)
+      .addReg(RISCV::X0)
+      .addReg(RISCV::X0)
+      .addImm(0);
+}
+
 unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
                                              int &FrameIndex) const {
   switch (MI.getOpcode()) {
@@ -77,14 +87,17 @@ unsigned RISCVInstrInfo::isLoadFromStackSlot(const MachineInstr &MI,
   case RISCV::PseudoVRELOAD_M2:
   case RISCV::PseudoVRELOAD_M4:
   case RISCV::PseudoVRELOAD_M8:
-
-  case RISCV::PseudoEPIVRELOAD_VRN2M1:
-  case RISCV::PseudoEPIVRELOAD_VRN3M1:
-  case RISCV::PseudoEPIVRELOAD_VRN4M1:
-  case RISCV::PseudoEPIVRELOAD_VRN5M1:
-  case RISCV::PseudoEPIVRELOAD_VRN6M1:
-  case RISCV::PseudoEPIVRELOAD_VRN7M1:
-  case RISCV::PseudoEPIVRELOAD_VRN8M1:
+  case RISCV::PseudoVRELOAD2_M1:
+  case RISCV::PseudoVRELOAD2_M2:
+  case RISCV::PseudoVRELOAD2_M4:
+  case RISCV::PseudoVRELOAD3_M1:
+  case RISCV::PseudoVRELOAD3_M2:
+  case RISCV::PseudoVRELOAD4_M1:
+  case RISCV::PseudoVRELOAD4_M2:
+  case RISCV::PseudoVRELOAD5_M1:
+  case RISCV::PseudoVRELOAD6_M1:
+  case RISCV::PseudoVRELOAD7_M1:
+  case RISCV::PseudoVRELOAD8_M1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -120,14 +133,17 @@ unsigned RISCVInstrInfo::isStoreToStackSlot(const MachineInstr &MI,
   case RISCV::PseudoVSPILL_M2:
   case RISCV::PseudoVSPILL_M4:
   case RISCV::PseudoVSPILL_M8:
-
-  case RISCV::PseudoEPIVSPILL_VRN2M1:
-  case RISCV::PseudoEPIVSPILL_VRN3M1:
-  case RISCV::PseudoEPIVSPILL_VRN4M1:
-  case RISCV::PseudoEPIVSPILL_VRN5M1:
-  case RISCV::PseudoEPIVSPILL_VRN6M1:
-  case RISCV::PseudoEPIVSPILL_VRN7M1:
-  case RISCV::PseudoEPIVSPILL_VRN8M1:
+  case RISCV::PseudoVSPILL2_M1:
+  case RISCV::PseudoVSPILL2_M2:
+  case RISCV::PseudoVSPILL2_M4:
+  case RISCV::PseudoVSPILL3_M1:
+  case RISCV::PseudoVSPILL3_M2:
+  case RISCV::PseudoVSPILL4_M1:
+  case RISCV::PseudoVSPILL4_M2:
+  case RISCV::PseudoVSPILL5_M1:
+  case RISCV::PseudoVSPILL6_M1:
+  case RISCV::PseudoVSPILL7_M1:
+  case RISCV::PseudoVSPILL8_M1:
     assert(MI.getOperand(1).isFI());
     FrameIndex = MI.getOperand(1).getIndex();
     assert(MI.getOperand(0).isReg());
@@ -277,71 +293,56 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   MachineFrameInfo &MFI = MF->getFrameInfo();
 
   unsigned Opcode;
-  bool IsScalableVector = false;
-  if (RISCV::GPRRegClass.hasSubClassEq(RC))
+  bool IsScalableVector = true;
+  bool IsZvlsseg = true;
+  if (RISCV::GPRRegClass.hasSubClassEq(RC)) {
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::SW : RISCV::SD;
-  else if (RISCV::FPR16RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR16RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FSH;
-  else if (RISCV::FPR32RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR32RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FSW;
-  else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR64RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FSD;
-  else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
+    IsScalableVector = false;
+  } else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVSPILL_M1;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVSPILL_M2;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVSPILL_M4;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVSPILL_M8;
-    IsScalableVector = true;
-  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN2M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN3M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN4M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN5M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN6M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN7M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVSPILL_VRN8M1))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI);
-    return;
-  } else
+    IsZvlsseg = false;
+  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL2_M1;
+  else if (RISCV::VRN2M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL2_M2;
+  else if (RISCV::VRN2M4RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL2_M4;
+  else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL3_M1;
+  else if (RISCV::VRN3M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL3_M2;
+  else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL4_M1;
+  else if (RISCV::VRN4M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL4_M2;
+  else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL5_M1;
+  else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL6_M1;
+  else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL7_M1;
+  else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVSPILL8_M1;
+  else
     llvm_unreachable("Can't store this register to stack slot");
 
   if (IsScalableVector) {
@@ -350,10 +351,16 @@ void RISCVInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
         MemoryLocation::UnknownSize, MFI.getObjectAlign(FI));
 
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(Opcode))
-        .addReg(SrcReg, getKillRegState(IsKill))
-        .addFrameIndex(FI)
-        .addMemOperand(MMO);
+    auto MIB = BuildMI(MBB, I, DL, get(Opcode))
+                   .addReg(SrcReg, getKillRegState(IsKill))
+                   .addFrameIndex(FI)
+                   .addMemOperand(MMO);
+    if (IsZvlsseg) {
+      // For spilling/reloading Zvlsseg registers, append the dummy field for
+      // the scaled vector length. The argument will be used when expanding
+      // these pseudo instructions.
+      MIB.addReg(RISCV::X0);
+    }
   } else {
     MachineMemOperand *MMO = MF->getMachineMemOperand(
         MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOStore,
@@ -380,64 +387,56 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
   MachineFrameInfo &MFI = MF->getFrameInfo();
 
   unsigned Opcode;
-  bool IsScalableVector = false;
-  if (RISCV::GPRRegClass.hasSubClassEq(RC))
+  bool IsScalableVector = true;
+  bool IsZvlsseg = true;
+  if (RISCV::GPRRegClass.hasSubClassEq(RC)) {
     Opcode = TRI->getRegSizeInBits(RISCV::GPRRegClass) == 32 ?
              RISCV::LW : RISCV::LD;
-  else if (RISCV::FPR16RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR16RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FLH;
-  else if (RISCV::FPR32RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR32RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FLW;
-  else if (RISCV::FPR64RegClass.hasSubClassEq(RC))
+    IsScalableVector = false;
+  } else if (RISCV::FPR64RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::FLD;
-  else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
+    IsScalableVector = false;
+  } else if (RISCV::VRRegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVRELOAD_M1;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM2RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVRELOAD_M2;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM4RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVRELOAD_M4;
-    IsScalableVector = true;
+    IsZvlsseg = false;
   } else if (RISCV::VRM8RegClass.hasSubClassEq(RC)) {
     Opcode = RISCV::PseudoVRELOAD_M8;
-    IsScalableVector = true;
-  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN2M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN3M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN4M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN5M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN6M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN7M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC)) {
-    MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(RISCV::PseudoEPIVRELOAD_VRN8M1), DstReg)
-        .addFrameIndex(FI);
-    return;
-  } else
+    IsZvlsseg = false;
+  } else if (RISCV::VRN2M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD2_M1;
+  else if (RISCV::VRN2M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD2_M2;
+  else if (RISCV::VRN2M4RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD2_M4;
+  else if (RISCV::VRN3M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD3_M1;
+  else if (RISCV::VRN3M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD3_M2;
+  else if (RISCV::VRN4M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD4_M1;
+  else if (RISCV::VRN4M2RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD4_M2;
+  else if (RISCV::VRN5M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD5_M1;
+  else if (RISCV::VRN6M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD6_M1;
+  else if (RISCV::VRN7M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD7_M1;
+  else if (RISCV::VRN8M1RegClass.hasSubClassEq(RC))
+    Opcode = RISCV::PseudoVRELOAD8_M1;
+  else
     llvm_unreachable("Can't load this register from stack slot");
 
   if (IsScalableVector) {
@@ -446,9 +445,15 @@ void RISCVInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
         MemoryLocation::UnknownSize, MFI.getObjectAlign(FI));
 
     MFI.setStackID(FI, TargetStackID::ScalableVector);
-    BuildMI(MBB, I, DL, get(Opcode), DstReg)
-        .addFrameIndex(FI)
-        .addMemOperand(MMO);
+    auto MIB = BuildMI(MBB, I, DL, get(Opcode), DstReg)
+                   .addFrameIndex(FI)
+                   .addMemOperand(MMO);
+    if (IsZvlsseg) {
+      // For spilling/reloading Zvlsseg registers, append the dummy field for
+      // the scaled vector length. The argument will be used when expanding
+      // these pseudo instructions.
+      MIB.addReg(RISCV::X0);
+    }
   } else {
     MachineMemOperand *MMO = MF->getMachineMemOperand(
         MachinePointerInfo::getFixedStack(*MF, FI), MachineMemOperand::MOLoad,
@@ -1403,4 +1408,45 @@ Register RISCVInstrInfo::getVLENFactoredAmount(MachineFunction &MF,
   }
 
   return FactorRegister;
+}
+
+Optional<std::pair<unsigned, unsigned>>
+RISCVInstrInfo::isRVVSpillForZvlsseg(unsigned Opcode) const {
+  switch (Opcode) {
+  default:
+    return None;
+  case RISCV::PseudoVSPILL2_M1:
+  case RISCV::PseudoVRELOAD2_M1:
+    return std::make_pair(2u, 1u);
+  case RISCV::PseudoVSPILL2_M2:
+  case RISCV::PseudoVRELOAD2_M2:
+    return std::make_pair(2u, 2u);
+  case RISCV::PseudoVSPILL2_M4:
+  case RISCV::PseudoVRELOAD2_M4:
+    return std::make_pair(2u, 4u);
+  case RISCV::PseudoVSPILL3_M1:
+  case RISCV::PseudoVRELOAD3_M1:
+    return std::make_pair(3u, 1u);
+  case RISCV::PseudoVSPILL3_M2:
+  case RISCV::PseudoVRELOAD3_M2:
+    return std::make_pair(3u, 2u);
+  case RISCV::PseudoVSPILL4_M1:
+  case RISCV::PseudoVRELOAD4_M1:
+    return std::make_pair(4u, 1u);
+  case RISCV::PseudoVSPILL4_M2:
+  case RISCV::PseudoVRELOAD4_M2:
+    return std::make_pair(4u, 2u);
+  case RISCV::PseudoVSPILL5_M1:
+  case RISCV::PseudoVRELOAD5_M1:
+    return std::make_pair(5u, 1u);
+  case RISCV::PseudoVSPILL6_M1:
+  case RISCV::PseudoVRELOAD6_M1:
+    return std::make_pair(6u, 1u);
+  case RISCV::PseudoVSPILL7_M1:
+  case RISCV::PseudoVRELOAD7_M1:
+    return std::make_pair(7u, 1u);
+  case RISCV::PseudoVSPILL8_M1:
+  case RISCV::PseudoVRELOAD8_M1:
+    return std::make_pair(8u, 1u);
+  }
 }

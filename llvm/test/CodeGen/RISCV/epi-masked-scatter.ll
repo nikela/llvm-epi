@@ -7,7 +7,7 @@ define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %in
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; CHECK-NEXT:    vsll.vi v25, v9, 3
-; CHECK-NEXT:    vsuxei64.v v8, (a0), v25, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v25, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   call void @llvm.masked.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask)
@@ -39,7 +39,7 @@ define void @nxv8f64(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i6
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vsll.vi v16, v16, 3
-; CHECK-NEXT:    vsuxei64.v v8, (a0), v16, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   call void @llvm.masked.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask)
@@ -52,7 +52,7 @@ define void @nxv2i32(<vscale x 2 x i32> %data, i32* %ptr, <vscale x 2 x i64> %in
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vsll.vi v26, v10, 2
 ; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vsuxei64.v v8, (a0), v26, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v26, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices
   call void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %1, i32 4, <vscale x 2 x i1> %mask)
@@ -63,7 +63,7 @@ define void @nxv2i32_full(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %ptr, <v
 ; CHECK-LABEL: nxv2i32_full:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
-; CHECK-NEXT:    vsuxei64.v v8, (zero), v10, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %ptr, i32 4, <vscale x 2 x i1> %mask)
   ret void

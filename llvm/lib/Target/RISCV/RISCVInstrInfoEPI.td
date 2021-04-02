@@ -171,43 +171,6 @@ def "PseudoEPIVMCLR_" # MInfo.MX : Pseudo<(outs VR:$rd), (ins GPR:$vl, ixlenimm:
 def "PseudoEPIVMSET_" # MInfo.MX : Pseudo<(outs VR:$rd), (ins GPR:$vl, ixlenimm:$sew), []>;
 }
 
-
-//===----------------------------------------------------------------------===//
-// Pseudo instructions we need for SPILL and RELOAD
-//===----------------------------------------------------------------------===//
-
-multiclass pseudo_spill_reload<LMULInfo MInfo> {
-  defvar reg_class = MInfo.vrclass;
-
-  let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
-      Uses = [VL, VTYPE] in
-  def "PseudoEPIVSPILL_VR" # MInfo.MX : Pseudo<(outs), (ins reg_class:$rs1, GPR:$rs2), []>;
-
-  let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
-      Uses = [VL, VTYPE] in
-  def "PseudoEPIVRELOAD_VR" # MInfo.MX : Pseudo<(outs reg_class:$rs1), (ins GPR:$rs2), []>;
-
-}
-
-foreach m = MxListNonFractional.m in {
-  defm "" : pseudo_spill_reload<m>;
-}
-
-// Tuples.
-foreach tsize = 2 ... 8 in {
-
-defvar TupleRegClass = !cast<RegisterClass>("VRN"#tsize#"M1");
-
-let hasSideEffects = 1, mayLoad = 0, mayStore = 1, isCodeGenOnly = 1,
-    Uses = [VL, VTYPE] in
-def PseudoEPIVSPILL_VRN#tsize#M1 : Pseudo<(outs), (ins TupleRegClass:$rs1, GPR:$rs2), []>;
-
-let hasSideEffects = 1, mayLoad = 1, mayStore = 0, isCodeGenOnly = 1,
-    Uses = [VL, VTYPE] in
-def PseudoEPIVRELOAD_VRN#tsize#M1 : Pseudo<(outs TupleRegClass:$rs1), (ins GPR:$rs2), []>;
-
-} // tsize
-
 }
 
 //===----------------------------------------------------------------------===//
@@ -494,8 +457,8 @@ multiclass pseudo_unary<VReg result_reg_class,
 }
 
 // Special case for masking that does not have a merge operand.
-multiclass pseudo_unary_nomerge<VReg result_reg_class,
-                                VReg op_reg_class,
+multiclass pseudo_unary_nomerge<RegisterClass result_reg_class,
+                                RegisterClass op_reg_class,
                                 LMULInfo MInfo,
                                 string constraints = ""> {
   let Constraints = constraints,
@@ -978,8 +941,8 @@ multiclass pseudo_binary_m_vv_vf {
 }
 
 multiclass pseudo_ternary<VReg result_reg_class,
-                          VReg op1_reg_class,
-                          RegisterClass op2_reg_class,
+                          RegisterClass op1_reg_class,
+                          VReg op2_reg_class,
                           LMULInfo MInfo,
                           string constraints,
                           list<SchedReadWrite> sched = []> {
@@ -1623,8 +1586,8 @@ class FPZero<DAGOperand operand> {
                 (FMV_D_X X0), (FMV_W_X X0));
 }
 
-multiclass epi_pat_load_store<LLVMType type,
-                              LLVMType mask_type,
+multiclass epi_pat_load_store<ValueType type,
+                              ValueType mask_type,
                               int eew,
                               LMULInfo MInfo,
                               VReg reg_class>
@@ -3240,7 +3203,7 @@ foreach fvti = EPIAllFloatVectors in {
 //===----------------------------------------------------------------------===//
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_binary_v<SDNode vop,
+multiclass pat_vop_binary_v<SDPatternOperator vop,
                             string instruction_name,
                             ValueType result_type,
                             ValueType op_type,
@@ -3264,7 +3227,7 @@ multiclass pat_vop_binary_v<SDNode vop,
               swap>.Value>;
 }
 
-multiclass pat_vop_binary_v_nomask<SDNode vop,
+multiclass pat_vop_binary_v_nomask<SDPatternOperator vop,
                                    string instruction_name,
                                    string kind,
                                    ValueType result_type,
@@ -3288,7 +3251,7 @@ multiclass pat_vop_binary_v_nomask<SDNode vop,
               swap>.Value>;
 }
 
-multiclass pat_vop_binary_xif<SDNode vop,
+multiclass pat_vop_binary_xif<SDPatternOperator vop,
                               string instruction_name,
                               string kind,
                               ValueType result_type,
@@ -3315,7 +3278,7 @@ multiclass pat_vop_binary_xif<SDNode vop,
               swap>.Value>;
 }
 
-multiclass pat_vop_binary_int_v_vv_vx<SDNode vop,
+multiclass pat_vop_binary_int_v_vv_vx<SDPatternOperator vop,
                                       string instruction_name>
 {
   foreach vti = EPIAllIntegerVectors in
@@ -3331,7 +3294,7 @@ multiclass pat_vop_binary_int_v_vv_vx<SDNode vop,
   }
 }
 
-multiclass pat_vop_binary_int_v_vv_vx_vi<SDNode vop,
+multiclass pat_vop_binary_int_v_vv_vx_vi<SDPatternOperator vop,
                                          string instruction_name,
                                          DAGOperand imm_kind = simm5>
 {
@@ -3352,7 +3315,7 @@ multiclass pat_vop_binary_int_v_vv_vx_vi<SDNode vop,
   }
 }
 
-multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
+multiclass pat_vop_binary_fp_v_vv_vf<SDPatternOperator vop,
                                      string instruction_name>
 {
   foreach fvti = EPIAllFloatVectors in
@@ -3369,7 +3332,7 @@ multiclass pat_vop_binary_fp_v_vv_vf<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_binary_reduction_int<SDNode vop,
+multiclass pat_vop_binary_reduction_int<SDPatternOperator vop,
                                         string instruction_name>
 {
   foreach vti = EPIAllIntegerVectors in {
@@ -3391,7 +3354,7 @@ multiclass pat_vop_binary_reduction_int<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_binary_reduction_fp<SDNode vop,
+multiclass pat_vop_binary_reduction_fp<SDPatternOperator vop,
                                        string instruction_name>
 {
   foreach fvti = EPIAllFloatVectors in {
@@ -3414,7 +3377,7 @@ multiclass pat_vop_binary_reduction_fp<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_ternary_v<SDNode vop,
+multiclass pat_vop_ternary_v<SDPatternOperator vop,
                              string instruction_name,
                              ValueType vector_type,
                              ValueType mask_type,
@@ -3435,7 +3398,7 @@ multiclass pat_vop_ternary_v<SDNode vop,
              sew)>;
 }
 
-multiclass pat_vop_ternary_xf<SDNode vop,
+multiclass pat_vop_ternary_xf<SDPatternOperator vop,
                               string instruction_name,
                               string kind,
                               ValueType vector_type,
@@ -3459,7 +3422,7 @@ multiclass pat_vop_ternary_xf<SDNode vop,
              sew)>;
 }
 
-multiclass pat_vop_ternary_fp_v_vv_vf<SDNode vop,
+multiclass pat_vop_ternary_fp_v_vv_vf<SDPatternOperator vop,
                                       string instruction_name>
 {
   foreach fvti = EPIAllFloatVectors in
@@ -3476,7 +3439,7 @@ multiclass pat_vop_ternary_fp_v_vv_vf<SDNode vop,
 }
 
 // FIXME: Add patterns that can select masked versions
-multiclass pat_vop_unary<SDNode vop,
+multiclass pat_vop_unary<SDPatternOperator vop,
                          string instruction_name,
                          ValueType vector_type,
                          ValueType mask_type,
@@ -3494,7 +3457,7 @@ multiclass pat_vop_unary<SDNode vop,
              sew)>;
 }
 
-multiclass pat_vop_unary_fp_v_v<SDNode vop,
+multiclass pat_vop_unary_fp_v_v<SDPatternOperator vop,
                                 string instruction_name>
 {
   foreach vti = EPIAllFloatVectors in
@@ -3589,12 +3552,6 @@ foreach vti = EPIAllIntegerVectors in
             (!cast<Instruction>("PseudoEPIVMV_V_I_" # vti.MInfo.MX)
              simm5:$value,
              VLMax, vti.SEW)>;
-
-  def : Pat<(vti.Vector (int_experimental_vector_stepvector)),
-            (!cast<Instruction>("PseudoEPIVID_V_" # vti.MInfo.MX)
-             (vti.Vector (IMPLICIT_DEF)),
-             (vti.Mask zero_reg),
-             VLMax, vti.SEW)>;
 }
 
 foreach vti = EPIAllIntegerVectors in {
@@ -3634,7 +3591,7 @@ foreach fvti = EPIAllFloatVectors in {
 // Patterns. Full vector relational operations
 //===----------------------------------------------------------------------===//
 
-multiclass pat_vop_binary_int_m_vv<SDNode vop,
+multiclass pat_vop_binary_int_m_vv<SDPatternOperator vop,
                                    string instruction_name,
                                    bit swap = 0>
 {
@@ -3647,7 +3604,7 @@ multiclass pat_vop_binary_int_m_vv<SDNode vop,
   }
 }
 
-multiclass pat_vop_binary_int_m_vv_vx<SDNode vop,
+multiclass pat_vop_binary_int_m_vv_vx<SDPatternOperator vop,
                                       string instruction_name,
                                       bit swap = 0>
 {
@@ -3664,7 +3621,7 @@ multiclass pat_vop_binary_int_m_vv_vx<SDNode vop,
   }
 }
 
-multiclass pat_vop_binary_int_m_vv_vx_vi<SDNode vop,
+multiclass pat_vop_binary_int_m_vv_vx_vi<SDPatternOperator vop,
                                          string instruction_name,
                                          bit swap = 0>
 {
@@ -3704,7 +3661,7 @@ defm "" : pat_vop_binary_int_m_vv<setge, "PseudoEPIVMSLE", /* swap */ 1>;
 // Patterns. Full vector mask logical operations
 //===----------------------------------------------------------------------===//
 
-multiclass pat_vop_binary_m_mm<SDNode vop,
+multiclass pat_vop_binary_m_mm<SDPatternOperator vop,
                                string instruction_name>
 {
   foreach mti = EPIAllMasks in

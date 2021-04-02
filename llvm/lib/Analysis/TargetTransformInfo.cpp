@@ -220,13 +220,18 @@ unsigned TargetTransformInfo::getEstimatedNumberOfCaseClusters(
   return TTIImpl->getEstimatedNumberOfCaseClusters(SI, JTSize, PSI, BFI);
 }
 
-int TargetTransformInfo::getUserCost(const User *U,
-                                     ArrayRef<const Value *> Operands,
-                                     enum TargetCostKind CostKind) const {
-  int Cost = TTIImpl->getUserCost(U, Operands, CostKind);
+InstructionCost
+TargetTransformInfo::getUserCost(const User *U,
+                                 ArrayRef<const Value *> Operands,
+                                 enum TargetCostKind CostKind) const {
+  InstructionCost Cost = TTIImpl->getUserCost(U, Operands, CostKind);
   assert((CostKind == TTI::TCK_RecipThroughput || Cost >= 0) &&
          "TTI should not produce negative costs!");
   return Cost;
+}
+
+BranchProbability TargetTransformInfo::getPredictableBranchThreshold() const {
+  return TTIImpl->getPredictableBranchThreshold();
 }
 
 bool TargetTransformInfo::hasBranchDivergence() const {
@@ -574,8 +579,9 @@ const char *TargetTransformInfo::getRegisterClassName(unsigned ClassID) const {
   return TTIImpl->getRegisterClassName(ClassID);
 }
 
-unsigned TargetTransformInfo::getRegisterBitWidth(bool Vector) const {
-  return TTIImpl->getRegisterBitWidth(Vector);
+TypeSize TargetTransformInfo::getRegisterBitWidth(
+    TargetTransformInfo::RegisterKind K) const {
+  return TTIImpl->getRegisterBitWidth(K);
 }
 
 unsigned TargetTransformInfo::getMaxElementWidth() const {
@@ -586,23 +592,20 @@ unsigned TargetTransformInfo::getMinVectorRegisterBitWidth() const {
   return TTIImpl->getMinVectorRegisterBitWidth();
 }
 
-unsigned
-TargetTransformInfo::getVectorRegisterBitWidth(unsigned WidthFactor) const {
-  return TTIImpl->getVectorRegisterBitWidth(WidthFactor);
-}
-
 unsigned TargetTransformInfo::getVectorRegisterUsage(
-    unsigned VFKnownMin, unsigned ElementTypeSize, unsigned SafeDepDist) const {
-  return TTIImpl->getVectorRegisterUsage(VFKnownMin, ElementTypeSize,
+    RegisterKind K, unsigned VFKnownMin,
+    unsigned ElementTypeSize, unsigned SafeDepDist) const {
+  return TTIImpl->getVectorRegisterUsage(K, VFKnownMin, ElementTypeSize,
                                          SafeDepDist);
 }
 
 std::pair<ElementCount, ElementCount>
-TargetTransformInfo::getFeasibleMaxVFRange(unsigned SmallestType,
+TargetTransformInfo::getFeasibleMaxVFRange(RegisterKind K,
+                                           unsigned SmallestType,
                                            unsigned WidestType,
                                            unsigned MaxSafeRegisterWidth,
                                            unsigned RegWidthFactor) const {
-  return TTIImpl->getFeasibleMaxVFRange(SmallestType, WidestType,
+  return TTIImpl->getFeasibleMaxVFRange(K, SmallestType, WidestType,
                                         MaxSafeRegisterWidth, RegWidthFactor);
 }
 
@@ -731,8 +734,9 @@ int TargetTransformInfo::getArithmeticInstrCost(
 }
 
 int TargetTransformInfo::getShuffleCost(ShuffleKind Kind, VectorType *Ty,
-                                        int Index, VectorType *SubTp) const {
-  int Cost = TTIImpl->getShuffleCost(Kind, Ty, Index, SubTp);
+                                        ArrayRef<int> Mask, int Index,
+                                        VectorType *SubTp) const {
+  int Cost = TTIImpl->getShuffleCost(Kind, Ty, Mask, Index, SubTp);
   assert(Cost >= 0 && "TTI should not produce negative costs!");
   return Cost;
 }
@@ -869,10 +873,10 @@ int TargetTransformInfo::getInterleavedMemoryOpCost(
   return Cost;
 }
 
-int
+InstructionCost
 TargetTransformInfo::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                            TTI::TargetCostKind CostKind) const {
-  int Cost = TTIImpl->getIntrinsicInstrCost(ICA, CostKind);
+  InstructionCost Cost = TTIImpl->getIntrinsicInstrCost(ICA, CostKind);
   assert(Cost >= 0 && "TTI should not produce negative costs!");
   return Cost;
 }
@@ -1051,7 +1055,8 @@ bool TargetTransformInfo::supportsScalableVectors() const {
   return TTIImpl->supportsScalableVectors();
 }
 
-int TargetTransformInfo::getInstructionLatency(const Instruction *I) const {
+InstructionCost
+TargetTransformInfo::getInstructionLatency(const Instruction *I) const {
   return TTIImpl->getInstructionLatency(I);
 }
 
@@ -1348,7 +1353,8 @@ TTI::matchVectorReduction(const ExtractElementInst *Root, unsigned &Opcode,
   return matchPairwiseReduction(Root, Opcode, Ty);
 }
 
-int TargetTransformInfo::getInstructionThroughput(const Instruction *I) const {
+InstructionCost
+TargetTransformInfo::getInstructionThroughput(const Instruction *I) const {
   TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
 
   switch (I->getOpcode()) {

@@ -167,7 +167,7 @@ unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
 }
 
 unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
-                                      int Index, VectorType *SubTp) {
+                                      ArrayRef<int> Mask, int Index, VectorType *SubTp) {
   if (isa<ScalableVectorType>(Tp) &&
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
     switch (Kind) {
@@ -187,7 +187,7 @@ unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                         cast<ScalableVectorType>(SubTp));
     }
   }
-  return BaseT::getShuffleCost(Kind, Tp, Index, SubTp);
+  return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
 }
 
 /// Estimate the overhead of scalarizing an instructions unique
@@ -260,17 +260,6 @@ unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
   return LegalizationFactor * Log2_32(BitRatio);
 }
 
-unsigned RISCVTTIImpl::getRegisterBitWidth(bool Vector) const {
-  if (!Vector)
-    return ST->is64Bit() ? 64 : 32;
-
-  // Largest vector register type will be `vscale * 8 * 64` bits for LMUL = 8
-  // (largest LMUL value). Since vscale is unknown at compile time, the largest
-  // possible register (register-group to be precise) bit width will be at least
-  // `64 * 8`.
-  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * 8 : 0;
-}
-
 bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
   return (ST->hasStdExtV() && true);
 }
@@ -279,12 +268,6 @@ unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
   // Actual min vector register bitwidth is <vscale x ELEN>.
   // getMaxElementWidth() simply return ELEN.
   return ST->hasStdExtV() ? getMaxElementWidth() : 0;
-}
-
-unsigned RISCVTTIImpl::getVectorRegisterBitWidth(unsigned WidthFactor) const {
-  assert(WidthFactor <= 8 && isPowerOf2_32(WidthFactor) &&
-         "Possible RISC-V LMUL values are 1, 2, 4 and 8.");
-  return ST->hasStdExtV() ? getMinVectorRegisterBitWidth() * WidthFactor : 0;
 }
 
 ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
@@ -297,10 +280,9 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
              : ElementCount::getNull();
 }
 
-unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
-                                              unsigned ElementTypeSize,
-                                              unsigned SafeDepDist) const {
-
+unsigned RISCVTTIImpl::getVectorRegisterUsage(
+    TargetTransformInfo::RegisterKind K, unsigned VFKnownMin,
+    unsigned ElementTypeSize, unsigned SafeDepDist) const {
   // FIXME: For the time being we assume dependency distance is always safe.
   // Once we have dependency distance computations for scalable vectors, we need
   // to figure out its relationship with register group usage;
@@ -309,7 +291,8 @@ unsigned RISCVTTIImpl::getVectorRegisterUsage(unsigned VFKnownMin,
 }
 
 std::pair<ElementCount, ElementCount>
-RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
+RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
+                                    unsigned SmallestType, unsigned WidestType,
                                     unsigned MaxSafeRegisterWidth,
                                     unsigned RegWidthFactor) const {
   // check for SEW <= ELEN in the base ISA
@@ -319,8 +302,9 @@ RISCVTTIImpl::getFeasibleMaxVFRange(unsigned SmallestType, unsigned WidestType,
   // valid range of VFs.
   SmallestType = std::max<unsigned>(8, SmallestType);
   WidestType = std::max<unsigned>(8, WidestType);
-  unsigned WidestRegister =
-      std::min(getVectorRegisterBitWidth(RegWidthFactor), MaxSafeRegisterWidth);
+  unsigned WidestRegister = std::min<unsigned>(
+      getMinVectorRegisterBitWidth() * RegWidthFactor,
+      MaxSafeRegisterWidth);
   unsigned SmallestRegister =
       std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
   bool IsScalable = useScalableVectorType();
@@ -354,16 +338,10 @@ int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
   return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
 
-unsigned RISCVTTIImpl::getGatherScatterOpCost(
-    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
-    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
-  // We can do gather/scatter using a single instruction.
-  // FIXME: The actual cost is likely to be higher than that.
-  if (isa<ScalableVectorType>(DataTy))
-    return 1;
-
-  return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
-                                       Alignment, CostKind, I);
+TargetTransformInfo::PopcntSupportKind
+RISCVTTIImpl::getPopcntSupport(unsigned TyWidth) {
+  assert(isPowerOf2_32(TyWidth) && "Ty width must be power of 2");
+  return ST->hasStdExtZbb() ? TTI::PSK_FastHardware : TTI::PSK_Software;
 }
 
 bool RISCVTTIImpl::shouldExpandReduction(const IntrinsicInst *II) const {
@@ -470,4 +448,136 @@ int RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   }
 
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
+}
+
+unsigned RISCVTTIImpl::getGatherScatterOpCost(
+    unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
+    Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
+  // We can do gather/scatter using a single instruction.
+  // FIXME: The actual cost is likely to be higher than that.
+  if (isa<ScalableVectorType>(DataTy))
+    return 1;
+
+  if (CostKind != TTI::TCK_RecipThroughput)
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  if ((Opcode == Instruction::Load &&
+       !isLegalMaskedGather(DataTy, Align(Alignment))) ||
+      (Opcode == Instruction::Store &&
+       !isLegalMaskedScatter(DataTy, Align(Alignment))))
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  if (!isa<FixedVectorType>(DataTy))
+    return BaseT::getGatherScatterOpCost(Opcode, DataTy, Ptr, VariableMask,
+                                         Alignment, CostKind, I);
+
+  auto *VTy = cast<FixedVectorType>(DataTy);
+  unsigned NumLoads = VTy->getNumElements();
+  unsigned MemOpCost =
+      getMemoryOpCost(Opcode, VTy->getElementType(), Alignment, 0, CostKind, I);
+  return NumLoads * MemOpCost;
+}
+
+bool RISCVTTIImpl::isLegalToVectorizeReduction(RecurrenceDescriptor RdxDesc,
+                                               ElementCount VF) const {
+  if (!VF.isScalable())
+    return true;
+
+  // FIXME: Check legal types here.
+
+  switch (RdxDesc.getRecurrenceKind()) {
+  case RecurKind::Add:
+  case RecurKind::FAdd:
+  case RecurKind::And:
+  case RecurKind::Or:
+  case RecurKind::Xor:
+  case RecurKind::SMin:
+  case RecurKind::SMax:
+  case RecurKind::UMin:
+  case RecurKind::UMax:
+  case RecurKind::FMin:
+  case RecurKind::FMax:
+    return true;
+  default:
+    return false;
+  }
+}
+
+InstructionCost
+RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
+                                    TTI::TargetCostKind CostKind) {
+  // Taken from AArch64.
+  auto *RetTy = ICA.getReturnType();
+  switch (ICA.getID()) {
+  case Intrinsic::experimental_stepvector: {
+    unsigned Cost = 1; // Cost of the `index' instruction
+    auto LT = TLI->getTypeLegalizationCost(DL, RetTy);
+    // Legalisation of illegal vectors involves an `index' instruction plus
+    // (LT.first - 1) vector adds.
+    if (LT.first > 1) {
+      Type *LegalVTy = EVT(LT.second).getTypeForEVT(RetTy->getContext());
+      unsigned AddCost =
+          getArithmeticInstrCost(Instruction::Add, LegalVTy, CostKind);
+      Cost += AddCost * (LT.first - 1);
+    }
+    return Cost;
+  }
+  // This is not ideal but untill all VP intrinsics are in upstream we can't use
+  // the IsVPIntrinsic getter, so build the list manually from
+  // IntrinsicEnums.inc.
+#define VP_INTRINSIC_LIST                                                      \
+  VP_INTRINSIC(add)                                                            \
+  VP_INTRINSIC(and)                                                            \
+  VP_INTRINSIC(ashr)                                                           \
+  VP_INTRINSIC(bitcast)                                                        \
+  VP_INTRINSIC(fadd)                                                           \
+  VP_INTRINSIC(fcmp)                                                           \
+  VP_INTRINSIC(fdiv)                                                           \
+  VP_INTRINSIC(fma)                                                            \
+  VP_INTRINSIC(fmul)                                                           \
+  VP_INTRINSIC(fneg)                                                           \
+  VP_INTRINSIC(fpext)                                                          \
+  VP_INTRINSIC(fptosi)                                                         \
+  VP_INTRINSIC(fptoui)                                                         \
+  VP_INTRINSIC(fptrunc)                                                        \
+  VP_INTRINSIC(frem)                                                           \
+  VP_INTRINSIC(fsub)                                                           \
+  VP_INTRINSIC(gather)                                                         \
+  VP_INTRINSIC(icmp)                                                           \
+  VP_INTRINSIC(inttoptr)                                                       \
+  VP_INTRINSIC(load)                                                           \
+  VP_INTRINSIC(lshr)                                                           \
+  VP_INTRINSIC(mul)                                                            \
+  VP_INTRINSIC(or)                                                             \
+  VP_INTRINSIC(ptrtoint)                                                       \
+  VP_INTRINSIC(scatter)                                                        \
+  VP_INTRINSIC(sdiv)                                                           \
+  VP_INTRINSIC(select)                                                         \
+  VP_INTRINSIC(sext)                                                           \
+  VP_INTRINSIC(shl)                                                            \
+  VP_INTRINSIC(sitofp)                                                         \
+  VP_INTRINSIC(srem)                                                           \
+  VP_INTRINSIC(store)                                                          \
+  VP_INTRINSIC(sub)                                                            \
+  VP_INTRINSIC(trunc)                                                          \
+  VP_INTRINSIC(udiv)                                                           \
+  VP_INTRINSIC(uitofp)                                                         \
+  VP_INTRINSIC(urem)                                                           \
+  VP_INTRINSIC(xor)                                                            \
+  VP_INTRINSIC(zext)
+#define VP_INTRINSIC(name) case Intrinsic::vp_##name:
+    VP_INTRINSIC_LIST
+    // EPI-specific
+  case Intrinsic::experimental_vector_vp_slideleftfill:
+    // FIXME: Assume they can be affordably implemented.
+    // FIXME: This will swallow also fixed-vectors.
+    return 1;
+#undef VP_INTRINSIC
+  default:
+    break;
+  }
+
+  return BaseT::getIntrinsicInstrCost(ICA, CostKind);
 }

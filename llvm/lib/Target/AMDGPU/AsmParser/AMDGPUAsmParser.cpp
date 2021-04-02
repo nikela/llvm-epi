@@ -338,9 +338,6 @@ public:
   bool isGDS() const { return isImmTy(ImmTyGDS); }
   bool isLDS() const { return isImmTy(ImmTyLDS); }
   bool isCPol() const { return isImmTy(ImmTyCPol); }
-  // "CPol_GLC1" is a MatchClass of the CPOL_GLC1 operand with the default and
-  // forced value of the GLC operand.
-  bool isCPol_GLC1() const { return isImmTy(ImmTyCPol); }
   bool isSWZ() const { return isImmTy(ImmTySWZ); }
   bool isTFE() const { return isImmTy(ImmTyTFE); }
   bool isD16() const { return isImmTy(ImmTyD16); }
@@ -1215,7 +1212,8 @@ private:
   bool ParseDirectiveHSACodeObjectISA();
   bool ParseAMDKernelCodeTValue(StringRef ID, amd_kernel_code_t &Header);
   bool ParseDirectiveAMDKernelCodeT();
-  bool subtargetHasRegister(const MCRegisterInfo &MRI, unsigned RegNo) const;
+  // TODO: Possibly make subtargetHasRegister const.
+  bool subtargetHasRegister(const MCRegisterInfo &MRI, unsigned RegNo);
   bool ParseDirectiveAMDGPUHsaKernel();
 
   bool ParseDirectiveISAVersion();
@@ -1294,7 +1292,7 @@ public:
       // AsmParser::parseDirectiveSet() cannot be specialized for specific target.
       AMDGPU::IsaVersion ISA = AMDGPU::getIsaVersion(getSTI().getCPU());
       MCContext &Ctx = getContext();
-      if (ISA.Major >= 6 && isHsaAbiVersion3(&getSTI())) {
+      if (ISA.Major >= 6 && isHsaAbiVersion3Or4(&getSTI())) {
         MCSymbol *Sym =
             Ctx.getOrCreateSymbol(Twine(".amdgcn.gfx_generation_number"));
         Sym->setVariableValue(MCConstantExpr::create(ISA.Major, Ctx));
@@ -1311,16 +1309,12 @@ public:
         Sym = Ctx.getOrCreateSymbol(Twine(".option.machine_version_stepping"));
         Sym->setVariableValue(MCConstantExpr::create(ISA.Stepping, Ctx));
       }
-      if (ISA.Major >= 6 && isHsaAbiVersion3(&getSTI())) {
+      if (ISA.Major >= 6 && isHsaAbiVersion3Or4(&getSTI())) {
         initializeGprCountSymbol(IS_VGPR);
         initializeGprCountSymbol(IS_SGPR);
       } else
         KernelScope.initialize(getContext());
     }
-  }
-
-  bool hasXNACK() const {
-    return AMDGPU::hasXNACK(getSTI());
   }
 
   bool hasMIMG_R128() const {
@@ -1539,7 +1533,6 @@ private:
   bool validateMIMGD16(const MCInst &Inst);
   bool validateMIMGDim(const MCInst &Inst);
   bool validateMIMGMSAA(const MCInst &Inst);
-  bool validateLdsDirect(const MCInst &Inst);
   bool validateOpSel(const MCInst &Inst);
   bool validateVccOperand(unsigned Reg) const;
   bool validateVOP3Literal(const MCInst &Inst, const OperandVector &Operands);
@@ -1549,6 +1542,7 @@ private:
   bool validateDivScale(const MCInst &Inst);
   bool validateCoherencyBits(const MCInst &Inst, const OperandVector &Operands,
                              const SMLoc &IDLoc);
+  Optional<StringRef> validateLdsDirect(const MCInst &Inst);
   unsigned getConstantBusLimit(unsigned Opcode) const;
   bool usesConstantBus(const MCInst &Inst, unsigned OpIdx);
   bool isInlineConstant(const MCInst &Inst, unsigned OpIdx) const;
@@ -1583,6 +1577,8 @@ private:
   void lex();
 
 public:
+  void onBeginOfFile() override;
+
   OperandMatchResultTy parseOptionalOperand(OperandVector &Operands);
   OperandMatchResultTy parseOptionalOpr(OperandVector &Operands);
 
@@ -1620,7 +1616,6 @@ public:
   void cvtMtbuf(MCInst &Inst, const OperandVector &Operands);
 
   AMDGPUOperand::Ptr defaultCPol() const;
-  AMDGPUOperand::Ptr defaultCPol_GLC1() const;
 
   AMDGPUOperand::Ptr defaultSMRDOffset8() const;
   AMDGPUOperand::Ptr defaultSMEMOffset() const;
@@ -2715,7 +2710,7 @@ AMDGPUAsmParser::parseRegister(bool RestoreOnFailure) {
   if (!ParseAMDGPURegister(RegKind, Reg, RegNum, RegWidth)) {
     return nullptr;
   }
-  if (isHsaAbiVersion3(&getSTI())) {
+  if (isHsaAbiVersion3Or4(&getSTI())) {
     if (!updateGprCountSymbols(RegKind, RegNum, RegWidth))
       return nullptr;
   } else
@@ -3768,7 +3763,7 @@ static bool IsRevOpcode(const unsigned Opcode)
   }
 }
 
-bool AMDGPUAsmParser::validateLdsDirect(const MCInst &Inst) {
+Optional<StringRef> AMDGPUAsmParser::validateLdsDirect(const MCInst &Inst) {
 
   using namespace SIInstrFlags;
   const unsigned Opcode = Inst.getOpcode();
@@ -3776,33 +3771,29 @@ bool AMDGPUAsmParser::validateLdsDirect(const MCInst &Inst) {
 
   // lds_direct register is defined so that it can be used
   // with 9-bit operands only. Ignore encodings which do not accept these.
-  if ((Desc.TSFlags & (VOP1 | VOP2 | VOP3 | VOPC | VOP3P | SIInstrFlags::SDWA)) == 0)
-    return true;
+  const auto Enc = VOP1 | VOP2 | VOP3 | VOPC | VOP3P | SIInstrFlags::SDWA;
+  if ((Desc.TSFlags & Enc) == 0)
+    return None;
 
-  const int Src0Idx = AMDGPU::getNamedOperandIdx(Opcode, AMDGPU::OpName::src0);
-  const int Src1Idx = AMDGPU::getNamedOperandIdx(Opcode, AMDGPU::OpName::src1);
-  const int Src2Idx = AMDGPU::getNamedOperandIdx(Opcode, AMDGPU::OpName::src2);
-
-  const int SrcIndices[] = { Src1Idx, Src2Idx };
-
-  // lds_direct cannot be specified as either src1 or src2.
-  for (int SrcIdx : SrcIndices) {
-    if (SrcIdx == -1) break;
-    const MCOperand &Src = Inst.getOperand(SrcIdx);
+  for (auto SrcName : {OpName::src0, OpName::src1, OpName::src2}) {
+    auto SrcIdx = getNamedOperandIdx(Opcode, SrcName);
+    if (SrcIdx == -1)
+      break;
+    const auto &Src = Inst.getOperand(SrcIdx);
     if (Src.isReg() && Src.getReg() == LDS_DIRECT) {
-      return false;
+
+      if (isGFX90A())
+        return StringRef("lds_direct is not supported on this GPU");
+
+      if (IsRevOpcode(Opcode) || (Desc.TSFlags & SIInstrFlags::SDWA))
+        return StringRef("lds_direct cannot be used with this instruction");
+
+      if (SrcName != OpName::src0)
+        return StringRef("lds_direct may be used as src0 only");
     }
   }
 
-  if (Src0Idx == -1)
-    return true;
-
-  const MCOperand &Src = Inst.getOperand(Src0Idx);
-  if (!Src.isReg() || Src.getReg() != LDS_DIRECT)
-    return true;
-
-  // lds_direct is specified as src0. Check additional limitations.
-  return (Desc.TSFlags & SIInstrFlags::SDWA) == 0 && !IsRevOpcode(Opcode);
+  return None;
 }
 
 SMLoc AMDGPUAsmParser::getFlatOffsetLoc(const OperandVector &Operands) const {
@@ -4133,9 +4124,8 @@ bool AMDGPUAsmParser::validateCoherencyBits(const MCInst &Inst,
 bool AMDGPUAsmParser::validateInstruction(const MCInst &Inst,
                                           const SMLoc &IDLoc,
                                           const OperandVector &Operands) {
-  if (!validateLdsDirect(Inst)) {
-    Error(getRegLoc(AMDGPU::LDS_DIRECT, Operands),
-      "invalid use of lds_direct");
+  if (auto ErrMsg = validateLdsDirect(Inst)) {
+    Error(getRegLoc(LDS_DIRECT, Operands), *ErrMsg);
     return false;
   }
   if (!validateSOPLiteral(Inst)) {
@@ -4395,21 +4385,19 @@ bool AMDGPUAsmParser::ParseDirectiveAMDGCNTarget() {
   if (getSTI().getTargetTriple().getArch() != Triple::amdgcn)
     return TokError("directive only supported for amdgcn architecture");
 
-  std::string Target;
-
-  SMLoc TargetStart = getLoc();
-  if (getParser().parseEscapedString(Target))
+  std::string TargetIDDirective;
+  SMLoc TargetStart = getTok().getLoc();
+  if (getParser().parseEscapedString(TargetIDDirective))
     return true;
-  SMRange TargetRange = SMRange(TargetStart, getLoc());
 
-  std::string ExpectedTarget;
-  raw_string_ostream ExpectedTargetOS(ExpectedTarget);
-  IsaInfo::streamIsaVersion(&getSTI(), ExpectedTargetOS);
+  SMRange TargetRange = SMRange(TargetStart, getTok().getLoc());
+  if (getTargetStreamer().getTargetID()->toString() != TargetIDDirective)
+    return getParser().Error(TargetRange.Start,
+        (Twine(".amdgcn_target directive's target id ") +
+         Twine(TargetIDDirective) +
+         Twine(" does not match the specified target id ") +
+         Twine(getTargetStreamer().getTargetID()->toString())).str());
 
-  if (Target != ExpectedTargetOS.str())
-    return Error(TargetRange.Start, "target must match options", TargetRange);
-
-  getTargetStreamer().EmitDirectiveAMDGCNTarget(Target);
   return false;
 }
 
@@ -4482,7 +4470,6 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
   unsigned UserSGPRCount = 0;
   bool ReserveVCC = true;
   bool ReserveFlatScr = true;
-  bool ReserveXNACK = hasXNACK();
   Optional<bool> EnableWavefrontSize32;
 
   while (true) {
@@ -4525,6 +4512,10 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
       if (!isUInt<sizeof(KD.private_segment_fixed_size) * CHAR_BIT>(Val))
         return OutOfRangeError(ValRange);
       KD.private_segment_fixed_size = Val;
+    } else if (ID == ".amdhsa_kernarg_size") {
+      if (!isUInt<sizeof(KD.kernarg_size) * CHAR_BIT>(Val))
+        return OutOfRangeError(ValRange);
+      KD.kernarg_size = Val;
     } else if (ID == ".amdhsa_user_sgpr_private_segment_buffer") {
       PARSE_BITS_ENTRY(KD.kernel_code_properties,
                        KERNEL_CODE_PROPERTY_ENABLE_SGPR_PRIVATE_SEGMENT_BUFFER,
@@ -4624,7 +4615,9 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
         return Error(IDRange.Start, "directive requires gfx8+", IDRange);
       if (!isUInt<1>(Val))
         return OutOfRangeError(ValRange);
-      ReserveXNACK = Val;
+      if (Val != getTargetStreamer().getTargetID()->isXnackOnOrAny())
+        return getParser().Error(IDRange.Start, ".amdhsa_reserve_xnack_mask does not match target id",
+                                 IDRange);
     } else if (ID == ".amdhsa_float_round_mode_32") {
       PARSE_BITS_ENTRY(KD.compute_pgm_rsrc1,
                        COMPUTE_PGM_RSRC1_FLOAT_ROUND_MODE_32, Val, ValRange);
@@ -4715,7 +4708,8 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
   unsigned VGPRBlocks;
   unsigned SGPRBlocks;
   if (calculateGPRBlocks(getFeatureBits(), ReserveVCC, ReserveFlatScr,
-                         ReserveXNACK, EnableWavefrontSize32, NextFreeVGPR,
+                         getTargetStreamer().getTargetID()->isXnackOnOrAny(),
+                         EnableWavefrontSize32, NextFreeVGPR,
                          VGPRRange, NextFreeSGPR, SGPRRange, VGPRBlocks,
                          SGPRBlocks))
     return true;
@@ -4752,7 +4746,7 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
 
   getTargetStreamer().EmitAmdhsaKernelDescriptor(
       getSTI(), KernelName, KD, NextFreeVGPR, NextFreeSGPR, ReserveVCC,
-      ReserveFlatScr, ReserveXNACK);
+      ReserveFlatScr);
   return false;
 }
 
@@ -4778,9 +4772,9 @@ bool AMDGPUAsmParser::ParseDirectiveHSACodeObjectISA() {
   // targeted GPU.
   if (isToken(AsmToken::EndOfStatement)) {
     AMDGPU::IsaVersion ISA = AMDGPU::getIsaVersion(getSTI().getCPU());
-    getTargetStreamer().EmitDirectiveHSACodeObjectISA(ISA.Major, ISA.Minor,
-                                                      ISA.Stepping,
-                                                      "AMD", "AMDGPU");
+    getTargetStreamer().EmitDirectiveHSACodeObjectISAV2(ISA.Major, ISA.Minor,
+                                                        ISA.Stepping,
+                                                        "AMD", "AMDGPU");
     return false;
   }
 
@@ -4805,8 +4799,8 @@ bool AMDGPUAsmParser::ParseDirectiveHSACodeObjectISA() {
   if (!parseString(ArchName, "invalid arch name"))
     return true;
 
-  getTargetStreamer().EmitDirectiveHSACodeObjectISA(Major, Minor, Stepping,
-                                                    VendorName, ArchName);
+  getTargetStreamer().EmitDirectiveHSACodeObjectISAV2(Major, Minor, Stepping,
+                                                      VendorName, ArchName);
   return false;
 }
 
@@ -4915,19 +4909,11 @@ bool AMDGPUAsmParser::ParseDirectiveISAVersion() {
                  "architectures");
   }
 
-  auto ISAVersionStringFromASM = getToken().getStringContents();
+  auto TargetIDDirective = getLexer().getTok().getStringContents();
+  if (getTargetStreamer().getTargetID()->toString() != TargetIDDirective)
+    return Error(getParser().getTok().getLoc(), "target id must match options");
 
-  std::string ISAVersionStringFromSTI;
-  raw_string_ostream ISAVersionStreamFromSTI(ISAVersionStringFromSTI);
-  IsaInfo::streamIsaVersion(&getSTI(), ISAVersionStreamFromSTI);
-
-  if (ISAVersionStringFromASM != ISAVersionStreamFromSTI.str()) {
-    return Error(getLoc(),
-                 ".amd_amdgpu_isa directive does not match triple and/or mcpu "
-                 "arguments specified through the command line");
-  }
-
-  getTargetStreamer().EmitISAVersion(ISAVersionStreamFromSTI.str());
+  getTargetStreamer().EmitISAVersion();
   Lex();
 
   return false;
@@ -4937,7 +4923,7 @@ bool AMDGPUAsmParser::ParseDirectiveHSAMetadata() {
   const char *AssemblerDirectiveBegin;
   const char *AssemblerDirectiveEnd;
   std::tie(AssemblerDirectiveBegin, AssemblerDirectiveEnd) =
-      isHsaAbiVersion3(&getSTI())
+      isHsaAbiVersion3Or4(&getSTI())
           ? std::make_tuple(HSAMD::V3::AssemblerDirectiveBegin,
                             HSAMD::V3::AssemblerDirectiveEnd)
           : std::make_tuple(HSAMD::AssemblerDirectiveBegin,
@@ -4954,7 +4940,7 @@ bool AMDGPUAsmParser::ParseDirectiveHSAMetadata() {
                           HSAMetadataString))
     return true;
 
-  if (isHsaAbiVersion3(&getSTI())) {
+  if (isHsaAbiVersion3Or4(&getSTI())) {
     if (!getTargetStreamer().EmitHSAMetadataV3(HSAMetadataString))
       return Error(getLoc(), "invalid HSA metadata");
   } else {
@@ -5104,12 +5090,9 @@ bool AMDGPUAsmParser::ParseDirectiveAMDGPULDS() {
 bool AMDGPUAsmParser::ParseDirective(AsmToken DirectiveID) {
   StringRef IDVal = DirectiveID.getString();
 
-  if (isHsaAbiVersion3(&getSTI())) {
-    if (IDVal == ".amdgcn_target")
-      return ParseDirectiveAMDGCNTarget();
-
+  if (isHsaAbiVersion3Or4(&getSTI())) {
     if (IDVal == ".amdhsa_kernel")
-      return ParseDirectiveAMDHSAKernel();
+     return ParseDirectiveAMDHSAKernel();
 
     // TODO: Restructure/combine with PAL metadata directive.
     if (IDVal == AMDGPU::HSAMD::V3::AssemblerDirectiveBegin)
@@ -5134,6 +5117,9 @@ bool AMDGPUAsmParser::ParseDirective(AsmToken DirectiveID) {
       return ParseDirectiveHSAMetadata();
   }
 
+  if (IDVal == ".amdgcn_target")
+    return ParseDirectiveAMDGCNTarget();
+
   if (IDVal == ".amdgpu_lds")
     return ParseDirectiveAMDGPULDS();
 
@@ -5147,7 +5133,7 @@ bool AMDGPUAsmParser::ParseDirective(AsmToken DirectiveID) {
 }
 
 bool AMDGPUAsmParser::subtargetHasRegister(const MCRegisterInfo &MRI,
-                                           unsigned RegNo) const {
+                                           unsigned RegNo) {
 
   for (MCRegAliasIterator R(AMDGPU::TTMP12_TTMP13_TTMP14_TTMP15, &MRI, true);
        R.isValid(); ++R) {
@@ -5179,7 +5165,7 @@ bool AMDGPUAsmParser::subtargetHasRegister(const MCRegisterInfo &MRI,
   case AMDGPU::XNACK_MASK:
   case AMDGPU::XNACK_MASK_LO:
   case AMDGPU::XNACK_MASK_HI:
-    return (isVI() || isGFX9()) && hasXNACK();
+    return (isVI() || isGFX9()) && getTargetStreamer().getTargetID()->isXnackSupported();
   case AMDGPU::SGPR_NULL:
     return isGFX10Plus();
   default:
@@ -6910,11 +6896,6 @@ AMDGPUOperand::Ptr AMDGPUAsmParser::defaultCPol() const {
   return AMDGPUOperand::CreateImm(this, 0, SMLoc(), AMDGPUOperand::ImmTyCPol);
 }
 
-AMDGPUOperand::Ptr AMDGPUAsmParser::defaultCPol_GLC1() const {
-  return AMDGPUOperand::CreateImm(this, CPol::GLC, SMLoc(),
-                                  AMDGPUOperand::ImmTyCPol);
-}
-
 void AMDGPUAsmParser::cvtMubufImpl(MCInst &Inst,
                                    const OperandVector &Operands,
                                    bool IsAtomic,
@@ -7274,6 +7255,18 @@ static const OptionalOperand AMDGPUOptionalOperandTable[] = {
   {"cbsz", AMDGPUOperand::ImmTyCBSZ, false, nullptr},
   {"abid", AMDGPUOperand::ImmTyABID, false, nullptr}
 };
+
+void AMDGPUAsmParser::onBeginOfFile() {
+  if (!getParser().getStreamer().getTargetStreamer() ||
+      getSTI().getTargetTriple().getArch() == Triple::r600)
+    return;
+
+  if (!getTargetStreamer().getTargetID())
+    getTargetStreamer().initializeTargetID(getSTI(), getSTI().getFeatureString());
+
+  if (isHsaAbiVersion3Or4(&getSTI()))
+    getTargetStreamer().EmitDirectiveAMDGCNTarget();
+}
 
 OperandMatchResultTy AMDGPUAsmParser::parseOptionalOperand(OperandVector &Operands) {
 
