@@ -142,8 +142,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addiw s3, a4, -2
 ; CHECK-NEXT:    addi ra, zero, 18
 ; CHECK-NEXT:    addi a4, zero, -1
-; CHECK-NEXT:    slli a4, a4, 63
-; CHECK-NEXT:    addi s5, a4, -1
+; CHECK-NEXT:    srli s5, a4, 1
 ; CHECK-NEXT:    # implicit-def: $v25
 ; CHECK-NEXT:  .LBB0_3: # %while.body
 ; CHECK-NEXT:    # =>This Loop Header: Depth=1

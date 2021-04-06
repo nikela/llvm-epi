@@ -20,12 +20,14 @@
 #include "Target.h"
 #include "UnwindInfoSection.h"
 
+#include "lld/Common/Arrays.h"
 #include "lld/Common/ErrorHandler.h"
 #include "lld/Common/Memory.h"
 #include "llvm/BinaryFormat/MachO.h"
 #include "llvm/Config/llvm-config.h"
 #include "llvm/Support/LEB128.h"
 #include "llvm/Support/MathExtras.h"
+#include "llvm/Support/Parallel.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/TimeProfiler.h"
 #include "llvm/Support/xxhash.h"
@@ -47,8 +49,8 @@ public:
 
   void scanRelocations();
   void scanSymbols();
-  void createOutputSections();
-  void createLoadCommands();
+  template <class LP> void createOutputSections();
+  template <class LP> void createLoadCommands();
   void finalizeAddressses();
   void finalizeLinkEditSegment();
   void assignAddresses(OutputSegment *);
@@ -59,7 +61,7 @@ public:
   void writeCodeSignature();
   void writeOutputFile();
 
-  void run();
+  template <class LP> void run();
 
   std::unique_ptr<FileOutputBuffer> &buffer;
   uint64_t addr = 0;
@@ -169,20 +171,23 @@ public:
   IndirectSymtabSection *indirectSymtabSection;
 };
 
-class LCSegment : public LoadCommand {
+template <class LP> class LCSegment : public LoadCommand {
 public:
   LCSegment(StringRef name, OutputSegment *seg) : name(name), seg(seg) {}
 
   uint32_t getSize() const override {
-    return sizeof(segment_command_64) +
-           seg->numNonHiddenSections() * sizeof(section_64);
+    return sizeof(typename LP::segment_command) +
+           seg->numNonHiddenSections() * sizeof(typename LP::section);
   }
 
   void writeTo(uint8_t *buf) const override {
-    auto *c = reinterpret_cast<segment_command_64 *>(buf);
-    buf += sizeof(segment_command_64);
+    using SegmentCommand = typename LP::segment_command;
+    using Section = typename LP::section;
 
-    c->cmd = LC_SEGMENT_64;
+    auto *c = reinterpret_cast<SegmentCommand *>(buf);
+    buf += sizeof(SegmentCommand);
+
+    c->cmd = LP::segmentLCType;
     c->cmdsize = getSize();
     memcpy(c->segname, name.data(), name.size());
     c->fileoff = seg->fileOff;
@@ -200,15 +205,15 @@ public:
     for (const OutputSection *osec : seg->getSections()) {
       if (!isZeroFill(osec->flags)) {
         assert(osec->fileOff >= seg->fileOff);
-        c->filesize = std::max(
+        c->filesize = std::max<uint64_t>(
             c->filesize, osec->fileOff + osec->getFileSize() - seg->fileOff);
       }
 
       if (osec->isHidden())
         continue;
 
-      auto *sectHdr = reinterpret_cast<section_64 *>(buf);
-      buf += sizeof(section_64);
+      auto *sectHdr = reinterpret_cast<Section *>(buf);
+      buf += sizeof(Section);
 
       memcpy(sectHdr->sectname, osec->name.data(), osec->name.size());
       memcpy(sectHdr->segname, name.data(), name.size());
@@ -340,7 +345,7 @@ public:
   LCRPath(StringRef path) : path(path) {}
 
   uint32_t getSize() const override {
-    return alignTo(sizeof(rpath_command) + path.size() + 1, WordSize);
+    return alignTo(sizeof(rpath_command) + path.size() + 1, target->wordSize);
   }
 
   void writeTo(uint8_t *buf) const override {
@@ -457,9 +462,9 @@ static void prepareBranchTarget(Symbol *sym) {
     if (in.stubs->addEntry(dysym)) {
       if (sym->isWeakDef()) {
         in.binding->addEntry(dysym, in.lazyPointers->isec,
-                             sym->stubsIndex * WordSize);
+                             sym->stubsIndex * target->wordSize);
         in.weakBinding->addEntry(sym, in.lazyPointers->isec,
-                                 sym->stubsIndex * WordSize);
+                                 sym->stubsIndex * target->wordSize);
       } else {
         in.lazyBinding->addEntry(dysym);
       }
@@ -467,9 +472,10 @@ static void prepareBranchTarget(Symbol *sym) {
   } else if (auto *defined = dyn_cast<Defined>(sym)) {
     if (defined->isExternalWeakDef()) {
       if (in.stubs->addEntry(sym)) {
-        in.rebase->addEntry(in.lazyPointers->isec, sym->stubsIndex * WordSize);
+        in.rebase->addEntry(in.lazyPointers->isec,
+                            sym->stubsIndex * target->wordSize);
         in.weakBinding->addEntry(sym, in.lazyPointers->isec,
-                                 sym->stubsIndex * WordSize);
+                                 sym->stubsIndex * target->wordSize);
       }
     }
   }
@@ -553,10 +559,10 @@ void Writer::scanSymbols() {
   }
 }
 
-void Writer::createLoadCommands() {
+template <class LP> void Writer::createLoadCommands() {
   uint8_t segIndex = 0;
   for (OutputSegment *seg : outputSegments) {
-    in.header->addLoadCommand(make<LCSegment>(seg->name, seg));
+    in.header->addLoadCommand(make<LCSegment<LP>>(seg->name, seg));
     seg->index = segIndex++;
   }
 
@@ -786,12 +792,12 @@ static NamePair maybeRenameSection(NamePair key) {
   return key;
 }
 
-void Writer::createOutputSections() {
+template <class LP> void Writer::createOutputSections() {
   TimeTraceScope timeScope("Create output sections");
   // First, create hidden sections
   stringTableSection = make<StringTableSection>();
   unwindInfoSection = make<UnwindInfoSection>(); // TODO(gkm): only when no -r
-  symtabSection = make<SymtabSection>(*stringTableSection);
+  symtabSection = makeSymtabSection<LP>(*stringTableSection);
   indirectSymtabSection = make<IndirectSymtabSection>();
   if (config->adhocCodesign)
     codeSignatureSection = make<CodeSignatureSection>();
@@ -920,10 +926,21 @@ void Writer::writeSections() {
       osec->writeTo(buf + osec->fileOff);
 }
 
+// In order to utilize multiple cores, we first split the buffer into chunks,
+// compute a hash for each chunk, and then compute a hash value of the hash
+// values.
 void Writer::writeUuid() {
   TimeTraceScope timeScope("Computing UUID");
-  uint64_t digest =
-      xxHash64({buffer->getBufferStart(), buffer->getBufferEnd()});
+  ArrayRef<uint8_t> data{buffer->getBufferStart(), buffer->getBufferEnd()};
+  unsigned chunkCount = parallel::strategy.compute_thread_count() * 10;
+  // Round-up integer division
+  size_t chunkSize = (data.size() + chunkCount - 1) / chunkCount;
+  std::vector<ArrayRef<uint8_t>> chunks = split(data, chunkSize);
+  std::vector<uint64_t> hashes(chunks.size());
+  parallelForEachN(0, chunks.size(),
+                   [&](size_t i) { hashes[i] = xxHash64(chunks[i]); });
+  uint64_t digest = xxHash64({reinterpret_cast<uint8_t *>(hashes.data()),
+                              hashes.size() * sizeof(uint64_t)});
   uuidCommand->writeUuid(digest);
 }
 
@@ -945,26 +962,26 @@ void Writer::writeOutputFile() {
     error("failed to write to the output file: " + toString(std::move(e)));
 }
 
-void Writer::run() {
+template <class LP> void Writer::run() {
   prepareBranchTarget(config->entry);
   scanRelocations();
   if (in.stubHelper->isNeeded())
     in.stubHelper->setup();
   scanSymbols();
-  createOutputSections();
+  createOutputSections<LP>();
   // No more sections nor segments are created beyond this point.
   sortSegmentsAndSections();
-  createLoadCommands();
+  createLoadCommands<LP>();
   finalizeAddressses();
   finalizeLinkEditSegment();
   writeMapFile();
   writeOutputFile();
 }
 
-void macho::writeResult() { Writer().run(); }
+template <class LP> void macho::writeResult() { Writer().run<LP>(); }
 
-void macho::createSyntheticSections() {
-  in.header = make<MachHeaderSection>();
+template <class LP> void macho::createSyntheticSections() {
+  in.header = makeMachHeaderSection<LP>();
   in.rebase = make<RebaseSection>();
   in.binding = make<BindingSection>();
   in.weakBinding = make<WeakBindingSection>();
@@ -979,3 +996,8 @@ void macho::createSyntheticSections() {
 }
 
 OutputSection *macho::firstTLVDataSection = nullptr;
+
+template void macho::writeResult<LP64>();
+template void macho::writeResult<ILP32>();
+template void macho::createSyntheticSections<LP64>();
+template void macho::createSyntheticSections<ILP32>();
