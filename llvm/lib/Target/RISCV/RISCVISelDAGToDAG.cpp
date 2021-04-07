@@ -662,7 +662,6 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     }
     ReplaceNode(Node, selectImm(CurDAG, DL, ConstNode->getSExtValue(), XLenVT));
     return;
-    break;
   }
   case ISD::FrameIndex: {
     SDValue Imm = CurDAG->getTargetConstant(0, DL, XLenVT);
@@ -1313,11 +1312,13 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       SDValue RC = CurDAG->getTargetConstant(InRegClassID, DL, XLenVT);
       SDNode *NewNode = CurDAG->getMachineNode(TargetOpcode::COPY_TO_REGCLASS,
                                                DL, VT, SubV, RC);
-      return ReplaceNode(Node, NewNode);
+      ReplaceNode(Node, NewNode);
+      return;
     }
 
     SDValue Insert = CurDAG->getTargetInsertSubreg(SubRegIdx, DL, VT, V, SubV);
-    return ReplaceNode(Node, Insert.getNode());
+    ReplaceNode(Node, Insert.getNode());
+    return;
   }
   case ISD::EXTRACT_SUBVECTOR: {
     SDValue V = Node->getOperand(0);
@@ -1356,11 +1357,13 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       SDValue RC = CurDAG->getTargetConstant(InRegClassID, DL, XLenVT);
       SDNode *NewNode =
           CurDAG->getMachineNode(TargetOpcode::COPY_TO_REGCLASS, DL, VT, V, RC);
-      return ReplaceNode(Node, NewNode);
+      ReplaceNode(Node, NewNode);
+      return;
     }
 
     SDValue Extract = CurDAG->getTargetExtractSubreg(SubRegIdx, DL, VT, V);
-    return ReplaceNode(Node, Extract.getNode());
+    ReplaceNode(Node, Extract.getNode());
+    return;
   }
   }
 
