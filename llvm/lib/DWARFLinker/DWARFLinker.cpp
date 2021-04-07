@@ -1422,20 +1422,12 @@ DIE *DWARFLinker::DIECloner::cloneDIE(const DWARFDie &InputDIE,
       Flags |= TF_SkipPC;
   }
 
-  bool Copied = false;
   for (const auto &AttrSpec : Abbrev->attributes()) {
     if (LLVM_LIKELY(!Update) &&
         shouldSkipAttribute(AttrSpec, Die->getTag(), Info.InDebugMap,
                             Flags & TF_SkipPC, Flags & TF_InFunctionScope)) {
       DWARFFormValue::skipValue(AttrSpec.Form, Data, &Offset,
                                 U.getFormParams());
-      // FIXME: dsymutil-classic keeps the old abbreviation around
-      // even if it's not used. We can remove this (and the copyAbbrev
-      // helper) as soon as bit-for-bit compatibility is not a goal anymore.
-      if (!Copied) {
-        copyAbbrev(*InputDIE.getAbbreviationDeclarationPtr(), Unit.hasODR());
-        Copied = true;
-      }
       continue;
     }
 
@@ -1909,12 +1901,7 @@ void DWARFLinker::patchFrameInfoForObject(const DWARFFile &File,
     auto IteratorInserted = EmittedCIEs.insert(
         std::make_pair(CIEData, TheDwarfEmitter->getFrameSectionSize()));
     // If there is no CIE yet for this ID, emit it.
-    if (IteratorInserted.second ||
-        // FIXME: dsymutil-classic only caches the last used CIE for
-        // reuse. Mimic that behavior for now. Just removing that
-        // second half of the condition and the LastCIEOffset variable
-        // makes the code DTRT.
-        LastCIEOffset != IteratorInserted.first->getValue()) {
+    if (IteratorInserted.second) {
       LastCIEOffset = TheDwarfEmitter->getFrameSectionSize();
       IteratorInserted.first->getValue() = LastCIEOffset;
       TheDwarfEmitter->emitCIE(CIEData);
@@ -1929,21 +1916,6 @@ void DWARFLinker::patchFrameInfoForObject(const DWARFFile &File,
                              FrameData.substr(InputOffset, FDERemainingBytes));
     InputOffset += FDERemainingBytes;
   }
-}
-
-void DWARFLinker::DIECloner::copyAbbrev(
-    const DWARFAbbreviationDeclaration &Abbrev, bool HasODR) {
-  DIEAbbrev Copy(dwarf::Tag(Abbrev.getTag()),
-                 dwarf::Form(Abbrev.hasChildren()));
-
-  for (const auto &Attr : Abbrev.attributes()) {
-    uint16_t Form = Attr.Form;
-    if (HasODR && isODRAttribute(Attr.Attr))
-      Form = dwarf::DW_FORM_ref_addr;
-    Copy.AddAttribute(dwarf::Attribute(Attr.Attr), dwarf::Form(Form));
-  }
-
-  Linker.assignAbbrev(Copy);
 }
 
 uint32_t DWARFLinker::DIECloner::hashFullyQualifiedName(DWARFDie DIE,
