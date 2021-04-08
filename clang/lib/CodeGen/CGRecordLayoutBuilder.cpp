@@ -729,6 +729,10 @@ void CGRecordLowering::calculateZeroInit() {
 }
 
 void CGRecordLowering::clipTailPadding() {
+  if (D->getHasEPIVectorFields()) {
+    // This kind of structs will never need clipping.
+    return;
+  }
   std::vector<MemberInfo>::iterator Prior = Members.begin();
   CharUnits Tail = getSize(Prior->Data);
   for (std::vector<MemberInfo>::iterator Member = Prior + 1,
@@ -791,6 +795,10 @@ void CGRecordLowering::determinePacked(bool NVBaseType) {
 }
 
 void CGRecordLowering::insertPadding() {
+  if (D->getHasEPIVectorFields()) {
+    // This kind of structs should not need padding.
+    return;
+  }
   std::vector<std::pair<CharUnits, CharUnits> > Padding;
   CharUnits Size = CharUnits::Zero();
   for (std::vector<MemberInfo>::const_iterator Member = Members.begin(),
