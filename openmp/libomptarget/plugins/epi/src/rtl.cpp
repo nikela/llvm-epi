@@ -264,7 +264,7 @@ __tgt_target_table *__tgt_rtl_load_binary(int32_t ID,
 	return output;
 }
 
-void *__tgt_rtl_data_alloc(int32_t ID, int64_t Size, void *HostPtr) {
+void *__tgt_rtl_data_alloc(int32_t ID, int64_t Size, void *HostPtr, int32_t Kind) {
 	uint64_t addr;
 	void *map;
 	int id;
