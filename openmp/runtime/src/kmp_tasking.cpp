@@ -21,6 +21,16 @@
 #include "ompt-specific.h"
 #endif
 
+#if LIBOMP_TASKGRAPH
+// Taskgraph
+extern int inside_taskgraph;
+extern int MapSize;
+extern int MapIncrement;
+extern int SuccessorsSize;
+extern int id_counter;
+extern int taskify;
+#endif
+
 /* forward declaration */
 static void __kmp_enable_tasking(kmp_task_team_t *task_team,
                                  kmp_info_t *this_thr);
@@ -749,12 +759,41 @@ static void __kmp_free_task(kmp_int32 gtid, kmp_taskdata_t *taskdata,
 
   taskdata->td_flags.freed = 1;
 // deallocate the taskdata and shared variable blocks associated with this task
+#if LIBOMP_TASKGRAPH
+  kmp_task *task = KMP_TASKDATA_TO_TASK(taskdata);
+  if (task->part_id == 0 || !taskify) {
+#endif // LIBOMP_TASKGRAPH
+    // only free tasks created outside taskgraph
 #if USE_FAST_MEMORY
-  __kmp_fast_free(thread, taskdata);
+    __kmp_fast_free(thread, taskdata);
 #else /* ! USE_FAST_MEMORY */
   __kmp_thread_free(thread, taskdata);
 #endif
-  KA_TRACE(20, ("__kmp_free_task: T#%d freed task %p\n", gtid, taskdata));
+    KA_TRACE(20, ("__kmp_free_task: T#%d freed task %p\n", gtid, taskdata));
+#if LIBOMP_TASKGRAPH
+  } else {
+
+    taskdata->td_flags.complete = 0;
+    taskdata->td_flags.started = 0;
+    taskdata->td_flags.freed = 0;
+    taskdata->td_flags.executing = 0;
+    taskdata->td_flags.task_serial =
+        (taskdata->td_parent->td_flags.final ||
+         taskdata->td_flags.team_serial || taskdata->td_flags.tasking_ser);
+
+    taskdata->td_allow_completion_event.pending_events_count = 1;
+    KMP_ATOMIC_ST_RLX(&taskdata->td_untied_count, 0);
+
+    KMP_ATOMIC_ST_RLX(&taskdata->td_incomplete_child_tasks, 0);
+    // start at one because counts current task and children
+    KMP_ATOMIC_ST_RLX(&taskdata->td_allocated_child_tasks, 1);
+
+    if (RecordMap) {
+      RecordMap[task->part_id].npredecessors_counter =
+          RecordMap[task->part_id].npredecessors;
+    }
+  }
+#endif
 }
 
 // __kmp_free_task_and_ancestors: free the current task and ancestors without
@@ -1239,6 +1278,7 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
                              kmp_tasking_flags_t *flags,
                              size_t sizeof_kmp_task_t, size_t sizeof_shareds,
                              kmp_routine_entry_t task_entry) {
+
   kmp_task_t *task;
   kmp_taskdata_t *taskdata;
   kmp_info_t *thread = __kmp_threads[gtid];
@@ -1340,7 +1380,6 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   }
   task->routine = task_entry;
   task->part_id = 0; // AC: Always start with 0 part id
-
   taskdata->td_task_id = KMP_GEN_TASK_ID();
   taskdata->td_team = thread->th.th_team;
   taskdata->td_alloc_thread = thread;
@@ -1437,10 +1476,22 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   return task;
 }
 
+#if LIBOMP_TASKGRAPH
+void __kmpc_set_task_static_id(kmp_task_t *task, kmp_int32 staticID) {
+  if (inside_taskgraph) {
+    kmp_taskdata_t *taskdata = KMP_TASK_TO_TASKDATA(task);
+    id_counter++;
+    task->part_id = id_counter;
+    taskdata->td_task_id = staticID;
+  }
+}
+#endif
+
 kmp_task_t *__kmpc_omp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
                                   kmp_int32 flags, size_t sizeof_kmp_task_t,
                                   size_t sizeof_shareds,
                                   kmp_routine_entry_t task_entry) {
+
   kmp_task_t *retval;
   kmp_tasking_flags_t *input_flags = (kmp_tasking_flags_t *)&flags;
   __kmp_assert_valid_gtid(gtid);
@@ -1757,6 +1808,31 @@ kmp_int32 __kmp_omp_task(kmp_int32 gtid, kmp_task_t *new_task,
                          bool serialize_immediate) {
   kmp_taskdata_t *new_taskdata = KMP_TASK_TO_TASKDATA(new_task);
 
+#if LIBOMP_TASKGRAPH
+  if (recording && inside_taskgraph) {
+    // Extend Map Size if needed
+    if (new_task->part_id >= MapSize) {
+      int OldSize = MapSize;
+      MapSize += MapIncrement;
+      RecordMap = (kmp_record_info *)realloc(RecordMap,
+                                             MapSize * sizeof(kmp_record_info));
+
+      for (int i = OldSize; i < MapSize; i++) {
+        kmp_int32 *successorsList =
+            (kmp_int32 *)malloc(SuccessorsSize * sizeof(kmp_int32));
+        kmp_record_info newRecord = {successorsList, 0, nullptr, 0, 0, nullptr,
+                                     SuccessorsSize};
+        RecordMap[i] = newRecord;
+      }
+    }
+
+    if (RecordMap[new_task->part_id].td_ident == nullptr) {
+      RecordMap[new_task->part_id].td_ident = new_taskdata->td_ident->psource;
+      RecordMap[new_task->part_id].static_id = new_taskdata->td_task_id;
+      RecordMap[new_task->part_id].task = new_task;
+    }
+  }
+#endif
   /* Should we execute the new task or queue it? For now, let's just always try
      to queue it.  If the queue fills up, then we'll execute it.  */
   if (new_taskdata->td_flags.proxy == TASK_PROXY ||

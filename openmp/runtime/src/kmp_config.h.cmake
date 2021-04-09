@@ -136,4 +136,6 @@
 # define KMP_GOMP_COMPAT
 #endif
 
+#cmakedefine01 LIBOMP_TASKGRAPH
+
 #endif // KMP_CONFIG_H

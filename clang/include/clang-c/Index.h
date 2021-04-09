@@ -2592,7 +2592,11 @@ enum CXCursorKind {
    */
   CXCursor_OMPUnrollDirective = 293,
 
-  CXCursor_LastStmt = CXCursor_OMPUnrollDirective,
+  /** OpenMP taskgraph directive.
+   */
+  CXCursor_OMPTaskgraphDirective = 294,
+
+  CXCursor_LastStmt = CXCursor_OMPTaskgraphDirective,
 
   /**
    * Cursor that represents the translation unit itself.

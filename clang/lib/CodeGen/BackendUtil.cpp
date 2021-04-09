@@ -80,6 +80,7 @@
 #include "llvm/Transforms/Scalar/EarlyCSE.h"
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Scalar/LowerMatrixIntrinsics.h"
+#include "llvm/Transforms/StaticTDG.h"
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/CanonicalizeAliases.h"
 #include "llvm/Transforms/Utils/Debugify.h"
@@ -214,6 +215,12 @@ static void addAddDiscriminatorsPass(const PassManagerBuilder &Builder,
 static void addBoundsCheckingPass(const PassManagerBuilder &Builder,
                                   legacy::PassManagerBase &PM) {
   PM.add(createBoundsCheckingLegacyPass());
+}
+
+static void addStaticTDGIdentPass(const PassManagerBuilder &Builder,
+                                  PassManagerBase &PM) {
+  if (Builder.OptLevel > 0)
+    PM.add(createStaticTDGIdentLegacyPass());
 }
 
 static SanitizerCoverageOptions
@@ -721,6 +728,10 @@ void EmitAssemblyHelper::CreatePasses(legacy::PassManager &MPM,
 
   if (LangOpts.Coroutines)
     addCoroutinePassesToExtensionPoints(PMBuilder);
+
+  if (LangOpts.OpenMPTaskGraph)
+    PMBuilder.addExtension(PassManagerBuilder::EP_LoopOptimizerEnd,
+       addStaticTDGIdentPass);
 
   if (!CodeGenOpts.MemoryProfileOutput.empty()) {
     PMBuilder.addExtension(PassManagerBuilder::EP_OptimizerLast,
@@ -1347,6 +1358,14 @@ void EmitAssemblyHelper::EmitAssemblyWithNewPassManager(
           [](FunctionPassManager &FPM, OptimizationLevel Level) {
             if (Level != OptimizationLevel::O0)
               FPM.addPass(ObjCARCOptPass());
+          });
+    }
+
+    if (LangOpts.OpenMPTaskGraph) {
+      PB.registerPipelineEarlySimplificationEPCallback(
+          [](ModulePassManager &MPM, OptimizationLevel Level) {
+            if (Level != OptimizationLevel::O0)
+              MPM.addPass(StaticTDGIdentPass());
           });
     }
 

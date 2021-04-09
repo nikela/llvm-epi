@@ -67,6 +67,7 @@ add_llvm_component_library(LLVMipo
   Object
   ProfileData
   Scalar
+  StaticTDG
   Support
   TransformUtils
   Vectorize

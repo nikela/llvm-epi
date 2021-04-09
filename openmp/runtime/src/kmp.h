@@ -2298,6 +2298,9 @@ typedef struct kmp_base_depnode {
   kmp_lock_t *mtx_locks[MAX_MTX_DEPS]; /* lock mutexinoutset dependent tasks */
   kmp_int32 mtx_num_locks; /* number of locks in mtx_locks array */
   kmp_lock_t lock; /* guards shared fields: task, successors */
+#if LIBOMP_TASKGRAPH
+  kmp_uint32 part_id; /* used by taskgraph */
+#endif
 #if KMP_SUPPORT_GRAPH_OUTPUT
   kmp_uint32 id;
 #endif
@@ -2396,6 +2399,23 @@ typedef struct kmp_tasking_flags { /* Total struct must be exactly 32 bits */
   unsigned reserved31 : 7; /* reserved for library use */
 
 } kmp_tasking_flags_t;
+
+
+struct kmp_record_info {
+  kmp_int32 * successors;
+  kmp_int32 nsuccessors;
+  kmp_task_t * task;
+  kmp_int32 npredecessors_counter;
+  kmp_int32 npredecessors;
+  const char *td_ident;
+  kmp_int32 static_id;
+  kmp_int32 successorsSize;
+};
+
+struct dynamic_tdg_info{
+  const char *loc;
+  kmp_record_info *RecordMap;
+};
 
 struct kmp_taskdata { /* aligned during dynamic allocation       */
   kmp_int32 td_task_id; /* id, assigned by debugger                */
@@ -3858,11 +3878,10 @@ extern void KMPC_SET_NESTED(int flag);
 /* OMP 3.0 tasking interface routines */
 KMP_EXPORT kmp_int32 __kmpc_omp_task(ident_t *loc_ref, kmp_int32 gtid,
                                      kmp_task_t *new_task);
-KMP_EXPORT kmp_task_t *__kmpc_omp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
-                                             kmp_int32 flags,
-                                             size_t sizeof_kmp_task_t,
-                                             size_t sizeof_shareds,
-                                             kmp_routine_entry_t task_entry);
+KMP_EXPORT kmp_task_t *
+__kmpc_omp_task_alloc(ident_t *loc_ref, kmp_int32 gtid, kmp_int32 flags,
+                      size_t sizeof_kmp_task_t, size_t sizeof_shareds,
+                      kmp_routine_entry_t task_entry);
 KMP_EXPORT kmp_task_t *__kmpc_omp_target_task_alloc(
     ident_t *loc_ref, kmp_int32 gtid, kmp_int32 flags, size_t sizeof_kmp_task_t,
     size_t sizeof_shareds, kmp_routine_entry_t task_entry, kmp_int64 device_id);
@@ -3873,6 +3892,10 @@ KMP_EXPORT void __kmpc_omp_task_complete_if0(ident_t *loc_ref, kmp_int32 gtid,
 KMP_EXPORT kmp_int32 __kmpc_omp_task_parts(ident_t *loc_ref, kmp_int32 gtid,
                                            kmp_task_t *new_task);
 KMP_EXPORT kmp_int32 __kmpc_omp_taskwait(ident_t *loc_ref, kmp_int32 gtid);
+KMP_EXPORT kmp_int32 __kmpc_taskgraph(ident_t *loc_ref, kmp_int32 gtid,
+                                      void (*entry)(void *), void *args,
+                                      kmp_uint32 condition);
+KMP_EXPORT void __kmpc_set_task_static_id(kmp_task_t *task, int staticID);
 
 KMP_EXPORT kmp_int32 __kmpc_omp_taskyield(ident_t *loc_ref, kmp_int32 gtid,
                                           int end_part);

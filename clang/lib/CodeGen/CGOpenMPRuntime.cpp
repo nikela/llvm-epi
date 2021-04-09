@@ -4189,6 +4189,22 @@ static void getKmpAffinityType(ASTContext &C, QualType &KmpTaskAffinityInfoTy) {
   }
 }
 
+llvm::GlobalVariable* getOrInsertTaskID(CodeGenFunction &CGF) {
+  llvm::GlobalVariable *TaskID;
+  TaskID = CGF.CGM.getModule().getNamedGlobal("__staticTaskID");
+  if (TaskID)
+    return TaskID;
+  else {
+    TaskID = llvm::cast<llvm::GlobalVariable>(
+        CGF.CGM.getModule().getOrInsertGlobal("__staticTaskID", CGF.Int32Ty));
+    // gvar->setDSOLocal(true);
+    TaskID->setLinkage(llvm::GlobalValue::CommonLinkage);
+    TaskID->setAlignment(llvm::MaybeAlign(4));
+    TaskID->setInitializer(CGF.Builder.getInt32(0));
+    return TaskID;
+  }
+}
+
 CGOpenMPRuntime::TaskResultTy
 CGOpenMPRuntime::emitTaskInit(CodeGenFunction &CGF, SourceLocation Loc,
                               const OMPExecutableDirective &D,
@@ -4353,6 +4369,22 @@ CGOpenMPRuntime::emitTaskInit(CodeGenFunction &CGF, SourceLocation Loc,
         CGF.EmitRuntimeCall(OMPBuilder.getOrCreateRuntimeFunction(
                                 CGM.getModule(), OMPRTL___kmpc_omp_task_alloc),
                             AllocArgs);
+    if (CGF.CGM.getLangOpts().OpenMPTaskGraph) {
+      // Taskgraph support: compute the static id.
+      llvm::GlobalVariable *TaskID = getOrInsertTaskID(CGF);
+
+      CharUnits Align = CharUnits::fromQuantity(
+          CGF.CGM.getDataLayout().getABITypeAlignment(CGF.Int32Ty));
+
+      llvm::Value *TaskIDValue = CGF.Builder.CreateLoad(Address(TaskID, Align));
+      llvm::Value *TaskIDAdded =
+          CGF.Builder.CreateAdd(TaskIDValue, CGF.Builder.getInt32(1));
+      CGF.Builder.CreateStore(TaskIDAdded, Address(TaskID, Align));
+      CGF.EmitRuntimeCall(
+          OMPBuilder.getOrCreateRuntimeFunction(
+              CGM.getModule(), OMPRTL___kmpc_set_task_static_id),
+          {NewTask, TaskIDAdded});
+    }
   }
   // Emit detach clause initialization.
   // evt = (typeof(evt))__kmpc_task_allow_completion_event(loc, tid,
@@ -6918,6 +6950,55 @@ void CGOpenMPRuntime::emitTaskwaitCall(CodeGenFunction &CGF,
     Region->emitUntiedSwitch(CGF);
 }
 
+void CGOpenMPRuntime::emitTaskgraphCall(CodeGenFunction &CGF,
+                                        SourceLocation Loc,
+                                        const OMPExecutableDirective &D) {
+  if (!CGF.HaveInsertPoint())
+    return;
+
+  llvm::Value *IfVal = nullptr;
+
+  for (const auto *C : D.getClausesOfKind<OMPIfClause>()) {
+    const Expr *Cond = C->getCondition();
+    llvm::Value *CondVal = nullptr;
+    CondVal = CGF.EvaluateExprAsBool(Cond);
+    if (CondVal) {
+      IfVal = CGF.Builder.CreateIntCast(CondVal, CGF.IntTy,
+                                        /*isSigned=*/true);
+    }
+  }
+
+  const CapturedStmt *CS = cast<CapturedStmt>(D.getAssociatedStmt());
+
+  auto OutlineInfo = CGF.EmitCapturedStmtNoCall(*CS, CR_Default);
+  llvm::Value *Condition = nullptr;
+  if (IfVal != nullptr)
+    Condition = IfVal;
+  else
+    Condition = CGF.Builder.getInt32(0);
+
+  llvm::Value *Args[] = {emitUpdateLocation(CGF, Loc), getThreadID(CGF, Loc),
+                         CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+                             OutlineInfo.first, CGF.Int8PtrTy),
+                         CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+                             OutlineInfo.second, CGF.Int8PtrTy),
+                         Condition};
+  CGF.EmitRuntimeCall(OMPBuilder.getOrCreateRuntimeFunction(
+                          CGM.getModule(), OMPRTL___kmpc_taskgraph),
+                      Args);
+
+  auto InsertP = CGF.Builder.saveIP();
+  CGF.Builder.SetInsertPoint(
+      OutlineInfo.first->getEntryBlock().getFirstNonPHI());
+
+  llvm::GlobalVariable *TaskID = getOrInsertTaskID(CGF);
+
+  CharUnits Align = CharUnits::fromQuantity(
+      CGF.CGM.getDataLayout().getABITypeAlignment(CGF.Int32Ty));
+  CGF.Builder.CreateStore(CGF.Builder.getInt32(0), Address(TaskID, Align));
+  CGF.Builder.restoreIP(InsertP);
+}
+
 void CGOpenMPRuntime::emitInlinedDirective(CodeGenFunction &CGF,
                                            OpenMPDirectiveKind InnerKind,
                                            const RegionCodeGenTy &CodeGen,
@@ -7364,6 +7445,7 @@ const Expr *CGOpenMPRuntime::getNumTeamsExprForTargetDirective(
   case OMPD_taskyield:
   case OMPD_barrier:
   case OMPD_taskwait:
+  case OMPD_taskgraph:
   case OMPD_taskgroup:
   case OMPD_atomic:
   case OMPD_flush:
@@ -7838,6 +7920,7 @@ llvm::Value *CGOpenMPRuntime::emitNumThreadsForTargetDirective(
   case OMPD_taskyield:
   case OMPD_barrier:
   case OMPD_taskwait:
+  case OMPD_taskgraph:
   case OMPD_taskgroup:
   case OMPD_atomic:
   case OMPD_flush:
@@ -10434,6 +10517,7 @@ getNestedDistributeDirective(ASTContext &Ctx, const OMPExecutableDirective &D) {
     case OMPD_taskyield:
     case OMPD_barrier:
     case OMPD_taskwait:
+    case OMPD_taskgraph:
     case OMPD_taskgroup:
     case OMPD_atomic:
     case OMPD_flush:
@@ -11284,6 +11368,7 @@ void CGOpenMPRuntime::scanForTargetRegionsFunctions(const Stmt *S,
     case OMPD_taskyield:
     case OMPD_barrier:
     case OMPD_taskwait:
+    case OMPD_taskgraph:
     case OMPD_taskgroup:
     case OMPD_atomic:
     case OMPD_flush:
@@ -11958,6 +12043,7 @@ void CGOpenMPRuntime::emitTargetDataStandAloneCall(
     case OMPD_taskyield:
     case OMPD_barrier:
     case OMPD_taskwait:
+    case OMPD_taskgraph:
     case OMPD_taskgroup:
     case OMPD_atomic:
     case OMPD_flush:
@@ -13616,6 +13702,12 @@ Address CGOpenMPSIMDRuntime::getTaskReductionItem(CodeGenFunction &CGF,
 
 void CGOpenMPSIMDRuntime::emitTaskwaitCall(CodeGenFunction &CGF,
                                            SourceLocation Loc) {
+  llvm_unreachable("Not supported in SIMD-only mode");
+}
+
+void CGOpenMPSIMDRuntime::emitTaskgraphCall(CodeGenFunction &CGF,
+                                            SourceLocation Loc,
+                                            const OMPExecutableDirective &D) {
   llvm_unreachable("Not supported in SIMD-only mode");
 }
 

@@ -672,6 +672,9 @@ void clang::getOpenMPCaptureRegions(
   case OMPD_unroll:
     // loop transformations do not introduce captures.
     break;
+  case OMPD_taskgraph:
+    CaptureRegions.push_back(OMPD_taskgraph);
+    break;
   case OMPD_threadprivate:
   case OMPD_allocate:
   case OMPD_taskyield:
