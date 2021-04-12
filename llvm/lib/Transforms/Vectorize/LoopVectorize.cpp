@@ -5056,7 +5056,7 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
           Value *VecGep = Builder.CreateGEP(
               II.getStartValue()->getType()->getPointerElementType(),
               II.getStartValue(), StepVec);
-          State.set(Def, VecGep, Part);
+          State.set(PhiR, VecGep, Part);
         }
         return;
       }
