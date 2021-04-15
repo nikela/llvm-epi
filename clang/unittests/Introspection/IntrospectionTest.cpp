@@ -36,16 +36,43 @@ FormatExpected(const MapType &Accessors) {
                                           }),
                   std::inserter(Result, Result.end()),
                   [](const auto &Accessor) {
-                    return std::make_pair(
-                        LocationCallFormatterCpp::format(Accessor.second.get()),
-                        Accessor.first);
+                    return std::make_pair(LocationCallFormatterCpp::format(
+                                              *Accessor.second.get()),
+                                          Accessor.first);
                   });
   return Result;
 }
 
 #define STRING_LOCATION_PAIR(INSTANCE, LOC) Pair(#LOC, INSTANCE->LOC)
 
+TEST(Introspection, SourceLocations_CallContainer) {
+  SourceLocationMap slm;
+  SharedLocationCall Prefix;
+  slm.insert(std::make_pair(
+      SourceLocation(),
+      llvm::makeIntrusiveRefCnt<LocationCall>(Prefix, "getSourceRange")));
+  EXPECT_EQ(slm.size(), 1u);
+
+  auto callTypeLoc =
+      llvm::makeIntrusiveRefCnt<LocationCall>(Prefix, "getTypeLoc");
+  slm.insert(std::make_pair(
+      SourceLocation(),
+      llvm::makeIntrusiveRefCnt<LocationCall>(callTypeLoc, "getSourceRange")));
+  EXPECT_EQ(slm.size(), 2u);
+}
+
+TEST(Introspection, SourceLocations_CallChainFormatting) {
+  SharedLocationCall Prefix;
+  auto chainedCall = llvm::makeIntrusiveRefCnt<LocationCall>(
+      llvm::makeIntrusiveRefCnt<LocationCall>(Prefix, "getTypeLoc"),
+      "getSourceRange");
+  EXPECT_EQ(LocationCallFormatterCpp::format(*chainedCall),
+            "getTypeLoc().getSourceRange()");
+}
+
 TEST(Introspection, SourceLocations_Stmt) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST = buildASTFromCode("void foo() {} void bar() { foo(); }", "foo.cpp",
                               std::make_shared<PCHContainerOperations>());
   auto &Ctx = AST->getASTContext();
@@ -61,11 +88,6 @@ TEST(Introspection, SourceLocations_Stmt) {
   auto *FooCall = BoundNodes[0].getNodeAs<CallExpr>("fooCall");
 
   auto Result = NodeIntrospection::GetLocations(FooCall);
-
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty())
-  {
-    return;
-  }
 
   auto ExpectedLocations =
     FormatExpected<SourceLocation>(Result.LocationAccessors);
@@ -84,6 +106,8 @@ TEST(Introspection, SourceLocations_Stmt) {
 }
 
 TEST(Introspection, SourceLocations_Decl) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 namespace ns1 {
@@ -118,10 +142,6 @@ ns1::ns2::Foo<A, B> ns1::ns2::Bar<T, U>::Nested::method(int i, bool b) const
 
   auto Result = NodeIntrospection::GetLocations(MethodDecl);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -148,6 +168,8 @@ ns1::ns2::Foo<A, B> ns1::ns2::Bar<T, U>::Nested::method(int i, bool b) const
 }
 
 TEST(Introspection, SourceLocations_NNS) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 namespace ns
@@ -171,10 +193,6 @@ void ns::A::foo() {}
 
   auto Result = NodeIntrospection::GetLocations(NNS);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -194,6 +212,8 @@ void ns::A::foo() {}
 }
 
 TEST(Introspection, SourceLocations_TA_Type) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<typename T>
@@ -219,10 +239,6 @@ void foo()
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -236,6 +252,8 @@ void foo()
 }
 
 TEST(Introspection, SourceLocations_TA_Decl) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<void(*Ty)()>
@@ -258,10 +276,6 @@ void test() {
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -275,6 +289,8 @@ void test() {
 }
 
 TEST(Introspection, SourceLocations_TA_Nullptr) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<void(*Ty)()>
@@ -297,10 +313,6 @@ void test() {
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -314,6 +326,8 @@ void test() {
 }
 
 TEST(Introspection, SourceLocations_TA_Integral) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<int>
@@ -335,10 +349,6 @@ void test() {
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -352,6 +362,8 @@ void test() {
 }
 
 TEST(Introspection, SourceLocations_TA_Template) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<typename T> class A;
@@ -374,10 +386,6 @@ void bar()
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -393,6 +401,8 @@ void bar()
 }
 
 TEST(Introspection, SourceLocations_TA_TemplateExpansion) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST = buildASTFromCodeWithArgs(
       R"cpp(
 template<template<typename> class ...> class B { };
@@ -414,10 +424,6 @@ template<template<typename> class ...> class B { };
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -434,6 +440,8 @@ template<template<typename> class ...> class B { };
 }
 
 TEST(Introspection, SourceLocations_TA_Expression) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<int, int = 0> class testExpr;
@@ -452,10 +460,6 @@ template<int I> class testExpr<I> { };
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -469,6 +473,8 @@ template<int I> class testExpr<I> { };
 }
 
 TEST(Introspection, SourceLocations_TA_Pack) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST = buildASTFromCodeWithArgs(
       R"cpp(
 template<typename... T> class A {};
@@ -491,10 +497,6 @@ void foo()
 
   auto Result = NodeIntrospection::GetLocations(TA);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -508,6 +510,8 @@ void foo()
 }
 
 TEST(Introspection, SourceLocations_CXXCtorInitializer_base) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 struct A {
@@ -532,10 +536,6 @@ struct B : A {
 
   auto Result = NodeIntrospection::GetLocations(CtorInit);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -552,6 +552,8 @@ struct B : A {
 }
 
 TEST(Introspection, SourceLocations_CXXCtorInitializer_member) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 struct A {
@@ -574,10 +576,6 @@ struct A {
 
   auto Result = NodeIntrospection::GetLocations(CtorInit);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -595,6 +593,8 @@ struct A {
 }
 
 TEST(Introspection, SourceLocations_CXXCtorInitializer_ctor) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 struct C {
@@ -617,10 +617,6 @@ struct C {
 
   auto Result = NodeIntrospection::GetLocations(CtorInit);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -637,6 +633,8 @@ struct C {
 }
 
 TEST(Introspection, SourceLocations_CXXCtorInitializer_pack) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST = buildASTFromCodeWithArgs(
       R"cpp(
 template<typename... T>
@@ -664,10 +662,6 @@ struct D : Templ<T...> {
 
   auto Result = NodeIntrospection::GetLocations(CtorInit);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -686,6 +680,8 @@ struct D : Templ<T...> {
 }
 
 TEST(Introspection, SourceLocations_CXXBaseSpecifier_plain) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 class A {};
@@ -706,10 +702,6 @@ class B : A {};
 
   auto Result = NodeIntrospection::GetLocations(Base);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -725,6 +717,8 @@ class B : A {};
 }
 
 TEST(Introspection, SourceLocations_CXXBaseSpecifier_accessspec) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 class A {};
@@ -745,10 +739,6 @@ class B : public A {};
 
   auto Result = NodeIntrospection::GetLocations(Base);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -764,6 +754,8 @@ class B : public A {};
 }
 
 TEST(Introspection, SourceLocations_CXXBaseSpecifier_virtual) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 class A {};
@@ -785,10 +777,6 @@ class C : virtual B, A {};
 
   auto Result = NodeIntrospection::GetLocations(Base);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -804,6 +792,8 @@ class C : virtual B, A {};
 }
 
 TEST(Introspection, SourceLocations_CXXBaseSpecifier_template_base) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST =
       buildASTFromCode(R"cpp(
 template<typename T, typename U>
@@ -825,10 +815,6 @@ class B : A<int, bool> {};
 
   auto Result = NodeIntrospection::GetLocations(Base);
 
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
-
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
 
@@ -844,6 +830,8 @@ class B : A<int, bool> {};
 }
 
 TEST(Introspection, SourceLocations_CXXBaseSpecifier_pack) {
+  if (!NodeIntrospection::hasIntrospectionSupport())
+    return;
   auto AST = buildASTFromCodeWithArgs(
       R"cpp(
 template<typename... T>
@@ -865,10 +853,6 @@ struct Templ : T... {
   const auto *Base = BoundNodes[0].getNodeAs<CXXBaseSpecifier>("base");
 
   auto Result = NodeIntrospection::GetLocations(Base);
-
-  if (Result.LocationAccessors.empty() && Result.RangeAccessors.empty()) {
-    return;
-  }
 
   auto ExpectedLocations =
       FormatExpected<SourceLocation>(Result.LocationAccessors);
