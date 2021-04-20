@@ -1,7 +1,7 @@
 // REQUIRES: amdgpu-registered-target
 // RUN: %clang_cc1 -triple amdgcn-amd-amdhsa -fcuda-is-device -x hip %s \
 // RUN:   -std=c++11 -O3 -mllvm -amdgpu-internalize-symbols -emit-llvm -o - \
-// RUN:   -fno-legacy-pass-manager | FileCheck %s
+// RUN:   | FileCheck %s
 
 #include "Inputs/cuda.h"
 

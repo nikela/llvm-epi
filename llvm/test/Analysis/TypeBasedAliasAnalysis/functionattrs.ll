@@ -1,4 +1,4 @@
-; RUN: opt < %s -tbaa -basic-aa -function-attrs -S --enable-new-pm | FileCheck %s
+; RUN: opt < %s -tbaa -basic-aa -function-attrs -S | FileCheck %s
 
 ; FunctionAttrs should make use of TBAA.
 
