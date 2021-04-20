@@ -45,43 +45,33 @@ define void @foo4(double* nocapture %A, double* nocapture readonly %B, i32* noca
 ; RV32-NEXT:    [[N_MOD_VF:%.*]] = urem i64 625, [[TMP3]]
 ; RV32-NEXT:    [[N_VEC:%.*]] = sub i64 625, [[N_MOD_VF]]
 ; RV32-NEXT:    [[IND_END:%.*]] = mul i64 [[N_VEC]], 16
-; RV32-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 0, i32 0
-; RV32-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; RV32-NEXT:    [[TMP4:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
-; RV32-NEXT:    [[DOTSPLATINSERT12:%.*]] = insertelement <vscale x 2 x i64> poison, i64 0, i32 0
-; RV32-NEXT:    [[DOTSPLAT13:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT12]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV32-NEXT:    [[TMP5:%.*]] = add <vscale x 2 x i64> [[TMP4]], [[DOTSPLAT13]]
-; RV32-NEXT:    [[DOTSPLATINSERT14:%.*]] = insertelement <vscale x 2 x i64> poison, i64 16, i32 0
-; RV32-NEXT:    [[DOTSPLAT15:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT14]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV32-NEXT:    [[TMP6:%.*]] = mul <vscale x 2 x i64> [[TMP5]], [[DOTSPLAT15]]
-; RV32-NEXT:    [[INDUCTION:%.*]] = add <vscale x 2 x i64> [[DOTSPLAT]], [[TMP6]]
+; RV32-NEXT:    [[TMP5:%.*]] = add <vscale x 2 x i64> [[TMP4]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 0, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
+; RV32-NEXT:    [[TMP6:%.*]] = mul <vscale x 2 x i64> [[TMP5]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 16, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
+; RV32-NEXT:    [[INDUCTION:%.*]] = add <vscale x 2 x i64> shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 0, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer), [[TMP6]]
 ; RV32-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
 ; RV32-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 2
 ; RV32-NEXT:    [[TMP9:%.*]] = mul i64 16, [[TMP8]]
-; RV32-NEXT:    [[DOTSPLATINSERT16:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP9]], i32 0
-; RV32-NEXT:    [[DOTSPLAT17:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT16]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV32-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 100, i32 0
-; RV32-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
-; RV32-NEXT:    [[BROADCAST_SPLATINSERT18:%.*]] = insertelement <vscale x 2 x i64> poison, i64 1, i32 0
-; RV32-NEXT:    [[BROADCAST_SPLAT19:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT18]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; RV32-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP9]], i32 0
+; RV32-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; RV32-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; RV32:       vector.body:
 ; RV32-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; RV32-NEXT:    [[VEC_IND:%.*]] = phi <vscale x 2 x i64> [ [[INDUCTION]], [[VECTOR_PH]] ], [ [[VEC_IND_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; RV32-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32, i32* [[TRIGGER]], <vscale x 2 x i64> [[VEC_IND]]
 ; RV32-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0i32(<vscale x 2 x i32*> [[TMP10]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i32> undef), !alias.scope !0
-; RV32-NEXT:    [[TMP11:%.*]] = icmp slt <vscale x 2 x i32> [[WIDE_MASKED_GATHER]], [[BROADCAST_SPLAT]]
-; RV32-NEXT:    [[TMP12:%.*]] = shl nuw nsw <vscale x 2 x i64> [[VEC_IND]], [[BROADCAST_SPLAT19]]
+; RV32-NEXT:    [[TMP11:%.*]] = icmp slt <vscale x 2 x i32> [[WIDE_MASKED_GATHER]], shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 100, i32 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer)
+; RV32-NEXT:    [[TMP12:%.*]] = shl nuw nsw <vscale x 2 x i64> [[VEC_IND]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 1, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
 ; RV32-NEXT:    [[TMP13:%.*]] = getelementptr inbounds double, double* [[B]], <vscale x 2 x i64> [[TMP12]]
-; RV32-NEXT:    [[WIDE_MASKED_GATHER20:%.*]] = call <vscale x 2 x double> @llvm.masked.gather.nxv2f64.nxv2p0f64(<vscale x 2 x double*> [[TMP13]], i32 8, <vscale x 2 x i1> [[TMP11]], <vscale x 2 x double> undef), !alias.scope !3
+; RV32-NEXT:    [[WIDE_MASKED_GATHER12:%.*]] = call <vscale x 2 x double> @llvm.masked.gather.nxv2f64.nxv2p0f64(<vscale x 2 x double*> [[TMP13]], i32 8, <vscale x 2 x i1> [[TMP11]], <vscale x 2 x double> undef), !alias.scope !3
 ; RV32-NEXT:    [[TMP14:%.*]] = sitofp <vscale x 2 x i32> [[WIDE_MASKED_GATHER]] to <vscale x 2 x double>
-; RV32-NEXT:    [[TMP15:%.*]] = fadd <vscale x 2 x double> [[WIDE_MASKED_GATHER20]], [[TMP14]]
+; RV32-NEXT:    [[TMP15:%.*]] = fadd <vscale x 2 x double> [[WIDE_MASKED_GATHER12]], [[TMP14]]
 ; RV32-NEXT:    [[TMP16:%.*]] = getelementptr inbounds double, double* [[A]], <vscale x 2 x i64> [[VEC_IND]]
 ; RV32-NEXT:    call void @llvm.masked.scatter.nxv2f64.nxv2p0f64(<vscale x 2 x double> [[TMP15]], <vscale x 2 x double*> [[TMP16]], i32 8, <vscale x 2 x i1> [[TMP11]]), !alias.scope !5, !noalias !7
 ; RV32-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; RV32-NEXT:    [[TMP18:%.*]] = mul i64 [[TMP17]], 2
 ; RV32-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
-; RV32-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT17]]
+; RV32-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; RV32-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; RV32-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; RV32:       middle.block:
@@ -143,43 +133,33 @@ define void @foo4(double* nocapture %A, double* nocapture readonly %B, i32* noca
 ; RV64-NEXT:    [[N_MOD_VF:%.*]] = urem i64 625, [[TMP3]]
 ; RV64-NEXT:    [[N_VEC:%.*]] = sub i64 625, [[N_MOD_VF]]
 ; RV64-NEXT:    [[IND_END:%.*]] = mul i64 [[N_VEC]], 16
-; RV64-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 0, i32 0
-; RV64-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; RV64-NEXT:    [[TMP4:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
-; RV64-NEXT:    [[DOTSPLATINSERT12:%.*]] = insertelement <vscale x 2 x i64> poison, i64 0, i32 0
-; RV64-NEXT:    [[DOTSPLAT13:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT12]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV64-NEXT:    [[TMP5:%.*]] = add <vscale x 2 x i64> [[TMP4]], [[DOTSPLAT13]]
-; RV64-NEXT:    [[DOTSPLATINSERT14:%.*]] = insertelement <vscale x 2 x i64> poison, i64 16, i32 0
-; RV64-NEXT:    [[DOTSPLAT15:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT14]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV64-NEXT:    [[TMP6:%.*]] = mul <vscale x 2 x i64> [[TMP5]], [[DOTSPLAT15]]
-; RV64-NEXT:    [[INDUCTION:%.*]] = add <vscale x 2 x i64> [[DOTSPLAT]], [[TMP6]]
+; RV64-NEXT:    [[TMP5:%.*]] = add <vscale x 2 x i64> [[TMP4]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 0, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
+; RV64-NEXT:    [[TMP6:%.*]] = mul <vscale x 2 x i64> [[TMP5]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 16, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
+; RV64-NEXT:    [[INDUCTION:%.*]] = add <vscale x 2 x i64> shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 0, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer), [[TMP6]]
 ; RV64-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
 ; RV64-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 2
 ; RV64-NEXT:    [[TMP9:%.*]] = mul i64 16, [[TMP8]]
-; RV64-NEXT:    [[DOTSPLATINSERT16:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP9]], i32 0
-; RV64-NEXT:    [[DOTSPLAT17:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT16]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; RV64-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 100, i32 0
-; RV64-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i32> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
-; RV64-NEXT:    [[BROADCAST_SPLATINSERT18:%.*]] = insertelement <vscale x 2 x i64> poison, i64 1, i32 0
-; RV64-NEXT:    [[BROADCAST_SPLAT19:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT18]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; RV64-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP9]], i32 0
+; RV64-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; RV64-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; RV64:       vector.body:
 ; RV64-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; RV64-NEXT:    [[VEC_IND:%.*]] = phi <vscale x 2 x i64> [ [[INDUCTION]], [[VECTOR_PH]] ], [ [[VEC_IND_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; RV64-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32, i32* [[TRIGGER]], <vscale x 2 x i64> [[VEC_IND]]
 ; RV64-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0i32(<vscale x 2 x i32*> [[TMP10]], i32 4, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i32> undef), !alias.scope !0
-; RV64-NEXT:    [[TMP11:%.*]] = icmp slt <vscale x 2 x i32> [[WIDE_MASKED_GATHER]], [[BROADCAST_SPLAT]]
-; RV64-NEXT:    [[TMP12:%.*]] = shl nuw nsw <vscale x 2 x i64> [[VEC_IND]], [[BROADCAST_SPLAT19]]
+; RV64-NEXT:    [[TMP11:%.*]] = icmp slt <vscale x 2 x i32> [[WIDE_MASKED_GATHER]], shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 100, i32 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer)
+; RV64-NEXT:    [[TMP12:%.*]] = shl nuw nsw <vscale x 2 x i64> [[VEC_IND]], shufflevector (<vscale x 2 x i64> insertelement (<vscale x 2 x i64> poison, i64 1, i32 0), <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer)
 ; RV64-NEXT:    [[TMP13:%.*]] = getelementptr inbounds double, double* [[B]], <vscale x 2 x i64> [[TMP12]]
-; RV64-NEXT:    [[WIDE_MASKED_GATHER20:%.*]] = call <vscale x 2 x double> @llvm.masked.gather.nxv2f64.nxv2p0f64(<vscale x 2 x double*> [[TMP13]], i32 8, <vscale x 2 x i1> [[TMP11]], <vscale x 2 x double> undef), !alias.scope !3
+; RV64-NEXT:    [[WIDE_MASKED_GATHER12:%.*]] = call <vscale x 2 x double> @llvm.masked.gather.nxv2f64.nxv2p0f64(<vscale x 2 x double*> [[TMP13]], i32 8, <vscale x 2 x i1> [[TMP11]], <vscale x 2 x double> undef), !alias.scope !3
 ; RV64-NEXT:    [[TMP14:%.*]] = sitofp <vscale x 2 x i32> [[WIDE_MASKED_GATHER]] to <vscale x 2 x double>
-; RV64-NEXT:    [[TMP15:%.*]] = fadd <vscale x 2 x double> [[WIDE_MASKED_GATHER20]], [[TMP14]]
+; RV64-NEXT:    [[TMP15:%.*]] = fadd <vscale x 2 x double> [[WIDE_MASKED_GATHER12]], [[TMP14]]
 ; RV64-NEXT:    [[TMP16:%.*]] = getelementptr inbounds double, double* [[A]], <vscale x 2 x i64> [[VEC_IND]]
 ; RV64-NEXT:    call void @llvm.masked.scatter.nxv2f64.nxv2p0f64(<vscale x 2 x double> [[TMP15]], <vscale x 2 x double*> [[TMP16]], i32 8, <vscale x 2 x i1> [[TMP11]]), !alias.scope !5, !noalias !7
 ; RV64-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; RV64-NEXT:    [[TMP18:%.*]] = mul i64 [[TMP17]], 2
 ; RV64-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
-; RV64-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT17]]
+; RV64-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; RV64-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; RV64-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; RV64:       middle.block:

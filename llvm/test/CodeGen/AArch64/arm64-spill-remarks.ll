@@ -23,7 +23,7 @@
 ; (loop:)
 ; REMARK: remark: /tmp/kk.c:1:20: 2 spills 2 reloads generated in loop{{$}}
 ; (func:)
-; REMARK: remark: <unknown>:0:0: 3 spills 3 reloads generated in function{{$}}
+; REMARK: remark: /tmp/kk.c:1:1: 3 spills 3 reloads generated in function{{$}}
 
 ; (loop3:)
 ; HOTNESS: remark: /tmp/kk.c:3:20: 1 spills 1 reloads generated in loop (hotness: 300)
@@ -39,7 +39,7 @@
 
 ; YAML: --- !Missed
 ; YAML: Pass:            regalloc
-; YAML: Name:            LoopSpillReload
+; YAML: Name:            LoopSpillReloadCopies
 ; YAML: DebugLoc:        { File: '/tmp/kk.c', Line: 3, Column: 20 }
 ; YAML: Function:        fpr128
 ; YAML: Hotness:         300
@@ -52,7 +52,7 @@
 ; YAML: ...
 ; YAML: --- !Missed
 ; YAML: Pass:            regalloc
-; YAML: Name:            LoopSpillReload
+; YAML: Name:            LoopSpillReloadCopies
 ; YAML: DebugLoc:        { File: '/tmp/kk.c', Line: 2, Column: 20 }
 ; YAML: Function:        fpr128
 ; YAML: Hotness:         30000
@@ -65,7 +65,7 @@
 ; YAML: ...
 ; YAML: --- !Missed
 ; YAML: Pass:            regalloc
-; YAML: Name:            LoopSpillReload
+; YAML: Name:            LoopSpillReloadCopies
 ; YAML: DebugLoc:        { File: '/tmp/kk.c', Line: 1, Column: 20 }
 ; YAML: Function:        fpr128
 ; YAML: Hotness:         300
@@ -78,7 +78,8 @@
 ; YAML: ...
 ; YAML: --- !Missed
 ; YAML: Pass:            regalloc
-; YAML: Name:            SpillReload
+; YAML: Name:            SpillReloadCopies
+; YAML: DebugLoc:        { File: '/tmp/kk.c', Line: 1, Column: 1 }
 ; YAML: Function:        fpr128
 ; YAML: Hotness:         3
 ; YAML: Args:
@@ -92,7 +93,7 @@
 ; THRESHOLD_YAML-NOT: Hotness:         300{{$}}
 ; THRESHOLD_YAML: --- !Missed
 ; THRESHOLD_YAML: Pass:            regalloc
-; THRESHOLD_YAML: Name:            LoopSpillReload
+; THRESHOLD_YAML: Name:            LoopSpillReloadCopies
 ; THRESHOLD_YAML: DebugLoc:        { File: '/tmp/kk.c', Line: 2, Column: 20 }
 ; THRESHOLD_YAML: Function:        fpr128
 ; THRESHOLD_YAML: Hotness:         30000
@@ -104,7 +105,7 @@
 ; THRESHOLD_YAML:   - String:          generated in loop
 ; THRESHOLD_YAML: ...
 
-define void @fpr128(<4 x float>* %p) nounwind ssp !prof !11 {
+define void @fpr128(<4 x float>* %p) nounwind ssp !prof !11 !dbg !6 {
 entry:
   br label %loop, !dbg !8
 
