@@ -3375,12 +3375,6 @@ static void RenderBuiltinOptions(const ToolChain &TC, const llvm::Triple &T,
     StringRef FuncName = Arg->getValue();
     CmdArgs.push_back(Args.MakeArgString("-fno-builtin-" + FuncName));
   }
-
-  // le32-specific flags:
-  //  -fno-math-builtin: clang should not convert math builtins to intrinsics
-  //                     by default.
-  if (TC.getArch() == llvm::Triple::le32)
-    CmdArgs.push_back("-fno-math-builtin");
 }
 
 bool Driver::getDefaultModuleCachePath(SmallVectorImpl<char> &Result) {
@@ -5167,6 +5161,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back("-H");
     CmdArgs.push_back("-sys-header-deps");
   }
+  Args.AddAllArgs(CmdArgs, options::OPT_fshow_skipped_includes);
 
   if (D.CCPrintHeaders && !D.CCGenDiagnostics) {
     CmdArgs.push_back("-header-include-file");
@@ -6504,6 +6499,16 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (IsHIP)
     CmdArgs.push_back("-fcuda-allow-variadic-functions");
+
+  if (IsCudaDevice || IsHIPDevice) {
+    StringRef InlineThresh =
+        Args.getLastArgValue(options::OPT_fgpu_inline_threshold_EQ);
+    if (!InlineThresh.empty()) {
+      std::string ArgStr =
+          std::string("-inline-threshold=") + InlineThresh.str();
+      CmdArgs.append({"-mllvm", Args.MakeArgStringRef(ArgStr)});
+    }
+  }
 
   // OpenMP offloading device jobs take the argument -fopenmp-host-ir-file-path
   // to specify the result of the compile phase on the host, so the meaningful

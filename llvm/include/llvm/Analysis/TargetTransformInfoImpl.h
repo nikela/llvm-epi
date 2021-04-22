@@ -426,7 +426,7 @@ public:
     return {LowerBoundVF, UpperBoundVF};
   }
 
-  bool shouldMaximizeVectorBandwidth(bool OptSize) const { return false; }
+  bool shouldMaximizeVectorBandwidth() const { return false; }
 
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const {
     return ElementCount::get(0, IsScalable);

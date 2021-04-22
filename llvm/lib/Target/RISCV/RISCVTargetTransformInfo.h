@@ -162,7 +162,7 @@ public:
                                    TTI::CastContextHint CCH,
                                    TTI::TargetCostKind CostKind,
                                    const Instruction *I = nullptr);
-  bool shouldMaximizeVectorBandwidth(bool OptSize) const;
+  bool shouldMaximizeVectorBandwidth() const;
   unsigned getMinVectorRegisterBitWidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,

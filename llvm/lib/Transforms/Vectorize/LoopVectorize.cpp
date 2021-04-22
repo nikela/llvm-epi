@@ -1676,6 +1676,11 @@ public:
   InstructionCost getVectorCallCost(CallInst *CI, ElementCount VF,
                                     bool &NeedToScalarize) const;
 
+  /// Returns true if the per-lane cost of VectorizationFactor A is lower than
+  /// that of B.
+  bool isMoreProfitable(const VectorizationFactor &A,
+                        const VectorizationFactor &B) const;
+
   /// Invalidates decisions already taken by the cost model.
   void invalidateCostModelingDecisions() {
     WideningDecisions.clear();
@@ -6476,14 +6481,19 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
   unsigned MaxVFKnownMinLowerBound = FeasibleMaxVFLowerBound.getKnownMinValue();
   bool MaxVFIsScalableLowerBound = FeasibleMaxVFLowerBound.isScalable();
 
+  // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
+  // Note that both WidestRegister and WidestType may not be a powers of 2.
+  auto MaxVectorSize =
+      ElementCount::getFixed(PowerOf2Floor(WidestRegister / WidestType));
+
   LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
                     << " / " << WidestType << " bits.\n");
   LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
                     << WidestRegister << " bits.\n");
 
-  assert((MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 64) ||
-         (!MaxVFIsScalableLowerBound && MaxVFKnownMinLowerBound <= 256) &&
-             "Did not expect to pack so many elements into one vector!");
+  assert(MaxVectorSize.getFixedValue() <= WidestRegister &&
+         "Did not expect to pack so many elements"
+         " into one vector!");
 
   if (MaxVFIsScalableLowerBound) {
     // TODO: Adjust scalable VF for register usage and bandwidth maximization.
@@ -6493,25 +6503,22 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
       return None;
     }
   } else {
-    if (MaxVFKnownMinLowerBound == 0) {
+    if (MaxVectorSize.getFixedValue() == 0) {
       LLVM_DEBUG(dbgs() << "LV: The target has no vector registers.\n");
-      MaxVFKnownMinLowerBound = 1;
-      return static_cast<ElementCount>(
-          ElementCount::getFixed(MaxVFKnownMinLowerBound));
-    } else if (ConstTripCount && ConstTripCount < MaxVFKnownMinLowerBound &&
+      return ElementCount::getFixed(1);
+    } else if (ConstTripCount &&
+               ConstTripCount < MaxVectorSize.getFixedValue() &&
                isPowerOf2_32(ConstTripCount)) {
       // We need to clamp the VF to be the ConstTripCount. There is no point in
       // choosing a higher viable VF as done in the loop below.
       LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to the constant trip count: "
                         << ConstTripCount << "\n");
-      MaxVFKnownMinLowerBound = ConstTripCount;
-      return static_cast<ElementCount>(
-          ElementCount::getFixed(MaxVFKnownMinLowerBound));
+      return ElementCount::getFixed(ConstTripCount);
     }
   }
 
   ElementCount MaxVF = FeasibleMaxVFLowerBound;
-  if (TTI.shouldMaximizeVectorBandwidth(!isScalarEpilogueAllowed()) ||
+  if (TTI.shouldMaximizeVectorBandwidth() ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
     // (i.e. FeasibleMaxVFUpperBound).
@@ -6554,6 +6561,18 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
   return MaxVF;
 }
 
+bool LoopVectorizationCostModel::isMoreProfitable(
+    const VectorizationFactor &A, const VectorizationFactor &B) const {
+  InstructionCost::CostType CostA = *A.getCost().getValue();
+  InstructionCost::CostType CostB = *B.getCost().getValue();
+
+  // To avoid the need for FP division:
+  //      (CostA / A.Width) < (CostB / B.Width)
+  // <=>  (CostA * B.Width) < (CostB * A.Width)
+  return (CostA * B.getWidth().getKnownMinValue()) <
+         (CostB * A.getWidth().getKnownMinValue());
+}
+
 VectorizationFactor
 LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
   // Compute cost of scalar loop or no vectorization. This would be the same for
@@ -6563,16 +6582,15 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
   LLVM_DEBUG(dbgs() << "LV: Scalar loop costs: " << ExpectedCost << ".\n");
   assert(ExpectedCost.isValid() && "Unexpected invalid cost for scalar loop");
 
-  auto Width = ElementCount::getFixed(1);
-  const float ScalarCost = *ExpectedCost.getValue();
-  float Cost = ScalarCost;
+  const VectorizationFactor ScalarCost(ElementCount::getFixed(1), ExpectedCost);
+  VectorizationFactor ChosenFactor = ScalarCost;
 
   bool ForceVectorization = Hints->getForce() == LoopVectorizeHints::FK_Enabled;
   if ((ForceVectorization || MaxVF.isScalable()) && MaxVF.isVector()) {
     // Ignore scalar width, because the user explicitly wants vectorization.
-    // Initialize cost to max so that VF = 2 for fixed vectors and VF = 1 x
-    // vscale for scalable vectors is, at least, chosen during cost evaluation.
-    Cost = std::numeric_limits<float>::max();
+    // Initialize cost to max so that VF = 2 is, at least, chosen during cost
+    // evaluation.
+    ChosenFactor.setCost(std::numeric_limits<InstructionCost::CostType>::max());
   }
 
   // FIXME: Move MinVF to TTI. A target may have a different MinVF than the
@@ -6594,9 +6612,12 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
                         << " yields an invalid cost. Skipping\n");
       continue;
     }
-    float VectorCost = *C.first.getValue() / (float)i.getKnownMinValue();
-    LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i
-                      << " costs: " << (int)VectorCost << ".\n");
+    VectorizationFactor Candidate(i, C.first);
+    LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i << " costs: "
+                      << (*Candidate.getCost().getValue() /
+                          Candidate.getWidth().getKnownMinValue())
+                      << ".\n");
+
     if (!C.second && !ForceVectorization) {
       LLVM_DEBUG(
           dbgs() << "LV: Not considering vector loop of width " << i
@@ -6605,17 +6626,11 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     }
 
     // If profitable add it to ProfitableVF list.
-    // This is used for epilogue vectorization.
-    if (VectorCost < ScalarCost) {
-      LLVM_DEBUG(dbgs() << "LV: Setting " << i << " as a profitable VF\n");
-      ProfitableVFs.push_back(VectorizationFactor({i, (unsigned)VectorCost}));
-    }
+    if (isMoreProfitable(Candidate, ScalarCost))
+      ProfitableVFs.push_back(Candidate);
 
-    if (VectorCost < Cost) {
-      LLVM_DEBUG(dbgs() << "LV: Updating VF to " << i << "\n");
-      Cost = VectorCost;
-      Width = i;
-    }
+    if (isMoreProfitable(Candidate, ChosenFactor))
+      ChosenFactor = Candidate;
   }
 
   if (!EnableCondStoresVectorization && NumPredStores) {
@@ -6623,37 +6638,24 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
         "There are conditional stores.",
         "store that is conditionally executed prevents vectorization",
         "ConditionalStore", ORE, TheLoop);
-    Width = ElementCount::getFixed(1);
-    Cost = ScalarCost;
+    ChosenFactor = ScalarCost;
   }
 
-  if (Width.isScalable() && ScalarCost < Cost) {
-    if (!ForceVectorization) {
-      LLVM_DEBUG(dbgs() << "LV: Scalable vectorization is not profitable\n");
-      return VectorizationFactor::Disabled();
-    } else {
-      LLVM_DEBUG(
-          dbgs() << "LV: Scalable vectorization seems to be not beneficial, "
-                 << "but was forced by a user.\n");
-    }
-  }
-
-  if (TTI.useScalableVectorType() && Width.isScalar()) {
+  if (TTI.useScalableVectorType() && ChosenFactor.getWidth().isScalar()) {
     LLVM_DEBUG(
         dbgs()
         << "LV: Scalable vectorization could not select a viable factor\n");
     return VectorizationFactor::Disabled();
   }
 
-  LLVM_DEBUG(if (!Width.isScalable() && ForceVectorization &&
-                 Width.getFixedValue() > 1 && Cost >= ScalarCost) dbgs()
+  LLVM_DEBUG(if (ForceVectorization && !ChosenFactor.getWidth().isScalar() &&
+                 *ChosenFactor.getCost().getValue() >=
+                     *ScalarCost.getCost().getValue()) dbgs()
              << "LV: Vectorization seems to be not beneficial, "
              << "but was forced by a user.\n");
-
-  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << Width << ".\n");
-  VectorizationFactor Factor = {Width,
-                                (unsigned)(Width.getKnownMinValue() * Cost)};
-  return Factor;
+  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << ChosenFactor.getWidth()
+                    << ".\n");
+  return ChosenFactor;
 }
 
 bool LoopVectorizationCostModel::isCandidateForEpilogueVectorization(
@@ -6768,7 +6770,7 @@ LoopVectorizationCostModel::selectEpilogueVectorizationFactor(
     if (ElementCount::isKnownLT(NextVF.getWidth(), MainLoopVF) &&
         (Result == VectorizationFactor::Disabled() ||
          Result.getWidth().getFixedValue() == 1 ||
-         NextVF.getCost() < Result.getCost()) &&
+         isMoreProfitable(NextVF, Result)) &&
         LVP.hasPlanWithVFs({MainLoopVF, NextVF.getWidth()}))
       Result = NextVF;
 
@@ -10765,8 +10767,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   if (MaybeVF && *MaybeVF != VectorizationFactor::Disabled()) {
     VF = *MaybeVF;
     // Select the interleave count.
-    IC = CM.selectInterleaveCount(VF.getWidth(),
-                                  VF.getCost().getValue().getValueOr(0));
+    IC = CM.selectInterleaveCount(VF.getWidth(), *VF.getCost().getValue());
   }
 
   // Identify the diagnostic messages that should be produced.

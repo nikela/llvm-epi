@@ -195,6 +195,15 @@ public:
     assert(Width.getKnownMinValue() > 0 && "Width cannot be zero");
   }
 
+  void setWidth(ElementCount W) {
+    assert(Width.getKnownMinValue() > 0 && "Width cannot be zero");
+    Width = W;
+  }
+
+  void setCost(InstructionCost C) {
+    Cost = C;
+  }
+
   ElementCount getWidth() const {
     assert(Width.getKnownMinValue() > 0 &&
            "Cannot get width of invalid vectorization factor");

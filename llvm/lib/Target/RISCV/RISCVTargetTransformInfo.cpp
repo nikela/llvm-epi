@@ -261,8 +261,8 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
   return LegalizationFactor * Log2_32(BitRatio);
 }
 
-bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
-  return (ST->hasStdExtV() && true);
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
+  return ST->hasStdExtV();
 }
 
 unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {

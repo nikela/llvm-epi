@@ -43,6 +43,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/ModuleSlotTracker.h"
 #include "llvm/IR/Type.h"
+#include "llvm/Support/InstructionCost.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
