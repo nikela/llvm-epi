@@ -48,8 +48,8 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
 
   /// Estimate a cost of Broadcast as an extract and sequence of insert
   /// operations.
-  unsigned getBroadcastShuffleOverhead(ScalableVectorType *VTy) {
-    unsigned MinCost = 0;
+  InstructionCost getBroadcastShuffleOverhead(ScalableVectorType *VTy) {
+    InstructionCost MinCost = 0;
     // Broadcast cost is equal to the cost of extracting the zero'th element
     // plus the cost of inserting it into every element of the result vector.
     // FIXME: For scalable vectors for now we compute the MinCost based on Min
@@ -65,8 +65,8 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
 
   /// Estimate a cost of shuffle as a sequence of extract and insert
   /// operations.
-  unsigned getPermuteShuffleOverhead(ScalableVectorType *VTy) {
-    unsigned MinCost = 0;
+  InstructionCost getPermuteShuffleOverhead(ScalableVectorType *VTy) {
+    InstructionCost MinCost = 0;
     // Shuffle cost is equal to the cost of extracting element from its argument
     // plus the cost of inserting them onto the result vector.
 
@@ -86,13 +86,13 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
 
   /// Estimate a cost of subvector extraction as a sequence of extract and
   /// insert operations.
-  unsigned getExtractSubvectorOverhead(ScalableVectorType *VTy, int Index,
+  InstructionCost getExtractSubvectorOverhead(ScalableVectorType *VTy, int Index,
                                        ScalableVectorType *SubVTy) {
     assert(VTy && SubVTy && "Can only extract subvectors from vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
     unsigned NumSubElts = SubVTy->getElementCount().getKnownMinValue();
-    unsigned MinCost = 0;
+    InstructionCost MinCost = 0;
     // Subvector extraction cost is equal to the cost of extracting element
     // from the source type plus the cost of inserting them into the result
     // vector type.
@@ -109,13 +109,13 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
 
   /// Estimate a cost of subvector insertion as a sequence of extract and
   /// insert operations.
-  unsigned getInsertSubvectorOverhead(ScalableVectorType *VTy, int Index,
-                                      ScalableVectorType *SubVTy) {
+  InstructionCost getInsertSubvectorOverhead(ScalableVectorType *VTy, int Index,
+                                             ScalableVectorType *SubVTy) {
     assert(VTy && SubVTy && "Can only insert subvectors into vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
     unsigned NumSubElts = SubVTy->getElementCount().getKnownMinValue();
-    unsigned MinCost = 0;
+    InstructionCost MinCost = 0;
     // Subvector insertion cost is equal to the cost of extracting element
     // from the source type plus the cost of inserting them into the result
     // vector type.
@@ -149,17 +149,19 @@ public:
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
-  unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
-  unsigned getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
-                          ArrayRef<int> Mask, int Index, VectorType *SubTp);
+  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
+  InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
+                                 ArrayRef<int> Mask, int Index,
+                                 VectorType *SubTp);
   unsigned getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                             ArrayRef<Type *> Tys);
-  unsigned getScalarizationOverhead(VectorType *InTy, const APInt &DemandedElts,
-                                    bool Insert, bool Extract);
-  unsigned getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
-                            TTI::CastContextHint CCH,
-                            TTI::TargetCostKind CostKind,
-                            const Instruction *I = nullptr);
+  unsigned getScalarizationOverhead(VectorType *InTy,
+                                           const APInt &DemandedElts,
+                                           bool Insert, bool Extract);
+  InstructionCost getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
+                                   TTI::CastContextHint CCH,
+                                   TTI::TargetCostKind CostKind,
+                                   const Instruction *I = nullptr);
   bool shouldMaximizeVectorBandwidth(bool OptSize) const;
   unsigned getMinVectorRegisterBitWidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
@@ -171,23 +173,23 @@ public:
                         unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1) const;
-  int getCmpSelInstrCost(
-      unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
-      CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
-      TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
-      const Instruction *I = nullptr);
+  InstructionCost
+  getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
+                     CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
+                     TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
+                     const Instruction *I = nullptr);
 
   TargetTransformInfo::PopcntSupportKind getPopcntSupport(unsigned TyWidth);
 
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasStdExtV(); }
   Optional<unsigned> getMaxVScale() const;
-  int getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                 bool IsPairwiseForm,
-                                 TTI::TargetCostKind CostKind);
-  int getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                             bool IsPairwise, bool IsUnsigned,
-                             TTI::TargetCostKind CostKind);
+  InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
+                                             bool IsPairwiseForm,
+                                             TTI::TargetCostKind CostKind);
+  InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
+                                         bool IsPairwise, bool IsUnsigned,
+                                         TTI::TargetCostKind CostKind);
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
     switch (K) {
     case TargetTransformInfo::RGK_Scalar:
@@ -203,10 +205,11 @@ public:
     llvm_unreachable("Unsupported register kind");
   }
 
-  unsigned getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
-                                  const Value *Ptr, bool VariableMask,
-                                  Align Alignment, TTI::TargetCostKind CostKind,
-                                  const Instruction *I);
+  InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
+                                         const Value *Ptr, bool VariableMask,
+                                         Align Alignment,
+                                         TTI::TargetCostKind CostKind,
+                                         const Instruction *I);
 
   bool isLegalElementTypeForRVV(Type *ScalarTy) {
     if (ScalarTy->isPointerTy())

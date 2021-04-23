@@ -25,22 +25,19 @@
 #define LLVM_TRANSFORMS_VECTORIZE_LOOPVECTORIZATIONPLANNER_H
 
 #include "VPlan.h"
-#include "VPlanValue.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Analysis/LoopInfo.h"
-#include "llvm/Analysis/TargetLibraryInfo.h"
-#include "llvm/Analysis/TargetTransformInfo.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/GlobalValue.h"
+#include "llvm/Support/InstructionCost.h"
 
 namespace llvm {
 
+class LoopInfo;
 class LoopVectorizationLegality;
 class LoopVectorizationCostModel;
 class PredicatedScalarEvolution;
 class LoopVectorizationRequirements;
 class LoopVectorizeHints;
 class OptimizationRemarkEmitter;
+class TargetTransformInfo;
+class TargetLibraryInfo;
 class VPRecipeBuilder;
 
 /// VPlan-based builder utility analogous to IRBuilder.

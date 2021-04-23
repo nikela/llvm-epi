@@ -2397,13 +2397,10 @@ public:
 
   Value *CreateInsertElement(Value *Vec, Value *NewElt, Value *Idx,
                              const Twine &Name = "") {
-    if (isa<ScalableVectorType>(Vec->getType()))
-      return Insert(InsertElementInst::Create(Vec, NewElt, Idx), Name);
     if (auto *VC = dyn_cast<Constant>(Vec))
       if (auto *NC = dyn_cast<Constant>(NewElt))
         if (auto *IC = dyn_cast<Constant>(Idx))
-          if (auto *Fold = Insert(Folder.CreateInsertElement(VC, NC, IC), Name))
-            return Fold;
+          return Insert(Folder.CreateInsertElement(VC, NC, IC), Name);
     return Insert(InsertElementInst::Create(Vec, NewElt, Idx), Name);
   }
 

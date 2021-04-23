@@ -507,7 +507,7 @@ static bool shouldPinPassToLegacyPM(StringRef Pass) {
   std::vector<StringRef> PassNamePrefix = {
       "x86-",  "xcore-", "wasm-",    "systemz-", "ppc-",    "nvvm-",   "nvptx-",
       "mips-", "lanai-", "hexagon-", "bpf-",     "avr-",    "thumb2-", "arm-",
-      "si-",   "gcn-",   "amdgpu-",  "aarch64-", "amdgcn-", "polly-"};
+      "si-",   "gcn-",   "amdgpu-",  "aarch64-", "amdgcn-", "polly-", "epi-"};
   std::vector<StringRef> PassNameContain = {"ehprepare"};
   std::vector<StringRef> PassNameExact = {
       "safe-stack",           "cost-model",

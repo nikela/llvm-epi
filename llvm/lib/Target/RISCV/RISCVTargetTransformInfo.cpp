@@ -156,7 +156,7 @@ bool RISCVTTIImpl::isLegalMaskedScatter(Type *DataType,
   return isLegalMaskedLoadStore(DataType);
 }
 
-unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
+InstructionCost RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
                                           unsigned Index) {
   // FIXME: Implement a more precise cost computation model.
   // For now this function is simply a wrapper over the base implementation
@@ -166,8 +166,9 @@ unsigned RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
   return BaseT::getVectorInstrCost(Opcode, Val, Index);
 }
 
-unsigned RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
-                                      ArrayRef<int> Mask, int Index, VectorType *SubTp) {
+InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
+                                             VectorType *Tp, ArrayRef<int> Mask,
+                                             int Index, VectorType *SubTp) {
   if (isa<ScalableVectorType>(Tp) &&
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
     switch (Kind) {
@@ -199,9 +200,8 @@ RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
   return BaseT::getOperandsScalarizationOverhead(Args, Tys);
 }
 
-unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
-                                                const APInt &DemandedElts,
-                                                bool Insert, bool Extract) {
+unsigned RISCVTTIImpl::getScalarizationOverhead(
+    VectorType *InTy, const APInt &DemandedElts, bool Insert, bool Extract) {
   // FIXME: a bitfield is not a reasonable abstraction for talking about
   // which elements are needed from a scalable vector.
   // For scalable vectors DemenadedElts currently represent
@@ -210,7 +210,7 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
   unsigned NumELts = InTy->getElementCount().getKnownMinValue();
   assert(DemandedElts.getBitWidth() == NumELts && "Vector size mismatch");
 
-  unsigned MinCost = 0;
+  InstructionCost MinCost = 0;
 
   for (unsigned i = 0, e = NumELts; i < e; ++i) {
     if (!DemandedElts[i])
@@ -221,13 +221,14 @@ unsigned RISCVTTIImpl::getScalarizationOverhead(VectorType *InTy,
       MinCost += getVectorInstrCost(Instruction::ExtractElement, InTy, i);
   }
 
-  return MinCost;
+  return *MinCost.getValue();
 }
 
-unsigned RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
-                                        TTI::CastContextHint CCH,
-                                        TTI::TargetCostKind CostKind,
-                                        const Instruction *I) {
+InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
+                                               Type *Src,
+                                               TTI::CastContextHint CCH,
+                                               TTI::TargetCostKind CostKind,
+                                               const Instruction *I) {
   if (!isa<ScalableVectorType>(Dst) || !isa<ScalableVectorType>(Src))
     return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
 
@@ -322,10 +323,11 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
   return {LowerBoundVF, UpperBoundVF};
 }
 
-int RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
-                                     CmpInst::Predicate VecPred,
-                                     TTI::TargetCostKind CostKind,
-                                     const Instruction *I) {
+InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
+                                                 Type *CondTy,
+                                                 CmpInst::Predicate VecPred,
+                                                 TTI::TargetCostKind CostKind,
+                                                 const Instruction *I) {
   // FIXME: For the time being we only consider the case when the ValTy or
   // CondTy is illegal and return an artificially high cost. For other cases we
   // default to the base implementation.
@@ -384,9 +386,10 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
   return BaseT::getMaxVScale();
 }
 
-int RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                             bool IsPairwiseForm,
-                                             TTI::TargetCostKind CostKind) {
+InstructionCost
+RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
+                                         bool IsPairwiseForm,
+                                         TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(ValTy))
     return BaseT::getArithmeticReductionCost(Opcode, ValTy, IsPairwiseForm,
                                              CostKind);
@@ -397,7 +400,7 @@ int RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
                                              CostKind);
 
   std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
-  int LegalizationCost = 0;
+  InstructionCost LegalizationCost = 0;
   if (LT.first > 1) {
     Type *LegalVTy = EVT(LT.second).getTypeForEVT(ValTy->getContext());
     LegalizationCost = getArithmeticInstrCost(Opcode, LegalVTy, CostKind);
@@ -423,9 +426,10 @@ int RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
 }
 
 // Taken from AArch64.
-int RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                                         bool IsPairwise, bool IsUnsigned,
-                                         TTI::TargetCostKind CostKind) {
+InstructionCost
+RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
+                                     bool IsPairwise, bool IsUnsigned,
+                                     TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(Ty))
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsPairwise, IsUnsigned,
                                          CostKind);
@@ -434,7 +438,7 @@ int RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
          "Both vectors need to be scalable");
 
   std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
-  int LegalizationCost = 0;
+  InstructionCost LegalizationCost = 0;
   if (LT.first > 1) {
     Type *LegalVTy = EVT(LT.second).getTypeForEVT(Ty->getContext());
     unsigned CmpOpcode =
@@ -450,7 +454,7 @@ int RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
 }
 
-unsigned RISCVTTIImpl::getGatherScatterOpCost(
+InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
     unsigned Opcode, Type *DataTy, const Value *Ptr, bool VariableMask,
     Align Alignment, TTI::TargetCostKind CostKind, const Instruction *I) {
   // We can do gather/scatter using a single instruction.
@@ -475,7 +479,7 @@ unsigned RISCVTTIImpl::getGatherScatterOpCost(
 
   auto *VTy = cast<FixedVectorType>(DataTy);
   unsigned NumLoads = VTy->getNumElements();
-  unsigned MemOpCost =
+  InstructionCost MemOpCost =
       getMemoryOpCost(Opcode, VTy->getElementType(), Alignment, 0, CostKind, I);
   return NumLoads * MemOpCost;
 }
@@ -512,13 +516,13 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   auto *RetTy = ICA.getReturnType();
   switch (ICA.getID()) {
   case Intrinsic::experimental_stepvector: {
-    unsigned Cost = 1; // Cost of the `index' instruction
+    InstructionCost Cost = 1; // Cost of the `index' instruction
     auto LT = TLI->getTypeLegalizationCost(DL, RetTy);
     // Legalisation of illegal vectors involves an `index' instruction plus
     // (LT.first - 1) vector adds.
     if (LT.first > 1) {
       Type *LegalVTy = EVT(LT.second).getTypeForEVT(RetTy->getContext());
-      unsigned AddCost =
+      InstructionCost AddCost =
           getArithmeticInstrCost(Instruction::Add, LegalVTy, CostKind);
       Cost += AddCost * (LT.first - 1);
     }
