@@ -24,17 +24,13 @@ define i64 @foo(i64 %t7, i64 %b) {
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = add i64 [[A]], [[INDEX]]
-; CHECK-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP7:%.*]] = mul i64 [[TMP6]], 0
-; CHECK-NEXT:    [[TMP8:%.*]] = add i64 [[TMP7]], 0
-; CHECK-NEXT:    [[TMP9:%.*]] = mul i64 [[TMP8]], 1
-; CHECK-NEXT:    [[TMP10:%.*]] = add i64 [[OFFSET_IDX]], [[TMP9]]
-; CHECK-NEXT:    [[TMP11:%.*]] = add nuw nsw i64 [[TMP10]], 1
-; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP13:%.*]] = mul i64 [[TMP12]], 8
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP13]]
-; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], [[LOOP0:!llvm.loop !.*]]
+; CHECK-NEXT:    [[TMP6:%.*]] = add i64 [[OFFSET_IDX]], 0
+; CHECK-NEXT:    [[TMP7:%.*]] = add nuw nsw i64 [[TMP6]], 1
+; CHECK-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP9:%.*]] = mul i64 [[TMP8]], 8
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
+; CHECK-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP10]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[TMP1]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[T9:%.*]], label [[SCALAR_PH]]
@@ -45,7 +41,7 @@ define i64 @foo(i64 %t7, i64 %b) {
 ; CHECK-NEXT:    [[T12:%.*]] = phi i64 [ [[T11:%.*]], [[T0]] ], [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ]
 ; CHECK-NEXT:    [[T11]] = add nuw nsw i64 [[T12]], 1
 ; CHECK-NEXT:    [[EXIT:%.*]] = icmp eq i64 [[T11]], [[T7]]
-; CHECK-NEXT:    br i1 [[EXIT]], label [[T9]], label [[T0]], [[LOOP2:!llvm.loop !.*]]
+; CHECK-NEXT:    br i1 [[EXIT]], label [[T9]], label [[T0]], !llvm.loop [[LOOP2:![0-9]+]]
 ; CHECK:       t9:
 ; CHECK-NEXT:    [[T11_LCSSA:%.*]] = phi i64 [ [[T11]], [[T0]] ], [ [[IND_END]], [[MIDDLE_BLOCK]] ]
 ; CHECK-NEXT:    ret i64 [[T11_LCSSA]]

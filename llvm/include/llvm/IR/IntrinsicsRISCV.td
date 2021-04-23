@@ -90,6 +90,16 @@ let TargetPrefix = "riscv" in {
   def int_riscv_clmulh : BitManipGPRGPRIntrinsics;
   def int_riscv_clmulr : BitManipGPRGPRIntrinsics;
 
+  // Zbp
+  def int_riscv_grev  : BitManipGPRGPRIntrinsics;
+  def int_riscv_gorc  : BitManipGPRGPRIntrinsics;
+  def int_riscv_shfl  : BitManipGPRGPRIntrinsics;
+  def int_riscv_unshfl  : BitManipGPRGPRIntrinsics;
+  def int_riscv_xperm_n  : BitManipGPRGPRIntrinsics;
+  def int_riscv_xperm_b  : BitManipGPRGPRIntrinsics;
+  def int_riscv_xperm_h  : BitManipGPRGPRIntrinsics;
+  def int_riscv_xperm_w  : BitManipGPRGPRIntrinsics;
+
   // Zbr
   def int_riscv_crc32_b : BitManipGPRIntrinsics;
   def int_riscv_crc32_h : BitManipGPRIntrinsics;
@@ -990,6 +1000,8 @@ let TargetPrefix = "riscv" in {
   defm vmsle : RISCVCompare;
   defm vmsgtu : RISCVCompare;
   defm vmsgt : RISCVCompare;
+  defm vmsgeu : RISCVCompare;
+  defm vmsge : RISCVCompare;
 
   defm vminu : RISCVBinaryAAX;
   defm vmin : RISCVBinaryAAX;

@@ -272,7 +272,8 @@ public:
 #endif
   }
 
-  uptr computeOddEvenMaskForPointerMaybe(Options Options, uptr Ptr, uptr Size) {
+  uptr computeOddEvenMaskForPointerMaybe(Options Options, uptr Ptr,
+                                         uptr ClassId) {
     if (!Options.get(OptionBit::UseOddEvenTags))
       return 0;
 
@@ -281,8 +282,7 @@ public:
     // Size to Ptr will flip the least significant set bit of Size in Ptr, so
     // that bit will have the pattern 010101... for consecutive blocks, which we
     // can use to determine which tag mask to use.
-    return (Ptr & (1ULL << getLeastSignificantSetBitIndex(Size))) ? 0xaaaa
-                                                                  : 0x5555;
+    return 0x5555U << ((Ptr >> SizeClassMap::getSizeLSBByClassId(ClassId)) & 1);
   }
 
   NOINLINE void *allocate(uptr Size, Chunk::Origin Origin,
@@ -444,7 +444,7 @@ public:
           }
         } else {
           const uptr OddEvenMask =
-              computeOddEvenMaskForPointerMaybe(Options, BlockUptr, BlockSize);
+              computeOddEvenMaskForPointerMaybe(Options, BlockUptr, ClassId);
           TaggedPtr = prepareTaggedChunk(Ptr, Size, OddEvenMask, BlockEnd);
         }
         storePrimaryAllocationStackMaybe(Options, Ptr);
@@ -518,6 +518,7 @@ public:
     if (UNLIKELY(!isAligned(reinterpret_cast<uptr>(Ptr), MinAlignment)))
       reportMisalignedPointer(AllocatorAction::Deallocating, Ptr);
 
+    void *TaggedPtr = Ptr;
     Ptr = getHeaderTaggedPointer(Ptr);
 
     Chunk::UnpackedHeader Header;
@@ -543,7 +544,7 @@ public:
         reportDeleteSizeMismatch(Ptr, DeleteSize, Size);
     }
 
-    quarantineOrDeallocateChunk(Options, Ptr, &Header, Size);
+    quarantineOrDeallocateChunk(Options, TaggedPtr, &Header, Size);
   }
 
   void *reallocate(void *OldPtr, uptr NewSize, uptr Alignment = MinAlignment) {
@@ -639,7 +640,7 @@ public:
     void *NewPtr = allocate(NewSize, Chunk::Origin::Malloc, Alignment);
     if (LIKELY(NewPtr)) {
       memcpy(NewPtr, OldTaggedPtr, Min(NewSize, OldSize));
-      quarantineOrDeallocateChunk(Options, OldPtr, &OldHeader, OldSize);
+      quarantineOrDeallocateChunk(Options, OldTaggedPtr, &OldHeader, OldSize);
     }
     return NewPtr;
   }
@@ -1031,18 +1032,18 @@ private:
            reinterpret_cast<uptr>(Ptr) - SizeOrUnusedBytes;
   }
 
-  void quarantineOrDeallocateChunk(Options Options, void *Ptr,
+  void quarantineOrDeallocateChunk(Options Options, void *TaggedPtr,
                                    Chunk::UnpackedHeader *Header, uptr Size) {
+    void *Ptr = getHeaderTaggedPointer(TaggedPtr);
     Chunk::UnpackedHeader NewHeader = *Header;
     if (UNLIKELY(useMemoryTagging<Params>(Options))) {
-      u8 PrevTag = 0;
+      u8 PrevTag = extractTag(reinterpret_cast<uptr>(TaggedPtr));
       if (NewHeader.ClassId) {
-        PrevTag = extractTag(loadTag(reinterpret_cast<uptr>(Ptr)));
         if (!TSDRegistry.getDisableMemInit()) {
           uptr TaggedBegin, TaggedEnd;
           const uptr OddEvenMask = computeOddEvenMaskForPointerMaybe(
               Options, reinterpret_cast<uptr>(getBlockBegin(Ptr, &NewHeader)),
-              SizeClassMap::getSizeByClassId(NewHeader.ClassId));
+              NewHeader.ClassId);
           // Exclude the previous tag so that immediate use after free is
           // detected 100% of the time.
           setRandomTag(Ptr, Size, OddEvenMask | (1UL << PrevTag), &TaggedBegin,

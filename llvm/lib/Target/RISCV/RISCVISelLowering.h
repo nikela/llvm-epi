@@ -96,6 +96,9 @@ enum NodeType : unsigned {
   GORC,
   GORCW,
   SHFL,
+  SHFLW,
+  UNSHFL,
+  UNSHFLW,
   // EPI nodes
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
@@ -145,6 +148,7 @@ enum NodeType : unsigned {
   VZIP2,
   VUNZIP2,
   VTRN,
+  // End of EPI nodes
   // Vector Extension
   // VMV_V_X_VL matches the semantics of vmv.v.x but includes an extra operand
   // for the VL value to be used for the operation.
@@ -352,8 +356,6 @@ public:
                                       unsigned DefinedValues) const override;
 
   // Provide custom lowering hooks for some operations.
-  void LowerOperationWrapper(SDNode *N, SmallVectorImpl<SDValue> &Results,
-                             SelectionDAG &DAG) const override;
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
   void ReplaceNodeResults(SDNode *N, SmallVectorImpl<SDValue> &Results,
                           SelectionDAG &DAG) const override;
@@ -604,6 +606,8 @@ private:
                             bool HasMask = true) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
                                             unsigned ExtendOpc) const;
+  SDValue lowerGET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerSET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;
 
   bool isEligibleForTailCallOptimization(
       CCState &CCInfo, CallLoweringInfo &CLI, MachineFunction &MF,

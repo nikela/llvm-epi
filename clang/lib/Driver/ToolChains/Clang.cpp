@@ -1114,7 +1114,7 @@ static const char *RelocationModelName(llvm::Reloc::Model Model) {
 static void handleAMDGPUCodeObjectVersionOptions(const Driver &D,
                                                  const ArgList &Args,
                                                  ArgStringList &CmdArgs) {
-  unsigned CodeObjVer = getOrCheckAMDGPUCodeObjectVersion(D, Args);
+  unsigned CodeObjVer = getAMDGPUCodeObjectVersion(D, Args);
   CmdArgs.insert(CmdArgs.begin() + 1,
                  Args.MakeArgString(Twine("--amdhsa-code-object-version=") +
                                     Twine(CodeObjVer)));
@@ -3375,6 +3375,12 @@ static void RenderBuiltinOptions(const ToolChain &TC, const llvm::Triple &T,
     StringRef FuncName = Arg->getValue();
     CmdArgs.push_back(Args.MakeArgString("-fno-builtin-" + FuncName));
   }
+
+  // le32-specific flags:
+  //  -fno-math-builtin: clang should not convert math builtins to intrinsics
+  //                     by default.
+  if (TC.getArch() == llvm::Triple::le32)
+    CmdArgs.push_back("-fno-math-builtin");
 }
 
 bool Driver::getDefaultModuleCachePath(SmallVectorImpl<char> &Result) {
@@ -3986,7 +3992,14 @@ static void renderDebugOptions(const ToolChain &TC, const Driver &D,
       DebugInfoKind == codegenoptions::DebugDirectivesOnly)
     DebugInfoKind = codegenoptions::NoDebugInfo;
 
-  // We ignore flag -gstrict-dwarf for now.
+  // strict DWARF is set to false by default. But for DBX, we need it to be set
+  // as true by default.
+  if (const Arg *A = Args.getLastArg(options::OPT_gstrict_dwarf))
+    (void)checkDebugInfoOption(A, Args, D, TC);
+  if (Args.hasFlag(options::OPT_gstrict_dwarf, options::OPT_gno_strict_dwarf,
+                   DebuggerTuning == llvm::DebuggerKind::DBX))
+    CmdArgs.push_back("-gstrict-dwarf");
+
   // And we handle flag -grecord-gcc-switches later with DWARFDebugFlags.
   Args.ClaimAllArgs(options::OPT_g_flags_Group);
 

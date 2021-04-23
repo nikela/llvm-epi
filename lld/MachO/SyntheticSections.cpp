@@ -1050,8 +1050,8 @@ BitcodeBundleSection::BitcodeBundleSection()
 
 class ErrorCodeWrapper {
 public:
-  ErrorCodeWrapper(std::error_code ec) : errorCode(ec.value()) {}
-  ErrorCodeWrapper(int ec) : errorCode(ec) {}
+  explicit ErrorCodeWrapper(std::error_code ec) : errorCode(ec.value()) {}
+  explicit ErrorCodeWrapper(int ec) : errorCode(ec) {}
   operator int() const { return errorCode; }
 
 private:
@@ -1102,7 +1102,7 @@ void macho::createSyntheticSymbols() {
   auto addHeaderSymbol = [](const char *name) {
     symtab->addSynthetic(name, in.header->isec, 0,
                          /*privateExtern=*/true,
-                         /*includeInSymtab*/ false);
+                         /*includeInSymtab=*/false);
   };
 
   switch (config->outputType) {
@@ -1114,13 +1114,13 @@ void macho::createSyntheticSymbols() {
     // Otherwise, it's an absolute symbol.
     if (config->isPic)
       symtab->addSynthetic("__mh_execute_header", in.header->isec, 0,
-                           /*privateExtern*/ false,
-                           /*includeInSymbtab*/ true);
+                           /*privateExtern=*/false,
+                           /*includeInSymbtab=*/true);
     else
       symtab->addSynthetic("__mh_execute_header",
                            /*isec*/ nullptr, 0,
-                           /*privateExtern*/ false,
-                           /*includeInSymbtab*/ true);
+                           /*privateExtern=*/false,
+                           /*includeInSymbtab=*/true);
     break;
 
     // The following symbols are  N_SECT symbols, even though the header is not
