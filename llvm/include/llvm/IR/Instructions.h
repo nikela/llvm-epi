@@ -1123,7 +1123,9 @@ public:
   /// the base GEP pointer.
   bool accumulateConstantOffset(const DataLayout &DL, APInt &Offset,
                                 bool SkipScalableCheck = false) const;
-
+  bool collectOffset(const DataLayout &DL, unsigned BitWidth,
+                     SmallDenseMap<Value *, APInt, 8> &VariableOffsets,
+                     APInt &ConstantOffset) const;
   // Methods for support type inquiry through isa, cast, and dyn_cast:
   static bool classof(const Instruction *I) {
     return (I->getOpcode() == Instruction::GetElementPtr);

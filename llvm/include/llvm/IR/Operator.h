@@ -578,6 +578,12 @@ public:
       APInt &Offset,
       function_ref<bool(Value &, APInt &)> ExternalAnalysis = nullptr,
       bool SkipScalableCheck = false);
+
+  /// Collect the offset of this GEP as a map of Values to their associated
+  /// APInt multipliers, as well as a total Constant Offset.
+  bool collectOffset(const DataLayout &DL, unsigned BitWidth,
+                     SmallDenseMap<Value *, APInt, 8> &VariableOffsets,
+                     APInt &ConstantOffset) const;
 };
 
 class PtrToIntOperator
