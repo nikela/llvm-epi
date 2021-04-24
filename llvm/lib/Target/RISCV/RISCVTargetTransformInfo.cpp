@@ -19,8 +19,8 @@ using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
 
-int RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
-                                TTI::TargetCostKind CostKind) {
+InstructionCost RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
+                                            TTI::TargetCostKind CostKind) {
   assert(Ty->isIntegerTy() &&
          "getIntImmCost can only estimate cost of materialising integers");
 
@@ -34,10 +34,10 @@ int RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
                                     getST()->is64Bit());
 }
 
-int RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
-                                    const APInt &Imm, Type *Ty,
-                                    TTI::TargetCostKind CostKind,
-                                    Instruction *Inst) {
+InstructionCost RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
+                                                const APInt &Imm, Type *Ty,
+                                                TTI::TargetCostKind CostKind,
+                                                Instruction *Inst) {
   assert(Ty->isIntegerTy() &&
          "getIntImmCost can only estimate cost of materialising integers");
 
@@ -92,9 +92,10 @@ int RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
   return TTI::TCC_Free;
 }
 
-int RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
-                                      const APInt &Imm, Type *Ty,
-                                      TTI::TargetCostKind CostKind) {
+InstructionCost
+RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
+                                  const APInt &Imm, Type *Ty,
+                                  TTI::TargetCostKind CostKind) {
   // Prevent hoisting in unknown cases.
   return TTI::TCC_Free;
 }

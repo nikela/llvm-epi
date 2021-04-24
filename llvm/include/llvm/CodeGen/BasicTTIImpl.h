@@ -282,8 +282,9 @@ public:
     return TargetTransformInfoImplBase::isProfitableLSRChainElement(I);
   }
 
-  int getScalingFactorCost(Type *Ty, GlobalValue *BaseGV, int64_t BaseOffset,
-                           bool HasBaseReg, int64_t Scale, unsigned AddrSpace) {
+  InstructionCost getScalingFactorCost(Type *Ty, GlobalValue *BaseGV,
+                                       int64_t BaseOffset, bool HasBaseReg,
+                                       int64_t Scale, unsigned AddrSpace) {
     TargetLoweringBase::AddrMode AM;
     AM.BaseGV = BaseGV;
     AM.BaseOffs = BaseOffset;
@@ -311,8 +312,8 @@ public:
     return getTLI()->getTypeLegalizationCost(DL, Ty).first;
   }
 
-  int getGEPCost(Type *PointeeType, const Value *Ptr,
-                 ArrayRef<const Value *> Operands) {
+  InstructionCost getGEPCost(Type *PointeeType, const Value *Ptr,
+                             ArrayRef<const Value *> Operands) {
     return BaseT::getGEPCost(PointeeType, Ptr, Operands);
   }
 
@@ -1410,7 +1411,7 @@ public:
     // Assume that we need to scalarize this intrinsic.
     // Compute the scalarization overhead based on Args for a vector
     // intrinsic.
-    unsigned ScalarizationCost = std::numeric_limits<unsigned>::max();
+    InstructionCost ScalarizationCost = InstructionCost::getInvalid();
     if (RetVF.isVector() && !RetVF.isScalable()) {
       ScalarizationCost = 0;
       if (!RetTy->isVoidTy())
@@ -1436,7 +1437,7 @@ public:
     Type *RetTy = ICA.getReturnType();
     const SmallVectorImpl<Type *> &Tys = ICA.getArgTypes();
     FastMathFlags FMF = ICA.getFlags();
-    unsigned ScalarizationCostPassed = ICA.getScalarizationCost();
+    InstructionCost ScalarizationCostPassed = ICA.getScalarizationCost();
     bool SkipScalarizationCost = ICA.skipScalarizationCost();
 
     VectorType *VecOpTy = nullptr;
@@ -1463,7 +1464,8 @@ public:
         return InstructionCost::getInvalid();
 
       // Assume that we need to scalarize this intrinsic.
-      InstructionCost ScalarizationCost = ScalarizationCostPassed;
+      InstructionCost ScalarizationCost =
+          SkipScalarizationCost ? ScalarizationCostPassed : 0;
       unsigned ScalarCalls = 1;
       Type *ScalarRetTy = RetTy;
       if (auto *RetVTy = dyn_cast<FixedVectorType>(RetTy)) {
@@ -1879,8 +1881,9 @@ public:
           }))
         return InstructionCost::getInvalid();
 
-      unsigned ScalarizationCost = SkipScalarizationCost ?
-        ScalarizationCostPassed : getScalarizationOverhead(RetVTy, true, false);
+      InstructionCost ScalarizationCost =
+          SkipScalarizationCost ? ScalarizationCostPassed
+                                : getScalarizationOverhead(RetVTy, true, false);
 
       unsigned ScalarCalls = cast<FixedVectorType>(RetVTy)->getNumElements();
       SmallVector<Type *, 4> ScalarTys;
@@ -1930,8 +1933,8 @@ public:
     return LT.first;
   }
 
-  unsigned getAddressComputationCost(Type *Ty, ScalarEvolution *,
-                                     const SCEV *) {
+  InstructionCost getAddressComputationCost(Type *Ty, ScalarEvolution *,
+                                            const SCEV *) {
     return 0;
   }
 

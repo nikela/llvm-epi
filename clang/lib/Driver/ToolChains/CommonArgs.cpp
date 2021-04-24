@@ -1641,6 +1641,11 @@ unsigned tools::getAMDGPUCodeObjectVersion(const Driver &D,
   return CodeObjVer;
 }
 
+bool tools::haveAMDGPUCodeObjectVersionArgument(
+    const Driver &D, const llvm::opt::ArgList &Args) {
+  return getAMDGPUCodeObjectArgument(D, Args) != nullptr;
+}
+
 void tools::addMachineOutlinerArgs(const Driver &D,
                                    const llvm::opt::ArgList &Args,
                                    llvm::opt::ArgStringList &CmdArgs,
