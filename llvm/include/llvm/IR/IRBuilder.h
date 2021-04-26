@@ -2508,31 +2508,6 @@ public:
   /// NumElts elements.
   Value *CreateVectorSplat(unsigned NumElts, Value *V, const Twine &Name = "");
 
-private:
-  /// Return an integer or a vector of integer constant of given type that has
-  /// all bits set to true.
-  Value *getAllOnesValue(Type *Ty) {
-    VectorType *VTy = dyn_cast<VectorType>(Ty);
-    if (isa_and_nonnull<ScalableVectorType>(VTy)) {
-      Constant *Ones = Constant::getAllOnesValue(VTy->getElementType());
-      return CreateVectorSplat(VTy->getElementCount(), Ones, "");
-    }
-    return Constant::getAllOnesValue(Ty);
-  }
-
-public:
-  /// Return an all true boolean vector of size and scalability \p NumElts.
-  /// If not scalable, then the returned vector is a Constant Value.
-  Value *getTrueVector(ElementCount NumElts) {
-    return getAllOnesValue(VectorType::get(Type::getInt1Ty(Context), NumElts));
-  }
-
-  /// Return an all false boolean vector of size and scalability \p NumElts.
-  Value *getFalseVector(ElementCount NumElts) {
-    return ConstantAggregateZero::get(
-        VectorType::get(Type::getInt1Ty(Context), NumElts));
-  }
-
   /// Return a vector value that contains \arg V broadcasted to \p
   /// EC elements.
   Value *CreateVectorSplat(ElementCount EC, Value *V, const Twine &Name = "");
@@ -2552,6 +2527,18 @@ public:
   Value *CreatePreserveStructAccessIndex(Type *ElTy, Value *Base,
                                          unsigned Index, unsigned FieldIndex,
                                          MDNode *DbgInfo);
+
+  /// Return an all true boolean vector of size and scalability \p NumElts.
+  Value *getTrueVector(ElementCount NumElts) {
+    VectorType *VTy = VectorType::get(Type::getInt1Ty(Context), NumElts);
+    return Constant::getAllOnesValue(VTy);
+  }
+
+  /// Return an all false boolean vector of size and scalability \p NumElts.
+  Value *getFalseVector(ElementCount NumElts) {
+    VectorType *Vty = VectorType::get(Type::getInt1Ty(Context), NumElts);
+    return ConstantAggregateZero::get(Vty);
+  }
 
 private:
   /// Helper function that creates an assume intrinsic call that
