@@ -6562,14 +6562,14 @@ LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
 
 bool LoopVectorizationCostModel::isMoreProfitable(
     const VectorizationFactor &A, const VectorizationFactor &B) const {
-  InstructionCost::CostType CostA = *A.getCost().getValue();
-  InstructionCost::CostType CostB = *B.getCost().getValue();
+  InstructionCost::CostType CostA = *A.Cost.getValue();
+  InstructionCost::CostType CostB = *B.Cost.getValue();
 
   // To avoid the need for FP division:
   //      (CostA / A.Width) < (CostB / B.Width)
   // <=>  (CostA * B.Width) < (CostB * A.Width)
-  return (CostA * B.getWidth().getKnownMinValue()) <
-         (CostB * A.getWidth().getKnownMinValue());
+  return (CostA * B.Width.getKnownMinValue()) <
+         (CostB * A.Width.getKnownMinValue());
 }
 
 VectorizationFactor
@@ -6589,7 +6589,7 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     // Ignore scalar width, because the user explicitly wants vectorization.
     // Initialize cost to max so that VF = 2 is, at least, chosen during cost
     // evaluation.
-    ChosenFactor.setCost(std::numeric_limits<InstructionCost::CostType>::max());
+    ChosenFactor.Cost = std::numeric_limits<InstructionCost::CostType>::max();
   }
 
   // FIXME: Move MinVF to TTI. A target may have a different MinVF than the
@@ -6613,8 +6613,8 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     }
     VectorizationFactor Candidate(i, C.first);
     LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i << " costs: "
-                      << (*Candidate.getCost().getValue() /
-                          Candidate.getWidth().getKnownMinValue())
+                      << (*Candidate.Cost.getValue() /
+                          Candidate.Width.getKnownMinValue())
                       << ".\n");
 
     if (!C.second && !ForceVectorization) {
@@ -6640,20 +6640,19 @@ LoopVectorizationCostModel::selectVectorizationFactor(ElementCount MaxVF) {
     ChosenFactor = ScalarCost;
   }
 
-  if (TTI.useScalableVectorType() && ChosenFactor.getWidth().isScalar()) {
+  if (TTI.useScalableVectorType() && ChosenFactor.Width.isScalar()) {
     LLVM_DEBUG(
         dbgs()
         << "LV: Scalable vectorization could not select a viable factor\n");
     return VectorizationFactor::Disabled();
   }
 
-  LLVM_DEBUG(if (ForceVectorization && !ChosenFactor.getWidth().isScalar() &&
-                 *ChosenFactor.getCost().getValue() >=
-                     *ScalarCost.getCost().getValue()) dbgs()
+  LLVM_DEBUG(if (ForceVectorization && !ChosenFactor.Width.isScalar() &&
+                 *ChosenFactor.Cost.getValue() >= *ScalarCost.Cost.getValue())
+                 dbgs()
              << "LV: Vectorization seems to be not beneficial, "
              << "but was forced by a user.\n");
-  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << ChosenFactor.getWidth()
-                    << ".\n");
+  LLVM_DEBUG(dbgs() << "LV: Selecting VF: " << ChosenFactor.Width << ".\n");
   return ChosenFactor;
 }
 
@@ -6766,16 +6765,16 @@ LoopVectorizationCostModel::selectEpilogueVectorizationFactor(
     return Result;
 
   for (auto &NextVF : ProfitableVFs)
-    if (ElementCount::isKnownLT(NextVF.getWidth(), MainLoopVF) &&
+    if (ElementCount::isKnownLT(NextVF.Width, MainLoopVF) &&
         (Result == VectorizationFactor::Disabled() ||
-         Result.getWidth().getFixedValue() == 1 ||
+         Result.Width.getFixedValue() == 1 ||
          isMoreProfitable(NextVF, Result)) &&
-        LVP.hasPlanWithVFs({MainLoopVF, NextVF.getWidth()}))
+        LVP.hasPlanWithVFs({MainLoopVF, NextVF.Width}))
       Result = NextVF;
 
   if (Result != VectorizationFactor::Disabled())
     LLVM_DEBUG(dbgs() << "LEV: Vectorizing epilogue loop with VF = "
-                      << Result.getWidth().getFixedValue() << "\n";);
+                      << Result.Width.getFixedValue() << "\n";);
   return Result;
 }
 
@@ -8675,7 +8674,7 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
   // Check if it is profitable to vectorize with runtime checks.
   unsigned NumRuntimePointerChecks = Requirements.getNumRuntimePointerChecks();
   if (SelectedVF != VectorizationFactor::Disabled() &&
-      SelectedVF.getWidth().isVector() && NumRuntimePointerChecks) {
+      SelectedVF.Width.isVector() && NumRuntimePointerChecks) {
     bool PragmaThresholdReached =
         NumRuntimePointerChecks > PragmaVectorizeMemoryCheckThreshold;
     bool ThresholdReached =
@@ -10528,7 +10527,7 @@ static bool processLoopInVPlanNativePath(
       LVP.planInVPlanNativePath(UserVF);
   // Normalize the meaning of VF == 1 for fixed vectors.
   if (!TTI->useScalableVectorType() && VF != VectorizationFactor::Disabled() &&
-      VF.getWidth().isScalar())
+      VF.Width.isScalar())
     VF = VectorizationFactor::Disabled();
 
   // If we are stress testing VPlan builds, do not attempt to generate vector
@@ -10538,12 +10537,12 @@ static bool processLoopInVPlanNativePath(
       VectorizationFactor::Disabled() == VF)
     return false;
 
-  LVP.setBestPlan(VF.getWidth(), 1);
+  LVP.setBestPlan(VF.Width, 1);
 
   {
     GeneratedRTChecks Checks(*PSE.getSE(), DT, LI,
                              F->getParent()->getDataLayout());
-    InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.getWidth(), 1, LVL,
+    InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.Width, 1, LVL,
                            &CM, BFI, PSI, Checks);
     LLVM_DEBUG(dbgs() << "Vectorizing outer loop in \""
                       << L->getHeader()->getParent()->getName() << "\"\n");
@@ -10766,14 +10765,14 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   if (MaybeVF && *MaybeVF != VectorizationFactor::Disabled()) {
     VF = *MaybeVF;
     // Select the interleave count.
-    IC = CM.selectInterleaveCount(VF.getWidth(), *VF.getCost().getValue());
+    IC = CM.selectInterleaveCount(VF.Width, *VF.Cost.getValue());
   }
 
   // Identify the diagnostic messages that should be produced.
   std::pair<StringRef, std::string> VecDiagMsg, IntDiagMsg;
   bool VectorizeLoop = true, InterleaveLoop = true;
   if (VF == VectorizationFactor::Disabled() ||
-      (VF.getWidth().isScalar() && !TTI->useScalableVectorType())) {
+      (VF.Width.isScalar() && !TTI->useScalableVectorType())) {
     LLVM_DEBUG(dbgs() << "LV: Vectorization is possible but not beneficial.\n");
     VecDiagMsg = std::make_pair(
         "VectorizationNotBeneficial",
@@ -10839,7 +10838,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
              << VecDiagMsg.second;
     });
   } else if (VectorizeLoop && !InterleaveLoop) {
-    LLVM_DEBUG(dbgs() << "LV: Found a vectorizable loop (" << VF.getWidth()
+    LLVM_DEBUG(dbgs() << "LV: Found a vectorizable loop (" << VF.Width
                       << ") in " << DebugLocStr << '\n');
     ORE->emit([&]() {
       return OptimizationRemarkAnalysis(LV_NAME, IntDiagMsg.first,
@@ -10847,7 +10846,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
              << IntDiagMsg.second;
     });
   } else if (VectorizeLoop && InterleaveLoop) {
-    LLVM_DEBUG(dbgs() << "LV: Found a vectorizable loop (" << VF.getWidth()
+    LLVM_DEBUG(dbgs() << "LV: Found a vectorizable loop (" << VF.Width
                       << ") in " << DebugLocStr << '\n');
     LLVM_DEBUG(dbgs() << "LV: Interleave Count is " << IC << '\n');
   }
@@ -10860,9 +10859,9 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     // immediately after vector codegeneration is done.
     GeneratedRTChecks Checks(*PSE.getSE(), DT, LI,
                              F->getParent()->getDataLayout());
-    if (!VF.getWidth().isScalar() || IC > 1)
+    if (!VF.Width.isScalar() || IC > 1)
       Checks.Create(L, *LVL.getLAI(), PSE.getUnionPredicate());
-    LVP.setBestPlan(VF.getWidth(), IC);
+    LVP.setBestPlan(VF.Width, IC);
 
     using namespace ore;
     if (!VectorizeLoop) {
@@ -10884,15 +10883,15 @@ bool LoopVectorizePass::processLoop(Loop *L) {
 
       // Consider vectorizing the epilogue too if it's profitable.
       VectorizationFactor EpilogueVF =
-          CM.selectEpilogueVectorizationFactor(VF.getWidth(), LVP);
+          CM.selectEpilogueVectorizationFactor(VF.Width, LVP);
       if (EpilogueVF != VectorizationFactor::Disabled() &&
-          EpilogueVF.getWidth().isVector()) {
+          EpilogueVF.Width.isVector()) {
 
         // The first pass vectorizes the main loop and creates a scalar epilogue
         // to be vectorized by executing the plan (potentially with a different
         // factor) again shortly afterwards.
-        EpilogueLoopVectorizationInfo EPI(VF.getWidth().getKnownMinValue(), IC,
-                                          EpilogueVF.getWidth().getKnownMinValue(),
+        EpilogueLoopVectorizationInfo EPI(VF.Width.getKnownMinValue(), IC,
+                                          EpilogueVF.Width.getKnownMinValue(),
                                           1);
         EpilogueVectorizerMainLoop MainILV(L, PSE, LI, DT, TLI, TTI, AC, ORE,
                                            EPI, &LVL, &CM, BFI, PSI, Checks);
@@ -10918,7 +10917,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
         if (!MainILV.areSafetyChecksAdded())
           DisableRuntimeUnroll = true;
       } else {
-        InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.getWidth(), IC,
+        InnerLoopVectorizer LB(L, PSE, LI, DT, TLI, TTI, AC, ORE, VF.Width, IC,
                                &LVL, &CM, BFI, PSI, Checks);
         LVP.executePlan(LB, DT);
         ++LoopsVectorized;
@@ -10934,7 +10933,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
         return OptimizationRemark(LV_NAME, "Vectorized", L->getStartLoc(),
                                   L->getHeader())
                << "vectorized loop (vectorization width: "
-               << NV("VectorizationFactor", VF.getWidth())
+               << NV("VectorizationFactor", VF.Width)
                << ", interleaved count: " << NV("InterleaveCount", IC) << ")";
       });
     }
