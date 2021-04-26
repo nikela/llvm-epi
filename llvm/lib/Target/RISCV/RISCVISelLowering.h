@@ -99,6 +99,14 @@ enum NodeType : unsigned {
   SHFLW,
   UNSHFL,
   UNSHFLW,
+  // Bit Compress/Decompress implement the generic bit extract and bit deposit
+  // functions. This operation is also referred to as bit gather/scatter, bit
+  // pack/unpack, parallel extract/deposit, compress/expand, or right
+  // compress/right expand.
+  BCOMPRESS,
+  BCOMPRESSW,
+  BDECOMPRESS,
+  BDECOMPRESSW,
   // EPI nodes
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
