@@ -195,13 +195,13 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
 /// Estimate the overhead of scalarizing an instructions unique
 /// non-constant operands. The types of the arguments are ordinarily
 /// scalar, in which case the costs are multiplied with VF.
-unsigned
+InstructionCost
 RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                                ArrayRef<Type *> Tys) {
   return BaseT::getOperandsScalarizationOverhead(Args, Tys);
 }
 
-unsigned RISCVTTIImpl::getScalarizationOverhead(
+InstructionCost RISCVTTIImpl::getScalarizationOverhead(
     VectorType *InTy, const APInt &DemandedElts, bool Insert, bool Extract) {
   // FIXME: a bitfield is not a reasonable abstraction for talking about
   // which elements are needed from a scalable vector.
