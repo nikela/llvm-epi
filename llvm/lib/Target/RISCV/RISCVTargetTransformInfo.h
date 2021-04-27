@@ -208,6 +208,10 @@ public:
     llvm_unreachable("Unsupported register kind");
   }
 
+  InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
+                                        Align Alignment, unsigned AddressSpace,
+                                        TTI::TargetCostKind CostKind);
+
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,
                                          Align Alignment,

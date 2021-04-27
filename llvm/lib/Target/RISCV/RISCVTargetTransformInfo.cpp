@@ -13,6 +13,7 @@
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/InstructionCost.h"
 #include "llvm/Support/MathExtras.h"
 #include <algorithm>
 using namespace llvm;
@@ -453,6 +454,17 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   }
 
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
+}
+
+InstructionCost
+RISCVTTIImpl::getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
+                                    unsigned AddressSpace,
+                                    TTI::TargetCostKind CostKind) {
+  if (!isa<ScalableVectorType>(Src))
+    return BaseT::getMaskedMemoryOpCost(Opcode, Src, Alignment, AddressSpace,
+                                        CostKind);
+
+  return TLI->getTypeLegalizationCost(DL, Src).first;
 }
 
 InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
