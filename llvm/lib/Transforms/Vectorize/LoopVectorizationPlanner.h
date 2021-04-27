@@ -189,7 +189,7 @@ struct VectorizationFactor {
       : Width(Width), Cost(Cost) {}
 
   static VectorizationFactor Disabled() {
-    return {ElementCount::getNull(), 0};
+    return {ElementCount::getFixed(1), 0};
   }
 
   bool operator==(const VectorizationFactor &rhs) const {

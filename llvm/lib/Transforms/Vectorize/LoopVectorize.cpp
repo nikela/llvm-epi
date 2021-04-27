@@ -10762,7 +10762,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   VectorizationFactor VF = VectorizationFactor::Disabled();
   unsigned IC = 1;
 
-  if (MaybeVF && *MaybeVF != VectorizationFactor::Disabled()) {
+  if (MaybeVF) {
     VF = *MaybeVF;
     // Select the interleave count.
     IC = CM.selectInterleaveCount(VF.Width, *VF.Cost.getValue());
