@@ -6016,7 +6016,8 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
 
     // A uniform memory op is itself uniform.  We exclude uniform stores
     // here as they demand the last lane, not the first one.
-    if (isa<LoadInst>(I) && Legal->isUniformMemOp(*I)) {
+    if (isa<LoadInst>(I) && Legal->isUniformMemOp(*I) &&
+        !TTI.useScalableVectorType()) {
       assert(WideningDecision == CM_Scalarize);
       return true;
     }
@@ -6051,7 +6052,8 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
 
       // A uniform memory op is itself uniform.  We exclude uniform stores
       // here as they demand the last lane, not the first one.
-      if (isa<LoadInst>(I) && Legal->isUniformMemOp(I))
+      if (isa<LoadInst>(I) && Legal->isUniformMemOp(I) &&
+          !TTI.useScalableVectorType())
         addToWorklistIfAllowed(&I);
 
       if (isUniformDecision(&I, VF)) {
@@ -7985,7 +7987,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
       if (isa<StoreInst>(&I) && isScalarWithPredication(&I))
         NumPredStores++;
 
-      if (Legal->isUniformMemOp(I)) {
+      if (Legal->isUniformMemOp(I) && !TTI.useScalableVectorType()) {
         // TODO: Avoid replicating loads and stores instead of
         // relying on instcombine to remove them.
         // Load: Scalar load + broadcast
