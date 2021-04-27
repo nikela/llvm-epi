@@ -924,6 +924,8 @@ def rocm_path_EQ : Joined<["--"], "rocm-path=">, Group<i_Group>,
   HelpText<"ROCm installation path, used for finding and automatically linking required bitcode libraries.">;
 def hip_path_EQ : Joined<["--"], "hip-path=">, Group<i_Group>,
   HelpText<"HIP runtime installation path, used for finding HIP version and adding HIP include path.">;
+def amdgpu_arch_tool_EQ : Joined<["--"], "amdgpu-arch-tool=">, Group<i_Group>,
+  HelpText<"Tool used for detecting AMD GPU arch in the system.">;
 def rocm_device_lib_path_EQ : Joined<["--"], "rocm-device-lib-path=">, Group<Link_Group>,
   HelpText<"ROCm device library path. Alternative to rocm-path.">;
 def : Joined<["--"], "hip-device-lib-path=">, Alias<rocm_device_lib_path_EQ>;
@@ -940,7 +942,7 @@ defm hip_new_launch_api : BoolFOption<"hip-new-launch-api",
 defm gpu_allow_device_init : BoolFOption<"gpu-allow-device-init",
   LangOpts<"GPUAllowDeviceInit">, DefaultFalse,
   PosFlag<SetTrue, [CC1Option], "Allow">, NegFlag<SetFalse, [], "Don't allow">,
-  BothFlags<[], " device side init function in HIP">>,
+  BothFlags<[], " device side init function in HIP (experimental)">>,
   ShouldParseIf<hip.KeyPath>;
 defm gpu_defer_diag : BoolFOption<"gpu-defer-diag",
   LangOpts<"GPUDeferDiag">, DefaultFalse,
