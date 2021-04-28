@@ -2,6 +2,9 @@
 ; RUN: opt < %s -simplifycfg -simplifycfg-require-and-preserve-domtree=1 -sink-common-insts -S | FileCheck %s
 ; RUN: opt < %s -passes='simplify-cfg<sink-common-insts>' -S | FileCheck %s
 
+target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64"
+target triple = "x86_64-pc-linux-gnu"
+
 define zeroext i1 @test1(i1 zeroext %flag, i32 %blksA, i32 %blksB, i32 %nblks) {
 ; CHECK-LABEL: @test1(
 ; CHECK-NEXT:  entry:
@@ -1026,11 +1029,17 @@ if.end:
 define float @allow_intrinsic_remove_constant(i1 zeroext %flag, float %w, float %x, float %y) {
 ; CHECK-LABEL: @allow_intrinsic_remove_constant(
 ; CHECK-NEXT:  entry:
+; CHECK-NEXT:    br i1 [[FLAG:%.*]], label [[IF_THEN:%.*]], label [[IF_ELSE:%.*]]
+; CHECK:       if.then:
 ; CHECK-NEXT:    [[DUMMY:%.*]] = fadd float [[W:%.*]], 4.000000e+00
 ; CHECK-NEXT:    [[SV1:%.*]] = call float @llvm.fma.f32(float [[DUMMY]], float 2.000000e+00, float 1.000000e+00)
+; CHECK-NEXT:    br label [[IF_END:%.*]]
+; CHECK:       if.else:
 ; CHECK-NEXT:    [[DUMMY1:%.*]] = fadd float [[W]], 8.000000e+00
 ; CHECK-NEXT:    [[SV2:%.*]] = call float @llvm.fma.f32(float 2.000000e+00, float [[DUMMY1]], float 1.000000e+00)
-; CHECK-NEXT:    [[P:%.*]] = select i1 [[FLAG:%.*]], float [[SV1]], float [[SV2]]
+; CHECK-NEXT:    br label [[IF_END]]
+; CHECK:       if.end:
+; CHECK-NEXT:    [[P:%.*]] = phi float [ [[SV1]], [[IF_THEN]] ], [ [[SV2]], [[IF_ELSE]] ]
 ; CHECK-NEXT:    ret float [[P]]
 ;
 entry:
@@ -1370,6 +1379,32 @@ if.else:
 
 if.end:
   ret i32 1
+}
+
+define void @indirect_caller(i1 %c, i32 %v, void (i32)* %foo, void (i32)* %bar) {
+; CHECK-LABEL: @indirect_caller(
+; CHECK-NEXT:    br i1 [[C:%.*]], label [[CALL_FOO:%.*]], label [[CALL_BAR:%.*]]
+; CHECK:       call_foo:
+; CHECK-NEXT:    tail call void [[FOO:%.*]](i32 [[V:%.*]])
+; CHECK-NEXT:    br label [[END:%.*]]
+; CHECK:       call_bar:
+; CHECK-NEXT:    tail call void [[BAR:%.*]](i32 [[V]])
+; CHECK-NEXT:    br label [[END]]
+; CHECK:       end:
+; CHECK-NEXT:    ret void
+;
+  br i1 %c, label %call_foo, label %call_bar
+
+call_foo:
+  tail call void %foo(i32 %v)
+  br label %end
+
+call_bar:
+  tail call void %bar(i32 %v)
+  br label %end
+
+end:
+  ret void
 }
 
 declare void @llvm.lifetime.start.p0i8(i64, i8* nocapture)
