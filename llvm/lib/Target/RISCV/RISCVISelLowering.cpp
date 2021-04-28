@@ -7887,24 +7887,15 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
   auto BuildVSETVLI = [&]() {
     if (VLIndex >= 0) {
       Register DestReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+      const MachineOperand &VLOp = MI.getOperand(VLIndex);
+
+      // VL can be a register or an immediate.
+      if (VLOp.isImm())
+        return BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoVSETIVLI))
+            .addReg(DestReg, RegState::Define | RegState::Dead)
+            .addImm(VLOp.getImm());
+
       Register VLReg = MI.getOperand(VLIndex).getReg();
-
-      // VL might be a compile time constant, but isel would have to put it
-      // in a register. See if VL comes from an ADDI X0, imm.
-      if (VLReg.isVirtual()) {
-        MachineInstr *Def = MRI.getVRegDef(VLReg);
-        if (Def && Def->getOpcode() == RISCV::ADDI &&
-            Def->getOperand(1).getReg() == RISCV::X0 &&
-            Def->getOperand(2).isImm()) {
-          uint64_t Imm = Def->getOperand(2).getImm();
-          // VSETIVLI allows a 5-bit zero extended immediate.
-          if (isUInt<5>(Imm))
-            return BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoVSETIVLI))
-                .addReg(DestReg, RegState::Define | RegState::Dead)
-                .addImm(Imm);
-        }
-      }
-
       return BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoVSETVLI))
           .addReg(DestReg, RegState::Define | RegState::Dead)
           .addReg(VLReg);
@@ -7945,7 +7936,7 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
                                      Nontemporal));
 
   // Remove (now) redundant operands from pseudo
-  if (VLIndex >= 0) {
+  if (VLIndex >= 0 && MI.getOperand(VLIndex).isReg()) {
     MI.getOperand(VLIndex).setReg(RISCV::NoRegister);
     MI.getOperand(VLIndex).setIsKill(false);
   }
