@@ -15,21 +15,21 @@ target triple = "riscv64-unknown-linux-gnu"
 define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT_ctx* nocapture %x_, i8* nocapture readonly %m, i8* nocapture %c_, i32 signext %bytes) local_unnamed_addr
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -256
-; CHECK-NEXT:    .cfi_def_cfa_offset 256
-; CHECK-NEXT:    sd ra, 248(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s0, 240(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s1, 232(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s2, 224(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s3, 216(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s4, 208(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s5, 200(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s6, 192(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s7, 184(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s8, 176(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s9, 168(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s10, 160(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    sd s11, 152(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -272
+; CHECK-NEXT:    .cfi_def_cfa_offset 272
+; CHECK-NEXT:    sd ra, 264(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s0, 256(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s1, 248(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s2, 240(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s3, 232(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s4, 224(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s5, 216(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s6, 208(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s7, 200(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s8, 192(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s9, 184(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s10, 176(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd s11, 168(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
 ; CHECK-NEXT:    .cfi_offset s0, -16
 ; CHECK-NEXT:    .cfi_offset s1, -24
@@ -60,14 +60,14 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a5, zero, 10
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, a7
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    addi a5, zero, 9
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu t0, 8(a0)
 ; CHECK-NEXT:    lwu t1, 12(a0)
@@ -77,28 +77,28 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    slli a4, a4, 3
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, t1
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    addi a5, zero, 7
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, t2
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    addi a5, zero, 6
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, t3
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    addi a5, zero, 5
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu t4, 24(a0)
 ; CHECK-NEXT:    lwu t5, 28(a0)
@@ -108,32 +108,32 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    slli a4, a4, 2
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, t5
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    addi a5, zero, 3
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, t6
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    slli a4, a4, 1
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v25, s2
 ; CHECK-NEXT:    csrr a4, vlenb
 ; CHECK-NEXT:    add a4, a4, sp
-; CHECK-NEXT:    addi a4, a4, 152
+; CHECK-NEXT:    addi a4, a4, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu s4, 40(a0)
 ; CHECK-NEXT:    lwu s7, 44(a0)
 ; CHECK-NEXT:    lwu s8, 56(a0)
 ; CHECK-NEXT:    lwu s9, 60(a0)
 ; CHECK-NEXT:    vmv.v.x v25, s4
-; CHECK-NEXT:    addi a4, sp, 152
+; CHECK-NEXT:    addi a4, sp, 168
 ; CHECK-NEXT:    vs1r.v v25, (a4) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vmv.v.x v15, s7
 ; CHECK-NEXT:    vmv.v.x v16, s8
@@ -174,58 +174,58 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a4, zero, 10
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v28, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 9
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v31, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 3
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v30, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 7
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v29, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 6
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v8, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 5
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v6, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 2
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v5, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 3
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v4, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 1
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v3, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    add a3, a3, sp
-; CHECK-NEXT:    addi a3, a3, 152
+; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v7, (a3) # Unknown-size Folded Reload
-; CHECK-NEXT:    addi a3, sp, 152
+; CHECK-NEXT:    addi a3, sp, 168
 ; CHECK-NEXT:    vl1r.v v22, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vmv1r.v v21, v15
 ; CHECK-NEXT:    vmv1r.v v23, v18
@@ -640,10 +640,10 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  # %bb.6: # %if.end207
 ; CHECK-NEXT:    beqz a3, .LBB0_21
 ; CHECK-NEXT:  .LBB0_7: # %for.cond211.preheader
-; CHECK-NEXT:    sd a3, 16(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd a3, 32(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    slli a3, a3, 32
 ; CHECK-NEXT:    srli a3, a3, 32
-; CHECK-NEXT:    sd a3, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd a3, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi t4, zero, 2
 ; CHECK-NEXT:    addi t5, zero, 56
 ; CHECK-NEXT:  .LBB0_8: # %for.cond211
@@ -655,42 +655,42 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    lwu a4, 0(a0)
 ; CHECK-NEXT:    slli a3, a3, 32
 ; CHECK-NEXT:    or a6, a3, a4
-; CHECK-NEXT:    sd a6, 88(sp)
+; CHECK-NEXT:    sd a6, 104(sp)
 ; CHECK-NEXT:    lwu a4, 20(a0)
 ; CHECK-NEXT:    lwu a5, 16(a0)
 ; CHECK-NEXT:    slli a4, a4, 32
 ; CHECK-NEXT:    or a7, a4, a5
-; CHECK-NEXT:    sd a7, 104(sp)
+; CHECK-NEXT:    sd a7, 120(sp)
 ; CHECK-NEXT:    lwu a5, 52(a0)
 ; CHECK-NEXT:    lwu s1, 48(a0)
 ; CHECK-NEXT:    slli a5, a5, 32
 ; CHECK-NEXT:    or t6, a5, s1
-; CHECK-NEXT:    sd t6, 136(sp)
+; CHECK-NEXT:    sd t6, 152(sp)
 ; CHECK-NEXT:    lwu a5, 36(a0)
 ; CHECK-NEXT:    lwu s0, 32(a0)
 ; CHECK-NEXT:    slli a5, a5, 32
 ; CHECK-NEXT:    or s1, a5, s0
-; CHECK-NEXT:    sd s1, 120(sp)
+; CHECK-NEXT:    sd s1, 136(sp)
 ; CHECK-NEXT:    lwu a5, 12(a0)
 ; CHECK-NEXT:    lwu a3, 8(a0)
 ; CHECK-NEXT:    slli a5, a5, 32
 ; CHECK-NEXT:    or s2, a5, a3
-; CHECK-NEXT:    sd s2, 96(sp)
+; CHECK-NEXT:    sd s2, 112(sp)
 ; CHECK-NEXT:    lwu a5, 28(a0)
 ; CHECK-NEXT:    lwu a4, 24(a0)
 ; CHECK-NEXT:    slli a5, a5, 32
 ; CHECK-NEXT:    or a3, a5, a4
-; CHECK-NEXT:    sd a3, 112(sp)
+; CHECK-NEXT:    sd a3, 128(sp)
 ; CHECK-NEXT:    lwu a4, 60(a0)
 ; CHECK-NEXT:    lwu a5, 56(a0)
 ; CHECK-NEXT:    slli a4, a4, 32
 ; CHECK-NEXT:    or s0, a4, a5
-; CHECK-NEXT:    sd s0, 144(sp)
+; CHECK-NEXT:    sd s0, 160(sp)
 ; CHECK-NEXT:    lwu a4, 44(a0)
 ; CHECK-NEXT:    lwu a5, 40(a0)
 ; CHECK-NEXT:    slli a4, a4, 32
 ; CHECK-NEXT:    or s4, a4, a5
-; CHECK-NEXT:    sd s4, 128(sp)
+; CHECK-NEXT:    sd s4, 144(sp)
 ; CHECK-NEXT:    slli a4, a6, 32
 ; CHECK-NEXT:    srli ra, a4, 32
 ; CHECK-NEXT:    slli a4, a7, 32
@@ -699,20 +699,20 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    srli s5, a4, 32
 ; CHECK-NEXT:    slli a4, s1, 32
 ; CHECK-NEXT:    srli t2, a4, 32
-; CHECK-NEXT:    lwu a6, 92(sp)
-; CHECK-NEXT:    lwu s8, 108(sp)
-; CHECK-NEXT:    lwu s6, 140(sp)
-; CHECK-NEXT:    lwu a7, 124(sp)
+; CHECK-NEXT:    lwu a6, 108(sp)
+; CHECK-NEXT:    lwu s8, 124(sp)
+; CHECK-NEXT:    lwu s6, 156(sp)
+; CHECK-NEXT:    lwu a7, 140(sp)
 ; CHECK-NEXT:    slli s1, s2, 32
 ; CHECK-NEXT:    srli t0, s1, 32
 ; CHECK-NEXT:    slli a3, a3, 32
 ; CHECK-NEXT:    srli s9, a3, 32
 ; CHECK-NEXT:    slli a3, s0, 32
 ; CHECK-NEXT:    srli s7, a3, 32
-; CHECK-NEXT:    lwu t1, 100(sp)
-; CHECK-NEXT:    lwu s10, 116(sp)
-; CHECK-NEXT:    lwu t6, 148(sp)
-; CHECK-NEXT:    lwu s3, 132(sp)
+; CHECK-NEXT:    lwu t1, 116(sp)
+; CHECK-NEXT:    lwu s10, 132(sp)
+; CHECK-NEXT:    lwu t6, 164(sp)
+; CHECK-NEXT:    lwu s3, 148(sp)
 ; CHECK-NEXT:    slli a3, s4, 32
 ; CHECK-NEXT:    srli s4, a3, 32
 ; CHECK-NEXT:    addi s2, zero, 20
@@ -902,69 +902,69 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    lw a3, 0(a0)
 ; CHECK-NEXT:    add s2, a3, ra
-; CHECK-NEXT:    sw s2, 88(sp)
+; CHECK-NEXT:    sw s2, 104(sp)
 ; CHECK-NEXT:    lw a3, 4(a0)
 ; CHECK-NEXT:    add a6, a6, a3
-; CHECK-NEXT:    sw a6, 92(sp)
+; CHECK-NEXT:    sw a6, 108(sp)
 ; CHECK-NEXT:    lw a3, 8(a0)
 ; CHECK-NEXT:    add a3, a3, t0
-; CHECK-NEXT:    sw a3, 96(sp)
+; CHECK-NEXT:    sw a3, 112(sp)
 ; CHECK-NEXT:    lw a3, 12(a0)
 ; CHECK-NEXT:    add a3, a3, t1
-; CHECK-NEXT:    sw a3, 100(sp)
+; CHECK-NEXT:    sw a3, 116(sp)
 ; CHECK-NEXT:    lw a3, 16(a0)
 ; CHECK-NEXT:    add a3, a3, a5
-; CHECK-NEXT:    sw a3, 104(sp)
+; CHECK-NEXT:    sw a3, 120(sp)
 ; CHECK-NEXT:    lw a3, 20(a0)
 ; CHECK-NEXT:    add a3, a3, s8
-; CHECK-NEXT:    sw a3, 108(sp)
+; CHECK-NEXT:    sw a3, 124(sp)
 ; CHECK-NEXT:    lw a3, 24(a0)
 ; CHECK-NEXT:    add a3, a3, s9
-; CHECK-NEXT:    sw a3, 112(sp)
+; CHECK-NEXT:    sw a3, 128(sp)
 ; CHECK-NEXT:    lw a3, 28(a0)
 ; CHECK-NEXT:    add a3, a3, s10
-; CHECK-NEXT:    sw a3, 116(sp)
+; CHECK-NEXT:    sw a3, 132(sp)
 ; CHECK-NEXT:    lw a3, 32(a0)
 ; CHECK-NEXT:    add a3, a3, t2
-; CHECK-NEXT:    sw a3, 120(sp)
+; CHECK-NEXT:    sw a3, 136(sp)
 ; CHECK-NEXT:    lw a3, 36(a0)
 ; CHECK-NEXT:    add a3, a3, a7
-; CHECK-NEXT:    sw a3, 124(sp)
+; CHECK-NEXT:    sw a3, 140(sp)
 ; CHECK-NEXT:    lw a3, 40(a0)
 ; CHECK-NEXT:    add a3, a3, s4
-; CHECK-NEXT:    sw a3, 128(sp)
+; CHECK-NEXT:    sw a3, 144(sp)
 ; CHECK-NEXT:    lw a3, 44(a0)
 ; CHECK-NEXT:    add a3, a3, s3
-; CHECK-NEXT:    sw a3, 132(sp)
+; CHECK-NEXT:    sw a3, 148(sp)
 ; CHECK-NEXT:    lwu t0, 48(a0)
 ; CHECK-NEXT:    add a3, t0, s5
-; CHECK-NEXT:    sw a3, 136(sp)
+; CHECK-NEXT:    sw a3, 152(sp)
 ; CHECK-NEXT:    lwu a7, 52(a0)
 ; CHECK-NEXT:    add a3, a7, s6
-; CHECK-NEXT:    sw a3, 140(sp)
+; CHECK-NEXT:    sw a3, 156(sp)
 ; CHECK-NEXT:    lw a3, 56(a0)
 ; CHECK-NEXT:    add a3, a3, s7
-; CHECK-NEXT:    sw a3, 144(sp)
+; CHECK-NEXT:    sw a3, 160(sp)
 ; CHECK-NEXT:    lw a3, 60(a0)
 ; CHECK-NEXT:    mv s1, zero
 ; CHECK-NEXT:    add a3, a3, t6
-; CHECK-NEXT:    sw a3, 148(sp)
+; CHECK-NEXT:    sw a3, 164(sp)
 ; CHECK-NEXT:    srli a3, s2, 8
 ; CHECK-NEXT:    srli s0, s2, 16
 ; CHECK-NEXT:    srli a4, s2, 24
-; CHECK-NEXT:    sb s2, 24(sp)
-; CHECK-NEXT:    sb a3, 25(sp)
-; CHECK-NEXT:    sb s0, 26(sp)
-; CHECK-NEXT:    sb a4, 27(sp)
+; CHECK-NEXT:    sb s2, 40(sp)
+; CHECK-NEXT:    sb a3, 41(sp)
+; CHECK-NEXT:    sb s0, 42(sp)
+; CHECK-NEXT:    sb a4, 43(sp)
 ; CHECK-NEXT:    srli a3, a6, 8
 ; CHECK-NEXT:    srli a4, a6, 16
 ; CHECK-NEXT:    srli s0, a6, 24
-; CHECK-NEXT:    sb a6, 28(sp)
-; CHECK-NEXT:    sb a3, 29(sp)
-; CHECK-NEXT:    sb a4, 30(sp)
-; CHECK-NEXT:    sb s0, 31(sp)
-; CHECK-NEXT:    addi t1, sp, 96
-; CHECK-NEXT:    addi t2, sp, 32
+; CHECK-NEXT:    sb a6, 44(sp)
+; CHECK-NEXT:    sb a3, 45(sp)
+; CHECK-NEXT:    sb a4, 46(sp)
+; CHECK-NEXT:    sb s0, 47(sp)
+; CHECK-NEXT:    addi t1, sp, 112
+; CHECK-NEXT:    addi t2, sp, 48
 ; CHECK-NEXT:  .LBB0_11: # %do.body.do.body_crit_edge.i.do.body.do.body_crit_edge.i_crit_edge
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
@@ -993,15 +993,15 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    sw a3, 52(a0)
 ; CHECK-NEXT:  .LBB0_14: # %if.end221
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
-; CHECK-NEXT:    ld a7, 16(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld a7, 32(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    sext.w a3, a7
-; CHECK-NEXT:    ld a6, 8(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld a6, 24(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi a4, zero, 65
 ; CHECK-NEXT:    bltu a3, a4, .LBB0_18
 ; CHECK-NEXT:  # %bb.15: # %for.body243.preheader
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    mv a3, zero
-; CHECK-NEXT:    addi s0, sp, 24
+; CHECK-NEXT:    addi s0, sp, 40
 ; CHECK-NEXT:    addi s1, zero, 64
 ; CHECK-NEXT:  .LBB0_16: # %for.body243
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
@@ -1018,17 +1018,17 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  # %bb.17: # %for.end256
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    addi a7, a7, -64
-; CHECK-NEXT:    sd a7, 16(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd a7, 32(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi a2, a2, 64
 ; CHECK-NEXT:    addi a1, a1, 64
 ; CHECK-NEXT:    addi a6, a6, -64
-; CHECK-NEXT:    sd a6, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    sd a6, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    j .LBB0_8
 ; CHECK-NEXT:  .LBB0_18: # %for.cond225.preheader
 ; CHECK-NEXT:    beqz a3, .LBB0_21
 ; CHECK-NEXT:  # %bb.19: # %for.body228.preheader
 ; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    addi a3, sp, 24
+; CHECK-NEXT:    addi a3, sp, 40
 ; CHECK-NEXT:  .LBB0_20: # %for.body228
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a1, a0
@@ -1046,20 +1046,20 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a1, zero, 11
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld s11, 152(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s10, 160(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s9, 168(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s8, 176(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s7, 184(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s6, 192(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s5, 200(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s4, 208(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s3, 216(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s2, 224(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s1, 232(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s0, 240(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld ra, 248(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 256
+; CHECK-NEXT:    ld s11, 168(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s10, 176(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s9, 184(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s8, 192(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s7, 200(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s6, 208(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s5, 216(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s4, 224(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s3, 232(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s2, 240(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s1, 248(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s0, 256(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld ra, 264(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 272
 ; CHECK-NEXT:    ret
 {
 entry:

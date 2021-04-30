@@ -13,14 +13,15 @@
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/InstructionCost.h"
 #include "llvm/Support/MathExtras.h"
 #include <algorithm>
 using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
 
-int RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
-                                TTI::TargetCostKind CostKind) {
+InstructionCost RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
+                                            TTI::TargetCostKind CostKind) {
   assert(Ty->isIntegerTy() &&
          "getIntImmCost can only estimate cost of materialising integers");
 
@@ -34,10 +35,10 @@ int RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
                                     getST()->is64Bit());
 }
 
-int RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
-                                    const APInt &Imm, Type *Ty,
-                                    TTI::TargetCostKind CostKind,
-                                    Instruction *Inst) {
+InstructionCost RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
+                                                const APInt &Imm, Type *Ty,
+                                                TTI::TargetCostKind CostKind,
+                                                Instruction *Inst) {
   assert(Ty->isIntegerTy() &&
          "getIntImmCost can only estimate cost of materialising integers");
 
@@ -92,9 +93,10 @@ int RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
   return TTI::TCC_Free;
 }
 
-int RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
-                                      const APInt &Imm, Type *Ty,
-                                      TTI::TargetCostKind CostKind) {
+InstructionCost
+RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
+                                  const APInt &Imm, Type *Ty,
+                                  TTI::TargetCostKind CostKind) {
   // Prevent hoisting in unknown cases.
   return TTI::TCC_Free;
 }
@@ -194,13 +196,13 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
 /// Estimate the overhead of scalarizing an instructions unique
 /// non-constant operands. The types of the arguments are ordinarily
 /// scalar, in which case the costs are multiplied with VF.
-unsigned
+InstructionCost
 RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                                ArrayRef<Type *> Tys) {
   return BaseT::getOperandsScalarizationOverhead(Args, Tys);
 }
 
-unsigned RISCVTTIImpl::getScalarizationOverhead(
+InstructionCost RISCVTTIImpl::getScalarizationOverhead(
     VectorType *InTy, const APInt &DemandedElts, bool Insert, bool Extract) {
   // FIXME: a bitfield is not a reasonable abstraction for talking about
   // which elements are needed from a scalable vector.
@@ -261,8 +263,8 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
   return LegalizationFactor * Log2_32(BitRatio);
 }
 
-bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(bool OptSize) const {
-  return (ST->hasStdExtV() && true);
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
+  return ST->hasStdExtV();
 }
 
 unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
@@ -452,6 +454,17 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   }
 
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
+}
+
+InstructionCost
+RISCVTTIImpl::getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
+                                    unsigned AddressSpace,
+                                    TTI::TargetCostKind CostKind) {
+  if (!isa<ScalableVectorType>(Src))
+    return BaseT::getMaskedMemoryOpCost(Opcode, Src, Alignment, AddressSpace,
+                                        CostKind);
+
+  return TLI->getTypeLegalizationCost(DL, Src).first;
 }
 
 InstructionCost RISCVTTIImpl::getGatherScatterOpCost(

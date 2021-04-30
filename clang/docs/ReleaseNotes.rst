@@ -117,9 +117,16 @@ C Language Changes in Clang
 C++ Language Changes in Clang
 -----------------------------
 
+- The oldest supported GNU libstdc++ is now 4.8.3 (released 2014-05-22).
+  Clang workarounds for bugs in earlier versions have been removed.
+
 - ...
 
-C++1z Feature Support
+C++20 Feature Support
+^^^^^^^^^^^^^^^^^^^^^
+...
+
+C++2b Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
 ...
 
@@ -228,6 +235,9 @@ clang-format
 - Checks for newlines in option ``EmptyLineBeforeAccessModifier`` are now based
   on the formatted new lines and not on the new lines in the file. (Fixes
   https://llvm.org/PR41870.)
+
+- Option ``SpacesInAngles`` has been improved, it now accepts ``Leave`` value
+  that allows to keep spaces where they are already present.
 
 libclang
 --------

@@ -616,9 +616,10 @@ static TargetInfo *createTargetInfo(InputArgList &args) {
     fatal("must specify -arch");
   PlatformKind platform = parsePlatformVersion(args);
 
-  config->target = MachO::Target(getArchitectureFromName(archName), platform);
+  config->platformInfo.target =
+      MachO::Target(getArchitectureFromName(archName), platform);
 
-  switch (getCPUTypeFromArchitecture(config->target.Arch).first) {
+  switch (getCPUTypeFromArchitecture(config->arch()).first) {
   case CPU_TYPE_X86_64:
     return createX86_64TargetInfo();
   case CPU_TYPE_ARM64:
@@ -694,30 +695,6 @@ static const char *getReproduceOption(InputArgList &args) {
   if (const Arg *arg = args.getLastArg(OPT_reproduce))
     return arg->getValue();
   return getenv("LLD_REPRODUCE");
-}
-
-static bool isPie(InputArgList &args) {
-  if (config->outputType != MH_EXECUTE || args.hasArg(OPT_no_pie))
-    return false;
-  if (config->target.Arch == AK_arm64 || config->target.Arch == AK_arm64e ||
-      config->target.Arch == AK_arm64_32)
-    return true;
-
-  // TODO: add logic here as we support more archs. E.g. i386 should default
-  // to PIE from 10.7
-  assert(config->target.Arch == AK_x86_64 ||
-         config->target.Arch == AK_x86_64h ||
-         config->target.Arch == AK_arm64_32);
-
-  PlatformKind kind = config->target.Platform;
-  if (kind == PlatformKind::macOS &&
-      config->platformInfo.minimum >= VersionTuple(10, 6))
-    return true;
-
-  if (kind == PlatformKind::iOSSimulator || kind == PlatformKind::driverKit)
-    return true;
-
-  return args.hasArg(OPT_pie);
 }
 
 static void parseClangOption(StringRef opt, const Twine &msg) {
@@ -876,6 +853,11 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
   MachOOptTable parser;
   InputArgList args = parser.parse(argsArr.slice(1));
 
+  errorHandler().errorLimitExceededMsg =
+      "too many errors emitted, stopping now "
+      "(use --error-limit=0 to see all errors)";
+  errorHandler().errorLimit = args::getInteger(args, OPT_error_limit_eq, 20);
+
   if (args.hasArg(OPT_help_hidden)) {
     parser.printHelp(argsArr[0], /*showHidden=*/true);
     return true;
@@ -961,6 +943,12 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
   config->emitFunctionStarts = !args.hasArg(OPT_no_function_starts);
   config->emitBitcodeBundle = args.hasArg(OPT_bitcode_bundle);
 
+  std::array<PlatformKind, 3> encryptablePlatforms{
+      PlatformKind::iOS, PlatformKind::watchOS, PlatformKind::tvOS};
+  config->emitEncryptionInfo =
+      args.hasFlag(OPT_encryptable, OPT_no_encryption,
+                   is_contained(encryptablePlatforms, config->platform()));
+
 #ifndef HAVE_LIBXAR
   if (config->emitBitcodeBundle)
     error("-bitcode_bundle unsupported because LLD wasn't built with libxar");
@@ -1029,7 +1017,7 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
     StringRef segName = arg->getValue(0);
     uint32_t maxProt = parseProtection(arg->getValue(1));
     uint32_t initProt = parseProtection(arg->getValue(2));
-    if (maxProt != initProt && config->target.Arch != AK_i386)
+    if (maxProt != initProt && config->arch() != AK_i386)
       error("invalid argument '" + arg->getAsString(args) +
             "': max and init must be the same for non-i386 archs");
     if (segName == segment_names::linkEdit)
@@ -1051,8 +1039,8 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
 
   config->adhocCodesign = args.hasFlag(
       OPT_adhoc_codesign, OPT_no_adhoc_codesign,
-      (config->target.Arch == AK_arm64 || config->target.Arch == AK_arm64e) &&
-          config->target.Platform == PlatformKind::macOS);
+      (config->arch() == AK_arm64 || config->arch() == AK_arm64e) &&
+          config->platform() == PlatformKind::macOS);
 
   if (args.hasArg(OPT_v)) {
     message(getLLDVersion());
@@ -1084,7 +1072,9 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
     createFiles(args);
 
     config->isPic = config->outputType == MH_DYLIB ||
-                    config->outputType == MH_BUNDLE || isPie(args);
+                    config->outputType == MH_BUNDLE ||
+                    (config->outputType == MH_EXECUTE &&
+                     args.hasFlag(OPT_pie, OPT_no_pie, true));
 
     // Now that all dylibs have been loaded, search for those that should be
     // re-exported.

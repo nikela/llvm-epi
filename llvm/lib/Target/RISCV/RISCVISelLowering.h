@@ -96,6 +96,17 @@ enum NodeType : unsigned {
   GORC,
   GORCW,
   SHFL,
+  SHFLW,
+  UNSHFL,
+  UNSHFLW,
+  // Bit Compress/Decompress implement the generic bit extract and bit deposit
+  // functions. This operation is also referred to as bit gather/scatter, bit
+  // pack/unpack, parallel extract/deposit, compress/expand, or right
+  // compress/right expand.
+  BCOMPRESS,
+  BCOMPRESSW,
+  BDECOMPRESS,
+  BDECOMPRESSW,
   // EPI nodes
   SHUFFLE_EXTEND,
   SIGN_EXTEND_BITS_INREG,
@@ -145,6 +156,7 @@ enum NodeType : unsigned {
   VZIP2,
   VUNZIP2,
   VTRN,
+  // End of EPI nodes
   // Vector Extension
   // VMV_V_X_VL matches the semantics of vmv.v.x but includes an extra operand
   // for the VL value to be used for the operation.
@@ -240,6 +252,8 @@ enum NodeType : unsigned {
   SMAX_VL,
   UMIN_VL,
   UMAX_VL,
+  FMINNUM_VL,
+  FMAXNUM_VL,
   MULHS_VL,
   MULHU_VL,
   FP_TO_SINT_VL,
@@ -352,8 +366,6 @@ public:
                                       unsigned DefinedValues) const override;
 
   // Provide custom lowering hooks for some operations.
-  void LowerOperationWrapper(SDNode *N, SmallVectorImpl<SDValue> &Results,
-                             SelectionDAG &DAG) const override;
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
   void ReplaceNodeResults(SDNode *N, SmallVectorImpl<SDValue> &Results,
                           SelectionDAG &DAG) const override;
@@ -523,10 +535,6 @@ public:
                                            unsigned InsertExtractIdx,
                                            const RISCVRegisterInfo *TRI);
   MVT getContainerForFixedLengthVector(MVT VT) const;
-  static MVT getContainerForFixedLengthVector(const TargetLowering &TLI, MVT VT,
-                                              const RISCVSubtarget &Subtarget);
-  static MVT getContainerForFixedLengthVector(SelectionDAG &DAG, MVT VT,
-                                              const RISCVSubtarget &Subtarget);
 
   bool shouldRemoveExtendFromGSIndex(EVT VT) const override;
 
@@ -566,7 +574,6 @@ private:
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
                                  int Opcode) const;
@@ -604,6 +611,8 @@ private:
                             bool HasMask = true) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
                                             unsigned ExtendOpc) const;
+  SDValue lowerGET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerSET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;
 
   bool isEligibleForTailCallOptimization(
       CCState &CCInfo, CallLoweringInfo &CLI, MachineFunction &MF,

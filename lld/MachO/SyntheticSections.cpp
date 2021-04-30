@@ -85,7 +85,13 @@ template <class LP> MachHeaderSection *macho::makeMachHeaderSection() {
 }
 
 template <class LP> uint64_t MachHeaderSectionImpl<LP>::getSize() const {
-  return sizeof(typename LP::mach_header) + sizeOfCmds + config->headerPad;
+  uint64_t size =
+      sizeof(typename LP::mach_header) + sizeOfCmds + config->headerPad;
+  // If we are emitting an encryptable binary, our load commands must have a
+  // separate (non-encrypted) page to themselves.
+  if (config->emitEncryptionInfo)
+    size = alignTo(size, target->getPageSize());
+  return size;
 }
 
 static uint32_t cpuSubtype() {
@@ -93,7 +99,7 @@ static uint32_t cpuSubtype() {
 
   if (config->outputType == MH_EXECUTE && !config->staticLink &&
       target->cpuSubtype == CPU_SUBTYPE_X86_64_ALL &&
-      config->target.Platform == PlatformKind::macOS &&
+      config->platform() == PlatformKind::macOS &&
       config->platformInfo.minimum >= VersionTuple(10, 5))
     subtype |= CPU_SUBTYPE_LIB64;
 
@@ -414,7 +420,7 @@ void WeakBindingSection::writeTo(uint8_t *buf) const {
 }
 
 StubsSection::StubsSection()
-    : SyntheticSection(segment_names::text, "__stubs") {
+    : SyntheticSection(segment_names::text, section_names::stubs) {
   flags = S_SYMBOL_STUBS | S_ATTR_SOME_INSTRUCTIONS | S_ATTR_PURE_INSTRUCTIONS;
   // The stubs section comprises machine instructions, which are aligned to
   // 4 bytes on the archs we care about.
@@ -442,7 +448,7 @@ bool StubsSection::addEntry(Symbol *sym) {
 }
 
 StubHelperSection::StubHelperSection()
-    : SyntheticSection(segment_names::text, "__stub_helper") {
+    : SyntheticSection(segment_names::text, section_names::stubHelper) {
   flags = S_ATTR_SOME_INSTRUCTIONS | S_ATTR_PURE_INSTRUCTIONS;
   align = 4; // This section comprises machine instructions
 }
@@ -482,7 +488,7 @@ void StubHelperSection::setup() {
 
 ImageLoaderCacheSection::ImageLoaderCacheSection() {
   segname = segment_names::data;
-  name = "__data";
+  name = section_names::data;
   uint8_t *arr = bAlloc.Allocate<uint8_t>(target->wordSize);
   memset(arr, 0, target->wordSize);
   data = {arr, target->wordSize};
@@ -490,7 +496,7 @@ ImageLoaderCacheSection::ImageLoaderCacheSection() {
 }
 
 LazyPointerSection::LazyPointerSection()
-    : SyntheticSection(segment_names::data, "__la_symbol_ptr") {
+    : SyntheticSection(segment_names::data, section_names::lazySymbolPtr) {
   align = target->wordSize;
   flags = S_LAZY_SYMBOL_POINTERS;
 }
@@ -579,8 +585,10 @@ static void validateExportSymbol(const Defined *defined) {
 }
 
 static bool shouldExportSymbol(const Defined *defined) {
-  if (defined->privateExtern)
+  if (defined->privateExtern) {
+    assert(defined->isExternal() && "invalid input file");
     return false;
+  }
   // TODO: Is this a performance bottleneck? If a build has mostly
   // global symbols in the input but uses -exported_symbols to filter
   // out most of them, then it would be better to set the value of
@@ -838,7 +846,6 @@ template <class LP> void SymtabSectionImpl<LP>::writeTo(uint8_t *buf) const {
       if (!shouldExportSymbol(defined)) {
         // Private external -- dylib scoped symbol.
         // Promote to non-external at link time.
-        assert(defined->isExternal() && "invalid input file");
         scope = N_PEXT;
       } else if (defined->isExternal()) {
         // Normal global symbol.
@@ -1044,8 +1051,8 @@ BitcodeBundleSection::BitcodeBundleSection()
 
 class ErrorCodeWrapper {
 public:
-  ErrorCodeWrapper(std::error_code ec) : errorCode(ec.value()) {}
-  ErrorCodeWrapper(int ec) : errorCode(ec) {}
+  explicit ErrorCodeWrapper(std::error_code ec) : errorCode(ec.value()) {}
+  explicit ErrorCodeWrapper(int ec) : errorCode(ec) {}
   operator int() const { return errorCode; }
 
 private:
@@ -1096,7 +1103,7 @@ void macho::createSyntheticSymbols() {
   auto addHeaderSymbol = [](const char *name) {
     symtab->addSynthetic(name, in.header->isec, 0,
                          /*privateExtern=*/true,
-                         /*includeInSymtab*/ false);
+                         /*includeInSymtab=*/false);
   };
 
   switch (config->outputType) {
@@ -1108,13 +1115,13 @@ void macho::createSyntheticSymbols() {
     // Otherwise, it's an absolute symbol.
     if (config->isPic)
       symtab->addSynthetic("__mh_execute_header", in.header->isec, 0,
-                           /*privateExtern*/ false,
-                           /*includeInSymbtab*/ true);
+                           /*privateExtern=*/false,
+                           /*includeInSymtab=*/true);
     else
       symtab->addSynthetic("__mh_execute_header",
                            /*isec*/ nullptr, 0,
-                           /*privateExtern*/ false,
-                           /*includeInSymbtab*/ true);
+                           /*privateExtern=*/false,
+                           /*includeInSymtab=*/true);
     break;
 
     // The following symbols are  N_SECT symbols, even though the header is not

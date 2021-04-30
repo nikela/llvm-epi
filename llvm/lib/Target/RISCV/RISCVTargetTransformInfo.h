@@ -134,12 +134,15 @@ public:
       : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
         TLI(ST->getTargetLowering()) {}
 
-  int getIntImmCost(const APInt &Imm, Type *Ty, TTI::TargetCostKind CostKind);
-  int getIntImmCostInst(unsigned Opcode, unsigned Idx, const APInt &Imm,
-                        Type *Ty, TTI::TargetCostKind CostKind,
-                        Instruction *Inst = nullptr);
-  int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
-                          Type *Ty, TTI::TargetCostKind CostKind);
+  InstructionCost getIntImmCost(const APInt &Imm, Type *Ty,
+                                TTI::TargetCostKind CostKind);
+  InstructionCost getIntImmCostInst(unsigned Opcode, unsigned Idx,
+                                    const APInt &Imm, Type *Ty,
+                                    TTI::TargetCostKind CostKind,
+                                    Instruction *Inst = nullptr);
+  InstructionCost getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
+                                      const APInt &Imm, Type *Ty,
+                                      TTI::TargetCostKind CostKind);
 
   unsigned getNumberOfRegisters(unsigned ClassID) const;
   unsigned getMaxElementWidth() const;
@@ -153,16 +156,16 @@ public:
   InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                  ArrayRef<int> Mask, int Index,
                                  VectorType *SubTp);
-  unsigned getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
-                                            ArrayRef<Type *> Tys);
-  unsigned getScalarizationOverhead(VectorType *InTy,
+  InstructionCost getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
+                                                   ArrayRef<Type *> Tys);
+  InstructionCost getScalarizationOverhead(VectorType *InTy,
                                            const APInt &DemandedElts,
                                            bool Insert, bool Extract);
   InstructionCost getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
                                    TTI::CastContextHint CCH,
                                    TTI::TargetCostKind CostKind,
                                    const Instruction *I = nullptr);
-  bool shouldMaximizeVectorBandwidth(bool OptSize) const;
+  bool shouldMaximizeVectorBandwidth() const;
   unsigned getMinVectorRegisterBitWidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
@@ -204,6 +207,10 @@ public:
 
     llvm_unreachable("Unsupported register kind");
   }
+
+  InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
+                                        Align Alignment, unsigned AddressSpace,
+                                        TTI::TargetCostKind CostKind);
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,

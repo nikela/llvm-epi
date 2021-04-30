@@ -2851,6 +2851,11 @@ bool SITargetLowering::isEligibleForTailCallOptimization(
   if (!mayTailCallThisCC(CalleeCC))
     return false;
 
+  // For a divergent call target, we need to do a waterfall loop over the
+  // possible callees which precludes us from using a simple jump.
+  if (Callee->isDivergent())
+    return false;
+
   MachineFunction &MF = DAG.getMachineFunction();
   const Function &CallerF = MF.getFunction();
   CallingConv::ID CallerCC = CallerF.getCallingConv();
@@ -2957,12 +2962,6 @@ SDValue SITargetLowering::LowerCall(CallLoweringInfo &CLI,
 
   if (!CLI.CB)
     report_fatal_error("unsupported libcall legalization");
-
-  if (!AMDGPUTargetMachine::EnableFixedFunctionABI &&
-      !CLI.CB->getCalledFunction() && CallConv != CallingConv::AMDGPU_Gfx) {
-    return lowerUnhandledCall(CLI, InVals,
-                              "unsupported indirect call to function ");
-  }
 
   if (IsTailCall && MF.getTarget().Options.GuaranteedTailCallOpt) {
     return lowerUnhandledCall(CLI, InVals,
@@ -9650,6 +9649,45 @@ bool SITargetLowering::isCanonicalized(SelectionDAG &DAG, SDValue Op,
   llvm_unreachable("invalid operation");
 }
 
+bool SITargetLowering::isCanonicalized(Register Reg, MachineFunction &MF,
+                                       unsigned MaxDepth) const {
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  MachineInstr *MI = MRI.getVRegDef(Reg);
+  unsigned Opcode = MI->getOpcode();
+
+  if (Opcode == AMDGPU::G_FCANONICALIZE)
+    return true;
+
+  if (Opcode == AMDGPU::G_FCONSTANT) {
+    auto F = MI->getOperand(1).getFPImm()->getValueAPF();
+    if (F.isNaN() && F.isSignaling())
+      return false;
+    return !F.isDenormal() || denormalsEnabledForType(MRI.getType(Reg), MF);
+  }
+
+  if (MaxDepth == 0)
+    return false;
+
+  switch (Opcode) {
+  case AMDGPU::G_FMINNUM_IEEE:
+  case AMDGPU::G_FMAXNUM_IEEE: {
+    if (Subtarget->supportsMinMaxDenormModes() ||
+        denormalsEnabledForType(MRI.getType(Reg), MF))
+      return true;
+    for (unsigned I = 1, E = MI->getNumOperands(); I != E; ++I) {
+      if (!isCanonicalized(MI->getOperand(I).getReg(), MF, MaxDepth - 1))
+        return false;
+    }
+    return true;
+  }
+  default:
+    return denormalsEnabledForType(MRI.getType(Reg), MF) &&
+           isKnownNeverSNaN(Reg, MRI);
+  }
+
+  llvm_unreachable("invalid operation");
+}
+
 // Constant fold canonicalize.
 SDValue SITargetLowering::getCanonicalConstantFP(
   SelectionDAG &DAG, const SDLoc &SL, EVT VT, const APFloat &C) const {
@@ -12010,6 +12048,19 @@ bool SITargetLowering::denormalsEnabledForType(const SelectionDAG &DAG,
   case MVT::f64:
   case MVT::f16:
     return hasFP64FP16Denormals(DAG.getMachineFunction());
+  default:
+    return false;
+  }
+}
+
+bool SITargetLowering::denormalsEnabledForType(LLT Ty,
+                                               MachineFunction &MF) const {
+  switch (Ty.getScalarSizeInBits()) {
+  case 32:
+    return hasFP32Denormals(MF);
+  case 64:
+  case 16:
+    return hasFP64FP16Denormals(MF);
   default:
     return false;
   }

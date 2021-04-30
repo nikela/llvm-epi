@@ -781,25 +781,24 @@ bool Value::canBeFreed() const {
     return true;
   
   const auto &GCName = F->getGC();
-  const StringRef StatepointExampleName("statepoint-example");
-  if (GCName != StatepointExampleName)
-    return true;
-
-  auto *PT = cast<PointerType>(this->getType());
-  if (PT->getAddressSpace() != 1)
-    // For the sake of this example GC, we arbitrarily pick addrspace(1) as our
-    // GC managed heap.  This must match the same check in
-    // RewriteStatepointsForGC (and probably needs better factored.)
-    return true;
-
-  // It is cheaper to scan for a declaration than to scan for a use in this
-  // function.  Note that gc.statepoint is a type overloaded function so the
-  // usual trick of requesting declaration of the intrinsic from the module
-  // doesn't work.
-  for (auto &Fn : *F->getParent())
-    if (Fn.getIntrinsicID() == Intrinsic::experimental_gc_statepoint)
+  if (GCName == "statepoint-example") {
+    auto *PT = cast<PointerType>(this->getType());
+    if (PT->getAddressSpace() != 1)
+      // For the sake of this example GC, we arbitrarily pick addrspace(1) as
+      // our GC managed heap.  This must match the same check in
+      // RewriteStatepointsForGC (and probably needs better factored.)
       return true;
-  return false;
+
+    // It is cheaper to scan for a declaration than to scan for a use in this
+    // function.  Note that gc.statepoint is a type overloaded function so the
+    // usual trick of requesting declaration of the intrinsic from the module
+    // doesn't work.
+    for (auto &Fn : *F->getParent())
+      if (Fn.getIntrinsicID() == Intrinsic::experimental_gc_statepoint)
+        return true;
+    return false;
+  }
+  return true;
 }
 
 uint64_t Value::getPointerDereferenceableBytes(const DataLayout &DL,
@@ -979,6 +978,27 @@ bool Value::isSwiftError() const {
   if (!Alloca)
     return false;
   return Alloca->isSwiftError();
+}
+
+bool Value::isTransitiveUsedByMetadataOnly() const {
+  if (use_empty())
+    return false;
+  llvm::SmallVector<const User *, 32> WorkList;
+  llvm::SmallPtrSet<const User *, 32> Visited;
+  WorkList.insert(WorkList.begin(), user_begin(), user_end());
+  while (!WorkList.empty()) {
+    const User *U = WorkList.back();
+    WorkList.pop_back();
+    Visited.insert(U);
+    // If it is transitively used by a global value or a non-constant value,
+    // it's obviously not only used by metadata.
+    if (!isa<Constant>(U) || isa<GlobalValue>(U))
+      return false;
+    for (const User *UU : U->users())
+      if (!Visited.count(UU))
+        WorkList.push_back(UU);
+  }
+  return true;
 }
 
 //===----------------------------------------------------------------------===//
