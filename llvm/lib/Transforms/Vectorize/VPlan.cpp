@@ -1212,7 +1212,7 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
 
     // Add the consecutive indices to the vector value.
     Value *CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
-    State.set(getVPValue(), CanonicalVectorIV, Part);
+    State.set(getVPSingleValue(), CanonicalVectorIV, Part);
   }
 }
 

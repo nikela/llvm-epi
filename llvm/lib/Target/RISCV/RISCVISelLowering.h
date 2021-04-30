@@ -574,7 +574,6 @@ private:
   SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerSPLAT_VECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerTRUNCATE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerExtendVectorInReg(SDValue Op, SelectionDAG &DAG,
                                  int Opcode) const;
