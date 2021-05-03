@@ -330,14 +330,11 @@ InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
                                                  CmpInst::Predicate VecPred,
                                                  TTI::TargetCostKind CostKind,
                                                  const Instruction *I) {
-  // FIXME: For the time being we only consider the case when the ValTy or
-  // CondTy is illegal and return an artificially high cost. For other cases we
-  // default to the base implementation.
   if (ValTy && ValTy->isVectorTy() && !isTypeLegal(ValTy))
-    return HighCost;
+    return InstructionCost::getInvalid();
 
   if (CondTy && CondTy->isVectorTy() && !isTypeLegal(CondTy))
-    return HighCost;
+    return InstructionCost::getInvalid();
 
   return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
