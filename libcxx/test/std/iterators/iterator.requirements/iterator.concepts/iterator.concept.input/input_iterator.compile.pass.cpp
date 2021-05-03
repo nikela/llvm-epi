@@ -9,7 +9,6 @@
 // UNSUPPORTED: c++03, c++11, c++14, c++17
 // UNSUPPORTED: libcpp-no-concepts
 // UNSUPPORTED: gcc-10
-// XFAIL: msvc && clang
 
 // template<class T>
 // concept input_iterator;
@@ -18,7 +17,7 @@
 
 #include "test_iterators.h"
 
-static_assert(std::input_iterator<input_iterator<int*> >);
+static_assert(std::input_iterator<cpp17_input_iterator<int*> >);
 static_assert(std::input_iterator<cpp20_input_iterator<int*> >);
 
 struct no_explicit_iter_concept {

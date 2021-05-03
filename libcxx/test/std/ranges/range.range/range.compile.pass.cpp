@@ -9,7 +9,6 @@
 // UNSUPPORTED: c++03, c++11, c++14, c++17
 // UNSUPPORTED: libcpp-no-concepts
 // UNSUPPORTED: gcc-10
-// XFAIL: msvc && clang
 
 // template<class T>
 // concept range;
@@ -22,7 +21,7 @@
 
 namespace stdr = std::ranges;
 
-static_assert(stdr::range<test_range<> >);
+static_assert(stdr::range<test_range<cpp20_input_iterator> >);
 
 struct incompatible_iterators {
   int* begin();

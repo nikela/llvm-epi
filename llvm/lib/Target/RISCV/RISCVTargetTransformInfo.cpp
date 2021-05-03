@@ -401,7 +401,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
     return BaseT::getArithmeticReductionCost(Opcode, ValTy, IsPairwiseForm,
                                              CostKind);
 
-  std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
   InstructionCost LegalizationCost = 0;
   if (LT.first > 1) {
     Type *LegalVTy = EVT(LT.second).getTypeForEVT(ValTy->getContext());
@@ -409,8 +409,6 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
     LegalizationCost *= LT.first - 1;
   }
 
-  // Update to InstructionCost when ready.
-  constexpr int InfiniteCost = 1024;
   // Add the final reduction cost for the legal horizontal reduction
   switch (Opcode) {
   case Instruction::And:
@@ -422,8 +420,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
   case Instruction::Add:
     return LegalizationCost + 2;
   default:
-    // TODO: Replace for invalid when InstructionCost is used.
-    return InfiniteCost;
+    return InstructionCost::getInvalid();
   }
 }
 
@@ -439,7 +436,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   assert((isa<ScalableVectorType>(Ty) && isa<ScalableVectorType>(CondTy)) &&
          "Both vectors need to be scalable");
 
-  std::pair<int, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
   InstructionCost LegalizationCost = 0;
   if (LT.first > 1) {
     Type *LegalVTy = EVT(LT.second).getTypeForEVT(Ty->getContext());
