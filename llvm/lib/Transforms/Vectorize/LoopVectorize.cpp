@@ -4609,7 +4609,8 @@ void InnerLoopVectorizer::fixReduction(VPWidenPHIRecipe *PhiR,
       // If using preferPredicatedVectorOps, replace incoming value of the
       // reduction phi node for vector.body with the above select instruction.
       if (preferPredicatedVectorOps()) {
-        Value *VecRdxPhi =  State.get(State.Plan->getOrAddVPValue(Phi), Part);
+        auto *VecRdxPhi =
+            cast<PHINode>(State.get(PhiR->getVPSingleValue(), Part));
         BasicBlock *VectorBodyLatch =
             LI->getLoopFor(LoopVectorBody)->getLoopLatch();
         Value *CurrIncoming =

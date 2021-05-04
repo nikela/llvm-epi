@@ -852,21 +852,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
     }
-
-    // Vector fp reductions.
-    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
-                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
-      setOperationAction(ISD::VECREDUCE_FMUL, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_FMAX, VT, Legal);
-      setOperationAction(ISD::VECREDUCE_FMIN, VT, Legal);
-    }
-
-    // Vector fp min/max operations.
-    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
-                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
-      setOperationAction(ISD::FMINNUM, VT, Legal);
-      setOperationAction(ISD::FMAXNUM, VT, Legal);
-    }
   }
 
   setTargetDAGCombine(ISD::AND);
