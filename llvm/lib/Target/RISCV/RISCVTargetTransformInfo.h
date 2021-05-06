@@ -270,6 +270,16 @@ public:
 
   InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                         TTI::TargetCostKind CostKind);
+
+  TargetTransformInfo::VPLegalization
+  getVPLegalizationStrategy(const VPIntrinsic &PI) const {
+    // FIXME: we may want to be more selective.
+    if (ST->hasStdExtV())
+      return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
+              /* Op */ TargetTransformInfo::VPLegalization::Legal};
+
+    return BaseT::getVPLegalizationStrategy(PI);
+  }
 };
 
 } // end namespace llvm
