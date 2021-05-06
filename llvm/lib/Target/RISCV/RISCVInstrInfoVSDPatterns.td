@@ -520,7 +520,7 @@ foreach mti = AllMasks in {
             (!cast<Instruction>("PseudoVMORNOT_MM_"#mti.LMul.MX)
                  VR:$rs1, VR:$rs2, mti.AVL, mti.Log2SEW)>;
 
-  // Handle rvv_vnot the same as the vmnot.m pseudoinstruction.
+  // Handle rvv_vnot the same as the vnot.mm pseudoinstruction.
   def : Pat<(mti.Mask (rvv_vnot VR:$rs)),
             (!cast<Instruction>("PseudoVMNAND_MM_"#mti.LMul.MX)
                  VR:$rs, VR:$rs, mti.AVL, mti.Log2SEW)>;
