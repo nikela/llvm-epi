@@ -887,12 +887,22 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
     setLibcallName(RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32");
 
+    setLibcallName(RTLIB::FMOD_NXV1F64, "__epi_fmod_nxv1f64");
+    setLibcallName(RTLIB::FMOD_NXV2F64, "__epi_fmod_nxv2f64");
+    setLibcallName(RTLIB::FMOD_NXV4F64, "__epi_fmod_nxv4f64");
+    setLibcallName(RTLIB::FMOD_NXV8F64, "__epi_fmod_nxv8f64");
+    setLibcallName(RTLIB::FMOD_NXV2F32, "__epi_fmod_nxv2f32");
+    setLibcallName(RTLIB::FMOD_NXV4F32, "__epi_fmod_nxv4f32");
+    setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
+    setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
+
     // Custom-legalize these nodes for fp scalable vectors.
     for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
                     MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::FEXP, VT, Custom);
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
+      setOperationAction(ISD::FREM, VT, Custom);
     }
   }
 
@@ -1254,7 +1264,17 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
-RISCVII::VLMUL RISCVTargetLowering::getLMUL(MVT VT) {
+SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
+  VTToLibCall VTToLC[] = {
+      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64}, {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
+      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64}, {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
+      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32}, {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
+      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32}, {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
+  };
+  return lowerVECLIBCALL(Op, DAG, VTToLC);
+}
+
+RISCVVLMUL RISCVTargetLowering::getLMUL(MVT VT) {
   assert(VT.isScalableVector() && "Expecting a scalable vector type");
   unsigned KnownSize = VT.getSizeInBits().getKnownMinValue();
   if (VT.getVectorElementType() == MVT::i1)
@@ -2207,6 +2227,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerFSIN(Op, DAG);
   case ISD::FCOS:
     return lowerFCOS(Op, DAG);
+  case ISD::FREM:
+    return lowerFREM(Op, DAG);
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
     // Convert BSWAP/BITREVERSE to GREVI to enable GREVI combinining.
