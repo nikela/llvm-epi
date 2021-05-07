@@ -1,0 +1,55 @@
+; RUN: llc -mtriple riscv64 -mattr=+d,+experimental-v < %s | FileCheck %s
+
+define <vscale x 1 x double> @test_vp_frem_nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x double> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
+  %r0 = call <vscale x 1 x double> @llvm.vp.frem.nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x double> %f1, <vscale x 1 x i1> %m, i32 %n)
+  ret <vscale x 1 x double> %r0
+}
+declare <vscale x 1 x double> @llvm.vp.frem.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
+
+define <vscale x 2 x double> @test_vp_frem_nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x double> %f1, <vscale x 2 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 2 x double> @llvm.vp.frem.nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x double> %f1, <vscale x 2 x i1> %m, i32 %n)
+  ret <vscale x 2 x double> %r0
+}
+declare <vscale x 2 x double> @llvm.vp.frem.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>, <vscale x 2 x i1>, i32)
+
+define <vscale x 4 x double> @test_vp_frem_nxv4f64(<vscale x 4 x double> %f0, <vscale x 4 x double> %f1, <vscale x 4 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 4 x double> @llvm.vp.frem.nxv4f64(<vscale x 4 x double> %f0, <vscale x 4 x double> %f1, <vscale x 4 x i1> %m, i32 %n)
+  ret <vscale x 4 x double> %r0
+}
+declare <vscale x 4 x double> @llvm.vp.frem.nxv4f64(<vscale x 4 x double>, <vscale x 4 x double>, <vscale x 4 x i1>, i32)
+
+define <vscale x 8 x double> @test_vp_frem_nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 8 x double> @llvm.vp.frem.nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 %n)
+  ret <vscale x 8 x double> %r0
+}
+declare <vscale x 8 x double> @llvm.vp.frem.nxv8f64(<vscale x 8 x double>, <vscale x 8 x double>, <vscale x 8 x i1>, i32)
+
+define <vscale x 1 x float> @test_vp_frem_nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 %n)
+  ret <vscale x 1 x float> %r0
+}
+declare <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float>, <vscale x 1 x float>, <vscale x 1 x i1>, i32)
+
+define <vscale x 2 x float> @test_vp_frem_nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 2 x float> @llvm.vp.frem.nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x i1> %m, i32 %n)
+  ret <vscale x 2 x float> %r0
+}
+declare <vscale x 2 x float> @llvm.vp.frem.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x i1>, i32)
+
+define <vscale x 4 x float> @test_vp_frem_nxv4f32(<vscale x 4 x float> %f0, <vscale x 4 x float> %f1, <vscale x 4 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 4 x float> @llvm.vp.frem.nxv4f32(<vscale x 4 x float> %f0, <vscale x 4 x float> %f1, <vscale x 4 x i1> %m, i32 %n)
+  ret <vscale x 4 x float> %r0
+}
+declare <vscale x 4 x float> @llvm.vp.frem.nxv4f32(<vscale x 4 x float>, <vscale x 4 x float>, <vscale x 4 x i1>, i32)
+
+define <vscale x 8 x float> @test_vp_frem_nxv8f32(<vscale x 8 x float> %f0, <vscale x 8 x float> %f1, <vscale x 8 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 8 x float> @llvm.vp.frem.nxv8f32(<vscale x 8 x float> %f0, <vscale x 8 x float> %f1, <vscale x 8 x i1> %m, i32 %n)
+  ret <vscale x 8 x float> %r0
+}
+declare <vscale x 8 x float> @llvm.vp.frem.nxv8f32(<vscale x 8 x float>, <vscale x 8 x float>, <vscale x 8 x i1>, i32)
+
+define <vscale x 16 x float> @test_vp_frem_nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 zeroext %n) {
+  %r0 = call <vscale x 16 x float> @llvm.vp.frem.nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 %n)
+  ret <vscale x 16 x float> %r0
+}
+declare <vscale x 16 x float> @llvm.vp.frem.nxv16f32(<vscale x 16 x float>, <vscale x 16 x float>, <vscale x 16 x i1>, i32)
