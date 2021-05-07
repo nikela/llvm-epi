@@ -37,13 +37,6 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
   const RISCVSubtarget *getST() const { return ST; }
   const RISCVTargetLowering *getTLI() const { return TLI; }
 
-  // FIXME:This is just a temporary way to signal that the cost of an
-  // instruction is too high to consider. When we have a more complete cost
-  // object that has inbuilt mechanism to indicate an infinite/saturated cost,
-  // use that. (For the same reason, at the moment we are limiting this const
-  // value only to RISCV.)
-  const int HighCost = 1 << 10;
-
   bool isLegalMaskedLoadStore(Type *DataType) const;
 
   /// Estimate a cost of Broadcast as an extract and sequence of insert
@@ -277,6 +270,16 @@ public:
 
   InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                         TTI::TargetCostKind CostKind);
+
+  TargetTransformInfo::VPLegalization
+  getVPLegalizationStrategy(const VPIntrinsic &PI) const {
+    // FIXME: we may want to be more selective.
+    if (ST->hasStdExtV())
+      return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
+              /* Op */ TargetTransformInfo::VPLegalization::Legal};
+
+    return BaseT::getVPLegalizationStrategy(PI);
+  }
 };
 
 } // end namespace llvm

@@ -344,8 +344,7 @@ public:
 
   unsigned getMaxSafeDepDistBytes() { return LAI->getMaxSafeDepDistBytes(); }
 
-  uint64_t getMaxSafeRegisterWidth() const {
-
+  uint64_t getMaxSafeVectorWidthInBits() const {
     if (TTI->useScalableVectorType())
       return std::numeric_limits<uint64_t>::max();
 

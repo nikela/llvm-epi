@@ -782,8 +782,8 @@ define <vscale x 1 x i64> @vdivu_vi_nxv1i64_0(<vscale x 1 x i64> %va) {
 ; CHECK-NEXT:    vmv.v.i v26, -7
 ; CHECK-NEXT:    vmulhu.vv v25, v8, v25
 ; CHECK-NEXT:    addi a0, zero, 61
-; CHECK-NEXT:    vmseq.vi v0, v26, 1
 ; CHECK-NEXT:    vsrl.vx v25, v25, a0
+; CHECK-NEXT:    vmseq.vi v0, v26, 1
 ; CHECK-NEXT:    vmerge.vvm v8, v25, v8, v0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -837,8 +837,8 @@ define <vscale x 2 x i64> @vdivu_vi_nxv2i64_0(<vscale x 2 x i64> %va) {
 ; CHECK-NEXT:    vmv.v.i v28, -7
 ; CHECK-NEXT:    vmulhu.vv v26, v8, v26
 ; CHECK-NEXT:    addi a0, zero, 61
-; CHECK-NEXT:    vmseq.vi v0, v28, 1
 ; CHECK-NEXT:    vsrl.vx v26, v26, a0
+; CHECK-NEXT:    vmseq.vi v0, v28, 1
 ; CHECK-NEXT:    vmerge.vvm v8, v26, v8, v0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -892,8 +892,8 @@ define <vscale x 4 x i64> @vdivu_vi_nxv4i64_0(<vscale x 4 x i64> %va) {
 ; CHECK-NEXT:    vmv.v.i v12, -7
 ; CHECK-NEXT:    vmulhu.vv v28, v8, v28
 ; CHECK-NEXT:    addi a0, zero, 61
-; CHECK-NEXT:    vmseq.vi v0, v12, 1
 ; CHECK-NEXT:    vsrl.vx v28, v28, a0
+; CHECK-NEXT:    vmseq.vi v0, v12, 1
 ; CHECK-NEXT:    vmerge.vvm v8, v28, v8, v0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -947,8 +947,8 @@ define <vscale x 8 x i64> @vdivu_vi_nxv8i64_0(<vscale x 8 x i64> %va) {
 ; CHECK-NEXT:    vmv.v.i v24, -7
 ; CHECK-NEXT:    vmulhu.vv v16, v8, v16
 ; CHECK-NEXT:    addi a0, zero, 61
-; CHECK-NEXT:    vmseq.vi v0, v24, 1
 ; CHECK-NEXT:    vsrl.vx v16, v16, a0
+; CHECK-NEXT:    vmseq.vi v0, v24, 1
 ; CHECK-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret

@@ -67,17 +67,17 @@ define void @test_vp_logical(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, i
 ; CHECK-O2-NEXT:    vand.vi v25, v26, 1
 ; CHECK-O2-NEXT:    vmsne.vi v26, v25, 0
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
-; CHECK-O2-NEXT:    vmor.mm v25, v27, v26
-; CHECK-O2-NEXT:    vmxor.mm v26, v27, v26
-; CHECK-O2-NEXT:    vmv.v.i v27, 0
-; CHECK-O2-NEXT:    vmerge.vim v28, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v25, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v27, 1, v0
-; CHECK-O2-NEXT:    vse64.v v28, (a0)
-; CHECK-O2-NEXT:    vse64.v v25, (a0)
+; CHECK-O2-NEXT:    vmor.mm v28, v27, v26
+; CHECK-O2-NEXT:    vmxor.mm v29, v27, v26
+; CHECK-O2-NEXT:    vmv.v.i v25, 0
+; CHECK-O2-NEXT:    vmerge.vim v26, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v28
+; CHECK-O2-NEXT:    vmerge.vim v27, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v29
+; CHECK-O2-NEXT:    vmerge.vim v25, v25, 1, v0
 ; CHECK-O2-NEXT:    vse64.v v26, (a0)
+; CHECK-O2-NEXT:    vse64.v v27, (a0)
+; CHECK-O2-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -166,17 +166,17 @@ define void @test_vp_logical_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1,
 ; CHECK-O2-NEXT:    vand.vi v25, v26, 1
 ; CHECK-O2-NEXT:    vmsne.vi v26, v25, 0
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
-; CHECK-O2-NEXT:    vmor.mm v25, v27, v26
-; CHECK-O2-NEXT:    vmxor.mm v26, v27, v26
-; CHECK-O2-NEXT:    vmv.v.i v27, 0
-; CHECK-O2-NEXT:    vmerge.vim v28, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v25, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v27, 1, v0
-; CHECK-O2-NEXT:    vse32.v v28, (a0)
-; CHECK-O2-NEXT:    vse32.v v25, (a0)
+; CHECK-O2-NEXT:    vmor.mm v28, v27, v26
+; CHECK-O2-NEXT:    vmxor.mm v29, v27, v26
+; CHECK-O2-NEXT:    vmv.v.i v25, 0
+; CHECK-O2-NEXT:    vmerge.vim v26, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v28
+; CHECK-O2-NEXT:    vmerge.vim v27, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v29
+; CHECK-O2-NEXT:    vmerge.vim v25, v25, 1, v0
 ; CHECK-O2-NEXT:    vse32.v v26, (a0)
+; CHECK-O2-NEXT:    vse32.v v27, (a0)
+; CHECK-O2-NEXT:    vse32.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
@@ -265,17 +265,17 @@ define void @test_vp_logical_3(<vscale x 4 x i16>* %a0, <vscale x 4 x i16>* %a1,
 ; CHECK-O2-NEXT:    vand.vi v25, v26, 1
 ; CHECK-O2-NEXT:    vmsne.vi v26, v25, 0
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
-; CHECK-O2-NEXT:    vmor.mm v25, v27, v26
-; CHECK-O2-NEXT:    vmxor.mm v26, v27, v26
-; CHECK-O2-NEXT:    vmv.v.i v27, 0
-; CHECK-O2-NEXT:    vmerge.vim v28, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v25, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v27, 1, v0
-; CHECK-O2-NEXT:    vse16.v v28, (a0)
-; CHECK-O2-NEXT:    vse16.v v25, (a0)
+; CHECK-O2-NEXT:    vmor.mm v28, v27, v26
+; CHECK-O2-NEXT:    vmxor.mm v29, v27, v26
+; CHECK-O2-NEXT:    vmv.v.i v25, 0
+; CHECK-O2-NEXT:    vmerge.vim v26, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v28
+; CHECK-O2-NEXT:    vmerge.vim v27, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v29
+; CHECK-O2-NEXT:    vmerge.vim v25, v25, 1, v0
 ; CHECK-O2-NEXT:    vse16.v v26, (a0)
+; CHECK-O2-NEXT:    vse16.v v27, (a0)
+; CHECK-O2-NEXT:    vse16.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 4 x i1> %head, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
@@ -364,17 +364,17 @@ define void @test_vp_logical_4(<vscale x 8 x i8>* %a0, <vscale x 8 x i8>* %a1, i
 ; CHECK-O2-NEXT:    vand.vi v25, v26, 1
 ; CHECK-O2-NEXT:    vmsne.vi v26, v25, 0
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
-; CHECK-O2-NEXT:    vmor.mm v25, v27, v26
-; CHECK-O2-NEXT:    vmxor.mm v26, v27, v26
-; CHECK-O2-NEXT:    vmv.v.i v27, 0
-; CHECK-O2-NEXT:    vmerge.vim v28, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v25, v27, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v27, 1, v0
-; CHECK-O2-NEXT:    vse8.v v28, (a0)
-; CHECK-O2-NEXT:    vse8.v v25, (a0)
+; CHECK-O2-NEXT:    vmor.mm v28, v27, v26
+; CHECK-O2-NEXT:    vmxor.mm v29, v27, v26
+; CHECK-O2-NEXT:    vmv.v.i v25, 0
+; CHECK-O2-NEXT:    vmerge.vim v26, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v28
+; CHECK-O2-NEXT:    vmerge.vim v27, v25, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v29
+; CHECK-O2-NEXT:    vmerge.vim v25, v25, 1, v0
 ; CHECK-O2-NEXT:    vse8.v v26, (a0)
+; CHECK-O2-NEXT:    vse8.v v27, (a0)
+; CHECK-O2-NEXT:    vse8.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 8 x i1> %head, <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -459,20 +459,20 @@ define void @test_vp_logical_5(<vscale x 16 x i8>* %a0, <vscale x 16 x i8>* %a1,
 ; CHECK-O2-NEXT:    vle8.v v28, (a1)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vand.vi v26, v26, 1
-; CHECK-O2-NEXT:    vmsne.vi v30, v26, 0
+; CHECK-O2-NEXT:    vmsne.vi v25, v26, 0
 ; CHECK-O2-NEXT:    vand.vi v26, v28, 1
 ; CHECK-O2-NEXT:    vmsne.vi v28, v26, 0
-; CHECK-O2-NEXT:    vmand.mm v0, v30, v28
-; CHECK-O2-NEXT:    vmor.mm v25, v30, v28
-; CHECK-O2-NEXT:    vmxor.mm v26, v30, v28
-; CHECK-O2-NEXT:    vmv.v.i v28, 0
-; CHECK-O2-NEXT:    vmerge.vim v30, v28, 1, v0
+; CHECK-O2-NEXT:    vmand.mm v0, v25, v28
+; CHECK-O2-NEXT:    vmor.mm v30, v25, v28
+; CHECK-O2-NEXT:    vmxor.mm v25, v25, v28
+; CHECK-O2-NEXT:    vmv.v.i v26, 0
+; CHECK-O2-NEXT:    vmerge.vim v28, v26, 1, v0
+; CHECK-O2-NEXT:    vmv1r.v v0, v30
+; CHECK-O2-NEXT:    vmerge.vim v30, v26, 1, v0
 ; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmerge.vim v8, v28, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
-; CHECK-O2-NEXT:    vmerge.vim v26, v28, 1, v0
+; CHECK-O2-NEXT:    vmerge.vim v26, v26, 1, v0
+; CHECK-O2-NEXT:    vse8.v v28, (a0)
 ; CHECK-O2-NEXT:    vse8.v v30, (a0)
-; CHECK-O2-NEXT:    vse8.v v8, (a0)
 ; CHECK-O2-NEXT:    vse8.v v26, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 16 x i1> undef, i1 1, i32 0
@@ -558,17 +558,17 @@ define void @test_vp_logical_6(<vscale x 32 x i8>* %a0, <vscale x 32 x i8>* %a1,
 ; CHECK-O2-NEXT:    vle8.v v8, (a1)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vand.vi v28, v28, 1
-; CHECK-O2-NEXT:    vmsne.vi v26, v28, 0
+; CHECK-O2-NEXT:    vmsne.vi v25, v28, 0
 ; CHECK-O2-NEXT:    vand.vi v28, v8, 1
-; CHECK-O2-NEXT:    vmsne.vi v27, v28, 0
-; CHECK-O2-NEXT:    vmand.mm v0, v26, v27
-; CHECK-O2-NEXT:    vmor.mm v25, v26, v27
-; CHECK-O2-NEXT:    vmxor.mm v26, v26, v27
+; CHECK-O2-NEXT:    vmsne.vi v26, v28, 0
+; CHECK-O2-NEXT:    vmand.mm v0, v25, v26
+; CHECK-O2-NEXT:    vmor.mm v27, v25, v26
+; CHECK-O2-NEXT:    vmxor.mm v25, v25, v26
 ; CHECK-O2-NEXT:    vmv.v.i v28, 0
 ; CHECK-O2-NEXT:    vmerge.vim v8, v28, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
+; CHECK-O2-NEXT:    vmv1r.v v0, v27
 ; CHECK-O2-NEXT:    vmerge.vim v12, v28, 1, v0
-; CHECK-O2-NEXT:    vmv1r.v v0, v26
+; CHECK-O2-NEXT:    vmv1r.v v0, v25
 ; CHECK-O2-NEXT:    vmerge.vim v28, v28, 1, v0
 ; CHECK-O2-NEXT:    vse8.v v8, (a0)
 ; CHECK-O2-NEXT:    vse8.v v12, (a0)
