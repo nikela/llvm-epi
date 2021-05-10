@@ -4408,7 +4408,7 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
       auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
       VectorInit = Builder.CreateInsertElement(
           PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
-	  VectorInit, LastIdx, "vector.recur.init");
+          VectorInit, LastIdx, "vector.recur.init");
     }
   }
 
@@ -8487,8 +8487,7 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
     if (VF.isVector() && Legal->isFirstOrderRecurrence(Phi))
       return TTI.getShuffleCost(
           TargetTransformInfo::SK_ExtractSubvector, cast<VectorType>(VectorTy),
-          None, VF.getKnownMinValue() - 1,
-          VectorType::get(RetTy, ElementCount::get(1, VF.isScalable())));
+          None, VF.getKnownMinValue() - 1, FixedVectorType::get(RetTy, 1));
 
     // Phi nodes in non-header blocks (not inductions, reductions, etc.) are
     // converted into select instructions. We require N - 1 selects per phi
