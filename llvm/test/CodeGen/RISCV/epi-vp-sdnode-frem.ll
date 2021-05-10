@@ -57,11 +57,19 @@ define <vscale x 8 x double> @test_vp_frem_nxv8f64(<vscale x 8 x double> %f0, <v
 }
 declare <vscale x 8 x double> @llvm.vp.frem.nxv8f64(<vscale x 8 x double>, <vscale x 8 x double>, <vscale x 8 x i1>, i32)
 
-;define <vscale x 1 x float> @test_vp_frem_nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
-;  %r0 = call <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 %n)
-;  ret <vscale x 1 x float> %r0
-;}
-;declare <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float>, <vscale x 1 x float>, <vscale x 1 x i1>, i32)
+define <vscale x 1 x float> @test_vp_frem_nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
+; CHECK-LABEL: test_vp_frem_nxv1f32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    call __epi_fmod_nxv1f32@plt
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    ret
+  %r0 = call <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 %n)
+  ret <vscale x 1 x float> %r0
+}
+declare <vscale x 1 x float> @llvm.vp.frem.nxv1f32(<vscale x 1 x float>, <vscale x 1 x float>, <vscale x 1 x i1>, i32)
 
 define <vscale x 2 x float> @test_vp_frem_nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_frem_nxv2f32:

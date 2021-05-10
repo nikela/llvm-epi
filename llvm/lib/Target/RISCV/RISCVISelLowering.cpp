@@ -864,6 +864,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64");
     setLibcallName(RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64");
     setLibcallName(RTLIB::EXP_NXV8F64, "__epi_exp_nxv8f64");
+    setLibcallName(RTLIB::EXP_NXV1F32, "__epi_exp_nxv1f32");
     setLibcallName(RTLIB::EXP_NXV2F32, "__epi_exp_nxv2f32");
     setLibcallName(RTLIB::EXP_NXV4F32, "__epi_exp_nxv4f32");
     setLibcallName(RTLIB::EXP_NXV8F32, "__epi_exp_nxv8f32");
@@ -873,6 +874,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::SIN_NXV2F64, "__epi_sin_nxv2f64");
     setLibcallName(RTLIB::SIN_NXV4F64, "__epi_sin_nxv4f64");
     setLibcallName(RTLIB::SIN_NXV8F64, "__epi_sin_nxv8f64");
+    setLibcallName(RTLIB::SIN_NXV1F32, "__epi_sin_nxv1f32");
     setLibcallName(RTLIB::SIN_NXV2F32, "__epi_sin_nxv2f32");
     setLibcallName(RTLIB::SIN_NXV4F32, "__epi_sin_nxv4f32");
     setLibcallName(RTLIB::SIN_NXV8F32, "__epi_sin_nxv8f32");
@@ -882,6 +884,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV2F64, "__epi_cos_nxv2f64");
     setLibcallName(RTLIB::COS_NXV4F64, "__epi_cos_nxv4f64");
     setLibcallName(RTLIB::COS_NXV8F64, "__epi_cos_nxv8f64");
+    setLibcallName(RTLIB::COS_NXV1F32, "__epi_cos_nxv1f32");
     setLibcallName(RTLIB::COS_NXV2F32, "__epi_cos_nxv2f32");
     setLibcallName(RTLIB::COS_NXV4F32, "__epi_cos_nxv4f32");
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
@@ -891,14 +894,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::FMOD_NXV2F64, "__epi_fmod_nxv2f64");
     setLibcallName(RTLIB::FMOD_NXV4F64, "__epi_fmod_nxv4f64");
     setLibcallName(RTLIB::FMOD_NXV8F64, "__epi_fmod_nxv8f64");
+    setLibcallName(RTLIB::FMOD_NXV1F32, "__epi_fmod_nxv1f32");
     setLibcallName(RTLIB::FMOD_NXV2F32, "__epi_fmod_nxv2f32");
     setLibcallName(RTLIB::FMOD_NXV4F32, "__epi_fmod_nxv4f32");
     setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
     setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
 
     // Custom-legalize these nodes for fp scalable vectors.
-    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
-                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+    for (auto VT :
+         {MVT::nxv1f32, MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
+          MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::FEXP, VT, Custom);
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
@@ -1236,40 +1241,48 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
 
 SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::EXP_NXV1F64}, {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
-      {MVT::nxv4f64, RTLIB::EXP_NXV4F64}, {MVT::nxv8f64, RTLIB::EXP_NXV8F64},
-      {MVT::nxv2f32, RTLIB::EXP_NXV2F32}, {MVT::nxv4f32, RTLIB::EXP_NXV4F32},
-      {MVT::nxv8f32, RTLIB::EXP_NXV8F32}, {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
+      {MVT::nxv1f64, RTLIB::EXP_NXV1F64},   {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
+      {MVT::nxv4f64, RTLIB::EXP_NXV4F64},   {MVT::nxv8f64, RTLIB::EXP_NXV8F64},
+      {MVT::nxv1f32, RTLIB::EXP_NXV1F32},   {MVT::nxv2f32, RTLIB::EXP_NXV2F32},
+      {MVT::nxv4f32, RTLIB::EXP_NXV4F32},   {MVT::nxv8f32, RTLIB::EXP_NXV8F32},
+      {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
 SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::SIN_NXV1F64}, {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
-      {MVT::nxv4f64, RTLIB::SIN_NXV4F64}, {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
-      {MVT::nxv2f32, RTLIB::SIN_NXV2F32}, {MVT::nxv4f32, RTLIB::SIN_NXV4F32},
-      {MVT::nxv8f32, RTLIB::SIN_NXV8F32}, {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
+      {MVT::nxv1f64, RTLIB::SIN_NXV1F64},   {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
+      {MVT::nxv4f64, RTLIB::SIN_NXV4F64},   {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
+      {MVT::nxv1f32, RTLIB::SIN_NXV1F32},   {MVT::nxv2f32, RTLIB::SIN_NXV2F32},
+      {MVT::nxv4f32, RTLIB::SIN_NXV4F32},   {MVT::nxv8f32, RTLIB::SIN_NXV8F32},
+      {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
 SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::COS_NXV1F64}, {MVT::nxv2f64, RTLIB::COS_NXV2F64},
-      {MVT::nxv4f64, RTLIB::COS_NXV4F64}, {MVT::nxv8f64, RTLIB::COS_NXV8F64},
-      {MVT::nxv2f32, RTLIB::COS_NXV2F32}, {MVT::nxv4f32, RTLIB::COS_NXV4F32},
-      {MVT::nxv8f32, RTLIB::COS_NXV8F32}, {MVT::nxv16f32, RTLIB::COS_NXV16F32},
+      {MVT::nxv1f64, RTLIB::COS_NXV1F64},   {MVT::nxv2f64, RTLIB::COS_NXV2F64},
+      {MVT::nxv4f64, RTLIB::COS_NXV4F64},   {MVT::nxv8f64, RTLIB::COS_NXV8F64},
+      {MVT::nxv1f32, RTLIB::COS_NXV1F32},   {MVT::nxv2f32, RTLIB::COS_NXV2F32},
+      {MVT::nxv4f32, RTLIB::COS_NXV4F32},   {MVT::nxv8f32, RTLIB::COS_NXV8F32},
+      {MVT::nxv16f32, RTLIB::COS_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64}, {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
-      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64}, {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
-      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32}, {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
-      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32}, {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
+      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64},
+      {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
+      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64},
+      {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
+      {MVT::nxv1f32, RTLIB::FMOD_NXV1F32},
+      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32},
+      {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
+      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32},
+      {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
