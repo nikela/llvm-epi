@@ -6,27 +6,23 @@
 
 define <vscale x 1 x double> @test.fmadd.x.y.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.x.y.z(
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.x.y.z(
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -34,27 +30,23 @@ define <vscale x 1 x double> @test.fmadd.x.y.z(i32 signext %evl, <vscale x 1 x d
 
 define <vscale x 1 x double> @test.fmadd.z.x.y(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.z.x.y(
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.z.x.y(
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -62,38 +54,34 @@ define <vscale x 1 x double> @test.fmadd.z.x.y(i32 signext %evl, <vscale x 1 x d
 
 define <vscale x 1 x double> @test.fmadd.nx.ny.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.nx.ny.z(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.nx.ny.z(
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -101,34 +89,30 @@ define <vscale x 1 x double> @test.fmadd.nx.ny.z(i32 signext %evl, <vscale x 1 x
 
 define <vscale x 1 x double> @test.fmadd.nx.y.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.nx.y.z(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.nx.y.z(
-; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -136,34 +120,30 @@ define <vscale x 1 x double> @test.fmadd.nx.y.z(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmadd.z.nx.y(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.z.nx.y(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.z.nx.y(
-; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -171,34 +151,30 @@ define <vscale x 1 x double> @test.fmadd.z.nx.y(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmadd.x.ny.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.x.ny.z(
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.x.ny.z(
-; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -206,34 +182,30 @@ define <vscale x 1 x double> @test.fmadd.x.ny.z(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmadd.z.x.ny(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmadd.z.x.ny(
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmadd.z.x.ny(
-; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -241,28 +213,24 @@ define <vscale x 1 x double> @test.fmadd.z.x.ny(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmsub.x.y.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.x.y.z(
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.x.y.z(
-; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMSUB]]
 ;
 {
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -270,39 +238,35 @@ define <vscale x 1 x double> @test.fmsub.x.y.z(i32 signext %evl, <vscale x 1 x d
 
 define <vscale x 1 x double> @test.fmsub.nx.ny.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.nx.ny.z(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.nx.ny.z(
-; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMSUB]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -310,35 +274,31 @@ define <vscale x 1 x double> @test.fmsub.nx.ny.z(i32 signext %evl, <vscale x 1 x
 
 define <vscale x 1 x double> @test.fmsub.x.ny.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.x.ny.z(
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.x.ny.z(
-; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[VP_FNEG]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NY]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMSUB]]
 ;
 {
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -346,35 +306,31 @@ define <vscale x 1 x double> @test.fmsub.x.ny.z(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmsub.nx.y.z(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.nx.y.z(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[TMP]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.nx.y.z(
-; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMSUB:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMSUB]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %tmp,
   <vscale x 1 x double> %z,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -382,28 +338,24 @@ define <vscale x 1 x double> @test.fmsub.nx.y.z(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmsub.z.x.y(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.z.x.y(
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.z.x.y(
-; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[VP_FNEG:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[VP_FNEG]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -411,33 +363,29 @@ define <vscale x 1 x double> @test.fmsub.z.x.y(i32 signext %evl, <vscale x 1 x d
 
 define <vscale x 1 x double> @test.fmsub.z.x.ny(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.z.x.ny(
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.z.x.ny(
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %x,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -445,33 +393,29 @@ define <vscale x 1 x double> @test.fmsub.z.x.ny(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmsub.z.nx.y(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.z.nx.y(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.z.nx.y(
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %y,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
@@ -479,50 +423,46 @@ define <vscale x 1 x double> @test.fmsub.z.nx.y(i32 signext %evl, <vscale x 1 x 
 
 define <vscale x 1 x double> @test.fmsub.z.nx.ny(i32 signext %evl, <vscale x 1 x double> %x, <vscale x 1 x double> %y, <vscale x 1 x double> %z) #0
 ; NOCONTRACT-LABEL: @test.fmsub.z.nx.ny(
-; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
-; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; NOCONTRACT-NEXT:    [[NY:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[Y:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[TMP:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[NY]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; NOCONTRACT-NEXT:    [[RES:%.*]] = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> [[Z:%.*]], <vscale x 1 x double> [[TMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; NOCONTRACT-NEXT:    ret <vscale x 1 x double> [[RES]]
 ;
 ; CONTRACT-LABEL: @test.fmsub.z.nx.ny(
-; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
-; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
+; CONTRACT-NEXT:    [[NX:%.*]] = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> [[X:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CONTRACT-NEXT:    [[VP_CONTRACTED_FMADD:%.*]] = call <vscale x 1 x double> @llvm.vp.fma.nxv1f64(<vscale x 1 x double> [[NX]], <vscale x 1 x double> [[Y:%.*]], <vscale x 1 x double> [[Z:%.*]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[EVL]])
 ; CONTRACT-NEXT:    ret <vscale x 1 x double> [[VP_CONTRACTED_FMADD]]
 ;
 {
   %nx = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %x, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %x,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %ny = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(
-  <vscale x 1 x double> %y, metadata !"fpexcept.ignore",
+  <vscale x 1 x double> %y,
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
 
   %tmp = call fast <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(
   <vscale x 1 x double> %nx,
   <vscale x 1 x double> %ny,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   %res = call fast <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(
   <vscale x 1 x double> %z,
   <vscale x 1 x double> %tmp,
-  metadata !"round.tonearest",
-  metadata !"fpexcept.ignore",
   <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer),
   i32 %evl)
   ret <vscale x 1 x double> %res
 }
 
-declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, metadata, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
-declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, metadata, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
-declare <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, metadata, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
-declare <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double>, metadata, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
 attributes #0 = { nofree norecurse nounwind "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="true" "no-jump-tables"="false" "no-nans-fp-math"="true" "no-signed-zeros-fp-math"="true" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+experimental-v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" "unsafe-fp-math"="true" "use-soft-float"="false" }

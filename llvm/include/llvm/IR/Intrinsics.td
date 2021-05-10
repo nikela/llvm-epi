@@ -1415,7 +1415,6 @@ def int_vp_scatter: Intrinsic<[],
 // "fpround.tonearest" and "fpexcept.ignore".
 def int_vp_fneg : Intrinsic<[ llvm_anyvector_ty ],
                             [ LLVMMatchType<0>,
-                              llvm_metadata_ty,
                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                               llvm_i32_ty],
                             [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]>;
@@ -1466,8 +1465,6 @@ def int_vp_fma : Intrinsic<[ llvm_anyvector_ty ],
                            [ LLVMMatchType<0>,
                              LLVMMatchType<0>,
                              LLVMMatchType<0>,
-                             llvm_metadata_ty,
-                             llvm_metadata_ty,
                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                              llvm_i32_ty ],
                            [ IntrNoMem, IntrNoSync, IntrWillReturn
