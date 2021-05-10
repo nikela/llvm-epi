@@ -8676,6 +8676,9 @@ static bool isOpenCLSizeDependentType(ASTContext &C, QualType Ty) {
 }
 
 static OpenCLParamType getOpenCLKernelParameterType(Sema &S, QualType PT) {
+  if (PT->isDependentType())
+    return InvalidKernelParam;
+
   if (PT->isPointerType() || PT->isReferenceType()) {
     QualType PointeeType = PT->getPointeeType();
     if (PointeeType.getAddressSpace() == LangAS::opencl_generic ||
@@ -8698,8 +8701,11 @@ static OpenCLParamType getOpenCLKernelParameterType(Sema &S, QualType PT) {
     // Moreover the types used in parameters of the kernel functions must be:
     // Standard layout types for pointer parameters. The same applies to
     // reference if an implementation supports them in kernel parameters.
-    if (S.getLangOpts().OpenCLCPlusPlus && !PointeeType->isAtomicType() &&
-        !PointeeType->isVoidType() && !PointeeType->isStandardLayoutType())
+    if (S.getLangOpts().OpenCLCPlusPlus &&
+        !S.getOpenCLOptions().isAvailableOption(
+            "__cl_clang_non_portable_kernel_param_types", S.getLangOpts()) &&
+        !PointeeType->isAtomicType() && !PointeeType->isVoidType() &&
+        !PointeeType->isStandardLayoutType())
       return InvalidKernelParam;
 
     return PtrKernelParam;
@@ -8739,8 +8745,10 @@ static OpenCLParamType getOpenCLKernelParameterType(Sema &S, QualType PT) {
   // Moreover the types used in parameters of the kernel functions must be:
   // Trivial and standard-layout types C++17 [basic.types] (plain old data
   // types) for parameters passed by value;
-  if (S.getLangOpts().OpenCLCPlusPlus && !PT->isOpenCLSpecificType() &&
-      !PT.isPODType(S.Context))
+  if (S.getLangOpts().OpenCLCPlusPlus &&
+      !S.getOpenCLOptions().isAvailableOption(
+          "__cl_clang_non_portable_kernel_param_types", S.getLangOpts()) &&
+      !PT->isOpenCLSpecificType() && !PT.isPODType(S.Context))
     return InvalidKernelParam;
 
   if (PT->isRecordType())
@@ -18471,7 +18479,7 @@ Sema::FunctionEmissionStatus Sema::getEmissionStatus(FunctionDecl *FD,
         OMPDeclareTargetDeclAttr::getDeviceType(FD->getCanonicalDecl());
     // DevTy may be changed later by
     //  #pragma omp declare target to(*) device_type(*).
-    // Therefore DevTyhaving no value does not imply host. The emission status
+    // Therefore DevTy having no value does not imply host. The emission status
     // will be checked again at the end of compilation unit with Final = true.
     if (DevTy.hasValue())
       if (*DevTy == OMPDeclareTargetDeclAttr::DT_Host)

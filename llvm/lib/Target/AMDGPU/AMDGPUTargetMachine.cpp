@@ -900,8 +900,9 @@ void AMDGPUPassConfig::addIRPasses() {
 
     if (EnableSROA)
       addPass(createSROAPass());
-
-    if (EnableScalarIRPasses)
+    if (EnableScalarIRPasses.getNumOccurrences()
+            ? EnableScalarIRPasses
+            : TM.getOptLevel() > CodeGenOpt::Less)
       addStraightLineScalarOptimizationPasses();
 
     if (EnableAMDGPUAliasAnalysis) {
@@ -933,7 +934,9 @@ void AMDGPUPassConfig::addIRPasses() {
   //   %1 = shl %a, 2
   //
   // but EarlyCSE can do neither of them.
-  if (getOptLevel() != CodeGenOpt::None && EnableScalarIRPasses)
+  if (EnableScalarIRPasses.getNumOccurrences()
+          ? EnableScalarIRPasses
+          : TM.getOptLevel() > CodeGenOpt::Less)
     addEarlyCSEOrGVNPass();
 }
 
@@ -949,7 +952,9 @@ void AMDGPUPassConfig::addCodeGenPrepare() {
 
   TargetPassConfig::addCodeGenPrepare();
 
-  if (EnableLoadStoreVectorizer)
+  if (EnableLoadStoreVectorizer.getNumOccurrences()
+          ? EnableLoadStoreVectorizer
+          : TM->getOptLevel() > CodeGenOpt::Less)
     addPass(createLoadStoreVectorizerPass());
 
   // LowerSwitch pass may introduce unreachable blocks that can
@@ -1072,7 +1077,9 @@ void GCNPassConfig::addMachineSSAOptimization() {
   if (EnableDPPCombine)
     addPass(&GCNDPPCombineID);
   addPass(&SILoadStoreOptimizerID);
-  if (EnableSDWAPeephole) {
+  if (EnableSDWAPeephole.getNumOccurrences()
+          ? EnableSDWAPeephole
+          : TM->getOptLevel() > CodeGenOpt::Less) {
     addPass(&SIPeepholeSDWAID);
     addPass(&EarlyMachineLICMID);
     addPass(&MachineCSEID);
@@ -1230,8 +1237,8 @@ yaml::MachineFunctionInfo *GCNTargetMachine::createDefaultFuncInfoYAML() const {
 yaml::MachineFunctionInfo *
 GCNTargetMachine::convertFuncInfoToYAML(const MachineFunction &MF) const {
   const SIMachineFunctionInfo *MFI = MF.getInfo<SIMachineFunctionInfo>();
-  return new yaml::SIMachineFunctionInfo(*MFI,
-                                         *MF.getSubtarget().getRegisterInfo());
+  return new yaml::SIMachineFunctionInfo(
+      *MFI, *MF.getSubtarget().getRegisterInfo(), MF);
 }
 
 bool GCNTargetMachine::parseMachineFunctionInfo(
@@ -1242,7 +1249,8 @@ bool GCNTargetMachine::parseMachineFunctionInfo(
   MachineFunction &MF = PFS.MF;
   SIMachineFunctionInfo *MFI = MF.getInfo<SIMachineFunctionInfo>();
 
-  MFI->initializeBaseYamlFields(YamlMFI);
+  if (MFI->initializeBaseYamlFields(YamlMFI, MF, PFS, Error, SourceRange))
+    return true;
 
   if (MFI->Occupancy == 0) {
     // Fixup the subtarget dependent default value.

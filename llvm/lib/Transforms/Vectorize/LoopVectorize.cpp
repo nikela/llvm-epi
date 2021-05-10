@@ -3813,6 +3813,15 @@ BasicBlock *InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // Get the metadata of the original loop before it gets modified.
   MDNode *OrigLoopID = OrigLoop->getLoopID();
 
+  // Workaround!  Compute the trip count of the original loop and cache it
+  // before we start modifying the CFG.  This code has a systemic problem
+  // wherein it tries to run analysis over partially constructed IR; this is
+  // wrong, and not simply for SCEV.  The trip count of the original loop
+  // simply happens to be prone to hitting this in practice.  In theory, we
+  // can hit the same issue for any SCEV, or ValueTracking query done during
+  // mutation.  See PR49900.
+  getOrCreateTripCount(OrigLoop);
+
   // Create an empty vector loop, and prepare basic blocks for the runtime
   // checks.
   Loop *Lp = createVectorLoopSkeleton("");
@@ -4376,6 +4385,9 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   auto *ScalarInit = Phi->getIncomingValueForBlock(Preheader);
   auto *Previous = Phi->getIncomingValueForBlock(Latch);
 
+  auto *IdxTy = Builder.getInt32Ty();
+  auto *One = ConstantInt::get(IdxTy, 1);
+
   // Create a vector from the initial value.
   auto *VectorInit = ScalarInit;
   Value *InitLen = Builder.getInt32(VF.getKnownMinValue());
@@ -4391,10 +4403,13 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
       VectorInit = Builder.CreateInsertElement(
           PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
           VectorInit, LastIndex, "vector.recur.init");
-    } else
+    } else {
+      auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, VF);
+      auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
       VectorInit = Builder.CreateInsertElement(
-          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)), VectorInit,
-          Builder.getInt32(VF.getKnownMinValue() - 1), "vector.recur.init");
+          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
+	  VectorInit, LastIdx, "vector.recur.init");
+    }
   }
 
   VPValue *PhiDef = State.Plan->getVPValue(Phi);
@@ -4446,13 +4461,6 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   }
   Builder.SetInsertPoint(&*InsertPt);
 
-  // We will construct a vector for the recurrence by combining the values for
-  // the current and previous iterations. This is the required shuffle mask.
-  SmallVector<int, 8> ShuffleMask(VF.getKnownMinValue());
-  ShuffleMask[0] = VF.getKnownMinValue() - 1;
-  for (unsigned I = 1; I < VF.getKnownMinValue(); ++I)
-    ShuffleMask[I] = I + VF.getKnownMinValue() - 1;
-
   // The vector from which to take the initial value for the current iteration
   // (actual or unrolled). Initially, this is the vector phi node.
   Value *Incoming = VecPhi;
@@ -4462,12 +4470,11 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
     Value *PreviousPart = State.get(PreviousDef, Part);
     Value *PhiPart = State.get(PhiDef, Part);
     Value *Shuffle;
-    if (VF.isScalable()) {
+    if (VF.isScalable() && preferPredicatedVectorOps()) {
       Type *Int32Ty = Type::getInt32Ty(Phi->getContext());
       Value *Vlen = Builder.CreateVScale(
           ConstantInt::get(Int32Ty, VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(Int32Ty, 1));
-      if (preferPredicatedVectorOps())
         Shuffle = Builder.CreateIntrinsic(
             Intrinsic::experimental_vector_vp_slideleftfill,
             {VecPhi->getType()},
@@ -4475,15 +4482,10 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
              Builder.CreateTrunc(EVLPhi, Int32Ty),
              Builder.CreateTrunc(State.get(EVL, 0), Int32Ty)},
             nullptr);
-      else
-        Shuffle = Builder.CreateIntrinsic(
-            Intrinsic::experimental_vector_slideleftfill, {VecPhi->getType()},
-            {Incoming, PreviousPart, Shift}, nullptr);
     } else {
-      Shuffle =
-        VF.isVector()
-              ? Builder.CreateShuffleVector(Incoming, PreviousPart, ShuffleMask)
-              : Incoming;
+      Shuffle = VF.isVector()
+                      ? Builder.CreateVectorSplice(Incoming, PreviousPart, -1)
+                      : Incoming;
     }
     PhiPart->replaceAllUsesWith(Shuffle);
     cast<Instruction>(PhiPart)->eraseFromParent();
@@ -4499,9 +4501,10 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   auto *ExtractForScalar = Incoming;
   if (VF.isVector()) {
     Builder.SetInsertPoint(LoopMiddleBlock->getTerminator());
-    ExtractForScalar = Builder.CreateExtractElement(
-        ExtractForScalar, Builder.getInt32(VF.getKnownMinValue() - 1),
-        "vector.recur.extract");
+    auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, VF);
+    auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
+    ExtractForScalar = Builder.CreateExtractElement(ExtractForScalar, LastIdx,
+                                                    "vector.recur.extract");
   }
   // Extract the second last element in the middle block if the
   // Phi is used outside the loop. We need to extract the phi itself
@@ -4509,15 +4512,16 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   // will be the value when jumping to the exit block from the LoopMiddleBlock,
   // when the scalar loop is not run at all.
   Value *ExtractForPhiUsedOutsideLoop = nullptr;
-  if (VF.isVector())
+  if (VF.isVector()) {
+    auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, VF);
+    auto *Idx = Builder.CreateSub(RuntimeVF, ConstantInt::get(IdxTy, 2));
     ExtractForPhiUsedOutsideLoop = Builder.CreateExtractElement(
-        Incoming, Builder.getInt32(VF.getKnownMinValue() - 2),
-        "vector.recur.extract.for.phi");
-  // When loop is unrolled without vectorizing, initialize
-  // ExtractForPhiUsedOutsideLoop with the value just prior to unrolled value of
-  // `Incoming`. This is analogous to the vectorized case above: extracting the
-  // second last element when VF > 1.
-  else if (UF > 1)
+        Incoming, Idx, "vector.recur.extract.for.phi");
+  } else if (UF > 1)
+    // When loop is unrolled without vectorizing, initialize
+    // ExtractForPhiUsedOutsideLoop with the value just prior to unrolled value
+    // of `Incoming`. This is analogous to the vectorized case above: extracting
+    // the second last element when VF > 1.
     ExtractForPhiUsedOutsideLoop = State.get(PreviousDef, UF - 2);
 
   // Fix the initial value of the original recurrence in the scalar loop.
@@ -4575,8 +4579,6 @@ void InnerLoopVectorizer::fixReduction(VPWidenPHIRecipe *PhiR,
 
   // Reductions do not have to start at zero. They can start with
   // any loop invariant values.
-  BasicBlock *OrigLatch = OrigLoop->getLoopLatch();
-  Value *OrigLoopVal = OrigPhi->getIncomingValueForBlock(OrigLatch);
   BasicBlock *VectorLoopLatch = LI->getLoopFor(LoopVectorBody)->getLoopLatch();
 
   bool IsOrdered = State.VF.isVector() && IsInLoopReductionPhi &&
@@ -4586,9 +4588,10 @@ void InnerLoopVectorizer::fixReduction(VPWidenPHIRecipe *PhiR,
     if (IsOrdered && Part > 0)
       break;
     Value *VecRdxPhi = State.get(PhiR->getVPSingleValue(), Part);
-    Value *Val = State.get(State.Plan->getVPValue(OrigLoopVal), Part);
+    Value *Val = State.get(PhiR->getBackedgeValue(), Part);
     if (IsOrdered)
-      Val = State.get(State.Plan->getVPValue(OrigLoopVal), UF - 1);
+      Val = State.get(PhiR->getBackedgeValue(), UF - 1);
+
     cast<PHINode>(VecRdxPhi)->addIncoming(Val, VectorLoopLatch);
   }
 
@@ -4659,7 +4662,6 @@ void InnerLoopVectorizer::fixReduction(VPWidenPHIRecipe *PhiR,
   // entire expression in the smaller type.
   if (VF.isVector() && PhiTy != RdxDesc.getRecurrenceType()) {
     assert(!IsInLoopReductionPhi && "Unexpected truncated inloop reduction!");
-    assert(!VF.isScalable() && "scalable vectors not yet supported.");
     Type *RdxVecTy = VectorType::get(RdxDesc.getRecurrenceType(), VF);
     Builder.SetInsertPoint(
         LI->getLoopFor(LoopVectorBody)->getLoopLatch()->getTerminator());
@@ -6828,6 +6830,22 @@ bool LoopVectorizationCostModel::isMoreProfitable(
     const VectorizationFactor &A, const VectorizationFactor &B) const {
   InstructionCost::CostType CostA = *A.Cost.getValue();
   InstructionCost::CostType CostB = *B.Cost.getValue();
+
+  unsigned MaxTripCount = PSE.getSE()->getSmallConstantMaxTripCount(TheLoop);
+
+  if (!A.Width.isScalable() && !B.Width.isScalable() && FoldTailByMasking &&
+      MaxTripCount) {
+    // If we are folding the tail and the trip count is a known (possibly small)
+    // constant, the trip count will be rounded up to an integer number of
+    // iterations. The total cost will be PerIterationCost*ceil(TripCount/VF),
+    // which we compare directly. When not folding the tail, the total cost will
+    // be PerIterationCost*floor(TC/VF) + Scalar remainder cost, and so is
+    // approximated with the per-lane cost below instead of using the tripcount
+    // as here.
+    int64_t RTCostA = CostA * divideCeil(MaxTripCount, A.Width.getFixedValue());
+    int64_t RTCostB = CostB * divideCeil(MaxTripCount, B.Width.getFixedValue());
+    return RTCostA < RTCostB;
+  }
 
   // To avoid the need for FP division:
   //      (CostA / A.Width) < (CostB / B.Width)
@@ -9839,6 +9857,16 @@ VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
                                      Mask, getOrCreateEVL(Plan));
 }
 
+void VPRecipeBuilder::fixHeaderPhis() {
+  BasicBlock *OrigLatch = OrigLoop->getLoopLatch();
+  for (VPWidenPHIRecipe *R : PhisToFix) {
+    auto *PN = cast<PHINode>(R->getUnderlyingValue());
+    VPRecipeBase *IncR =
+        getRecipe(cast<Instruction>(PN->getIncomingValueForBlock(OrigLatch)));
+    R->addOperand(IncR->getVPSingleValue());
+  }
+}
+
 VPBasicBlock *VPRecipeBuilder::handleReplication(
     Instruction *I, VFRange &Range, VPBasicBlock *VPBB,
     VPlanPtr &Plan) {
@@ -9946,7 +9974,15 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
       assert(RdxDesc.getRecurrenceStartValue() ==
              Phi->getIncomingValueForBlock(OrigLoop->getLoopPreheader()));
       VPValue *StartV = Operands[0];
-      return toVPRecipeResult(new VPWidenPHIRecipe(Phi, RdxDesc, *StartV));
+
+      // Record the PHI and the incoming value from the backedge, so we can add
+      // the incoming value from the backedge after all recipes have been
+      // created.
+      auto *PhiRecipe = new VPWidenPHIRecipe(Phi, RdxDesc, *StartV);
+      PhisToFix.push_back(PhiRecipe);
+      recordRecipeOf(cast<Instruction>(
+          Phi->getIncomingValueForBlock(OrigLoop->getLoopLatch())));
+      return toVPRecipeResult(PhiRecipe);
     }
 
     return toVPRecipeResult(new VPWidenPHIRecipe(Phi));
@@ -10136,6 +10172,8 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
     }
   }
 
+  RecipeBuilder.fixHeaderPhis();
+
   // Discard empty dummy pre-entry VPBasicBlock. Note that other VPBasicBlocks
   // may also be empty, such as the last one VPBB, reflecting original
   // basic-blocks with no recipes.
@@ -10154,6 +10192,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   for (auto &Entry : SinkAfter) {
     VPRecipeBase *Sink = RecipeBuilder.getRecipe(Entry.first);
     VPRecipeBase *Target = RecipeBuilder.getRecipe(Entry.second);
+
     // If the target is in a replication region, make sure to move Sink to the
     // block after it, not into the replication region itself.
     if (auto *Region =
@@ -10166,7 +10205,37 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
         continue;
       }
     }
-    Sink->moveAfter(Target);
+
+    auto *SinkRegion =
+        dyn_cast_or_null<VPRegionBlock>(Sink->getParent()->getParent());
+    // Unless the sink source is in a replicate region, sink the recipe
+    // directly.
+    if (!SinkRegion || !SinkRegion->isReplicator()) {
+      Sink->moveAfter(Target);
+      continue;
+    }
+
+    // If the sink source is in a replicate region, we need to move the whole
+    // replicate region, which should only contain a single recipe in the main
+    // block.
+    assert(Sink->getParent()->size() == 1 &&
+           "parent must be a replicator with a single recipe");
+    auto *SplitBlock =
+        Target->getParent()->splitAt(std::next(Target->getIterator()));
+
+    auto *Pred = SinkRegion->getSinglePredecessor();
+    auto *Succ = SinkRegion->getSingleSuccessor();
+    VPBlockUtils::disconnectBlocks(Pred, SinkRegion);
+    VPBlockUtils::disconnectBlocks(SinkRegion, Succ);
+    VPBlockUtils::connectBlocks(Pred, Succ);
+
+    auto *SplitPred = SplitBlock->getSinglePredecessor();
+
+    VPBlockUtils::disconnectBlocks(SplitPred, SplitBlock);
+    VPBlockUtils::connectBlocks(SplitPred, SinkRegion);
+    VPBlockUtils::connectBlocks(SinkRegion, SplitBlock);
+    if (VPBB == SplitPred)
+      VPBB = SplitBlock;
   }
 
   // Interleave memory: for each Interleave Group we marked earlier as relevant
