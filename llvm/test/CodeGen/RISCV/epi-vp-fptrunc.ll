@@ -11,7 +11,6 @@ define <vscale x 2 x float> @fptrunc.f32.f64(<vscale x 2 x double> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(<vscale x 2 x double> %a,
-            metadata !"round.tonearest", metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x float> %b
@@ -27,10 +26,9 @@ define <vscale x 2 x float> @fptrunc.f32.f64.mask(<vscale x 2 x double> %a, <vsc
 {
   %b = call <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(
                <vscale x 2 x double> %a,
-               metadata !"round.tonearest", metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x float> %b
 }
 
-declare <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(<vscale x 2 x double>, metadata, metadata, <vscale x 2 x i1>, i32) #3
+declare <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(<vscale x 2 x double>, <vscale x 2 x i1>, i32) #3
