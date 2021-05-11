@@ -527,15 +527,8 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ;
 ; RV64-LABEL: select_v16f16:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -696,10 +689,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    fsh ft1, 2(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e16,m2,ta,mu
 ; RV64-NEXT:    vle16.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x half> %a, <16 x half> %b
   ret <16 x half> %v
@@ -886,15 +876,8 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ;
 ; RV64-LABEL: selectcc_v16f16:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    feq.h a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
@@ -1056,10 +1039,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    fsh ft1, 2(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e16,m2,ta,mu
 ; RV64-NEXT:    vle16.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq half %a, %b
   %v = select i1 %cmp, <16 x half> %c, <16 x half> %d
@@ -1323,15 +1303,8 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ;
 ; RV64-LABEL: select_v8f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -1412,10 +1385,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    fsw ft1, 4(sp)
 ; RV64-NEXT:    vsetivli a0, 8, e32,m2,ta,mu
 ; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %v = select i1 %c, <8 x float> %a, <8 x float> %b
   ret <8 x float> %v
@@ -1522,15 +1492,8 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ;
 ; RV64-LABEL: selectcc_v8f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    feq.s a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
@@ -1612,10 +1575,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    fsw ft1, 4(sp)
 ; RV64-NEXT:    vsetivli a0, 8, e32,m2,ta,mu
 ; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
   %v = select i1 %cmp, <8 x float> %c, <8 x float> %d
@@ -1802,15 +1762,8 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ;
 ; RV64-LABEL: select_v16f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
-; RV64-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 128
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -64
+; RV64-NEXT:    addi sp, sp, -64
+; RV64-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v12
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -1971,10 +1924,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    fsw ft1, 4(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e32,m4,ta,mu
 ; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -128
-; RV64-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x float> %a, <16 x float> %b
   ret <16 x float> %v
@@ -2161,15 +2111,8 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ;
 ; RV64-LABEL: selectcc_v16f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
-; RV64-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 128
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -64
+; RV64-NEXT:    addi sp, sp, -64
+; RV64-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-NEXT:    feq.s a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v12
@@ -2331,10 +2274,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    fsw ft1, 4(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e32,m4,ta,mu
 ; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -128
-; RV64-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
   %v = select i1 %cmp, <16 x float> %c, <16 x float> %d
@@ -2454,15 +2394,8 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ;
 ; RV64-LABEL: select_v4f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -2503,10 +2436,7 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 4, e64,m2,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %v = select i1 %c, <4 x double> %a, <4 x double> %b
   ret <4 x double> %v
@@ -2573,15 +2503,8 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ;
 ; RV64-LABEL: selectcc_v4f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
-; RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 64
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -32
+; RV64-NEXT:    addi sp, sp, -32
+; RV64-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v10
@@ -2623,10 +2546,7 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 4, e64,m2,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <4 x double> %c, <4 x double> %d
@@ -2733,15 +2653,8 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ;
 ; RV64-LABEL: select_v8f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
-; RV64-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 128
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -64
+; RV64-NEXT:    addi sp, sp, -64
+; RV64-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v12
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -2822,10 +2735,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 8, e64,m4,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -128
-; RV64-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
   %v = select i1 %c, <8 x double> %a, <8 x double> %b
   ret <8 x double> %v
@@ -2932,15 +2842,8 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ;
 ; RV64-LABEL: selectcc_v8f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
-; RV64-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 128
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -64
+; RV64-NEXT:    addi sp, sp, -64
+; RV64-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v12
@@ -3022,10 +2925,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 8, e64,m4,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -128
-; RV64-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <8 x double> %c, <8 x double> %d
@@ -3212,15 +3112,8 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ;
 ; RV64-LABEL: select_v16f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -256
-; RV64-NEXT:    .cfi_def_cfa_offset 256
-; RV64-NEXT:    sd ra, 248(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 240(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 256
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -128
+; RV64-NEXT:    addi sp, sp, -128
+; RV64-NEXT:    .cfi_def_cfa_offset 128
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v16
 ; RV64-NEXT:    vfmv.f.s ft0, v8
@@ -3381,10 +3274,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e64,m8,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -256
-; RV64-NEXT:    ld s0, 240(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 248(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 256
+; RV64-NEXT:    addi sp, sp, 128
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x double> %a, <16 x double> %b
   ret <16 x double> %v
@@ -3571,15 +3461,8 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ;
 ; RV64-LABEL: selectcc_v16f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -256
-; RV64-NEXT:    .cfi_def_cfa_offset 256
-; RV64-NEXT:    sd ra, 248(sp) # 8-byte Folded Spill
-; RV64-NEXT:    sd s0, 240(sp) # 8-byte Folded Spill
-; RV64-NEXT:    .cfi_offset ra, -8
-; RV64-NEXT:    .cfi_offset s0, -16
-; RV64-NEXT:    addi s0, sp, 256
-; RV64-NEXT:    .cfi_def_cfa s0, 0
-; RV64-NEXT:    andi sp, sp, -128
+; RV64-NEXT:    addi sp, sp, -128
+; RV64-NEXT:    .cfi_def_cfa_offset 128
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft1, v16
@@ -3741,10 +3624,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    fsd ft1, 8(sp)
 ; RV64-NEXT:    vsetivli a0, 16, e64,m8,ta,mu
 ; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, s0, -256
-; RV64-NEXT:    ld s0, 240(sp) # 8-byte Folded Reload
-; RV64-NEXT:    ld ra, 248(sp) # 8-byte Folded Reload
-; RV64-NEXT:    addi sp, sp, 256
+; RV64-NEXT:    addi sp, sp, 128
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <16 x double> %c, <16 x double> %d

@@ -220,7 +220,7 @@ define <2 x i8> @select_v2i8(i1 zeroext %c, <2 x i8> %a, <2 x i8> %b) {
 ; CHECK-NEXT:    vsetivli a0, 2, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -239,7 +239,7 @@ define <2 x i8> @selectcc_v2i8(i8 signext %a, i8 signext %b, <2 x i8> %c, <2 x i
 ; CHECK-NEXT:    vsetivli a0, 2, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -259,7 +259,7 @@ define <4 x i8> @select_v4i8(i1 zeroext %c, <4 x i8> %a, <4 x i8> %b) {
 ; CHECK-NEXT:    vsetivli a0, 4, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -278,7 +278,7 @@ define <4 x i8> @selectcc_v4i8(i8 signext %a, i8 signext %b, <4 x i8> %c, <4 x i
 ; CHECK-NEXT:    vsetivli a0, 4, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -298,7 +298,7 @@ define <8 x i8> @select_v8i8(i1 zeroext %c, <8 x i8> %a, <8 x i8> %b) {
 ; CHECK-NEXT:    vsetivli a0, 8, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -317,7 +317,7 @@ define <8 x i8> @selectcc_v8i8(i8 signext %a, i8 signext %b, <8 x i8> %c, <8 x i
 ; CHECK-NEXT:    vsetivli a0, 8, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -337,7 +337,7 @@ define <16 x i8> @select_v16i8(i1 zeroext %c, <16 x i8> %a, <16 x i8> %b) {
 ; CHECK-NEXT:    vsetivli a0, 16, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -356,7 +356,7 @@ define <16 x i8> @selectcc_v16i8(i8 signext %a, i8 signext %b, <16 x i8> %c, <16
 ; CHECK-NEXT:    vsetivli a0, 16, e8,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -376,7 +376,7 @@ define <2 x i16> @select_v2i16(i1 zeroext %c, <2 x i16> %a, <2 x i16> %b) {
 ; CHECK-NEXT:    vsetivli a0, 2, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -395,7 +395,7 @@ define <2 x i16> @selectcc_v2i16(i16 signext %a, i16 signext %b, <2 x i16> %c, <
 ; CHECK-NEXT:    vsetivli a0, 2, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -415,7 +415,7 @@ define <4 x i16> @select_v4i16(i1 zeroext %c, <4 x i16> %a, <4 x i16> %b) {
 ; CHECK-NEXT:    vsetivli a0, 4, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -434,7 +434,7 @@ define <4 x i16> @selectcc_v4i16(i16 signext %a, i16 signext %b, <4 x i16> %c, <
 ; CHECK-NEXT:    vsetivli a0, 4, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -454,7 +454,7 @@ define <8 x i16> @select_v8i16(i1 zeroext %c, <8 x i16> %a, <8 x i16> %b) {
 ; CHECK-NEXT:    vsetivli a0, 8, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -473,7 +473,7 @@ define <8 x i16> @selectcc_v8i16(i16 signext %a, i16 signext %b, <8 x i16> %c, <
 ; CHECK-NEXT:    vsetivli a0, 8, e16,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -493,7 +493,7 @@ define <16 x i16> @select_v16i16(i1 zeroext %c, <16 x i16> %a, <16 x i16> %b) {
 ; CHECK-NEXT:    vsetivli a0, 16, e16,m2,ta,mu
 ; CHECK-NEXT:    vand.vx v26, v8, a1
 ; CHECK-NEXT:    vmv.v.x v28, a1
-; CHECK-NEXT:    vxor.vi v28, v28, -1
+; CHECK-NEXT:    vnot.v v28, v28
 ; CHECK-NEXT:    vand.vv v28, v10, v28
 ; CHECK-NEXT:    vor.vv v8, v26, v28
 ; CHECK-NEXT:    ret
@@ -512,7 +512,7 @@ define <16 x i16> @selectcc_v16i16(i16 signext %a, i16 signext %b, <16 x i16> %c
 ; CHECK-NEXT:    vsetivli a0, 16, e16,m2,ta,mu
 ; CHECK-NEXT:    vand.vx v26, v8, a2
 ; CHECK-NEXT:    vmv.v.x v28, a2
-; CHECK-NEXT:    vxor.vi v28, v28, -1
+; CHECK-NEXT:    vnot.v v28, v28
 ; CHECK-NEXT:    vand.vv v28, v10, v28
 ; CHECK-NEXT:    vor.vv v8, v26, v28
 ; CHECK-NEXT:    ret
@@ -532,7 +532,7 @@ define <2 x i32> @select_v2i32(i1 zeroext %c, <2 x i32> %a, <2 x i32> %b) {
 ; CHECK-NEXT:    vsetivli a0, 2, e32,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -551,7 +551,7 @@ define <2 x i32> @selectcc_v2i32(i32 signext %a, i32 signext %b, <2 x i32> %c, <
 ; CHECK-NEXT:    vsetivli a0, 2, e32,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -571,7 +571,7 @@ define <4 x i32> @select_v4i32(i1 zeroext %c, <4 x i32> %a, <4 x i32> %b) {
 ; CHECK-NEXT:    vsetivli a0, 4, e32,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a1
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -590,7 +590,7 @@ define <4 x i32> @selectcc_v4i32(i32 signext %a, i32 signext %b, <4 x i32> %c, <
 ; CHECK-NEXT:    vsetivli a0, 4, e32,m1,ta,mu
 ; CHECK-NEXT:    vand.vx v25, v8, a2
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vxor.vi v26, v26, -1
+; CHECK-NEXT:    vnot.v v26, v26
 ; CHECK-NEXT:    vand.vv v26, v9, v26
 ; CHECK-NEXT:    vor.vv v8, v25, v26
 ; CHECK-NEXT:    ret
@@ -610,7 +610,7 @@ define <8 x i32> @select_v8i32(i1 zeroext %c, <8 x i32> %a, <8 x i32> %b) {
 ; CHECK-NEXT:    vsetivli a0, 8, e32,m2,ta,mu
 ; CHECK-NEXT:    vand.vx v26, v8, a1
 ; CHECK-NEXT:    vmv.v.x v28, a1
-; CHECK-NEXT:    vxor.vi v28, v28, -1
+; CHECK-NEXT:    vnot.v v28, v28
 ; CHECK-NEXT:    vand.vv v28, v10, v28
 ; CHECK-NEXT:    vor.vv v8, v26, v28
 ; CHECK-NEXT:    ret
@@ -629,7 +629,7 @@ define <8 x i32> @selectcc_v8i32(i32 signext %a, i32 signext %b, <8 x i32> %c, <
 ; CHECK-NEXT:    vsetivli a0, 8, e32,m2,ta,mu
 ; CHECK-NEXT:    vand.vx v26, v8, a2
 ; CHECK-NEXT:    vmv.v.x v28, a2
-; CHECK-NEXT:    vxor.vi v28, v28, -1
+; CHECK-NEXT:    vnot.v v28, v28
 ; CHECK-NEXT:    vand.vv v28, v10, v28
 ; CHECK-NEXT:    vor.vv v8, v26, v28
 ; CHECK-NEXT:    ret
@@ -649,7 +649,7 @@ define <16 x i32> @select_v16i32(i1 zeroext %c, <16 x i32> %a, <16 x i32> %b) {
 ; CHECK-NEXT:    vsetivli a0, 16, e32,m4,ta,mu
 ; CHECK-NEXT:    vand.vx v28, v8, a1
 ; CHECK-NEXT:    vmv.v.x v8, a1
-; CHECK-NEXT:    vxor.vi v8, v8, -1
+; CHECK-NEXT:    vnot.v v8, v8
 ; CHECK-NEXT:    vand.vv v8, v12, v8
 ; CHECK-NEXT:    vor.vv v8, v28, v8
 ; CHECK-NEXT:    ret
@@ -668,7 +668,7 @@ define <16 x i32> @selectcc_v16i32(i32 signext %a, i32 signext %b, <16 x i32> %c
 ; CHECK-NEXT:    vsetivli a0, 16, e32,m4,ta,mu
 ; CHECK-NEXT:    vand.vx v28, v8, a2
 ; CHECK-NEXT:    vmv.v.x v8, a2
-; CHECK-NEXT:    vxor.vi v8, v8, -1
+; CHECK-NEXT:    vnot.v v8, v8
 ; CHECK-NEXT:    vand.vv v8, v12, v8
 ; CHECK-NEXT:    vor.vv v8, v28, v8
 ; CHECK-NEXT:    ret
@@ -707,7 +707,7 @@ define <2 x i64> @select_v2i64(i1 zeroext %c, <2 x i64> %a, <2 x i64> %b) {
 ; RV64-NEXT:    vsetivli a0, 2, e64,m1,ta,mu
 ; RV64-NEXT:    vand.vx v25, v8, a1
 ; RV64-NEXT:    vmv.v.x v26, a1
-; RV64-NEXT:    vxor.vi v26, v26, -1
+; RV64-NEXT:    vnot.v v26, v26
 ; RV64-NEXT:    vand.vv v26, v9, v26
 ; RV64-NEXT:    vor.vv v8, v25, v26
 ; RV64-NEXT:    ret
@@ -748,7 +748,7 @@ define <2 x i64> @selectcc_v2i64(i64 signext %a, i64 signext %b, <2 x i64> %c, <
 ; RV64-NEXT:    vsetivli a0, 2, e64,m1,ta,mu
 ; RV64-NEXT:    vand.vx v25, v8, a2
 ; RV64-NEXT:    vmv.v.x v26, a2
-; RV64-NEXT:    vxor.vi v26, v26, -1
+; RV64-NEXT:    vnot.v v26, v26
 ; RV64-NEXT:    vand.vv v26, v9, v26
 ; RV64-NEXT:    vor.vv v8, v25, v26
 ; RV64-NEXT:    ret
@@ -787,7 +787,7 @@ define <4 x i64> @select_v4i64(i1 zeroext %c, <4 x i64> %a, <4 x i64> %b) {
 ; RV64-NEXT:    vsetivli a0, 4, e64,m2,ta,mu
 ; RV64-NEXT:    vand.vx v26, v8, a1
 ; RV64-NEXT:    vmv.v.x v28, a1
-; RV64-NEXT:    vxor.vi v28, v28, -1
+; RV64-NEXT:    vnot.v v28, v28
 ; RV64-NEXT:    vand.vv v28, v10, v28
 ; RV64-NEXT:    vor.vv v8, v26, v28
 ; RV64-NEXT:    ret
@@ -828,7 +828,7 @@ define <4 x i64> @selectcc_v4i64(i64 signext %a, i64 signext %b, <4 x i64> %c, <
 ; RV64-NEXT:    vsetivli a0, 4, e64,m2,ta,mu
 ; RV64-NEXT:    vand.vx v26, v8, a2
 ; RV64-NEXT:    vmv.v.x v28, a2
-; RV64-NEXT:    vxor.vi v28, v28, -1
+; RV64-NEXT:    vnot.v v28, v28
 ; RV64-NEXT:    vand.vv v28, v10, v28
 ; RV64-NEXT:    vor.vv v8, v26, v28
 ; RV64-NEXT:    ret
@@ -867,7 +867,7 @@ define <8 x i64> @select_v8i64(i1 zeroext %c, <8 x i64> %a, <8 x i64> %b) {
 ; RV64-NEXT:    vsetivli a0, 8, e64,m4,ta,mu
 ; RV64-NEXT:    vand.vx v28, v8, a1
 ; RV64-NEXT:    vmv.v.x v8, a1
-; RV64-NEXT:    vxor.vi v8, v8, -1
+; RV64-NEXT:    vnot.v v8, v8
 ; RV64-NEXT:    vand.vv v8, v12, v8
 ; RV64-NEXT:    vor.vv v8, v28, v8
 ; RV64-NEXT:    ret
@@ -908,7 +908,7 @@ define <8 x i64> @selectcc_v8i64(i64 signext %a, i64 signext %b, <8 x i64> %c, <
 ; RV64-NEXT:    vsetivli a0, 8, e64,m4,ta,mu
 ; RV64-NEXT:    vand.vx v28, v8, a2
 ; RV64-NEXT:    vmv.v.x v8, a2
-; RV64-NEXT:    vxor.vi v8, v8, -1
+; RV64-NEXT:    vnot.v v8, v8
 ; RV64-NEXT:    vand.vv v8, v12, v8
 ; RV64-NEXT:    vor.vv v8, v28, v8
 ; RV64-NEXT:    ret
@@ -948,7 +948,7 @@ define <16 x i64> @select_v16i64(i1 zeroext %c, <16 x i64> %a, <16 x i64> %b) {
 ; RV64-NEXT:    vsetivli a0, 16, e64,m8,ta,mu
 ; RV64-NEXT:    vand.vx v8, v8, a1
 ; RV64-NEXT:    vmv.v.x v24, a1
-; RV64-NEXT:    vxor.vi v24, v24, -1
+; RV64-NEXT:    vnot.v v24, v24
 ; RV64-NEXT:    vand.vv v16, v16, v24
 ; RV64-NEXT:    vor.vv v8, v8, v16
 ; RV64-NEXT:    ret
@@ -990,7 +990,7 @@ define <16 x i64> @selectcc_v16i64(i64 signext %a, i64 signext %b, <16 x i64> %c
 ; RV64-NEXT:    vsetivli a0, 16, e64,m8,ta,mu
 ; RV64-NEXT:    vand.vx v8, v8, a2
 ; RV64-NEXT:    vmv.v.x v24, a2
-; RV64-NEXT:    vxor.vi v24, v24, -1
+; RV64-NEXT:    vnot.v v24, v24
 ; RV64-NEXT:    vand.vv v16, v16, v24
 ; RV64-NEXT:    vor.vv v8, v8, v16
 ; RV64-NEXT:    ret
