@@ -5304,10 +5304,6 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
           VectorType::get(CI->getType(), SrcTy->getElementCount());
       SmallVector<Value *, 5> Ops;
       Ops.push_back(SrcVal);
-      if (Round)
-        Ops.push_back(Round);
-      if (Except)
-        Ops.push_back(Except);
       Ops.push_back(MaskValue(Part, DestTy->getElementCount()));
       Ops.push_back(EVLValue(Part));
       Value *V =
@@ -5479,16 +5475,6 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     SmallVector<Value *, 4> Ops;
     for (Value *Op : I.operands())
       Ops.push_back(State.get(State.Plan->getOrAddVPValue(Op), Part));
-
-    // Add rounding mode and exception control args.
-    // TODO: Add support for non-default values.
-    if (getVPIntrInstr(Opcode).IsFP) {
-      if (Opcode != Instruction::FNeg)
-        Ops.push_back(getConstrainedFPRounding(
-            Builder.getContext(), RoundingMode::NearestTiesToEven));
-      Ops.push_back(getConstrainedFPExcept(Builder.getContext(),
-                                           fp::ExceptionBehavior::ebIgnore));
-    }
 
     VectorType *OpTy = cast<VectorType>(Ops[0]->getType());
     Ops.push_back(MaskValue(Part, OpTy->getElementCount()));
