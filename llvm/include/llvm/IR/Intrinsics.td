@@ -1513,15 +1513,11 @@ let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<3>, VectorLength<4>*/ ] in {
   def int_vp_sitofp : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
-                                  llvm_metadata_ty,
-                                  llvm_metadata_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                   llvm_i32_ty ]>;
 
   def int_vp_uitofp : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
-                                  llvm_metadata_ty,
-                                  llvm_metadata_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                   llvm_i32_ty ]>;
 
