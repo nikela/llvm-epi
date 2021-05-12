@@ -1313,7 +1313,80 @@ RISCVVLMUL RISCVTargetLowering::getLMUL(MVT VT) {
   }
 }
 
-unsigned RISCVTargetLowering::getRegClassIDForLMUL(RISCVII::VLMUL LMul) {
+std::pair<RISCVVSEW, RISCVVLMUL> RISCVTargetLowering::getSewLMul(MVT VT) {
+  switch (VT.SimpleTy) {
+  default:
+    llvm_unreachable("Unexpected type");
+	// LMUL=1/8
+  case MVT::nxv1i8:
+	return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F8};
+	// LMUL=1/4
+  case MVT::nxv1i16:
+  case MVT::nxv1f16:
+	return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_F4};
+  case MVT::nxv2i8:
+	return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F4};
+	// LMUL=1/2
+  case MVT::nxv1i32:
+  case MVT::nxv1f32:
+    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_F2};
+  case MVT::nxv2i16:
+  case MVT::nxv2f16:
+    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_F2};
+  case MVT::nxv4i8:
+    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F2};
+    // LMUL=1
+  case MVT::nxv1i64:
+  case MVT::nxv1f64:
+    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_1};
+  case MVT::nxv2i32:
+  case MVT::nxv2f32:
+    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_1};
+  case MVT::nxv4i16:
+  case MVT::nxv4f16:
+    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_1};
+  case MVT::nxv8i8:
+    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_1};
+    // LMUL=2
+  case MVT::nxv2i64:
+  case MVT::nxv2f64:
+    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_2};
+  case MVT::nxv4i32:
+  case MVT::nxv4f32:
+    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_2};
+  case MVT::nxv8i16:
+  case MVT::nxv8f16:
+    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_2};
+  case MVT::nxv16i8:
+    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_2};
+    // LMUL=4
+  case MVT::nxv4i64:
+  case MVT::nxv4f64:
+    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_4};
+  case MVT::nxv8i32:
+  case MVT::nxv8f32:
+    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_4};
+  case MVT::nxv16i16:
+  case MVT::nxv16f16:
+    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_4};
+  case MVT::nxv32i8:
+    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_4};
+    // LMUL=8
+  case MVT::nxv8i64:
+  case MVT::nxv8f64:
+    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_8};
+  case MVT::nxv16i32:
+  case MVT::nxv16f32:
+    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_8};
+  case MVT::nxv32i16:
+  case MVT::nxv32f16:
+    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_8};
+  case MVT::nxv64i8:
+    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_8};
+  }
+}
+
+unsigned RISCVTargetLowering::getRegClassIDForLMUL(RISCVVLMUL LMul) {
   switch (LMul) {
   default:
     llvm_unreachable("Invalid LMUL.");
@@ -3986,62 +4059,6 @@ static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
   Offsets = Addresses;
 }
 
-// FIXME: This does not handle fractional LMUL.
-static std::pair<int64_t, int64_t> getSewLMul(MVT VT) {
-  switch (VT.SimpleTy) {
-  default:
-    llvm_unreachable("Unexpected type");
-    // LMUL=1
-  case MVT::nxv1i64:
-  case MVT::nxv1f64:
-    return {64, 1};
-  case MVT::nxv2i32:
-  case MVT::nxv2f32:
-    return {32, 1};
-  case MVT::nxv4i16:
-  case MVT::nxv4f16:
-    return {16, 1};
-  case MVT::nxv8i8:
-    return {8, 1};
-    // LMUL=2
-  case MVT::nxv2i64:
-  case MVT::nxv2f64:
-    return {64, 2};
-  case MVT::nxv4i32:
-  case MVT::nxv4f32:
-    return {32, 2};
-  case MVT::nxv8i16:
-  case MVT::nxv8f16:
-    return {16, 2};
-  case MVT::nxv16i8:
-    return {8, 2};
-    // LMUL=4
-  case MVT::nxv4i64:
-  case MVT::nxv4f64:
-    return {64, 4};
-  case MVT::nxv8i32:
-  case MVT::nxv8f32:
-    return {32, 4};
-  case MVT::nxv16i16:
-  case MVT::nxv16f16:
-    return {16, 4};
-  case MVT::nxv32i8:
-    return {8, 4};
-    // LMUL=8
-  case MVT::nxv8i64:
-  case MVT::nxv8f64:
-    return {64, 8};
-  case MVT::nxv16i32:
-  case MVT::nxv16f32:
-    return {32, 8};
-  case MVT::nxv32i16:
-  case MVT::nxv32f16:
-    return {16, 8};
-  case MVT::nxv64i8:
-    return {8, 8};
-  }
-}
-
 
 static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
                           const RISCVSubtarget &Subtarget, unsigned OpCode,
@@ -4051,12 +4068,12 @@ static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
   SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
   EVT VT = VTList.VTs[0];
 
-  int64_t LMUL;
-  int64_t SEWBits;
-  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+  RISCVVLMUL LMUL;
+  RISCVVSEW SEWBits;
+  std::tie (SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
 
   MVT XLenVT = Subtarget.getXLenVT();
-  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+  SDValue SEW = DAG.getTargetConstant((uint64_t)SEWBits, DL, XLenVT);
 
   SmallVector<SDValue, 4> Operands;
   for (unsigned I = 0, E = Op->getNumOperands(); I != E; I++) {
@@ -4157,12 +4174,12 @@ static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
                           unsigned Opcode, unsigned BuildOpcode) {
   SDLoc DL(Op);
   EVT VT = Op->getOperand(2).getValueType();
-  int64_t LMUL;
-  int64_t SEWBits;
-  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
+  RISCVVLMUL LMUL;
+  RISCVVSEW SEWBits;
+  std::tie(SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
 
   MVT XLenVT = Subtarget.getXLenVT();
-  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
+  SDValue SEW = DAG.getTargetConstant((uint64_t)SEWBits, DL, XLenVT);
 
   // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
   // so we use a pseudo instruction that we will expand later into proper
