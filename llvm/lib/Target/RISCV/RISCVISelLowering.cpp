@@ -36,6 +36,7 @@
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
+#include <cstdint>
 
 using namespace llvm;
 
@@ -4073,7 +4074,34 @@ static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
   std::tie (SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
 
   MVT XLenVT = Subtarget.getXLenVT();
-  SDValue SEW = DAG.getTargetConstant((uint64_t)SEWBits, DL, XLenVT);
+  uint64_t SEWBitsValue;
+  switch(SEWBits) {
+	  case RISCVVSEW::SEW_8:
+		  SEWBitsValue = 8;
+		  break;
+	  case RISCVVSEW::SEW_16:
+		  SEWBitsValue = 16;
+		  break;
+	  case RISCVVSEW::SEW_32:
+		  SEWBitsValue = 32;
+		  break;
+	  case RISCVVSEW::SEW_64:
+		  SEWBitsValue = 64;
+		  break;
+	  case RISCVVSEW::SEW_128:
+		  SEWBitsValue = 128;
+		  break;
+	  case RISCVVSEW::SEW_256:
+		  SEWBitsValue = 256;
+		  break;
+	  case RISCVVSEW::SEW_512:
+		  SEWBitsValue = 512;
+		  break;
+	  case RISCVVSEW::SEW_1024:
+		  SEWBitsValue = 1024;
+		  break;
+  }
+  SDValue SEW = DAG.getTargetConstant(SEWBitsValue, DL, XLenVT);
 
   SmallVector<SDValue, 4> Operands;
   for (unsigned I = 0, E = Op->getNumOperands(); I != E; I++) {
@@ -4179,7 +4207,34 @@ static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
   std::tie(SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
 
   MVT XLenVT = Subtarget.getXLenVT();
-  SDValue SEW = DAG.getTargetConstant((uint64_t)SEWBits, DL, XLenVT);
+  uint64_t SEWBitsValue;
+  switch(SEWBits) {
+	  case RISCVVSEW::SEW_8:
+		  SEWBitsValue = 8;
+		  break;
+	  case RISCVVSEW::SEW_16:
+		  SEWBitsValue = 16;
+		  break;
+	  case RISCVVSEW::SEW_32:
+		  SEWBitsValue = 32;
+		  break;
+	  case RISCVVSEW::SEW_64:
+		  SEWBitsValue = 64;
+		  break;
+	  case RISCVVSEW::SEW_128:
+		  SEWBitsValue = 128;
+		  break;
+	  case RISCVVSEW::SEW_256:
+		  SEWBitsValue = 256;
+		  break;
+	  case RISCVVSEW::SEW_512:
+		  SEWBitsValue = 512;
+		  break;
+	  case RISCVVSEW::SEW_1024:
+		  SEWBitsValue = 1024;
+		  break;
+  }
+  SDValue SEW = DAG.getTargetConstant(SEWBitsValue, DL, XLenVT);
 
   // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
   // so we use a pseudo instruction that we will expand later into proper
