@@ -1638,14 +1638,12 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
         goto MatchFail;
     }
 
-    unsigned SewLog2 = Log2_32(Sew / 8);
     unsigned LmulLog2 = Log2_32(Lmul);
-    RISCVII::VSEW VSEW = static_cast<RISCVII::VSEW>(SewLog2);
     RISCVII::VLMUL VLMUL =
         static_cast<RISCVII::VLMUL>(Fractional ? 8 - LmulLog2 : LmulLog2);
 
-    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMUL, VSEW, TailAgnostic,
-                                              MaskAgnostic, Nontemporal);
+    unsigned VTypeI =
+        RISCVVType::encodeVTYPE(VLMUL, Sew, TailAgnostic, MaskAgnostic, Nontemporal);
     Operands.push_back(RISCVOperand::createVType(VTypeI, S, isRV64()));
     return MatchOperand_Success;
   }

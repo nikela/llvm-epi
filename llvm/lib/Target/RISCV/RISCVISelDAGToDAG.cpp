@@ -748,23 +748,6 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
 
       // FIXME: Make all this easier.
       uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
-      RISCVII::VSEW SEWBits;
-      switch (SEW) {
-      default:
-        llvm_unreachable("Unexpected SEW");
-      case 8:
-        SEWBits = RISCVII::SEW_8;
-        break;
-      case 16:
-        SEWBits = RISCVII::SEW_16;
-        break;
-      case 32:
-        SEWBits = RISCVII::SEW_32;
-        break;
-      case 64:
-        SEWBits = RISCVII::SEW_64;
-        break;
-      }
       ElementCount EC = VT.getVectorElementCount();
       assert(EC.isScalable() && "Unexpected VT");
       uint64_t LMul =
@@ -787,7 +770,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         break;
       }
       SDValue VTypeIOp = CurDAG->getTargetConstant(
-          RISCVVType::encodeVTYPE(LMulBits, SEWBits, /*TailAgnostic*/ true,
+          RISCVVType::encodeVTYPE(LMulBits, SEW, /*TailAgnostic*/ true,
                                   /*MaskAgnostic*/ false,
                                   /* Nontemporal */ false),
           DL, XLenVT);
@@ -995,13 +978,13 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       assert(Node->getNumOperands() == Offset + 2 &&
              "Unexpected number of operands");
 
-      RISCVII::VSEW VSEW =
-          static_cast<RISCVII::VSEW>(Node->getConstantOperandVal(Offset) & 0x7);
+      unsigned SEW =
+          RISCVVType::decodeVSEW(Node->getConstantOperandVal(Offset) & 0x7);
       RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(
           Node->getConstantOperandVal(Offset + 1) & 0x7);
 
       unsigned VTypeI = RISCVVType::encodeVTYPE(
-          VLMul, VSEW, /*TailAgnostic*/ true, /*MaskAgnostic*/ false,
+          VLMul, SEW, /*TailAgnostic*/ true, /*MaskAgnostic*/ false,
           /* Nontemporal */ false);
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
 

@@ -1,3 +1,4 @@
+; XFAIL: *
 ; RUN: opt -mtriple aarch64-linux-gnu -mattr=+sve -loop-vectorize -dce -instcombine -S < %s | FileCheck %s
 
 ; Ensure that we can vectorize loops such as:

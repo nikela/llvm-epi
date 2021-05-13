@@ -8195,8 +8195,8 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
 
   unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
   unsigned Log2SEW = MI.getOperand(SEWIndex).getImm();
-  assert(RISCVVType::isValidSEW(1 << Log2SEW) && "Unexpected SEW");
-  RISCVII::VSEW ElementWidth = static_cast<RISCVII::VSEW>(Log2SEW - 3);
+  unsigned SEW = 1 << Log2SEW;
+  assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
 
   MachineRegisterInfo &MRI = MF.getRegInfo();
 
@@ -8246,7 +8246,7 @@ static MachineBasicBlock *addVSetVL(MachineInstr &MI, MachineBasicBlock *BB,
   }
 
   // For simplicity we reuse the vtype representation here.
-  MIB.addImm(RISCVVType::encodeVTYPE(VLMul, ElementWidth,
+  MIB.addImm(RISCVVType::encodeVTYPE(VLMul, SEW,
                                      /*TailAgnostic*/ TailAgnostic,
                                      /*MaskAgnostic*/ false,
                                      Nontemporal));
@@ -8270,7 +8270,6 @@ static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
   unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
   unsigned SEW = MI.getOperand(SEWIndex).getImm() & ~(0x1 << 9);
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
-  RISCVII::VSEW ElementWidth = static_cast<RISCVII::VSEW>(Log2_32(SEW / 8));
 
   // LMUL should already be encoded correctly.
   RISCVII::VLMUL Multiplier = static_cast<RISCVII::VLMUL>(VLMul);
@@ -8292,7 +8291,7 @@ static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
         .addReg(RISCV::X0, RegState::Kill);
 
   // For simplicity we reuse the vtype representation here.
-  MIB.addImm(RISCVVType::encodeVTYPE(Multiplier, ElementWidth,
+  MIB.addImm(RISCVVType::encodeVTYPE(Multiplier, SEW,
                                      /*TailAgnostic*/ true,
                                      /*MaskAgnostic*/ false,
                                      Nontemporal));
@@ -8349,7 +8348,7 @@ static MachineBasicBlock *emitComputeVSCALE(MachineInstr &MI,
            .addReg(RISCV::X0)
            // FIXME - ELEN hardcoded to SEW=64.
            .addImm(RISCVVType::encodeVTYPE(RISCVII::LMUL_1,
-                                           RISCVII::SEW_64,
+                                           /*SEW=64*/ 3,
                                            /*TailAgnostic*/ true,
                                            /*MaskAgnostic*/ false,
                                            /*Nontemporal*/ false));
