@@ -526,7 +526,6 @@ public:
                              Optional<CallingConv::ID> CC) const override;
 
   static RISCVVLMUL getLMUL(MVT VT);
-  static std::pair<RISCVVSEW, RISCVVLMUL> getSewLMul(MVT VT);
   static unsigned getRegClassIDForLMUL(RISCVVLMUL LMul);
   static unsigned getSubregIndexByMVT(MVT VT, unsigned Index);
   static unsigned getRegClassIDForVecVT(MVT VT);

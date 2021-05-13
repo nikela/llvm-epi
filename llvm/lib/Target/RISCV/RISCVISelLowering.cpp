@@ -36,7 +36,6 @@
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
-#include <cstdint>
 
 using namespace llvm;
 
@@ -1311,79 +1310,6 @@ RISCVVLMUL RISCVTargetLowering::getLMUL(MVT VT) {
     return RISCVII::VLMUL::LMUL_4;
   case 512:
     return RISCVII::VLMUL::LMUL_8;
-  }
-}
-
-std::pair<RISCVVSEW, RISCVVLMUL> RISCVTargetLowering::getSewLMul(MVT VT) {
-  switch (VT.SimpleTy) {
-  default:
-    llvm_unreachable("Unexpected type");
-	// LMUL=1/8
-  case MVT::nxv1i8:
-	return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F8};
-	// LMUL=1/4
-  case MVT::nxv1i16:
-  case MVT::nxv1f16:
-	return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_F4};
-  case MVT::nxv2i8:
-	return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F4};
-	// LMUL=1/2
-  case MVT::nxv1i32:
-  case MVT::nxv1f32:
-    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_F2};
-  case MVT::nxv2i16:
-  case MVT::nxv2f16:
-    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_F2};
-  case MVT::nxv4i8:
-    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_F2};
-    // LMUL=1
-  case MVT::nxv1i64:
-  case MVT::nxv1f64:
-    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_1};
-  case MVT::nxv2i32:
-  case MVT::nxv2f32:
-    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_1};
-  case MVT::nxv4i16:
-  case MVT::nxv4f16:
-    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_1};
-  case MVT::nxv8i8:
-    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_1};
-    // LMUL=2
-  case MVT::nxv2i64:
-  case MVT::nxv2f64:
-    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_2};
-  case MVT::nxv4i32:
-  case MVT::nxv4f32:
-    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_2};
-  case MVT::nxv8i16:
-  case MVT::nxv8f16:
-    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_2};
-  case MVT::nxv16i8:
-    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_2};
-    // LMUL=4
-  case MVT::nxv4i64:
-  case MVT::nxv4f64:
-    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_4};
-  case MVT::nxv8i32:
-  case MVT::nxv8f32:
-    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_4};
-  case MVT::nxv16i16:
-  case MVT::nxv16f16:
-    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_4};
-  case MVT::nxv32i8:
-    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_4};
-    // LMUL=8
-  case MVT::nxv8i64:
-  case MVT::nxv8f64:
-    return {RISCVVSEW::SEW_64, RISCVVLMUL::LMUL_8};
-  case MVT::nxv16i32:
-  case MVT::nxv16f32:
-    return {RISCVVSEW::SEW_32, RISCVVLMUL::LMUL_8};
-  case MVT::nxv32i16:
-  case MVT::nxv32f16:
-    return {RISCVVSEW::SEW_16, RISCVVLMUL::LMUL_8};
-  case MVT::nxv64i8:
-    return {RISCVVSEW::SEW_8, RISCVVLMUL::LMUL_8};
   }
 }
 
@@ -4069,39 +3995,11 @@ static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
   SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
   EVT VT = VTList.VTs[0];
 
-  RISCVVLMUL LMUL;
-  RISCVVSEW SEWBits;
-  std::tie (SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
-
+  uint64_t SEWBits =
+      VT.getSimpleVT().getVectorElementType().getScalarSizeInBits();
+  assert(RISCVVType::isValidSEW(SEWBits) && "Unexpected SEW");
   MVT XLenVT = Subtarget.getXLenVT();
-  uint64_t SEWBitsValue;
-  switch(SEWBits) {
-	  case RISCVVSEW::SEW_8:
-		  SEWBitsValue = 8;
-		  break;
-	  case RISCVVSEW::SEW_16:
-		  SEWBitsValue = 16;
-		  break;
-	  case RISCVVSEW::SEW_32:
-		  SEWBitsValue = 32;
-		  break;
-	  case RISCVVSEW::SEW_64:
-		  SEWBitsValue = 64;
-		  break;
-	  case RISCVVSEW::SEW_128:
-		  SEWBitsValue = 128;
-		  break;
-	  case RISCVVSEW::SEW_256:
-		  SEWBitsValue = 256;
-		  break;
-	  case RISCVVSEW::SEW_512:
-		  SEWBitsValue = 512;
-		  break;
-	  case RISCVVSEW::SEW_1024:
-		  SEWBitsValue = 1024;
-		  break;
-  }
-  SDValue SEW = DAG.getTargetConstant(SEWBitsValue, DL, XLenVT);
+  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
 
   SmallVector<SDValue, 4> Operands;
   for (unsigned I = 0, E = Op->getNumOperands(); I != E; I++) {
@@ -4202,39 +4100,12 @@ static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
                           unsigned Opcode, unsigned BuildOpcode) {
   SDLoc DL(Op);
   EVT VT = Op->getOperand(2).getValueType();
-  RISCVVLMUL LMUL;
-  RISCVVSEW SEWBits;
-  std::tie(SEWBits, LMUL) = RISCVTargetLowering::getSewLMul(VT.getSimpleVT());
 
+  uint64_t SEWBits =
+      VT.getSimpleVT().getVectorElementType().getScalarSizeInBits();
+  assert(RISCVVType::isValidSEW(SEWBits) && "Unexpected SEW");
   MVT XLenVT = Subtarget.getXLenVT();
-  uint64_t SEWBitsValue;
-  switch(SEWBits) {
-	  case RISCVVSEW::SEW_8:
-		  SEWBitsValue = 8;
-		  break;
-	  case RISCVVSEW::SEW_16:
-		  SEWBitsValue = 16;
-		  break;
-	  case RISCVVSEW::SEW_32:
-		  SEWBitsValue = 32;
-		  break;
-	  case RISCVVSEW::SEW_64:
-		  SEWBitsValue = 64;
-		  break;
-	  case RISCVVSEW::SEW_128:
-		  SEWBitsValue = 128;
-		  break;
-	  case RISCVVSEW::SEW_256:
-		  SEWBitsValue = 256;
-		  break;
-	  case RISCVVSEW::SEW_512:
-		  SEWBitsValue = 512;
-		  break;
-	  case RISCVVSEW::SEW_1024:
-		  SEWBitsValue = 1024;
-		  break;
-  }
-  SDValue SEW = DAG.getTargetConstant(SEWBitsValue, DL, XLenVT);
+  SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
 
   // Because the type is MVT:Untyped we can't actually use INSERT_SUBREG
   // so we use a pseudo instruction that we will expand later into proper
