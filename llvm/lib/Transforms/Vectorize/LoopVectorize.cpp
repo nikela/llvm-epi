@@ -3061,11 +3061,9 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           Value *BlockInMaskPart = isMaskRequired
                                        ? BlockInMaskParts[Part]
                                        : Builder.getTrueVector(NumElts);
-          Value *EVLPartTrunc = Builder.CreateTrunc(
-              EVLPart, Type::getInt32Ty(VectorGep->getType()->getContext()));
           Value *Operands[] = {StoredVal, VectorGep,
                                Builder.getInt32(Alignment.value()),
-                               BlockInMaskPart, EVLPartTrunc};
+                               BlockInMaskPart, EVLPart};
           NewSI = Builder.CreateIntrinsic(Intrinsic::vp_scatter,
                                           {DataTy, PtrsTy}, Operands);
 
@@ -3096,11 +3094,9 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
                   ? MaskValue(Part, StoredValTy->getElementCount())
                   : Builder.getTrueVector(StoredValTy->getElementCount());
 
-          Value *EVLPartTrunc = Builder.CreateTrunc(
-              EVLPart, Type::getInt32Ty(VecPtr->getType()->getContext()));
           NewSI = Builder.CreateCall(
               VPIntr, {StoredVal, VecPtr, Builder.getInt32(Alignment.value()),
-                       BlockInMaskPart, EVLPartTrunc});
+                       BlockInMaskPart, EVLPart});
         } else if (isMaskRequired)
           NewSI = Builder.CreateMaskedStore(StoredVal, VecPtr, Alignment,
                                             BlockInMaskParts[Part]);
@@ -3129,10 +3125,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         Value *BlockInMaskPart = isMaskRequired
                                      ? BlockInMaskParts[Part]
                                      : Builder.getTrueVector(NumElts);
-        Value *EVLPartTrunc = Builder.CreateTrunc(
-            EVLPart, Type::getInt32Ty(DataTy->getContext()));
         Value *Operands[] = {VectorGep, Builder.getInt32(Alignment.value()),
-                             BlockInMaskPart, EVLPartTrunc};
+                             BlockInMaskPart, EVLPart};
         NewLI = Builder.CreateIntrinsic(Intrinsic::vp_gather, {DataTy, PtrsTy},
                                         Operands, nullptr, "vp.gather");
       } else {
@@ -3157,11 +3151,9 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
             isMaskRequired ? MaskValue(Part, VecTy->getElementCount())
                            : Builder.getTrueVector(VecTy->getElementCount());
 
-        Value *EVLPartTrunc = Builder.CreateTrunc(
-            EVLPart, Type::getInt32Ty(VecPtr->getType()->getContext()));
         NewLI = Builder.CreateCall(VPIntr,
                                    {VecPtr, Builder.getInt32(Alignment.value()),
-                                    BlockInMaskPart, EVLPartTrunc},
+                                    BlockInMaskPart, EVLPart},
                                    "vp.op.load");
       } else if (isMaskRequired)
         NewLI = Builder.CreateMaskedLoad(
@@ -4294,9 +4286,12 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State) {
 
 void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
   // FIXME: Add support for interleaving.
-  ReplaceInstWithInst(NextIndex, BinaryOperator::Create(
-                                     Instruction::Add, NextIndex->getOperand(0),
-                                     State.get(EVL, 0)));
+  Builder.SetInsertPoint(NextIndex);
+  auto *NextIndexOp0 = NextIndex->getOperand(0);
+  auto *CurrEVL =
+      Builder.CreateZExtOrTrunc(State.get(EVL, 0), NextIndexOp0->getType());
+  ReplaceInstWithInst(NextIndex, BinaryOperator::Create(Instruction::Add,
+                                                        NextIndexOp0, CurrEVL));
 
   // Fix instructions that need EVL value
   if (NextInductionInfo.NextInduction.size() > 0) {
@@ -4402,26 +4397,14 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
 
   // Create a vector from the initial value.
   auto *VectorInit = ScalarInit;
-  Value *InitLen = Builder.getInt32(VF.getKnownMinValue());
+  Value *RuntimeVF = nullptr;
   if (VF.isVector()) {
     Builder.SetInsertPoint(LoopVectorPreHeader->getTerminator());
-    if (VF.isScalable() && preferPredicatedVectorOps()) {
-      Value *EVLInstr = State.get(EVL, 0);
-      InitLen = Builder.CreateVScale(
-          ConstantInt::get(EVLInstr->getType(), VF.getKnownMinValue()),
-          "vscale.x.vf");
-      Value *LastIndex =
-          Builder.CreateSub(InitLen, ConstantInt::get(EVLInstr->getType(), 1));
-      VectorInit = Builder.CreateInsertElement(
-          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
-          VectorInit, LastIndex, "vector.recur.init");
-    } else {
-      auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, VF);
-      auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
-      VectorInit = Builder.CreateInsertElement(
-          PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
-          VectorInit, LastIdx, "vector.recur.init");
-    }
+    RuntimeVF = getRuntimeVF(Builder, IdxTy, VF);
+    auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
+    VectorInit = Builder.CreateInsertElement(
+        PoisonValue::get(VectorType::get(VectorInit->getType(), VF)),
+        VectorInit, LastIdx, "vector.recur.init");
   }
 
   VPValue *PhiDef = State.Plan->getVPValue(Phi);
@@ -4442,7 +4425,7 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(PHINode *Phi,
   if (VF.isScalable() && preferPredicatedVectorOps()) {
     Value *EVLInstr = State.get(EVL, 0);
     EVLPhi = Builder.CreatePHI(EVLInstr->getType(), 2, "prev.evl");
-    EVLPhi->addIncoming(InitLen, LoopVectorPreHeader);
+    EVLPhi->addIncoming(RuntimeVF, LoopVectorPreHeader);
     EVLPhi->addIncoming(EVLInstr,
                         LI->getLoopFor(LoopVectorBody)->getLoopLatch());
   }
@@ -5303,11 +5286,6 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       return State.get(BlockInMask, Part);
   };
 
-  auto EVLValue = [&](unsigned Part) -> Value * {
-    Value *EVLPart = State.get(EVL, Part);
-    return Builder.CreateTrunc(EVLPart, Type::getInt32Ty(Builder.getContext()));
-  };
-
   auto CreateCast = [&](CastInst *CI) {
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *SrcVal =
@@ -5318,7 +5296,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       SmallVector<Value *, 5> Ops;
       Ops.push_back(SrcVal);
       Ops.push_back(MaskValue(Part, DestTy->getElementCount()));
-      Ops.push_back(EVLValue(Part));
+      Ops.push_back(State.get(EVL, Part));
       Value *V =
           Builder.CreateIntrinsic(getVPIntrInstr(CI->getOpcode()).Intr,
                                   {DestTy, SrcTy}, Ops, nullptr, "vp.cast");
@@ -5343,7 +5321,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
 
       VectorType *OpTy = cast<VectorType>(A->getType());
       Value *MaskArg = MaskValue(Part, OpTy->getElementCount());
-      Value *EVLArg = EVLValue(Part);
+      Value *EVLArg = State.get(EVL, Part);
       Value *PredArg = Builder.getInt8(Cmp->getPredicate());
 
       if (FCmp) {
@@ -5478,7 +5456,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
 
     VectorType *OpTy = cast<VectorType>(Ops[0]->getType());
     Ops.push_back(MaskValue(Part, OpTy->getElementCount()));
-    Ops.push_back(EVLValue(Part));
+    Ops.push_back(State.get(EVL, Part));
 
     Value *V = Builder.CreateIntrinsic(getVPIntrInstr(Opcode).Intr, {OpTy}, Ops,
                                        nullptr, "vp.op");
@@ -10480,7 +10458,8 @@ Value *InnerLoopVectorizer::createEVL() {
   // may wrap. This should not be a big problem for EPI (or other 64-bit)
   // architectures.
   Value *RVL = Builder.CreateSub(TripCount, Induction);
-  return getSetVL(RVL);
+  Value *SetVL = getSetVL(RVL);
+  return Builder.CreateTrunc(SetVL, Builder.getInt32Ty());
 }
 
 void VPWidenGEPRecipe::execute(VPTransformState &State) {
