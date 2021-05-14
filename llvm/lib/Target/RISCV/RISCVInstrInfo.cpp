@@ -1413,6 +1413,7 @@ MachineInstr *RISCVInstrInfo::commuteInstructionImpl(MachineInstr &MI,
 Register RISCVInstrInfo::getVLENFactoredAmount(MachineFunction &MF,
                                                MachineBasicBlock &MBB,
                                                MachineBasicBlock::iterator II,
+                                               const DebugLoc &DL,
                                                int64_t Amount) const {
   assert(Amount > 0 && "There is no need to get VLEN scaled value.");
   assert(Amount % 8 == 0 &&
@@ -1420,7 +1421,6 @@ Register RISCVInstrInfo::getVLENFactoredAmount(MachineFunction &MF,
 
   MachineRegisterInfo &MRI = MF.getRegInfo();
   const RISCVInstrInfo *TII = MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
-  DebugLoc DL = II->getDebugLoc();
   int64_t NumOfVReg = Amount / 8;
 
   Register VL = MRI.createVirtualRegister(&RISCV::GPRRegClass);
