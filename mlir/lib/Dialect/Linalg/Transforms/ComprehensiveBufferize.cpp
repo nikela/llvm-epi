@@ -82,8 +82,8 @@
 #include "mlir/Dialect/Linalg/IR/LinalgOps.h"
 #include "mlir/Dialect/Linalg/Passes.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/Vector/VectorOps.h"
 #include "mlir/IR/Operation.h"
-#include "mlir/Interfaces/LoopLikeInterface.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/BufferUtils.h"
 
@@ -128,16 +128,25 @@ OpResult getMatchingOpResult(LinalgOp linalgOp, OpOperand &opOperand) {
   return linalgOp->getResult(outputOperandIndex - numOutputBuffers);
 }
 
+OpResult getMatchingOpResult(VectorTransferOpInterface op,
+                             OpOperand &opOperand) {
+  if (opOperand.get() != op.source() ||
+      !op.source().getType().isa<TensorType>())
+    return OpResult();
+  return op->getResult(0);
+}
+
 /// Determine which results may be reused inplace by the bufferization
 /// patterns of `bufferizeFuncOpInternals`.
 /// The inplace analysis uses this information along with interfering read
 /// analysis to determine which op results reuse the same buffer as some
 /// operand.
 OpResult getMatchingOpResult(OpOperand &opOperand) {
-  OpResult res =
-      llvm::TypeSwitch<Operation *, OpResult>(opOperand.getOwner())
-          .Case([&](LinalgOp op) { return getMatchingOpResult(op, opOperand); })
-          .Default([&](Operation *op) { return OpResult(); });
+  OpResult res = llvm::TypeSwitch<Operation *, OpResult>(opOperand.getOwner())
+                     .Case<LinalgOp, VectorTransferOpInterface>([&](auto op) {
+                       return getMatchingOpResult(op, opOperand);
+                     })
+                     .Default([&](Operation *op) { return OpResult(); });
   return res;
 }
 
@@ -482,9 +491,10 @@ static void propagateInPlace(const SmallVector<OpOperand *> &initalWorklist,
                              const DominanceInfo &domInfo) {
   LLVM_DEBUG(DBGS() << "\n\n");
   LLVM_DEBUG(DBGS() << "Start propagateInPlace from initial WL\n");
-  for (OpOperand *operand : initalWorklist)
-    LLVM_DEBUG(DBGS() << "WL item: " << operand->get() << " used by "
-                      << *operand->getOwner() << "\n");
+  LLVM_DEBUG(for (OpOperand *operand
+                  : initalWorklist) DBGS()
+             << "WL item: " << operand->get() << " used by "
+             << *operand->getOwner() << "\n");
   SmallVector<OpOperand *> worklist(initalWorklist);
   for (unsigned idx = 0; idx < worklist.size(); ++idx) {
     // TODO: bail on subtensor/subtensor_insert and vector.transfer_read/write
@@ -550,8 +560,7 @@ static void destructiveUpdateAnalysis(Block *block,
                     [&](Operation *op) { return op->getBlock() == block; });
 
     LLVM_DEBUG(DBGS() << "Slice:\n");
-    for (auto *op : slice)
-      LLVM_DEBUG(DBGS() << *op << "\n");
+    LLVM_DEBUG(for (auto *op : slice) DBGS() << *op << "\n");
 
     bool failedDetectingDestructiveUpdate =
         // func / return inplace patterns.
@@ -696,8 +705,8 @@ static LogicalResult convertReturnOp(OpBuilder &b, ReturnOp returnOp,
   OpBuilder::InsertionGuard g(b);
   b.setInsertionPoint(returnOp);
 
-  FuncOp funcOp = cast<FuncOp>(returnOp->getParentOp());
-  assert(funcOp && "only support FuncOp parent for ReturnOp");
+  assert(isa<FuncOp>(returnOp->getParentOp()) &&
+         "only support FuncOp parent for ReturnOp");
   for (OpOperand &operand : returnOp->getOpOperands()) {
     auto tensorType = operand.get().getType().dyn_cast<TensorType>();
     if (!tensorType)
@@ -705,6 +714,54 @@ static LogicalResult convertReturnOp(OpBuilder &b, ReturnOp returnOp,
     operand.set(b.create<memref::TensorLoadOp>(returnOp.getLoc(),
                                                lookup(bvm, operand.get())));
   }
+  return success();
+}
+
+static LogicalResult convertTransferOp(OpBuilder &b,
+                                       VectorTransferOpInterface op,
+                                       BlockAndValueMapping &bvm) {
+  // Take a guard before anything else.
+  OpBuilder::InsertionGuard g(b);
+  b.setInsertionPoint(op);
+  Location loc = op.getLoc();
+
+  if (op.getShapedType().isa<MemRefType>())
+    return failure();
+
+  LLVM_DEBUG(DBGS() << "convert: " << *op << "\n");
+
+  /// transfer_read from buffer
+  if (auto readOp = dyn_cast<vector::TransferReadOp>(op.getOperation())) {
+    readOp.sourceMutable().assign(lookup(bvm, op.source()));
+    return success();
+  }
+
+  auto inPlace = getInPlace(op->getResult(0));
+  auto writeOp = cast<vector::TransferWriteOp>(op.getOperation());
+
+  // If transfer_write is not inPlace, allocate a new buffer.
+  Value newInputBuffer;
+  if (inPlace != InPlaceSpec::True) {
+    newInputBuffer =
+        createNewAllocDeallocPairForShapedValue(b, loc, writeOp.result());
+    b.setInsertionPointAfter(newInputBuffer.getDefiningOp());
+    map(bvm, writeOp.result(), newInputBuffer);
+  } else {
+    // InPlace write will result in memref.tensor_load(x) which must
+    // canonicalize away with one of it uses.
+    newInputBuffer = lookup(bvm, writeOp.source());
+  }
+
+  // Create a new transfer_write on buffer that doesn't have a return value.
+  // Leave the previous transfer_write to dead code as it still has uses at
+  // this point.
+  b.create<vector::TransferWriteOp>(
+      loc, writeOp.vector(), newInputBuffer, writeOp.indices(),
+      writeOp.permutation_map(),
+      writeOp.in_bounds() ? *writeOp.in_bounds() : ArrayAttr());
+
+  map(bvm, op->getResult(0), newInputBuffer);
+
   return success();
 }
 
@@ -733,6 +790,9 @@ static LogicalResult bufferizeFuncOpInternals(
             .Case([&](memref::DimOp op) { return convertDimOp(b, op, bvm); })
             .Case([&](LinalgOp op) { return convertAnyLinalgOp(b, op, bvm); })
             .Case([&](ReturnOp op) { return convertReturnOp(b, op, bvm); })
+            .Case([&](VectorTransferOpInterface op) {
+              return convertTransferOp(b, op, bvm);
+            })
             .Default([&](Operation *op) {
               auto isaTensor = [](Type t) { return t.isa<TensorType>(); };
               if (llvm::any_of(op->getOperandTypes(), isaTensor) ||
