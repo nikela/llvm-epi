@@ -114,10 +114,8 @@ struct VSETVLInstr : public std::tuple<Register, unsigned, VLMulRatio, bool> {
 
     unsigned VTypeI = VTypeIOp.getImm();
 
-    unsigned SEWBits = static_cast<unsigned>(RISCVVType::getVSEW(VTypeI));
+    unsigned SEW = static_cast<unsigned>(RISCVVType::getSEW(VTypeI));
     unsigned VLMulBits = static_cast<unsigned>(RISCVVType::getVLMUL(VTypeI));
-
-    unsigned SEW = (1 << SEWBits) * 8;
 
     VLMulRatio VLMul;
     if (VLMulBits & 0x4) {

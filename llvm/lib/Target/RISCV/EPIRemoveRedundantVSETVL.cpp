@@ -121,11 +121,10 @@ struct VSETVLInfo {
 
     unsigned VTypeI = VTypeIOp.getImm();
 
-    unsigned SEWBits = static_cast<unsigned>(RISCVVType::getVSEW(VTypeI));
+    SEW = static_cast<unsigned>(RISCVVType::getSEW(VTypeI));
     unsigned VMulBits = static_cast<unsigned>(RISCVVType::getVLMUL(VTypeI));
 
     Nontemporal = RISCVVType::isNontemporal(VTypeI);
-    SEW = (1 << SEWBits) * 8;
 
     if (VMulBits & 0x4) {
       // Fractional LMUL

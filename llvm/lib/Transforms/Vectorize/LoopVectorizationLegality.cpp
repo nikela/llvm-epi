@@ -377,7 +377,7 @@ static bool hasOutsideLoopUser(const Loop *TheLoop, Instruction *Inst,
   return false;
 }
 
-int LoopVectorizationLegality::isConsecutivePtr(Value *Ptr) {
+int LoopVectorizationLegality::isConsecutivePtr(Value *Ptr) const {
   const ValueToValueMap &Strides =
       getSymbolicStrides() ? *getSymbolicStrides() : ValueToValueMap();
 
@@ -880,7 +880,7 @@ bool LoopVectorizationLegality::isFirstOrderRecurrence(const PHINode *Phi) {
   return FirstOrderRecurrences.count(Phi);
 }
 
-bool LoopVectorizationLegality::blockNeedsPredication(BasicBlock *BB) {
+bool LoopVectorizationLegality::blockNeedsPredication(BasicBlock *BB) const {
   return LoopAccessInfo::blockNeedsPredication(BB, TheLoop, DT);
 }
 
