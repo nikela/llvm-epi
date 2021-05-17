@@ -94,14 +94,16 @@ class Value;
 
 namespace Sched {
 
-  enum Preference {
-    None,             // No preference
-    Source,           // Follow source order.
-    RegPressure,      // Scheduling for lowest register pressure.
-    Hybrid,           // Scheduling for both latency and register pressure.
-    ILP,              // Scheduling for ILP in low register pressure mode.
-    VLIW              // Scheduling for VLIW targets.
-  };
+enum Preference {
+  None,        // No preference
+  Source,      // Follow source order.
+  RegPressure, // Scheduling for lowest register pressure.
+  Hybrid,      // Scheduling for both latency and register pressure.
+  ILP,         // Scheduling for ILP in low register pressure mode.
+  VLIW,        // Scheduling for VLIW targets.
+  Fast,        // Fast suboptimal list scheduling
+  Linearize    // Linearize DAG, no scheduling
+};
 
 } // end namespace Sched
 
@@ -288,8 +290,8 @@ public:
     bool IsSwiftError : 1;
     bool IsCFGuardTarget : 1;
     MaybeAlign Alignment = None;
-    // Type for byval, inalloca, or preallocated.
-    Type *IndirectType = nullptr;
+    Type *ByValType = nullptr;
+    Type *PreallocatedType = nullptr;
 
     ArgListEntry()
         : IsSExt(false), IsZExt(false), IsInReg(false), IsSRet(false),
