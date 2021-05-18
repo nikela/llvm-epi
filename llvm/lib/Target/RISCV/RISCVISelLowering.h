@@ -593,6 +593,7 @@ private:
   SDValue lowerEXTRACT_SUBVECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerSTEP_VECTOR(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECTOR_REVERSE(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVECTOR_SPLICE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerABS(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMLOAD(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerMSTORE(SDValue Op, SelectionDAG &DAG) const;

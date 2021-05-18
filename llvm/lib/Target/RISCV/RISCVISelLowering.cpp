@@ -537,6 +537,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setLoadExtAction(ISD::SEXTLOAD, OtherVT, VT, Expand);
         setLoadExtAction(ISD::ZEXTLOAD, OtherVT, VT, Expand);
       }
+
+	  // Splice
+      setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -908,6 +911,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
       setOperationAction(ISD::FREM, VT, Custom);
+      setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
   }
 
@@ -2699,6 +2703,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
 	return lowerVPOp(Op, DAG, RISCVISD::FMUL_VL);
   case ISD::VP_FDIV:
 	return lowerVPOp(Op, DAG, RISCVISD::FDIV_VL);
+  case ISD::VECTOR_SPLICE:
+    return lowerVECTOR_SPLICE(Op, DAG);
   }
 }
 
@@ -5670,6 +5676,34 @@ SDValue RISCVTargetLowering::lowerVECTOR_REVERSE(SDValue Op,
       DAG.getNode(RISCVISD::SUB_VL, DL, IntVT, SplatVL, VID, Mask, VL);
 
   return DAG.getNode(GatherOpc, DL, VecVT, Op.getOperand(0), Indices, Mask, VL);
+}
+
+SDValue RISCVTargetLowering::lowerVECTOR_SPLICE(SDValue Op,
+                                                SelectionDAG &DAG) const {
+
+  SDLoc DL(Op);
+  SDValue V1 = Op.getOperand(0);
+  SDValue V2 = Op.getOperand(1);
+  SDValue Offset = Op.getOperand(2);
+  MVT XLenVT = Subtarget.getXLenVT();
+  MVT VecVT = Op.getSimpleValueType();
+  MVT MaskVT = MVT::getVectorVT(MVT::i1, VecVT.getVectorElementCount());
+
+  unsigned MinElts = VecVT.getVectorMinNumElements();
+  SDValue VLMax = DAG.getNode(ISD::VSCALE, DL, XLenVT,
+                              DAG.getConstant(MinElts, DL, XLenVT));
+
+  int64_t ImmValue = cast<ConstantSDNode>(Offset)->getSExtValue();
+  Offset = (ImmValue < 0) ? DAG.getNode(ISD::ADD, DL, XLenVT, VLMax, Offset)
+                          : Offset;
+
+  SDValue UndefMask = DAG.getNode(RISCVISD::VMSET_VL, DL, MaskVT, VLMax);
+
+  SDValue VSLIDEDOWN = DAG.getNode(RISCVISD::VSLIDEDOWN_VL, DL, VecVT, V1, V1,
+                                   Offset, UndefMask, VLMax);
+  SDValue Difference = DAG.getNode(ISD::SUB, DL, XLenVT, VLMax, Offset);
+  return DAG.getNode(RISCVISD::VSLIDEUP_VL, DL, VecVT, VSLIDEDOWN, V2,
+                     Difference, UndefMask, VLMax);
 }
 
 SDValue

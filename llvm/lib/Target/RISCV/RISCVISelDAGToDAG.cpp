@@ -123,7 +123,7 @@ static SDNode *SelectSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
   // t2 <- vslidedup v2, evl2, diff
   // vi <- vid, evl2
   // v0 <- vmsltu vi, diff, evl2
-  // v <- vmerge t2, t1, vi, evl2
+  // v <- vmerge t2, t1, v0, evl2
 
   SDValue Undef =
       SDValue(CurDAG->getMachineNode(TargetOpcode::IMPLICIT_DEF, DL, VT), 0);
