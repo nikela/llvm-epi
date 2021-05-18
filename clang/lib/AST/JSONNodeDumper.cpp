@@ -1454,6 +1454,7 @@ void JSONNodeDumper::VisitCaseStmt(const CaseStmt *CS) {
 void JSONNodeDumper::VisitLabelStmt(const LabelStmt *LS) {
   JOS.attribute("name", LS->getName());
   JOS.attribute("declId", createPointerRepresentation(LS->getDecl()));
+  attributeOnlyIfTrue("sideEntry", LS->isSideEntry());
 }
 void JSONNodeDumper::VisitGotoStmt(const GotoStmt *GS) {
   JOS.attribute("targetLabelDeclId",
