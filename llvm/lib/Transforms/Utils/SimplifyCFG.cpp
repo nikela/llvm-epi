@@ -4401,12 +4401,8 @@ bool SimplifyCFGOpt::simplifyCommonResume(ResumeInst *RI) {
   }
 
   // Delete the resume block if all its predecessors have been removed.
-  if (pred_empty(BB)) {
-    if (DTU)
-      DTU->deleteBB(BB);
-    else
-      BB->eraseFromParent();
-  }
+  if (pred_empty(BB))
+    DeleteDeadBlock(BB, DTU);
 
   return !TrivialUnwindBlocks.empty();
 }
@@ -4430,10 +4426,7 @@ bool SimplifyCFGOpt::simplifySingleResume(ResumeInst *RI) {
   }
 
   // The landingpad is now unreachable.  Zap it.
-  if (DTU)
-    DTU->deleteBB(BB);
-  else
-    BB->eraseFromParent();
+  DeleteDeadBlock(BB, DTU);
   return true;
 }
 
@@ -4652,13 +4645,8 @@ bool SimplifyCFGOpt::simplifyReturn(ReturnInst *RI, IRBuilder<> &Builder) {
     }
 
     // If we eliminated all predecessors of the block, delete the block now.
-    if (pred_empty(BB)) {
-      // We know there are no successors, so just nuke the block.
-      if (DTU)
-        DTU->deleteBB(BB);
-      else
-        BB->eraseFromParent();
-    }
+    if (pred_empty(BB))
+      DeleteDeadBlock(BB, DTU);
 
     return true;
   }
@@ -4863,11 +4851,7 @@ bool SimplifyCFGOpt::simplifyUnreachable(UnreachableInst *UI) {
 
   // If this block is now dead, remove it.
   if (pred_empty(BB) && BB != &BB->getParent()->getEntryBlock()) {
-    // We know there are no successors, so just nuke the block.
-    if (DTU)
-      DTU->deleteBB(BB);
-    else
-      BB->eraseFromParent();
+    DeleteDeadBlock(BB, DTU);
     return true;
   }
 
