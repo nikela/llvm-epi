@@ -3377,9 +3377,9 @@ static bool isTypeCongruent(Type *L, Type *R) {
 
 static AttrBuilder getParameterABIAttributes(int I, AttributeList Attrs) {
   static const Attribute::AttrKind ABIAttrs[] = {
-      Attribute::StructRet,  Attribute::ByVal,      Attribute::InAlloca,
-      Attribute::InReg,      Attribute::SwiftSelf,  Attribute::SwiftAsync,
-      Attribute::SwiftError, Attribute::SwiftAsync, Attribute::Preallocated,
+      Attribute::StructRet,  Attribute::ByVal,          Attribute::InAlloca,
+      Attribute::InReg,      Attribute::StackAlignment, Attribute::SwiftSelf,
+      Attribute::SwiftAsync, Attribute::SwiftError,     Attribute::Preallocated,
       Attribute::ByRef};
   AttrBuilder Copy;
   for (auto AK : ABIAttrs) {
@@ -4478,6 +4478,10 @@ void Verifier::visitInstruction(Instruction &I) {
       Assert(
           !F->isIntrinsic() || isa<CallInst>(I) ||
               F->getIntrinsicID() == Intrinsic::donothing ||
+              F->getIntrinsicID() == Intrinsic::seh_try_begin ||
+              F->getIntrinsicID() == Intrinsic::seh_try_end ||
+              F->getIntrinsicID() == Intrinsic::seh_scope_begin ||
+              F->getIntrinsicID() == Intrinsic::seh_scope_end ||
               F->getIntrinsicID() == Intrinsic::coro_resume ||
               F->getIntrinsicID() == Intrinsic::coro_destroy ||
               F->getIntrinsicID() == Intrinsic::experimental_patchpoint_void ||
