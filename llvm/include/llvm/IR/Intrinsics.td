@@ -1410,14 +1410,43 @@ def int_vp_scatter: Intrinsic<[],
 // TODO allow IntrNoCapture for vectors of pointers
 
 // standard fp-math intrinsics.
-// Rounding mode and exception control arguments are included in the intrinsics
-// but the only allowed values are the default llvm values, i.e
-// "fpround.tonearest" and "fpexcept.ignore".
+// Note: rounding mode and exception control is planned to be integrated using
+// operand bundles. For now we assume the default environment for both.
 def int_vp_fneg : Intrinsic<[ llvm_anyvector_ty ],
                             [ LLVMMatchType<0>,
                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                               llvm_i32_ty],
                             [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]>;
+
+// Floating-point arithmetic.
+let IntrProperties =
+    [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {
+  def int_vp_fadd : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                             [ LLVMMatchType<0>,
+                               LLVMMatchType<0>,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty]>;
+  def int_vp_fsub : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                             [ LLVMMatchType<0>,
+                               LLVMMatchType<0>,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty]>;
+  def int_vp_fmul  : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+  def int_vp_fdiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+  def int_vp_frem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+}
 
 def int_vp_fma : Intrinsic<[ llvm_anyvector_ty ],
                            [ LLVMMatchType<0>,
@@ -1596,36 +1625,6 @@ let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 llvm_i32_ty]>;
   def int_vp_urem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-}
-
-// Floating-point arithmetic.
-let IntrProperties =
-    [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {
-  def int_vp_fadd : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                             [ LLVMMatchType<0>,
-                               LLVMMatchType<0>,
-                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                               llvm_i32_ty]>;
-  def int_vp_fsub : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                             [ LLVMMatchType<0>,
-                               LLVMMatchType<0>,
-                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                               llvm_i32_ty]>;
-  def int_vp_fmul  : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_fdiv : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty]>;
-  def int_vp_frem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                               [ LLVMMatchType<0>,
                                 LLVMMatchType<0>,
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,

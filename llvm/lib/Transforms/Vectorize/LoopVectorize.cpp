@@ -5295,7 +5295,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     return Builder.CreateTrunc(EVLPart, Type::getInt32Ty(Builder.getContext()));
   };
 
-  auto CreateCast = [&](CastInst *CI, Value *Round, Value *Except) {
+  auto CreateCast = [&](CastInst *CI) {
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *SrcVal =
           State.get(State.Plan->getOrAddVPValue(CI->getOperand(0)), Part);
@@ -5381,7 +5381,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     else
       assert(DestElemTy->getBitWidth() > SrcElemTy->getBitWidth() &&
              "Cannot extend to a smaller size.");
-    return CreateCast(CI, nullptr, nullptr);
+    return CreateCast(CI);
   }
 
   //===------------------- Float-to-Float cast instructions ---------------===//
@@ -5398,14 +5398,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     else
       assert(DestElemTy->getTypeID() > SrcElemTy->getTypeID() &&
              "Cannot extend to a smaller size.");
-    Value *Except = getConstrainedFPExcept(Builder.getContext(),
-                                           fp::ExceptionBehavior::ebIgnore);
-    Value *Round =
-        Opcode == Instruction::FPTrunc
-            ? getConstrainedFPRounding(Builder.getContext(),
-                                       RoundingMode::NearestTiesToEven)
-            : nullptr;
-    return CreateCast(CI, Round, Except);
+    return CreateCast(CI);
   }
 
   //===------------------- Float-to-Int cast instructions -----------------===//
@@ -5416,9 +5409,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     Type *SrcElemTy = CI->getOperand(0)->getType();
     assert(DestElemTy->isIntegerTy() && SrcElemTy->isFloatingPointTy() &&
            "Invalid destination/source type for float to int cast.");
-    Value *Except = getConstrainedFPExcept(Builder.getContext(),
-                                           fp::ExceptionBehavior::ebIgnore);
-    return CreateCast(CI, nullptr, Except);
+    return CreateCast(CI);
   }
 
   //===------------------- Int-to-Float cast instructions -----------------===//
@@ -5429,11 +5420,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     Type *SrcElemTy = CI->getOperand(0)->getType();
     assert(SrcElemTy->isIntegerTy() && DestElemTy->isFloatingPointTy() &&
            "Invalid destination/source type for float to int cast.");
-    Value *Except = getConstrainedFPExcept(Builder.getContext(),
-                                           fp::ExceptionBehavior::ebIgnore);
-    Value *Round = getConstrainedFPRounding(Builder.getContext(),
-                                            RoundingMode::NearestTiesToEven);
-    return CreateCast(CI, Round, Except);
+    return CreateCast(CI);
   }
 
   //===------------------- Int-Ptr cast instructions ----------------------===//
@@ -5448,7 +5435,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     else
       assert(DestElemTy->isIntegerTy() && SrcElemTy->isPointerTy() &&
              "Invalid destination/source type for ptr to int cast.");
-    return CreateCast(CI, nullptr, nullptr);
+    return CreateCast(CI);
   }
 
   //===------------------- bitcast cast instructions ----------------------===//
@@ -5460,7 +5447,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     assert(SrcElemTy->getPrimitiveSizeInBits() ==
                DestElemTy->getPrimitiveSizeInBits() &&
            "Invalid destination/source type for bitcast.");
-    return CreateCast(CI, nullptr, nullptr);
+    return CreateCast(CI);
   }
 
   //===------------------- Other Binary and Unary Ops ---------------------===//
