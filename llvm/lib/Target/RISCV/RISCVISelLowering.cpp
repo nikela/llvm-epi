@@ -1287,7 +1287,7 @@ SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
-RISCVVLMUL RISCVTargetLowering::getLMUL(MVT VT) {
+RISCVII::VLMUL RISCVTargetLowering::getLMUL(MVT VT) {
   assert(VT.isScalableVector() && "Expecting a scalable vector type");
   unsigned KnownSize = VT.getSizeInBits().getKnownMinValue();
   if (VT.getVectorElementType() == MVT::i1)
@@ -1313,7 +1313,7 @@ RISCVVLMUL RISCVTargetLowering::getLMUL(MVT VT) {
   }
 }
 
-unsigned RISCVTargetLowering::getRegClassIDForLMUL(RISCVVLMUL LMul) {
+unsigned RISCVTargetLowering::getRegClassIDForLMUL(RISCVII::VLMUL LMul) {
   switch (LMul) {
   default:
     llvm_unreachable("Invalid LMUL.");
