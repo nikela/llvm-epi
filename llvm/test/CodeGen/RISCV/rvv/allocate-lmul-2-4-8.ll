@@ -69,12 +69,12 @@ define void @lmul1_and_2() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -107,8 +107,8 @@ define void @lmul1_and_4() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 5
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 2
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 5
@@ -126,12 +126,12 @@ define void @lmul2_and_1() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -145,8 +145,8 @@ define void @lmul4_and_1() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 5
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 2
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 5
@@ -226,14 +226,14 @@ define void @gpr_and_lmul1_and_2() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -32
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    addi a0, zero, 3
 ; CHECK-NEXT:    sd a0, 24(sp)
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
@@ -249,8 +249,8 @@ define void @gpr_and_lmul1_and_4() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -32
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 5
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 2
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    addi a0, zero, 3
 ; CHECK-NEXT:    sd a0, 24(sp)
@@ -272,8 +272,8 @@ define void @lmul_1_2_4_8() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 15
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, vl
+; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 15

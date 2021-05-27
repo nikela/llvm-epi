@@ -33,11 +33,6 @@ template <typename Config> static void testSecondaryBasic(void) {
   EXPECT_GE(SecondaryT::getBlockSize(P), Size);
   L->deallocate(scudo::Options{}, P);
 
-// TODO(hctim): Looks like the secondary pointer doesn't get unmapped on arm32.
-// It's not clear whether this is a kernel issue, or something in EXPECT_DEATH()
-// is mmap-ing something that uses the same vaddr space. For now, just disable
-// the test on arm32 until we can debug it further.
-#ifndef __arm__
   // If the Secondary can't cache that pointer, it will be unmapped.
   if (!L->canCache(Size)) {
     EXPECT_DEATH(
@@ -52,7 +47,6 @@ template <typename Config> static void testSecondaryBasic(void) {
         },
         "");
   }
-#endif // __arm__
 
   const scudo::uptr Align = 1U << 16;
   P = L->allocate(scudo::Options{}, Size + Align, Align);
@@ -73,6 +67,7 @@ template <typename Config> static void testSecondaryBasic(void) {
   scudo::ScopedString Str(1024);
   L->getStats(&Str);
   Str.output();
+  L->unmapTestOnly();
 }
 
 struct NoCacheConfig {
@@ -130,6 +125,7 @@ TEST(ScudoSecondaryTest, SecondaryCombinations) {
   scudo::ScopedString Str(1024);
   L->getStats(&Str);
   Str.output();
+  L->unmapTestOnly();
 }
 
 TEST(ScudoSecondaryTest, SecondaryIterate) {
@@ -153,6 +149,7 @@ TEST(ScudoSecondaryTest, SecondaryIterate) {
   scudo::ScopedString Str(1024);
   L->getStats(&Str);
   Str.output();
+  L->unmapTestOnly();
 }
 
 TEST(ScudoSecondaryTest, SecondaryOptions) {
@@ -176,6 +173,7 @@ TEST(ScudoSecondaryTest, SecondaryOptions) {
     EXPECT_TRUE(L->setOption(scudo::Option::MaxCacheEntrySize, 1UL << 20));
     EXPECT_TRUE(L->canCache(1UL << 16));
   }
+  L->unmapTestOnly();
 }
 
 static std::mutex Mutex;
@@ -222,4 +220,5 @@ TEST(ScudoSecondaryTest, SecondaryThreadsRace) {
   scudo::ScopedString Str(1024);
   L->getStats(&Str);
   Str.output();
+  L->unmapTestOnly();
 }

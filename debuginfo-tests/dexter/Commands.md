@@ -9,6 +9,7 @@
 * [DexLimitSteps](Commands.md#DexLimitSteps)
 * [DexLabel](Commands.md#DexLabel)
 * [DexWatch](Commands.md#DexWatch)
+* [DexDeclareFile](Commands.md#DexDeclareFile)
 
 ---
 ## DexExpectProgramState
@@ -178,7 +179,7 @@ Expect the source line this is found on will never be stepped on to.
 ----
 ## DexLimitSteps
     DexLimitSteps([expr, *values][, **from_line=1][,**to_line=Max]
-                  [,**on_line])
+                  [,**on_line][,**hit_count])
 
     Args:
         expr (str): variable or value to compare.
@@ -191,12 +192,15 @@ Expect the source line this is found on will never be stepped on to.
         to_line (int): Define the end of the limited step range.
         on_line (int): Define a range with length 1 starting and ending on the
                        same line.
+        hit_count (int): If provided, limit the number of times the command
+                         triggers.
 
 ### Description
 Define a limited stepping range that may be predicated on a condition. When the
 leading line is stepped on and any condition '(expr) == (values[n])' is true or
 there are no conditions, set a range of temporary breakpoints within the test
-file defined by the range 'from_line' and 'to_line' or 'on_line'.
+file defined by the range 'from_line' and 'to_line' or 'on_line'. This only
+happens 'hit_count' number of times if the argument is provided.
 
 The condition is only evaluated on the line 'from_line' or 'on_line'. If the
 condition is not true at the start of the range, or that line is never stepped
@@ -228,6 +232,23 @@ arithmetic operators to get offsets from labels:
 ### Heuristic
 This command does not contribute to the heuristic score.
 
+----
+## DexDeclareFile
+    DexDeclareFile(declared_file)
+
+    Args:
+        name (str): A declared file path for which all subsequent commands
+          will have their path attribute set too.
+
+### Description
+Set the path attribute of all commands from this point in the test onwards.
+The new path holds until the end of the test file or until a new DexDeclareFile
+command is encountered. Used in conjunction with .dex files, DexDeclareFile can
+be used to write your dexter commands in a separate test file avoiding inlined
+Dexter commands mixed with test source.
+
+### Heuristic
+This command does not contribute to the heuristic score.
 
 ---
 ## DexWatch

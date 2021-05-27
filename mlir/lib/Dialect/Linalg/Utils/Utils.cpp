@@ -16,7 +16,6 @@
 #include "mlir/Dialect/Linalg/IR/LinalgOps.h"
 #include "mlir/Dialect/Linalg/IR/LinalgTypes.h"
 #include "mlir/Dialect/SCF/SCF.h"
-#include "mlir/Dialect/StandardOps/EDSC/Intrinsics.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/Dialect/StandardOps/Utils/Utils.h"
 #include "mlir/IR/AffineExpr.h"
@@ -31,8 +30,6 @@
 #define DEBUG_TYPE "linalg-utils"
 
 using namespace mlir;
-using namespace mlir::edsc;
-using namespace mlir::edsc::intrinsics;
 using namespace mlir::linalg;
 using namespace mlir::scf;
 
@@ -201,7 +198,8 @@ void GenerateLoopNest<scf::ForOp>::doit(
     function_ref<scf::ValueVector(OpBuilder &, Location, ValueRange,
                                   ValueRange)>
         bodyBuilderFn,
-    Optional<LinalgLoopDistributionOptions> distributionOptions) {
+    Optional<LinalgLoopDistributionOptions> distributionOptions,
+    ArrayRef<StringRef> distributionTypes) {
   auto iterArgInitValues = linalgOp.getOutputTensors();
   // Create procInfo so it dominates loops, if appropriate.
   SmallVector<ProcInfo, 4> procInfo;
@@ -249,7 +247,7 @@ void GenerateLoopNest<AffineForOp>::doit(
     function_ref<scf::ValueVector(OpBuilder &, Location, ValueRange,
                                   ValueRange)>
         bodyBuilderFn,
-    Optional<LinalgLoopDistributionOptions>) {
+    Optional<LinalgLoopDistributionOptions>, ArrayRef<StringRef>) {
   auto iterArgInitValues = linalgOp.getOutputTensors();
   assert(iterArgInitValues.empty() && "unexpected AffineForOp init values");
   SmallVector<Value, 4> lbs, ubs, steps;
@@ -278,7 +276,8 @@ void GenerateLoopNest<TiledLoopOp>::doit(
     function_ref<scf::ValueVector(OpBuilder &, Location, ValueRange,
                                   ValueRange)>
         bodyBuilderFn,
-    Optional<LinalgLoopDistributionOptions>) {
+    Optional<LinalgLoopDistributionOptions> distributionOptions,
+    ArrayRef<StringRef> distributionTypes) {
   SmallVector<ProcInfo, 2> procInfo;
   SmallVector<Value, 4> lbs, ubs, steps;
   unpackRanges(loopRanges, lbs, ubs, steps);
@@ -294,6 +293,8 @@ void GenerateLoopNest<TiledLoopOp>::doit(
   auto tiledLoop = b.create<TiledLoopOp>(
       loc, lbs, ubs, steps, linalgOp.getInputs(), linalgOp.getOutputs(),
       b.getArrayAttr(iteratorTypes), wrappedBuilderFn);
+  if (!distributionTypes.empty())
+    tiledLoop.setDistributionTypes(b, distributionTypes);
 
   // Replace inputs/outputs with the corresponding region args.
   auto isInsideTiledLoop = [&](OpOperand &operand) {
@@ -449,7 +450,8 @@ void GenerateLoopNest<scf::ParallelOp>::doit(
     function_ref<scf::ValueVector(OpBuilder &, Location, ValueRange,
                                   ValueRange)>
         bodyBuilderFn,
-    Optional<LinalgLoopDistributionOptions> distributionOptions) {
+    Optional<LinalgLoopDistributionOptions> distributionOptions,
+    ArrayRef<StringRef> distributionTypes) {
   auto iterArgInitValues = linalgOp.getOutputTensors();
   assert(iterArgInitValues.empty() && "unexpected ParallelOp init values");
   // This function may be passed more iterator types than ranges.
@@ -470,8 +472,6 @@ void GenerateLoopNest<scf::ParallelOp>::doit(
   SmallVector<DistributionMethod, 0> distributionMethod;
   if (distributionOptions) {
     auto &options = distributionOptions.getValue();
-    OpBuilder &b = edsc::ScopedContext::getBuilderRef();
-    Location loc = edsc::ScopedContext::getLocation();
     distributionMethod.assign(distributionOptions->distributionMethod.begin(),
                               distributionOptions->distributionMethod.end());
     SmallVector<Range, 2> parallelLoopRanges;

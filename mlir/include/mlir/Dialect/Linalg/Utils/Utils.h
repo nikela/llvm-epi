@@ -12,7 +12,6 @@
 #include "mlir/Dialect/Linalg/Analysis/DependenceAnalysis.h"
 #include "mlir/Dialect/Linalg/IR/LinalgOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
-#include "mlir/Dialect/StandardOps/EDSC/Intrinsics.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/SetVector.h"
@@ -185,6 +184,8 @@ struct ProcInfo {
 };
 using ProcInfoCallBackFn = std::function<SmallVector<ProcInfo, 2>(
     OpBuilder &b, Location loc, ArrayRef<Range> parallelLoopRanges)>;
+using OneDimProcInfoCallBackFn =
+    std::function<ProcInfo(OpBuilder &b, Location loc)>;
 
 /// Options that allow distribution of loops generated in Linalg transforms to
 /// processors while generating the loops.
@@ -202,6 +203,11 @@ struct LinalgLoopDistributionOptions {
   /// applied. If the vector is less than the number of `scf.parallel` loops
   /// generated, then no distribution is applied.
   SmallVector<DistributionMethod, 0> distributionMethod = {};
+
+  /// The map keyed by the distribution type that contains callback functions
+  /// that return the Values for processor ID (`procId`), and number of
+  /// processors (`nprocs`) used to execute the parallel loops.
+  DenseMap<StringRef, OneDimProcInfoCallBackFn> procInfoMap;
 };
 
 /// Update the `lb`, `ub` and `step` to get per processor `lb`, `ub` and `step`.
@@ -248,7 +254,8 @@ struct GenerateLoopNest {
                    function_ref<scf::ValueVector(OpBuilder &, Location,
                                                  ValueRange, ValueRange)>
                        bodyBuilderFn,
-                   Optional<LinalgLoopDistributionOptions> = None);
+                   Optional<LinalgLoopDistributionOptions> = None,
+                   ArrayRef<StringRef> distributionTypes = {});
 };
 
 } // namespace linalg

@@ -174,6 +174,9 @@ enum NodeType : unsigned {
   // Splats an i64 scalar to a vector type (with element type i64) where the
   // scalar is a sign-extended i32.
   SPLAT_VECTOR_I64,
+  // Splats an 64-bit value that has been split into two i32 parts. This is
+  // expanded late to two scalar stores and a stride 0 vector load.
+  SPLAT_VECTOR_SPLIT_I64_VL,
   // Read VLENB CSR
   READ_VLENB,
   // Truncates a RVV integer vector by one power-of-two. Carries both an extra
@@ -628,6 +631,16 @@ private:
       MachineFunction &MF) const;
 
   bool useRVVForFixedLengthVectorVT(MVT VT) const;
+
+  MVT getVPExplicitVectorLengthTy() const override;
+
+  /// RVV code generation for fixed length vectors does not lower all
+  /// BUILD_VECTORs. This makes BUILD_VECTOR legalisation a source of stores to
+  /// merge. However, merging them creates a BUILD_VECTOR that is just as
+  /// illegal as the original, thus leading to an infinite legalisation loop.
+  /// NOTE: Once BUILD_VECTOR can be custom lowered for all legal vector types,
+  /// this override can be removed.
+  bool mergeStoresAfterLegalization(EVT VT) const override;
 };
 
 namespace RISCV {

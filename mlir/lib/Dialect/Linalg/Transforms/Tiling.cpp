@@ -16,7 +16,6 @@
 #include "mlir/Dialect/Linalg/Transforms/Transforms.h"
 #include "mlir/Dialect/Linalg/Utils/Utils.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
-#include "mlir/Dialect/StandardOps/EDSC/Intrinsics.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/IR/AffineExpr.h"
 #include "mlir/IR/AffineMap.h"
@@ -26,8 +25,6 @@
 #include "llvm/Support/CommandLine.h"
 
 using namespace mlir;
-using namespace mlir::edsc;
-using namespace mlir::edsc::intrinsics;
 using namespace mlir::linalg;
 using namespace mlir::scf;
 
@@ -281,7 +278,8 @@ tileLinalgOpImpl(OpBuilder &b, LinalgOp op, ValueRange tileSizes,
     return scf::ValueVector(tensorResults.begin(), tensorResults.end());
   };
   GenerateLoopNest<LoopTy>::doit(b, op.getLoc(), loopRanges, op, iteratorTypes,
-                                 tiledLoopBodyBuilder, options.distribution);
+                                 tiledLoopBodyBuilder, options.distribution,
+                                 options.distributionTypes);
 
   // 3. Transform IndexOp results w.r.t. the tiling.
   transformIndexOps(b, res, ivs, loopIndexToRangeIndex);
@@ -316,7 +314,6 @@ Optional<TiledLinalgOp> static tileLinalgOpImpl(
     OpBuilder &b, LinalgOp op, const LinalgTilingOptions &options) {
   OpBuilder::InsertionGuard g(b);
   b.setInsertionPoint(op);
-  ScopedContext scope(b, op.getLoc());
 
   if (!options.tileSizeComputationFunction)
     return llvm::None;
@@ -432,11 +429,14 @@ static void insertTilingPatterns(RewritePatternSet &patterns,
                      >::insert(patterns, options);
 }
 
-static void applyTilingToLoopPatterns(LinalgTilingLoopType loopType,
-                                      FuncOp funcOp,
-                                      ArrayRef<int64_t> tileSizes) {
-  auto options =
-      LinalgTilingOptions().setTileSizes(tileSizes).setLoopType(loopType);
+static void
+applyTilingToLoopPatterns(LinalgTilingLoopType loopType, FuncOp funcOp,
+                          ArrayRef<int64_t> tileSizes,
+                          ArrayRef<StringRef> distributionTypes = {}) {
+  auto options = LinalgTilingOptions()
+                     .setTileSizes(tileSizes)
+                     .setLoopType(loopType)
+                     .setDistributionTypes(distributionTypes);
   MLIRContext *ctx = funcOp.getContext();
   RewritePatternSet patterns(ctx);
   insertTilingPatterns(patterns, options);
@@ -476,11 +476,19 @@ struct LinalgTilingToParallelLoopsPass
 struct LinalgTilingToTiledLoopsPass
     : public LinalgTilingToTiledLoopsBase<LinalgTilingToTiledLoopsPass> {
   LinalgTilingToTiledLoopsPass() = default;
-  LinalgTilingToTiledLoopsPass(ArrayRef<int64_t> sizes) { tileSizes = sizes; }
+  LinalgTilingToTiledLoopsPass(ArrayRef<int64_t> sizes,
+                               ArrayRef<StringRef> types) {
+    tileSizes = sizes;
+    distributionTypes = llvm::to_vector<2>(
+        llvm::map_range(types, [](StringRef ref) { return ref.str(); }));
+  }
 
   void runOnFunction() override {
-    applyTilingToLoopPatterns(LinalgTilingLoopType::TiledLoops, getFunction(),
-                              tileSizes);
+    applyTilingToLoopPatterns(
+        LinalgTilingLoopType::TiledLoops, getFunction(), tileSizes,
+        llvm::to_vector<2>(
+            llvm::map_range(distributionTypes,
+                            [](std::string &str) { return StringRef(str); })));
   }
 };
 
@@ -497,6 +505,8 @@ mlir::createLinalgTilingToParallelLoopsPass(ArrayRef<int64_t> tileSizes) {
 }
 
 std::unique_ptr<OperationPass<FuncOp>>
-mlir::createLinalgTilingToTiledLoopPass(ArrayRef<int64_t> tileSizes) {
-  return std::make_unique<LinalgTilingToTiledLoopsPass>(tileSizes);
+mlir::createLinalgTilingToTiledLoopPass(ArrayRef<int64_t> tileSizes,
+                                        ArrayRef<StringRef> distributionTypes) {
+  return std::make_unique<LinalgTilingToTiledLoopsPass>(tileSizes,
+                                                        distributionTypes);
 }
