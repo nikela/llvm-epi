@@ -517,6 +517,12 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
     { ISD::SHL,  MVT::v32i16, 2 }, // 2*psllw.
     { ISD::SRL,  MVT::v32i16, 2 }, // 2*psrlw.
     { ISD::SRA,  MVT::v32i16, 2 }, // 2*psraw.
+
+    { ISD::SHL,  MVT::v8i32,  1 }, // pslld
+    { ISD::SRL,  MVT::v8i32,  1 }, // psrld
+    { ISD::SRA,  MVT::v8i32,  1 }, // psrad
+    { ISD::SHL,  MVT::v4i64,  1 }, // psllq
+    { ISD::SRL,  MVT::v4i64,  1 }, // psrlq
   };
 
   if (ST->hasAVX2() &&
@@ -576,10 +582,15 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
       return LT.first * Entry->Cost;
 
   static const CostTblEntry AVX512CostTable[] = {
+    { ISD::SHL,     MVT::v8i32,      1 },
+    { ISD::SRL,     MVT::v8i32,      1 },
+    { ISD::SRA,     MVT::v8i32,      1 },
     { ISD::SHL,     MVT::v16i32,     1 },
     { ISD::SRL,     MVT::v16i32,     1 },
     { ISD::SRA,     MVT::v16i32,     1 },
 
+    { ISD::SHL,     MVT::v4i64,      1 },
+    { ISD::SRL,     MVT::v4i64,      1 },
     { ISD::SHL,     MVT::v8i64,      1 },
     { ISD::SRL,     MVT::v8i64,      1 },
 
@@ -614,13 +625,13 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
     { ISD::SHL,     MVT::v4i32,    1 },
     { ISD::SRL,     MVT::v4i32,    1 },
     { ISD::SRA,     MVT::v4i32,    1 },
-    { ISD::SHL,     MVT::v8i32,    1 },
-    { ISD::SRL,     MVT::v8i32,    1 },
-    { ISD::SRA,     MVT::v8i32,    1 },
+    { ISD::SHL,     MVT::v8i32,    2 }, // vpsllvd (Haswell from agner.org)
+    { ISD::SRL,     MVT::v8i32,    2 }, // vpsrlvd (Haswell from agner.org)
+    { ISD::SRA,     MVT::v8i32,    2 }, // vpsravd (Haswell from agner.org)
     { ISD::SHL,     MVT::v2i64,    1 },
     { ISD::SRL,     MVT::v2i64,    1 },
-    { ISD::SHL,     MVT::v4i64,    1 },
-    { ISD::SRL,     MVT::v4i64,    1 },
+    { ISD::SHL,     MVT::v4i64,    2 }, // vpsllvq (Haswell from agner.org)
+    { ISD::SRL,     MVT::v4i64,    2 }, // vpsrlvq (Haswell from agner.org)
   };
 
   if (ST->hasAVX512()) {
@@ -1684,6 +1695,9 @@ InstructionCost X86TTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
     { ISD::TRUNCATE,  MVT::v2i1,    MVT::v2i64,  2 }, // vpsllq+vptestmq
     { ISD::TRUNCATE,  MVT::v4i1,    MVT::v4i64,  2 }, // vpsllq+vptestmq
     { ISD::TRUNCATE,  MVT::v4i32,   MVT::v4i64,  1 }, // vpmovqd
+    { ISD::TRUNCATE,  MVT::v4i8,    MVT::v4i64,  2 }, // vpmovqb
+    { ISD::TRUNCATE,  MVT::v4i16,   MVT::v4i64,  2 }, // vpmovqw
+    { ISD::TRUNCATE,  MVT::v8i8,    MVT::v8i32,  2 }, // vpmovwb
 
     // sign extend is vpcmpeq+maskedmove+vpmovdw+vpacksswb
     // zero extend is vpcmpeq+maskedmove+vpmovdw+vpsrlw+vpackuswb
@@ -1773,10 +1787,6 @@ InstructionCost X86TTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
 
     { ISD::TRUNCATE,    MVT::v4i32,  MVT::v4i64,  2 },
     { ISD::TRUNCATE,    MVT::v8i1,   MVT::v8i32,  2 },
-
-    { ISD::TRUNCATE,    MVT::v4i8,   MVT::v4i64,  2 },
-    { ISD::TRUNCATE,    MVT::v4i16,  MVT::v4i64,  2 },
-    { ISD::TRUNCATE,    MVT::v8i8,   MVT::v8i32,  2 },
     { ISD::TRUNCATE,    MVT::v8i16,  MVT::v8i32,  2 },
 
     { ISD::FP_EXTEND,   MVT::v8f64,  MVT::v8f32,  3 },

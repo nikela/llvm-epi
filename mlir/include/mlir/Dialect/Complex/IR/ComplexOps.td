@@ -144,6 +144,34 @@ def ImOp : Complex_Op<"im",
   let results = (outs AnyFloat:$imaginary);
 
   let assemblyFormat = "$complex attr-dict `:` type($complex)";
+  let hasFolder = 1;
+}
+
+//===----------------------------------------------------------------------===//
+// EqualOp
+//===----------------------------------------------------------------------===//
+
+def EqualOp : Complex_Op<"eq",
+    [NoSideEffect, AllTypesMatch<["lhs", "rhs"]>]> {
+  let summary = "computes whether two complex values are equal";
+  let description = [{
+    The `eq` op takes two complex numbers and returns whether they are equal.
+
+    Example:
+
+    ```mlir
+    %a = complex.eq %b, %c : complex<f32>
+    ```
+  }];
+
+  let arguments = (ins Complex<AnyFloat>:$lhs, Complex<AnyFloat>:$rhs);
+  let results = (outs I1:$result);
+  let builders = [
+    OpBuilder<(ins "Value":$lhs, "Value":$rhs), [{
+      build($_builder, $_state, $_builder.getI1Type(), lhs, rhs);
+    }]>];
+
+  let assemblyFormat = "$lhs `,` $rhs  attr-dict `:` type($lhs)";
 }
 
 //===----------------------------------------------------------------------===//
@@ -159,6 +187,34 @@ def MulOp : ComplexArithmeticOp<"mul"> {
     %a = complex.mul %b, %c : complex<f32>
     ```
   }];
+}
+
+//===----------------------------------------------------------------------===//
+// NotEqualOp
+//===----------------------------------------------------------------------===//
+
+def NotEqualOp : Complex_Op<"neq",
+    [NoSideEffect, AllTypesMatch<["lhs", "rhs"]>]> {
+  let summary = "computes whether two complex values are not equal";
+  let description = [{
+    The `neq` op takes two complex numbers and returns whether they are not
+    equal.
+
+    Example:
+
+    ```mlir
+    %a = complex.neq %b, %c : complex<f32>
+    ```
+  }];
+
+  let arguments = (ins Complex<AnyFloat>:$lhs, Complex<AnyFloat>:$rhs);
+  let results = (outs I1:$result);
+  let builders = [
+    OpBuilder<(ins "Value":$lhs, "Value":$rhs), [{
+      build($_builder, $_state, $_builder.getI1Type(), lhs, rhs);
+    }]>];
+
+  let assemblyFormat = "$lhs `,` $rhs  attr-dict `:` type($lhs)";
 }
 
 //===----------------------------------------------------------------------===//
@@ -185,6 +241,7 @@ def ReOp : Complex_Op<"re",
   let results = (outs AnyFloat:$real);
 
   let assemblyFormat = "$complex attr-dict `:` type($complex)";
+  let hasFolder = 1;
 }
 
 
