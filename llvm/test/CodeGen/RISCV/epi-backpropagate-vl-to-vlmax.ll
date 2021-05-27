@@ -8,8 +8,9 @@
 define <vscale x 1 x i64> @test.1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i64> %c, i32 %evl) nounwind
 ; ENABLED-LABEL: test.1:
 ; ENABLED:       # %bb.0:
-; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; ENABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; ENABLED-NEXT:    vadd.vv v25, v8, v9
+; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; ENABLED-NEXT:    vadd.vv v8, v25, v10
 ; ENABLED-NEXT:    ret
 ;
@@ -17,7 +18,7 @@ define <vscale x 1 x i64> @test.1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; DISABLED:       # %bb.0:
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v25, v8, v9
-; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; DISABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {
@@ -44,7 +45,7 @@ define <vscale x 1 x i64> @test.2(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v25, v8, v9
 ; DISABLED-NEXT:    addi a0, a0, 1
-; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; DISABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {
@@ -61,8 +62,9 @@ define <vscale x 1 x i64> @test.3(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; ENABLED-LABEL: test.3:
 ; ENABLED:       # %bb.0:
 ; ENABLED-NEXT:    addi a0, a0, 1
-; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; ENABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; ENABLED-NEXT:    vadd.vv v25, v8, v9
+; ENABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; ENABLED-NEXT:    vadd.vv v8, v25, v10
 ; ENABLED-NEXT:    ret
 ;
@@ -71,7 +73,7 @@ define <vscale x 1 x i64> @test.3(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, 
 ; DISABLED-NEXT:    addi a0, a0, 1
 ; DISABLED-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v25, v8, v9
-; DISABLED-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; DISABLED-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; DISABLED-NEXT:    vadd.vv v8, v25, v10
 ; DISABLED-NEXT:    ret
 {

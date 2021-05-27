@@ -635,7 +635,7 @@ define <vscale x 8 x i16> @select_nxv8i16(i1 zeroext %c, <vscale x 8 x i16> %a, 
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <vscale x 8 x i16> %a, <vscale x 8 x i16> %b
@@ -650,7 +650,7 @@ define <vscale x 8 x i16> @selectcc_nxv8i16(i16 signext %a, i16 signext %b, <vsc
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e16,m2,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %cmp = icmp ne i16 %a, %b
@@ -819,7 +819,7 @@ define <vscale x 8 x i32> @select_nxv8i32(i1 zeroext %c, <vscale x 8 x i32> %a, 
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <vscale x 8 x i32> %a, <vscale x 8 x i32> %b
@@ -834,7 +834,7 @@ define <vscale x 8 x i32> @selectcc_nxv8i32(i32 signext %a, i32 signext %b, <vsc
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %cmp = icmp ne i32 %a, %b
@@ -1003,7 +1003,7 @@ define <vscale x 8 x i64> @select_nxv8i64(i1 zeroext %c, <vscale x 8 x i64> %a, 
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <vscale x 8 x i64> %a, <vscale x 8 x i64> %b
@@ -1020,7 +1020,7 @@ define <vscale x 8 x i64> @selectcc_nxv8i64(i64 signext %a, i64 signext %b, <vsc
 ; RV32-NEXT:    neg a0, a0
 ; RV32-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; RV32-NEXT:    vmv.v.x v0, a0
-; RV32-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; RV32-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV32-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; RV32-NEXT:    ret
 ;
@@ -1031,7 +1031,7 @@ define <vscale x 8 x i64> @selectcc_nxv8i64(i64 signext %a, i64 signext %b, <vsc
 ; RV64-NEXT:    neg a0, a0
 ; RV64-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; RV64-NEXT:    vmv.v.x v0, a0
-; RV64-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; RV64-NEXT:    ret
   %cmp = icmp ne i64 %a, %b

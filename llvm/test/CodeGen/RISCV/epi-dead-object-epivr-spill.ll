@@ -13,15 +13,15 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    sd s3, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    sd s4, 16(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
-; CHECK-NEXT:    addi a3, zero, 5
-; CHECK-NEXT:    mul a1, a1, a3
+; CHECK-NEXT:    slli a3, a1, 2
+; CHECK-NEXT:    add a1, a3, a1
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv s2, a5
 ; CHECK-NEXT:    mv s0, a4
 ; CHECK-NEXT:    mv s3, a2
 ; CHECK-NEXT:    mv s1, a0
 ; CHECK-NEXT:    addi s4, zero, 8
-; CHECK-NEXT:    vsetvli a0, s4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s4, e64,m1,ta,mu
 ; CHECK-NEXT:    vid.v v26
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
@@ -29,8 +29,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vs1r.v v26, (a0) # Unknown-size Folded Spill
 ; CHECK-NEXT:    vsrl.vi v25, v26, 1
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vs1r.v v25, (a0) # Unknown-size Folded Spill
@@ -51,15 +51,15 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vs1r.v v25, (a0) # Unknown-size Folded Spill
 ; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64@plt
-; CHECK-NEXT:    vsetvli a0, s4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s4, e64,m1,ta,mu
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vl1r.v v25, (a0) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vxor.vi v26, v25, 1
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, zero, 3
-; CHECK-NEXT:    mul a0, a0, a1
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vl1r.v v25, (a0) # Unknown-size Folded Reload

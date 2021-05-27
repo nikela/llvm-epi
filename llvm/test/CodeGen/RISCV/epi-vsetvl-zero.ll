@@ -35,6 +35,7 @@ define void @test_vsetvl_avl(<vscale x 1 x double>* %v, i64 signext %avl) nounwi
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vfadd.vv v25, v26, v26
@@ -46,19 +47,18 @@ define void @test_vsetvl_avl(<vscale x 1 x double>* %v, i64 signext %avl) nounwi
 ; CHECK-O2-DISABLED-LABEL: test_vsetvl_avl:
 ; CHECK-O2-DISABLED:       # %bb.0:
 ; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
-; CHECK-O2-DISABLED-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; CHECK-O2-DISABLED-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vle64.v v25, (a0)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-DISABLED-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-DISABLED-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_avl:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -94,6 +94,7 @@ define void @test_vsetvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0-NEXT:    mv a1, zero
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vfadd.vv v25, v26, v26
@@ -106,13 +107,11 @@ define void @test_vsetvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O2-DISABLED:       # %bb.0:
 ; CHECK-O2-DISABLED-NEXT:    mv a1, zero
 ; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
-; CHECK-O2-DISABLED-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; CHECK-O2-DISABLED-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vle64.v v25, (a0)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-DISABLED-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-DISABLED-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    ret
 ;
@@ -120,6 +119,7 @@ define void @test_vsetvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    mv a1, zero
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,tu,mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -154,6 +154,7 @@ define void @test_vsetvlmax(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vfadd.vv v25, v26, v26
@@ -165,19 +166,18 @@ define void @test_vsetvlmax(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O2-DISABLED-LABEL: test_vsetvlmax:
 ; CHECK-O2-DISABLED:       # %bb.0:
 ; CHECK-O2-DISABLED-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
-; CHECK-O2-DISABLED-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; CHECK-O2-DISABLED-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vle64.v v25, (a0)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-DISABLED-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-DISABLED-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvlmax:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e64,m1,tu,mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -212,7 +212,7 @@ define void @test_gvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, zero
 ; CHECK-O0-NEXT:    # implicit-def: $v26
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vfadd.vv v25, v26, v26
@@ -224,20 +224,18 @@ define void @test_gvl_zero(<vscale x 1 x double>* %v) nounwind
 ; CHECK-O2-DISABLED-LABEL: test_gvl_zero:
 ; CHECK-O2-DISABLED:       # %bb.0:
 ; CHECK-O2-DISABLED-NEXT:    mv a1, zero
-; CHECK-O2-DISABLED-NEXT:    vsetvli a2, a1, e64,m1,ta,mu
+; CHECK-O2-DISABLED-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vle64.v v25, (a0)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a0, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-DISABLED-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-DISABLED-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-DISABLED-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
 ; CHECK-O2-DISABLED-NEXT:    vse64.v v25, (a0)
 ; CHECK-O2-DISABLED-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_gvl_zero:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    mv a1, zero
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)

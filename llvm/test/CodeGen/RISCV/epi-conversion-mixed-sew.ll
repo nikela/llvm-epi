@@ -10,7 +10,7 @@ declare <vscale x 2 x i64> @llvm.epi.vfwcvt.xu.f.nxv2i64.nxv2f32(<vscale x 2 x f
 define <vscale x 2 x i64> @test_widen_float_to_uint(<vscale x 2 x float> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_float_to_uint:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.xu.f.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -27,7 +27,7 @@ declare <vscale x 2 x i64> @llvm.epi.vfwcvt.x.f.nxv2i64.nxv2f32(<vscale x 2 x fl
 define <vscale x 2 x i64> @test_widen_float_to_int(<vscale x 2 x float> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_float_to_int:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.x.f.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -44,7 +44,7 @@ declare <vscale x 2 x double> @llvm.epi.vfwcvt.f.xu.nxv2f64.nxv2i32( <vscale x 2
 define <vscale x 2 x double> @test_widen_uint_to_float(<vscale x 2 x i32> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_uint_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.f.xu.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -62,7 +62,7 @@ declare <vscale x 2 x double> @llvm.epi.vfwcvt.f.x.nxv2f64.nxv2i32( <vscale x 2 
 define <vscale x 2 x double> @test_widen_int_to_float(<vscale x 2 x i32> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_int_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.f.x.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -80,7 +80,7 @@ declare <vscale x 2 x double> @llvm.epi.vfwcvt.f.f.nxv2f64.nxv2f32( <vscale x 2 
 define <vscale x 2 x double> @test_widen_float_to_float(<vscale x 2 x float> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_float_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfwcvt.f.f.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -98,7 +98,7 @@ declare <vscale x 2 x i64> @llvm.epi.vwcvtu.x.x.nxv2i64.nxv2i32( <vscale x 2 x i
 define <vscale x 2 x i64> @test_widen_int_to_uint(<vscale x 2 x i32> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_int_to_uint:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vwcvtu.x.x.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -116,7 +116,7 @@ declare <vscale x 2 x i64> @llvm.epi.vwcvt.x.x.nxv2i64.nxv2i32( <vscale x 2 x i3
 define <vscale x 2 x i64> @test_widen_int_to_int(<vscale x 2 x i32> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_widen_int_to_int:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vwcvt.x.x.v v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
@@ -134,7 +134,7 @@ declare <vscale x 2 x i32> @llvm.epi.vfncvt.xu.f.nxv2i32.nxv2f64(<vscale x 2 x d
 define <vscale x 2 x i32> @test_narrow_float_to_uint(<vscale x 2 x double> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_float_to_uint:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfncvt.xu.f.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
@@ -151,7 +151,7 @@ declare <vscale x 2 x i32> @llvm.epi.vfncvt.x.f.nxv2i32.nxv2f64(<vscale x 2 x do
 define <vscale x 2 x i32> @test_narrow_float_to_int(<vscale x 2 x double> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_float_to_int:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfncvt.x.f.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
@@ -168,7 +168,7 @@ declare <vscale x 2 x float> @llvm.epi.vfncvt.f.xu.nxv2f32.nxv2i64( <vscale x 2 
 define <vscale x 2 x float> @test_narrow_uint_to_float(<vscale x 2 x i64> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_uint_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfncvt.f.xu.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
@@ -186,7 +186,7 @@ declare <vscale x 2 x float> @llvm.epi.vfncvt.f.x.nxv2f32.nxv2i64( <vscale x 2 x
 define <vscale x 2 x float> @test_narrow_int_to_float(<vscale x 2 x i64> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_int_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfncvt.f.x.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
@@ -204,7 +204,7 @@ declare <vscale x 2 x float> @llvm.epi.vfncvt.f.f.nxv2f32.nxv2f64( <vscale x 2 x
 define <vscale x 2 x float> @test_narrow_float_to_float(<vscale x 2 x double> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_float_to_float:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vfncvt.f.f.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret
@@ -222,7 +222,7 @@ declare <vscale x 2 x i32> @llvm.epi.vncvt.x.x.nxv2i32.nxv2i64( <vscale x 2 x i6
 define <vscale x 2 x i32> @test_narrow_int_to_int(<vscale x 2 x i64> %parm0, i64 %gvl) nounwind {
 ; CHECK-LABEL: test_narrow_int_to_int:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vncvt.x.x.w v25, v8
 ; CHECK-NEXT:    vmv1r.v v8, v25
 ; CHECK-NEXT:    ret

@@ -7,7 +7,7 @@ declare { <vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, <
 define <vscale x 1 x double> @test_vlseg7_f64(double *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e64.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -27,7 +27,7 @@ define void @test_vsseg7_f64(<vscale x 1 x double> %v0, <vscale x 1 x double> %v
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e64.v v8, (a0), a1
 ; CHECK-NEXT:    ret
@@ -40,7 +40,7 @@ declare { <vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x float>, <vsc
 define <vscale x 2 x float> @test_vlseg7_f32(float *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e32.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -60,7 +60,7 @@ define void @test_vsseg7_f32(<vscale x 2 x float> %v0, <vscale x 2 x float> %v1,
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e32.v v8, (a0), a1
 ; CHECK-NEXT:    ret
@@ -73,7 +73,7 @@ declare { <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 1 x i64>, <vscale x 
 define <vscale x 1 x i64> @test_vlseg7_i64(i64 *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e64.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -93,7 +93,7 @@ define void @test_vsseg7_i64(<vscale x 1 x i64> %v0, <vscale x 1 x i64> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e64.v v8, (a0), a1
 ; CHECK-NEXT:    ret
@@ -106,7 +106,7 @@ declare { <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 2 x i32>, <vscale x 
 define <vscale x 2 x i32> @test_vlseg7_i32(i32 *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e32.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -126,7 +126,7 @@ define void @test_vsseg7_i32(<vscale x 2 x i32> %v0, <vscale x 2 x i32> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e32.v v8, (a0), a1
 ; CHECK-NEXT:    ret
@@ -139,7 +139,7 @@ declare { <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 4 x i16>, <vscale x 
 define <vscale x 4 x i16> @test_vlseg7_i16(i16 *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e16,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e16,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e16.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -159,7 +159,7 @@ define void @test_vsseg7_i16(<vscale x 4 x i16> %v0, <vscale x 4 x i16> %v1, <vs
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e16,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e16,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e16.v v8, (a0), a1
 ; CHECK-NEXT:    ret
@@ -172,7 +172,7 @@ declare { <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x i8>, <vscale x 8 x
 define <vscale x 8 x i8> @test_vlseg7_i8(i8 *%a, i64 %stride, i64 %avl) nounwind {
 ; CHECK-LABEL: test_vlseg7_i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, a2, e8,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e8,m1,ta,mu
 ; CHECK-NEXT:    vlsseg7e8.v v8, (a0), a1
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    ret
@@ -192,7 +192,7 @@ define void @test_vsseg7_i8(<vscale x 8 x i8> %v0, <vscale x 8 x i8> %v1, <vscal
 ; CHECK-NEXT:    # kill: def $v11 killed $v11 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v10 killed $v10 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    # kill: def $v9 killed $v9 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
-; CHECK-NEXT:    vsetvli a2, a2, e8,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e8,m1,ta,mu
 ; CHECK-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9_v10_v11_v12_v13_v14 def $v8_v9_v10_v11_v12_v13_v14
 ; CHECK-NEXT:    vssseg7e8.v v8, (a0), a1
 ; CHECK-NEXT:    ret

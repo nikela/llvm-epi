@@ -306,7 +306,7 @@ define void @test_select_scalar_int_4(<vscale x 8 x i64> %a, <vscale x 8 x i64> 
 ; CHECK-O0-NEXT:    sub a1, a1, a2
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O0-NEXT:    vmv.v.x v0, a1
-; CHECK-O0-NEXT:    vsetvli a1, zero, e64,m8,ta,mu
+; CHECK-O0-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; CHECK-O0-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-O0-NEXT:    vs8r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
@@ -318,7 +318,7 @@ define void @test_select_scalar_int_4(<vscale x 8 x i64> %a, <vscale x 8 x i64> 
 ; CHECK-O2-NEXT:    neg a0, a0
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8,m1,ta,mu
 ; CHECK-O2-NEXT:    vmv.v.x v0, a0
-; CHECK-O2-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; CHECK-O2-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; CHECK-O2-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-O2-NEXT:    vs8r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret

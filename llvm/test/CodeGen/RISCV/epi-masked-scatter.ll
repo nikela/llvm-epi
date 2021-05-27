@@ -51,7 +51,7 @@ define void @nxv2i32(<vscale x 2 x i32> %data, i32* %ptr, <vscale x 2 x i64> %in
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
 ; CHECK-NEXT:    vsll.vi v26, v10, 2
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vsoxei64.v v8, (a0), v26, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices

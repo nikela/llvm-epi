@@ -12,9 +12,9 @@ declare <vscale x 4 x i32> @llvm.epi.vload.v4i32(<vscale x 4 x i32>* nocapture, 
 define void @foo_1(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 1 x double>* %dst) nounwind {
 ; CHECK-LABEL: foo_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a3, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a1)
-; CHECK-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vse64.v v25, (a2)
 ; CHECK-NEXT:    ret
   %a = call <vscale x 2 x i32> @llvm.epi.vload.v2i32(<vscale x 2 x i32> *%src, i64 %gvl)
@@ -27,7 +27,7 @@ define void @foo_1(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 1 x double>* %d
 define void @foo_2(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 2 x float>* %dst) nounwind {
 ; CHECK-LABEL: foo_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m1,ta,mu
 ; CHECK-NEXT:    vle32.v v25, (a1)
 ; CHECK-NEXT:    vse32.v v25, (a2)
 ; CHECK-NEXT:    ret
@@ -40,7 +40,7 @@ define void @foo_2(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 2 x float>* %ds
 define void @foo_3(i64 %gvl, <vscale x 4 x i32>* %src, <vscale x 4 x float>* %dst) nounwind {
 ; CHECK-LABEL: foo_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e32,m2,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32,m2,ta,mu
 ; CHECK-NEXT:    vle32.v v26, (a1)
 ; CHECK-NEXT:    vse32.v v26, (a2)
 ; CHECK-NEXT:    ret

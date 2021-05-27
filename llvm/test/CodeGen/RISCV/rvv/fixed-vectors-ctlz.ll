@@ -8467,22 +8467,9 @@ define void @ctlz_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ;
 ; LMULMAX2-RV64-LABEL: ctlz_v16i16:
 ; LMULMAX2-RV64:       # %bb.0:
-<<<<<<< HEAD
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 16, e16,m2,ta,mu
-=======
-; LMULMAX2-RV64-NEXT:    addi sp, sp, -64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 64
-; LMULMAX2-RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    .cfi_offset ra, -8
-; LMULMAX2-RV64-NEXT:    .cfi_offset s0, -16
-; LMULMAX2-RV64-NEXT:    addi s0, sp, 64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa s0, 0
-; LMULMAX2-RV64-NEXT:    andi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
->>>>>>> origin/master
 ; LMULMAX2-RV64-NEXT:    vle16.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a2, v26
 ; LMULMAX2-RV64-NEXT:    lui a1, 16
@@ -10252,22 +10239,9 @@ define void @ctlz_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ;
 ; LMULMAX2-RV64-LABEL: ctlz_v8i32:
 ; LMULMAX2-RV64:       # %bb.0:
-<<<<<<< HEAD
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
-=======
-; LMULMAX2-RV64-NEXT:    addi sp, sp, -64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 64
-; LMULMAX2-RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    .cfi_offset ra, -8
-; LMULMAX2-RV64-NEXT:    .cfi_offset s0, -16
-; LMULMAX2-RV64-NEXT:    addi s0, sp, 64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa s0, 0
-; LMULMAX2-RV64-NEXT:    andi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
->>>>>>> origin/master
 ; LMULMAX2-RV64-NEXT:    vle32.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    srliw a2, a1, 1
@@ -11353,22 +11327,9 @@ define void @ctlz_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ;
 ; LMULMAX2-RV64-LABEL: ctlz_v4i64:
 ; LMULMAX2-RV64:       # %bb.0:
-<<<<<<< HEAD
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 4, e64,m2,ta,mu
-=======
-; LMULMAX2-RV64-NEXT:    addi sp, sp, -64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 64
-; LMULMAX2-RV64-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; LMULMAX2-RV64-NEXT:    .cfi_offset ra, -8
-; LMULMAX2-RV64-NEXT:    .cfi_offset s0, -16
-; LMULMAX2-RV64-NEXT:    addi s0, sp, 64
-; LMULMAX2-RV64-NEXT:    .cfi_def_cfa s0, 0
-; LMULMAX2-RV64-NEXT:    andi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
->>>>>>> origin/master
 ; LMULMAX2-RV64-NEXT:    vle64.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    srli a2, a1, 1

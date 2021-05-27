@@ -20,7 +20,7 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v14
-; CHECK-O0-NEXT:    vsetvli a3, a3, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli zero, a3, e64,m1,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v14, (a2), v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
@@ -124,7 +124,7 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ;
 ; CHECK-O2-LABEL: test_vp_int:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0), v0.t
 ; CHECK-O2-NEXT:    vle64.v v26, (a1), v0.t
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -201,7 +201,7 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v14
-; CHECK-O0-NEXT:    vsetvli a3, a3, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli zero, a3, e32,m1,ta,mu
 ; CHECK-O0-NEXT:    vle32.v v14, (a2)
 ; CHECK-O0-NEXT:    # implicit-def: $v15
 ; CHECK-O0-NEXT:    vle32.v v15, (a1)
@@ -248,7 +248,7 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ;
 ; CHECK-O2-LABEL: test_vp_int_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli zero, a2, e32,m1,ta,mu
 ; CHECK-O2-NEXT:    vle32.v v25, (a0)
 ; CHECK-O2-NEXT:    vle32.v v26, (a1)
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -333,7 +333,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v4m2
-; CHECK-O0-NEXT:    vsetvli a3, a3, e64,m2,ta,mu
+; CHECK-O0-NEXT:    vsetvli zero, a3, e64,m2,ta,mu
 ; CHECK-O0-NEXT:    vle64.v v4, (a2), v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
@@ -437,7 +437,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ;
 ; CHECK-O2-LABEL: test_vp_int_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64,m2,ta,mu
+; CHECK-O2-NEXT:    vsetvli zero, a2, e64,m2,ta,mu
 ; CHECK-O2-NEXT:    vle64.v v26, (a0), v0.t
 ; CHECK-O2-NEXT:    vle64.v v28, (a1), v0.t
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
