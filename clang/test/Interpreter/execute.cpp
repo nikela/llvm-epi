@@ -1,4 +1,3 @@
-// XFAIL: riscv64
 // RUN: cat %s | clang-repl | FileCheck %s
 // REQUIRES: host-supports-jit
 // UNSUPPORTED: system-aix
