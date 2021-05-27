@@ -535,7 +535,8 @@ def emit_builtins_def(out_file, j):
 """)
 
     for b in inst_builtins:
-        out_file.write("{}\n".format(b))
+        if b.builtin["RegisterInClang"] != 0:
+            out_file.write("{}\n".format(b))
 
     out_file.write("""
 #undef BUILTIN
@@ -548,6 +549,9 @@ def emit_codegen(out_file, j):
 
     code_set = {}
     for b in inst_builtins:
+        if b.builtin["RegisterInClang"] == 0:
+            continue
+
         code_case = ""
 
         if b.builtin["CodegenSetID"] != 0:
@@ -745,6 +749,9 @@ def emit_tests(out_file, j):
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
     for b in inst_builtins:
+        if b.builtin["RegisterInClang"] == 0:
+            continue
+
         # FIXME:
         if b.lmul not in [1, 2, 4]:
             continue
@@ -810,6 +817,9 @@ def run_builtin_tester(out_file, j, clang):
     num_builtins_tested = 0
     num_builtins_succeeded = 0
     for b in inst_builtins:
+        if b.builtin["RegisterInClang"] == 0:
+            continue
+
         # FIXME:
         if b.lmul not in [1, 2, 4]:
             continue
@@ -884,22 +894,64 @@ def emit_compatibility_header(out_file, j):
 
 """)
 
-    # TODO: add typedefs
+    # Add typedefs
+    ELEN = 64 # In EPI, ELEN=64
+    # TODO: think how to solve the _nt_ problem
+    ## Vector types
+    out_file.write("// Vector types\n")
+    typedef = "typedef v${ExtendedType}${LMul}_t __epi_${VScale}x${Type};"
+    for lm in IMPLEMENTED_LMULS:
+        # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
+        lmul = "m" + str(lm)
+        for type in ['i8', 'i16', 'i32', 'i64', 'f32', 'f64']:
+            ex_type = "int" + type[1:] if type[0] == 'i' else "float" + type[1:]
+            size = int(type[1:])
+            vscale = ELEN * lm / size 
+            out_file.write("{}\n".format(string.Template(typedef).substitute(
+                ExtendedType=ex_type, LMul=lmul, VScale=vscale, Type=type)))
+
+    out_file.write("\n")
+    ## Mask type
+    out_file.write("// Mask types\n")
+    typedef = "typedef vbool${N}_t __epi_${VScale}xi1;"
+    for vscale in [1, 2, 4, 8, 16, 32, 64]:
+        n = ELEN/vscale
+        out_file.write("{}\n".format(string.Template(typedef).substitute(
+            N = n, VScale = vscale)))
+
+    out_file.write("\n")
+    # Add macros
+    out_file.write("// MACROs\n")
     for ib in inst_builtins:
-        if ib.builtin["CompatibilityCode"] != "":
+        if ib.builtin["RegisterInClang"] == 0:
             if not ib.masked:
-                code = string.Template(ib.builtin["CompatibilityCode"])
+                code = ib.builtin["CompatibilityCode"]
             else:
-                code = string.Template(ib.builtin["CompatibilityCodeMasked"])
+                code = ib.builtin["CompatibilityCodeMasked"]
+            if "WidenedLMul" in code and ib.lmul > 4:
+                continue # We filter out undefined values of LMul
+            code = string.Template(code)
             subs = {}
             subs["FullName"] = ib.full_name
             subs["Name"] = ib.builtin["Name"]
-            if subs["Name"].startswith("vlseg") or subs["Name"].startswith("vsseg"):
-                subs["Tuple"] = subs["Name"][5]
+            # At the moment vlseg and vsseg builtins are not implemented upstream
+            # Once they are, uncommenitng this 'if' statement should be enough to make them work
+            #if subs["Name"].startswith("vlseg") or subs["Name"].startswith("vsseg"):
+            #    subs["Tuple"] = subs["Name"][5]
             subs["Type"] = TypePrimary(ib.type_spec).render_for_name()
             subs["Size"] = subs["Type"][1:]
+            subs["UType"] = "u" + subs["Size"]
+            subs["WidenedSize"] = str(2 * int(subs["Size"]))
+            subs["WidenedType"] = subs["Type"][0] + subs["WidenedSize"]
+            subs["WidenedUType"] = "u" + subs["WidenedSize"]
+            subs["NarrowedSize"] = str(int(subs["Size"]) / 2)
+            subs["NarrowedType"] = subs["Type"][0] + subs["NarrowedSize"]
+            subs["NarrowedUType"] = "u" + subs["NarrowedSize"]
             # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
             subs["LMul"] = "m" + str(ib.lmul)
+            subs["WidenedLMul"] = "m" + str(2 * ib.lmul)
+            subs["NarrowedLMul"] = "m" + str(ib.lmul / 2)
+            subs["Boolean"] = str(int(subs["Size"]) / ib.lmul)
             out_file.write("{}\n".format(code.substitute(subs)))
 
     out_file.write("""
