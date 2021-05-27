@@ -353,6 +353,33 @@ bool VPIntrinsic::IsVPIntrinsic(Intrinsic::ID ID) {
   return true;
 }
 
+bool VPIntrinsic::HasRoundingMode(Intrinsic::ID ID) {
+  switch (ID) {
+  default:
+    return false;
+
+#define BEGIN_REGISTER_VP_INTRINSIC(VPID, MASKPOS, VLENPOS)                    \
+  case Intrinsic::VPID:
+#define END_REGISTER_VP_INTRINSIC(VPID) return false;
+#define HANDLE_VP_TO_CONSTRAINEDFP(HASROUND, ...) return (bool)HASROUND;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+}
+
+bool VPIntrinsic::HasExceptionBehavior(Intrinsic::ID ID) {
+  switch (ID) {
+  default:
+    return false;
+
+#define BEGIN_REGISTER_VP_INTRINSIC(VPID, MASKPOS, VLENPOS)                    \
+  case Intrinsic::VPID:
+#define END_REGISTER_VP_INTRINSIC(VPID) return false;
+#define HANDLE_VP_TO_CONSTRAINEDFP(HASROUND, HASEXCEPT, ...)                   \
+  return (bool)HASEXCEPT;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+}
+
 // Equivalent non-predicated opcode
 Optional<unsigned> VPIntrinsic::GetFunctionalOpcodeForVP(Intrinsic::ID ID) {
   Optional<unsigned> FunctionalOC;

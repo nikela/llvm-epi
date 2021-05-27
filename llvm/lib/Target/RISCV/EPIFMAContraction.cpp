@@ -150,7 +150,7 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
       Z = I->getOperand(SecondOp);
       X = Builder.CreateIntrinsic(
           Intrinsic::vp_fneg, {X->getType()},
-          {X, I->getOperand(3), I->getOperand(4), I->getOperand(5)}, nullptr,
+          {X, I->getOperand(2), I->getOperand(3)}, nullptr,
           "vp.fneg");
       IsSub = false;
     } else {
@@ -169,14 +169,14 @@ bool EPIFMAContraction::tryFMADDContraction(IntrinsicInst *I, bool IsSub) {
   if (IsSub) {
     Z = Builder.CreateIntrinsic(
         Intrinsic::vp_fneg, {Z->getType()},
-        {Z, I->getOperand(3), I->getOperand(4), I->getOperand(5)}, nullptr,
+        {Z, I->getOperand(2), I->getOperand(3)}, nullptr,
         "vp.fneg");
   }
 
   Value *NewFMA = Builder.CreateIntrinsic(
       Intrinsic::vp_fma, {I->getOperand(0)->getType()},
-      {X, Y, Z, I->getOperand(2), I->getOperand(3), I->getOperand(4),
-       I->getOperand(5)},
+      {X, Y, Z, I->getOperand(2),
+       I->getOperand(3)},
       nullptr, IsSub ? "vp.contracted.fmsub" : "vp.contracted.fmadd");
   I->replaceAllUsesWith(NewFMA);
   I->eraseFromParent();

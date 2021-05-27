@@ -10,7 +10,6 @@ define <vscale x 2 x float> @sitofp.f32.i32(<vscale x 2 x i32> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(<vscale x 2 x i32> %a,
-            metadata !"round.tonearest", metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x float> %b
@@ -25,13 +24,12 @@ define <vscale x 2 x float> @sitofp.f32.i32.mask(<vscale x 2 x i32> %a, <vscale 
 {
   %b = call <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(
                <vscale x 2 x i32> %a,
-               metadata !"round.tonearest", metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x float> %b
 }
 
-declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(<vscale x 2 x i32> %a, metadata, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 
 define <vscale x 2 x float> @sitofp.f32.i64(<vscale x 2 x i64> %a, i32 %gvl)
 ; CHECK-LABEL: sitofp.f32.i64:
@@ -42,7 +40,6 @@ define <vscale x 2 x float> @sitofp.f32.i64(<vscale x 2 x i64> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i64(<vscale x 2 x i64> %a,
-            metadata !"round.tonearest", metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x float> %b
@@ -58,13 +55,12 @@ define <vscale x 2 x float> @sitofp.f32.i64.mask(<vscale x 2 x i64> %a, <vscale 
 {
   %b = call <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i64(
                <vscale x 2 x i64> %a,
-               metadata !"round.tonearest", metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x float> %b
 }
 
-declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i64(<vscale x 2 x i64> %a, metadata, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 
 define <vscale x 2 x double> @sitofp.f64.i32(<vscale x 2 x i32> %a, i32 %gvl)
 ; CHECK-LABEL: sitofp.f64.i32:
@@ -75,7 +71,6 @@ define <vscale x 2 x double> @sitofp.f64.i32(<vscale x 2 x i32> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x double> @llvm.vp.sitofp.nxv2f64.nxv2i32(<vscale x 2 x i32> %a,
-            metadata !"round.tonearest", metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x double> %b
@@ -91,10 +86,9 @@ define <vscale x 2 x double> @sitofp.f64.i32.mask(<vscale x 2 x i32> %a, <vscale
 {
   %b = call <vscale x 2 x double> @llvm.vp.sitofp.nxv2f64.nxv2i32(
                <vscale x 2 x i32> %a,
-               metadata !"round.tonearest", metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x double> %b
 }
 
-declare <vscale x 2 x double> @llvm.vp.sitofp.nxv2f64.nxv2i32(<vscale x 2 x i32> %a, metadata, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x double> @llvm.vp.sitofp.nxv2f64.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 %gvl)

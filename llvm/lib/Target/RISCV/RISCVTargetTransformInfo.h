@@ -271,7 +271,7 @@ public:
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
     // FIXME: we may want to be more selective.
-    if (ST->hasStdExtV())
+    if (ST->hasStdExtV() && PI.getIntrinsicID() != Intrinsic::vp_frem)
       return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
               /* Op */ TargetTransformInfo::VPLegalization::Legal};
 

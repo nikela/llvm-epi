@@ -11,7 +11,6 @@ define <vscale x 2 x i32> @fptoui.i32.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(<vscale x 2 x float> %a,
-            metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x i32> %b
@@ -26,13 +25,12 @@ define <vscale x 2 x i32> @fptoui.i32.f32.mask(<vscale x 2 x float> %a, <vscale 
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(
                <vscale x 2 x float> %a,
-               metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x i32> %b
 }
 
-declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(<vscale x 2 x float> %a, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 
 define <vscale x 2 x i64> @fptoui.i64.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-LABEL: fptoui.i64.f32:
@@ -43,7 +41,6 @@ define <vscale x 2 x i64> @fptoui.i64.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(<vscale x 2 x float> %a,
-            metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x i64> %b
@@ -59,13 +56,12 @@ define <vscale x 2 x i64> @fptoui.i64.f32.mask(<vscale x 2 x float> %a, <vscale 
 {
   %b = call <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(
                <vscale x 2 x float> %a,
-               metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x i64> %b
 }
 
-declare <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(<vscale x 2 x float> %a, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 
 define <vscale x 2 x i32> @fptoui.i32.f64(<vscale x 2 x double> %a, i32 %gvl)
 ; CHECK-LABEL: fptoui.i32.f64:
@@ -76,7 +72,6 @@ define <vscale x 2 x i32> @fptoui.i32.f64(<vscale x 2 x double> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double> %a,
-            metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x i32> %b
@@ -92,10 +87,9 @@ define <vscale x 2 x i32> @fptoui.i32.f64.mask(<vscale x 2 x double> %a, <vscale
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(
                <vscale x 2 x double> %a,
-               metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x i32> %b
 }
 
-declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double> %a, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x i1> %mask, i32 %gvl)

@@ -11,7 +11,6 @@ define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 %gvl)
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x double> @llvm.vp.fpext.nxv2f64.nxv2f32(<vscale x 2 x float> %a,
-            metadata !"fpexcept.ignore",
             <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> undef, i1 true, i32 0), <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer),
             i32 %gvl)
   ret <vscale x 2 x double> %b
@@ -27,10 +26,9 @@ define <vscale x 2 x double> @fpext.f64.f32.mask(<vscale x 2 x float> %a, <vscal
 {
   %b = call <vscale x 2 x double> @llvm.vp.fpext.nxv2f64.nxv2f32(
                <vscale x 2 x float> %a,
-               metadata !"fpexcept.ignore",
                <vscale x 2 x i1> %mask,
                i32 %gvl)
   ret <vscale x 2 x double> %b
 }
 
-declare <vscale x 2 x double> @llvm.vp.fpext.nxv2f64.nxv2f32(<vscale x 2 x float> %a, metadata, <vscale x 2 x i1> %mask, i32 %gvl)
+declare <vscale x 2 x double> @llvm.vp.fpext.nxv2f64.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %gvl)

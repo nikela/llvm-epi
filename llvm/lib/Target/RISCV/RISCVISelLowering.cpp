@@ -417,6 +417,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_SREM, ISD::VP_UREM, ISD::VP_AND, ISD::VP_OR,   ISD::VP_XOR,
         ISD::VP_ASHR, ISD::VP_LSHR, ISD::VP_SHL};
 
+    static unsigned FPVPOps[] = {ISD::VP_FADD, ISD::VP_FSUB, ISD::VP_FMUL,
+                                 ISD::VP_FDIV};
+
     if (!Subtarget.is64Bit()) {
       // We must custom-lower certain vXi64 operations on RV32 due to the vector
       // element type being illegal.
@@ -535,6 +538,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setLoadExtAction(ISD::SEXTLOAD, OtherVT, VT, Expand);
         setLoadExtAction(ISD::ZEXTLOAD, OtherVT, VT, Expand);
       }
+
+	  // Splice
+      setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -589,6 +595,13 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::EXTRACT_SUBVECTOR, VT, Custom);
 
       setOperationAction(ISD::VECTOR_REVERSE, VT, Custom);
+
+      for (unsigned VPOpc : FPVPOps) {
+        setOperationAction(VPOpc, VT, Custom);
+        // RV64 must custom-legalize the i32 EVL parameter.
+        if (Subtarget.is64Bit())
+          setOperationAction(VPOpc, MVT::i32, Custom);
+      }
     };
 
     // Sets common extload/truncstore actions on RVV floating-point vector
@@ -856,6 +869,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64");
     setLibcallName(RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64");
     setLibcallName(RTLIB::EXP_NXV8F64, "__epi_exp_nxv8f64");
+    setLibcallName(RTLIB::EXP_NXV1F32, "__epi_exp_nxv1f32");
     setLibcallName(RTLIB::EXP_NXV2F32, "__epi_exp_nxv2f32");
     setLibcallName(RTLIB::EXP_NXV4F32, "__epi_exp_nxv4f32");
     setLibcallName(RTLIB::EXP_NXV8F32, "__epi_exp_nxv8f32");
@@ -865,6 +879,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::SIN_NXV2F64, "__epi_sin_nxv2f64");
     setLibcallName(RTLIB::SIN_NXV4F64, "__epi_sin_nxv4f64");
     setLibcallName(RTLIB::SIN_NXV8F64, "__epi_sin_nxv8f64");
+    setLibcallName(RTLIB::SIN_NXV1F32, "__epi_sin_nxv1f32");
     setLibcallName(RTLIB::SIN_NXV2F32, "__epi_sin_nxv2f32");
     setLibcallName(RTLIB::SIN_NXV4F32, "__epi_sin_nxv4f32");
     setLibcallName(RTLIB::SIN_NXV8F32, "__epi_sin_nxv8f32");
@@ -874,17 +889,31 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV2F64, "__epi_cos_nxv2f64");
     setLibcallName(RTLIB::COS_NXV4F64, "__epi_cos_nxv4f64");
     setLibcallName(RTLIB::COS_NXV8F64, "__epi_cos_nxv8f64");
+    setLibcallName(RTLIB::COS_NXV1F32, "__epi_cos_nxv1f32");
     setLibcallName(RTLIB::COS_NXV2F32, "__epi_cos_nxv2f32");
     setLibcallName(RTLIB::COS_NXV4F32, "__epi_cos_nxv4f32");
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
     setLibcallName(RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32");
 
+    setLibcallName(RTLIB::FMOD_NXV1F64, "__epi_fmod_nxv1f64");
+    setLibcallName(RTLIB::FMOD_NXV2F64, "__epi_fmod_nxv2f64");
+    setLibcallName(RTLIB::FMOD_NXV4F64, "__epi_fmod_nxv4f64");
+    setLibcallName(RTLIB::FMOD_NXV8F64, "__epi_fmod_nxv8f64");
+    setLibcallName(RTLIB::FMOD_NXV1F32, "__epi_fmod_nxv1f32");
+    setLibcallName(RTLIB::FMOD_NXV2F32, "__epi_fmod_nxv2f32");
+    setLibcallName(RTLIB::FMOD_NXV4F32, "__epi_fmod_nxv4f32");
+    setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
+    setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
+
     // Custom-legalize these nodes for fp scalable vectors.
-    for (auto VT : {MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
-                    MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
+    for (auto VT :
+         {MVT::nxv1f32, MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
+          MVT::nxv1f64, MVT::nxv2f64, MVT::nxv4f64, MVT::nxv8f64}) {
       setOperationAction(ISD::FEXP, VT, Custom);
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
+      setOperationAction(ISD::FREM, VT, Custom);
+      setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
   }
 
@@ -1218,30 +1247,48 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
 
 SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::EXP_NXV1F64}, {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
-      {MVT::nxv4f64, RTLIB::EXP_NXV4F64}, {MVT::nxv8f64, RTLIB::EXP_NXV8F64},
-      {MVT::nxv2f32, RTLIB::EXP_NXV2F32}, {MVT::nxv4f32, RTLIB::EXP_NXV4F32},
-      {MVT::nxv8f32, RTLIB::EXP_NXV8F32}, {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
+      {MVT::nxv1f64, RTLIB::EXP_NXV1F64},   {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
+      {MVT::nxv4f64, RTLIB::EXP_NXV4F64},   {MVT::nxv8f64, RTLIB::EXP_NXV8F64},
+      {MVT::nxv1f32, RTLIB::EXP_NXV1F32},   {MVT::nxv2f32, RTLIB::EXP_NXV2F32},
+      {MVT::nxv4f32, RTLIB::EXP_NXV4F32},   {MVT::nxv8f32, RTLIB::EXP_NXV8F32},
+      {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
 SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::SIN_NXV1F64}, {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
-      {MVT::nxv4f64, RTLIB::SIN_NXV4F64}, {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
-      {MVT::nxv2f32, RTLIB::SIN_NXV2F32}, {MVT::nxv4f32, RTLIB::SIN_NXV4F32},
-      {MVT::nxv8f32, RTLIB::SIN_NXV8F32}, {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
+      {MVT::nxv1f64, RTLIB::SIN_NXV1F64},   {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
+      {MVT::nxv4f64, RTLIB::SIN_NXV4F64},   {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
+      {MVT::nxv1f32, RTLIB::SIN_NXV1F32},   {MVT::nxv2f32, RTLIB::SIN_NXV2F32},
+      {MVT::nxv4f32, RTLIB::SIN_NXV4F32},   {MVT::nxv8f32, RTLIB::SIN_NXV8F32},
+      {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
 
 SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
   VTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::COS_NXV1F64}, {MVT::nxv2f64, RTLIB::COS_NXV2F64},
-      {MVT::nxv4f64, RTLIB::COS_NXV4F64}, {MVT::nxv8f64, RTLIB::COS_NXV8F64},
-      {MVT::nxv2f32, RTLIB::COS_NXV2F32}, {MVT::nxv4f32, RTLIB::COS_NXV4F32},
-      {MVT::nxv8f32, RTLIB::COS_NXV8F32}, {MVT::nxv16f32, RTLIB::COS_NXV16F32},
+      {MVT::nxv1f64, RTLIB::COS_NXV1F64},   {MVT::nxv2f64, RTLIB::COS_NXV2F64},
+      {MVT::nxv4f64, RTLIB::COS_NXV4F64},   {MVT::nxv8f64, RTLIB::COS_NXV8F64},
+      {MVT::nxv1f32, RTLIB::COS_NXV1F32},   {MVT::nxv2f32, RTLIB::COS_NXV2F32},
+      {MVT::nxv4f32, RTLIB::COS_NXV4F32},   {MVT::nxv8f32, RTLIB::COS_NXV8F32},
+      {MVT::nxv16f32, RTLIB::COS_NXV16F32},
+  };
+  return lowerVECLIBCALL(Op, DAG, VTToLC);
+}
+
+SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
+  VTToLibCall VTToLC[] = {
+      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64},
+      {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
+      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64},
+      {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
+      {MVT::nxv1f32, RTLIB::FMOD_NXV1F32},
+      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32},
+      {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
+      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32},
+      {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC);
 }
@@ -2211,6 +2258,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerFSIN(Op, DAG);
   case ISD::FCOS:
     return lowerFCOS(Op, DAG);
+  case ISD::FREM:
+    return lowerFREM(Op, DAG);
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
     // Convert BSWAP/BITREVERSE to GREVI to enable GREVI combinining.
@@ -2660,6 +2709,16 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::SRL_VL);
   case ISD::VP_SHL:
     return lowerVPOp(Op, DAG, RISCVISD::SHL_VL);
+  case ISD::VP_FADD:
+	return lowerVPOp(Op, DAG, RISCVISD::FADD_VL);
+  case ISD::VP_FSUB:
+	return lowerVPOp(Op, DAG, RISCVISD::FSUB_VL);
+  case ISD::VP_FMUL:
+	return lowerVPOp(Op, DAG, RISCVISD::FMUL_VL);
+  case ISD::VP_FDIV:
+	return lowerVPOp(Op, DAG, RISCVISD::FDIV_VL);
+  case ISD::VECTOR_SPLICE:
+    return lowerVECTOR_SPLICE(Op, DAG);
   }
 }
 
@@ -3947,62 +4006,6 @@ static void GetBaseAddressAndOffsets(const SDValue &Addresses, EVT OffsetsVT,
   Offsets = Addresses;
 }
 
-// FIXME: This does not handle fractional LMUL.
-static std::pair<int64_t, int64_t> getSewLMul(MVT VT) {
-  switch (VT.SimpleTy) {
-  default:
-    llvm_unreachable("Unexpected type");
-    // LMUL=1
-  case MVT::nxv1i64:
-  case MVT::nxv1f64:
-    return {64, 1};
-  case MVT::nxv2i32:
-  case MVT::nxv2f32:
-    return {32, 1};
-  case MVT::nxv4i16:
-  case MVT::nxv4f16:
-    return {16, 1};
-  case MVT::nxv8i8:
-    return {8, 1};
-    // LMUL=2
-  case MVT::nxv2i64:
-  case MVT::nxv2f64:
-    return {64, 2};
-  case MVT::nxv4i32:
-  case MVT::nxv4f32:
-    return {32, 2};
-  case MVT::nxv8i16:
-  case MVT::nxv8f16:
-    return {16, 2};
-  case MVT::nxv16i8:
-    return {8, 2};
-    // LMUL=4
-  case MVT::nxv4i64:
-  case MVT::nxv4f64:
-    return {64, 4};
-  case MVT::nxv8i32:
-  case MVT::nxv8f32:
-    return {32, 4};
-  case MVT::nxv16i16:
-  case MVT::nxv16f16:
-    return {16, 4};
-  case MVT::nxv32i8:
-    return {8, 4};
-    // LMUL=8
-  case MVT::nxv8i64:
-  case MVT::nxv8f64:
-    return {64, 8};
-  case MVT::nxv16i32:
-  case MVT::nxv16f32:
-    return {32, 8};
-  case MVT::nxv32i16:
-  case MVT::nxv32f16:
-    return {16, 8};
-  case MVT::nxv64i8:
-    return {8, 8};
-  }
-}
-
 
 static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
                           const RISCVSubtarget &Subtarget, unsigned OpCode,
@@ -4012,10 +4015,9 @@ static SDValue lowerVLSEG(SDValue Op, SelectionDAG &DAG,
   SDVTList VTs = DAG.getVTList(MVT::Untyped, MVT::Other);
   EVT VT = VTList.VTs[0];
 
-  int64_t LMUL;
-  int64_t SEWBits;
-  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
-
+  uint64_t SEWBits =
+      VT.getSimpleVT().getVectorElementType().getScalarSizeInBits();
+  assert(RISCVVType::isValidSEW(SEWBits) && "Unexpected SEW");
   MVT XLenVT = Subtarget.getXLenVT();
   SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
 
@@ -4118,10 +4120,10 @@ static SDValue lowerVSSEG(SDValue Op, SelectionDAG &DAG,
                           unsigned Opcode, unsigned BuildOpcode) {
   SDLoc DL(Op);
   EVT VT = Op->getOperand(2).getValueType();
-  int64_t LMUL;
-  int64_t SEWBits;
-  std::tie(SEWBits, LMUL) = getSewLMul(VT.getSimpleVT());
 
+  uint64_t SEWBits =
+      VT.getSimpleVT().getVectorElementType().getScalarSizeInBits();
+  assert(RISCVVType::isValidSEW(SEWBits) && "Unexpected SEW");
   MVT XLenVT = Subtarget.getXLenVT();
   SDValue SEW = DAG.getTargetConstant(SEWBits, DL, XLenVT);
 
@@ -5697,6 +5699,34 @@ SDValue RISCVTargetLowering::lowerVECTOR_REVERSE(SDValue Op,
       DAG.getNode(RISCVISD::SUB_VL, DL, IntVT, SplatVL, VID, Mask, VL);
 
   return DAG.getNode(GatherOpc, DL, VecVT, Op.getOperand(0), Indices, Mask, VL);
+}
+
+SDValue RISCVTargetLowering::lowerVECTOR_SPLICE(SDValue Op,
+                                                SelectionDAG &DAG) const {
+
+  SDLoc DL(Op);
+  SDValue V1 = Op.getOperand(0);
+  SDValue V2 = Op.getOperand(1);
+  SDValue Offset = Op.getOperand(2);
+  MVT XLenVT = Subtarget.getXLenVT();
+  MVT VecVT = Op.getSimpleValueType();
+  MVT MaskVT = MVT::getVectorVT(MVT::i1, VecVT.getVectorElementCount());
+
+  unsigned MinElts = VecVT.getVectorMinNumElements();
+  SDValue VLMax = DAG.getNode(ISD::VSCALE, DL, XLenVT,
+                              DAG.getConstant(MinElts, DL, XLenVT));
+
+  int64_t ImmValue = cast<ConstantSDNode>(Offset)->getSExtValue();
+  Offset = (ImmValue < 0) ? DAG.getNode(ISD::ADD, DL, XLenVT, VLMax, Offset)
+                          : Offset;
+
+  SDValue UndefMask = DAG.getNode(RISCVISD::VMSET_VL, DL, MaskVT, VLMax);
+
+  SDValue VSLIDEDOWN = DAG.getNode(RISCVISD::VSLIDEDOWN_VL, DL, VecVT, V1, V1,
+                                   Offset, UndefMask, VLMax);
+  SDValue Difference = DAG.getNode(ISD::SUB, DL, XLenVT, VLMax, Offset);
+  return DAG.getNode(RISCVISD::VSLIDEUP_VL, DL, VecVT, VSLIDEDOWN, V2,
+                     Difference, UndefMask, VLMax);
 }
 
 SDValue

@@ -398,6 +398,17 @@ public:
   // Whether \p ID is a VP intrinsic ID.
   static bool IsVPIntrinsic(Intrinsic::ID);
 
+  /// Constrained FP {
+
+  // Whether the VP intrinsic \p ID can have a rounding mode bundle.
+  static bool HasRoundingMode(Intrinsic::ID);
+
+  // Whether the VP intrinsic \p ID can have a exception behavior
+  // bundle.
+  static bool HasExceptionBehavior(Intrinsic::ID);
+
+  /// } Constrained FP
+
   /// \return the mask parameter or nullptr.
   Value *getMaskParam() const;
   void setMaskParam(Value *);
