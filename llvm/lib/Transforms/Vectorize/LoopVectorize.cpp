@@ -7386,6 +7386,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   unsigned MaxSafeDepDist = -1U;
   if (Legal->getMaxSafeDepDistBytes() != -1U)
     MaxSafeDepDist = Legal->getMaxSafeDepDistBytes() * 8;
+  const DataLayout &DL = TheFunction->getParent()->getDataLayout();
   // FIXME: This is wrong. Register grouping is not necessary if using scalable
   // vector type. We need another TTI method to indicate it.
 
@@ -7395,12 +7396,17 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   LLVM_DEBUG(dbgs() << "LV(REG): Calculating max register usage:\n");
 
   // A lambda that gets the register usage for the given type and VF.
-  const auto &TTICapture = TTI;
-  auto GetRegUsage = [&TTICapture](Type *Ty, ElementCount VF) {
-    if (Ty->isTokenTy() || !VectorType::isValidElementType(Ty))
-      return 0;
-    return *TTICapture.getRegUsageForType(VectorType::get(Ty, VF)).getValue();
+  auto GetRegUsage = [&DL, MaxSafeDepDist, this](Type *Ty, ElementCount VF) {
+    if (Ty->isTokenTy())
+      return 0U;
+    unsigned TypeSize = DL.getTypeSizeInBits(Ty->getScalarType());
+    return TTI.getVectorRegisterUsage(
+        TTI.useScalableVectorType() // FIXME
+            ? TargetTransformInfo::RGK_ScalableVector
+            : TargetTransformInfo::RGK_FixedWidthVector,
+        VF.getKnownMinValue(), TypeSize, MaxSafeDepDist);
   };
+
 
   for (unsigned int i = 0, s = IdxToInstr.size(); i < s; ++i) {
     Instruction *I = IdxToInstr[i];
