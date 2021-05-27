@@ -40,8 +40,6 @@ add_llvm_target(RISCVCodeGen
   RISCVTargetTransformInfo.cpp
   EPIFoldBroadcast.cpp
   EPIFMAContraction.cpp
-  EPIRemoveRedundantVSETVL.cpp
-  EPIRemoveRedundantVSETVLGlobal.cpp
 
   LINK_COMPONENTS
   Analysis

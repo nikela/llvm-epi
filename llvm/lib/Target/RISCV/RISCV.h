@@ -58,12 +58,6 @@ void initializeEPIFoldBroadcastPass(PassRegistry &);
 
 ModulePass *createEPIFMAContractionPass();
 void initializeEPIFMAContractionPass(PassRegistry &);
-
-FunctionPass *createEPIRemoveRedundantVSETVLPass();
-void initializeEPIRemoveRedundantVSETVLPass(PassRegistry &);
-
-FunctionPass *createEPIRemoveRedundantVSETVLGlobalPass();
-void initializeEPIRemoveRedundantVSETVLGlobalPass(PassRegistry &);
 }
 
 #endif

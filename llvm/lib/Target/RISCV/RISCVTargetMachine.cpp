@@ -54,8 +54,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
 
   initializeEPIFoldBroadcastPass(*PR);
   initializeEPIFMAContractionPass(*PR);
-  initializeEPIRemoveRedundantVSETVLPass(*PR);
-  initializeEPIRemoveRedundantVSETVLGlobalPass(*PR);
 }
 
 static StringRef computeDataLayout(const Triple &TT, StringRef FS) {
