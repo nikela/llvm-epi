@@ -21,10 +21,10 @@ add_public_tablegen_target(RISCVCommonTableGen)
 add_llvm_target(RISCVCodeGen
   RISCVAsmPrinter.cpp
   RISCVCallLowering.cpp
-  RISCVCleanupVSETVLI.cpp
   RISCVExpandAtomicPseudoInsts.cpp
   RISCVExpandPseudoInsts.cpp
   RISCVFrameLowering.cpp
+  RISCVInsertVSETVLI.cpp
   RISCVInstrInfo.cpp
   RISCVInstructionSelector.cpp
   RISCVISelDAGToDAG.cpp
@@ -40,8 +40,6 @@ add_llvm_target(RISCVCodeGen
   RISCVTargetTransformInfo.cpp
   EPIFoldBroadcast.cpp
   EPIFMAContraction.cpp
-  EPIRemoveRedundantVSETVL.cpp
-  EPIRemoveRedundantVSETVLGlobal.cpp
 
   LINK_COMPONENTS
   Analysis

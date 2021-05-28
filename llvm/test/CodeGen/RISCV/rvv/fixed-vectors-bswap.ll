@@ -9,7 +9,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV32:       # %bb.0:
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle16.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV32-NEXT:    slli a2, a1, 8
@@ -17,7 +17,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sh a1, 0(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 1, e16,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v26, v25, 7
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV32-NEXT:    slli a2, a1, 8
@@ -67,7 +67,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sh a1, 2(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle16.v v25, (sp)
 ; LMULMAX2-RV32-NEXT:    vse16.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, 16
@@ -77,7 +77,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV64:       # %bb.0:
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -16
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle16.v v25, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV64-NEXT:    slli a2, a1, 8
@@ -85,7 +85,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sh a1, 0(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 1, e16,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v26, v25, 7
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    slli a2, a1, 8
@@ -135,7 +135,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX2-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sh a1, 2(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle16.v v25, (sp)
 ; LMULMAX2-RV64-NEXT:    vse16.v v25, (a0)
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, 16
@@ -145,7 +145,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle16.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV32-NEXT:    slli a2, a1, 8
@@ -153,7 +153,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX1-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX1-RV32-NEXT:    sh a1, 0(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 1, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v26, v25, 7
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV32-NEXT:    slli a2, a1, 8
@@ -203,7 +203,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX1-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX1-RV32-NEXT:    sh a1, 2(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle16.v v25, (sp)
 ; LMULMAX1-RV32-NEXT:    vse16.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, 16
@@ -213,7 +213,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV64:       # %bb.0:
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, -16
 ; LMULMAX1-RV64-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle16.v v25, (a0)
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV64-NEXT:    slli a2, a1, 8
@@ -221,7 +221,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX1-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX1-RV64-NEXT:    sh a1, 0(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v26, v25, 7
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV64-NEXT:    slli a2, a1, 8
@@ -271,7 +271,7 @@ define void @bswap_v8i16(<8 x i16>* %x, <8 x i16>* %y) {
 ; LMULMAX1-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX1-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX1-RV64-NEXT:    sh a1, 2(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle16.v v25, (sp)
 ; LMULMAX1-RV64-NEXT:    vse16.v v25, (a0)
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, 16
@@ -289,7 +289,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV32:       # %bb.0:
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV32-NEXT:    srli a2, a1, 8
@@ -305,7 +305,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a4
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV32-NEXT:    sw a1, 0(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v26, v25, 3
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV32-NEXT:    srli a2, a1, 8
@@ -342,7 +342,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v25, (sp)
 ; LMULMAX2-RV32-NEXT:    vse32.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, 16
@@ -352,7 +352,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV64:       # %bb.0:
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -16
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle32.v v25, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV64-NEXT:    srliw a2, a1, 8
@@ -368,7 +368,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a4
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV64-NEXT:    sw a1, 0(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v26, v25, 3
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    srliw a2, a1, 8
@@ -405,7 +405,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV64-NEXT:    sw a1, 4(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle32.v v25, (sp)
 ; LMULMAX2-RV64-NEXT:    vse32.v v25, (a0)
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, 16
@@ -415,7 +415,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV32-NEXT:    srli a2, a1, 8
@@ -431,7 +431,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a4
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 0(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v26, v25, 3
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV32-NEXT:    srli a2, a1, 8
@@ -468,7 +468,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (sp)
 ; LMULMAX1-RV32-NEXT:    vse32.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, 16
@@ -478,7 +478,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV64:       # %bb.0:
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, -16
 ; LMULMAX1-RV64-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle32.v v25, (a0)
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV64-NEXT:    srliw a2, a1, 8
@@ -494,7 +494,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a4
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV64-NEXT:    sw a1, 0(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v26, v25, 3
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV64-NEXT:    srliw a2, a1, 8
@@ -531,7 +531,7 @@ define void @bswap_v4i32(<4 x i32>* %x, <4 x i32>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV64-NEXT:    sw a1, 4(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle32.v v25, (sp)
 ; LMULMAX1-RV64-NEXT:    vse32.v v25, (a0)
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, 16
@@ -549,7 +549,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX2-RV32:       # %bb.0:
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle64.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV32-NEXT:    srli a2, a1, 8
@@ -565,7 +565,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a4
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v26, v25, 1
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV32-NEXT:    srli a2, a1, 8
@@ -603,18 +603,18 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX2-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV32-NEXT:    sw a1, 8(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v25, (sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX2-RV32-NEXT:    vse64.v v25, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, sp, 16
 ; LMULMAX2-RV32-NEXT:    ret
 ;
 ; LMULMAX2-RV64-LABEL: bswap_v2i64:
 ; LMULMAX2-RV64:       # %bb.0:
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle64.v v25, (a0)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v26, v25, 1
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    srli a2, a1, 40
@@ -646,7 +646,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a5
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a4
 ; LMULMAX2-RV64-NEXT:    or a1, a1, t0
-; LMULMAX2-RV64-NEXT:    vsetivli a4, 2, e64,m1,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX2-RV64-NEXT:    vmv.v.x v26, a1
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX2-RV64-NEXT:    srli a4, a1, 24
@@ -678,7 +678,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -16
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 16
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle64.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV32-NEXT:    srli a2, a1, 8
@@ -694,7 +694,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a4
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v26, v25, 1
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV32-NEXT:    srli a2, a1, 8
@@ -732,18 +732,18 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 8(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vse64.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, 16
 ; LMULMAX1-RV32-NEXT:    ret
 ;
 ; LMULMAX1-RV64-LABEL: bswap_v2i64:
 ; LMULMAX1-RV64:       # %bb.0:
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle64.v v25, (a0)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v26, v25, 1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX1-RV64-NEXT:    srli a2, a1, 40
@@ -775,7 +775,7 @@ define void @bswap_v2i64(<2 x i64>* %x, <2 x i64>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a4
 ; LMULMAX1-RV64-NEXT:    or a1, a1, t0
-; LMULMAX1-RV64-NEXT:    vsetivli a4, 2, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vmv.v.x v26, a1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV64-NEXT:    srli a4, a1, 24
@@ -822,7 +822,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV32-NEXT:    addi s0, sp, 64
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa s0, 0
 ; LMULMAX2-RV32-NEXT:    andi sp, sp, -32
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 16, e16,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle16.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV32-NEXT:    slli a2, a1, 8
@@ -830,7 +830,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sh a1, 0(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 1, e16,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v28, v26, 15
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a1, v28
 ; LMULMAX2-RV32-NEXT:    slli a2, a1, 8
@@ -936,7 +936,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV32-NEXT:    srli a1, a1, 24
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sh a1, 2(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 16, e16,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle16.v v26, (sp)
 ; LMULMAX2-RV32-NEXT:    vse16.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, s0, -64
@@ -949,7 +949,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV64:       # %bb.0:
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 16, e16,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle16.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v26
 ; LMULMAX2-RV64-NEXT:    slli a2, a1, 8
@@ -957,7 +957,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sh a1, 0(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 1, e16,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v28, v26, 15
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v28
 ; LMULMAX2-RV64-NEXT:    slli a2, a1, 8
@@ -1063,7 +1063,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX2-RV64-NEXT:    srli a1, a1, 56
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sh a1, 2(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 16, e16,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle16.v v26, (sp)
 ; LMULMAX2-RV64-NEXT:    vse16.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, 32
@@ -1073,7 +1073,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -32
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    addi a1, a0, 16
 ; LMULMAX1-RV32-NEXT:    vle16.v v26, (a1)
 ; LMULMAX1-RV32-NEXT:    vle16.v v25, (a0)
@@ -1083,7 +1083,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV32-NEXT:    srli a2, a2, 24
 ; LMULMAX1-RV32-NEXT:    or a2, a3, a2
 ; LMULMAX1-RV32-NEXT:    sh a2, 16(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a2, 1, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v27, v26, 7
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a2, v27
 ; LMULMAX1-RV32-NEXT:    slli a3, a2, 8
@@ -1188,7 +1188,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV32-NEXT:    srli a2, a2, 24
 ; LMULMAX1-RV32-NEXT:    or a2, a3, a2
 ; LMULMAX1-RV32-NEXT:    sh a2, 2(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a2, 8, e16,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle16.v v25, (sp)
 ; LMULMAX1-RV32-NEXT:    addi a2, sp, 16
 ; LMULMAX1-RV32-NEXT:    vle16.v v26, (a2)
@@ -1201,7 +1201,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV64:       # %bb.0:
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX1-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 8, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    addi a1, a0, 16
 ; LMULMAX1-RV64-NEXT:    vle16.v v26, (a1)
 ; LMULMAX1-RV64-NEXT:    vle16.v v25, (a0)
@@ -1211,7 +1211,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV64-NEXT:    srli a2, a2, 56
 ; LMULMAX1-RV64-NEXT:    or a2, a3, a2
 ; LMULMAX1-RV64-NEXT:    sh a2, 16(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a2, 1, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v27, v26, 7
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a2, v27
 ; LMULMAX1-RV64-NEXT:    slli a3, a2, 8
@@ -1316,7 +1316,7 @@ define void @bswap_v16i16(<16 x i16>* %x, <16 x i16>* %y) {
 ; LMULMAX1-RV64-NEXT:    srli a2, a2, 56
 ; LMULMAX1-RV64-NEXT:    or a2, a3, a2
 ; LMULMAX1-RV64-NEXT:    sh a2, 2(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a2, 8, e16,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle16.v v25, (sp)
 ; LMULMAX1-RV64-NEXT:    addi a2, sp, 16
 ; LMULMAX1-RV64-NEXT:    vle16.v v26, (a2)
@@ -1344,7 +1344,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV32-NEXT:    addi s0, sp, 64
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa s0, 0
 ; LMULMAX2-RV32-NEXT:    andi sp, sp, -32
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a3, v26
 ; LMULMAX2-RV32-NEXT:    srli a2, a3, 8
@@ -1360,7 +1360,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a3, a3, a5
 ; LMULMAX2-RV32-NEXT:    or a3, a3, a4
 ; LMULMAX2-RV32-NEXT:    sw a3, 0(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a3, 1, e32,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v28, v26, 7
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a3, v28
 ; LMULMAX2-RV32-NEXT:    srli a4, a3, 8
@@ -1445,7 +1445,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a2, a3, a2
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v26, (sp)
 ; LMULMAX2-RV32-NEXT:    vse32.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, s0, -64
@@ -1458,7 +1458,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV64:       # %bb.0:
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle32.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a3, v26
 ; LMULMAX2-RV64-NEXT:    srliw a2, a3, 8
@@ -1474,7 +1474,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a3, a3, a5
 ; LMULMAX2-RV64-NEXT:    or a3, a3, a4
 ; LMULMAX2-RV64-NEXT:    sw a3, 0(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a3, 1, e32,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v28, v26, 7
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a3, v28
 ; LMULMAX2-RV64-NEXT:    srliw a4, a3, 8
@@ -1559,7 +1559,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a2, a3, a2
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sw a1, 4(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle32.v v26, (sp)
 ; LMULMAX2-RV64-NEXT:    vse32.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, 32
@@ -1569,7 +1569,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -32
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    addi a6, a0, 16
 ; LMULMAX1-RV32-NEXT:    vle32.v v26, (a6)
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (a0)
@@ -1587,7 +1587,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a4, a1
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV32-NEXT:    sw a1, 16(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v27, v26, 3
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v27
 ; LMULMAX1-RV32-NEXT:    srli a4, a1, 8
@@ -1671,7 +1671,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 4(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (sp)
 ; LMULMAX1-RV32-NEXT:    addi a1, sp, 16
 ; LMULMAX1-RV32-NEXT:    vle32.v v26, (a1)
@@ -1684,7 +1684,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV64:       # %bb.0:
 ; LMULMAX1-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX1-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    addi a6, a0, 16
 ; LMULMAX1-RV64-NEXT:    vle32.v v26, (a6)
 ; LMULMAX1-RV64-NEXT:    vle32.v v25, (a0)
@@ -1702,7 +1702,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a4, a1
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV64-NEXT:    sw a1, 16(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v27, v26, 3
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v27
 ; LMULMAX1-RV64-NEXT:    srliw a4, a1, 8
@@ -1786,7 +1786,7 @@ define void @bswap_v8i32(<8 x i32>* %x, <8 x i32>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV64-NEXT:    sw a1, 4(sp)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vle32.v v25, (sp)
 ; LMULMAX1-RV64-NEXT:    addi a1, sp, 16
 ; LMULMAX1-RV64-NEXT:    vle32.v v26, (a1)
@@ -1814,7 +1814,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV32-NEXT:    addi s0, sp, 64
 ; LMULMAX2-RV32-NEXT:    .cfi_def_cfa s0, 0
 ; LMULMAX2-RV32-NEXT:    andi sp, sp, -32
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 4, e64,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle64.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a3, v26
 ; LMULMAX2-RV32-NEXT:    srli a2, a3, 8
@@ -1830,7 +1830,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a3, a3, a5
 ; LMULMAX2-RV32-NEXT:    or a3, a3, a4
 ; LMULMAX2-RV32-NEXT:    sw a3, 4(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a3, 1, e64,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vslidedown.vi v28, v26, 3
 ; LMULMAX2-RV32-NEXT:    vmv.x.s a3, v28
 ; LMULMAX2-RV32-NEXT:    srli a4, a3, 8
@@ -1916,9 +1916,9 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV32-NEXT:    or a2, a2, a3
 ; LMULMAX2-RV32-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV32-NEXT:    sw a1, 8(sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 8, e32,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vle32.v v26, (sp)
-; LMULMAX2-RV32-NEXT:    vsetivli a1, 4, e64,m2,ta,mu
+; LMULMAX2-RV32-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
 ; LMULMAX2-RV32-NEXT:    vse64.v v26, (a0)
 ; LMULMAX2-RV32-NEXT:    addi sp, s0, -64
 ; LMULMAX2-RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
@@ -1930,7 +1930,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV64:       # %bb.0:
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, -32
 ; LMULMAX2-RV64-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 4, e64,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle64.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a2, v26
 ; LMULMAX2-RV64-NEXT:    srli a1, a2, 24
@@ -1963,7 +1963,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a2, a2, a3
 ; LMULMAX2-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX2-RV64-NEXT:    sd a1, 0(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 1, e64,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vslidedown.vi v28, v26, 3
 ; LMULMAX2-RV64-NEXT:    vmv.x.s a1, v28
 ; LMULMAX2-RV64-NEXT:    srli a2, a1, 40
@@ -2036,7 +2036,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX2-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX2-RV64-NEXT:    sd a1, 8(sp)
-; LMULMAX2-RV64-NEXT:    vsetivli a1, 4, e64,m2,ta,mu
+; LMULMAX2-RV64-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
 ; LMULMAX2-RV64-NEXT:    vle64.v v26, (sp)
 ; LMULMAX2-RV64-NEXT:    vse64.v v26, (a0)
 ; LMULMAX2-RV64-NEXT:    addi sp, sp, 32
@@ -2046,7 +2046,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV32:       # %bb.0:
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, -32
 ; LMULMAX1-RV32-NEXT:    .cfi_def_cfa_offset 32
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    addi a6, a0, 16
 ; LMULMAX1-RV32-NEXT:    vle64.v v26, (a6)
 ; LMULMAX1-RV32-NEXT:    vle64.v v25, (a0)
@@ -2064,7 +2064,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a4, a1
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV32-NEXT:    sw a1, 20(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vslidedown.vi v27, v26, 1
 ; LMULMAX1-RV32-NEXT:    vmv.x.s a1, v27
 ; LMULMAX1-RV32-NEXT:    srli a4, a1, 8
@@ -2149,11 +2149,11 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV32-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV32-NEXT:    sw a1, 8(sp)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 4, e32,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vle32.v v25, (sp)
 ; LMULMAX1-RV32-NEXT:    addi a1, sp, 16
 ; LMULMAX1-RV32-NEXT:    vle32.v v26, (a1)
-; LMULMAX1-RV32-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV32-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV32-NEXT:    vse64.v v25, (a0)
 ; LMULMAX1-RV32-NEXT:    vse64.v v26, (a6)
 ; LMULMAX1-RV32-NEXT:    addi sp, sp, 32
@@ -2161,11 +2161,11 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ;
 ; LMULMAX1-RV64-LABEL: bswap_v4i64:
 ; LMULMAX1-RV64:       # %bb.0:
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 2, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    addi a6, a0, 16
 ; LMULMAX1-RV64-NEXT:    vle64.v v27, (a6)
 ; LMULMAX1-RV64-NEXT:    vle64.v v25, (a0)
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v26, v27, 1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a2, v26
 ; LMULMAX1-RV64-NEXT:    srli a1, a2, 40
@@ -2197,7 +2197,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a2, a1
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a3
-; LMULMAX1-RV64-NEXT:    vsetivli a2, 2, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vmv.v.x v26, a1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v27
 ; LMULMAX1-RV64-NEXT:    srli a2, a1, 24
@@ -2222,7 +2222,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a2
 ; LMULMAX1-RV64-NEXT:    vmv.s.x v26, a1
-; LMULMAX1-RV64-NEXT:    vsetivli a1, 1, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 1, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vslidedown.vi v27, v25, 1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v27
 ; LMULMAX1-RV64-NEXT:    srli a2, a1, 40
@@ -2246,7 +2246,7 @@ define void @bswap_v4i64(<4 x i64>* %x, <4 x i64>* %y) {
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a5
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a3
 ; LMULMAX1-RV64-NEXT:    or a1, a1, a2
-; LMULMAX1-RV64-NEXT:    vsetivli a2, 2, e64,m1,ta,mu
+; LMULMAX1-RV64-NEXT:    vsetivli zero, 2, e64,m1,ta,mu
 ; LMULMAX1-RV64-NEXT:    vmv.v.x v27, a1
 ; LMULMAX1-RV64-NEXT:    vmv.x.s a1, v25
 ; LMULMAX1-RV64-NEXT:    srli a2, a1, 24

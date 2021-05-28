@@ -211,7 +211,7 @@ public:
                                          TTI::TargetCostKind CostKind,
                                          const Instruction *I);
 
-  bool isLegalElementTypeForRVV(Type *ScalarTy) {
+  bool isLegalElementTypeForRVV(Type *ScalarTy) const {
     if (ScalarTy->isPointerTy())
       return true;
 
@@ -265,20 +265,47 @@ public:
     return isLegalMaskedGatherScatter(DataType, Alignment);
   }
 
-  bool isLegalToVectorizeReduction(RecurrenceDescriptor RdxDesc,
-                                   ElementCount VF) const;
-
   InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                         TTI::TargetCostKind CostKind);
 
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
     // FIXME: we may want to be more selective.
-    if (ST->hasStdExtV())
+    if (ST->hasStdExtV() && PI.getIntrinsicID() != Intrinsic::vp_frem)
       return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
               /* Op */ TargetTransformInfo::VPLegalization::Legal};
 
     return BaseT::getVPLegalizationStrategy(PI);
+  }
+
+  bool isLegalToVectorizeReduction(RecurrenceDescriptor RdxDesc,
+                                   ElementCount VF) const {
+    if (!ST->hasStdExtV())
+      return false;
+
+    if (!VF.isScalable())
+      return true;
+
+    Type *Ty = RdxDesc.getRecurrenceType();
+    if (!isLegalElementTypeForRVV(Ty))
+      return false;
+
+    switch (RdxDesc.getRecurrenceKind()) {
+    case RecurKind::Add:
+    case RecurKind::FAdd:
+    case RecurKind::And:
+    case RecurKind::Or:
+    case RecurKind::Xor:
+    case RecurKind::SMin:
+    case RecurKind::SMax:
+    case RecurKind::UMin:
+    case RecurKind::UMax:
+    case RecurKind::FMin:
+    case RecurKind::FMax:
+      return true;
+    default:
+      return false;
+    }
   }
 };
 

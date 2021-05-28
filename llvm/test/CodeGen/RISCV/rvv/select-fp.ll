@@ -346,7 +346,7 @@ define <vscale x 8 x float> @select_nxv8f32(i1 zeroext %c, <vscale x 8 x float> 
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <vscale x 8 x float> %a, <vscale x 8 x float> %b
@@ -360,7 +360,7 @@ define <vscale x 8 x float> @selectcc_nxv8f32(float %a, float %b, <vscale x 8 x 
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
@@ -486,7 +486,7 @@ define <vscale x 8 x double> @select_nxv8f64(i1 zeroext %c, <vscale x 8 x double
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <vscale x 8 x double> %a, <vscale x 8 x double> %b
@@ -500,7 +500,7 @@ define <vscale x 8 x double> @selectcc_nxv8f64(double %a, double %b, <vscale x 8
 ; CHECK-NEXT:    neg a0, a0
 ; CHECK-NEXT:    vsetvli a1, zero, e8,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v0, a0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m8,ta,mu
+; CHECK-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; CHECK-NEXT:    vmerge.vvm v8, v16, v8, v0
 ; CHECK-NEXT:    ret
   %cmp = fcmp oeq double %a, %b

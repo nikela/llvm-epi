@@ -204,6 +204,11 @@ public:
 
   void replaceVariableLocationOp(Value *OldValue, Value *NewValue);
   void replaceVariableLocationOp(unsigned OpIdx, Value *NewValue);
+  /// Adding a new location operand will always result in this intrinsic using
+  /// an ArgList, and must always be accompanied by a new expression that uses
+  /// the new operand.
+  void addVariableLocationOps(ArrayRef<Value *> NewValues,
+                              DIExpression *NewExpr);
 
   void setVariable(DILocalVariable *NewVar) {
     setArgOperand(1, MetadataAsValue::get(NewVar->getContext(), NewVar));
@@ -393,6 +398,17 @@ public:
   // Whether \p ID is a VP intrinsic ID.
   static bool IsVPIntrinsic(Intrinsic::ID);
 
+  /// Constrained FP {
+
+  // Whether the VP intrinsic \p ID can have a rounding mode bundle.
+  static bool HasRoundingMode(Intrinsic::ID);
+
+  // Whether the VP intrinsic \p ID can have a exception behavior
+  // bundle.
+  static bool HasExceptionBehavior(Intrinsic::ID);
+
+  /// } Constrained FP
+
   /// \return the mask parameter or nullptr.
   Value *getMaskParam() const;
   void setMaskParam(Value *);
@@ -417,12 +433,12 @@ public:
   }
 
   // Equivalent non-predicated opcode
-  unsigned getFunctionalOpcode() const {
+  Optional<unsigned> getFunctionalOpcode() const {
     return GetFunctionalOpcodeForVP(getIntrinsicID());
   }
 
   // Equivalent non-predicated opcode
-  static unsigned GetFunctionalOpcodeForVP(Intrinsic::ID ID);
+  static Optional<unsigned> GetFunctionalOpcodeForVP(Intrinsic::ID ID);
 };
 
 /// This is the common base class for constrained floating point intrinsics.
@@ -432,6 +448,7 @@ public:
   bool isTernaryOp() const;
   Optional<RoundingMode> getRoundingMode() const;
   Optional<fp::ExceptionBehavior> getExceptionBehavior() const;
+  bool isDefaultFPEnvironment() const;
 
   // Methods for support type inquiry through isa, cast, and dyn_cast:
   static bool classof(const IntrinsicInst *I);

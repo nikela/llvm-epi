@@ -14,26 +14,32 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    srli a6, a0, 32
 ; CHECK-NEXT:  .LBB0_2: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    slli t2, a5, 3
-; CHECK-NEXT:    add a7, a1, t2
-; CHECK-NEXT:    sub t0, a6, a5
-; CHECK-NEXT:    vsetvli t1, t0, e64,m1,tu,mu
+; CHECK-NEXT:    slli t0, a5, 3
+; CHECK-NEXT:    add a7, a1, t0
+; CHECK-NEXT:    sub a0, a6, a5
+; CHECK-NEXT:    vsetvli t1, a0, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli zero, t1, e64,m1,ta,mu
 ; CHECK-NEXT:    vle64.v v25, (a7)
-; CHECK-NEXT:    vmflt.vf v25, v25, ft0
-; CHECK-NEXT:    add a0, a2, t2
+; CHECK-NEXT:    vmflt.vf v28, v25, ft0
+; CHECK-NEXT:    add a0, a2, t0
+; CHECK-NEXT:    vle64.v v25, (a0)
+; CHECK-NEXT:    add a0, a3, t0
 ; CHECK-NEXT:    vle64.v v26, (a0)
-; CHECK-NEXT:    add a0, a3, t2
-; CHECK-NEXT:    vle64.v v27, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8,mf8,ta,mu
-; CHECK-NEXT:    vmnand.mm v0, v25, v25
-; CHECK-NEXT:    vsetvli a0, t0, e64,m1,ta,mu
-; CHECK-NEXT:    vfmul.vv v28, v26, v27, v0.t
-; CHECK-NEXT:    add a0, a4, t2
-; CHECK-NEXT:    vse64.v v28, (a0), v0.t
-; CHECK-NEXT:    vmv1r.v v0, v25
-; CHECK-NEXT:    vfadd.vv v26, v26, v27, v0.t
+; CHECK-NEXT:    vmnand.mm v0, v28, v28
+; CHECK-NEXT:    slli a0, t1, 32
+; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vfmul.vv v27, v25, v26, v0.t
+; CHECK-NEXT:    add t0, t0, a4
+; CHECK-NEXT:    vsetvli zero, t1, e64,m1,ta,mu
+; CHECK-NEXT:    vse64.v v27, (t0), v0.t
+; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vmv1r.v v0, v28
+; CHECK-NEXT:    vfadd.vv v25, v25, v26, v0.t
+; CHECK-NEXT:    vsetvli zero, t1, e64,m1,ta,mu
 ; CHECK-NEXT:    add a5, a5, t1
-; CHECK-NEXT:    vse64.v v26, (a7), v0.t
+; CHECK-NEXT:    vse64.v v25, (a7), v0.t
 ; CHECK-NEXT:    bne a5, a6, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.cond.cleanup
 ; CHECK-NEXT:    ret
@@ -62,11 +68,11 @@ vector.body:                                      ; preds = %vector.body, %for.b
   %9 = bitcast double* %8 to <vscale x 1 x double>*
   %vp.op.load33 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %9, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %10 = xor <vscale x 1 x i1> %5, shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer)
-  %vp.op = call <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> %10, i32 %4)
+  %vp.op = call <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, <vscale x 1 x i1> %10, i32 %4)
   %11 = getelementptr inbounds double, double* %d, i64 %index
   %12 = bitcast double* %11 to <vscale x 1 x double>*
   call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op, <vscale x 1 x double>* %12, i32 8, <vscale x 1 x i1> %10, i32 %4)
-  %vp.op36 = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, metadata !"round.tonearest", metadata !"fpexcept.ignore", <vscale x 1 x i1> %5, i32 %4)
+  %vp.op36 = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, <vscale x 1 x i1> %5, i32 %4)
   call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op36, <vscale x 1 x double>* %3, i32 8, <vscale x 1 x i1> %5, i32 %4)
   %index.next = add i64 %index, %2
   %13 = icmp eq i64 %index.next, %wide.trip.count
@@ -86,10 +92,10 @@ declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x doub
 declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, i8 immarg, <vscale x 1 x i1>, i32) #3
 
 ; Function Attrs: nounwind readnone willreturn
-declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, metadata, <vscale x 1 x i1>, i32) #4
+declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #4
 
 ; Function Attrs: argmemonly nosync nounwind willreturn writeonly
 declare void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i32 immarg, <vscale x 1 x i1>, i32) #5
 
 ; Function Attrs: nounwind readnone willreturn
-declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, metadata, <vscale x 1 x i1>, i32) #4
+declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #4

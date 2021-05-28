@@ -71,7 +71,7 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    sd a0, 64(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    ld a0, 16(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    # implicit-def: $v25
-; SPILL-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; SPILL-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    vle64.v v25, (a0)
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload

@@ -57,6 +57,20 @@ define <vscale x 8 x double> @cos_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 
   ret <vscale x 8 x double> %1
 }
 
+define <vscale x 1 x float> @cos_nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x float> %b) nounwind {
+; CHECK-LABEL: cos_nxv1f32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    call __epi_cos_nxv1f32@plt
+; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    ret
+  %1 = call <vscale x 1 x float> @llvm.cos.nxv1f32(<vscale x 1 x float> %b)
+  ret <vscale x 1 x float> %1
+}
+
 define <vscale x 2 x float> @cos_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b) nounwind {
 ; CHECK-LABEL: cos_nxv2f32:
 ; CHECK:       # %bb.0:
@@ -117,6 +131,7 @@ declare <vscale x 1 x double> @llvm.cos.nxv1f64(<vscale x 1 x double>)
 declare <vscale x 2 x double> @llvm.cos.nxv2f64(<vscale x 2 x double>)
 declare <vscale x 4 x double> @llvm.cos.nxv4f64(<vscale x 4 x double>)
 declare <vscale x 8 x double> @llvm.cos.nxv8f64(<vscale x 8 x double>)
+declare <vscale x 1 x float> @llvm.cos.nxv1f32(<vscale x 1 x float>)
 declare <vscale x 2 x float> @llvm.cos.nxv2f32(<vscale x 2 x float>)
 declare <vscale x 4 x float> @llvm.cos.nxv4f32(<vscale x 4 x float>)
 declare <vscale x 8 x float> @llvm.cos.nxv8f32(<vscale x 8 x float>)

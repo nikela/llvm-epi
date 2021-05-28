@@ -40,9 +40,8 @@ EnableGEPOpt("riscv-gep-opt", cl::Hidden,
              cl::desc("Enable optimizations on complex GEPs"),
              cl::init(false));
 
-static cl::opt<bool> EPIPipeline("epi-pipeline", cl::Hidden,
-                                 cl::desc("Use EPI pipeline passes"),
-                                 cl::init(false));
+cl::opt<bool> EPIPipeline("epi-pipeline", cl::Hidden,
+                          cl::desc("Use EPI pipeline passes"), cl::init(false));
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
@@ -51,11 +50,10 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   initializeGlobalISel(*PR);
   initializeRISCVMergeBaseOffsetOptPass(*PR);
   initializeRISCVExpandPseudoPass(*PR);
+  initializeRISCVInsertVSETVLIPass(*PR);
+
   initializeEPIFoldBroadcastPass(*PR);
   initializeEPIFMAContractionPass(*PR);
-  initializeEPIRemoveRedundantVSETVLPass(*PR);
-  initializeEPIRemoveRedundantVSETVLGlobalPass(*PR);
-  initializeRISCVCleanupVSETVLIPass(*PR);
 }
 
 static StringRef computeDataLayout(const Triple &TT, StringRef FS) {
@@ -236,14 +234,7 @@ void RISCVPassConfig::addPreEmitPass2() {
 }
 
 void RISCVPassConfig::addPreRegAlloc() {
-  if (TM->getOptLevel() != CodeGenOpt::None) {
+  if (TM->getOptLevel() != CodeGenOpt::None)
     addPass(createRISCVMergeBaseOffsetOptPass());
-    if (!EPIPipeline) {
-      addPass(createRISCVCleanupVSETVLIPass());
-    }
-  }
-  if (EPIPipeline) {
-    addPass(createEPIRemoveRedundantVSETVLPass());
-    addPass(createEPIRemoveRedundantVSETVLGlobalPass());
-  }
+  addPass(createRISCVInsertVSETVLIPass());
 }
