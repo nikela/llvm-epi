@@ -1219,11 +1219,11 @@ let HasMergeOperand = 0,
   def vfirst : EPIMaskToScalarBuiltin<"m", "sm", "csil">;
 }
 
-let HasMergeOperand = 0,
+let HasMergeOperand = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_m_b${Boolean} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, mask, vl) \
-        ${Name}_m_b${Boolean}_m (mask, /*TODO: undefined bool*/ vundefined() a, vl)}] in
+        ${Name}_m_b${Boolean}_m (mask, vmset_m_b${Boolean}(vl), a, vl)}] in
 {
 def vmsbf : EPIMaskUnaBuiltin<"m", "mm", "csil">;
 def vmsif : EPIMaskUnaBuiltin<"m", "mm", "csil">;
