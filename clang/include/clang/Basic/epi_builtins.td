@@ -289,7 +289,7 @@ class EPINulBuiltin<string suffix, string prototype, string type_range>
 // Builtin definitions.
 //===----------------------------------------------------------------------===//
 let HasVL = 0, HasMask = 0, HasSideEffects = 1, LMUL = [1],
-    ManualCodegen = [{}] in
+    RegisterInClang = 0, ManualCodegen = [{}] in
 {
   let CompatibilityCode = [{#define __builtin_epi_${Name}(vl, sew, lmul) \
         ${Name}_e${Size}${LMul} (vl)}] in
@@ -310,7 +310,8 @@ let ManualCodegen = [{
       llvm::PointerType::getUnqual(ResultType));
 }] in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, lv) \
+  let RegisterInClang = 0,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, lv) \
         vle${Size}_v_${Type}${LMul} (addr, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, mask, lv) \
         vle${Size}_v_${Type}${LMul}_m (mask, merge, addr, vl)}] in
@@ -318,7 +319,7 @@ let ManualCodegen = [{
 
   def vload_nt : EPIBuiltin<"v", "vPCe", "csilfd">;
 
-  let IntrinsicName = "vload", IntrinsicNameMask = "vload_mask",
+  let IntrinsicName = "vload", IntrinsicNameMask = "vload_mask", RegisterInClang = 0,
       CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, lv) \
         vle${Size}_v_${UType}${LMul} (addr, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, mask, lv) \
@@ -339,7 +340,8 @@ let ManualCodegen = [{
       llvm::PointerType::getUnqual(ResultType));
 }] in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, stride, vl) \
+  let RegisterInClang = 0,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, stride, vl) \
         vlse${Size}_v_${Type}${LMul} (addr, stride, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, stride, mask, vl) \
         vlse${Size}_v_${Type}${LMul}_m (mask, merge, addr, stride, vl)}] in
@@ -349,6 +351,7 @@ let ManualCodegen = [{
 
   let IntrinsicName = "vload_strided",
       IntrinsicNameMask = "vload_strided_mask",
+      RegisterInClang = 0,
       CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, stride, vl) \
         vlse${Size}_v_${UType}${LMul} (addr, stride, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, stride, mask, vl) \
@@ -370,7 +373,8 @@ let ManualCodegen = [{
       llvm::PointerType::getUnqual(ResultType));
 }] in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, index, vl) \
+  let RegisterInClang = 0,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, index, vl) \
         vluxei${Size}_v_${Type}${LMul} (addr, index, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, index, mask, vl) \
         vluxei${Size}_v_${Type}${LMul}_m (mask, merge, addr, index, vl)}] in
@@ -380,6 +384,7 @@ let ManualCodegen = [{
 
   let IntrinsicName = "vload_indexed",
       IntrinsicNameMask = "vload_indexed_mask",
+      RegisterInClang = 0,
       CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, index, vl) \
         vluxei${Size}_v_${UType}${LMul} (addr, index, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, addr, index, mask, vl) \
@@ -420,7 +425,8 @@ let HasMergeOperand = 0 in
     IntrinsicTypes = {Ops[0]->getType(), Ops[2]->getType()};
   }] in
   {
-    let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, vl) \
+    let RegisterInClang = 0,
+        CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, vl) \
         vse${Size}_v_${Type}${LMul} (addr, value, vl)}],
         CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, mask, vl) \
         vse${Size}_v_${Type}${LMul}_m (mask, addr, value, vl)}] in
@@ -429,6 +435,7 @@ let HasMergeOperand = 0 in
     def vstore_nt : EPIBuiltin<"v", "0Pev", "csilfd">;
 
     let IntrinsicName = "vstore", IntrinsicNameMask = "vstore_mask",
+      RegisterInClang = 0,
       CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, vl) \
         vse${Size}_v_${UType}${LMul} (addr, value, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, vl) \
@@ -453,7 +460,8 @@ let HasMergeOperand = 0 in
     IntrinsicTypes = {Ops[0]->getType(), Ops[3]->getType()};
   }] in
   {
-    let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, stride, vl) \
+    let RegisterInClang = 0,
+        CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, stride, vl) \
         vsse${Size}_v_${Type}${LMul} (addr, stride, value, vl)}],
         CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, stride, mask, vl) \
         vsse${Size}_v_${Type}${LMul}_m (mask, addr, stride, value, vl)}] in
@@ -463,6 +471,7 @@ let HasMergeOperand = 0 in
 
     let IntrinsicName = "vstore_strided",
         IntrinsicNameMask = "vstore_strided_mask",
+        RegisterInClang = 0,
         CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, stride, vl) \
         vsse${Size}_v_${UType}${LMul} (addr, stride, value, vl)}],
         CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, stride, mask, vl) \
@@ -488,7 +497,8 @@ let HasMergeOperand = 0 in
     IntrinsicTypes = {Ops[0]->getType(), Ops[2]->getType(), Ops[3]->getType()};
   }] in
   {
-    let CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, indexes, vl) \
+    let RegisterInClang = 0,
+        CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, indexes, vl) \
         vsuxei${Size}_v_${Type}${LMul} (addr, indexes, value, vl)}],
         CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, indexes, mask, vl) \
         vsuxei${Size}_v_${Type}${LMul}_m (mask, addr, indexes, value, vl)}] in
@@ -498,6 +508,7 @@ let HasMergeOperand = 0 in
 
     let IntrinsicName = "vstore_indexed",
         IntrinsicNameMask = "vstore_indexed_mask",
+        RegisterInClang = 0,
         CompatibilityCode = [{#define __builtin_epi_${FullName}(addr, value, indexes, vl) \
         vsuxei${Size}_v_${UType}${LMul} (addr, indexes, value, vl)}],
         CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(addr, value, indexes, mask, vl) \
@@ -848,7 +859,8 @@ def vsseg8_indexed : EPIBuiltin<"TTTTTTTTv", "0PeTTTTTTTTvIv", "csilfd">;
 
 def vrsub : EPIBinBuiltin<"v", "vve", "csil">;
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${Type}${LMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${Type}${LMul}_m (mask, merge, a, b, vl)}] in {
@@ -891,7 +903,8 @@ def vsplat : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 def vrgather : EPIBinBuiltin<"v", "vvIv", "csilfd">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${WidenedType}${WidenedLMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${WidenedType}${WidenedLMul}_m (mask, merge, a, b, vl)}] in {
@@ -905,7 +918,8 @@ def vfwsub : EPIWidenBinBuiltin<"w", "wvv", "f">;
 def vfwmul : EPIWidenBinBuiltin<"w", "wvv", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${WidenedUType}${WidenedLMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${WidenedUType}${WidenedLMul}_m (mask, merge, a, b, vl)}] in {
@@ -914,7 +928,8 @@ def vwsubu : EPIWidenBinBuiltin<"w", "wvv", "csi">;
 def vwmulu : EPIWidenBinBuiltin<"w", "wvv", "csi">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}v_${WidenedType}${WidenedLMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}v_${WidenedType}${WidenedLMul}_m (mask, merge, a, b, vl)}] in {
@@ -925,7 +940,8 @@ def vfwadd_w : EPIBinBuiltin<"w", "wwv", "f">;
 def vfwsub_w : EPIBinBuiltin<"w", "wwv", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}v_${WidenedUType}${WidenedLMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}v_${WidenedUType}${WidenedLMul}_m (mask, merge, a, b, vl)}] in {
@@ -933,14 +949,15 @@ def vwaddu_w : EPIBinBuiltin<"w", "wwv", "csi">;
 def vwsubu_w : EPIBinBuiltin<"w", "wwv", "csi">;
 }
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, in, vl) \
         ${Name}_vvm_${Type}${LMul} (a, b, in, vl)}] in {
 def vadc : EPIBinMaskInBuiltin<"v", "vvvm", "csil">;
 def vsbc : EPIBinMaskInBuiltin<"v", "vvvm", "csil">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${Type}${LMul}_b${Boolean} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${Type}${LMul}_b${Boolean}_m (mask, merge, a, b, vl)}] in {
@@ -962,17 +979,18 @@ def vmfgt : EPIRelBuiltin<"v", "mvv", "fd">;
 def vmfge : EPIRelBuiltin<"v", "mvv", "fd">;
 }
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, in, vl) \
         vmadc_vvm_${Type}${LMul}_b${Boolean} (a, b, in, vl)}] in
 def vmadc_carry_in : EPIRelBuiltin<"v", "mvvm", "csil">;
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, in, vl) \
         vmsbc_vvm_${Type}${LMul}_b${Boolean} (a, b, in, vl)}] in
 def vmsbc_borrow_in : EPIRelBuiltin<"v", "mvvm", "csil">;
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${UType}${LMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${UType}${LMul}_m (mask, merge, a, b, vl)}] in {
@@ -985,21 +1003,24 @@ def vremu : EPIBinBuiltin<"v", "vvv", "csil">;
 }
 
 // These do narrowing but typewise they are like their widen counterparts
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_wv_${Type}${LMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_wv_${Type}${LMul}_m (mask, merge, a, b, vl)}] in {
 def vnsra : EPIWidenBinBuiltin<"v", "vwv", "csi">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_wv_${UType}${LMul} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_wv_${UType}${LMul}_m (mask, merge, a, b, vl)}] in {
 def vnsrl : EPIWidenBinBuiltin<"v", "vwv", "csi">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vv_${UType}${LMul}_b${Boolean} (a, b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vv_${UType}${LMul}_b${Boolean}_m (mask, merge, a, b, vl)}] in {
@@ -1026,7 +1047,7 @@ let HasMergeOperand = 0 in
   def vwsmsac : EPIWidenTerBuiltin<"w", "wvvw", "csi">;
 }
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, mask, vl) \
         vmerge_vvm_${Type}${LMul} (mask, a, b, vl)}] in {
 def vmerge : EPIBinMaskInBuiltin<"v", "vvvm", "csil">;
@@ -1051,7 +1072,8 @@ def vnclip : EPIBuiltin<"v", "vww", "csi">;
 
 let HasMergeOperand = 0 in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, c, vl) \
+  let RegisterInClang = 0,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, c, vl) \
         ${Name}_vv_${Type}${LMul} (a, b, c, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, b, c, mask, vl) \
         ${Name}_vv_${Type}${LMul}_m (mask, a, b, c, vl)}] in {
@@ -1065,7 +1087,8 @@ let HasMergeOperand = 0 in
   def vfnmsac : EPITerBuiltin<"v", "vvvv", "fd">;
   }
 
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, c, vl) \
+  let RegisterInClang = 0,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, c, vl) \
         ${Name}_vv_${WidenedType}${WidenedLMul} (c, a, b, vl)}],
       CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, b, c, mask, vl) \
         ${Name}_vv_${WidenedType}${WidenedLMul}_m (mask, c, a, b, vl)}] in {
@@ -1076,27 +1099,31 @@ let HasMergeOperand = 0 in
   }
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_${Type}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_${Type}${LMul}_m (mask, merge, a, vl)}] in 
 def vfsqrt : EPIUnaBuiltin<"v", "vv", "fd">;
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_${UType}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_${UType}${LMul}_m (mask, merge, a, vl)}] in {
 def vfcvt_xu_f : EPIUnaBuiltin<"Ivv", "Ivv", "fd">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_i${Size}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_i${Size}${LMul}_m (mask, merge, a, vl)}] in {
 def vfcvt_x_f : EPIUnaBuiltin<"Ivv", "Ivv", "fd">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_f${Size}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_f${Size}${LMul}_m (mask, merge, a, vl)}] in {
@@ -1104,21 +1131,24 @@ def vfcvt_f_xu : EPIUnaBuiltin<"Fvv", "Fvv", "il">;
 def vfcvt_f_x : EPIUnaBuiltin<"Fvv", "Fvv", "il">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_${WidenedUType}${WidenedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_${WidenedUType}${WidenedLMul}_m (mask, merge, a, vl)}] in {
 def vfwcvt_xu_f : EPIUnaBuiltin<"Iwv", "Iwv", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_i${WidenedSize}${WidenedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_i${WidenedSize}${WidenedLMul}_m (mask, merge, a, vl)}] in {
 def vfwcvt_x_f : EPIUnaBuiltin<"Iwv", "Iwv", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_f${WidenedSize}${WidenedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_f${WidenedSize}${WidenedLMul}_m (mask, merge, a, vl)}] in {
@@ -1128,21 +1158,24 @@ def vfwcvt_f_x : EPIUnaBuiltin<"Fwv", "Fwv", "si">;
 
 // Note that we use "vFw" + "si" here because "Ivw" + "f" would miss f32→i16
 // We have no way to represent f16 in the TypeRange yet.
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_w_${NarrowedUType}${NarrowedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_w_${NarrowedUType}${NarrowedLMul}_m (mask, merge, a, vl)}] in {
 def vfncvt_xu_f : EPIUnaBuiltin<"vFw", "vFw", "si">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_w_${NarrowedType}${NarrowedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_w_${NarrowedType}${NarrowedLMul}_m (mask, merge, a, vl)}] in {
 def vfncvt_x_f : EPIUnaBuiltin<"vFw", "vFw", "si">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_w_f${NarrowedSize}${NarrowedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_w_f${NarrowedSize}${NarrowedLMul}_m (mask, merge, a, vl)}] in {
@@ -1150,21 +1183,24 @@ def vfncvt_f_xu : EPIUnaBuiltin<"Fvw", "Fvw", "i">;
 def vfncvt_f_x : EPIUnaBuiltin<"Fvw", "Fvw", "i">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_v_${WidenedType}${WidenedLMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_v_${WidenedType}${WidenedLMul}_m (mask, merge, a, vl)}] in {
 def vfwcvt_f_f : EPIUnaBuiltin<"wv", "wv", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_w_${Type}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_w_${Type}${LMul}_m (mask, merge, a, vl)}] in {
 def vfncvt_f_f : EPIUnaBuiltin<"vw", "vw", "f">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vs_${Type}${LMul}_${Type}m1 (vundefined_${Type}m1 (), a, /* TODO: cast to LMUL 1 */ b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vs_${Type}${LMul}_${Type}m1_m (mask, merge, a, /* TODO: cast to LMUL 1 */ b, vl)}] in {
@@ -1187,7 +1223,8 @@ def vfredmin : EPIBinBuiltin<"v", "vvv", "fd">;
 // def vwredsum : EPIWidenBinBuiltin<"w", "wvw", "csi">;
 // def vwredsumu : EPIWidenBinBuiltin<"w", "wvw", "csi">;
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_vs_${Type}${LMul}_${WidenedType}m1 (vundefined_${WidenedType}m1(), a, /* TODO: cast to LMUL 1 */ b, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         ${Name}_vs_${Type}${LMul}_${WidenedType}m1_m (mask, merge, a, /* TODO: cast to LMUL 1 */ b, vl)}] in {
@@ -1195,7 +1232,7 @@ def vfwredosum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 def vfwredsum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 }
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_mm_b${Boolean} (a, b, vl)}] in
 {
@@ -1209,7 +1246,7 @@ let HasMask = 0,
   def vmxnor : EPIBinBuiltin<"m", "mmm", "csil">;
 }
 
-let HasMergeOperand = 0,
+let HasMergeOperand = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_m_b${Boolean} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, mask, vl) \
@@ -1230,33 +1267,36 @@ def vmsif : EPIMaskUnaBuiltin<"m", "mm", "csil">;
 def vmsof : EPIMaskUnaBuiltin<"m", "mm", "csil">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_m_${UType}${LMul} (a, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, mask, vl) \
         ${Name}_m_${UType}${LMul}_m (mask, merge, a, vl)}] in
 def viota : EPIMaskToIntBuiltin<"v", "vm", "csil">;
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(vl) \
         ${Name}_v_${UType}${LMul} (vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, mask, vl) \
         ${Name}_v_${UType}${LMul}_m (mask, merge, vl)}] in
 def vid : EPINulBuiltin<"v", "v", "csil">;
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         ${Name}_${Type}${LMul} (a, b, vl)}] in {
 def vmv_s_x : EPIScalarToScalarVecBuiltin<"v", "vve", "csil">;
 def vfmv_s_f : EPIScalarToScalarVecBuiltin<"v", "vve", "fd">;
 }
 
-let HasMask = 0, HasVL = 0,
+let HasMask = 0, HasVL = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a) \
         ${Name}_${Type}${LMul}_${Type} (a)}] in {
 def vmv_x_s : EPIVecToScalarBuiltin<"v", "ev", "csil">;
 def vfmv_f_s : EPIVecToScalarBuiltin<"v", "ev", "fd">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, off, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, off, vl) \
         ${Name}_vx_${Type}${LMul} (vundefined_${Type}${LMul}(), a, off, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, off, mask, vl) \
         ${Name}_vx_${Type}${LMul}_m (mask, merge, a, off, vl)}] in {
@@ -1264,7 +1304,8 @@ def vslideup : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 def vslidedown : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 }
 
-let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, v, vl) \
+let RegisterInClang = 0,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, v, vl) \
         ${Name}_vx_${Type}${LMul} (a, v, vl)}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, v, mask, vl) \
         ${Name}_vx_${Type}${LMul}_m (mask, merge, a, v, vl)}] in {
@@ -1272,7 +1313,7 @@ def vslide1up : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 def vslide1down : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 }
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, mask, vl) \
         ${Name}_vm_${Type}${LMul} (mask, vundefined_${Type}${LMul}(), a, vl)}] in {
 def vcompress : EPIBinBuiltin<"v", "vvm", "csilfd">;
@@ -1283,7 +1324,7 @@ def vcompress : EPIBinBuiltin<"v", "vvm", "csilfd">;
 //def vdotu : EPIBinBuiltin<"v", "vvv", "csil">;
 //def vfdot : EPIBinBuiltin<"v", "vvv", "fd">;
 
-let HasMask = 0,
+let HasMask = 0, RegisterInClang = 0,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
         ${Name}_${Type}${LMul} (a, vl)}] in {
 def vmv_v_x : EPIScalarToVecBuiltin<"v", "ve", "csil">;
