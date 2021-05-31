@@ -354,3 +354,15 @@ RISCVRegisterInfo::getLargestLegalSuperClass(const TargetRegisterClass *RC,
     return &RISCV::VRRegClass;
   return RC;
 }
+
+unsigned RISCVRegisterInfo::getRegPressureSetScore(const MachineFunction &MF,
+                                                   unsigned PSetID) const {
+  // Score register pressure for vector registers very low.
+  for (const int *PSets = getRegClassPressureSets(&RISCV::VRRegClass);
+       *PSets != -1; PSets++) {
+    if ((unsigned)*PSets == PSetID)
+      return 0;
+  }
+
+  return PSetID;
+}

@@ -243,15 +243,8 @@ define <8 x float> @si2fp_v8i1_v8f32(<8 x i1> %x) {
 ;
 ; RV64-LMULMAX8-LABEL: si2fp_v8i1_v8f32:
 ; RV64-LMULMAX8:       # %bb.0:
-; RV64-LMULMAX8-NEXT:    addi sp, sp, -64
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 64
-; RV64-LMULMAX8-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    .cfi_offset ra, -8
-; RV64-LMULMAX8-NEXT:    .cfi_offset s0, -16
-; RV64-LMULMAX8-NEXT:    addi s0, sp, 64
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa s0, 0
-; RV64-LMULMAX8-NEXT:    andi sp, sp, -32
+; RV64-LMULMAX8-NEXT:    addi sp, sp, -32
+; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e8,mf2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vmv.v.i v25, 0
 ; RV64-LMULMAX8-NEXT:    vmerge.vim v25, v25, 1, v0
@@ -305,10 +298,7 @@ define <8 x float> @si2fp_v8i1_v8f32(<8 x i1> %x) {
 ; RV64-LMULMAX8-NEXT:    fsw ft0, 4(sp)
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vle32.v v8, (sp)
-; RV64-LMULMAX8-NEXT:    addi sp, s0, -64
-; RV64-LMULMAX8-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    addi sp, sp, 64
+; RV64-LMULMAX8-NEXT:    addi sp, sp, 32
 ; RV64-LMULMAX8-NEXT:    ret
 ;
 ; RV32-LMULMAX1-LABEL: si2fp_v8i1_v8f32:
@@ -519,15 +509,8 @@ define <8 x float> @ui2fp_v8i1_v8f32(<8 x i1> %x) {
 ;
 ; RV64-LMULMAX8-LABEL: ui2fp_v8i1_v8f32:
 ; RV64-LMULMAX8:       # %bb.0:
-; RV64-LMULMAX8-NEXT:    addi sp, sp, -64
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 64
-; RV64-LMULMAX8-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    .cfi_offset ra, -8
-; RV64-LMULMAX8-NEXT:    .cfi_offset s0, -16
-; RV64-LMULMAX8-NEXT:    addi s0, sp, 64
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa s0, 0
-; RV64-LMULMAX8-NEXT:    andi sp, sp, -32
+; RV64-LMULMAX8-NEXT:    addi sp, sp, -32
+; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 32
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e8,mf2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vmv.v.i v25, 0
 ; RV64-LMULMAX8-NEXT:    vmerge.vim v25, v25, 1, v0
@@ -573,10 +556,7 @@ define <8 x float> @ui2fp_v8i1_v8f32(<8 x i1> %x) {
 ; RV64-LMULMAX8-NEXT:    fsw ft0, 4(sp)
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vle32.v v8, (sp)
-; RV64-LMULMAX8-NEXT:    addi sp, s0, -64
-; RV64-LMULMAX8-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    addi sp, sp, 64
+; RV64-LMULMAX8-NEXT:    addi sp, sp, 32
 ; RV64-LMULMAX8-NEXT:    ret
 ;
 ; RV32-LMULMAX1-LABEL: ui2fp_v8i1_v8f32:
@@ -901,15 +881,8 @@ define <8 x double> @si2fp_v8i1_v8f64(<8 x i1> %x) {
 ;
 ; RV64-LMULMAX8-LABEL: si2fp_v8i1_v8f64:
 ; RV64-LMULMAX8:       # %bb.0:
-; RV64-LMULMAX8-NEXT:    addi sp, sp, -128
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 128
-; RV64-LMULMAX8-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    .cfi_offset ra, -8
-; RV64-LMULMAX8-NEXT:    .cfi_offset s0, -16
-; RV64-LMULMAX8-NEXT:    addi s0, sp, 128
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa s0, 0
-; RV64-LMULMAX8-NEXT:    andi sp, sp, -64
+; RV64-LMULMAX8-NEXT:    addi sp, sp, -64
+; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e8,mf2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vmv.v.i v25, 0
 ; RV64-LMULMAX8-NEXT:    vmerge.vim v25, v25, 1, v0
@@ -963,10 +936,7 @@ define <8 x double> @si2fp_v8i1_v8f64(<8 x i1> %x) {
 ; RV64-LMULMAX8-NEXT:    fsd ft0, 8(sp)
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
 ; RV64-LMULMAX8-NEXT:    vle64.v v8, (sp)
-; RV64-LMULMAX8-NEXT:    addi sp, s0, -128
-; RV64-LMULMAX8-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    addi sp, sp, 128
+; RV64-LMULMAX8-NEXT:    addi sp, sp, 64
 ; RV64-LMULMAX8-NEXT:    ret
 ;
 ; RV32-LMULMAX1-LABEL: si2fp_v8i1_v8f64:
@@ -1207,15 +1177,8 @@ define <8 x double> @ui2fp_v8i1_v8f64(<8 x i1> %x) {
 ;
 ; RV64-LMULMAX8-LABEL: ui2fp_v8i1_v8f64:
 ; RV64-LMULMAX8:       # %bb.0:
-; RV64-LMULMAX8-NEXT:    addi sp, sp, -128
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 128
-; RV64-LMULMAX8-NEXT:    sd ra, 120(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    sd s0, 112(sp) # 8-byte Folded Spill
-; RV64-LMULMAX8-NEXT:    .cfi_offset ra, -8
-; RV64-LMULMAX8-NEXT:    .cfi_offset s0, -16
-; RV64-LMULMAX8-NEXT:    addi s0, sp, 128
-; RV64-LMULMAX8-NEXT:    .cfi_def_cfa s0, 0
-; RV64-LMULMAX8-NEXT:    andi sp, sp, -64
+; RV64-LMULMAX8-NEXT:    addi sp, sp, -64
+; RV64-LMULMAX8-NEXT:    .cfi_def_cfa_offset 64
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e8,mf2,ta,mu
 ; RV64-LMULMAX8-NEXT:    vmv.v.i v25, 0
 ; RV64-LMULMAX8-NEXT:    vmerge.vim v25, v25, 1, v0
@@ -1261,10 +1224,7 @@ define <8 x double> @ui2fp_v8i1_v8f64(<8 x i1> %x) {
 ; RV64-LMULMAX8-NEXT:    fsd ft0, 8(sp)
 ; RV64-LMULMAX8-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
 ; RV64-LMULMAX8-NEXT:    vle64.v v8, (sp)
-; RV64-LMULMAX8-NEXT:    addi sp, s0, -128
-; RV64-LMULMAX8-NEXT:    ld s0, 112(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    ld ra, 120(sp) # 8-byte Folded Reload
-; RV64-LMULMAX8-NEXT:    addi sp, sp, 128
+; RV64-LMULMAX8-NEXT:    addi sp, sp, 64
 ; RV64-LMULMAX8-NEXT:    ret
 ;
 ; RV32-LMULMAX1-LABEL: ui2fp_v8i1_v8f64:

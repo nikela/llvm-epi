@@ -126,8 +126,10 @@ LLVM_DUMP_METHOD
 void PressureDiff::dump(const TargetRegisterInfo &TRI) const {
   const char *sep = "";
   for (const PressureChange &Change : *this) {
-    if (!Change.isValid())
+    if (!Change.isValid()) {
+      dbgs() << " (no more changes)";
       break;
+    }
     dbgs() << sep << TRI.getRegPressureSetName(Change.getPSet())
            << " " << Change.getUnitInc();
     sep = "    ";
