@@ -136,6 +136,7 @@ void nanos6_increase_current_task_event_counter(void *event_counter,
 
     kmp_uint32 pending_events_count
       = KMP_TEST_THEN_ADD32(&(completion_event->pending_events_count), increment);
+    (void)pending_events_count;
     KA_TRACE(5, ("event %p pending_events %d -> %d\n",
               event_counter, pending_events_count, pending_events_count + increment));
 }

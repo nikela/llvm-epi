@@ -2256,6 +2256,26 @@ public:
                                              EndLoc);
   }
 
+  /// Build a new OpenMP 'cost' clause.
+  ///
+  /// By default, performs semantic analysis to build the new OpenMP clause.
+  /// Subclasses may override this routine to provide different behavior.
+  OMPClause *RebuildOMPCostClause(Expr *Cost, SourceLocation StartLoc,
+                                  SourceLocation LParenLoc,
+                                  SourceLocation EndLoc) {
+    return getSema().ActOnOpenMPCostClause(Cost, StartLoc, LParenLoc, EndLoc);
+  }
+
+  /// Build a new OpenMP 'label' clause.
+  ///
+  /// By default, performs semantic analysis to build the new OpenMP clause.
+  /// Subclasses may override this routine to provide different behavior.
+  OMPClause *RebuildOMPLabelClause(Expr *Label, SourceLocation StartLoc,
+                                  SourceLocation LParenLoc,
+                                  SourceLocation EndLoc) {
+    return getSema().ActOnOpenMPLabelClause(Label, StartLoc, LParenLoc, EndLoc);
+  }
+
   /// Rebuild the operand to an Objective-C \@synchronized statement.
   ///
   /// By default, performs semantic analysis to build the new statement.
@@ -10228,6 +10248,26 @@ OMPClause *TreeTransform<Derived>::TransformOMPOrderClause(OMPOrderClause *C) {
   return getDerived().RebuildOMPOrderClause(C->getKind(), C->getKindKwLoc(),
                                             C->getBeginLoc(), C->getLParenLoc(),
                                             C->getEndLoc());
+}
+
+template <typename Derived>
+OMPClause *
+TreeTransform<Derived>::TransformOMPCostClause(OMPCostClause *C) {
+  ExprResult Cost = getDerived().TransformExpr(C->getCost());
+  if (Cost.isInvalid())
+    return nullptr;
+  return getDerived().RebuildOMPCostClause(
+      Cost.get(), C->getBeginLoc(), C->getLParenLoc(), C->getEndLoc());
+}
+
+template <typename Derived>
+OMPClause *
+TreeTransform<Derived>::TransformOMPLabelClause(OMPLabelClause *C) {
+  ExprResult Label = getDerived().TransformExpr(C->getLabel());
+  if (Label.isInvalid())
+    return nullptr;
+  return getDerived().RebuildOMPLabelClause(
+      Label.get(), C->getBeginLoc(), C->getLParenLoc(), C->getEndLoc());
 }
 
 //===----------------------------------------------------------------------===//

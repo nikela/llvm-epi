@@ -8404,6 +8404,142 @@ public:
   }
 };
 
+/// This represents 'cost' clause in the '#pragma omp ...'
+/// directive.
+///
+/// \code
+/// #pragma omp task cost(N*2)
+/// \endcode
+class OMPCostClause final : public OMPClause, public OMPClauseWithPreInit {
+  friend class OMPClauseReader;
+
+  /// Location of '('.
+  SourceLocation LParenLoc;
+
+  /// Value of the 'cost' clause.
+  Stmt *Cost = nullptr;
+
+  /// Set condition.
+  void setCost(Expr *C) { Cost = C; }
+
+public:
+  /// Build 'cost' clause with value \a Cost.
+  ///
+  /// \param Cost Cost value of the task.
+  /// \param HelperCost Helper cost for the construct.
+  /// \param CaptureRegion Innermost OpenMP region where expressions in this
+  /// clause must be captured.
+  /// \param StartLoc Starting location of the clause.
+  /// \param LParenLoc Location of '('.
+  /// \param EndLoc Ending location of the clause.
+  OMPCostClause(Expr *Cost, Stmt *HelperCost, OpenMPDirectiveKind CaptureRegion,
+                SourceLocation StartLoc, SourceLocation LParenLoc,
+                SourceLocation EndLoc)
+      : OMPClause(llvm::omp::OMPC_cost, StartLoc, EndLoc),
+        OMPClauseWithPreInit(this), LParenLoc(LParenLoc), Cost(Cost) {
+    setPreInitStmt(HelperCost, CaptureRegion);
+  }
+
+  /// Build an empty clause.
+  OMPCostClause()
+      : OMPClause(llvm::omp::OMPC_cost, SourceLocation(), SourceLocation()),
+        OMPClauseWithPreInit(this) {}
+
+  /// Sets the location of '('.
+  void setLParenLoc(SourceLocation Loc) { LParenLoc = Loc; }
+
+  /// Returns the location of '('.
+  SourceLocation getLParenLoc() const { return LParenLoc; }
+
+  /// Returns expression of the cost.
+  Expr *getCost() const { return cast_or_null<Expr>(Cost); }
+
+  child_range children() { return child_range(&Cost, &Cost + 1); }
+
+  const_child_range children() const {
+    return const_child_range(&Cost, &Cost + 1);
+  }
+
+  child_range used_children() {
+    return child_range(child_iterator(), child_iterator());
+  }
+  const_child_range used_children() const {
+    return const_child_range(const_child_iterator(), const_child_iterator());
+  }
+
+  static bool classof(const OMPClause *T) {
+    return T->getClauseKind() == llvm::omp::OMPC_cost;
+  }
+};
+
+/// This represents 'label' clause in the '#pragma omp ...'
+/// directive.
+///
+/// \code
+/// #pragma omp task label(N*2)
+/// \endcode
+class OMPLabelClause final : public OMPClause, public OMPClauseWithPreInit {
+  friend class OMPClauseReader;
+
+  /// Location of '('.
+  SourceLocation LParenLoc;
+
+  /// Value of the 'label' clause.
+  Stmt *Label = nullptr;
+
+  /// Set condition.
+  void setLabel(Expr *C) { Label = C; }
+
+public:
+  /// Build 'label' clause with value \a Label.
+  ///
+  /// \param Label Label value of the task.
+  /// \param HelperLabel Helper label for the construct.
+  /// \param CaptureRegion Innermost OpenMP region where expressions in this
+  /// clause must be captured.
+  /// \param StartLoc Starting location of the clause.
+  /// \param LParenLoc Location of '('.
+  /// \param EndLoc Ending location of the clause.
+  OMPLabelClause(Expr *Label, Stmt *HelperLabel, OpenMPDirectiveKind CaptureRegion,
+                SourceLocation StartLoc, SourceLocation LParenLoc,
+                SourceLocation EndLoc)
+      : OMPClause(llvm::omp::OMPC_label, StartLoc, EndLoc),
+        OMPClauseWithPreInit(this), LParenLoc(LParenLoc), Label(Label) {
+    setPreInitStmt(HelperLabel, CaptureRegion);
+  }
+
+  /// Build an empty clause.
+  OMPLabelClause()
+      : OMPClause(llvm::omp::OMPC_label, SourceLocation(), SourceLocation()),
+        OMPClauseWithPreInit(this) {}
+
+  /// Sets the location of '('.
+  void setLParenLoc(SourceLocation Loc) { LParenLoc = Loc; }
+
+  /// Returns the location of '('.
+  SourceLocation getLParenLoc() const { return LParenLoc; }
+
+  /// Returns expression of the label.
+  Expr *getLabel() const { return cast_or_null<Expr>(Label); }
+
+  child_range children() { return child_range(&Label, &Label + 1); }
+
+  const_child_range children() const {
+    return const_child_range(&Label, &Label + 1);
+  }
+
+  child_range used_children() {
+    return child_range(child_iterator(), child_iterator());
+  }
+  const_child_range used_children() const {
+    return const_child_range(const_child_iterator(), const_child_iterator());
+  }
+
+  static bool classof(const OMPClause *T) {
+    return T->getClauseKind() == llvm::omp::OMPC_label;
+  }
+};
+
 /// This class implements a simple visitor for OMPClause
 /// subclasses.
 template<class ImplClass, template <typename> class Ptr, typename RetTy>

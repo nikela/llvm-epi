@@ -1462,15 +1462,15 @@ static inline void __kmp_suspend_template(int th_gtid, C *flag) {
 #if USE_SUSPEND_TIMEOUT
       struct timespec now;
       struct timeval tval;
-      int msecs;
 
       status = gettimeofday(&tval, NULL);
       KMP_CHECK_SYSFAIL_ERRNO("gettimeofday", status);
       TIMEVAL_TO_TIMESPEC(&tval, &now);
 
-      msecs = (4 * __kmp_dflt_blocktime) + 200;
-      now.tv_sec += msecs / 1000;
-      now.tv_nsec += (msecs % 1000) * 1000;
+      kmp_uint64 msecs = (4UL * __kmp_dflt_blocktime) + 200UL +
+                         (now.tv_sec * 1000UL) + (now.tv_nsec / 1000000UL);
+      now.tv_sec = msecs / 1000UL;
+      now.tv_nsec = msecs % 1000000UL;
 
       KF_TRACE(15, ("__kmp_suspend_template: T#%d about to perform "
                     "pthread_cond_timedwait\n",
@@ -1486,7 +1486,11 @@ static inline void __kmp_suspend_template(int th_gtid, C *flag) {
 #endif // USE_SUSPEND_TIMEOUT
 
       if ((status != 0) && (status != EINTR) && (status != ETIMEDOUT)) {
+#if USE_SUSPEND_TIMEOUT
+        KMP_SYSFAIL("pthread_cond_timedwait", status);
+#else
         KMP_SYSFAIL("pthread_cond_wait", status);
+#endif
       }
 
       KMP_DEBUG_ASSERT(flag->get_type() == flag->get_ptr_type());

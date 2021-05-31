@@ -11333,6 +11333,16 @@ public:
                                        SourceLocation EndLoc, Expr *Modifier,
                                        ArrayRef<Expr *> Locators);
 
+  /// Called on well-formed 'cost' clause.
+  OMPClause *ActOnOpenMPCostClause(Expr *NumTasks, SourceLocation StartLoc,
+                                   SourceLocation LParenLoc,
+                                   SourceLocation EndLoc);
+
+  /// Called on well-formed 'label' clause.
+  OMPClause *ActOnOpenMPLabelClause(Expr *NumTasks, SourceLocation StartLoc,
+                                    SourceLocation LParenLoc,
+                                    SourceLocation EndLoc);
+
   /// The kind of conversion being performed.
   enum CheckedConversionKind {
     /// An implicit conversion.

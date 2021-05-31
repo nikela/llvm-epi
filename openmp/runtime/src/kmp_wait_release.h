@@ -16,6 +16,7 @@
 #include "kmp.h"
 #include "kmp_itt.h"
 #include "kmp_stats.h"
+#include "kmp_taskprediction.h"
 #if OMPT_SUPPORT
 #include "ompt-specific.h"
 #endif
@@ -369,6 +370,33 @@ static void kmp_compact_allowed_teams(kmp_info_t *this_thr) {
   __kmp_release_bootstrap_lock(&this_thr->th.allowed_teams_lock);
 }
 
+#define TASKPREDICTION_EXTRAE_WR 0
+
+#if TASKPREDICTION_EXTRAE_WR
+extern "C" {
+void Extrae_event(unsigned type, long long value) __attribute__((weak));
+}
+
+static inline void do_extrae_event_wr(unsigned type, long long value) {
+  if (Extrae_event) {
+    Extrae_event(type, value);
+  }
+}
+
+#else
+static inline void do_extrae_event_wr(unsigned, long long) { }
+#endif
+
+enum Extrae_Event_Types_WR
+{
+  extrae_prediction_type_wr = 222,
+};
+
+enum Extrae_Event_Values_WR
+{
+  extrae_going_to_sleep = 1,
+};
+
 /* Spin wait loop that first does pause/yield, then sleep. A thread that calls
    __kmp_wait_*  must make certain that another thread calls __kmp_release
    to wake it back up to prevent deadlocks!
@@ -533,7 +561,6 @@ final_spin=FALSE)
 
   KMP_MB();
 
-
     // Main wait spin loop
   while (flag->notdone_check()) {
     kmp_task_team_t *task_team = NULL;
@@ -678,31 +705,58 @@ final_spin=FALSE)
       continue;
     }
 
+#if LIBOMP_TASK_PREDICTION
+    bool suspended_by_prediction = [this_thr]() {
+      if (__kmp_enable_task_prediction)
+        return false;
+      int tid = this_thr->th.th_info.ds.ds_tid;
+      int predicted = __kmp_predicted_threads();
+      return !KMP_MASTER_TID(tid) && predicted > 0 && tid >= predicted;
+    }();
+#else
+    bool suspended_by_prediction = false;
+#endif
+
     // Don't suspend if KMP_BLOCKTIME is set to "infinite"
     if (__kmp_dflt_blocktime == KMP_MAX_BLOCKTIME &&
-        __kmp_pause_status != kmp_soft_paused)
+        __kmp_pause_status != kmp_soft_paused
+        && !suspended_by_prediction)
+    {
+      KA_TRACE(2, ("__kmp_wait_template: T#%d will try again (1)\n", th_gtid));
       continue;
+    }
 
-    // Don't suspend if there is a likelihood of new tasks being spawned.
-    if ((task_team != NULL) && TCR_4(task_team->tt.tt_found_tasks))
-      continue;
+    if (UNLIKELY(suspended_by_prediction)) {
+    } else {
+      // Don't suspend if there is a likelihood of new tasks being spawned.
+      if ((task_team != NULL) && TCR_4(task_team->tt.tt_found_tasks))
+        continue;
+    }
 
 #if KMP_USE_MONITOR
     // If we have waited a bit more, fall asleep
     if (TCR_4(__kmp_global.g.g_time.dt.t_value) < hibernate)
       continue;
 #else
-    if (KMP_BLOCKING(hibernate_goal, poll_count++))
+    if (UNLIKELY(suspended_by_prediction)) {
+    } else if (KMP_BLOCKING(hibernate_goal, poll_count++)) {
+      KA_TRACE(2, ("__kmp_wait_template: T#%d will try again (2)\n", th_gtid));
       continue;
+    }
 #endif
     // Don't suspend if wait loop designated non-sleepable
     // in template parameters
-    if (!Sleepable)
+    if (!Sleepable) {
+      KA_TRACE(2, ("__kmp_wait_template: T#%d will try again (3)\n", th_gtid));
       continue;
+    }
 
-    if (__kmp_dflt_blocktime == KMP_MAX_BLOCKTIME &&
-        __kmp_pause_status != kmp_soft_paused)
+    if (UNLIKELY(suspended_by_prediction)) {
+    } else if (__kmp_dflt_blocktime == KMP_MAX_BLOCKTIME &&
+               __kmp_pause_status != kmp_soft_paused) {
+      KA_TRACE(2, ("__kmp_wait_template: T#%d will try again (4)\n", th_gtid));
       continue;
+    }
 
 #if KMP_HAVE_MWAIT || KMP_HAVE_UMWAIT
     if (__kmp_mwait_enabled || __kmp_umwait_enabled) {
@@ -715,7 +769,35 @@ final_spin=FALSE)
       if (final_spin)
         KMP_ATOMIC_ST_REL(&this_thr->th.th_blocking, false);
 #endif
+      KA_TRACE(2, ("__kmp_wait_template: T#%d going to sleep\n", th_gtid));
+      bool sleep_due_to_pred = false;
+      if (UNLIKELY(suspended_by_prediction && task_team != NULL &&
+                   !tasks_completed)) {
+        do_extrae_event_wr(extrae_prediction_type_wr, extrae_going_to_sleep);
+        sleep_due_to_pred = true;
+        std::atomic<kmp_int32> *unfinished_threads;
+        unfinished_threads = &(task_team->tt.tt_unfinished_threads);
+        kmp_int32 old_val = KMP_ATOMIC_DEC(unfinished_threads) - 1;
+        (void)old_val;
+        tasks_completed = TRUE;
+        // If we are being suspended due to the prediction,
+        // we act as if we had finished working.
+        KA_TRACE(1, ("__kmp_wait_template: T#%d dec unfinished_threads to %d [going to sleep due to "
+                     "prediction, mark myself as finished for now]\n",
+                     th_gtid, old_val));
+      }
       flag->suspend(th_gtid);
+      if (UNLIKELY(sleep_due_to_pred)) {
+        do_extrae_event_wr(extrae_prediction_type_wr, 0);
+        std::atomic<kmp_int32> *unfinished_threads;
+        unfinished_threads = &(task_team->tt.tt_unfinished_threads);
+        kmp_int32 old_val = KMP_ATOMIC_INC(unfinished_threads) + 1;
+        (void)old_val;
+        tasks_completed = FALSE;
+        KA_TRACE(1, ("__kmp_wait_template: T#%d inc unfinished_threads to %d "
+                     "[returned from sleep due to prediction]\n",
+                     th_gtid, old_val));
+      }
 #if KMP_OS_UNIX
       if (final_spin)
         KMP_ATOMIC_ST_REL(&this_thr->th.th_blocking, true);

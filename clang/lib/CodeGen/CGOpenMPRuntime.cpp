@@ -4604,6 +4604,21 @@ CGOpenMPRuntime::emitTaskInit(CodeGenFunction &CGF, SourceLocation Loc,
         Data2LV, *std::next(KmpCmplrdataUD->field_begin(), Priority));
     CGF.EmitStoreOfScalar(Data.Priority.getPointer(), PriorityLV);
   }
+  // Set cost.
+  if (Data.Cost.getInt()) {
+    llvm::Value *CostValue = Data.Cost.getPointer();
+    (void)CGF.EmitRuntimeCall(OMPBuilder.getOrCreateRuntimeFunction(
+                                  CGM.getModule(), OMPRTL___kmpc_task_set_cost),
+                              {NewTask, CostValue});
+  }
+  // Set label.
+  if (Data.Label.getInt()) {
+    llvm::Value *LabelValue = Data.Label.getPointer();
+    (void)CGF.EmitRuntimeCall(
+        OMPBuilder.getOrCreateRuntimeFunction(CGM.getModule(),
+                                              OMPRTL___kmpc_task_set_label),
+        {NewTask, LabelValue});
+  }
   Result.NewTask = NewTask;
   Result.TaskEntry = TaskEntry;
   Result.NewTaskNewTaskTTy = NewTaskNewTaskTTy;

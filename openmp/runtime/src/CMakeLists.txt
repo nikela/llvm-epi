@@ -109,6 +109,7 @@ else()
   libomp_append(LIBOMP_CXXFILES kmp_stats_timing.cpp LIBOMP_STATS)
   libomp_append(LIBOMP_CXXFILES kmp_taskdeps.cpp)
   libomp_append(LIBOMP_CXXFILES kmp_cancel.cpp)
+  libomp_append(LIBOMP_CXXFILES kmp_taskprediction.cpp)
 endif()
 # Files common to stubs and normal library
 libomp_append(LIBOMP_CXXFILES kmp_ftn_cdecl.cpp)

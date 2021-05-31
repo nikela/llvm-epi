@@ -206,6 +206,8 @@ __OMP_RTL(__kmpc_push_proc_bind, false, Void, IdentPtr, Int32, /* Int */ Int32)
 __OMP_RTL(__kmpc_omp_reg_task_with_affinity, false, Int32, IdentPtr, Int32,
           /* kmp_task_t */ VoidPtr, Int32,
           /* kmp_task_affinity_info_t */ VoidPtr)
+__OMP_RTL(__kmpc_task_set_cost, false, Void, /* kmp_task_t */ VoidPtr, Int32)
+__OMP_RTL(__kmpc_task_set_label, false, Void, /* kmp_task_t */ VoidPtr, Int32)
 
 __OMP_RTL(__kmpc_get_hardware_num_blocks, false, Int32, )
 __OMP_RTL(__kmpc_get_hardware_num_threads_in_block, false, Int32, )
@@ -606,6 +608,10 @@ __OMP_RTL_ATTRS(__kmpc_end_serialized_parallel, InaccessibleArgOnlyAttrs,
 __OMP_RTL_ATTRS(__kmpc_omp_reg_task_with_affinity, DefaultAttrs, AttributeSet(),
                 ParamAttrs(ReadOnlyPtrAttrs, AttributeSet(), ReadOnlyPtrAttrs,
                            AttributeSet(), ReadOnlyPtrAttrs))
+__OMP_RTL_ATTRS(__kmpc_task_set_cost, SetterAttrs, AttributeSet(),
+                ParamAttrs())
+__OMP_RTL_ATTRS(__kmpc_task_set_label, SetterAttrs, AttributeSet(),
+                ParamAttrs())
 
 __OMP_RTL_ATTRS(__kmpc_get_hardware_num_blocks, GetterAttrs, AttributeSet(), ParamAttrs())
 __OMP_RTL_ATTRS(__kmpc_get_hardware_num_threads_in_block, GetterAttrs, AttributeSet(), ParamAttrs())

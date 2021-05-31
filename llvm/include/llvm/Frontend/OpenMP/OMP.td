@@ -338,6 +338,16 @@ def OMPC_Filter : Clause<"filter"> {
   let flangClass = "ScalarIntExpr";
 }
 
+def OMPC_Cost : Clause<"cost"> {
+  let clangClass = "OMPCostClause";
+  let flangClass = "ScalarIntExpr";
+}
+
+def OMPC_Label : Clause<"label"> {
+  let clangClass = "OMPLabelClause";
+  let flangClass = "ScalarIntExpr";
+}
+
 //===----------------------------------------------------------------------===//
 // Definition of OpenMP directives
 //===----------------------------------------------------------------------===//
@@ -376,7 +386,9 @@ def OMP_Task : Directive<"task"> {
     VersionedClause<OMPC_Default>,
     VersionedClause<OMPC_If>,
     VersionedClause<OMPC_Final>,
-    VersionedClause<OMPC_Priority>
+    VersionedClause<OMPC_Priority>,
+    VersionedClause<OMPC_Cost>,
+    VersionedClause<OMPC_Label>
   ];
 }
 def OMP_Simd : Directive<"simd"> {

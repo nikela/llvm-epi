@@ -878,6 +878,18 @@ void OMPClauseProfiler::VisitOMPAffinityClause(const OMPAffinityClause *C) {
     Profiler->VisitStmt(E);
 }
 void OMPClauseProfiler::VisitOMPOrderClause(const OMPOrderClause *C) {}
+
+void OMPClauseProfiler::VisitOMPCostClause(const OMPCostClause *C) {
+  VistOMPClauseWithPreInit(C);
+  if (C->getCost())
+    Profiler->VisitStmt(C->getCost());
+}
+
+void OMPClauseProfiler::VisitOMPLabelClause(const OMPLabelClause *C) {
+  VistOMPClauseWithPreInit(C);
+  if (C->getLabel())
+    Profiler->VisitStmt(C->getLabel());
+}
 } // namespace
 
 void

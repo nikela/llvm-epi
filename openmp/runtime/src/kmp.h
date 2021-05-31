@@ -2195,6 +2195,7 @@ extern kmp_tasking_mode_t
     __kmp_tasking_mode; /* determines how/when to execute tasks */
 extern int __kmp_task_stealing_constraint;
 extern int __kmp_enable_task_throttling;
+extern int __kmp_enable_task_prediction;
 extern kmp_int32 __kmp_default_device; // Set via OMP_DEFAULT_DEVICE if
 // specified, defaults to 0 otherwise
 // Set via OMP_MAX_TASK_PRIORITY if specified, defaults to 0 otherwise
@@ -2458,6 +2459,13 @@ struct kmp_taskdata { /* aligned during dynamic allocation       */
   kmp_event_t td_allow_completion_event;
 #if OMPT_SUPPORT
   ompt_task_info_t ompt_task_info;
+#endif
+#if LIBOMP_TASK_PREDICTION
+  // Task prediction
+  kmp_int32 td_cost;
+  kmp_int32 td_label;
+  // Used by prediction. Zeroed when a task is added to the queues.
+  kmp_int32 td_prediction_info;
 #endif
 }; // struct kmp_taskdata
 
@@ -2873,6 +2881,10 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
   void *t_stack_id; // team specific stack stitching id (for ittnotify)
 #endif /* USE_ITT_BUILD */
   distributedBarrier *b; // Distributed barrier data associated with team
+#if LIBOMP_TASK_PREDICTION
+  kmp_uint64 last_prediction_timestamp;
+  kmp_uint32 predicted_threads;
+#endif
 } kmp_base_team_t;
 
 union KMP_ALIGN_CACHE kmp_team {

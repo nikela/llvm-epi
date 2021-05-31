@@ -16,6 +16,7 @@
 #include "kmp_stats.h"
 #include "kmp_wait_release.h"
 #include "kmp_taskdeps.h"
+#include "kmp_taskprediction.h"
 
 #if OMPT_SUPPORT
 #include "ompt-specific.h"
@@ -344,6 +345,21 @@ static kmp_int32 __kmp_push_task(kmp_int32 gtid, kmp_task_t *task) {
   kmp_int32 tid = __kmp_tid_from_gtid(gtid);
   kmp_thread_data_t *thread_data;
 
+#if LIBOMP_TASK_PREDICTION
+  if (__kmp_enable_task_prediction) {
+    // Mark as ready even if it never gets pushed.
+    taskdata->td_prediction_info = 0;
+    kmp_int32 label = taskdata->td_label;
+    kmp_int32 cost = taskdata->td_cost;
+    // New ready task.
+    KA_TRACE(
+        1, ("__kmp_invoke_task: task with label=%d and cost=%d (none)->ready\n",
+            label, cost));
+    __kmp_task_change_state(thread->th.th_team, KTP_NONE, KTP_READY, label,
+                            cost, &taskdata->td_prediction_info);
+  }
+#endif
+
   KA_TRACE(20,
            ("__kmp_push_task: T#%d trying to push task %p.\n", gtid, taskdata));
 
@@ -454,6 +470,20 @@ static kmp_int32 __kmp_push_task(kmp_int32 gtid, kmp_task_t *task) {
     // Wake hidden helper threads up if they're sleeping
     __kmp_hidden_helper_worker_thread_signal();
   }
+
+#if LIBOMP_TASK_PREDICTION
+  {
+    taskdata->td_prediction_info = 0;
+    kmp_int32 label = taskdata->td_label;
+    kmp_int32 cost = taskdata->td_cost;
+    // New ready task.
+    KA_TRACE(
+        1, ("__kmp_invoke_task: task with label=%d and cost=%d (none)->ready\n",
+            label, cost));
+    __kmp_task_change_state(thread->th.th_team, KTP_NONE, KTP_READY, label,
+                            cost, &taskdata->td_prediction_info);
+  }
+#endif
 
   // Traverse all the free agent threads, if we find one that is sleeping, resume it
   // so we give it a chance to execute the task.
@@ -1448,6 +1478,10 @@ kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
   if (UNLIKELY(ompt_enabled.enabled))
     __ompt_task_init(taskdata, gtid);
 #endif
+#if LIBOMP_TASK_PREDICTION
+  taskdata->td_cost = kmp_default_task_cost;
+  taskdata->td_label = kmp_default_task_label;
+#endif
   // Only need to keep track of child task counts if team parallel and tasking
   // not serialized or if it is a proxy or detachable or hidden helper task
   if (flags->proxy == TASK_PROXY || flags->detachable == TASK_DETACHABLE ||
@@ -1693,6 +1727,22 @@ static void __kmp_invoke_task(kmp_int32 gtid, kmp_task_t *task,
     KMP_FSYNC_ACQUIRED(taskdata); // acquired self (new task)
 #endif
 
+#if LIBOMP_TASK_PREDICTION
+    kmp_uint64 task_time_before;
+    kmp_int32 label = taskdata->td_label;
+    kmp_int32 cost = taskdata->td_cost;
+    kmp_info_t* pred_thread = __kmp_threads[gtid];
+    if (__kmp_enable_task_prediction) {
+      task_time_before = __kmp_task_time();
+
+      KA_TRACE(
+          1,
+          ("__kmp_invoke_task: task with label=%d and cost=%d ready->execute\n",
+           label, cost));
+      __kmp_task_change_state(pred_thread->th.th_team, KTP_READY, KTP_EXECUTE,
+                              label, cost, &taskdata->td_prediction_info);
+    }
+#endif
 #ifdef KMP_GOMP_COMPAT
     if (taskdata->td_flags.native) {
       ((void (*)(void *))(*(task->routine)))(task->shareds);
@@ -1701,6 +1751,21 @@ static void __kmp_invoke_task(kmp_int32 gtid, kmp_task_t *task,
     {
       (*(task->routine))(gtid, task);
     }
+#if LIBOMP_TASK_PREDICTION
+    if (__kmp_enable_task_prediction) {
+      KA_TRACE(1, ("__kmp_invoke_task: task with label=%d and cost=%d "
+                   "execute->(none)\n",
+                   label, cost));
+      __kmp_task_change_state(pred_thread->th.th_team, KTP_EXECUTE, KTP_NONE,
+                              label, cost, &taskdata->td_prediction_info);
+
+      kmp_uint64 task_time_after = __kmp_task_time();
+
+      kmp_uint64 diff = task_time_after - task_time_before;
+      __kmp_update_task_elapsed_time(label, cost, diff);
+    }
+#endif
+
     KMP_POP_PARTITIONED_TIMER();
 
 #if USE_ITT_BUILD && USE_ITT_NOTIFY
@@ -3028,10 +3093,24 @@ static inline int __kmp_execute_tasks_template(
     free_agent_victim_tid = (tid + 1) % nthreads;
   }
 
+#if LIBOMP_TASK_PREDICTION
+  enum { MAX_REDUNDANCY_NOTICES = 0 };
+  int num_redundancy_notices = 0;
+  bool thread_is_redundant = false;
+#endif
+
   while (1) { // Outer loop keeps trying to find tasks in case of single thread
     // getting tasks from target constructs
     while (1) { // Inner loop to find a task and execute it
       handleServices();
+#if LIBOMP_TASK_PREDICTION
+      // Update prediction
+      kmp_int32 predicted_threads = 0;
+      if (__kmp_enable_task_prediction) {
+        predicted_threads = __kmp_predicted_threads();
+        KMP_DEBUG_ASSERT(predicted_threads > 1);
+      }
+#endif
       task = NULL;
       if (use_own_tasks) { // check on own queue first
         if (thread->th.is_free_agent) {
@@ -3044,6 +3123,28 @@ static inline int __kmp_execute_tasks_template(
         }
       }
       if ((task == NULL) && (nthreads > 1)) { // Steal a task
+#if LIBOMP_TASK_PREDICTION
+        if (__kmp_enable_task_prediction && tid != 0) {
+          if (predicted_threads > 0 && tid >= predicted_threads) {
+            num_redundancy_notices++;
+            thread_is_redundant =
+                num_redundancy_notices > MAX_REDUNDANCY_NOTICES;
+            if (thread_is_redundant) {
+              // Don't attempt to steal anymore if prediction tells us we are
+              // redundant.
+              KA_TRACE(
+                  1,
+                  ("__kmp_wait_template: while stealing thread prediction says "
+                   "T#%d tid#%d is redundant for more than %d times, "
+                   "stopping\n",
+                   gtid, tid, MAX_REDUNDANCY_NOTICES));
+              break;
+            }
+          } else {
+            num_redundancy_notices = 0;
+          }
+        }
+#endif
         int asleep = 1;
         use_own_tasks = 0;
         // Try to steal from the last place I stole from successfully
@@ -3085,8 +3186,15 @@ static inline int __kmp_execute_tasks_template(
             asleep = 0;
             if ((__kmp_tasking_mode == tskm_task_teams) &&
                 (__kmp_dflt_blocktime != KMP_MAX_BLOCKTIME) &&
-                (TCR_PTR(CCAST(void *, other_thread->th.th_sleep_loc)) !=
-                 NULL)) {
+                (TCR_PTR(CCAST(void *, other_thread->th.th_sleep_loc)) != NULL)
+#if LIBOMP_TASK_PREDICTION
+                && (__kmp_enable_task_prediction &&
+                    (victim_tid < predicted_threads))
+#endif
+            ) {
+              KA_TRACE(2, ("__kmp_execute_tasks_template: T#%d waking T%d up "
+                           "while stealing\n",
+                           gtid, __kmp_gtid_from_thread(other_thread)));
               asleep = 1;
               __kmp_null_resume_wrapper(other_thread);
               // A sleeping thread should not have any tasks on it's queue.
@@ -3128,6 +3236,10 @@ static inline int __kmp_execute_tasks_template(
       if (task == NULL)
         break; // break out of tasking loop
 
+#if LIBOMP_TASK_PREDICTION
+      // We're being useful actually.
+      num_redundancy_notices = 0;
+#endif
 // Found a task; execute it
 #if USE_ITT_BUILD && USE_ITT_NOTIFY
       if (__itt_sync_create_ptr || KMP_ITT_DEBUG) {
@@ -3140,7 +3252,19 @@ static inline int __kmp_execute_tasks_template(
 #endif /* USE_ITT_BUILD && USE_ITT_NOTIFY */
         KA_TRACE(20, ("__kmp_execute_tasks_template: T#%d team %p\n",
                       gtid, thread->th.th_team));
+#ifdef LIBOMP_TASK_PREDICTION_TIMERS
+      bool disable_timer = false;
+      if (__kmp_enable_task_prediction && tid == 0) {
+        __kmp_prediction_start_timer();
+        disable_timer = true;
+      }
+#endif
       __kmp_invoke_task(gtid, task, current_task);
+#ifdef LIBOMP_TASK_PREDICTION_TIMERS
+      if (disable_timer) {
+        __kmp_prediction_stop_timer();
+      }
+#endif
 #if USE_ITT_BUILD
       if (itt_sync_obj != NULL)
         __kmp_itt_task_finished(itt_sync_obj);
@@ -3174,7 +3298,16 @@ static inline int __kmp_execute_tasks_template(
         use_own_tasks = 1;
         new_victim = 0;
       }
+    } // End -- Inner loop to find a task and execute it
+
+#if LIBOMP_TASK_PREDICTION
+    if (thread_is_redundant) {
+      KA_TRACE(1, ("__kmp_wait_template: (outer loop) thread prediction says "
+                   "T#%d tid#%d is not required\n",
+                   gtid, tid));
+      return FALSE;
     }
+#endif
 
     if (!final_spin && __kmp_free_agent_num_threads != 0 &&
         KMP_ATOMIC_LD_ACQ(&current_task->td_incomplete_child_tasks) == 0) {
@@ -3249,7 +3382,7 @@ static inline int __kmp_execute_tasks_template(
                ("__kmp_execute_tasks_template: T#%d can't find work\n", gtid));
       return FALSE;
     }
-  }
+  } // End - Outer loop keeps trying to find tasks in case of single thread
 }
 
 template <bool C, bool S>
@@ -4221,6 +4354,7 @@ kmp_event_t *__kmpc_task_allow_completion_event(ident_t *loc_ref, int gtid,
 
   kmp_uint32 pending_events_count
     = KMP_TEST_THEN_ADD32( &td->td_allow_completion_event.pending_events_count, 1);
+  (void)pending_events_count;
 
   KMP_DEBUG_ASSERT(pending_events_count != 0);
 

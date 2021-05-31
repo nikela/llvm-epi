@@ -137,5 +137,6 @@
 #endif
 
 #cmakedefine01 LIBOMP_TASKGRAPH
+#cmakedefine01 LIBOMP_TASK_PREDICTION
 
 #endif // KMP_CONFIG_H

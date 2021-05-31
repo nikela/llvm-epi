@@ -5028,6 +5028,19 @@ static void __kmp_stg_print_task_throttling(kmp_str_buf_t *buffer,
   __kmp_stg_print_bool(buffer, name, __kmp_enable_task_throttling);
 } // __kmp_stg_print_task_throttling
 
+// -----------------------------------------------------------------------------
+// KMP_ENABLE_TASK_PREDICTION
+
+static void __kmp_stg_parse_task_prediction(char const *name, char const *value,
+                                            void *data) {
+  __kmp_stg_parse_bool(name, value, &__kmp_enable_task_prediction);
+} // __kmp_stg_parse_task_prediction
+
+static void __kmp_stg_print_task_prediction(kmp_str_buf_t *buffer,
+                                            char const *name, void *data) {
+  __kmp_stg_print_bool(buffer, name, __kmp_enable_task_prediction);
+} // __kmp_stg_print_task_prediction
+
 #if KMP_HAVE_MWAIT || KMP_HAVE_UMWAIT
 // -----------------------------------------------------------------------------
 // KMP_USER_LEVEL_MWAIT
@@ -5468,6 +5481,8 @@ static kmp_setting_t __kmp_stg_table[] = {
 #endif
     {"KMP_ENABLE_TASK_THROTTLING", __kmp_stg_parse_task_throttling,
      __kmp_stg_print_task_throttling, NULL, 0, 0},
+    {"KMP_ENABLE_TASK_PREDICTION", __kmp_stg_parse_task_prediction,
+     __kmp_stg_print_task_prediction, NULL, 0, 0},
 
     {"OMP_DISPLAY_ENV", __kmp_stg_parse_omp_display_env,
      __kmp_stg_print_omp_display_env, NULL, 0, 0},

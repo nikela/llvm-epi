@@ -6222,6 +6222,8 @@ StmtResult Sema::ActOnOpenMPExecutableDirective(
       case OMPC_priority:
       case OMPC_novariants:
       case OMPC_nocontext:
+      case OMPC_cost:
+      case OMPC_label:
         // Do not analyze if no parent parallel directive.
         if (isOpenMPParallelDirective(Kind))
           break;
@@ -13188,6 +13190,12 @@ OMPClause *Sema::ActOnOpenMPSingleExprClause(OpenMPClauseKind Kind, Expr *Expr,
   case OMPC_partial:
     Res = ActOnOpenMPPartialClause(Expr, StartLoc, LParenLoc, EndLoc);
     break;
+  case OMPC_cost:
+    Res = ActOnOpenMPCostClause(Expr, StartLoc, LParenLoc, EndLoc);
+    break;
+  case OMPC_label:
+    Res = ActOnOpenMPLabelClause(Expr, StartLoc, LParenLoc, EndLoc);
+    break;
   case OMPC_device:
   case OMPC_if:
   case OMPC_default:
@@ -13904,6 +13912,8 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
   case OMPC_num_tasks:
   case OMPC_final:
   case OMPC_priority:
+  case OMPC_cost:
+  case OMPC_label:
     switch (DKind) {
     case OMPD_task:
     case OMPD_taskloop:
@@ -14522,6 +14532,8 @@ OMPClause *Sema::ActOnOpenMPSimpleClause(
   case OMPC_exclusive:
   case OMPC_uses_allocators:
   case OMPC_affinity:
+  case OMPC_cost:
+  case OMPC_label:
   default:
     llvm_unreachable("Clause is not allowed.");
   }
@@ -14814,6 +14826,8 @@ OMPClause *Sema::ActOnOpenMPSingleExprWithArgClause(
   case OMPC_exclusive:
   case OMPC_uses_allocators:
   case OMPC_affinity:
+  case OMPC_cost:
+  case OMPC_label:
   default:
     llvm_unreachable("Clause is not allowed.");
   }
@@ -15063,6 +15077,8 @@ OMPClause *Sema::ActOnOpenMPClause(OpenMPClauseKind Kind,
   case OMPC_exclusive:
   case OMPC_uses_allocators:
   case OMPC_affinity:
+  case OMPC_cost:
+  case OMPC_label:
   default:
     llvm_unreachable("Clause is not allowed.");
   }
@@ -15605,6 +15621,8 @@ OMPClause *Sema::ActOnOpenMPVarListClause(
   case OMPC_nocontext:
   case OMPC_detach:
   case OMPC_uses_allocators:
+  case OMPC_cost:
+  case OMPC_label:
   default:
     llvm_unreachable("Clause is not allowed.");
   }
@@ -21280,4 +21298,44 @@ OMPClause *Sema::ActOnOpenMPAffinityClause(
 
   return OMPAffinityClause::Create(Context, StartLoc, LParenLoc, ColonLoc,
                                    EndLoc, Modifier, Vars);
+}
+
+OMPClause *Sema::ActOnOpenMPCostClause(Expr *Cost,
+                                           SourceLocation StartLoc,
+                                           SourceLocation LParenLoc,
+                                           SourceLocation EndLoc) {
+  Expr *ValExpr = Cost;
+  Stmt *HelperValStmt = nullptr;
+  OpenMPDirectiveKind CaptureRegion = OMPD_unknown;
+
+  // The cost-value is a non-negative numerical scalar expression.
+  // FIXME: Modelled after priority. We could make this more flexible.
+  if (!isNonNegativeIntegerValue(
+          ValExpr, *this, OMPC_cost,
+          /*StrictlyPositive=*/false, /*BuildCapture=*/true,
+          DSAStack->getCurrentDirective(), &CaptureRegion, &HelperValStmt))
+    return nullptr;
+
+  return new (Context) OMPCostClause(ValExpr, HelperValStmt, CaptureRegion,
+                                         StartLoc, LParenLoc, EndLoc);
+}
+
+OMPClause *Sema::ActOnOpenMPLabelClause(Expr *Label,
+                                           SourceLocation StartLoc,
+                                           SourceLocation LParenLoc,
+                                           SourceLocation EndLoc) {
+  Expr *ValExpr = Label;
+  Stmt *HelperValStmt = nullptr;
+  OpenMPDirectiveKind CaptureRegion = OMPD_unknown;
+
+  // The label-value is a non-negative numerical scalar expression.
+  // FIXME: Modelled after priority. We could make this more flexible.
+  if (!isNonNegativeIntegerValue(
+          ValExpr, *this, OMPC_label,
+          /*StrictlyPositive=*/false, /*BuildCapture=*/true,
+          DSAStack->getCurrentDirective(), &CaptureRegion, &HelperValStmt))
+    return nullptr;
+
+  return new (Context) OMPLabelClause(ValExpr, HelperValStmt, CaptureRegion,
+                                         StartLoc, LParenLoc, EndLoc);
 }

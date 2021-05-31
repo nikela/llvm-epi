@@ -18,6 +18,14 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#ifdef LIBOMP_TASK_PREDICTION
+#if KMP_OS_LINUX
+#include <time.h>
+#else
+#error Task prediction only supported in linux
+#endif
+#endif
+
 #define KMP_FTN_PLAIN 1
 #define KMP_FTN_APPEND 2
 #define KMP_FTN_UPPER 3

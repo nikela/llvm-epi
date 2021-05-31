@@ -1978,6 +1978,9 @@ int __kmp_fork_call(ident_t *loc, int gtid,
     KMP_CHECK_UPDATE_SYNC(team->t.ompt_team_info.master_return_address,
                           return_address);
 #endif
+#if LIBOMP_TASK_PREDICTION
+    KMP_CHECK_UPDATE(team->t.last_prediction_timestamp, 0);
+#endif
     KMP_CHECK_UPDATE(team->t.t_invoke, invoker); // TODO move to root, maybe
     // TODO: parent_team->t.t_level == INT_MAX ???
     if (!master_th->th.th_teams_microtask || level > teams_level) {

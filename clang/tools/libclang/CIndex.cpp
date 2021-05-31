@@ -2579,6 +2579,14 @@ void OMPClauseEnqueue::VisitOMPAffinityClause(const OMPAffinityClause *C) {
   for (const Expr *E : C->varlists())
     Visitor->AddStmt(E);
 }
+void OMPClauseEnqueue::VisitOMPCostClause(const OMPCostClause *C) {
+  VisitOMPClauseWithPreInit(C);
+  Visitor->AddStmt(C->getCost());
+}
+void OMPClauseEnqueue::VisitOMPLabelClause(const OMPLabelClause *C) {
+  VisitOMPClauseWithPreInit(C);
+  Visitor->AddStmt(C->getLabel());
+}
 } // namespace
 
 void EnqueueVisitor::EnqueueChildren(const OMPClause *S) {

@@ -12986,6 +12986,18 @@ void OMPClauseReader::VisitOMPFilterClause(OMPFilterClause *C) {
   C->setLParenLoc(Record.readSourceLocation());
 }
 
+void OMPClauseReader::VisitOMPCostClause(OMPCostClause *C) {
+  VisitOMPClauseWithPreInit(C);
+  C->setCost(Record.readSubExpr());
+  C->setLParenLoc(Record.readSourceLocation());
+}
+
+void OMPClauseReader::VisitOMPLabelClause(OMPLabelClause *C) {
+  VisitOMPClauseWithPreInit(C);
+  C->setLabel(Record.readSubExpr());
+  C->setLParenLoc(Record.readSourceLocation());
+}
+
 OMPTraitInfo *ASTRecordReader::readOMPTraitInfo() {
   OMPTraitInfo &TI = getContext().getNewOMPTraitInfo();
   TI.Sets.resize(readUInt32());

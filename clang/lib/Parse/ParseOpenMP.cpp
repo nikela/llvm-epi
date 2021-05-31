@@ -2802,6 +2802,8 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
   case OMPC_nocontext:
   case OMPC_filter:
   case OMPC_partial:
+  case OMPC_cost:
+  case OMPC_label:
     // OpenMP [2.5, Restrictions]
     //  At most one num_threads clause can appear on the directive.
     // OpenMP [2.8.1, simd construct, Restrictions]
@@ -3055,6 +3057,12 @@ ExprResult Parser::ParseOpenMPParensExpr(StringRef ClauseName,
 ///
 ///    detach-clause:
 ///      'detach' '(' event-handler-expression ')'
+//
+///    cost-clause:
+///      'cost' '(' expression ')'
+//
+///    label-clause:
+///      'label' '(' expression ')'
 ///
 OMPClause *Parser::ParseOpenMPSingleExprClause(OpenMPClauseKind Kind,
                                                bool ParseOnly) {

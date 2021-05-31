@@ -468,6 +468,8 @@ AffHWSubsetNotExistGeneric   "KMP_HW_SUBSET ignored: %1$s: level not detected in
 AffHWSubsetEqvLayers         "KMP_HW_SUBSET ignored: %1$s, %2$s: layers are equivalent, please only specify one."
 AffHWSubsetOutOfOrder        "KMP_HW_SUBSET ignored: %1$s layer should come after %2$s."
 AffEqualTopologyTypes        "%1$s: topology layer \"%2$s\" is equivalent to \"%3$s\"."
+TaskPredictionIgnoringClause "Task prediction not compiled in library. Clause '%1$s' will be ignored"
+
 
 # --------------------------------------------------------------------------------------------------
 -*- HINTS -*-
@@ -526,7 +528,6 @@ BadExeFormat                 "System error #193 is \"Bad format of EXE or DLL fi
                              "Check whether \"%1$s\" is a file for %2$s architecture."
 SystemLimitOnThreads         "System-related limit on the number of threads."
 SetNewBound                  "Try setting new bounds (preferably less than or equal to %1$d) for num_teams clause."
-
 
 # --------------------------------------------------------------------------------------------------
 # end of file #
