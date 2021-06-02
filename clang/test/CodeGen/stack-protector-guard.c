@@ -1,8 +1,9 @@
-// RUN: %clang_cc1 -mstack-protector-guard=sysreg \
+// REQUIRES: x86-registered-target
+// RUN: %clang_cc1 -triple x86_64 -mstack-protector-guard=sysreg \
 // RUN:            -mstack-protector-guard-reg=sp_el0 \
 // RUN:            -mstack-protector-guard-offset=1024 \
 // RUN:            -emit-llvm %s -o - | FileCheck %s
-// RUN: %clang_cc1 -emit-llvm %s -o - | FileCheck --check-prefix=CHECK-NONE %s
+// RUN: %clang_cc1 -triple x86_64 -emit-llvm %s -o - | FileCheck --check-prefix=CHECK-NONE %s
 void foo(int*);
 void bar(int x) {
   int baz[x];
