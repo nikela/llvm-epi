@@ -16675,7 +16675,7 @@ static void ReplaceCMP_SWAP_128Results(SDNode *N,
     MachineMemOperand *MemOp = cast<MemSDNode>(N)->getMemOperand();
 
     unsigned Opcode;
-    switch (MemOp->getOrdering()) {
+    switch (MemOp->getMergedOrdering()) {
     case AtomicOrdering::Monotonic:
       Opcode = AArch64::CASPX;
       break;
@@ -18178,4 +18178,9 @@ bool AArch64TargetLowering::SimplifyDemandedBitsForTargetNode(
 
   return TargetLowering::SimplifyDemandedBitsForTargetNode(
       Op, OriginalDemandedBits, OriginalDemandedElts, Known, TLO, Depth);
+}
+
+bool AArch64TargetLowering::isConstantUnsignedBitfieldExtactLegal(
+    unsigned Opc, LLT Ty1, LLT Ty2) const {
+  return Ty1 == Ty2 && (Ty1 == LLT::scalar(32) || Ty1 == LLT::scalar(64));
 }

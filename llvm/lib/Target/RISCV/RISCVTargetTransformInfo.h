@@ -307,6 +307,11 @@ public:
       return false;
     }
   }
+
+  bool enableInterleavedAccessVectorization() { return true; }
+  unsigned getMaxInterleaveFactor(unsigned VF) {
+    return ST->getMaxInterleaveFactor();
+  }
 };
 
 } // end namespace llvm
