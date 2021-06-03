@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 
 import collections
@@ -905,7 +905,7 @@ def emit_compatibility_header(out_file, j):
         for type in ['i8', 'i16', 'i32', 'i64', 'f32', 'f64']:
             ex_type = "int" + type[1:] if type[0] == 'i' else "float" + type[1:]
             size = int(type[1:])
-            vscale = ELEN * lm / size 
+            vscale = int(ELEN * lm / size)
             out_file.write("{}\n".format(string.Template(vector_types).substitute(
                 ExtendedType=ex_type, LMul=lmul, VScale=vscale, Type=type)))
 
@@ -914,7 +914,7 @@ def emit_compatibility_header(out_file, j):
     out_file.write("// Mask types\n")
     mask_types = "#define __epi_${VScale}xi1 vbool${N}_t"
     for vscale in [1, 2, 4, 8, 16, 32, 64]:
-        n = ELEN/vscale
+        n = int(ELEN/vscale)
         out_file.write("{}\n".format(string.Template(mask_types).substitute(
             N = n, VScale = vscale)))
 
@@ -946,7 +946,7 @@ def emit_compatibility_header(out_file, j):
             # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
             subs["LMul"] = "m" + str(ib.lmul)
             subs["WidenedLMul"] = "m" + str(2 * ib.lmul)
-            subs["Boolean"] = str(int(subs["Size"]) / ib.lmul)
+            subs["Boolean"] = int(int(subs["Size"]) / ib.lmul)
             if "red" in ib.full_name:
                 if ib.lmul == 1:
                     subs["LMulExt"] = subs["LMulTrunc"] = subs["End"] = ""
