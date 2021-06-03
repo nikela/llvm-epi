@@ -171,13 +171,13 @@ define <4 x half> @selectcc_v4f16(half %a, half %b, <4 x half> %c, <4 x half> %d
 define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-LABEL: select_v8f16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    .cfi_def_cfa_offset 16
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    .cfi_def_cfa_offset 32
 ; CHECK-NEXT:    bnez a0, .LBB4_3
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v9
-; CHECK-NEXT:    fsh ft0, 0(sp)
+; CHECK-NEXT:    fsh ft0, 16(sp)
 ; CHECK-NEXT:    beqz a0, .LBB4_4
 ; CHECK-NEXT:  .LBB4_2:
 ; CHECK-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
@@ -186,14 +186,14 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:  .LBB4_3:
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
-; CHECK-NEXT:    fsh ft0, 0(sp)
+; CHECK-NEXT:    fsh ft0, 16(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_2
 ; CHECK-NEXT:  .LBB4_4:
 ; CHECK-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 7
 ; CHECK-NEXT:  .LBB4_5:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 14(sp)
+; CHECK-NEXT:    fsh ft0, 30(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_7
 ; CHECK-NEXT:  # %bb.6:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 6
@@ -202,7 +202,7 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 6
 ; CHECK-NEXT:  .LBB4_8:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 12(sp)
+; CHECK-NEXT:    fsh ft0, 28(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_10
 ; CHECK-NEXT:  # %bb.9:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 5
@@ -211,7 +211,7 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 5
 ; CHECK-NEXT:  .LBB4_11:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 10(sp)
+; CHECK-NEXT:    fsh ft0, 26(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_13
 ; CHECK-NEXT:  # %bb.12:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 4
@@ -220,7 +220,7 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 4
 ; CHECK-NEXT:  .LBB4_14:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 8(sp)
+; CHECK-NEXT:    fsh ft0, 24(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_16
 ; CHECK-NEXT:  # %bb.15:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 3
@@ -229,7 +229,7 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 3
 ; CHECK-NEXT:  .LBB4_17:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 6(sp)
+; CHECK-NEXT:    fsh ft0, 22(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_19
 ; CHECK-NEXT:  # %bb.18:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 2
@@ -238,7 +238,7 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 2
 ; CHECK-NEXT:  .LBB4_20:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 4(sp)
+; CHECK-NEXT:    fsh ft0, 20(sp)
 ; CHECK-NEXT:    bnez a0, .LBB4_22
 ; CHECK-NEXT:  # %bb.21:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 1
@@ -247,10 +247,11 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 1
 ; CHECK-NEXT:  .LBB4_23:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 2(sp)
+; CHECK-NEXT:    fsh ft0, 18(sp)
 ; CHECK-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
-; CHECK-NEXT:    vle16.v v8, (sp)
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <8 x half> %a, <8 x half> %b
   ret <8 x half> %v
@@ -259,14 +260,14 @@ define <8 x half> @select_v8f16(i1 zeroext %c, <8 x half> %a, <8 x half> %b) {
 define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d) {
 ; CHECK-LABEL: selectcc_v8f16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    .cfi_def_cfa_offset 16
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    .cfi_def_cfa_offset 32
 ; CHECK-NEXT:    feq.h a0, fa0, fa1
 ; CHECK-NEXT:    bnez a0, .LBB5_3
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v9
-; CHECK-NEXT:    fsh ft0, 0(sp)
+; CHECK-NEXT:    fsh ft0, 16(sp)
 ; CHECK-NEXT:    beqz a0, .LBB5_4
 ; CHECK-NEXT:  .LBB5_2:
 ; CHECK-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
@@ -275,14 +276,14 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:  .LBB5_3:
 ; CHECK-NEXT:    vsetvli zero, zero, e16,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
-; CHECK-NEXT:    fsh ft0, 0(sp)
+; CHECK-NEXT:    fsh ft0, 16(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_2
 ; CHECK-NEXT:  .LBB5_4:
 ; CHECK-NEXT:    vsetivli zero, 1, e16,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 7
 ; CHECK-NEXT:  .LBB5_5:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 14(sp)
+; CHECK-NEXT:    fsh ft0, 30(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_7
 ; CHECK-NEXT:  # %bb.6:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 6
@@ -291,7 +292,7 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 6
 ; CHECK-NEXT:  .LBB5_8:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 12(sp)
+; CHECK-NEXT:    fsh ft0, 28(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_10
 ; CHECK-NEXT:  # %bb.9:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 5
@@ -300,7 +301,7 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 5
 ; CHECK-NEXT:  .LBB5_11:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 10(sp)
+; CHECK-NEXT:    fsh ft0, 26(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_13
 ; CHECK-NEXT:  # %bb.12:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 4
@@ -309,7 +310,7 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 4
 ; CHECK-NEXT:  .LBB5_14:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 8(sp)
+; CHECK-NEXT:    fsh ft0, 24(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_16
 ; CHECK-NEXT:  # %bb.15:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 3
@@ -318,7 +319,7 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 3
 ; CHECK-NEXT:  .LBB5_17:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 6(sp)
+; CHECK-NEXT:    fsh ft0, 22(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_19
 ; CHECK-NEXT:  # %bb.18:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 2
@@ -327,7 +328,7 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 2
 ; CHECK-NEXT:  .LBB5_20:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 4(sp)
+; CHECK-NEXT:    fsh ft0, 20(sp)
 ; CHECK-NEXT:    bnez a0, .LBB5_22
 ; CHECK-NEXT:  # %bb.21:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 1
@@ -336,10 +337,11 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 1
 ; CHECK-NEXT:  .LBB5_23:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsh ft0, 2(sp)
+; CHECK-NEXT:    fsh ft0, 18(sp)
 ; CHECK-NEXT:    vsetivli zero, 8, e16,m1,ta,mu
-; CHECK-NEXT:    vle16.v v8, (sp)
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %cmp = fcmp oeq half %a, %b
   %v = select i1 %cmp, <8 x half> %c, <8 x half> %d
@@ -349,20 +351,20 @@ define <8 x half> @selectcc_v8f16(half %a, half %b, <8 x half> %c, <8 x half> %d
 define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b) {
 ; RV32-LABEL: select_v16f16:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    bnez a0, .LBB6_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsh ft0, 0(sp)
+; RV32-NEXT:    fsh ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB6_4
 ; RV32-NEXT:  .LBB6_2:
 ; RV32-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
@@ -371,14 +373,14 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:  .LBB6_3:
 ; RV32-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsh ft0, 0(sp)
+; RV32-NEXT:    fsh ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_2
 ; RV32-NEXT:  .LBB6_4:
 ; RV32-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 15
 ; RV32-NEXT:  .LBB6_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 30(sp)
+; RV32-NEXT:    fsh ft0, 62(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 14
@@ -387,7 +389,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 14
 ; RV32-NEXT:  .LBB6_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 28(sp)
+; RV32-NEXT:    fsh ft0, 60(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 13
@@ -396,7 +398,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 13
 ; RV32-NEXT:  .LBB6_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 26(sp)
+; RV32-NEXT:    fsh ft0, 58(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 12
@@ -405,7 +407,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 12
 ; RV32-NEXT:  .LBB6_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 24(sp)
+; RV32-NEXT:    fsh ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 11
@@ -414,7 +416,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 11
 ; RV32-NEXT:  .LBB6_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 22(sp)
+; RV32-NEXT:    fsh ft0, 54(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 10
@@ -423,7 +425,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 10
 ; RV32-NEXT:  .LBB6_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 20(sp)
+; RV32-NEXT:    fsh ft0, 52(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 9
@@ -432,7 +434,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 9
 ; RV32-NEXT:  .LBB6_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 18(sp)
+; RV32-NEXT:    fsh ft0, 50(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 8
@@ -441,7 +443,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 8
 ; RV32-NEXT:  .LBB6_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 16(sp)
+; RV32-NEXT:    fsh ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 7
@@ -450,7 +452,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 7
 ; RV32-NEXT:  .LBB6_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 14(sp)
+; RV32-NEXT:    fsh ft0, 46(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 6
@@ -459,7 +461,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 6
 ; RV32-NEXT:  .LBB6_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 12(sp)
+; RV32-NEXT:    fsh ft0, 44(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 5
@@ -468,7 +470,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 5
 ; RV32-NEXT:  .LBB6_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 10(sp)
+; RV32-NEXT:    fsh ft0, 42(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 4
@@ -477,7 +479,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 4
 ; RV32-NEXT:  .LBB6_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 8(sp)
+; RV32-NEXT:    fsh ft0, 40(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
@@ -486,7 +488,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 3
 ; RV32-NEXT:  .LBB6_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 6(sp)
+; RV32-NEXT:    fsh ft0, 38(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -495,7 +497,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB6_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 4(sp)
+; RV32-NEXT:    fsh ft0, 36(sp)
 ; RV32-NEXT:    bnez a0, .LBB6_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -504,24 +506,25 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB6_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 2(sp)
+; RV32-NEXT:    fsh ft0, 34(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
-; RV32-NEXT:    vle16.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle16.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v16f16:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    bnez a0, .LBB6_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsh ft0, 0(sp)
+; RV64-NEXT:    fsh ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB6_4
 ; RV64-NEXT:  .LBB6_2:
 ; RV64-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
@@ -530,14 +533,14 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:  .LBB6_3:
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsh ft0, 0(sp)
+; RV64-NEXT:    fsh ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_2
 ; RV64-NEXT:  .LBB6_4:
 ; RV64-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 15
 ; RV64-NEXT:  .LBB6_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 30(sp)
+; RV64-NEXT:    fsh ft0, 46(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 14
@@ -546,7 +549,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 14
 ; RV64-NEXT:  .LBB6_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 28(sp)
+; RV64-NEXT:    fsh ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 13
@@ -555,7 +558,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 13
 ; RV64-NEXT:  .LBB6_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 26(sp)
+; RV64-NEXT:    fsh ft0, 42(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 12
@@ -564,7 +567,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 12
 ; RV64-NEXT:  .LBB6_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 24(sp)
+; RV64-NEXT:    fsh ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 11
@@ -573,7 +576,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 11
 ; RV64-NEXT:  .LBB6_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 22(sp)
+; RV64-NEXT:    fsh ft0, 38(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 10
@@ -582,7 +585,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 10
 ; RV64-NEXT:  .LBB6_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 20(sp)
+; RV64-NEXT:    fsh ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 9
@@ -591,7 +594,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 9
 ; RV64-NEXT:  .LBB6_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 18(sp)
+; RV64-NEXT:    fsh ft0, 34(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 8
@@ -600,7 +603,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 8
 ; RV64-NEXT:  .LBB6_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 16(sp)
+; RV64-NEXT:    fsh ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 7
@@ -609,7 +612,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 7
 ; RV64-NEXT:  .LBB6_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 14(sp)
+; RV64-NEXT:    fsh ft0, 30(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 6
@@ -618,7 +621,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 6
 ; RV64-NEXT:  .LBB6_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 12(sp)
+; RV64-NEXT:    fsh ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 5
@@ -627,7 +630,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 5
 ; RV64-NEXT:  .LBB6_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 10(sp)
+; RV64-NEXT:    fsh ft0, 26(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 4
@@ -636,7 +639,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 4
 ; RV64-NEXT:  .LBB6_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 8(sp)
+; RV64-NEXT:    fsh ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
@@ -645,7 +648,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 3
 ; RV64-NEXT:  .LBB6_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 6(sp)
+; RV64-NEXT:    fsh ft0, 22(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -654,7 +657,7 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB6_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 4(sp)
+; RV64-NEXT:    fsh ft0, 20(sp)
 ; RV64-NEXT:    bnez a0, .LBB6_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -663,10 +666,11 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB6_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 2(sp)
+; RV64-NEXT:    fsh ft0, 18(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
-; RV64-NEXT:    vle16.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle16.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x half> %a, <16 x half> %b
   ret <16 x half> %v
@@ -675,13 +679,13 @@ define <16 x half> @select_v16f16(i1 zeroext %c, <16 x half> %a, <16 x half> %b)
 define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half> %d) {
 ; RV32-LABEL: selectcc_v16f16:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    feq.h a0, fa0, fa1
@@ -689,7 +693,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsh ft0, 0(sp)
+; RV32-NEXT:    fsh ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB7_4
 ; RV32-NEXT:  .LBB7_2:
 ; RV32-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
@@ -698,14 +702,14 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:  .LBB7_3:
 ; RV32-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsh ft0, 0(sp)
+; RV32-NEXT:    fsh ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_2
 ; RV32-NEXT:  .LBB7_4:
 ; RV32-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 15
 ; RV32-NEXT:  .LBB7_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 30(sp)
+; RV32-NEXT:    fsh ft0, 62(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 14
@@ -714,7 +718,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 14
 ; RV32-NEXT:  .LBB7_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 28(sp)
+; RV32-NEXT:    fsh ft0, 60(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 13
@@ -723,7 +727,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 13
 ; RV32-NEXT:  .LBB7_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 26(sp)
+; RV32-NEXT:    fsh ft0, 58(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 12
@@ -732,7 +736,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 12
 ; RV32-NEXT:  .LBB7_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 24(sp)
+; RV32-NEXT:    fsh ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 11
@@ -741,7 +745,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 11
 ; RV32-NEXT:  .LBB7_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 22(sp)
+; RV32-NEXT:    fsh ft0, 54(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 10
@@ -750,7 +754,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 10
 ; RV32-NEXT:  .LBB7_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 20(sp)
+; RV32-NEXT:    fsh ft0, 52(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 9
@@ -759,7 +763,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 9
 ; RV32-NEXT:  .LBB7_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 18(sp)
+; RV32-NEXT:    fsh ft0, 50(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 8
@@ -768,7 +772,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 8
 ; RV32-NEXT:  .LBB7_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 16(sp)
+; RV32-NEXT:    fsh ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 7
@@ -777,7 +781,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 7
 ; RV32-NEXT:  .LBB7_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 14(sp)
+; RV32-NEXT:    fsh ft0, 46(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 6
@@ -786,7 +790,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 6
 ; RV32-NEXT:  .LBB7_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 12(sp)
+; RV32-NEXT:    fsh ft0, 44(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 5
@@ -795,7 +799,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 5
 ; RV32-NEXT:  .LBB7_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 10(sp)
+; RV32-NEXT:    fsh ft0, 42(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 4
@@ -804,7 +808,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 4
 ; RV32-NEXT:  .LBB7_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 8(sp)
+; RV32-NEXT:    fsh ft0, 40(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
@@ -813,7 +817,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 3
 ; RV32-NEXT:  .LBB7_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 6(sp)
+; RV32-NEXT:    fsh ft0, 38(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -822,7 +826,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB7_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 4(sp)
+; RV32-NEXT:    fsh ft0, 36(sp)
 ; RV32-NEXT:    bnez a0, .LBB7_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -831,25 +835,26 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB7_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsh ft0, 2(sp)
+; RV32-NEXT:    fsh ft0, 34(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
-; RV32-NEXT:    vle16.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle16.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v16f16:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    feq.h a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB7_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsh ft0, 0(sp)
+; RV64-NEXT:    fsh ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB7_4
 ; RV64-NEXT:  .LBB7_2:
 ; RV64-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
@@ -858,14 +863,14 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:  .LBB7_3:
 ; RV64-NEXT:    vsetvli zero, zero, e16,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsh ft0, 0(sp)
+; RV64-NEXT:    fsh ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_2
 ; RV64-NEXT:  .LBB7_4:
 ; RV64-NEXT:    vsetivli zero, 1, e16,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 15
 ; RV64-NEXT:  .LBB7_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 30(sp)
+; RV64-NEXT:    fsh ft0, 46(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 14
@@ -874,7 +879,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 14
 ; RV64-NEXT:  .LBB7_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 28(sp)
+; RV64-NEXT:    fsh ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 13
@@ -883,7 +888,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 13
 ; RV64-NEXT:  .LBB7_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 26(sp)
+; RV64-NEXT:    fsh ft0, 42(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 12
@@ -892,7 +897,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 12
 ; RV64-NEXT:  .LBB7_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 24(sp)
+; RV64-NEXT:    fsh ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 11
@@ -901,7 +906,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 11
 ; RV64-NEXT:  .LBB7_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 22(sp)
+; RV64-NEXT:    fsh ft0, 38(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 10
@@ -910,7 +915,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 10
 ; RV64-NEXT:  .LBB7_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 20(sp)
+; RV64-NEXT:    fsh ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 9
@@ -919,7 +924,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 9
 ; RV64-NEXT:  .LBB7_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 18(sp)
+; RV64-NEXT:    fsh ft0, 34(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 8
@@ -928,7 +933,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 8
 ; RV64-NEXT:  .LBB7_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 16(sp)
+; RV64-NEXT:    fsh ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 7
@@ -937,7 +942,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 7
 ; RV64-NEXT:  .LBB7_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 14(sp)
+; RV64-NEXT:    fsh ft0, 30(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 6
@@ -946,7 +951,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 6
 ; RV64-NEXT:  .LBB7_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 12(sp)
+; RV64-NEXT:    fsh ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 5
@@ -955,7 +960,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 5
 ; RV64-NEXT:  .LBB7_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 10(sp)
+; RV64-NEXT:    fsh ft0, 26(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 4
@@ -964,7 +969,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 4
 ; RV64-NEXT:  .LBB7_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 8(sp)
+; RV64-NEXT:    fsh ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
@@ -973,7 +978,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 3
 ; RV64-NEXT:  .LBB7_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 6(sp)
+; RV64-NEXT:    fsh ft0, 22(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -982,7 +987,7 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB7_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 4(sp)
+; RV64-NEXT:    fsh ft0, 20(sp)
 ; RV64-NEXT:    bnez a0, .LBB7_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -991,10 +996,11 @@ define <16 x half> @selectcc_v16f16(half %a, half %b, <16 x half> %c, <16 x half
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB7_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsh ft0, 2(sp)
+; RV64-NEXT:    fsh ft0, 18(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e16,m2,ta,mu
-; RV64-NEXT:    vle16.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle16.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq half %a, %b
   %v = select i1 %cmp, <16 x half> %c, <16 x half> %d
@@ -1060,13 +1066,13 @@ define <2 x float> @selectcc_v2f32(float %a, float %b, <2 x float> %c, <2 x floa
 define <4 x float> @select_v4f32(i1 zeroext %c, <4 x float> %a, <4 x float> %b) {
 ; CHECK-LABEL: select_v4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    .cfi_def_cfa_offset 16
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    .cfi_def_cfa_offset 32
 ; CHECK-NEXT:    bnez a0, .LBB10_3
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v9
-; CHECK-NEXT:    fsw ft0, 0(sp)
+; CHECK-NEXT:    fsw ft0, 16(sp)
 ; CHECK-NEXT:    beqz a0, .LBB10_4
 ; CHECK-NEXT:  .LBB10_2:
 ; CHECK-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
@@ -1075,14 +1081,14 @@ define <4 x float> @select_v4f32(i1 zeroext %c, <4 x float> %a, <4 x float> %b) 
 ; CHECK-NEXT:  .LBB10_3:
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
-; CHECK-NEXT:    fsw ft0, 0(sp)
+; CHECK-NEXT:    fsw ft0, 16(sp)
 ; CHECK-NEXT:    bnez a0, .LBB10_2
 ; CHECK-NEXT:  .LBB10_4:
 ; CHECK-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 3
 ; CHECK-NEXT:  .LBB10_5:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 12(sp)
+; CHECK-NEXT:    fsw ft0, 28(sp)
 ; CHECK-NEXT:    bnez a0, .LBB10_7
 ; CHECK-NEXT:  # %bb.6:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 2
@@ -1091,7 +1097,7 @@ define <4 x float> @select_v4f32(i1 zeroext %c, <4 x float> %a, <4 x float> %b) 
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 2
 ; CHECK-NEXT:  .LBB10_8:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 8(sp)
+; CHECK-NEXT:    fsw ft0, 24(sp)
 ; CHECK-NEXT:    bnez a0, .LBB10_10
 ; CHECK-NEXT:  # %bb.9:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 1
@@ -1100,10 +1106,11 @@ define <4 x float> @select_v4f32(i1 zeroext %c, <4 x float> %a, <4 x float> %b) 
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 1
 ; CHECK-NEXT:  .LBB10_11:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 4(sp)
+; CHECK-NEXT:    fsw ft0, 20(sp)
 ; CHECK-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
-; CHECK-NEXT:    vle32.v v8, (sp)
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %v = select i1 %c, <4 x float> %a, <4 x float> %b
   ret <4 x float> %v
@@ -1112,14 +1119,14 @@ define <4 x float> @select_v4f32(i1 zeroext %c, <4 x float> %a, <4 x float> %b) 
 define <4 x float> @selectcc_v4f32(float %a, float %b, <4 x float> %c, <4 x float> %d) {
 ; CHECK-LABEL: selectcc_v4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    .cfi_def_cfa_offset 16
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    .cfi_def_cfa_offset 32
 ; CHECK-NEXT:    feq.s a0, fa0, fa1
 ; CHECK-NEXT:    bnez a0, .LBB11_3
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v9
-; CHECK-NEXT:    fsw ft0, 0(sp)
+; CHECK-NEXT:    fsw ft0, 16(sp)
 ; CHECK-NEXT:    beqz a0, .LBB11_4
 ; CHECK-NEXT:  .LBB11_2:
 ; CHECK-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
@@ -1128,14 +1135,14 @@ define <4 x float> @selectcc_v4f32(float %a, float %b, <4 x float> %c, <4 x floa
 ; CHECK-NEXT:  .LBB11_3:
 ; CHECK-NEXT:    vsetvli zero, zero, e32,m1,ta,mu
 ; CHECK-NEXT:    vfmv.f.s ft0, v8
-; CHECK-NEXT:    fsw ft0, 0(sp)
+; CHECK-NEXT:    fsw ft0, 16(sp)
 ; CHECK-NEXT:    bnez a0, .LBB11_2
 ; CHECK-NEXT:  .LBB11_4:
 ; CHECK-NEXT:    vsetivli zero, 1, e32,m1,ta,mu
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 3
 ; CHECK-NEXT:  .LBB11_5:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 12(sp)
+; CHECK-NEXT:    fsw ft0, 28(sp)
 ; CHECK-NEXT:    bnez a0, .LBB11_7
 ; CHECK-NEXT:  # %bb.6:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 2
@@ -1144,7 +1151,7 @@ define <4 x float> @selectcc_v4f32(float %a, float %b, <4 x float> %c, <4 x floa
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 2
 ; CHECK-NEXT:  .LBB11_8:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 8(sp)
+; CHECK-NEXT:    fsw ft0, 24(sp)
 ; CHECK-NEXT:    bnez a0, .LBB11_10
 ; CHECK-NEXT:  # %bb.9:
 ; CHECK-NEXT:    vslidedown.vi v25, v9, 1
@@ -1153,10 +1160,11 @@ define <4 x float> @selectcc_v4f32(float %a, float %b, <4 x float> %c, <4 x floa
 ; CHECK-NEXT:    vslidedown.vi v25, v8, 1
 ; CHECK-NEXT:  .LBB11_11:
 ; CHECK-NEXT:    vfmv.f.s ft0, v25
-; CHECK-NEXT:    fsw ft0, 4(sp)
+; CHECK-NEXT:    fsw ft0, 20(sp)
 ; CHECK-NEXT:    vsetivli zero, 4, e32,m1,ta,mu
-; CHECK-NEXT:    vle32.v v8, (sp)
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
   %v = select i1 %cmp, <4 x float> %c, <4 x float> %d
@@ -1166,20 +1174,20 @@ define <4 x float> @selectcc_v4f32(float %a, float %b, <4 x float> %c, <4 x floa
 define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) {
 ; RV32-LABEL: select_v8f32:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    bnez a0, .LBB12_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB12_4
 ; RV32-NEXT:  .LBB12_2:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
@@ -1188,14 +1196,14 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:  .LBB12_3:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_2
 ; RV32-NEXT:  .LBB12_4:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 7
 ; RV32-NEXT:  .LBB12_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 28(sp)
+; RV32-NEXT:    fsw ft0, 60(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 6
@@ -1204,7 +1212,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 6
 ; RV32-NEXT:  .LBB12_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 24(sp)
+; RV32-NEXT:    fsw ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 5
@@ -1213,7 +1221,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 5
 ; RV32-NEXT:  .LBB12_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 20(sp)
+; RV32-NEXT:    fsw ft0, 52(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 4
@@ -1222,7 +1230,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 4
 ; RV32-NEXT:  .LBB12_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 16(sp)
+; RV32-NEXT:    fsw ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
@@ -1231,7 +1239,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 3
 ; RV32-NEXT:  .LBB12_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 12(sp)
+; RV32-NEXT:    fsw ft0, 44(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -1240,7 +1248,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB12_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 8(sp)
+; RV32-NEXT:    fsw ft0, 40(sp)
 ; RV32-NEXT:    bnez a0, .LBB12_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -1249,24 +1257,25 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB12_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 4(sp)
+; RV32-NEXT:    fsw ft0, 36(sp)
 ; RV32-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
-; RV32-NEXT:    vle32.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle32.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v8f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    bnez a0, .LBB12_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB12_4
 ; RV64-NEXT:  .LBB12_2:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
@@ -1275,14 +1284,14 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:  .LBB12_3:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_2
 ; RV64-NEXT:  .LBB12_4:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 7
 ; RV64-NEXT:  .LBB12_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 28(sp)
+; RV64-NEXT:    fsw ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 6
@@ -1291,7 +1300,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 6
 ; RV64-NEXT:  .LBB12_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 24(sp)
+; RV64-NEXT:    fsw ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 5
@@ -1300,7 +1309,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 5
 ; RV64-NEXT:  .LBB12_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 20(sp)
+; RV64-NEXT:    fsw ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 4
@@ -1309,7 +1318,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 4
 ; RV64-NEXT:  .LBB12_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 16(sp)
+; RV64-NEXT:    fsw ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
@@ -1318,7 +1327,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 3
 ; RV64-NEXT:  .LBB12_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 12(sp)
+; RV64-NEXT:    fsw ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -1327,7 +1336,7 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB12_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 8(sp)
+; RV64-NEXT:    fsw ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB12_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -1336,10 +1345,11 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB12_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 4(sp)
+; RV64-NEXT:    fsw ft0, 20(sp)
 ; RV64-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
-; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle32.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %v = select i1 %c, <8 x float> %a, <8 x float> %b
   ret <8 x float> %v
@@ -1348,13 +1358,13 @@ define <8 x float> @select_v8f32(i1 zeroext %c, <8 x float> %a, <8 x float> %b) 
 define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x float> %d) {
 ; RV32-LABEL: selectcc_v8f32:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    feq.s a0, fa0, fa1
@@ -1362,7 +1372,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB13_4
 ; RV32-NEXT:  .LBB13_2:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
@@ -1371,14 +1381,14 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:  .LBB13_3:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_2
 ; RV32-NEXT:  .LBB13_4:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 7
 ; RV32-NEXT:  .LBB13_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 28(sp)
+; RV32-NEXT:    fsw ft0, 60(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 6
@@ -1387,7 +1397,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 6
 ; RV32-NEXT:  .LBB13_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 24(sp)
+; RV32-NEXT:    fsw ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 5
@@ -1396,7 +1406,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 5
 ; RV32-NEXT:  .LBB13_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 20(sp)
+; RV32-NEXT:    fsw ft0, 52(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 4
@@ -1405,7 +1415,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 4
 ; RV32-NEXT:  .LBB13_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 16(sp)
+; RV32-NEXT:    fsw ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
@@ -1414,7 +1424,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 3
 ; RV32-NEXT:  .LBB13_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 12(sp)
+; RV32-NEXT:    fsw ft0, 44(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -1423,7 +1433,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB13_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 8(sp)
+; RV32-NEXT:    fsw ft0, 40(sp)
 ; RV32-NEXT:    bnez a0, .LBB13_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -1432,25 +1442,26 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB13_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsw ft0, 4(sp)
+; RV32-NEXT:    fsw ft0, 36(sp)
 ; RV32-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
-; RV32-NEXT:    vle32.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle32.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v8f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    feq.s a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB13_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB13_4
 ; RV64-NEXT:  .LBB13_2:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
@@ -1459,14 +1470,14 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:  .LBB13_3:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_2
 ; RV64-NEXT:  .LBB13_4:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 7
 ; RV64-NEXT:  .LBB13_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 28(sp)
+; RV64-NEXT:    fsw ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 6
@@ -1475,7 +1486,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 6
 ; RV64-NEXT:  .LBB13_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 24(sp)
+; RV64-NEXT:    fsw ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 5
@@ -1484,7 +1495,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 5
 ; RV64-NEXT:  .LBB13_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 20(sp)
+; RV64-NEXT:    fsw ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 4
@@ -1493,7 +1504,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 4
 ; RV64-NEXT:  .LBB13_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 16(sp)
+; RV64-NEXT:    fsw ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
@@ -1502,7 +1513,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 3
 ; RV64-NEXT:  .LBB13_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 12(sp)
+; RV64-NEXT:    fsw ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -1511,7 +1522,7 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB13_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 8(sp)
+; RV64-NEXT:    fsw ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB13_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -1520,10 +1531,11 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB13_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsw ft0, 4(sp)
+; RV64-NEXT:    fsw ft0, 20(sp)
 ; RV64-NEXT:    vsetivli zero, 8, e32,m2,ta,mu
-; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle32.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
   %v = select i1 %cmp, <8 x float> %c, <8 x float> %d
@@ -1533,20 +1545,20 @@ define <8 x float> @selectcc_v8f32(float %a, float %b, <8 x float> %c, <8 x floa
 define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> %b) {
 ; RV32-LABEL: select_v16f32:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -128
-; RV32-NEXT:    .cfi_def_cfa_offset 128
-; RV32-NEXT:    sw ra, 124(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 120(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -192
+; RV32-NEXT:    .cfi_def_cfa_offset 192
+; RV32-NEXT:    sw ra, 188(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 184(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 128
+; RV32-NEXT:    addi s0, sp, 192
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -64
 ; RV32-NEXT:    bnez a0, .LBB14_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v12
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 64(sp)
 ; RV32-NEXT:    beqz a0, .LBB14_4
 ; RV32-NEXT:  .LBB14_2:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
@@ -1555,14 +1567,14 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:  .LBB14_3:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 64(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_2
 ; RV32-NEXT:  .LBB14_4:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
 ; RV32-NEXT:    vslidedown.vi v28, v12, 15
 ; RV32-NEXT:  .LBB14_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 60(sp)
+; RV32-NEXT:    fsw ft0, 124(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 14
@@ -1571,7 +1583,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 14
 ; RV32-NEXT:  .LBB14_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 56(sp)
+; RV32-NEXT:    fsw ft0, 120(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 13
@@ -1580,7 +1592,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 13
 ; RV32-NEXT:  .LBB14_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 52(sp)
+; RV32-NEXT:    fsw ft0, 116(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 12
@@ -1589,7 +1601,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 12
 ; RV32-NEXT:  .LBB14_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 48(sp)
+; RV32-NEXT:    fsw ft0, 112(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 11
@@ -1598,7 +1610,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 11
 ; RV32-NEXT:  .LBB14_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 44(sp)
+; RV32-NEXT:    fsw ft0, 108(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 10
@@ -1607,7 +1619,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 10
 ; RV32-NEXT:  .LBB14_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 40(sp)
+; RV32-NEXT:    fsw ft0, 104(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 9
@@ -1616,7 +1628,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 9
 ; RV32-NEXT:  .LBB14_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 36(sp)
+; RV32-NEXT:    fsw ft0, 100(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 8
@@ -1625,7 +1637,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 8
 ; RV32-NEXT:  .LBB14_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 32(sp)
+; RV32-NEXT:    fsw ft0, 96(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 7
@@ -1634,7 +1646,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 7
 ; RV32-NEXT:  .LBB14_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 28(sp)
+; RV32-NEXT:    fsw ft0, 92(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 6
@@ -1643,7 +1655,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 6
 ; RV32-NEXT:  .LBB14_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 24(sp)
+; RV32-NEXT:    fsw ft0, 88(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 5
@@ -1652,7 +1664,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 5
 ; RV32-NEXT:  .LBB14_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 20(sp)
+; RV32-NEXT:    fsw ft0, 84(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 4
@@ -1661,7 +1673,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 4
 ; RV32-NEXT:  .LBB14_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 16(sp)
+; RV32-NEXT:    fsw ft0, 80(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 3
@@ -1670,7 +1682,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 3
 ; RV32-NEXT:  .LBB14_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 12(sp)
+; RV32-NEXT:    fsw ft0, 76(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 2
@@ -1679,7 +1691,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 2
 ; RV32-NEXT:  .LBB14_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 8(sp)
+; RV32-NEXT:    fsw ft0, 72(sp)
 ; RV32-NEXT:    bnez a0, .LBB14_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 1
@@ -1688,24 +1700,25 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 1
 ; RV32-NEXT:  .LBB14_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 4(sp)
+; RV32-NEXT:    fsw ft0, 68(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e32,m4,ta,mu
-; RV32-NEXT:    vle32.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -128
-; RV32-NEXT:    lw s0, 120(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 124(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 128
+; RV32-NEXT:    addi a0, sp, 64
+; RV32-NEXT:    vle32.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -192
+; RV32-NEXT:    lw s0, 184(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 188(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 192
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v16f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
+; RV64-NEXT:    addi sp, sp, -80
+; RV64-NEXT:    .cfi_def_cfa_offset 80
 ; RV64-NEXT:    bnez a0, .LBB14_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v12
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB14_4
 ; RV64-NEXT:  .LBB14_2:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
@@ -1714,14 +1727,14 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:  .LBB14_3:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_2
 ; RV64-NEXT:  .LBB14_4:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
 ; RV64-NEXT:    vslidedown.vi v28, v12, 15
 ; RV64-NEXT:  .LBB14_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 60(sp)
+; RV64-NEXT:    fsw ft0, 76(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 14
@@ -1730,7 +1743,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 14
 ; RV64-NEXT:  .LBB14_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 56(sp)
+; RV64-NEXT:    fsw ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 13
@@ -1739,7 +1752,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 13
 ; RV64-NEXT:  .LBB14_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 52(sp)
+; RV64-NEXT:    fsw ft0, 68(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 12
@@ -1748,7 +1761,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 12
 ; RV64-NEXT:  .LBB14_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 48(sp)
+; RV64-NEXT:    fsw ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 11
@@ -1757,7 +1770,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 11
 ; RV64-NEXT:  .LBB14_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 44(sp)
+; RV64-NEXT:    fsw ft0, 60(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 10
@@ -1766,7 +1779,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 10
 ; RV64-NEXT:  .LBB14_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 40(sp)
+; RV64-NEXT:    fsw ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 9
@@ -1775,7 +1788,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 9
 ; RV64-NEXT:  .LBB14_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 36(sp)
+; RV64-NEXT:    fsw ft0, 52(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 8
@@ -1784,7 +1797,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 8
 ; RV64-NEXT:  .LBB14_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 32(sp)
+; RV64-NEXT:    fsw ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 7
@@ -1793,7 +1806,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 7
 ; RV64-NEXT:  .LBB14_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 28(sp)
+; RV64-NEXT:    fsw ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 6
@@ -1802,7 +1815,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 6
 ; RV64-NEXT:  .LBB14_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 24(sp)
+; RV64-NEXT:    fsw ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 5
@@ -1811,7 +1824,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 5
 ; RV64-NEXT:  .LBB14_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 20(sp)
+; RV64-NEXT:    fsw ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 4
@@ -1820,7 +1833,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 4
 ; RV64-NEXT:  .LBB14_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 16(sp)
+; RV64-NEXT:    fsw ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 3
@@ -1829,7 +1842,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 3
 ; RV64-NEXT:  .LBB14_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 12(sp)
+; RV64-NEXT:    fsw ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 2
@@ -1838,7 +1851,7 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 2
 ; RV64-NEXT:  .LBB14_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 8(sp)
+; RV64-NEXT:    fsw ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB14_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 1
@@ -1847,10 +1860,11 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 1
 ; RV64-NEXT:  .LBB14_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 4(sp)
+; RV64-NEXT:    fsw ft0, 20(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e32,m4,ta,mu
-; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle32.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 80
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x float> %a, <16 x float> %b
   ret <16 x float> %v
@@ -1859,13 +1873,13 @@ define <16 x float> @select_v16f32(i1 zeroext %c, <16 x float> %a, <16 x float> 
 define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x float> %d) {
 ; RV32-LABEL: selectcc_v16f32:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -128
-; RV32-NEXT:    .cfi_def_cfa_offset 128
-; RV32-NEXT:    sw ra, 124(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 120(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -192
+; RV32-NEXT:    .cfi_def_cfa_offset 192
+; RV32-NEXT:    sw ra, 188(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 184(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 128
+; RV32-NEXT:    addi s0, sp, 192
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -64
 ; RV32-NEXT:    feq.s a0, fa0, fa1
@@ -1873,7 +1887,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v12
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 64(sp)
 ; RV32-NEXT:    beqz a0, .LBB15_4
 ; RV32-NEXT:  .LBB15_2:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
@@ -1882,14 +1896,14 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:  .LBB15_3:
 ; RV32-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsw ft0, 0(sp)
+; RV32-NEXT:    fsw ft0, 64(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_2
 ; RV32-NEXT:  .LBB15_4:
 ; RV32-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
 ; RV32-NEXT:    vslidedown.vi v28, v12, 15
 ; RV32-NEXT:  .LBB15_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 60(sp)
+; RV32-NEXT:    fsw ft0, 124(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 14
@@ -1898,7 +1912,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 14
 ; RV32-NEXT:  .LBB15_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 56(sp)
+; RV32-NEXT:    fsw ft0, 120(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 13
@@ -1907,7 +1921,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 13
 ; RV32-NEXT:  .LBB15_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 52(sp)
+; RV32-NEXT:    fsw ft0, 116(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 12
@@ -1916,7 +1930,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 12
 ; RV32-NEXT:  .LBB15_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 48(sp)
+; RV32-NEXT:    fsw ft0, 112(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 11
@@ -1925,7 +1939,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 11
 ; RV32-NEXT:  .LBB15_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 44(sp)
+; RV32-NEXT:    fsw ft0, 108(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 10
@@ -1934,7 +1948,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 10
 ; RV32-NEXT:  .LBB15_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 40(sp)
+; RV32-NEXT:    fsw ft0, 104(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 9
@@ -1943,7 +1957,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 9
 ; RV32-NEXT:  .LBB15_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 36(sp)
+; RV32-NEXT:    fsw ft0, 100(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 8
@@ -1952,7 +1966,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 8
 ; RV32-NEXT:  .LBB15_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 32(sp)
+; RV32-NEXT:    fsw ft0, 96(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 7
@@ -1961,7 +1975,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 7
 ; RV32-NEXT:  .LBB15_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 28(sp)
+; RV32-NEXT:    fsw ft0, 92(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 6
@@ -1970,7 +1984,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 6
 ; RV32-NEXT:  .LBB15_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 24(sp)
+; RV32-NEXT:    fsw ft0, 88(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 5
@@ -1979,7 +1993,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 5
 ; RV32-NEXT:  .LBB15_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 20(sp)
+; RV32-NEXT:    fsw ft0, 84(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 4
@@ -1988,7 +2002,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 4
 ; RV32-NEXT:  .LBB15_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 16(sp)
+; RV32-NEXT:    fsw ft0, 80(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 3
@@ -1997,7 +2011,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 3
 ; RV32-NEXT:  .LBB15_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 12(sp)
+; RV32-NEXT:    fsw ft0, 76(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 2
@@ -2006,7 +2020,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 2
 ; RV32-NEXT:  .LBB15_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 8(sp)
+; RV32-NEXT:    fsw ft0, 72(sp)
 ; RV32-NEXT:    bnez a0, .LBB15_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 1
@@ -2015,25 +2029,26 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 1
 ; RV32-NEXT:  .LBB15_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsw ft0, 4(sp)
+; RV32-NEXT:    fsw ft0, 68(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e32,m4,ta,mu
-; RV32-NEXT:    vle32.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -128
-; RV32-NEXT:    lw s0, 120(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 124(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 128
+; RV32-NEXT:    addi a0, sp, 64
+; RV32-NEXT:    vle32.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -192
+; RV32-NEXT:    lw s0, 184(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 188(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 192
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v16f32:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
+; RV64-NEXT:    addi sp, sp, -80
+; RV64-NEXT:    .cfi_def_cfa_offset 80
 ; RV64-NEXT:    feq.s a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB15_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v12
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB15_4
 ; RV64-NEXT:  .LBB15_2:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
@@ -2042,14 +2057,14 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:  .LBB15_3:
 ; RV64-NEXT:    vsetvli zero, zero, e32,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsw ft0, 0(sp)
+; RV64-NEXT:    fsw ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_2
 ; RV64-NEXT:  .LBB15_4:
 ; RV64-NEXT:    vsetivli zero, 1, e32,m4,ta,mu
 ; RV64-NEXT:    vslidedown.vi v28, v12, 15
 ; RV64-NEXT:  .LBB15_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 60(sp)
+; RV64-NEXT:    fsw ft0, 76(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 14
@@ -2058,7 +2073,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 14
 ; RV64-NEXT:  .LBB15_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 56(sp)
+; RV64-NEXT:    fsw ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 13
@@ -2067,7 +2082,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 13
 ; RV64-NEXT:  .LBB15_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 52(sp)
+; RV64-NEXT:    fsw ft0, 68(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 12
@@ -2076,7 +2091,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 12
 ; RV64-NEXT:  .LBB15_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 48(sp)
+; RV64-NEXT:    fsw ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 11
@@ -2085,7 +2100,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 11
 ; RV64-NEXT:  .LBB15_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 44(sp)
+; RV64-NEXT:    fsw ft0, 60(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 10
@@ -2094,7 +2109,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 10
 ; RV64-NEXT:  .LBB15_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 40(sp)
+; RV64-NEXT:    fsw ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 9
@@ -2103,7 +2118,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 9
 ; RV64-NEXT:  .LBB15_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 36(sp)
+; RV64-NEXT:    fsw ft0, 52(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 8
@@ -2112,7 +2127,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 8
 ; RV64-NEXT:  .LBB15_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 32(sp)
+; RV64-NEXT:    fsw ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 7
@@ -2121,7 +2136,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 7
 ; RV64-NEXT:  .LBB15_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 28(sp)
+; RV64-NEXT:    fsw ft0, 44(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 6
@@ -2130,7 +2145,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 6
 ; RV64-NEXT:  .LBB15_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 24(sp)
+; RV64-NEXT:    fsw ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 5
@@ -2139,7 +2154,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 5
 ; RV64-NEXT:  .LBB15_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 20(sp)
+; RV64-NEXT:    fsw ft0, 36(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 4
@@ -2148,7 +2163,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 4
 ; RV64-NEXT:  .LBB15_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 16(sp)
+; RV64-NEXT:    fsw ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 3
@@ -2157,7 +2172,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 3
 ; RV64-NEXT:  .LBB15_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 12(sp)
+; RV64-NEXT:    fsw ft0, 28(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 2
@@ -2166,7 +2181,7 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 2
 ; RV64-NEXT:  .LBB15_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 8(sp)
+; RV64-NEXT:    fsw ft0, 24(sp)
 ; RV64-NEXT:    bnez a0, .LBB15_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 1
@@ -2175,10 +2190,11 @@ define <16 x float> @selectcc_v16f32(float %a, float %b, <16 x float> %c, <16 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 1
 ; RV64-NEXT:  .LBB15_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsw ft0, 4(sp)
+; RV64-NEXT:    fsw ft0, 20(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e32,m4,ta,mu
-; RV64-NEXT:    vle32.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle32.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 80
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq float %a, %b
   %v = select i1 %cmp, <16 x float> %c, <16 x float> %d
@@ -2244,20 +2260,20 @@ define <2 x double> @selectcc_v2f64(double %a, double %b, <2 x double> %c, <2 x 
 define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %b) {
 ; RV32-LABEL: select_v4f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    bnez a0, .LBB18_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB18_4
 ; RV32-NEXT:  .LBB18_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
@@ -2266,14 +2282,14 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV32-NEXT:  .LBB18_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB18_2
 ; RV32-NEXT:  .LBB18_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
 ; RV32-NEXT:  .LBB18_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB18_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -2282,7 +2298,7 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB18_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB18_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -2291,24 +2307,25 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB18_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 40(sp)
 ; RV32-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v4f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    bnez a0, .LBB18_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB18_4
 ; RV64-NEXT:  .LBB18_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
@@ -2317,14 +2334,14 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV64-NEXT:  .LBB18_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB18_2
 ; RV64-NEXT:  .LBB18_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
 ; RV64-NEXT:  .LBB18_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB18_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -2333,7 +2350,7 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB18_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB18_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -2342,10 +2359,11 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB18_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %v = select i1 %c, <4 x double> %a, <4 x double> %b
   ret <4 x double> %v
@@ -2354,13 +2372,13 @@ define <4 x double> @select_v4f64(i1 zeroext %c, <4 x double> %a, <4 x double> %
 define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x double> %d) {
 ; RV32-LABEL: selectcc_v4f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -64
-; RV32-NEXT:    .cfi_def_cfa_offset 64
-; RV32-NEXT:    sw ra, 60(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 56(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -96
+; RV32-NEXT:    .cfi_def_cfa_offset 96
+; RV32-NEXT:    sw ra, 92(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 88(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 64
+; RV32-NEXT:    addi s0, sp, 96
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -32
 ; RV32-NEXT:    feq.d a0, fa0, fa1
@@ -2368,7 +2386,7 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v10
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 32(sp)
 ; RV32-NEXT:    beqz a0, .LBB19_4
 ; RV32-NEXT:  .LBB19_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
@@ -2377,14 +2395,14 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV32-NEXT:  .LBB19_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 32(sp)
 ; RV32-NEXT:    bnez a0, .LBB19_2
 ; RV32-NEXT:  .LBB19_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; RV32-NEXT:    vslidedown.vi v26, v10, 3
 ; RV32-NEXT:  .LBB19_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 56(sp)
 ; RV32-NEXT:    bnez a0, .LBB19_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 2
@@ -2393,7 +2411,7 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 2
 ; RV32-NEXT:  .LBB19_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 48(sp)
 ; RV32-NEXT:    bnez a0, .LBB19_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v26, v10, 1
@@ -2402,25 +2420,26 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV32-NEXT:    vslidedown.vi v26, v8, 1
 ; RV32-NEXT:  .LBB19_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v26
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 40(sp)
 ; RV32-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 64
+; RV32-NEXT:    addi a0, sp, 32
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -96
+; RV32-NEXT:    lw s0, 88(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 92(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 96
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v4f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -32
-; RV64-NEXT:    .cfi_def_cfa_offset 32
+; RV64-NEXT:    addi sp, sp, -48
+; RV64-NEXT:    .cfi_def_cfa_offset 48
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB19_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v10
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB19_4
 ; RV64-NEXT:  .LBB19_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
@@ -2429,14 +2448,14 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV64-NEXT:  .LBB19_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m2,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB19_2
 ; RV64-NEXT:  .LBB19_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m2,ta,mu
 ; RV64-NEXT:    vslidedown.vi v26, v10, 3
 ; RV64-NEXT:  .LBB19_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB19_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 2
@@ -2445,7 +2464,7 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 2
 ; RV64-NEXT:  .LBB19_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB19_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v26, v10, 1
@@ -2454,10 +2473,11 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 ; RV64-NEXT:    vslidedown.vi v26, v8, 1
 ; RV64-NEXT:  .LBB19_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v26
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 4, e64,m2,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 32
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 48
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <4 x double> %c, <4 x double> %d
@@ -2467,20 +2487,20 @@ define <4 x double> @selectcc_v4f64(double %a, double %b, <4 x double> %c, <4 x 
 define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %b) {
 ; RV32-LABEL: select_v8f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -128
-; RV32-NEXT:    .cfi_def_cfa_offset 128
-; RV32-NEXT:    sw ra, 124(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 120(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -192
+; RV32-NEXT:    .cfi_def_cfa_offset 192
+; RV32-NEXT:    sw ra, 188(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 184(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 128
+; RV32-NEXT:    addi s0, sp, 192
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -64
 ; RV32-NEXT:    bnez a0, .LBB20_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v12
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 64(sp)
 ; RV32-NEXT:    beqz a0, .LBB20_4
 ; RV32-NEXT:  .LBB20_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
@@ -2489,14 +2509,14 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:  .LBB20_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 64(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_2
 ; RV32-NEXT:  .LBB20_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
 ; RV32-NEXT:    vslidedown.vi v28, v12, 7
 ; RV32-NEXT:  .LBB20_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 56(sp)
+; RV32-NEXT:    fsd ft0, 120(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 6
@@ -2505,7 +2525,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 6
 ; RV32-NEXT:  .LBB20_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 48(sp)
+; RV32-NEXT:    fsd ft0, 112(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 5
@@ -2514,7 +2534,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 5
 ; RV32-NEXT:  .LBB20_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 40(sp)
+; RV32-NEXT:    fsd ft0, 104(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 4
@@ -2523,7 +2543,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 4
 ; RV32-NEXT:  .LBB20_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 32(sp)
+; RV32-NEXT:    fsd ft0, 96(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 3
@@ -2532,7 +2552,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 3
 ; RV32-NEXT:  .LBB20_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 88(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 2
@@ -2541,7 +2561,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 2
 ; RV32-NEXT:  .LBB20_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 80(sp)
 ; RV32-NEXT:    bnez a0, .LBB20_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 1
@@ -2550,24 +2570,25 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV32-NEXT:    vslidedown.vi v28, v8, 1
 ; RV32-NEXT:  .LBB20_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 72(sp)
 ; RV32-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -128
-; RV32-NEXT:    lw s0, 120(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 124(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 128
+; RV32-NEXT:    addi a0, sp, 64
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -192
+; RV32-NEXT:    lw s0, 184(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 188(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 192
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v8f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
+; RV64-NEXT:    addi sp, sp, -80
+; RV64-NEXT:    .cfi_def_cfa_offset 80
 ; RV64-NEXT:    bnez a0, .LBB20_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v12
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB20_4
 ; RV64-NEXT:  .LBB20_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
@@ -2576,14 +2597,14 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:  .LBB20_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_2
 ; RV64-NEXT:  .LBB20_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
 ; RV64-NEXT:    vslidedown.vi v28, v12, 7
 ; RV64-NEXT:  .LBB20_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 56(sp)
+; RV64-NEXT:    fsd ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 6
@@ -2592,7 +2613,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 6
 ; RV64-NEXT:  .LBB20_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 48(sp)
+; RV64-NEXT:    fsd ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 5
@@ -2601,7 +2622,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 5
 ; RV64-NEXT:  .LBB20_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 40(sp)
+; RV64-NEXT:    fsd ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 4
@@ -2610,7 +2631,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 4
 ; RV64-NEXT:  .LBB20_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 32(sp)
+; RV64-NEXT:    fsd ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 3
@@ -2619,7 +2640,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 3
 ; RV64-NEXT:  .LBB20_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 2
@@ -2628,7 +2649,7 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 2
 ; RV64-NEXT:  .LBB20_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB20_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 1
@@ -2637,10 +2658,11 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 ; RV64-NEXT:    vslidedown.vi v28, v8, 1
 ; RV64-NEXT:  .LBB20_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 80
 ; RV64-NEXT:    ret
   %v = select i1 %c, <8 x double> %a, <8 x double> %b
   ret <8 x double> %v
@@ -2649,13 +2671,13 @@ define <8 x double> @select_v8f64(i1 zeroext %c, <8 x double> %a, <8 x double> %
 define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x double> %d) {
 ; RV32-LABEL: selectcc_v8f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -128
-; RV32-NEXT:    .cfi_def_cfa_offset 128
-; RV32-NEXT:    sw ra, 124(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 120(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -192
+; RV32-NEXT:    .cfi_def_cfa_offset 192
+; RV32-NEXT:    sw ra, 188(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 184(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 128
+; RV32-NEXT:    addi s0, sp, 192
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -64
 ; RV32-NEXT:    feq.d a0, fa0, fa1
@@ -2663,7 +2685,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v12
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 64(sp)
 ; RV32-NEXT:    beqz a0, .LBB21_4
 ; RV32-NEXT:  .LBB21_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
@@ -2672,14 +2694,14 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:  .LBB21_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 64(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_2
 ; RV32-NEXT:  .LBB21_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
 ; RV32-NEXT:    vslidedown.vi v28, v12, 7
 ; RV32-NEXT:  .LBB21_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 56(sp)
+; RV32-NEXT:    fsd ft0, 120(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 6
@@ -2688,7 +2710,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 6
 ; RV32-NEXT:  .LBB21_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 48(sp)
+; RV32-NEXT:    fsd ft0, 112(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 5
@@ -2697,7 +2719,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 5
 ; RV32-NEXT:  .LBB21_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 40(sp)
+; RV32-NEXT:    fsd ft0, 104(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 4
@@ -2706,7 +2728,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 4
 ; RV32-NEXT:  .LBB21_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 32(sp)
+; RV32-NEXT:    fsd ft0, 96(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 3
@@ -2715,7 +2737,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 3
 ; RV32-NEXT:  .LBB21_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 88(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 2
@@ -2724,7 +2746,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 2
 ; RV32-NEXT:  .LBB21_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 80(sp)
 ; RV32-NEXT:    bnez a0, .LBB21_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v28, v12, 1
@@ -2733,25 +2755,26 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV32-NEXT:    vslidedown.vi v28, v8, 1
 ; RV32-NEXT:  .LBB21_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v28
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 72(sp)
 ; RV32-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -128
-; RV32-NEXT:    lw s0, 120(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 124(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 128
+; RV32-NEXT:    addi a0, sp, 64
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -192
+; RV32-NEXT:    lw s0, 184(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 188(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 192
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v8f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -64
-; RV64-NEXT:    .cfi_def_cfa_offset 64
+; RV64-NEXT:    addi sp, sp, -80
+; RV64-NEXT:    .cfi_def_cfa_offset 80
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB21_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v12
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB21_4
 ; RV64-NEXT:  .LBB21_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
@@ -2760,14 +2783,14 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:  .LBB21_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m4,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_2
 ; RV64-NEXT:  .LBB21_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m4,ta,mu
 ; RV64-NEXT:    vslidedown.vi v28, v12, 7
 ; RV64-NEXT:  .LBB21_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 56(sp)
+; RV64-NEXT:    fsd ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 6
@@ -2776,7 +2799,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 6
 ; RV64-NEXT:  .LBB21_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 48(sp)
+; RV64-NEXT:    fsd ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 5
@@ -2785,7 +2808,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 5
 ; RV64-NEXT:  .LBB21_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 40(sp)
+; RV64-NEXT:    fsd ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 4
@@ -2794,7 +2817,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 4
 ; RV64-NEXT:  .LBB21_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 32(sp)
+; RV64-NEXT:    fsd ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 3
@@ -2803,7 +2826,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 3
 ; RV64-NEXT:  .LBB21_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 2
@@ -2812,7 +2835,7 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 2
 ; RV64-NEXT:  .LBB21_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB21_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v28, v12, 1
@@ -2821,10 +2844,11 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 ; RV64-NEXT:    vslidedown.vi v28, v8, 1
 ; RV64-NEXT:  .LBB21_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v28
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 8, e64,m4,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 64
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 80
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <8 x double> %c, <8 x double> %d
@@ -2834,20 +2858,20 @@ define <8 x double> @selectcc_v8f64(double %a, double %b, <8 x double> %c, <8 x 
 define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x double> %b) {
 ; RV32-LABEL: select_v16f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -256
-; RV32-NEXT:    .cfi_def_cfa_offset 256
-; RV32-NEXT:    sw ra, 252(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 248(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -384
+; RV32-NEXT:    .cfi_def_cfa_offset 384
+; RV32-NEXT:    sw ra, 380(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 376(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 256
+; RV32-NEXT:    addi s0, sp, 384
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -128
 ; RV32-NEXT:    bnez a0, .LBB22_3
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v16
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 128(sp)
 ; RV32-NEXT:    beqz a0, .LBB22_4
 ; RV32-NEXT:  .LBB22_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
@@ -2856,14 +2880,14 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:  .LBB22_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 128(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_2
 ; RV32-NEXT:  .LBB22_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
 ; RV32-NEXT:    vslidedown.vi v24, v16, 15
 ; RV32-NEXT:  .LBB22_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 120(sp)
+; RV32-NEXT:    fsd ft0, 248(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 14
@@ -2872,7 +2896,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 14
 ; RV32-NEXT:  .LBB22_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 112(sp)
+; RV32-NEXT:    fsd ft0, 240(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 13
@@ -2881,7 +2905,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 13
 ; RV32-NEXT:  .LBB22_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 104(sp)
+; RV32-NEXT:    fsd ft0, 232(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 12
@@ -2890,7 +2914,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 12
 ; RV32-NEXT:  .LBB22_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 96(sp)
+; RV32-NEXT:    fsd ft0, 224(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 11
@@ -2899,7 +2923,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 11
 ; RV32-NEXT:  .LBB22_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 88(sp)
+; RV32-NEXT:    fsd ft0, 216(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 10
@@ -2908,7 +2932,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 10
 ; RV32-NEXT:  .LBB22_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 80(sp)
+; RV32-NEXT:    fsd ft0, 208(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 9
@@ -2917,7 +2941,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 9
 ; RV32-NEXT:  .LBB22_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 72(sp)
+; RV32-NEXT:    fsd ft0, 200(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 8
@@ -2926,7 +2950,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 8
 ; RV32-NEXT:  .LBB22_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 64(sp)
+; RV32-NEXT:    fsd ft0, 192(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 7
@@ -2935,7 +2959,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 7
 ; RV32-NEXT:  .LBB22_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 56(sp)
+; RV32-NEXT:    fsd ft0, 184(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 6
@@ -2944,7 +2968,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 6
 ; RV32-NEXT:  .LBB22_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 48(sp)
+; RV32-NEXT:    fsd ft0, 176(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 5
@@ -2953,7 +2977,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 5
 ; RV32-NEXT:  .LBB22_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 40(sp)
+; RV32-NEXT:    fsd ft0, 168(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 4
@@ -2962,7 +2986,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 4
 ; RV32-NEXT:  .LBB22_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 32(sp)
+; RV32-NEXT:    fsd ft0, 160(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 3
@@ -2971,7 +2995,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 3
 ; RV32-NEXT:  .LBB22_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 152(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 2
@@ -2980,7 +3004,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v24, v8, 2
 ; RV32-NEXT:  .LBB22_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 144(sp)
 ; RV32-NEXT:    bnez a0, .LBB22_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v8, v16, 1
@@ -2989,24 +3013,25 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV32-NEXT:    vslidedown.vi v8, v8, 1
 ; RV32-NEXT:  .LBB22_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 136(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e64,m8,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -256
-; RV32-NEXT:    lw s0, 248(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 252(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 256
+; RV32-NEXT:    addi a0, sp, 128
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -384
+; RV32-NEXT:    lw s0, 376(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 380(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 384
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: select_v16f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
+; RV64-NEXT:    addi sp, sp, -144
+; RV64-NEXT:    .cfi_def_cfa_offset 144
 ; RV64-NEXT:    bnez a0, .LBB22_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v16
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB22_4
 ; RV64-NEXT:  .LBB22_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
@@ -3015,14 +3040,14 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:  .LBB22_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_2
 ; RV64-NEXT:  .LBB22_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
 ; RV64-NEXT:    vslidedown.vi v24, v16, 15
 ; RV64-NEXT:  .LBB22_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 120(sp)
+; RV64-NEXT:    fsd ft0, 136(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 14
@@ -3031,7 +3056,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 14
 ; RV64-NEXT:  .LBB22_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 112(sp)
+; RV64-NEXT:    fsd ft0, 128(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 13
@@ -3040,7 +3065,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 13
 ; RV64-NEXT:  .LBB22_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 104(sp)
+; RV64-NEXT:    fsd ft0, 120(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 12
@@ -3049,7 +3074,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 12
 ; RV64-NEXT:  .LBB22_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 96(sp)
+; RV64-NEXT:    fsd ft0, 112(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 11
@@ -3058,7 +3083,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 11
 ; RV64-NEXT:  .LBB22_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 88(sp)
+; RV64-NEXT:    fsd ft0, 104(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 10
@@ -3067,7 +3092,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 10
 ; RV64-NEXT:  .LBB22_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 80(sp)
+; RV64-NEXT:    fsd ft0, 96(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 9
@@ -3076,7 +3101,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 9
 ; RV64-NEXT:  .LBB22_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 72(sp)
+; RV64-NEXT:    fsd ft0, 88(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 8
@@ -3085,7 +3110,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 8
 ; RV64-NEXT:  .LBB22_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 64(sp)
+; RV64-NEXT:    fsd ft0, 80(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 7
@@ -3094,7 +3119,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 7
 ; RV64-NEXT:  .LBB22_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 56(sp)
+; RV64-NEXT:    fsd ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 6
@@ -3103,7 +3128,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 6
 ; RV64-NEXT:  .LBB22_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 48(sp)
+; RV64-NEXT:    fsd ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 5
@@ -3112,7 +3137,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 5
 ; RV64-NEXT:  .LBB22_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 40(sp)
+; RV64-NEXT:    fsd ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 4
@@ -3121,7 +3146,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 4
 ; RV64-NEXT:  .LBB22_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 32(sp)
+; RV64-NEXT:    fsd ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 3
@@ -3130,7 +3155,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 3
 ; RV64-NEXT:  .LBB22_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 2
@@ -3139,7 +3164,7 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v24, v8, 2
 ; RV64-NEXT:  .LBB22_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB22_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v8, v16, 1
@@ -3148,10 +3173,11 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 ; RV64-NEXT:    vslidedown.vi v8, v8, 1
 ; RV64-NEXT:  .LBB22_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e64,m8,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 144
 ; RV64-NEXT:    ret
   %v = select i1 %c, <16 x double> %a, <16 x double> %b
   ret <16 x double> %v
@@ -3160,13 +3186,13 @@ define <16 x double> @select_v16f64(i1 zeroext %c, <16 x double> %a, <16 x doubl
 define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <16 x double> %d) {
 ; RV32-LABEL: selectcc_v16f64:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    addi sp, sp, -256
-; RV32-NEXT:    .cfi_def_cfa_offset 256
-; RV32-NEXT:    sw ra, 252(sp) # 4-byte Folded Spill
-; RV32-NEXT:    sw s0, 248(sp) # 4-byte Folded Spill
+; RV32-NEXT:    addi sp, sp, -384
+; RV32-NEXT:    .cfi_def_cfa_offset 384
+; RV32-NEXT:    sw ra, 380(sp) # 4-byte Folded Spill
+; RV32-NEXT:    sw s0, 376(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    .cfi_offset ra, -4
 ; RV32-NEXT:    .cfi_offset s0, -8
-; RV32-NEXT:    addi s0, sp, 256
+; RV32-NEXT:    addi s0, sp, 384
 ; RV32-NEXT:    .cfi_def_cfa s0, 0
 ; RV32-NEXT:    andi sp, sp, -128
 ; RV32-NEXT:    feq.d a0, fa0, fa1
@@ -3174,7 +3200,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:  # %bb.1:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v16
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 128(sp)
 ; RV32-NEXT:    beqz a0, .LBB23_4
 ; RV32-NEXT:  .LBB23_2:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
@@ -3183,14 +3209,14 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:  .LBB23_3:
 ; RV32-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 0(sp)
+; RV32-NEXT:    fsd ft0, 128(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_2
 ; RV32-NEXT:  .LBB23_4:
 ; RV32-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
 ; RV32-NEXT:    vslidedown.vi v24, v16, 15
 ; RV32-NEXT:  .LBB23_5:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 120(sp)
+; RV32-NEXT:    fsd ft0, 248(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_7
 ; RV32-NEXT:  # %bb.6:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 14
@@ -3199,7 +3225,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 14
 ; RV32-NEXT:  .LBB23_8:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 112(sp)
+; RV32-NEXT:    fsd ft0, 240(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_10
 ; RV32-NEXT:  # %bb.9:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 13
@@ -3208,7 +3234,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 13
 ; RV32-NEXT:  .LBB23_11:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 104(sp)
+; RV32-NEXT:    fsd ft0, 232(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_13
 ; RV32-NEXT:  # %bb.12:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 12
@@ -3217,7 +3243,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 12
 ; RV32-NEXT:  .LBB23_14:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 96(sp)
+; RV32-NEXT:    fsd ft0, 224(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_16
 ; RV32-NEXT:  # %bb.15:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 11
@@ -3226,7 +3252,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 11
 ; RV32-NEXT:  .LBB23_17:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 88(sp)
+; RV32-NEXT:    fsd ft0, 216(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_19
 ; RV32-NEXT:  # %bb.18:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 10
@@ -3235,7 +3261,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 10
 ; RV32-NEXT:  .LBB23_20:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 80(sp)
+; RV32-NEXT:    fsd ft0, 208(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_22
 ; RV32-NEXT:  # %bb.21:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 9
@@ -3244,7 +3270,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 9
 ; RV32-NEXT:  .LBB23_23:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 72(sp)
+; RV32-NEXT:    fsd ft0, 200(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_25
 ; RV32-NEXT:  # %bb.24:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 8
@@ -3253,7 +3279,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 8
 ; RV32-NEXT:  .LBB23_26:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 64(sp)
+; RV32-NEXT:    fsd ft0, 192(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_28
 ; RV32-NEXT:  # %bb.27:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 7
@@ -3262,7 +3288,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 7
 ; RV32-NEXT:  .LBB23_29:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 56(sp)
+; RV32-NEXT:    fsd ft0, 184(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_31
 ; RV32-NEXT:  # %bb.30:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 6
@@ -3271,7 +3297,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 6
 ; RV32-NEXT:  .LBB23_32:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 48(sp)
+; RV32-NEXT:    fsd ft0, 176(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_34
 ; RV32-NEXT:  # %bb.33:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 5
@@ -3280,7 +3306,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 5
 ; RV32-NEXT:  .LBB23_35:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 40(sp)
+; RV32-NEXT:    fsd ft0, 168(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_37
 ; RV32-NEXT:  # %bb.36:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 4
@@ -3289,7 +3315,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 4
 ; RV32-NEXT:  .LBB23_38:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 32(sp)
+; RV32-NEXT:    fsd ft0, 160(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_40
 ; RV32-NEXT:  # %bb.39:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 3
@@ -3298,7 +3324,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 3
 ; RV32-NEXT:  .LBB23_41:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 24(sp)
+; RV32-NEXT:    fsd ft0, 152(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_43
 ; RV32-NEXT:  # %bb.42:
 ; RV32-NEXT:    vslidedown.vi v24, v16, 2
@@ -3307,7 +3333,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v24, v8, 2
 ; RV32-NEXT:  .LBB23_44:
 ; RV32-NEXT:    vfmv.f.s ft0, v24
-; RV32-NEXT:    fsd ft0, 16(sp)
+; RV32-NEXT:    fsd ft0, 144(sp)
 ; RV32-NEXT:    bnez a0, .LBB23_46
 ; RV32-NEXT:  # %bb.45:
 ; RV32-NEXT:    vslidedown.vi v8, v16, 1
@@ -3316,25 +3342,26 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV32-NEXT:    vslidedown.vi v8, v8, 1
 ; RV32-NEXT:  .LBB23_47:
 ; RV32-NEXT:    vfmv.f.s ft0, v8
-; RV32-NEXT:    fsd ft0, 8(sp)
+; RV32-NEXT:    fsd ft0, 136(sp)
 ; RV32-NEXT:    vsetivli zero, 16, e64,m8,ta,mu
-; RV32-NEXT:    vle64.v v8, (sp)
-; RV32-NEXT:    addi sp, s0, -256
-; RV32-NEXT:    lw s0, 248(sp) # 4-byte Folded Reload
-; RV32-NEXT:    lw ra, 252(sp) # 4-byte Folded Reload
-; RV32-NEXT:    addi sp, sp, 256
+; RV32-NEXT:    addi a0, sp, 128
+; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    addi sp, s0, -384
+; RV32-NEXT:    lw s0, 376(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw ra, 380(sp) # 4-byte Folded Reload
+; RV32-NEXT:    addi sp, sp, 384
 ; RV32-NEXT:    ret
 ;
 ; RV64-LABEL: selectcc_v16f64:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    addi sp, sp, -128
-; RV64-NEXT:    .cfi_def_cfa_offset 128
+; RV64-NEXT:    addi sp, sp, -144
+; RV64-NEXT:    .cfi_def_cfa_offset 144
 ; RV64-NEXT:    feq.d a0, fa0, fa1
 ; RV64-NEXT:    bnez a0, .LBB23_3
 ; RV64-NEXT:  # %bb.1:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v16
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    beqz a0, .LBB23_4
 ; RV64-NEXT:  .LBB23_2:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
@@ -3343,14 +3370,14 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:  .LBB23_3:
 ; RV64-NEXT:    vsetvli zero, zero, e64,m8,ta,mu
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 0(sp)
+; RV64-NEXT:    fsd ft0, 16(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_2
 ; RV64-NEXT:  .LBB23_4:
 ; RV64-NEXT:    vsetivli zero, 1, e64,m8,ta,mu
 ; RV64-NEXT:    vslidedown.vi v24, v16, 15
 ; RV64-NEXT:  .LBB23_5:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 120(sp)
+; RV64-NEXT:    fsd ft0, 136(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_7
 ; RV64-NEXT:  # %bb.6:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 14
@@ -3359,7 +3386,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 14
 ; RV64-NEXT:  .LBB23_8:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 112(sp)
+; RV64-NEXT:    fsd ft0, 128(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_10
 ; RV64-NEXT:  # %bb.9:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 13
@@ -3368,7 +3395,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 13
 ; RV64-NEXT:  .LBB23_11:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 104(sp)
+; RV64-NEXT:    fsd ft0, 120(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_13
 ; RV64-NEXT:  # %bb.12:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 12
@@ -3377,7 +3404,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 12
 ; RV64-NEXT:  .LBB23_14:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 96(sp)
+; RV64-NEXT:    fsd ft0, 112(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_16
 ; RV64-NEXT:  # %bb.15:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 11
@@ -3386,7 +3413,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 11
 ; RV64-NEXT:  .LBB23_17:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 88(sp)
+; RV64-NEXT:    fsd ft0, 104(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_19
 ; RV64-NEXT:  # %bb.18:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 10
@@ -3395,7 +3422,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 10
 ; RV64-NEXT:  .LBB23_20:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 80(sp)
+; RV64-NEXT:    fsd ft0, 96(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_22
 ; RV64-NEXT:  # %bb.21:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 9
@@ -3404,7 +3431,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 9
 ; RV64-NEXT:  .LBB23_23:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 72(sp)
+; RV64-NEXT:    fsd ft0, 88(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_25
 ; RV64-NEXT:  # %bb.24:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 8
@@ -3413,7 +3440,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 8
 ; RV64-NEXT:  .LBB23_26:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 64(sp)
+; RV64-NEXT:    fsd ft0, 80(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_28
 ; RV64-NEXT:  # %bb.27:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 7
@@ -3422,7 +3449,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 7
 ; RV64-NEXT:  .LBB23_29:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 56(sp)
+; RV64-NEXT:    fsd ft0, 72(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_31
 ; RV64-NEXT:  # %bb.30:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 6
@@ -3431,7 +3458,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 6
 ; RV64-NEXT:  .LBB23_32:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 48(sp)
+; RV64-NEXT:    fsd ft0, 64(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_34
 ; RV64-NEXT:  # %bb.33:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 5
@@ -3440,7 +3467,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 5
 ; RV64-NEXT:  .LBB23_35:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 40(sp)
+; RV64-NEXT:    fsd ft0, 56(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_37
 ; RV64-NEXT:  # %bb.36:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 4
@@ -3449,7 +3476,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 4
 ; RV64-NEXT:  .LBB23_38:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 32(sp)
+; RV64-NEXT:    fsd ft0, 48(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_40
 ; RV64-NEXT:  # %bb.39:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 3
@@ -3458,7 +3485,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 3
 ; RV64-NEXT:  .LBB23_41:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 24(sp)
+; RV64-NEXT:    fsd ft0, 40(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_43
 ; RV64-NEXT:  # %bb.42:
 ; RV64-NEXT:    vslidedown.vi v24, v16, 2
@@ -3467,7 +3494,7 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v24, v8, 2
 ; RV64-NEXT:  .LBB23_44:
 ; RV64-NEXT:    vfmv.f.s ft0, v24
-; RV64-NEXT:    fsd ft0, 16(sp)
+; RV64-NEXT:    fsd ft0, 32(sp)
 ; RV64-NEXT:    bnez a0, .LBB23_46
 ; RV64-NEXT:  # %bb.45:
 ; RV64-NEXT:    vslidedown.vi v8, v16, 1
@@ -3476,10 +3503,11 @@ define <16 x double> @selectcc_v16f64(double %a, double %b, <16 x double> %c, <1
 ; RV64-NEXT:    vslidedown.vi v8, v8, 1
 ; RV64-NEXT:  .LBB23_47:
 ; RV64-NEXT:    vfmv.f.s ft0, v8
-; RV64-NEXT:    fsd ft0, 8(sp)
+; RV64-NEXT:    fsd ft0, 24(sp)
 ; RV64-NEXT:    vsetivli zero, 16, e64,m8,ta,mu
-; RV64-NEXT:    vle64.v v8, (sp)
-; RV64-NEXT:    addi sp, sp, 128
+; RV64-NEXT:    addi a0, sp, 16
+; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    addi sp, sp, 144
 ; RV64-NEXT:    ret
   %cmp = fcmp oeq double %a, %b
   %v = select i1 %cmp, <16 x double> %c, <16 x double> %d

@@ -7,17 +7,18 @@
 define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-LABEL: n1fv6:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -16
+; CHECK-NEXT:    addi sp, sp, -32
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
-; CHECK-NEXT:    vs1r.v v8, (sp)
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vs1r.v v8, (a0)
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    mv a1, sp
+; CHECK-NEXT:    addi a1, sp, 16
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    vs1r.v v8, (a0)
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
 entry:
   %KP500000000 = alloca %struct.__epi_1xi64x2, align 8
@@ -37,16 +38,17 @@ entry:
 define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-LABEL: n1fv6_1:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    addi sp, sp, -48
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
 ; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
 ; CHECK-NEXT:    vmv.v.x v25, a1
-; CHECK-NEXT:    vs1r.v v25, (sp)
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vs1r.v v25, (a0)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    slli a1, a0, 3
-; CHECK-NEXT:    mv a2, sp
+; CHECK-NEXT:    addi a2, sp, 16
 ; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    vs1r.v v25, (a1)
 ; CHECK-NEXT:    slli a1, a0, 4
@@ -57,7 +59,7 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    vs1r.v v25, (a0)
 ; CHECK-NEXT:    vl1re64.v v8, (a1)
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    addi sp, sp, 48
 ; CHECK-NEXT:    ret
 entry:
   %KP500000000 = alloca %struct.__epi_1xi64x4, align 8
