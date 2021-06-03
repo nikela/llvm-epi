@@ -48,10 +48,11 @@ bool canBeDetensored(TensorType tensorType) {
 
 bool shouldBeDetensored(Operation *op, TypeConverter typeConverter) {
   GenericOp genericOp = dyn_cast_or_null<GenericOp>(op);
-  return genericOp && llvm::all_of(genericOp.getShapedOperandTypes(),
-                                   [&](ShapedType shapedType) {
-                                     return !typeConverter.isLegal(shapedType);
-                                   });
+  return genericOp &&
+         llvm::all_of(
+             genericOp.getInputAndOutputOperands(), [&](OpOperand *opOperand) {
+               return !typeConverter.isLegal(opOperand->get().getType());
+             });
 }
 
 /// A conversion patttern for detensoring `linalg.generic` ops.
@@ -192,7 +193,8 @@ struct ExtractFromReshapeFromElements
 /// @see LinalgDetensorize in Linalg/Passes.td for more details.
 struct LinalgDetensorize : public LinalgDetensorizeBase<LinalgDetensorize> {
   LinalgDetensorize() = default;
-  LinalgDetensorize(const LinalgDetensorize &pass) {}
+  LinalgDetensorize(const LinalgDetensorize &pass)
+      : LinalgDetensorizeBase<LinalgDetensorize>() {}
 
   class CostModel {
   public:
