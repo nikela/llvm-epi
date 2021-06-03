@@ -890,16 +890,15 @@ def emit_compatibility_header(out_file, j):
 #ifndef EPIRVVCOMPATIBILITYHEADER_H
 #define EPIRVVCOMPATIBILITYHEADER_H
 
-#include <risc_vector.h>        
+#include <riscv_vector.h>
 
 """)
 
-    # Add typedefs
     ELEN = 64 # In EPI, ELEN=64
     # TODO: think how to solve the _nt_ problem
-    ## Vector types
+    # Vector types
     out_file.write("// Vector types\n")
-    typedef = "typedef v${ExtendedType}${LMul}_t __epi_${VScale}x${Type};"
+    vector_types = "#define __epi_${VScale}x${Type} v${ExtendedType}${LMul}_t"
     for lm in IMPLEMENTED_LMULS:
         # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
         lmul = "m" + str(lm)
@@ -907,21 +906,21 @@ def emit_compatibility_header(out_file, j):
             ex_type = "int" + type[1:] if type[0] == 'i' else "float" + type[1:]
             size = int(type[1:])
             vscale = ELEN * lm / size 
-            out_file.write("{}\n".format(string.Template(typedef).substitute(
+            out_file.write("{}\n".format(string.Template(vector_types).substitute(
                 ExtendedType=ex_type, LMul=lmul, VScale=vscale, Type=type)))
 
     out_file.write("\n")
-    ## Mask type
+    # Mask type
     out_file.write("// Mask types\n")
-    typedef = "typedef vbool${N}_t __epi_${VScale}xi1;"
+    mask_types = "#define __epi_${VScale}xi1 vbool${N}_t"
     for vscale in [1, 2, 4, 8, 16, 32, 64]:
         n = ELEN/vscale
-        out_file.write("{}\n".format(string.Template(typedef).substitute(
+        out_file.write("{}\n".format(string.Template(mask_types).substitute(
             N = n, VScale = vscale)))
 
     out_file.write("\n")
-    # Add macros
-    out_file.write("// MACROs\n")
+    # Builtins
+    out_file.write("// Builtin mappings\n")
     for ib in inst_builtins:
         if ib.builtin["RegisterInClang"] == 0:
             if not ib.masked:
@@ -944,25 +943,84 @@ def emit_compatibility_header(out_file, j):
             subs["WidenedSize"] = str(2 * int(subs["Size"]))
             subs["WidenedType"] = subs["Type"][0] + subs["WidenedSize"]
             subs["WidenedUType"] = "u" + subs["WidenedSize"]
-            subs["NarrowedSize"] = str(int(subs["Size"]) / 2)
-            subs["NarrowedType"] = subs["Type"][0] + subs["NarrowedSize"]
-            subs["NarrowedUType"] = "u" + subs["NarrowedSize"]
             # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
             subs["LMul"] = "m" + str(ib.lmul)
             subs["WidenedLMul"] = "m" + str(2 * ib.lmul)
-            subs["NarrowedLMul"] = "m" + str(ib.lmul / 2)
             subs["Boolean"] = str(int(subs["Size"]) / ib.lmul)
+            if "red" in ib.full_name:
+                if ib.lmul == 1:
+                    subs["LMulExt"] = subs["LMulTrunc"] = subs["End"] = ""
+                else:
+                    subs["LMulExt"] = "vlmul_ext_v_" + subs["Type"] + "m1_" + subs["Type"] + subs["LMul"] + "("
+                    subs["LMulTrunc"] = "vlmul_trunc_v_" + subs["Type"] + subs["LMul"] + "_" + subs["Type"] + "m1" + "("
+                    subs["End"] = ")"
+            if "slide" in ib.full_name:
+                subs["ifFloat"] = "f" if subs["Type"][0] == "f" else ""
+                subs["Reg"] = "f" if subs["Type"][0] == "f" else "x"
             out_file.write("{}\n".format(code.substitute(subs)))
 
     out_file.write("""
 #endif //EPIRVVCOMPATIBILITYHEADER_H
 """)
 
+def emit_header_tests(out_file, j):
+    out_file.write("""#include \"epi_rvv.h\"\n\n""")
+    out_file.write(r"""// RUN: %clang --target=riscv64-unknown-linux-gnu -mepi -S -emit-llvm -O2 -o - %s \
+// RUN:       | FileCheck --check-prefix=CHECK-O2 %s
+
+""")
+    inst_builtins = instantiate_builtins(j)
+    already_emitted = set([])
+    for b in inst_builtins:
+        if b.builtin["RegisterInClang"] != 0:
+            continue
+
+        # FIXME:
+        if b.lmul not in [1, 2, 4]:
+            continue
+
+        # The current strategy does not work for builtins that expect
+        # constant expressions. So skip these ones and let them be tested
+        # elsewhere
+        if "K" in b.builtin["Prototype"]:
+            continue
+
+        # This is a bit of stupid heuristic to skip builtins we know
+        # don't work.
+        if b.builtin["HasManualCodegen"] != 0:
+            codegen = b.builtin["ManualCodegen"] \
+                    if not b.masked else b.builtin["ManualCodegenMask"]
+            if "ErrorUnsupported" in codegen:
+                continue
+
+        if b.full_name in already_emitted:
+            continue
+
+        already_emitted.add(b.full_name)
+
+        (return_type, parameter_types) = b.c_prototoype_items()
+
+        parameters = []
+        arguments = []
+        i = 0
+        for p in parameter_types:
+            arg = "arg_{}".format(i)
+            i += 1
+            parameters.append("{} {}".format(p, arg))
+            arguments.append(arg)
+
+        out_file.write("{} test_{}({})\n{{\n    return __builtin_epi_{}({});\n}}\n\n".format(
+            return_type,
+            b.full_name,
+            ", ".join(parameters),
+            b.full_name,
+            ", ".join(arguments)))
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Generate instruction table")
     parser.add_argument("--mode", required=True,
-            choices=["builtins-def", "codegen", "tests", "docs", "builtin-tester", "header"], help="Mode of operation")
+            choices=["builtins-def", "codegen", "tests", "docs", "builtin-tester", "header", "header-tests"], help="Mode of operation")
     parser.add_argument("--tablegen", required=True, help="Path of tablegen")
     parser.add_argument("--output-file", required=False, help="Output file. stdout otherwise")
     parser.add_argument("--clang", required=False, help="Path of clang")
@@ -994,6 +1052,8 @@ if __name__ == "__main__":
         run_builtin_tester(out_file, j, args.clang)
     elif args.mode == "header":
         emit_compatibility_header(out_file, j)
+    elif args.mode == "header-tests":
+        emit_header_tests(out_file, j)
     else:
         raise Exception("Unexpected mode '{}".format(args.mode))
 
