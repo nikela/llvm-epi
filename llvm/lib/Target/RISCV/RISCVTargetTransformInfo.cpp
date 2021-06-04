@@ -330,10 +330,10 @@ InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
                                                  CmpInst::Predicate VecPred,
                                                  TTI::TargetCostKind CostKind,
                                                  const Instruction *I) {
-  if (ValTy && ValTy->isVectorTy() && !isTypeLegal(ValTy))
+  if (ValTy && isa<ScalableVectorType>(ValTy) && !isTypeLegal(ValTy))
     return InstructionCost::getInvalid();
 
-  if (CondTy && CondTy->isVectorTy() && !isTypeLegal(CondTy))
+  if (CondTy && isa<ScalableVectorType>(CondTy) && !isTypeLegal(CondTy))
     return InstructionCost::getInvalid();
 
   return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);

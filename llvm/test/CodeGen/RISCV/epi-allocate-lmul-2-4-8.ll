@@ -5,12 +5,10 @@
 define void @lmul1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 1 x i64>
   ret void
@@ -19,14 +17,12 @@ define void @lmul1() nounwind optnone noinline {
 define void @lmul2() nounwind optnone noinline {
 ; CHECK-LABEL: lmul2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 2 x i64>
   ret void
@@ -35,14 +31,12 @@ define void @lmul2() nounwind optnone noinline {
 define void @lmul4() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 4 x i64>
   ret void
@@ -51,14 +45,12 @@ define void @lmul4() nounwind optnone noinline {
 define void @lmul8() nounwind optnone noinline {
 ; CHECK-LABEL: lmul8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 8 x i64>
   ret void
@@ -67,7 +59,6 @@ define void @lmul8() nounwind optnone noinline {
 define void @lmul1_and_2() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1_and_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
@@ -76,7 +67,6 @@ define void @lmul1_and_2() nounwind optnone noinline {
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
   %v2 = alloca <vscale x 2 x i64>
@@ -86,7 +76,6 @@ define void @lmul1_and_2() nounwind optnone noinline {
 define void @lmul2_and_4() nounwind optnone noinline {
 ; CHECK-LABEL: lmul2_and_4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 6
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -95,7 +84,6 @@ define void @lmul2_and_4() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 6
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 2 x i64>
   %v2 = alloca <vscale x 4 x i64>
@@ -105,7 +93,6 @@ define void @lmul2_and_4() nounwind optnone noinline {
 define void @lmul1_and_4() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1_and_4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
@@ -114,7 +101,6 @@ define void @lmul1_and_4() nounwind optnone noinline {
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
   %v2 = alloca <vscale x 4 x i64>
@@ -124,7 +110,6 @@ define void @lmul1_and_4() nounwind optnone noinline {
 define void @lmul2_and_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul2_and_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
@@ -133,7 +118,6 @@ define void @lmul2_and_1() nounwind optnone noinline {
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 2 x i64>
   %v2 = alloca <vscale x 1 x i64>
@@ -143,7 +127,6 @@ define void @lmul2_and_1() nounwind optnone noinline {
 define void @lmul4_and_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4_and_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
@@ -152,7 +135,6 @@ define void @lmul4_and_1() nounwind optnone noinline {
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 4 x i64>
   %v2 = alloca <vscale x 1 x i64>
@@ -162,7 +144,6 @@ define void @lmul4_and_1() nounwind optnone noinline {
 define void @lmul4_and_2() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4_and_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 6
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -171,7 +152,6 @@ define void @lmul4_and_2() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 6
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 4 x i64>
   %v2 = alloca <vscale x 2 x i64>
@@ -181,7 +161,6 @@ define void @lmul4_and_2() nounwind optnone noinline {
 define void @lmul4_and_2_x2_0() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4_and_2_x2_0:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 12
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -190,7 +169,6 @@ define void @lmul4_and_2_x2_0() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 12
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 4 x i64>
   %v2 = alloca <vscale x 2 x i64>
@@ -202,7 +180,6 @@ define void @lmul4_and_2_x2_0() nounwind optnone noinline {
 define void @lmul4_and_2_x2_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4_and_2_x2_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 12
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -211,7 +188,6 @@ define void @lmul4_and_2_x2_1() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 12
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 4 x i64>
   %v3 = alloca <vscale x 4 x i64>
@@ -224,18 +200,18 @@ define void @lmul4_and_2_x2_1() nounwind optnone noinline {
 define void @gpr_and_lmul1_and_2() nounwind optnone noinline {
 ; CHECK-LABEL: gpr_and_lmul1_and_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    addi a0, zero, 3
-; CHECK-NEXT:    sd a0, 24(sp)
+; CHECK-NEXT:    sd a0, 8(sp)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %x1 = alloca i64
   %v1 = alloca <vscale x 1 x i64>
@@ -247,18 +223,18 @@ define void @gpr_and_lmul1_and_2() nounwind optnone noinline {
 define void @gpr_and_lmul1_and_4() nounwind optnone noinline {
 ; CHECK-LABEL: gpr_and_lmul1_and_4:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    addi a0, zero, 3
-; CHECK-NEXT:    sd a0, 24(sp)
+; CHECK-NEXT:    sd a0, 8(sp)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 2
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 32
+; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %x1 = alloca i64
   %v1 = alloca <vscale x 1 x i64>
@@ -270,7 +246,6 @@ define void @gpr_and_lmul1_and_4() nounwind optnone noinline {
 define void @lmul_1_2_4_8() nounwind optnone noinline {
 ; CHECK-LABEL: lmul_1_2_4_8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 4
 ; CHECK-NEXT:    sub a0, a1, a0
@@ -279,7 +254,6 @@ define void @lmul_1_2_4_8() nounwind optnone noinline {
 ; CHECK-NEXT:    slli a1, a0, 4
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
   %v2 = alloca <vscale x 2 x i64>
@@ -291,7 +265,6 @@ define void @lmul_1_2_4_8() nounwind optnone noinline {
 define void @lmul_1_2_4_8_x2_0() nounwind optnone noinline {
 ; CHECK-LABEL: lmul_1_2_4_8_x2_0:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 30
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -300,7 +273,6 @@ define void @lmul_1_2_4_8_x2_0() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 30
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
   %v2 = alloca <vscale x 1 x i64>
@@ -316,7 +288,6 @@ define void @lmul_1_2_4_8_x2_0() nounwind optnone noinline {
 define void @lmul_1_2_4_8_x2_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul_1_2_4_8_x2_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    addi a1, zero, 30
 ; CHECK-NEXT:    mul a0, a0, a1
@@ -325,7 +296,6 @@ define void @lmul_1_2_4_8_x2_1() nounwind optnone noinline {
 ; CHECK-NEXT:    addi a1, zero, 30
 ; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v8 = alloca <vscale x 8 x i64>
   %v7 = alloca <vscale x 8 x i64>
@@ -341,14 +311,12 @@ define void @lmul_1_2_4_8_x2_1() nounwind optnone noinline {
 define void @masks() nounwind optnone noinline {
 ; CHECK-LABEL: masks:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i1>
   %v2 = alloca <vscale x 2 x i1>

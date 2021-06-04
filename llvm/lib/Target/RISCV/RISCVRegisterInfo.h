@@ -63,6 +63,9 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
   const TargetRegisterClass *
   getLargestLegalSuperClass(const TargetRegisterClass *RC,
                             const MachineFunction &) const override;
+
+  unsigned getRegPressureSetScore(const MachineFunction &MF,
+                                          unsigned PSetID) const override;
 };
 }
 
