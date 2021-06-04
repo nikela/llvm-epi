@@ -1166,61 +1166,42 @@ __epi_4xi32 test_vdivu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4x
 
 // CHECK-O2-LABEL: @test_vdivu_2xi64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdivu.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%{
-    return __builtin_epi_vfncvt_x_f_4xi16_4xf32_mask(arg_0, arg_1, arg_2, arg_3);
-}
-
-__epi_2xi32 test_vfncvt_x_f_2xi32_2xf64(__epi_2xf64 arg_0, unsigned long int arg_1)
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdivu.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
+//
+__epi_2xi64 test_vdivu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long int arg_2)
 {
-    return __builtin_epi_vfncvt_x_f_2xi32_2xf64(arg_0, arg_1);
+    return __builtin_epi_vdivu_2xi64(arg_0, arg_1, arg_2);
 }
 
-__epi_2xi32 test_vfncvt_x_f_2xi32_2xf64_mask(__epi_2xi32 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
+// CHECK-O2-LABEL: @test_vdivu_2xi64_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdivu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
+//
+__epi_2xi64 test_vdivu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
 {
-    return __builtin_epi_vfncvt_x_f_2xi32_2xf64_mask(arg_0, arg_1, arg_2, arg_3);
+    return __builtin_epi_vdivu_2xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
-__epi_8xi16 test_vfncvt_x_f_8xi16_8xf32(__epi_8xf32 arg_0, unsigned long int arg_1)
+// CHECK-O2-LABEL: @test_vdivu_32xi8(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdivu.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
+//
+__epi_32xi8 test_vdivu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long int arg_2)
 {
-    return __builtin_epi_vfncvt_x_f_8xi16_8xf32(arg_0, arg_1);
+    return __builtin_epi_vdivu_32xi8(arg_0, arg_1, arg_2);
 }
 
-__epi_8xi16 test_vfncvt_x_f_8xi16_8xf32_mask(__epi_8xi16 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
+// CHECK-O2-LABEL: @test_vdivu_32xi8_mask(
+// CHECK-O2-NEXT:  entry:
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdivu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
+//
+__epi_32xi8 test_vdivu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
 {
-    return __builtin_epi_vfncvt_x_f_8xi16_8xf32_mask(arg_0, arg_1, arg_2, arg_3);
-}
-
-__epi_4xi32 test_vfncvt_x_f_4xi32_4xf64(__epi_4xf64 arg_0, unsigned long int arg_1)
-{
-    return __builtin_epi_vfncvt_x_f_4xi32_4xf64(arg_0, arg_1);
-}
-
-__epi_4xi32 test_vfncvt_x_f_4xi32_4xf64_mask(__epi_4xi32 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
-{
-    return __builtin_epi_vfncvt_x_f_4xi32_4xf64_mask(arg_0, arg_1, arg_2, arg_3);
-}
-
-__epi_16xi16 test_vfncvt_x_f_16xi16_16xf32(__epi_16xf32 arg_0, unsigned long int arg_1)
-{
-    return __builtin_epi_vfncvt_x_f_16xi16_16xf32(arg_0, arg_1);
-}
-
-__epi_16xi16 test_vfncvt_x_f_16xi16_16xf32_mask(__epi_16xi16 arg_0, __epi_16xf32 arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
-{
-    return __builtin_epi_vfncvt_x_f_16xi16_16xf32_mask(arg_0, arg_1, arg_2, arg_3);
-}
-
-__epi_8xi32 test_vfncvt_x_f_8xi32_8xf64(__epi_8xf64 arg_0, unsigned long int arg_1)
-{
-    return __builtin_epi_vfncvt_x_f_8xi32_8xf64(arg_0, arg_1);
-}
-
-__epi_8xi32 test_vfncvt_x_f_8xi32_8xf64_mask(__epi_8xi32 arg_0, __epi_8xf64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
-{
-    return __builtin_epi_vfncvt_x_f_8xi32_8xf64_mask(arg_0, arg_1, arg_2, arg_3);
-}
-
-2, arg_3, arg_4);
+    return __builtin_epi_vdivu_32xi8_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
 // CHECK-O2-LABEL: @test_vdivu_16xi16(

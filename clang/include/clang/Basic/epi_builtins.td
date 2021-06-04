@@ -291,12 +291,156 @@ class EPINulBuiltin<string suffix, string prototype, string type_range>
 let HasVL = 0, HasMask = 0, HasSideEffects = 1, LMUL = [1],
     RegisterInClang = 0, ManualCodegen = [{}] in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${Name}(vl, sew, lmul) \
-        ${Name}_e${Size}${LMul}((vl))}] in
+  let CompatibilityCode = [{
+static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_vsetvl(unsigned long int rvl, unsigned long int sew, unsigned long int lmul) {
+    switch(sew) {
+        // __epi_e8
+        case 0: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvl_e8m1((size_t) rvl);
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvl_e8m2((size_t) rvl);
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvl_e8m4((size_t) rvl);
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvl_e8m8((size_t) rvl);
+            }
+        }
+        // __epi_e16
+        case 1: { 
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvl_e16m1((size_t) rvl);
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvl_e16m2((size_t) rvl);
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvl_e16m4((size_t) rvl);
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvl_e16m8((size_t) rvl);
+            }
+        }
+        // __epi_e32
+        case 2: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvl_e32m1((size_t) rvl);
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvl_e32m2((size_t) rvl);
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvl_e32m4((size_t) rvl);
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvl_e32m8((size_t) rvl);
+            }
+        }
+        // __epi_e64
+        case 3: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvl_e64m1((size_t) rvl);
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvl_e64m2((size_t) rvl);
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvl_e64m4((size_t) rvl);
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvl_e64m8((size_t) rvl);
+            }
+        }
+    }
+}
+}] in
   def vsetvl : EPIBuiltin<"", "UeUeKUeKUe", "l">;
 
-  let CompatibilityCode = [{#define __builtin_epi_${Name}(sew, lmul) \
-        ${Name}_e${Size}${LMul}()}] in
+  let CompatibilityCode = [{
+static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_vsetvlmax(unsigned long int sew, unsigned long int lmul) {
+    switch(sew) {
+        // __epi_e8
+        case 0: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvlmax_e8m1();
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvlmax_e8m2();
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvlmax_e8m4();
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvlmax_e8m8();
+            }
+        }
+        // __epi_e16
+        case 1: { 
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvlmax_e16m1();
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvlmax_e16m2();
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvlmax_e16m4();
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvlmax_e16m8();
+            }
+        }
+        // __epi_e32
+        case 2: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvlmax_e32m1();
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvlmax_e32m2();
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvlmax_e32m4();
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvlmax_e32m8();
+            }
+        }
+        // __epi_e64
+        case 3: {
+            switch(lmul) {
+                // __epi_m1
+                case 0:
+                    return (unsigned long int)vsetvlmax_e64m1();
+                // __epi_m2
+                case 1:
+                    return (unsigned long int)vsetvlmax_e64m2();
+                // __epi_m4
+                case 2:
+                    return (unsigned long int)vsetvlmax_e64m4();
+                // __epi_m8
+                case 3:
+                    return (unsigned long int)vsetvlmax_e64m8();
+            }
+        }
+    }
+}
+}] in
   def vsetvlmax : EPIBuiltin<"", "UeKUeKUe", "l">;
 }
 
