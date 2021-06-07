@@ -310,6 +310,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvl_e8m8((size_t) rvl);
             }
+            break;
         }
         // __epi_e16
         case 1: { 
@@ -327,6 +328,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvl_e16m8((size_t) rvl);
             }
+            break;
         }
         // __epi_e32
         case 2: {
@@ -344,6 +346,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvl_e32m8((size_t) rvl);
             }
+            break;
         }
         // __epi_e64
         case 3: {
@@ -361,8 +364,10 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvl_e64m8((size_t) rvl);
             }
+            break;
         }
     }
+    abort();
 }
 }] in
   def vsetvl : EPIBuiltin<"", "UeUeKUeKUe", "l">;
@@ -386,6 +391,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvlmax_e8m8();
             }
+            break;
         }
         // __epi_e16
         case 1: { 
@@ -403,6 +409,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvlmax_e16m8();
             }
+            break;
         }
         // __epi_e32
         case 2: {
@@ -420,6 +427,7 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvlmax_e32m8();
             }
+            break;
         }
         // __epi_e64
         case 3: {
@@ -437,8 +445,10 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
                 case 3:
                     return (unsigned long int)vsetvlmax_e64m8();
             }
+            break;
         }
     }
+    abort();
 }
 }] in
   def vsetvlmax : EPIBuiltin<"", "UeKUeKUe", "l">;
