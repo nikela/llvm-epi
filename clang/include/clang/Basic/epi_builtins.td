@@ -291,8 +291,10 @@ class EPINulBuiltin<string suffix, string prototype, string type_range>
 let HasVL = 0, HasMask = 0, HasSideEffects = 1, LMUL = [1],
     RegisterInClang = 0, ManualCodegen = [{}] in
 {
-  let CompatibilityCode = [{
-static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_vsetvl(unsigned long int rvl, unsigned long int sew, unsigned long int lmul) {
+  let CompatibilityCode = [{#define __builtin_epi_${FullName}(rvl, sew, lmul) \
+        mapped_${FullName}(rvl, sew, lmul)
+
+static inline __attribute__((__always_inline__)) unsigned long int mapped_${FullName}(unsigned long int rvl, unsigned long int sew, unsigned long int lmul) {
     switch(sew) {
         // __epi_e8
         case 0: {
@@ -372,8 +374,10 @@ static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi
 }] in
   def vsetvl : EPIBuiltin<"", "UeUeKUeKUe", "l">;
 
-  let CompatibilityCode = [{
-static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_vsetvlmax(unsigned long int sew, unsigned long int lmul) {
+  let CompatibilityCode = [{#define __builtin_epi_${FullName}(sew, lmul) \
+        mapped_${FullName}(sew, lmul)
+
+static inline __attribute__((__always_inline__)) unsigned long int mapped_${FullName}(unsigned long int sew, unsigned long int lmul) {
     switch(sew) {
         // __epi_e8
         case 0: {
