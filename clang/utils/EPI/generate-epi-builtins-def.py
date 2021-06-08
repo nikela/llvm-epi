@@ -410,6 +410,7 @@ class InstantiatedBuiltin:
         # Now add names to the parameters
         # FIXME: This won't work for C declarators that need parentheses.
         # Luckily we don't need any yet.
+        parameter_types_str = list(parameter_types_str) # python3 compatibility
         letter = ord('a')
         for i in range(len(parameter_types_str)):
             adjusted_i = i
@@ -642,7 +643,7 @@ def adjust_text(text):
 def format_code(source, clang_format):
     format_pipe = subprocess.Popen([clang_format, "--style=LLVM"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    format_pipe.stdin.write(source)
+    format_pipe.stdin.write(source.encode())
     (outdata, errdata) = format_pipe.communicate()
     if format_pipe.returncode != 0:
         raise Exception("Call to clang-format failed\n{}".format(errdata))
@@ -708,7 +709,7 @@ def emit_markdown_document(out_file, j, clang_format):
 
             out_file.write("**Prototypes**:\n\n")
             out_file.write("```cpp\n");
-            out_file.write(formatted_prototypes)
+            out_file.write(formatted_prototypes.decode())
             out_file.write("```\n");
 
             if doc["Operation"]:
@@ -727,7 +728,7 @@ def emit_markdown_document(out_file, j, clang_format):
                 formatted_prototypes = format_code(prototypes, clang_format)
 
                 out_file.write("```cpp\n");
-                out_file.write(formatted_prototypes)
+                out_file.write(formatted_prototypes.decode())
                 out_file.write("```\n");
 
                 if doc["OperationMask"]:
@@ -810,76 +811,6 @@ def single_test_clang(clang, tmp_file, extra_flags = []):
         # print "ERROR: {}".format(e.output)
         return False
     return True
-
-def run_builtin_tester(out_file, j, clang):
-    inst_builtins = instantiate_builtins(j)
-    already_emitted = set([])
-    num_builtins_tested = 0
-    num_builtins_succeeded = 0
-    for b in inst_builtins:
-        if b.builtin["RegisterInClang"] == 0:
-            continue
-
-        # FIXME:
-        if b.lmul not in [1, 2, 4]:
-            continue
-
-        num_builtins_tested += 1
-
-        # The current strategy does not work for builtins that expect
-        # constant expressions. So skip these ones and let them be tested
-        # elsewhere
-        if "K" in b.builtin["Prototype"]:
-            continue
-
-        if b.full_name in already_emitted:
-            continue
-
-        already_emitted.add(b.full_name)
-
-        (return_type, parameter_types) = b.c_prototoype_items()
-
-        parameters = []
-        arguments = []
-        i = 0
-        for p in parameter_types:
-            arg = "arg_{}".format(i)
-            i += 1
-            parameters.append("{} {}".format(p, arg))
-            arguments.append(arg)
-
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_file.write("{} test_{}({})\n{{\n    return __builtin_epi_{}({});\n}}\n\n".format(
-                return_type,
-                b.full_name,
-                ", ".join(parameters),
-                b.full_name,
-                ", ".join(arguments)))
-
-            def report(msg):
-                out_file.write(msg)
-                out_file.flush()
-
-            tmp_file.flush()
-            if not single_test_clang(clang, tmp_file, ["-fsyntax-only"]):
-                report("Builtin {} not supported (clang syntax only)\n".format(b.full_name))
-                continue
-            if not single_test_clang(clang, tmp_file, ["-emit-llvm"]):
-                report("Builtin {} not supported (clang codegen)\n".format(b.full_name))
-                continue
-            if not single_test_clang(clang, tmp_file):
-                report("Builtin {} not supported (llvm codegen -O0)\n".format(b.full_name))
-                continue
-            if not single_test_clang(clang, tmp_file, ["-O2"]):
-                report("Builtin {} not supported (llvm codegen -O2)\n".format(b.full_name))
-                continue
-            # report("Builtin {} seems to work fine\n".format(b.full_name))
-            num_builtins_succeeded += 1
-    num_builtins_failed = num_builtins_tested - num_builtins_succeeded
-    out_file.write("Tested {} builtins. Failed {} ({:.2%})\n".format(
-        num_builtins_tested,
-        num_builtins_failed,
-        float(num_builtins_failed) / num_builtins_tested))
 
 def emit_compatibility_header(out_file, j):
     inst_builtins = instantiate_builtins(j)
@@ -1071,10 +1002,9 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Generate instruction table")
     parser.add_argument("--mode", required=True,
-            choices=["builtins-def", "codegen", "tests", "docs", "builtin-tester", "header", "header-tests", "header-verify"], help="Mode of operation")
+            choices=["builtins-def", "codegen", "tests", "docs", "header", "header-tests", "header-verify"], help="Mode of operation")
     parser.add_argument("--tablegen", required=True, help="Path of tablegen")
     parser.add_argument("--output-file", required=False, help="Output file. stdout otherwise")
-    parser.add_argument("--clang", required=False, help="Path of clang")
     parser.add_argument("--clang-format", required=False, help="Path of clang-format")
     parser.add_argument("-I", dest="include_paths", required=False, default=[],
                       help="Include path", action="append")
@@ -1097,10 +1027,6 @@ if __name__ == "__main__":
         emit_markdown_document(out_file, j, args.clang_format)
     elif args.mode == "tests":
         emit_tests(out_file, j)
-    elif args.mode == "builtin-tester":
-        if not args.clang:
-            parser.error("You have to pass --clang when running the builtin tester")
-        run_builtin_tester(out_file, j, args.clang)
     elif args.mode == "header":
         emit_compatibility_header(out_file, j)
     elif args.mode == "header-tests":
