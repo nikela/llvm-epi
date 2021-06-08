@@ -8,26 +8,35 @@ set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;llvm;polly" CACHE STRING "
 set(LLVM_ENABLE_RUNTIMES "compiler-rt;libcxx;libcxxabi;libunwind" CACHE STRING "")
 
 set(LLVM_ENABLE_BACKTRACES OFF CACHE BOOL "")
+set(LLVM_ENABLE_DIA_SDK OFF CACHE BOOL "")
 if(NOT APPLE)
+  # TODO: Remove this once we switch to ld64.lld.
   set(LLVM_ENABLE_LLD ON CACHE BOOL "")
 endif()
 set(LLVM_ENABLE_LTO ON CACHE BOOL "")
 set(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR ON CACHE BOOL "")
+if(NOT APPLE)
+  # TODO: Remove this once we switch to ld64.lld.
+  set(LLVM_ENABLE_PIC OFF CACHE BOOL "")
+endif()
+set(LLVM_ENABLE_LIBCXX ON CACHE BOOL "")
 set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "")
 set(LLVM_ENABLE_UNWIND_TABLES OFF CACHE BOOL "")
+set(LLVM_ENABLE_Z3_SOLVER OFF CACHE BOOL "")
 set(LLVM_ENABLE_ZLIB ON CACHE BOOL "")
 set(LLVM_INCLUDE_DOCS OFF CACHE BOOL "")
 set(LLVM_INCLUDE_EXAMPLES OFF CACHE BOOL "")
 set(LLVM_INCLUDE_GO_TESTS OFF CACHE BOOL "")
+set(LLVM_STATIC_LINK_CXX_STDLIB ON CACHE BOOL "")
 set(LLVM_USE_RELATIVE_PATHS_IN_FILES ON CACHE BOOL "")
-set(LLVM_ENABLE_Z3_SOLVER OFF CACHE BOOL "")
 
-if(MSVC)
+if(WIN32)
   set(LLVM_USE_CRT_RELEASE "MT" CACHE STRING "")
 endif()
 
 set(CLANG_DEFAULT_CXX_STDLIB libc++ CACHE STRING "")
 if(NOT APPLE)
+  # TODO: Remove this once we switch to ld64.lld.
   set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
   set(CLANG_DEFAULT_OBJCOPY llvm-objcopy CACHE STRING "")
 endif()
@@ -43,7 +52,7 @@ set(ENABLE_X86_RELAX_RELOCATIONS ON CACHE BOOL "")
 set(CMAKE_BUILD_TYPE Release CACHE STRING "")
 if (APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "")
-elseif(MSVC)
+elseif(WIN32)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded" CACHE STRING "")
 endif()
 
@@ -276,6 +285,7 @@ set(LLVM_TOOLCHAIN_TOOLS
   llvm-nm
   llvm-objcopy
   llvm-objdump
+  llvm-otool
   llvm-profdata
   llvm-rc
   llvm-ranlib
@@ -288,10 +298,14 @@ set(LLVM_TOOLCHAIN_TOOLS
   sancov
   CACHE STRING "")
 
+if(APPLE)
+  # TODO: Remove this once we switch to ld64.lld.
+  set(target_components LTO)
+endif()
+
 set(LLVM_DISTRIBUTION_COMPONENTS
   clang
   lld
-  LTO
   clang-apply-replacements
   clang-doc
   clang-format
@@ -303,5 +317,6 @@ set(LLVM_DISTRIBUTION_COMPONENTS
   clangd
   builtins
   runtimes
+  ${target_components}
   ${LLVM_TOOLCHAIN_TOOLS}
   CACHE STRING "")
