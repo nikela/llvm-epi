@@ -87,7 +87,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    store <vscale x 8 x double> [[TMP41]], <vscale x 8 x double>* [[TMP44]], align 8, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[TMP45:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP46:%.*]] = mul i64 [[TMP45]], 8
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP46]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP46]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 8 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT7]] = add <vscale x 8 x i32> [[VEC_IND6]], [[DOTSPLAT5]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT12]] = add <vscale x 8 x i32> [[VEC_IND11]], [[DOTSPLAT10]]
@@ -189,7 +189,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[TMP32:%.*]] = bitcast double* [[TMP31]] to <vscale x 1 x double>*
 ; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP29]], <vscale x 1 x double>* [[TMP32]], align 8, !tbaa [[TBAA2]]
 ; CHECK1-NEXT:    [[TMP33:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP33]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP33]]
 ; CHECK1-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 1 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; CHECK1-NEXT:    [[VEC_IND_NEXT7]] = add <vscale x 1 x i32> [[VEC_IND6]], [[DOTSPLAT5]]
 ; CHECK1-NEXT:    [[VEC_IND_NEXT12]] = add <vscale x 1 x i32> [[VEC_IND11]], [[DOTSPLAT10]]

@@ -57,7 +57,7 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK-NEXT:    store <vscale x 8 x double> [[TMP12]], <vscale x 8 x double>* [[TMP13]], align 8, !tbaa [[TBAA2]], !alias.scope !9, !noalias !6
 ; CHECK-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP15:%.*]] = mul i64 [[TMP14]], 8
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP15]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP15]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP16]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP11:![0-9]+]]
 ; CHECK:       middle.block:
@@ -127,7 +127,7 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK1-NEXT:    [[TMP11:%.*]] = bitcast double* [[TMP8]] to <vscale x 1 x double>*
 ; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP10]], <vscale x 1 x double>* [[TMP11]], align 8, !tbaa [[TBAA2]], !alias.scope !9, !noalias !6
 ; CHECK1-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP12]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP12]]
 ; CHECK1-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP11:![0-9]+]]
 ; CHECK1:       middle.block:

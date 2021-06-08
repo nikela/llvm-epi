@@ -44,7 +44,7 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    store <vscale x 16 x float> [[TMP11]], <vscale x 16 x float>* [[TMP14]], align 4, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 16
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP16]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP16]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP17]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
 ; CHECK:       middle.block:
@@ -104,7 +104,7 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK1-NEXT:    store <vscale x 2 x float> [[TMP11]], <vscale x 2 x float>* [[TMP14]], align 4, !tbaa [[TBAA2]]
 ; CHECK1-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 2
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP16]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP16]]
 ; CHECK1-NEXT:    [[TMP17:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[TMP17]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
 ; CHECK1:       middle.block:

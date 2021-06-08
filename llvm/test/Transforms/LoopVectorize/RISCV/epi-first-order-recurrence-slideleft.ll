@@ -51,7 +51,7 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECK-NEXT:    store <vscale x 16 x i32> [[TMP15]], <vscale x 16 x i32>* [[TMP16]], align 4
 ; CHECK-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP18:%.*]] = shl i64 [[TMP17]], 4
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP18]]
 ; CHECK-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       middle.block:
@@ -116,7 +116,7 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECK1-NEXT:    store <vscale x 2 x i32> [[TMP15]], <vscale x 2 x i32>* [[TMP16]], align 4
 ; CHECK1-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP18:%.*]] = shl i64 [[TMP17]], 1
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP18]]
 ; CHECK1-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK1:       middle.block:

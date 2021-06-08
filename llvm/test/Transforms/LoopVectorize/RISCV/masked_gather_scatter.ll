@@ -70,7 +70,7 @@ define void @foo4(double* nocapture %A, double* nocapture readonly %B, i32* noca
 ; RV32-NEXT:    call void @llvm.masked.scatter.nxv2f64.nxv2p0f64(<vscale x 2 x double> [[TMP15]], <vscale x 2 x double*> [[TMP16]], i32 8, <vscale x 2 x i1> [[TMP11]]), !alias.scope !5, !noalias !7
 ; RV32-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; RV32-NEXT:    [[TMP18:%.*]] = mul i64 [[TMP17]], 2
-; RV32-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
+; RV32-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP18]]
 ; RV32-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; RV32-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; RV32-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
@@ -158,7 +158,7 @@ define void @foo4(double* nocapture %A, double* nocapture readonly %B, i32* noca
 ; RV64-NEXT:    call void @llvm.masked.scatter.nxv2f64.nxv2p0f64(<vscale x 2 x double> [[TMP15]], <vscale x 2 x double*> [[TMP16]], i32 8, <vscale x 2 x i1> [[TMP11]]), !alias.scope !5, !noalias !7
 ; RV64-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
 ; RV64-NEXT:    [[TMP18:%.*]] = mul i64 [[TMP17]], 2
-; RV64-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
+; RV64-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP18]]
 ; RV64-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT]]
 ; RV64-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; RV64-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]

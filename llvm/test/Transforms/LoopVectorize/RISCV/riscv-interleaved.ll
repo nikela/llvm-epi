@@ -42,7 +42,7 @@ define dso_local void @foo(i32 signext %n, i32* nocapture %A) local_unnamed_addr
 ; CHECK-NEXT:    store <vscale x 2 x i32> [[STEP_ADD10]], <vscale x 2 x i32>* [[TMP13]], align 4, !tbaa [[TBAA4]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP15:%.*]] = shl i64 [[TMP14]], 2
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP15]]
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP15]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT12]] = add <vscale x 2 x i32> [[STEP_ADD10]], [[DOTSPLAT8]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP16]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
