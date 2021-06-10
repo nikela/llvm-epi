@@ -28,7 +28,7 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
 ; CHECK-NEXT:    vl1re16.v v25, (a4)
-; CHECK-NEXT:    vsetvli a4, zero, e16,m1,ta,mu
+; CHECK-NEXT:    vsetvli a4, zero, e16, m1, ta, mu
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vl1re16.v v26, (a4)
 ; CHECK-NEXT:    vmul.vx v25, v25, a3
@@ -145,7 +145,7 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
 ; CHECK-NEXT:    vl1re32.v v25, (a4)
-; CHECK-NEXT:    vsetvli a4, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a4, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vl1re32.v v26, (a4)
 ; CHECK-NEXT:    vmul.vx v25, v25, a3
@@ -259,7 +259,7 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
 ; CHECK-NEXT:    vl1re64.v v25, (a4)
-; CHECK-NEXT:    vsetvli a4, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a4, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vl1re64.v v26, (a4)
 ; CHECK-NEXT:    vmul.vx v25, v25, a3

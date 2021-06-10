@@ -30,7 +30,7 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    vl1re32.v v25, (a0)
 ; CHECK-NEXT:    add a0, a1, a5
 ; CHECK-NEXT:    vl1re32.v v26, (a0)
-; CHECK-NEXT:    vsetvli a3, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmacc.vf v26, ft0, v25
 ; CHECK-NEXT:    vs1r.v v26, (a0)
 ; CHECK-NEXT:    add a4, a4, t1
@@ -144,7 +144,7 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    vl1re64.v v25, (a4)
 ; CHECK-NEXT:    add a4, a1, a5
 ; CHECK-NEXT:    vl1re64.v v26, (a4)
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmacc.vf v26, ft0, v25
 ; CHECK-NEXT:    vs1r.v v26, (a4)
 ; CHECK-NEXT:    add a0, a0, t1

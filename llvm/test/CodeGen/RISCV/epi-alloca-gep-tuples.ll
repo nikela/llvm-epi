@@ -10,7 +10,7 @@ define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-NEXT:    addi sp, sp, -32
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
 ; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs1r.v v8, (a0)
@@ -41,7 +41,7 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-NEXT:    addi sp, sp, -48
 ; CHECK-NEXT:    addi a0, zero, 2
 ; CHECK-NEXT:    addi a1, zero, 64
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v25, a1
 ; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs1r.v v25, (a0)

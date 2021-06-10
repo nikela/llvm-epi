@@ -10,7 +10,7 @@ declare <vscale x 1 x double> @llvm.epi.vfadd.nxv1f64.nxv1f64(
 define <vscale x 1 x double> @basic_callee(
 ; CHECK-LABEL: basic_callee:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,
@@ -28,7 +28,7 @@ define <vscale x 1 x double> @basic_callee(
 define <vscale x 1 x double> @max_registers(
 ; CHECK-LABEL: max_registers:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v25, v8, v9
 ; CHECK-NEXT:    vfadd.vv v25, v25, v11
 ; CHECK-NEXT:    vfadd.vv v25, v25, v12
@@ -76,7 +76,7 @@ define <vscale x 1 x double> @max_registers(
 define <vscale x 1 x double> @too_many_registers_1(
 ; CHECK-LABEL: too_many_registers_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  i64 %gvl,
@@ -101,7 +101,7 @@ define <vscale x 1 x double> @too_many_registers_1(
 define <vscale x 1 x double> @too_many_registers_2(
 ; CHECK-LABEL: too_many_registers_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v0,
@@ -126,7 +126,7 @@ define <vscale x 1 x double> @too_many_registers_2(
 define <vscale x 1 x double> @too_many_registers_3(
 ; CHECK-LABEL: too_many_registers_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a7, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a7, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v16, v17
 ; CHECK-NEXT:    ret
                                  i64 %i0,
@@ -165,7 +165,7 @@ declare <vscale x 1 x double> @llvm.epi.vfadd.mask.nxv1f64.nxv1f64.nxv1i1(
 define <vscale x 1 x double> @first_mask_0(
 ; CHECK-LABEL: first_mask_0:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x i1> %mask,
@@ -185,7 +185,7 @@ define <vscale x 1 x double> @first_mask_0(
 define <vscale x 1 x double> @first_mask_2(
 ; CHECK-LABEL: first_mask_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,
@@ -206,7 +206,7 @@ define <vscale x 1 x double> @second_mask_1(
 ; CHECK-LABEL: second_mask_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vmv1r.v v0, v10
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v1,

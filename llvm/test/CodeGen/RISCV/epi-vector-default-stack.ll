@@ -24,7 +24,7 @@ define void @intrinsic(<vscale x 1 x i64> %v1, i64 %gvl) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -512
 ; CHECK-NEXT:    mv a1, sp
-; CHECK-NEXT:    vsetvli zero, a0, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vse64.v v8, (a1)
 ; CHECK-NEXT:    addi sp, sp, 512
 ; CHECK-NEXT:    ret

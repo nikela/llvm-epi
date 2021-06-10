@@ -21,7 +21,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    mv s3, a2
 ; CHECK-NEXT:    mv s1, a0
 ; CHECK-NEXT:    addi s4, zero, 8
-; CHECK-NEXT:    vsetvli zero, s4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s4, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v26
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
@@ -51,7 +51,7 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vs1r.v v25, (a0) # Unknown-size Folded Spill
 ; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64@plt
-; CHECK-NEXT:    vsetvli zero, s4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s4, e64, m1, ta, mu
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16

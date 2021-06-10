@@ -23,7 +23,7 @@ declare void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double>, <vscale x 1 x doubl
 define void @vzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vzip2.vv v0, v25, v26
@@ -48,7 +48,7 @@ entry:
 define void @vunzip2.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vunzip2.vv v0, v25, v26
@@ -73,7 +73,7 @@ entry:
 define void @vtrn.test.nxv1i64(i64* nocapture readonly %in_a0, i64* nocapture readonly %in_a1, i64* nocapture %out_a0, i64* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv1i64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vtrn.vv v0, v25, v26
@@ -98,7 +98,7 @@ entry:
 define void @vzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
 ; CHECK-NEXT:    vzip2.vv v0, v25, v26
@@ -123,7 +123,7 @@ entry:
 define void @vunzip2.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
 ; CHECK-NEXT:    vunzip2.vv v0, v25, v26
@@ -148,7 +148,7 @@ entry:
 define void @vtrn.test.nxv2i32(i32* nocapture readonly %in_a0, i32* nocapture readonly %in_a1, i32* nocapture %out_a0, i32* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv2i32:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v25, (a0)
 ; CHECK-NEXT:    vle32.v v26, (a1)
 ; CHECK-NEXT:    vtrn.vv v0, v25, v26
@@ -173,7 +173,7 @@ entry:
 define void @vzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vzip2.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vzip2.vv v0, v25, v26
@@ -198,7 +198,7 @@ entry:
 define void @vunzip2.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vunzip2.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vunzip2.vv v0, v25, v26
@@ -223,7 +223,7 @@ entry:
 define void @vtrn.test.nxv1f64(double* nocapture readonly %in_a0, double* nocapture readonly %in_a1, double* nocapture %out_a0, double* nocapture %out_a1, i64 %gvl) nounwind {
 ; CHECK-LABEL: vtrn.test.nxv1f64:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli zero, a4, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a0)
 ; CHECK-NEXT:    vle64.v v26, (a1)
 ; CHECK-NEXT:    vtrn.vv v0, v25, v26

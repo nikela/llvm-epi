@@ -15,7 +15,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    sd a2, 24(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    # implicit-def: $v25
-; SPILL-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; SPILL-O0-NEXT:    vle64.v v25, (a0)
 ; SPILL-O0-NEXT:    # implicit-def: $v26
 ; SPILL-O0-NEXT:    vle64.v v26, (a1)
@@ -38,7 +38,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    add a1, sp, a1
 ; SPILL-O0-NEXT:    addi a1, a1, 40
 ; SPILL-O0-NEXT:    vl1r.v v25, (a1) # Unknown-size Folded Reload
-; SPILL-O0-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
+; SPILL-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; SPILL-O0-NEXT:    vse64.v v26, (a0)
 ; SPILL-O0-NEXT:    vse64.v v25, (a0)
 ; SPILL-O0-NEXT:    csrr a0, vlenb
@@ -59,7 +59,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    sub sp, sp, a3
 ; SPILL-O2-NEXT:    mv s0, a2
 ; SPILL-O2-NEXT:    mv s1, a0
-; SPILL-O2-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
+; SPILL-O2-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; SPILL-O2-NEXT:    vle64.v v25, (a0)
 ; SPILL-O2-NEXT:    vle64.v v26, (a1)
 ; SPILL-O2-NEXT:    vzip2.vv v0, v25, v26
@@ -69,7 +69,7 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    add a0, a0, a1
 ; SPILL-O2-NEXT:    vs1r.v v1, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    call foo
-; SPILL-O2-NEXT:    vsetvli zero, s0, e64,m1,ta,mu
+; SPILL-O2-NEXT:    vsetvli zero, s0, e64, m1, ta, mu
 ; SPILL-O2-NEXT:    addi a0, sp, 24
 ; SPILL-O2-NEXT:    csrr a1, vlenb
 ; SPILL-O2-NEXT:    vl1r.v v0, (a0) # Unknown-size Folded Reload
