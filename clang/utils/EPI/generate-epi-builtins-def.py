@@ -876,7 +876,7 @@ def emit_compatibility_header(out_file, j):
             subs["LMul"] = "m" + str(ib.lmul)
             subs["WidenedLMul"] = "m" + str(2 * ib.lmul)
             subs["Boolean"] = int(int(subs["Size"]) / ib.lmul)
-            if "red" in ib.full_name:
+            if "vred" in ib.full_name or "vfred" in ib.full_name:
                 if ib.lmul == 1:
                     subs["LMulExt"] = subs["LMulTrunc"] = subs["End"] = ""
                 else:
