@@ -224,7 +224,7 @@ add_custom_command(
   OUTPUT epi_rvv.h
   COMMAND ${PYTHON_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../utils/EPI/generate-epi-builtins-def.py
-    --mode header
+    --mode compat-header
     --tablegen ${REAL_CLANG_TABLEGEN}
     --output-file epi_rvv.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../../include/clang/Basic/epi_builtins.td
@@ -236,7 +236,6 @@ add_custom_command(
 copy_header_to_output_dir(${CMAKE_CURRENT_BINARY_DIR} epi_rvv.h)
 list(APPEND generated_files "${CMAKE_CURRENT_BINARY_DIR}/epi_rvv.h")
 set(generated_files ${generated_files} PARENT_SCOPE)
-#add_custom_target(epi_rvv ALL DEPENDS epi_rvv.h)
 
 add_custom_target(clang-resource-headers ALL DEPENDS ${out_files})
 set_target_properties(clang-resource-headers PROPERTIES

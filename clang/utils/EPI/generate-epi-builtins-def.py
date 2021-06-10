@@ -816,8 +816,8 @@ def emit_compatibility_header(out_file, j):
     inst_builtins = instantiate_builtins(j)
 
     out_file.write("""\
-#ifndef __EPIRVVCOMPATIBILITYHEADER_H
-#define __EPIRVVCOMPATIBILITYHEADER_H
+#ifndef __EPI_RVV_H
+#define __EPI_RVV_H
 
 #include <riscv_vector.h>
 
@@ -889,7 +889,7 @@ def emit_compatibility_header(out_file, j):
             out_file.write("{}\n".format(code.substitute(subs)))
 
     out_file.write("""
-#endif //__EPIRVVCOMPATIBILITYHEADER_H
+#endif //__EPI_RVV_H
 """)
 
 def emit_header_tests(out_file, j):
@@ -1002,7 +1002,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Generate instruction table")
     parser.add_argument("--mode", required=True,
-            choices=["builtins-def", "codegen", "tests", "docs", "header", "header-tests", "header-verify"], help="Mode of operation")
+            choices=["builtins-def", "codegen", "tests", "docs", "compat-header", "compat-header-tests", "compat-header-verify"], help="Mode of operation")
     parser.add_argument("--tablegen", required=True, help="Path of tablegen")
     parser.add_argument("--output-file", required=False, help="Output file. stdout otherwise")
     parser.add_argument("--clang-format", required=False, help="Path of clang-format")
@@ -1027,11 +1027,11 @@ if __name__ == "__main__":
         emit_markdown_document(out_file, j, args.clang_format)
     elif args.mode == "tests":
         emit_tests(out_file, j)
-    elif args.mode == "header":
+    elif args.mode == "compat-header":
         emit_compatibility_header(out_file, j)
-    elif args.mode == "header-tests":
+    elif args.mode == "compat-header-tests":
         emit_header_tests(out_file, j)
-    elif args.mode == "header-verify":
+    elif args.mode == "compat-header-verify":
         emit_header_verify(out_file, j)
     else:
         raise Exception("Unexpected mode '{}".format(args.mode))
