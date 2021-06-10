@@ -292,9 +292,9 @@ let HasVL = 0, HasMask = 0, HasSideEffects = 1, LMUL = [1],
     RegisterInClang = 0, ManualCodegen = [{}] in
 {
   let CompatibilityCode = [{#define __builtin_epi_${FullName}(rvl, sew, lmul) \
-        mapped_${FullName}(rvl, sew, lmul)
+        __builtin_epi_${FullName}_compat(rvl, sew, lmul)
 
-static inline __attribute__((__always_inline__)) unsigned long int mapped_${FullName}(unsigned long int rvl, unsigned long int sew, unsigned long int lmul) {
+static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_${FullName}_compat(unsigned long int rvl, unsigned long int sew, unsigned long int lmul) {
     switch(sew) {
         // __epi_e8
         case 0: {
@@ -375,9 +375,9 @@ static inline __attribute__((__always_inline__)) unsigned long int mapped_${Full
   def vsetvl : EPIBuiltin<"", "UeUeKUeKUe", "l">;
 
   let CompatibilityCode = [{#define __builtin_epi_${FullName}(sew, lmul) \
-        mapped_${FullName}(sew, lmul)
+        __builtin_epi_${FullName}_compat(sew, lmul)
 
-static inline __attribute__((__always_inline__)) unsigned long int mapped_${FullName}(unsigned long int sew, unsigned long int lmul) {
+static inline __attribute__((__always_inline__)) unsigned long int __builtin_epi_${FullName}_compat(unsigned long int sew, unsigned long int lmul) {
     switch(sew) {
         // __epi_e8
         case 0: {
