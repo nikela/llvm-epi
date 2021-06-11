@@ -7,7 +7,7 @@
 define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %va, <vscale x 1 x i64> %vb, i32 %offset) {
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v25, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vid.v v26
@@ -29,7 +29,7 @@ declare <vscale x 1 x i64> @llvm.experimental.vector.slideleftfill.nxv1i64(<vsca
 define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %va, <vscale x 2 x i32> %vb, i32 %offset) {
 ; CHECK-LABEL: nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v25, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vid.v v26
@@ -51,7 +51,7 @@ declare <vscale x 2 x i32> @llvm.experimental.vector.slideleftfill.nxv2i32(<vsca
 define <vscale x 1 x double> @nxv1f64(<vscale x 1 x double> %va, <vscale x 1 x double> %vb, i32 %offset) {
 ; CHECK-LABEL: nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v25, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vid.v v26
@@ -73,7 +73,7 @@ declare <vscale x 1 x double> @llvm.experimental.vector.slideleftfill.nxv1f64(<v
 define <vscale x 2 x float> @nxv2f32(<vscale x 2 x float> %va, <vscale x 2 x float> %vb, i32 %offset) {
 ; CHECK-LABEL: nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v25, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vid.v v26
@@ -95,7 +95,7 @@ declare <vscale x 2 x float> @llvm.experimental.vector.slideleftfill.nxv2f32(<vs
 define <vscale x 2 x i64> @nxv2i64(<vscale x 2 x i64> %va, <vscale x 2 x i64> %vb, i32 %offset) {
 ; CHECK-LABEL: nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v26, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vid.v v28

@@ -6,7 +6,7 @@ define <vscale x 8 x i1> @indirect_register_param(<vscale x 8 x i32> %a, <vscale
 ; CHECK-LABEL: indirect_register_param:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vmv1r.v v25, v0
-; CHECK-NEXT:    vsetvli zero, a0, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v25
@@ -35,7 +35,7 @@ define <vscale x 8 x i1> @indirect_stack_param(
 ; CHECK-LABEL: indirect_stack_param:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vmv1r.v v25, v0
-; CHECK-NEXT:    vsetvli zero, a0, e32,m4,ta,mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v25

@@ -31,10 +31,10 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    slli a1, a4, 6
 ; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    addi a2, zero, 2
-; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v25
 ; CHECK-NEXT:    vand.vi v25, v25, 1
-; CHECK-NEXT:    vsetvli a2, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vand.vi v25, v25, 1
 ; CHECK-NEXT:    vmsne.vi v0, v25, 0
 ; CHECK-NEXT:    slli a2, a3, 3
@@ -81,7 +81,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    addi a2, zero, 2
-; CHECK-NEXT:    vsetvli zero, a2, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a1)
 ; CHECK-NEXT:    addi a2, a1, 16
 ; CHECK-NEXT:    vle64.v v26, (a2)

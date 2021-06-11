@@ -55,12 +55,14 @@ class VSETVLIInfo {
   // Fields from VTYPE.
   RISCVII::VLMUL VLMul = RISCVII::LMUL_1;
   uint8_t SEW = 0;
-  bool TailAgnostic = false;
-  bool MaskAgnostic = false;
-  bool Nontemporal = false;
+  uint8_t TailAgnostic : 1;
+  uint8_t MaskAgnostic : 1;
+  uint8_t MaskRegOp : 1;
+  uint8_t Nontemporal : 1;
 
 public:
-  VSETVLIInfo() : AVLImm(0) {}
+  VSETVLIInfo()
+      : AVLImm(0), TailAgnostic(false), MaskAgnostic(false), MaskRegOp(false) {}
 
   static VSETVLIInfo getUnknown() {
     VSETVLIInfo Info;
@@ -116,13 +118,15 @@ public:
     MaskAgnostic = RISCVVType::isMaskAgnostic(VType);
     Nontemporal = RISCVVType::isNontemporal(VType);
   }
-  void setVTYPE(RISCVII::VLMUL L, unsigned S, bool TA, bool MA, bool NT) {
+  void setVTYPE(RISCVII::VLMUL L, unsigned S, bool TA, bool MA, bool MRO,
+                bool NT) {
     assert(isValid() && !isUnknown() &&
            "Can't set VTYPE for uninitialized or unknown");
     VLMul = L;
     SEW = S;
     TailAgnostic = TA;
     MaskAgnostic = MA;
+    MaskRegOp = MRO;
     Nontemporal = NT;
   }
 
@@ -167,21 +171,34 @@ public:
     return getSEWLMULRatio() == Other.getSEWLMULRatio();
   }
 
-  bool isCompatible(const VSETVLIInfo &Other) const {
-    assert(isValid() && Other.isValid() &&
+  // Determine whether the vector instructions requirements represented by
+  // InstrInfo are compatible with the previous vsetvli instruction represented
+  // by this.
+  bool isCompatible(const VSETVLIInfo &InstrInfo) const {
+    assert(isValid() && InstrInfo.isValid() &&
            "Can't compare invalid VSETVLIInfos");
     // Nothing is compatible with Unknown.
-    if (isUnknown() || Other.isUnknown())
+    if (isUnknown() || InstrInfo.isUnknown())
       return false;
 
-    // If other doesn't need an AVLReg and the SEW matches, consider it
-    // compatible.
-    if (Other.hasAVLReg() && Other.AVLReg == RISCV::NoRegister) {
-      if (SEW == Other.SEW)
+    // If the instruction doesn't need an AVLReg and the SEW matches, consider
+    // it/ compatible.
+    if (InstrInfo.hasAVLReg() && InstrInfo.AVLReg == RISCV::NoRegister) {
+      if (SEW == InstrInfo.SEW)
         return true;
     }
 
-    return hasSameVTYPE(Other) && hasSameAVL(Other);
+    // VTypes must match unless the instruction is a mask reg operation, then it
+    // only care about VLMAX.
+    // FIXME: Mask reg operations are probably ok if "this" VLMAX is larger
+    // than "InstrInfo".
+    if (!hasSameVTYPE(InstrInfo) &&
+        !(InstrInfo.MaskRegOp && hasSameVLMAX(InstrInfo) &&
+          TailAgnostic == InstrInfo.TailAgnostic &&
+          MaskAgnostic == InstrInfo.MaskAgnostic))
+      return false;
+
+    return hasSameAVL(InstrInfo);
   }
 
   bool operator==(const VSETVLIInfo &Other) const {
@@ -200,8 +217,6 @@ public:
     // Otherwise compare the VTYPE and AVL.
     return hasSameVTYPE(Other) && hasSameAVL(Other);
   }
-
-  bool operator!=(const VSETVLIInfo &Other) const { return !(*this == Other); }
 
   // Calculate the VSETVLIInfo visible to a block assuming this and Other are
   // both predecessors.
@@ -320,7 +335,9 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
   RISCVII::VLMUL VLMul = RISCVII::getLMul(TSFlags);
 
   unsigned Log2SEW = MI.getOperand(NumOperands - 1).getImm();
-  unsigned SEW = 1 << Log2SEW;
+  // A Log2SEW of 0 is an operation on mask registers only.
+  bool MaskRegOp = Log2SEW == 0;
+  unsigned SEW = Log2SEW ? 1 << Log2SEW : 8;
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
 
   // Default to tail agnostic unless the destination is tied to a source.
@@ -354,7 +371,8 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ TailAgnostic,
-                     /*MaskAgnostic*/ false, /* Nontemporal */ false);
+                     /*MaskAgnostic*/ false, MaskRegOp,
+                     /* Nontemporal */ false);
 
   return InstrInfo;
 }
@@ -407,7 +425,8 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                     /*MaskAgnostic*/ false, Nontemporal);
+                     /*MaskAgnostic*/ false, /* MaskRegOp */ false,
+                     Nontemporal);
   return InstrInfo;
 }
 

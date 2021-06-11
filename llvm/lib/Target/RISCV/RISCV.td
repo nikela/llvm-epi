@@ -221,6 +221,17 @@ def FeatureSaveRestore : SubtargetFeature<"save-restore", "EnableSaveRestore",
                                           "true", "Enable save/restore.">;
 
 //===----------------------------------------------------------------------===//
+// EPI
+//===----------------------------------------------------------------------===//
+
+def FeatureEPI
+    : SubtargetFeature<"epi", "HasEPI", "true",
+                       "EPI support">;
+def HasEPI : Predicate<"Subtarget->hasEPI()">,
+                           AssemblerPredicate<(all_of FeatureEPI),
+                           "EPI support">;
+
+//===----------------------------------------------------------------------===//
 // Named operands for CSR instructions.
 //===----------------------------------------------------------------------===//
 

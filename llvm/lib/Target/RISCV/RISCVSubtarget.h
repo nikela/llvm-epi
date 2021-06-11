@@ -55,6 +55,7 @@ class RISCVSubtarget : public RISCVGenSubtargetInfo {
   bool HasStdExtZvlsseg = false;
   bool HasStdExtZvamo = false;
   bool HasStdExtZfh = false;
+  bool HasEPI = false;
   bool HasRV64 = false;
   bool IsRV32E = false;
   bool EnableLinkerRelax = false;
@@ -123,6 +124,7 @@ public:
   bool hasStdExtZvlsseg() const { return HasStdExtZvlsseg; }
   bool hasStdExtZvamo() const { return HasStdExtZvamo; }
   bool hasStdExtZfh() const { return HasStdExtZfh; }
+  bool hasEPI() const { return HasEPI; }
   bool is64Bit() const { return HasRV64; }
   bool isRV32E() const { return IsRV32E; }
   bool enableLinkerRelax() const { return EnableLinkerRelax; }
@@ -136,7 +138,9 @@ public:
     assert(i < RISCV::NUM_TARGET_REGS && "Register out of range");
     return UserReservedRegister[i];
   }
-  unsigned getMaxInterleaveFactor() const { return MaxInterleaveFactor; }
+  unsigned getMaxInterleaveFactor() const {
+    return hasStdExtV() ? MaxInterleaveFactor : 1;
+  }
 
 protected:
   // GlobalISel related APIs.

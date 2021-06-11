@@ -53,9 +53,9 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a3, zero, 256
 ; CHECK-NEXT:    bltu ra, a3, .LBB0_7
 ; CHECK-NEXT:  # %bb.2: # %if.then1
-; CHECK-NEXT:    vsetvli a3, zero, e32,m1,tu,mu
+; CHECK-NEXT:    vsetvli a3, zero, e32, m1, tu, mu
 ; CHECK-NEXT:    lwu a6, 0(a0)
-; CHECK-NEXT:    vsetvli zero, a3, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
 ; CHECK-NEXT:    lwu a7, 4(a0)
 ; CHECK-NEXT:    vmv.v.x v25, a6
 ; CHECK-NEXT:    csrr a3, vlenb
@@ -152,14 +152,14 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    # Child Loop BB0_4 Depth 2
 ; CHECK-NEXT:    srli a3, ra, 7
 ; CHECK-NEXT:    and a3, a3, s3
-; CHECK-NEXT:    vsetvli s10, a3, e64,m1,tu,mu
+; CHECK-NEXT:    vsetvli s10, a3, e64, m1, tu, mu
 ; CHECK-NEXT:    lw a3, 52(a0)
 ; CHECK-NEXT:    lwu s0, 48(a0)
 ; CHECK-NEXT:    mv a5, zero
 ; CHECK-NEXT:    slli s11, s10, 1
 ; CHECK-NEXT:    slli s1, a3, 32
 ; CHECK-NEXT:    or s1, s1, s0
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v26, s0
 ; CHECK-NEXT:    vmxor.mm v0, v25, v25
 ; CHECK-NEXT:    vid.v v27
@@ -403,20 +403,20 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  # %bb.5: # %for.end
 ; CHECK-NEXT:    # in Loop: Header=BB0_3 Depth=1
 ; CHECK-NEXT:    and a5, s10, s5
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v26
 ; CHECK-NEXT:    vsll.vi v0, v26, 8
 ; CHECK-NEXT:    vsrl.vi v9, v26, 1
 ; CHECK-NEXT:    vrgather.vv v2, v0, v9
 ; CHECK-NEXT:    vadd.vi v10, v2, 8
 ; CHECK-NEXT:    vand.vi v26, v26, 1
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vand.vi v26, v26, 1
 ; CHECK-NEXT:    vmsne.vi v26, v26, 0
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v26
 ; CHECK-NEXT:    vmerge.vvm v2, v2, v10, v0
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vadd.vx v28, v28, a6
 ; CHECK-NEXT:    vadd.vx v31, v31, a7
 ; CHECK-NEXT:    vadd.vx v10, v30, t0
@@ -426,10 +426,10 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v30, v28, v29
 ; CHECK-NEXT:    vrgather.vv v12, v31, v29
 ; CHECK-NEXT:    vand.vi v27, v27, 1
-; CHECK-NEXT:    vsetvli a3, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vand.vi v27, v27, 1
 ; CHECK-NEXT:    vmsne.vi v27, v27, 0
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v27
 ; CHECK-NEXT:    vmerge.vvm v12, v30, v12, v0
 ; CHECK-NEXT:    vadd.vi v30, v29, 1
@@ -442,7 +442,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v28, v10, v30
 ; CHECK-NEXT:    vrgather.vv v31, v11, v30
 ; CHECK-NEXT:    vmerge.vvm v10, v28, v31, v0
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vsll.vi v28, v9, 1
 ; CHECK-NEXT:    vrgather.vv v31, v12, v28
 ; CHECK-NEXT:    vluxei64.v v9, (a1), v2
@@ -478,7 +478,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 16
 ; CHECK-NEXT:    addi s0, a2, 16
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vadd.vx v8, v8, t2
 ; CHECK-NEXT:    vadd.vx v9, v6, t3
 ; CHECK-NEXT:    vadd.vx v10, v5, t4
@@ -496,7 +496,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v13, v10, v30
 ; CHECK-NEXT:    vrgather.vv v10, v11, v30
 ; CHECK-NEXT:    vmerge.vvm v10, v13, v10, v0
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v11, (a3), v2
 ; CHECK-NEXT:    vrgather.vv v13, v12, v28
 ; CHECK-NEXT:    vrgather.vv v14, v9, v28
@@ -530,7 +530,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsuxei64.v v8, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 32
 ; CHECK-NEXT:    addi s0, a2, 32
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vadd.vx v8, v3, t6
 ; CHECK-NEXT:    vadd.vx v9, v7, s2
 ; CHECK-NEXT:    vadd.vx v10, v22, s4
@@ -548,7 +548,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v13, v10, v30
 ; CHECK-NEXT:    vrgather.vv v10, v11, v30
 ; CHECK-NEXT:    vmerge.vvm v10, v13, v10, v0
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v11, (a3), v2
 ; CHECK-NEXT:    vrgather.vv v13, v12, v28
 ; CHECK-NEXT:    vrgather.vv v14, v9, v28
@@ -582,7 +582,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsuxei64.v v8, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 48
 ; CHECK-NEXT:    addi s0, a2, 48
-; CHECK-NEXT:    vsetvli zero, s11, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, s11, e32, m1, ta, mu
 ; CHECK-NEXT:    vadd.vv v8, v23, v18
 ; CHECK-NEXT:    vadd.vv v9, v1, v19
 ; CHECK-NEXT:    vadd.vx v10, v24, s8
@@ -600,7 +600,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v9, v10, v30
 ; CHECK-NEXT:    vrgather.vv v10, v11, v30
 ; CHECK-NEXT:    vmerge.vvm v27, v9, v10, v0
-; CHECK-NEXT:    vsetvli zero, a5, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v30, (a3), v2
 ; CHECK-NEXT:    vrgather.vv v9, v12, v28
 ; CHECK-NEXT:    vrgather.vv v10, v29, v28

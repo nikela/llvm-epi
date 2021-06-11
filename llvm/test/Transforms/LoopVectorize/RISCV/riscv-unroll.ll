@@ -1,6 +1,5 @@
 ; RUN: opt < %s -loop-vectorize -mtriple=riscv64 -mattr=+experimental-v -riscv-v-vector-bits-min=128 -S | FileCheck %s
 ; RUN: opt < %s -loop-vectorize -mtriple=riscv32 -mattr=+experimental-v -riscv-v-vector-bits-min=128 -S | FileCheck %s
-; XFAIL: *
 
 ; Function Attrs: nounwind
 define i32* @array_add(i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b, i32* %c, i32 %size) {

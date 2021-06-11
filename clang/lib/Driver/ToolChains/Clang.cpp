@@ -4861,8 +4861,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (Arg *A = Args.getLastArg(options::OPT_Wframe_larger_than_EQ)) {
     StringRef v = A->getValue();
-    CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back(Args.MakeArgString("-warn-stack-size=" + v));
+    CmdArgs.push_back(Args.MakeArgString("-fwarn-stack-size=" + v));
     A->claim();
   }
 
@@ -5688,11 +5687,14 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   Args.AddLastArg(CmdArgs, options::OPT_ftlsmodel_EQ);
 
+  if (Args.hasFlag(options::OPT_fno_operator_names,
+                   options::OPT_foperator_names, false))
+    CmdArgs.push_back("-fno-operator-names");
+
   // Forward -f (flag) options which we can pass directly.
   Args.AddLastArg(CmdArgs, options::OPT_femit_all_decls);
   Args.AddLastArg(CmdArgs, options::OPT_fheinous_gnu_extensions);
   Args.AddLastArg(CmdArgs, options::OPT_fdigraphs, options::OPT_fno_digraphs);
-  Args.AddLastArg(CmdArgs, options::OPT_fno_operator_names);
   Args.AddLastArg(CmdArgs, options::OPT_femulated_tls,
                   options::OPT_fno_emulated_tls);
 
@@ -7184,8 +7186,6 @@ void Clang::AddClangCLArgs(const ArgList &Args, types::ID InputType,
     if (types::isCXX(InputType))
       CmdArgs.push_back("-fcxx-exceptions");
     CmdArgs.push_back("-fexceptions");
-    if (EH.Asynch)
-      CmdArgs.push_back("-fasync-exceptions");
   }
   if (types::isCXX(InputType) && EH.Synch && EH.NoUnwindC)
     CmdArgs.push_back("-fexternc-nounwind");

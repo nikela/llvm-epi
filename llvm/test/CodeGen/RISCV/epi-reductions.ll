@@ -5,7 +5,7 @@
 define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-LABEL: red_nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
 ; CHECK-NEXT:    vredsum.vs v26, v8, v25
 ; CHECK-NEXT:    vmv.x.s a6, v26
@@ -62,7 +62,7 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-LABEL: red_nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
 ; CHECK-NEXT:    vredsum.vs v26, v8, v25
 ; CHECK-NEXT:    vmv.x.s a6, v26
@@ -120,29 +120,29 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-LABEL: red_nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vredsum.vs v26, v8, v25
 ; CHECK-NEXT:    vmv.x.s a6, v26
 ; CHECK-NEXT:    addi a1, zero, -1
 ; CHECK-NEXT:    slli a2, a1, 63
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v26, a2
-; CHECK-NEXT:    vsetvli a2, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vredmax.vs v26, v8, v26
 ; CHECK-NEXT:    vmv.x.s a7, v26
 ; CHECK-NEXT:    srli a1, a1, 1
-; CHECK-NEXT:    vsetvli a3, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v26, a1
-; CHECK-NEXT:    vsetvli a1, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vredmin.vs v26, v8, v26
 ; CHECK-NEXT:    vmv.x.s t0, v26
 ; CHECK-NEXT:    vredmaxu.vs v26, v8, v25
 ; CHECK-NEXT:    vmv.x.s a3, v26
-; CHECK-NEXT:    vsetvli a4, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a4, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v26, -1
-; CHECK-NEXT:    vsetvli a4, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a4, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vredminu.vs v27, v8, v26
 ; CHECK-NEXT:    vmv.x.s a4, v27
 ; CHECK-NEXT:    vredand.vs v26, v8, v26
@@ -187,7 +187,7 @@ define float @red_nxv2f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI3_0)
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI3_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e32,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft0
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft1, v25
@@ -230,7 +230,7 @@ define double @red_nxv1f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI4_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI4_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft0
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft1, v25
@@ -273,29 +273,29 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI5_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft1, v25
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vfredsum.vs v25, v8, v25
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_1)
 ; CHECK-NEXT:    fld ft2, %lo(.LCPI5_1)(a0)
 ; CHECK-NEXT:    vfmv.f.s ft3, v25
 ; CHECK-NEXT:    fadd.d ft0, ft3, ft0
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft2
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_2)
 ; CHECK-NEXT:    fld ft2, %lo(.LCPI5_2)(a0)
 ; CHECK-NEXT:    vfredmax.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft3, v25
-; CHECK-NEXT:    vsetvli a0, zero, e64,m1,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft2
-; CHECK-NEXT:    vsetvli a0, zero, e64,m2,ta,mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vfredmin.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft2, v25
 ; CHECK-NEXT:    fadd.d ft0, ft1, ft0

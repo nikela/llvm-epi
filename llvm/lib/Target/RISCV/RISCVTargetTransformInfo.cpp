@@ -122,11 +122,11 @@ unsigned RISCVTTIImpl::getMaxElementWidth() const {
 }
 
 bool RISCVTTIImpl::useScalableVectorType() const {
-  return ST->hasStdExtV();
+  return ST->hasStdExtV() && ST->hasEPI();
 }
 
 bool RISCVTTIImpl::preferPredicatedVectorOps() const {
-  return (useScalableVectorType() && true);
+  return this->useScalableVectorType();
 }
 
 bool RISCVTTIImpl::isLegalMaskedLoadStore(Type *DataType) const {
