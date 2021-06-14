@@ -819,12 +819,12 @@ def emit_compatibility_header(out_file, j):
 #ifndef __EPI_RVV_H
 #define __EPI_RVV_H
 
+#include <stdlib.h>
 #include <riscv_vector.h>
 
 """)
 
     ELEN = 64 # In EPI, ELEN=64
-    # TODO: think how to solve the _nt_ problem
     # Vector types
     out_file.write("// Vector types\n")
     vector_types = "#define __epi_${VScale}x${Type} v${ExtendedType}${LMul}_t"
