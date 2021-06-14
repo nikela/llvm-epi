@@ -620,6 +620,64 @@ void RISCVDAGToDAGISel::selectVLXSEG(SDNode *Node, bool IsMasked,
   CurDAG->RemoveDeadNode(Node);
 }
 
+void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT, unsigned Flags) {
+  SDLoc DL(Node);
+  
+  auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
+  auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
+
+  unsigned SEWBits = SEW->getZExtValue() & 0x7;
+  unsigned VMulBits = VMul->getZExtValue() & 0x7;
+
+  // TODO: check if Flags == __epi_nt, then
+  //unsigned VTypeI;
+  //if (0) {
+  //  unsigned SEW = RISCVVType::decodeVSEW(SEWBits);
+  //  RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VMulBits);
+  //  VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
+  //                                   /*MaskAgnostic*/ false,
+  //                                   /* Nontemporal */ true);
+  //} else {
+  //  VTypeI = (SEWBits << 3) | VMulBits | Flags;
+  //}
+  unsigned VTypeI = (SEWBits << 3) | VMulBits | Flags;
+  SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+
+  SDValue VLOperand = Node->getOperand(1);
+  if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
+    if (C->isNullValue()) {
+      VLOperand = SDValue(
+          CurDAG->getMachineNode(RISCV::ADDI, DL, XLenVT,
+                                 CurDAG->getRegister(RISCV::X0, XLenVT),
+                                 CurDAG->getTargetConstant(0, DL, XLenVT)),
+          0);
+    }
+  }
+
+  ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
+                                           VLOperand, VTypeIOp));
+  return;
+}
+
+void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT, unsigned Flags) {
+  SDLoc DL(Node);
+
+  auto *SEW = cast<ConstantSDNode>(Node->getOperand(1));
+  auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
+
+  unsigned SEWBits = SEW->getZExtValue() & 0x7;
+  unsigned VMulBits = VMul->getZExtValue() & 0x7;
+
+  unsigned VTypeI = (SEWBits << 3) | VMulBits | Flags;
+  SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+
+  // FIXME DstReg for VLMAX must be != X0
+  SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
+  ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
+                                           VLOperand, VTypeIOp));
+  return;
+}
+
 void RISCVDAGToDAGISel::selectVSSEG(SDNode *Node, bool IsMasked,
                                     bool IsStrided) {
   SDLoc DL(Node);
@@ -771,54 +829,23 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       break;
     case Intrinsic::epi_vsetvl: {
       assert(Node->getNumOperands() == 4);
-      auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
-      auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
-
-      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
-      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
-
-      uint64_t VTypeI = RISCVVType::encodeVTYPE(
-          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
-          /* TailAgnostic */ true,
-          /* MaskAgnostic */ false,
-          /* Nontemporal */ false);
-      SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
-
-      SDValue VLOperand = Node->getOperand(1);
-      if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
-        if (C->isNullValue()) {
-          VLOperand = SDValue(CurDAG->getMachineNode(
-                                  RISCV::ADDI, DL, MVT::i64,
-                                  CurDAG->getRegister(RISCV::X0, MVT::i64),
-                                  CurDAG->getTargetConstant(0, DL, MVT::i64)),
-                              0);
-        }
-      }
-
-      ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL,
-                                               MVT::i64, VLOperand, VTypeIOp));
-      return;
+      selectVSETVL(Node, XLenVT, /*no flags*/ 0);
+	  return;
     }
     case Intrinsic::epi_vsetvlmax: {
       assert(Node->getNumOperands() == 3);
-      auto *SEW = cast<ConstantSDNode>(Node->getOperand(1));
-      auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
-
-      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
-      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
-
-      uint64_t VTypeI = RISCVVType::encodeVTYPE(
-          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
-          /* TailAgnostic */ true,
-          /* MaskAgnostic */ false,
-          /* Nontemporal */ false);
-      SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
-
-      // FIXME DstReg for VLMAX must be != X0
-      SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
-      ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL,
-                                               MVT::i64, VLOperand, VTypeIOp));
-      return;
+      selectVSETVLMAX(Node, XLenVT, /*no flags*/ 0);
+	  return;
+    }
+    case Intrinsic::epi_vsetvl_ext: {
+	  assert(Node->getNumOperands() == 5);
+	  selectVSETVL(Node, XLenVT, Node->getConstantOperandVal(4));
+	  return;
+    }
+    case Intrinsic::epi_vsetvlmax_ext: {
+      assert(Node->getNumOperands() == 4);
+      selectVSETVLMAX(Node, XLenVT, Node->getConstantOperandVal(3));
+	  return;
     }
     case Intrinsic::experimental_vector_vp_slideleftfill: {
       SDValue Offset = Node->getOperand(3);

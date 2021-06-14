@@ -82,6 +82,8 @@ public:
   void selectVLSEG(SDNode *Node, bool IsMasked, bool IsStrided);
   void selectVLSEGFF(SDNode *Node, bool IsMasked);
   void selectVLXSEG(SDNode *Node, bool IsMasked, bool IsOrdered);
+  void selectVSETVL(SDNode *Node, MVT XLenVT, unsigned Flags);
+  void selectVSETVLMAX(SDNode *Node, MVT XLenVT, unsigned Flags);
   void selectVSSEG(SDNode *Node, bool IsMasked, bool IsStrided);
   void selectVSXSEG(SDNode *Node, bool IsMasked, bool IsOrdered);
 
