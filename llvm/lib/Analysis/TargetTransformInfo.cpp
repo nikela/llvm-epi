@@ -1021,7 +1021,7 @@ bool TargetTransformInfo::isLegalToVectorizeStoreChain(
 }
 
 bool TargetTransformInfo::isLegalToVectorizeReduction(
-    RecurrenceDescriptor RdxDesc, ElementCount VF) const {
+    const RecurrenceDescriptor &RdxDesc, ElementCount VF) const {
   return TTIImpl->isLegalToVectorizeReduction(RdxDesc, VF);
 }
 
