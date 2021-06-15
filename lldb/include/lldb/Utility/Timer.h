@@ -9,7 +9,7 @@
 #ifndef LLDB_UTILITY_TIMER_H
 #define LLDB_UTILITY_TIMER_H
 
-#include "lldb/lldb-defines.h"
+#include "llvm/Config/config.h"
 #include "llvm/ADT/ScopeExit.h"
 #include "llvm/Support/Chrono.h"
 #include "llvm/Support/Signposts.h"

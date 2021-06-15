@@ -21,6 +21,7 @@
 #include "lldb/Core/Section.h"
 #include "lldb/Core/StreamFile.h"
 #include "lldb/Host/Host.h"
+#include "lldb/Host/SafeMachO.h"
 #include "lldb/Symbol/DWARFCallFrameInfo.h"
 #include "lldb/Symbol/ObjectFile.h"
 #include "lldb/Target/DynamicLoader.h"
@@ -42,8 +43,6 @@
 #include "lldb/Utility/Timer.h"
 #include "lldb/Utility/UUID.h"
 
-#include "lldb/Host/SafeMachO.h"
-
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -64,122 +63,48 @@
 
 #include <memory>
 
+#if LLVM_SUPPORT_XCODE_SIGNPOSTS
 // Unfortunately the signpost header pulls in the system MachO header, too.
-#ifdef MH_MAGIC
-#undef MH_MAGIC
-#endif
-#ifdef MH_CIGAM
-#undef MH_CIGAM
-#endif
-#ifdef MH_MAGIC_64
-#undef MH_MAGIC_64
-#endif
-#ifdef MH_CIGAM_64
-#undef MH_CIGAM_64
-#endif
-#ifdef MH_OBJECT
-#undef MH_OBJECT
-#endif
-#ifdef MH_EXECUTE
-#undef MH_EXECUTE
-#endif
-#ifdef MH_FVMLIB
-#undef MH_FVMLIB
-#endif
-#ifdef MH_CORE
-#undef MH_CORE
-#endif
-#ifdef MH_PRELOAD
-#undef MH_PRELOAD
-#endif
-#ifdef MH_DYLIB
-#undef MH_DYLIB
-#endif
-#ifdef MH_DYLINKER
-#undef MH_DYLINKER
-#endif
-#ifdef MH_DYLIB_STUB
-#undef MH_DYLIB_STUB
-#endif
-#ifdef MH_DSYM
-#undef MH_DSYM
-#endif
-#ifdef MH_BUNDLE
-#undef MH_BUNDLE
-#endif
-#ifdef MH_KEXT_BUNDLE
-#undef MH_KEXT_BUNDLE
-#endif
-#ifdef MH_NOUNDEFS
-#undef MH_NOUNDEFS
-#endif
-#ifdef MH_INCRLINK
-#undef MH_INCRLINK
-#endif
-#ifdef MH_DYLDLINK
-#undef MH_DYLDLINK
-#endif
-#ifdef MH_BINDATLOAD
-#undef MH_BINDATLOAD
-#endif
-#ifdef CPU_TYPE_ARM
 #undef CPU_TYPE_ARM
-#endif
-#ifdef CPU_TYPE_ARM64
 #undef CPU_TYPE_ARM64
-#endif
-#ifdef CPU_TYPE_ARM64_32
 #undef CPU_TYPE_ARM64_32
-#endif
-#ifdef CPU_TYPE_I386
 #undef CPU_TYPE_I386
-#endif
-#ifdef CPU_TYPE_X86_64
 #undef CPU_TYPE_X86_64
-#endif
-#ifdef MH_DYLINKER
+#undef MH_BINDATLOAD
+#undef MH_BUNDLE
+#undef MH_CIGAM
+#undef MH_CIGAM_64
+#undef MH_CORE
+#undef MH_DSYM
+#undef MH_DYLDLINK
+#undef MH_DYLIB
+#undef MH_DYLIB_STUB
 #undef MH_DYLINKER
-#endif
-#ifdef MH_OBJECT
+#undef MH_DYLINKER
+#undef MH_EXECUTE
+#undef MH_FVMLIB
+#undef MH_INCRLINK
+#undef MH_KEXT_BUNDLE
+#undef MH_MAGIC
+#undef MH_MAGIC_64
+#undef MH_NOUNDEFS
 #undef MH_OBJECT
-#endif
-#ifdef LC_VERSION_MIN_MACOSX
-#undef LC_VERSION_MIN_MACOSX
-#endif
-#ifdef LC_VERSION_MIN_IPHONEOS
-#undef LC_VERSION_MIN_IPHONEOS
-#endif
-#ifdef LC_VERSION_MIN_TVOS
-#undef LC_VERSION_MIN_TVOS
-#endif
-#ifdef LC_VERSION_MIN_WATCHOS
-#undef LC_VERSION_MIN_WATCHOS
-#endif
-#ifdef LC_BUILD_VERSION
+#undef MH_OBJECT
+#undef MH_PRELOAD
+
 #undef LC_BUILD_VERSION
-#endif
-#ifdef PLATFORM_MACOS
+#undef LC_VERSION_MIN_MACOSX
+#undef LC_VERSION_MIN_IPHONEOS
+#undef LC_VERSION_MIN_TVOS
+#undef LC_VERSION_MIN_WATCHOS
+
 #undef PLATFORM_MACOS
-#endif
-#ifdef PLATFORM_MACCATALYST
 #undef PLATFORM_MACCATALYST
-#endif
-#ifdef PLATFORM_IOS
 #undef PLATFORM_IOS
-#endif
-#ifdef PLATFORM_IOSSIMULATOR
 #undef PLATFORM_IOSSIMULATOR
-#endif
-#ifdef PLATFORM_TVOS
 #undef PLATFORM_TVOS
-#endif
-#ifdef PLATFORM_TVOSSIMULATOR
 #undef PLATFORM_TVOSSIMULATOR
-#endif
-#ifdef PLATFORM_WATCHOS
 #undef PLATFORM_WATCHOS
-#endif
-#ifdef PLATFORM_WATCHOSSIMULATOR
 #undef PLATFORM_WATCHOSSIMULATOR
 #endif
 
