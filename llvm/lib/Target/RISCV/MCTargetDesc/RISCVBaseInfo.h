@@ -387,6 +387,10 @@ void validate(const Triple &TT, const FeatureBitset &FeatureBits);
 } // namespace RISCVFeatures
 
 namespace RISCVVType {
+enum {
+	EPI_NT = 0x200UL,
+};
+
 // Is this a SEW value that can be encoded into the VTYPE format.
 inline static bool isValidSEW(unsigned SEW) {
   return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;

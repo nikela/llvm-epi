@@ -620,34 +620,49 @@ void RISCVDAGToDAGISel::selectVLXSEG(SDNode *Node, bool IsMasked,
   CurDAG->RemoveDeadNode(Node);
 }
 
-// flagsIndex represent the node operand in which flags value is saved
-// flagsIndex == 0 => no operand
+// FlagsIndex represent the node operand in which flags value is saved
+// FlagsIndex == 0 => no operand
 void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
                                      uint8_t FlagsIndex) {
   SDLoc DL(Node);
-
-  auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
-  auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
-
-  unsigned SEWBits = SEW->getZExtValue() & 0x7;
-  unsigned VMulBits = VMul->getZExtValue() & 0x7;
+  unsigned SEWBits = Node->getConstantOperandVal(2) & 0x7;
+  unsigned SEW = RISCVVType::decodeVSEW(SEWBits);
+  unsigned VMulBits = Node->getConstantOperandVal(3) & 0x7;
+  RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VMulBits);
 
   bool UseVSetVL = false;
   SDValue VTypeIOp;
   if (!FlagsIndex) {
-    unsigned VTypeI = (SEWBits << 3) | VMulBits;
-    VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
-  } else if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
-    unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
-    unsigned VTypeI = (SEWBits << 3) | VMulBits | Flags;
+    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                              /* Nontemporal */ false);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   } else {
-    UseVSetVL = true;
-    unsigned VTypeI = (SEWBits << 3) | VMulBits;
-    VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
-    SDValue Flags = Node->getOperand(FlagsIndex);
-    VTypeIOp = SDValue(
-        CurDAG->getMachineNode(RISCV::OR, DL, XLenVT, VTypeIOp, Flags), 0);
+    Optional<unsigned> Flags;
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex)))
+      Flags = Node->getConstantOperandVal(FlagsIndex);
+    switch (Flags.getValueOr(-1)) {
+    case 0: {
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ false);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      break;
+    }
+	case RISCVVType::EPI_NT: {
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ true);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      break;
+    }
+    default: {
+      UseVSetVL = true;
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ false);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      SDValue Flags = Node->getOperand(FlagsIndex);
+      VTypeIOp = SDValue(
+          CurDAG->getMachineNode(RISCV::OR, DL, XLenVT, VTypeIOp, Flags), 0);
+    }
+    }
   }
 
   SDValue VLOperand = Node->getOperand(1);
@@ -666,38 +681,54 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
                                              VLOperand, VTypeIOp));
     return;
   }
-
   ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
                                            VLOperand, VTypeIOp));
   return;
 }
 
+// FlagsIndex represent the node operand in which flags value is saved
+// FlagsIndex == 0 => no operand
 void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
                                         uint8_t FlagsIndex) {
   SDLoc DL(Node);
-
-  auto *SEW = cast<ConstantSDNode>(Node->getOperand(1));
-  auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
-
-  unsigned SEWBits = SEW->getZExtValue() & 0x7;
-  unsigned VMulBits = VMul->getZExtValue() & 0x7;
+  unsigned SEWBits = Node->getConstantOperandVal(1) & 0x7;
+  unsigned SEW = RISCVVType::decodeVSEW(SEWBits);
+  unsigned VMulBits = Node->getConstantOperandVal(2) & 0x7;
+  RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VMulBits);
 
   bool UseVSetVL = false;
   SDValue VTypeIOp;
   if (!FlagsIndex) {
-    unsigned VTypeI = (SEWBits << 3) | VMulBits;
-    VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
-  } else if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
-    unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
-    unsigned VTypeI = (SEWBits << 3) | VMulBits | Flags;
+    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                              /* Nontemporal */ false);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   } else {
-    UseVSetVL = true;
-    unsigned VTypeI = (SEWBits << 3) | VMulBits;
-    VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
-    SDValue Flags = Node->getOperand(FlagsIndex);
-    VTypeIOp = SDValue(
-        CurDAG->getMachineNode(RISCV::OR, DL, XLenVT, VTypeIOp, Flags), 0);
+    Optional<unsigned> Flags;
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex)))
+      Flags = Node->getConstantOperandVal(FlagsIndex);
+    switch (Flags.getValueOr(-1)) {
+    case 0: {
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ false);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      break;
+    }
+    case RISCVVType::EPI_NT: {
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ true);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      break;
+    }
+    default: {
+      UseVSetVL = true;
+      unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
+                                                /* Nontemporal */ false);
+      VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+      SDValue Flags = Node->getOperand(FlagsIndex);
+      VTypeIOp = SDValue(
+          CurDAG->getMachineNode(RISCV::OR, DL, XLenVT, VTypeIOp, Flags), 0);
+    }
+    }
   }
 
   // FIXME DstReg for VLMAX must be != X0
