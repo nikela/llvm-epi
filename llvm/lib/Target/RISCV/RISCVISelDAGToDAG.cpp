@@ -647,7 +647,7 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
       VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
       break;
     }
-	case RISCVVType::EPI_NT: {
+    case RISCVVType::EPI_NT: {
       unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, true, false,
                                                 /* Nontemporal */ true);
       VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);

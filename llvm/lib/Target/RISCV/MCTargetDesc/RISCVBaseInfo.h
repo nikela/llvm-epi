@@ -388,7 +388,7 @@ void validate(const Triple &TT, const FeatureBitset &FeatureBits);
 
 namespace RISCVVType {
 enum {
-	EPI_NT = 0x200UL,
+  EPI_NT = 0x200UL,
 };
 
 // Is this a SEW value that can be encoded into the VTYPE format.
