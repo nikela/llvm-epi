@@ -59,6 +59,8 @@ class SOP1_Real<bits<8> op, SOP1_Pseudo ps, string real_name = ps.Mnemonic> :
           real_name # " " # ps.AsmOperands, []>,
   Enc32 {
 
+  let SALU = 1;
+  let SOP1 = 1;
   let isPseudo = 0;
   let isCodeGenOnly = 0;
   let Size = 4;
@@ -67,6 +69,8 @@ class SOP1_Real<bits<8> op, SOP1_Pseudo ps, string real_name = ps.Mnemonic> :
   let SubtargetPredicate = ps.SubtargetPredicate;
   let AsmMatchConverter  = ps.AsmMatchConverter;
   let SchedRW            = ps.SchedRW;
+  let mayLoad            = ps.mayLoad;
+  let mayStore           = ps.mayStore;
 
   // encoding
   bits<7> sdst;
@@ -368,6 +372,8 @@ class SOP2_Real<bits<7> op, SOP_Pseudo ps, string real_name = ps.Mnemonic> :
   InstSI <ps.OutOperandList, ps.InOperandList,
           real_name # " " # ps.AsmOperands, []>,
   Enc32 {
+  let SALU = 1;
+  let SOP2 = 1;
   let isPseudo = 0;
   let isCodeGenOnly = 0;
 
@@ -377,6 +383,8 @@ class SOP2_Real<bits<7> op, SOP_Pseudo ps, string real_name = ps.Mnemonic> :
   let UseNamedOperandTable = ps.UseNamedOperandTable;
   let TSFlags              = ps.TSFlags;
   let SchedRW              = ps.SchedRW;
+  let mayLoad              = ps.mayLoad;
+  let mayStore             = ps.mayStore;
 
   // encoding
   bits<7> sdst;
@@ -699,6 +707,8 @@ class SOPK_Pseudo <string opName, dag outs, dag ins,
 class SOPK_Real<bits<5> op, SOPK_Pseudo ps> :
   InstSI <ps.OutOperandList, ps.InOperandList,
           ps.Mnemonic # " " # ps.AsmOperands, []> {
+  let SALU = 1;
+  let SOPK = 1;
   let isPseudo = 0;
   let isCodeGenOnly = 0;
 
@@ -708,6 +718,8 @@ class SOPK_Real<bits<5> op, SOPK_Pseudo ps> :
   let DisableEncoding    = ps.DisableEncoding;
   let Constraints        = ps.Constraints;
   let SchedRW            = ps.SchedRW;
+  let mayLoad            = ps.mayLoad;
+  let mayStore           = ps.mayStore;
 
   // encoding
   bits<7>  sdst;
@@ -954,6 +966,8 @@ class SOPC_Real<bits<7> op, SOPC_Pseudo ps, string real_name = ps.Mnemonic> :
   InstSI <ps.OutOperandList, ps.InOperandList,
           real_name # " " # ps.AsmOperands, []>,
   Enc32 {
+  let SALU = 1;
+  let SOPC = 1;
   let isPseudo = 0;
   let isCodeGenOnly = 0;
 
@@ -964,6 +978,8 @@ class SOPC_Real<bits<7> op, SOPC_Pseudo ps, string real_name = ps.Mnemonic> :
   let UseNamedOperandTable = ps.UseNamedOperandTable;
   let TSFlags              = ps.TSFlags;
   let SchedRW              = ps.SchedRW;
+  let mayLoad              = ps.mayLoad;
+  let mayStore             = ps.mayStore;
 
   // encoding
   bits<8> src0;
@@ -1083,6 +1099,8 @@ class SOPPRelaxTable <bit isRelaxed, string keyName, string gfxip> {
 class SOPP_Real<bits<7> op, SOPP_Pseudo ps, string real_name = ps.Mnemonic> :
   InstSI <ps.OutOperandList, ps.InOperandList,
           real_name # ps.AsmOperands, []> {
+  let SALU = 1;
+  let SOPP = 1;
   let isPseudo = 0;
   let isCodeGenOnly = 0;
 
@@ -1093,6 +1111,8 @@ class SOPP_Real<bits<7> op, SOPP_Pseudo ps, string real_name = ps.Mnemonic> :
   let UseNamedOperandTable = ps.UseNamedOperandTable;
   let TSFlags              = ps.TSFlags;
   let SchedRW              = ps.SchedRW;
+  let mayLoad              = ps.mayLoad;
+  let mayStore             = ps.mayStore;
   bits <16> simm16;
 }
 
