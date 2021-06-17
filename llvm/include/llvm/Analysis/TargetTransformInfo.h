@@ -947,7 +947,8 @@ public:
 
   std::pair<ElementCount, ElementCount> getFeasibleMaxVFRange(
       RegisterKind K, unsigned SmallestType, unsigned WidestType,
-      unsigned MaxSafeRegisterWidth = -1U, unsigned RegWidthFactor = 1) const;
+      unsigned MaxSafeRegisterWidth = -1U, unsigned RegWidthFactor = 1,
+      bool IsScalable = false) const;
 
   /// \return The maximum value of vscale if the target specifies an
   ///  architectural maximum vector length, and None otherwise.
@@ -1385,9 +1386,6 @@ public:
   /// to a stack reload.
   unsigned getGISelRematGlobalCost() const;
 
-  /// \returns True if the target wants to use Scalable vectors.
-  bool useScalableVectorType() const;
-
   /// \returns True if the target prefers using vector predication for all Ops
   /// instead of just loads and stores.
   bool preferPredicatedVectorOps() const;
@@ -1603,7 +1601,8 @@ public:
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const = 0;
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const = 0;
   virtual Optional<unsigned> getMaxVScale() const = 0;
   virtual bool shouldMaximizeVectorBandwidth() const = 0;
   virtual ElementCount getMinimumVF(unsigned ElemWidth,
@@ -1752,7 +1751,6 @@ public:
   virtual unsigned getGISelRematGlobalCost() const = 0;
   virtual bool supportsScalableVectors() const = 0;
   virtual bool hasActiveVectorLength() const = 0;
-  virtual bool useScalableVectorType() const = 0;
   virtual bool preferPredicatedVectorOps() const = 0;
   virtual InstructionCost getInstructionLatency(const Instruction *I) = 0;
   virtual VPLegalization
@@ -2069,9 +2067,11 @@ public:
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const override {
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const override {
     return Impl.getFeasibleMaxVFRange(K, SmallestType, WidestType,
-                                      MaxSafeRegisterWidth, RegWidthFactor);
+                                      MaxSafeRegisterWidth, RegWidthFactor,
+                                      IsScalable);
   }
   Optional<unsigned> getMaxVScale() const override {
     return Impl.getMaxVScale();
@@ -2344,10 +2344,6 @@ public:
 
   InstructionCost getInstructionLatency(const Instruction *I) override {
     return Impl.getInstructionLatency(I);
-  }
-
-  bool useScalableVectorType() const override {
-    return Impl.useScalableVectorType();
   }
 
   bool preferPredicatedVectorOps() const override {

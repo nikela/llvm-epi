@@ -666,11 +666,11 @@ public:
   getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                         unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const {
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const {
     unsigned WidestRegister =
         static_cast<const T *>(this)->getRegisterBitWidth(K).getFixedSize();
     WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
-    bool IsScalable = static_cast<const T *>(this)->useScalableVectorType();
 
     unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
     ElementCount LowerBoundVF =
@@ -2200,8 +2200,6 @@ public:
   }
 
   InstructionCost getVectorSplitCost() { return 1; }
-
-  bool useScalableVectorType() const { return false; }
 
   bool preferPredicatedVectorOps() const { return false; }
 

@@ -611,9 +611,11 @@ TargetTransformInfo::getFeasibleMaxVFRange(RegisterKind K,
                                            unsigned SmallestType,
                                            unsigned WidestType,
                                            unsigned MaxSafeRegisterWidth,
-                                           unsigned RegWidthFactor) const {
+                                           unsigned RegWidthFactor,
+                                           bool IsScalable) const {
   return TTIImpl->getFeasibleMaxVFRange(K, SmallestType, WidestType,
-                                        MaxSafeRegisterWidth, RegWidthFactor);
+                                        MaxSafeRegisterWidth, RegWidthFactor,
+                                        IsScalable);
 }
 
 Optional<unsigned> TargetTransformInfo::getMaxVScale() const {
@@ -1073,10 +1075,6 @@ bool TargetTransformInfo::hasActiveVectorLength() const {
 InstructionCost
 TargetTransformInfo::getInstructionLatency(const Instruction *I) const {
   return TTIImpl->getInstructionLatency(I);
-}
-
-bool TargetTransformInfo::useScalableVectorType() const {
-  return TTIImpl->useScalableVectorType();
 }
 
 bool TargetTransformInfo::preferPredicatedVectorOps() const {

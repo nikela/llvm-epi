@@ -1720,8 +1720,8 @@ private:
   FixedScalableVFPair computeFeasibleMaxVF(unsigned ConstTripCount,
                                            ElementCount UserVF);
 
-  FixedScalableVFPair computeFeasibleMaxScalableVF(unsigned ConstTripCount,
-                                                   ElementCount UserVF);
+  FixedScalableVFPair computeFeasibleMaxVFScalableOnly(unsigned ConstTripCount,
+                                                       ElementCount UserVF);
 
   /// \return the maximized element count based on the targets vector
   /// registers and the loop trip-count, but limited to a maximum safe VF.
@@ -5969,7 +5969,7 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
     // A uniform memory op is itself uniform.  We exclude uniform stores
     // here as they demand the last lane, not the first one.
     if (isa<LoadInst>(I) && Legal->isUniformMemOp(*I) &&
-        !TTI.useScalableVectorType()) {
+        !Hints->isFixedVectorizationDisabled()) {
       assert(WideningDecision == CM_Scalarize);
       return true;
     }
@@ -6005,7 +6005,7 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
       // A uniform memory op is itself uniform.  We exclude uniform stores
       // here as they demand the last lane, not the first one.
       if (isa<LoadInst>(I) && Legal->isUniformMemOp(I) &&
-          !TTI.useScalableVectorType())
+          !Hints->isFixedVectorizationDisabled())
         addToWorklistIfAllowed(&I);
 
       if (isUniformDecision(&I, VF)) {
@@ -6179,12 +6179,10 @@ LoopVectorizationCostModel::getMaxLegalScalableVF(unsigned MaxSafeElements) {
   return MaxScalableVF;
 }
 
-FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
+FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     unsigned ConstTripCount, ElementCount UserVF) {
-
-  // FIXIT - Merge with the new computeFeasibleMaxVF() method.
-  if (!TTI.useScalableVectorType())
-    return computeFeasibleMaxVF(ConstTripCount, UserVF);
+  assert(Hints->isFixedVectorizationDisabled() &&
+         "Use this when doing scalable-only vectorization");
 
   bool IgnoreScalableUserVF = UserVF.isScalable() &&
                               !TTI.supportsScalableVectors() &&
@@ -6214,7 +6212,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
       return UserVF;
   }
 
-  if (TTI.useScalableVectorType() &&
+  if (Hints->isFixedVectorizationDisabled() &&
       !canVectorizeReductions(/* unused */ ElementCount::getScalable(1))) {
     reportVectorizationFailure(
         "LV: Scalable vectorization not supported for the reduction "
@@ -6230,9 +6228,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
   unsigned WidestRegister =
-      TTI.getRegisterBitWidth(TTI.useScalableVectorType() // FIXME
-                                  ? TargetTransformInfo::RGK_ScalableVector
-                                  : TargetTransformInfo::RGK_FixedWidthVector)
+      TTI.getRegisterBitWidth(TargetTransformInfo::RGK_ScalableVector)
           .getKnownMinValue();
   WidestRegister *= VectorRegisterWidthFactor;
 
@@ -6246,7 +6242,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
   // it should be possible for us to clamp the EVL in this case, but this
   // impacts other things like reductions, so conservatively disable these
   // cases for now.
-  if (TTI.useScalableVectorType() && Legal->getMaxSafeDepDistBytes() != -1U &&
+  if (Legal->getMaxSafeDepDistBytes() != -1U &&
       UserVF.isZero()) {
     reportVectorizationFailure(
         "LV: Scalable vectorization does not support non-infinite distance yet",
@@ -6259,12 +6255,11 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
   ElementCount FeasibleMaxVFLowerBound = ElementCount::getNull();
   ElementCount FeasibleMaxVFUpperBound = ElementCount::getNull();
   std::tie(FeasibleMaxVFLowerBound, FeasibleMaxVFUpperBound) =
-      TTI.getFeasibleMaxVFRange(TTI.useScalableVectorType() // FIXME
-                                    ? TargetTransformInfo::RGK_ScalableVector
-                                    : TargetTransformInfo::RGK_FixedWidthVector,
+      TTI.getFeasibleMaxVFRange(TargetTransformInfo::RGK_ScalableVector,
                                 SmallestType, WidestType,
                                 MaxSafeVectorWidthInBits,
-                                VectorRegisterWidthFactor);
+                                VectorRegisterWidthFactor,
+                                /* IsScalable */ true);
 
   // If the user vectorization factor is legally unsafe, clamp it to a safe
   // value. Otherwise, return as is.
@@ -6294,7 +6289,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
                  << "Max legal vector width too small, scalable vectorization "
                  << "unfeasible. Using fixed-width vectorization instead.";
         });
-        return computeFeasibleMaxScalableVF(
+        return computeFeasibleMaxVFScalableOnly(
             ConstTripCount, ElementCount::getFixed(UserVF.getKnownMinValue()));
       }
     }
@@ -6370,7 +6365,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
         FeasibleMaxVFUpperBound.getKnownMinValue();
     for (unsigned VS = MaxVFKnownMinLowerBound * 2;
          VS <= MaxVFKnownMinUpperBound; VS *= 2)
-      VFs.push_back(ElementCount::get(VS, TTI.useScalableVectorType()));
+      VFs.push_back(ElementCount::getScalable(VS));
 
     // For each VF calculate its register usage.
     auto RUs = calculateRegisterUsage(VFs);
@@ -6393,7 +6388,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
       }
     }
     if (ElementCount MinVF =
-            TTI.getMinimumVF(SmallestType, TTI.useScalableVectorType())) {
+            TTI.getMinimumVF(SmallestType, /* Scalable */ true)) {
       if (ElementCount::isKnownLT(MaxVF, MinVF)) {
         LLVM_DEBUG(dbgs() << "LV: Overriding calculated MaxVF(" << MaxVF
                           << ") with target's minimum: " << MinVF << '\n');
@@ -6407,6 +6402,10 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxScalableVF(
 FixedScalableVFPair
 LoopVectorizationCostModel::computeFeasibleMaxVF(unsigned ConstTripCount,
                                                  ElementCount UserVF) {
+  // EPI: We want to use a slightly different algorithm in this case.
+  if (Hints->isFixedVectorizationDisabled())
+    return computeFeasibleMaxVFScalableOnly(ConstTripCount, UserVF);
+
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
@@ -6511,8 +6510,8 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
   switch (ScalarEpilogueStatus) {
   case CM_ScalarEpilogueAllowed: {
-    FixedScalableVFPair MaxVF = computeFeasibleMaxScalableVF(TC, UserVF);
-    if (TTI.useScalableVectorType() && !MaxVF)
+    FixedScalableVFPair MaxVF = computeFeasibleMaxVF(TC, UserVF);
+    if (Hints->isFixedVectorizationDisabled() && !MaxVF)
       reportVectorizationFailure(
           "Cannot vectorize operations on unsupported scalable vector type",
           "Cannot vectorize operations on unsupported scalable vector type",
@@ -6557,7 +6556,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
       LLVM_DEBUG(dbgs() << "LV: Cannot fold tail by masking: vectorize with a "
                            "scalar epilogue instead.\n");
       ScalarEpilogueStatus = CM_ScalarEpilogueAllowed;
-      return computeFeasibleMaxScalableVF(TC, UserVF);
+      return computeFeasibleMaxVF(TC, UserVF);
     }
     return FixedScalableVFPair::getNone();
   }
@@ -6574,7 +6573,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
     InterleaveInfo.invalidateGroupsRequiringScalarEpilogue();
   }
 
-  FixedScalableVFPair MaxFactors = computeFeasibleMaxScalableVF(TC, UserVF);
+  FixedScalableVFPair MaxFactors = computeFeasibleMaxVF(TC, UserVF);
   // Avoid tail folding if the trip count is known to be a multiple of any VF
   // we chose.
   // FIXME: The condition below pessimises the case for fixed-width vectors,
@@ -6754,7 +6753,8 @@ bool LoopVectorizationCostModel::isMoreProfitable(
   // When set to preferred, for now assume vscale may be larger than 1, so
   // that scalable vectorization is slightly favorable over fixed-width
   // vectorization.
-  if (Hints->isScalableVectorizationPreferred() || TTI.useScalableVectorType())
+  if (Hints->isScalableVectorizationPreferred() ||
+      Hints->isFixedVectorizationDisabled())
     if (A.Width.isScalable() && !B.Width.isScalable())
       return (CostA * B.Width.getKnownMinValue()) <=
              (CostB * A.Width.getKnownMinValue());
@@ -6771,7 +6771,7 @@ VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
   InstructionCost ExpectedCost = expectedCost(ElementCount::getFixed(1)).first;
   LLVM_DEBUG(dbgs() << "LV: Scalar loop costs: " << ExpectedCost << ".\n");
   assert(ExpectedCost.isValid() && "Unexpected invalid cost for scalar loop");
-  assert((TTI.useScalableVectorType() ||
+  assert((Hints->isFixedVectorizationDisabled() ||
           VFCandidates.count(ElementCount::getFixed(1))) &&
          "Expected Scalar VF to be a candidate");
 
@@ -6836,7 +6836,7 @@ VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
     ChosenFactor = ScalarCost;
   }
 
-  if (TTI.useScalableVectorType() && ChosenFactor.Width.isScalar()) {
+  if (Hints->isFixedVectorizationDisabled() && ChosenFactor.Width.isScalar()) {
     LLVM_DEBUG(
         dbgs()
         << "LV: Scalable vectorization could not select a viable factor\n");
@@ -7343,7 +7343,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
       return 0U;
     unsigned TypeSize = DL.getTypeSizeInBits(Ty->getScalarType());
     return TTI.getVectorRegisterUsage(
-        TTI.useScalableVectorType() // FIXME
+        Hints->isFixedVectorizationDisabled() // FIXME
             ? TargetTransformInfo::RGK_ScalableVector
             : TargetTransformInfo::RGK_FixedWidthVector,
         VF.getKnownMinValue(), TypeSize, MaxSafeDepDist);
@@ -8177,7 +8177,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
       if (isa<StoreInst>(&I) && isScalarWithPredication(&I))
         NumPredStores++;
 
-      if (Legal->isUniformMemOp(I) && !TTI.useScalableVectorType()) {
+      if (Legal->isUniformMemOp(I) && !Hints->isFixedVectorizationDisabled()) {
         // TODO: Avoid replicating loads and stores instead of
         // relying on instcombine to remove them.
         // Load: Scalar load + broadcast
@@ -10859,8 +10859,8 @@ static bool processLoopInVPlanNativePath(
   VectorizationFactor VF =
       LVP.planInVPlanNativePath(UserVF);
   // Normalize the meaning of VF == 1 for fixed vectors.
-  if (!TTI->useScalableVectorType() && VF != VectorizationFactor::Disabled() &&
-      VF.Width.isScalar())
+  if (!Hints.isFixedVectorizationDisabled() &&
+      VF != VectorizationFactor::Disabled() && VF.Width.isScalar())
     VF = VectorizationFactor::Disabled();
 
   // If we are stress testing VPlan builds, do not attempt to generate vector
@@ -11106,7 +11106,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   std::pair<StringRef, std::string> VecDiagMsg, IntDiagMsg;
   bool VectorizeLoop = true, InterleaveLoop = true;
   if (VF == VectorizationFactor::Disabled() ||
-      (VF.Width.isScalar() && !TTI->useScalableVectorType())) {
+      (VF.Width.isScalar() && !Hints.isFixedVectorizationDisabled())) {
     LLVM_DEBUG(dbgs() << "LV: Vectorization is possible but not beneficial.\n");
     VecDiagMsg = std::make_pair(
         "VectorizationNotBeneficial",

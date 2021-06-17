@@ -121,12 +121,8 @@ unsigned RISCVTTIImpl::getMaxElementWidth() const {
   return 64;
 }
 
-bool RISCVTTIImpl::useScalableVectorType() const {
-  return ST->hasStdExtV() && ST->hasEPI();
-}
-
 bool RISCVTTIImpl::preferPredicatedVectorOps() const {
-  return this->useScalableVectorType();
+  return ST->hasEPI();
 }
 
 bool RISCVTTIImpl::isLegalMaskedLoadStore(Type *DataType) const {
@@ -297,7 +293,8 @@ std::pair<ElementCount, ElementCount>
 RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                                     unsigned SmallestType, unsigned WidestType,
                                     unsigned MaxSafeRegisterWidth,
-                                    unsigned RegWidthFactor) const {
+                                    unsigned RegWidthFactor,
+                                    bool IsScalable) const {
   // check for SEW <= ELEN in the base ISA
   assert(WidestType <= getMaxElementWidth() &&
          "Vector element type larger than the maximum supported type.");
@@ -310,7 +307,6 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
       MaxSafeRegisterWidth);
   unsigned SmallestRegister =
       std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
-  bool IsScalable = useScalableVectorType();
 
   unsigned LowerBoundVFKnownMin =
       std::max<unsigned>(1, PowerOf2Floor(SmallestRegister / SmallestType));

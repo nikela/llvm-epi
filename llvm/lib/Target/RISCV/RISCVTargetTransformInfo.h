@@ -139,7 +139,6 @@ public:
 
   unsigned getNumberOfRegisters(unsigned ClassID) const;
   unsigned getMaxElementWidth() const;
-  bool useScalableVectorType() const;
   bool preferPredicatedVectorOps() const;
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
@@ -168,7 +167,8 @@ public:
   getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                         unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const;
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const;
   InstructionCost
   getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
                      CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
