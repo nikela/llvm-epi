@@ -536,8 +536,7 @@ def emit_builtins_def(out_file, j):
 """)
 
     for b in inst_builtins:
-        if b.builtin["RegisterInClang"] != 0:
-            out_file.write("{}\n".format(b))
+        out_file.write("{}\n".format(b))
 
     out_file.write("""
 #undef BUILTIN
@@ -550,9 +549,6 @@ def emit_codegen(out_file, j):
 
     code_set = {}
     for b in inst_builtins:
-        if b.builtin["RegisterInClang"] == 0:
-            continue
-
         code_case = ""
 
         if b.builtin["CodegenSetID"] != 0:
@@ -750,8 +746,11 @@ def emit_tests(out_file, j):
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
     for b in inst_builtins:
-        if b.builtin["RegisterInClang"] == 0:
-            continue
+        # NOTE: this if would skip the builtins that are added to the
+        # compatibility header. But since at the moment we are still registering
+        # them in clang, that's probably better to include them also in this test
+        #if b.builtin["EPIRVVHeader"] == 1:
+        #    continue
 
         # FIXME:
         if b.lmul not in [1, 2, 4]:
@@ -819,7 +818,6 @@ def emit_compatibility_header(out_file, j):
 #ifndef __EPI_RVV_H
 #define __EPI_RVV_H
 
-#include <stdlib.h>
 #include <riscv_vector.h>
 
 """)
@@ -851,7 +849,7 @@ def emit_compatibility_header(out_file, j):
     # Builtins
     out_file.write("// Builtin mappings\n")
     for ib in inst_builtins:
-        if ib.builtin["RegisterInClang"] == 0:
+        if ib.builtin["EPIRVVHeader"] == 1:
             if not ib.masked:
                 code = ib.builtin["CompatibilityCode"]
             else:
@@ -901,7 +899,7 @@ def emit_header_tests(out_file, j):
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
     for b in inst_builtins:
-        if b.builtin["RegisterInClang"] != 0:
+        if b.builtin["EPIRVVHeader"] == 0:
             continue
 
         # FIXME:
@@ -954,7 +952,7 @@ def emit_header_verify(out_file, j):
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
     for b in inst_builtins:
-        if b.builtin["RegisterInClang"] != 0:
+        if b.builtin["EPIRVVHeader"] == 0:
             continue
 
         # FIXME:
