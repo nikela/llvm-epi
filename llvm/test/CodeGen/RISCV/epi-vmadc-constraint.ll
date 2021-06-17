@@ -53,9 +53,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a3, zero, 256
 ; CHECK-NEXT:    bltu ra, a3, .LBB0_7
 ; CHECK-NEXT:  # %bb.2: # %if.then1
-; CHECK-NEXT:    vsetvli a3, zero, e32, m1, tu, mu
+; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    lwu a6, 0(a0)
-; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
 ; CHECK-NEXT:    lwu a7, 4(a0)
 ; CHECK-NEXT:    vmv.v.x v25, a6
 ; CHECK-NEXT:    csrr a3, vlenb
@@ -152,7 +151,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    # Child Loop BB0_4 Depth 2
 ; CHECK-NEXT:    srli a3, ra, 7
 ; CHECK-NEXT:    and a3, a3, s3
-; CHECK-NEXT:    vsetvli s10, a3, e64, m1, tu, mu
+; CHECK-NEXT:    vsetvli s10, a3, e64, m1, ta, mu
 ; CHECK-NEXT:    lw a3, 52(a0)
 ; CHECK-NEXT:    lwu s0, 48(a0)
 ; CHECK-NEXT:    mv a5, zero

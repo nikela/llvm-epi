@@ -61,8 +61,8 @@ define void @test_vsetvl_interleave_sew(<vscale x 1 x double>* %vd, <vscale x 2 
 ; CHECK-O0-NEXT:    sd a2, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a3, a0
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, a1, e64, m1, tu, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m1, tu, mu
+; CHECK-O0-NEXT:    vsetvli a2, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vle64.v v25, (a3)
@@ -86,8 +86,8 @@ define void @test_vsetvl_interleave_sew(<vscale x 1 x double>* %vd, <vscale x 2 
 ;
 ; CHECK-O2-LABEL: test_vsetvl_interleave_sew:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a3, a2, e64, m1, tu, mu
-; CHECK-O2-NEXT:    vsetvli a2, a2, e32, m1, tu, mu
+; CHECK-O2-NEXT:    vsetvli a3, a2, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, a2, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli zero, a3, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
@@ -155,8 +155,8 @@ define void @test_vsetvl_interleave_vlmul(<vscale x 1 x double>* %vm1, <vscale x
 ; CHECK-O0-NEXT:    sd a2, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a3, a0
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, a1, e64, m1, tu, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m2, tu, mu
+; CHECK-O0-NEXT:    vsetvli a2, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m2, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vle64.v v26, (a3)
@@ -180,8 +180,8 @@ define void @test_vsetvl_interleave_vlmul(<vscale x 1 x double>* %vm1, <vscale x
 ;
 ; CHECK-O2-LABEL: test_vsetvl_interleave_vlmul:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a3, a2, e64, m1, tu, mu
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64, m2, tu, mu
+; CHECK-O2-NEXT:    vsetvli a3, a2, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, a2, e64, m2, ta, mu
 ; CHECK-O2-NEXT:    vsetvli zero, a3, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a2, e64, m2, ta, mu
@@ -249,10 +249,10 @@ define i64 @test_vsetvl_interleave_avl(i64 %avl, i64 %avl2, i64 %avl3, i64 %avl4
 ; CHECK-O0-NEXT:    sd a3, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a3, a0
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a3, a3, e64, m1, tu, mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, tu, mu
-; CHECK-O0-NEXT:    vsetvli a2, a2, e64, m1, tu, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, tu, mu
+; CHECK-O0-NEXT:    vsetvli a3, a3, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    add a0, a0, a3
 ; CHECK-O0-NEXT:    add a0, a0, a2
 ; CHECK-O0-NEXT:    add a0, a0, a1
@@ -261,10 +261,10 @@ define i64 @test_vsetvl_interleave_avl(i64 %avl, i64 %avl2, i64 %avl3, i64 %avl4
 ;
 ; CHECK-O2-LABEL: test_vsetvl_interleave_avl:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, tu, mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, tu, mu
-; CHECK-O2-NEXT:    vsetvli a2, a2, e64, m1, tu, mu
-; CHECK-O2-NEXT:    vsetvli a3, a3, e64, m1, tu, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, a2, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a3, a3, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    add a0, a1, a0
 ; CHECK-O2-NEXT:    add a0, a0, a2
 ; CHECK-O2-NEXT:    add a0, a0, a3
