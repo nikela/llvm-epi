@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 
 import collections
 import json
 import logging
+import string
 import subprocess
 import sys
 import tempfile
@@ -378,9 +379,10 @@ def compute_builtin_type_clang(builtin, prototype, type_spec, lmul):
 
 
 class InstantiatedBuiltin:
-    def __init__(self, lmul, full_name, type_description, flags, builtin,
+    def __init__(self, lmul, type_spec, full_name, type_description, flags, builtin,
             prototype, masked = False, index_of_mask = None):
         self.lmul = lmul
+        self.type_spec = type_spec
         self.full_name = full_name
         self.type_description = type_description
         self.flags = flags
@@ -408,6 +410,7 @@ class InstantiatedBuiltin:
         # Now add names to the parameters
         # FIXME: This won't work for C declarators that need parentheses.
         # Luckily we don't need any yet.
+        parameter_types_str = list(parameter_types_str) # python3 compatibility
         letter = ord('a')
         for i in range(len(parameter_types_str)):
             adjusted_i = i
@@ -456,7 +459,7 @@ def compute_single_builtin_defs(builtin, orig_prototype, type_spec, lmul):
     if builtin["HasSideEffects"] == 0:
         flags = "n"
 
-    builtin_list.append(InstantiatedBuiltin(lmul, full_name, type_description,
+    builtin_list.append(InstantiatedBuiltin(lmul, type_spec, full_name, type_description,
         flags, builtin, prototype))
 
     if builtin["HasMask"] != 0:
@@ -476,7 +479,7 @@ def compute_single_builtin_defs(builtin, orig_prototype, type_spec, lmul):
 
         type_description = compute_builtin_type_clang(builtin, prototype_mask,
                                                       type_spec, lmul)
-        builtin_list.append(InstantiatedBuiltin(lmul, full_name + "_mask",
+        builtin_list.append(InstantiatedBuiltin(lmul, type_spec, full_name + "_mask",
             type_description, flags, builtin, prototype_mask,
             masked = True, index_of_mask = index_of_mask))
 
@@ -636,7 +639,7 @@ def adjust_text(text):
 def format_code(source, clang_format):
     format_pipe = subprocess.Popen([clang_format, "--style=LLVM"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    format_pipe.stdin.write(source)
+    format_pipe.stdin.write(source.encode())
     (outdata, errdata) = format_pipe.communicate()
     if format_pipe.returncode != 0:
         raise Exception("Call to clang-format failed\n{}".format(errdata))
@@ -702,7 +705,7 @@ def emit_markdown_document(out_file, j, clang_format):
 
             out_file.write("**Prototypes**:\n\n")
             out_file.write("```cpp\n");
-            out_file.write(formatted_prototypes)
+            out_file.write(formatted_prototypes.decode())
             out_file.write("```\n");
 
             if doc["Operation"]:
@@ -721,7 +724,7 @@ def emit_markdown_document(out_file, j, clang_format):
                 formatted_prototypes = format_code(prototypes, clang_format)
 
                 out_file.write("```cpp\n");
-                out_file.write(formatted_prototypes)
+                out_file.write(formatted_prototypes.decode())
                 out_file.write("```\n");
 
                 if doc["OperationMask"]:
@@ -743,6 +746,12 @@ def emit_tests(out_file, j):
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
     for b in inst_builtins:
+        # NOTE: this if would skip the builtins that are added to the
+        # compatibility header. But since at the moment we are still registering
+        # them in clang, that's probably better to include them also in this test
+        #if b.builtin["EPIRVVHeader"] == 1:
+        #    continue
+
         # FIXME:
         if b.lmul not in [1, 2, 4]:
             continue
@@ -802,23 +811,114 @@ def single_test_clang(clang, tmp_file, extra_flags = []):
         return False
     return True
 
-def run_builtin_tester(out_file, j, clang):
+def emit_compatibility_header(out_file, j):
+    inst_builtins = instantiate_builtins(j)
+
+    out_file.write("""\
+#ifndef __EPI_RVV_H
+#define __EPI_RVV_H
+
+#include <riscv_vector.h>
+
+""")
+
+    ELEN = 64 # In EPI, ELEN=64
+    # Vector types
+    out_file.write("// Vector types\n")
+    vector_types = "#define __epi_${VScale}x${Type} v${ExtendedType}${LMul}_t"
+    for lm in IMPLEMENTED_LMULS:
+        # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
+        lmul = "m" + str(lm)
+        for type in ['i8', 'i16', 'i32', 'i64', 'f32', 'f64']:
+            ex_type = "int" + type[1:] if type[0] == 'i' else "float" + type[1:]
+            size = int(type[1:])
+            vscale = int(ELEN * lm / size)
+            out_file.write("{}\n".format(string.Template(vector_types).substitute(
+                ExtendedType=ex_type, LMul=lmul, VScale=vscale, Type=type)))
+
+    out_file.write("\n")
+    # Mask type
+    out_file.write("// Mask types\n")
+    mask_types = "#define __epi_${VScale}xi1 vbool${N}_t"
+    for vscale in [1, 2, 4, 8, 16, 32, 64]:
+        n = int(ELEN/vscale)
+        out_file.write("{}\n".format(string.Template(mask_types).substitute(
+            N = n, VScale = vscale)))
+
+    out_file.write("\n")
+    # Builtins
+    out_file.write("// Builtin mappings\n")
+    for ib in inst_builtins:
+        if ib.builtin["EPIRVVHeader"] == 1:
+            if not ib.masked:
+                code = ib.builtin["CompatibilityCode"]
+            else:
+                code = ib.builtin["CompatibilityCodeMasked"]
+            if "WidenedLMul" in code and ib.lmul > 4:
+                continue # We filter out undefined values of LMul
+            code = string.Template(code)
+            subs = {}
+            subs["FullName"] = ib.full_name
+            subs["Name"] = ib.builtin["Name"]
+            # At the moment vlseg and vsseg builtins are not implemented upstream
+            # Once they are, uncommenitng this 'if' statement should be enough to make them work
+            #if subs["Name"].startswith("vlseg") or subs["Name"].startswith("vsseg"):
+            #    subs["Tuple"] = subs["Name"][5]
+            subs["Type"] = TypePrimary(ib.type_spec).render_for_name()
+            subs["Size"] = subs["Type"][1:]
+            subs["UType"] = "u" + subs["Size"]
+            subs["WidenedSize"] = str(2 * int(subs["Size"]))
+            subs["WidenedType"] = subs["Type"][0] + subs["WidenedSize"]
+            subs["WidenedUType"] = "u" + subs["WidenedSize"]
+            # We only have LMUL >= 1, so no need to check if we need to prepend 'm' or 'mf'
+            subs["LMul"] = "m" + str(ib.lmul)
+            subs["WidenedLMul"] = "m" + str(2 * ib.lmul)
+            subs["Boolean"] = int(int(subs["Size"]) / ib.lmul)
+            if "vred" in ib.full_name or "vfred" in ib.full_name:
+                if ib.lmul == 1:
+                    subs["LMulExt"] = subs["LMulTrunc"] = subs["End"] = ""
+                else:
+                    subs["LMulExt"] = "vlmul_ext_v_" + subs["Type"] + "m1_" + subs["Type"] + subs["LMul"] + "("
+                    subs["LMulTrunc"] = "vlmul_trunc_v_" + subs["Type"] + subs["LMul"] + "_" + subs["Type"] + "m1" + "("
+                    subs["End"] = ")"
+            if "slide" in ib.full_name:
+                subs["ifFloat"] = "f" if subs["Type"][0] == "f" else ""
+                subs["Reg"] = "f" if subs["Type"][0] == "f" else "x"
+            out_file.write("{}\n".format(code.substitute(subs)))
+
+    out_file.write("""
+#endif //__EPI_RVV_H
+""")
+
+def emit_header_tests(out_file, j):
+    out_file.write(r"""// RUN: %clang -ffreestanding --target=riscv64-unknown-linux-gnu -mepi -S -emit-llvm -O2 -o - %s \
+// RUN:       | FileCheck --check-prefix=CHECK-O2 %s
+
+""")
+    out_file.write("""#include <epi_rvv.h>\n\n""")
     inst_builtins = instantiate_builtins(j)
     already_emitted = set([])
-    num_builtins_tested = 0
-    num_builtins_succeeded = 0
     for b in inst_builtins:
+        if b.builtin["EPIRVVHeader"] == 0:
+            continue
+
         # FIXME:
         if b.lmul not in [1, 2, 4]:
             continue
-
-        num_builtins_tested += 1
 
         # The current strategy does not work for builtins that expect
         # constant expressions. So skip these ones and let them be tested
         # elsewhere
         if "K" in b.builtin["Prototype"]:
             continue
+
+        # This is a bit of stupid heuristic to skip builtins we know
+        # don't work.
+        if b.builtin["HasManualCodegen"] != 0:
+            codegen = b.builtin["ManualCodegen"] \
+                    if not b.masked else b.builtin["ManualCodegenMask"]
+            if "ErrorUnsupported" in codegen:
+                continue
 
         if b.full_name in already_emitted:
             continue
@@ -836,47 +936,73 @@ def run_builtin_tester(out_file, j, clang):
             parameters.append("{} {}".format(p, arg))
             arguments.append(arg)
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_file.write("{} test_{}({})\n{{\n    return __builtin_epi_{}({});\n}}\n\n".format(
-                return_type,
-                b.full_name,
-                ", ".join(parameters),
-                b.full_name,
-                ", ".join(arguments)))
+        out_file.write("{} test_{}({})\n{{\n    return __builtin_epi_{}({});\n}}\n\n".format(
+            return_type,
+            b.full_name,
+            ", ".join(parameters),
+            b.full_name,
+            ", ".join(arguments)))
 
-            def report(msg):
-                out_file.write(msg)
-                out_file.flush()
+def emit_header_verify(out_file, j):
+    out_file.write(r"""// RUN: %clang -ffreestanding -Xclang -verify --target=riscv64-unknown-linux-gnu -mepi -S -emit-llvm -O2 -o - %s
 
-            tmp_file.flush()
-            if not single_test_clang(clang, tmp_file, ["-fsyntax-only"]):
-                report("Builtin {} not supported (clang syntax only)\n".format(b.full_name))
+""")
+    out_file.write("""// expected-no-diagnostics\n\n""")
+    out_file.write("""#include <epi_rvv.h>\n\n""")
+    inst_builtins = instantiate_builtins(j)
+    already_emitted = set([])
+    for b in inst_builtins:
+        if b.builtin["EPIRVVHeader"] == 0:
+            continue
+
+        # FIXME:
+        if b.lmul not in [1, 2, 4]:
+            continue
+
+        # The current strategy does not work for builtins that expect
+        # constant expressions. So skip these ones and let them be tested
+        # elsewhere
+        if "K" in b.builtin["Prototype"]:
+            continue
+
+        # This is a bit of stupid heuristic to skip builtins we know
+        # don't work.
+        if b.builtin["HasManualCodegen"] != 0:
+            codegen = b.builtin["ManualCodegen"] \
+                    if not b.masked else b.builtin["ManualCodegenMask"]
+            if "ErrorUnsupported" in codegen:
                 continue
-            if not single_test_clang(clang, tmp_file, ["-emit-llvm"]):
-                report("Builtin {} not supported (clang codegen)\n".format(b.full_name))
-                continue
-            if not single_test_clang(clang, tmp_file):
-                report("Builtin {} not supported (llvm codegen -O0)\n".format(b.full_name))
-                continue
-            if not single_test_clang(clang, tmp_file, ["-O2"]):
-                report("Builtin {} not supported (llvm codegen -O2)\n".format(b.full_name))
-                continue
-            # report("Builtin {} seems to work fine\n".format(b.full_name))
-            num_builtins_succeeded += 1
-    num_builtins_failed = num_builtins_tested - num_builtins_succeeded
-    out_file.write("Tested {} builtins. Failed {} ({:.2%})\n".format(
-        num_builtins_tested,
-        num_builtins_failed,
-        float(num_builtins_failed) / num_builtins_tested))
+
+        if b.full_name in already_emitted:
+            continue
+
+        already_emitted.add(b.full_name)
+
+        (return_type, parameter_types) = b.c_prototoype_items()
+
+        parameters = []
+        arguments = []
+        i = 0
+        for p in parameter_types:
+            arg = "arg_{}".format(i)
+            i += 1
+            parameters.append("{} {}".format(p, arg))
+            arguments.append(arg)
+
+        out_file.write("{} test_{}({})\n{{\n    return __builtin_epi_{}({});\n}}\n\n".format(
+            return_type,
+            b.full_name,
+            ", ".join(parameters),
+            b.full_name,
+            ", ".join(arguments)))
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Generate instruction table")
     parser.add_argument("--mode", required=True,
-            choices=["builtins-def", "codegen", "tests", "docs", "builtin-tester"], help="Mode of operation")
+            choices=["builtins-def", "codegen", "tests", "docs", "compat-header", "compat-header-tests", "compat-header-verify"], help="Mode of operation")
     parser.add_argument("--tablegen", required=True, help="Path of tablegen")
     parser.add_argument("--output-file", required=False, help="Output file. stdout otherwise")
-    parser.add_argument("--clang", required=False, help="Path of clang")
     parser.add_argument("--clang-format", required=False, help="Path of clang-format")
     parser.add_argument("-I", dest="include_paths", required=False, default=[],
                       help="Include path", action="append")
@@ -899,10 +1025,12 @@ if __name__ == "__main__":
         emit_markdown_document(out_file, j, args.clang_format)
     elif args.mode == "tests":
         emit_tests(out_file, j)
-    elif args.mode == "builtin-tester":
-        if not args.clang:
-            parser.error("You have to pass --clang when running the builtin tester")
-        run_builtin_tester(out_file, j, args.clang)
+    elif args.mode == "compat-header":
+        emit_compatibility_header(out_file, j)
+    elif args.mode == "compat-header-tests":
+        emit_header_tests(out_file, j)
+    elif args.mode == "compat-header-verify":
+        emit_header_verify(out_file, j)
     else:
         raise Exception("Unexpected mode '{}".format(args.mode))
 

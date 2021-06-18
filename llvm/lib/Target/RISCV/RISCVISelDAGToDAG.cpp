@@ -351,7 +351,11 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
     break;
   }
 
-  uint64_t VTypeI = (Log2_64(SEW / 8) << 3) | Log2_64(LMul);
+  uint64_t VTypeI = RISCVVType::encodeVTYPE(
+      static_cast<RISCVII::VLMUL>(Log2_64(LMul)), SEW,
+      /* TailAgnostic */ true,
+      /* MaskAgnostic */ false,
+      /* Nontemporal */ false);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
   auto *VSETVLI = CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, MVT::i64,
@@ -764,10 +768,14 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
       auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
 
-      uint64_t SEWBits = SEW->getZExtValue() & 0x7;
-      uint64_t VMulBits = VMul->getZExtValue() & 0x7;
+      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
+      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
 
-      uint64_t VTypeI = (SEWBits << 3) | VMulBits;
+      uint64_t VTypeI = RISCVVType::encodeVTYPE(
+          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
+          /* TailAgnostic */ true,
+          /* MaskAgnostic */ false,
+          /* Nontemporal */ false);
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
 
       SDValue VLOperand = Node->getOperand(1);
@@ -790,10 +798,14 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       auto *SEW = cast<ConstantSDNode>(Node->getOperand(1));
       auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
 
-      uint64_t SEWBits = SEW->getZExtValue() & 0x7;
-      uint64_t VMulBits = VMul->getZExtValue() & 0x7;
+      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
+      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
 
-      uint64_t VTypeI = (SEWBits << 3) | VMulBits;
+      uint64_t VTypeI = RISCVVType::encodeVTYPE(
+          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
+          /* TailAgnostic */ true,
+          /* MaskAgnostic */ false,
+          /* Nontemporal */ false);
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
 
       // FIXME DstReg for VLMAX must be != X0

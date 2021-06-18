@@ -26,7 +26,7 @@ declare void @llvm.epi.vstore.nxv1f64(
 define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_vtype:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, tu, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    srli a2, a1, 1
 ; CHECK-O0-NEXT:    #APP
 ; CHECK-O0-NEXT:    rdvtype t0
@@ -44,7 +44,7 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_vtype:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, tu, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    srli a0, a1, 1

@@ -6,7 +6,7 @@ def parse_type(prototype):
         end = len(prototype)
 
     class Helper:
-        digits = map(lambda x : str(x), range(0, 10))
+        digits = list(map(lambda x : str(x), range(0, 10)))
 
     def peek():
         if State.i >= State.end:

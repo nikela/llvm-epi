@@ -5215,7 +5215,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
         std::iota(Mask.begin(), std::next(Mask.begin(), NumScalars), 0);
       }
       if (!IsIdentity || NumElts != NumScalars)
-        V = Builder.CreateShuffleVector(V, UndefValue::get(V->getType()), Mask);
+        V = Builder.CreateShuffleVector(V, Mask);
 
       if (NumElts != NumScalars) {
         SmallVector<int> InsertMask(NumElts);
@@ -5501,6 +5501,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
 
       Value *ScalarArg = nullptr;
       std::vector<Value *> OpVecs;
+      SmallVector<Type *, 2> TysForDecl =
+          {FixedVectorType::get(CI->getType(), E->Scalars.size())};
       for (int j = 0, e = CI->getNumArgOperands(); j < e; ++j) {
         ValueList OpVL;
         // Some intrinsics have scalar arguments. This argument should not be
@@ -5509,6 +5511,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
           CallInst *CEI = cast<CallInst>(VL0);
           ScalarArg = CEI->getArgOperand(j);
           OpVecs.push_back(CEI->getArgOperand(j));
+          if (hasVectorInstrinsicOverloadedScalarOpd(IID, j))
+            TysForDecl.push_back(ScalarArg->getType());
           continue;
         }
 
@@ -5525,8 +5529,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
                          false /*HasGlobalPred*/);
         CF = VFDatabase(*CI).getVectorizedFunction(Shape);
       } else {
-        Type *Tys[] = {FixedVectorType::get(CI->getType(), E->Scalars.size())};
-        CF = Intrinsic::getDeclaration(F->getParent(), ID, Tys);
+        CF = Intrinsic::getDeclaration(F->getParent(), ID, TysForDecl);
       }
 
       SmallVector<OperandBundleDef, 1> OpBundles;
@@ -5715,8 +5718,11 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
       }
       Value *NewInst = ExtractAndExtendIfNeeded(Vec);
       CSEBlocks.insert(cast<Instruction>(Scalar)->getParent());
-      auto &Locs = ExternallyUsedValues[Scalar];
-      ExternallyUsedValues.insert({NewInst, Locs});
+      auto &NewInstLocs = ExternallyUsedValues[NewInst];
+      auto It = ExternallyUsedValues.find(Scalar);
+      assert(It != ExternallyUsedValues.end() &&
+             "Externally used scalar is not found in ExternallyUsedValues");
+      NewInstLocs.append(It->second);
       ExternallyUsedValues.erase(Scalar);
       // Required to update internally referenced instructions.
       Scalar->replaceAllUsesWith(NewInst);
@@ -6318,7 +6324,7 @@ void BoUpSLP::scheduleBlock(BlockScheduling *BS) {
     ScheduleData *BundleMember = picked;
     while (BundleMember) {
       Instruction *pickedInst = BundleMember->Inst;
-      if (LastScheduledInst->getNextNode() != pickedInst) {
+      if (pickedInst->getNextNode() != LastScheduledInst) {
         BS->BB->getInstList().remove(pickedInst);
         BS->BB->getInstList().insert(LastScheduledInst->getIterator(),
                                      pickedInst);
@@ -8248,7 +8254,7 @@ bool SLPVectorizerPass::vectorizeInsertElementInst(InsertElementInst *IEI,
     return false;
 
   LLVM_DEBUG(dbgs() << "SLP: array mappable to vector: " << *IEI << "\n");
-  return tryToVectorizeList(BuildVectorInsts, R, /*AllowReorder=*/false);
+  return tryToVectorizeList(BuildVectorInsts, R, /*AllowReorder=*/true);
 }
 
 bool SLPVectorizerPass::vectorizeSimpleInstructions(

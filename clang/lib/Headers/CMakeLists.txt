@@ -212,6 +212,31 @@ clang_generate_header(-gen-arm-cde-header arm_cde.td arm_cde.h)
 # Generate riscv_vector.h
 clang_generate_header(-gen-riscv-vector-header riscv_vector.td riscv_vector.h)
 
+# EPI compatibility header
+# FIXME: Do this better
+if( ${CLANG_TABLEGEN} STREQUAL "clang-tblgen" )
+  set(REAL_CLANG_TABLEGEN $<TARGET_FILE:clang-tblgen>)
+else()
+  set(REAL_CLANG_TABLEGEN ${CLANG_TABLEGEN_EXE})
+endif()
+
+add_custom_command(
+  OUTPUT epi_rvv.h
+  COMMAND ${PYTHON_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../utils/EPI/generate-epi-builtins-def.py
+    --mode compat-header
+    --tablegen ${REAL_CLANG_TABLEGEN}
+    --output-file epi_rvv.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../include/clang/Basic/epi_builtins.td
+   DEPENDS ../../include/clang/Basic/epi_builtins.td
+     ${CLANG_TABLEGEN_EXE}
+     ${CLANG_TABLEGEN_TARGET}
+     ${CMAKE_CURRENT_SOURCE_DIR}/../../utils/EPI/generate-epi-builtins-def.py
+   VERBATIM)
+copy_header_to_output_dir(${CMAKE_CURRENT_BINARY_DIR} epi_rvv.h)
+list(APPEND generated_files "${CMAKE_CURRENT_BINARY_DIR}/epi_rvv.h")
+set(generated_files ${generated_files} PARENT_SCOPE)
+
 add_custom_target(clang-resource-headers ALL DEPENDS ${out_files})
 set_target_properties(clang-resource-headers PROPERTIES
   FOLDER "Misc"

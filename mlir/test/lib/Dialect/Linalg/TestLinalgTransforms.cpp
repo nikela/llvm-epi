@@ -42,6 +42,12 @@ struct TestLinalgTransforms
                     gpu::GPUDialect>();
     // clang-format on
   }
+  StringRef getArgument() const final {
+    return "test-linalg-transform-patterns";
+  }
+  StringRef getDescription() const final {
+    return "Test Linalg transformation patterns by applying them greedily.";
+  }
 
   void runOnFunction() override;
 
@@ -533,7 +539,7 @@ static void applyAffineMinSCFCanonicalizationPatterns(FuncOp funcOp) {
 // For now, just assume it is the zero of type.
 // In the future, it should be the zero of type + op.
 static Value getNeutralOfLinalgOp(OpBuilder &b, OpOperand &op) {
-  auto t = getElementTypeOrSelf(op.get().getType());
+  auto t = getElementTypeOrSelf(op.get());
   return b.create<ConstantOp>(op.getOwner()->getLoc(), t, b.getZeroAttr(t));
 }
 
@@ -544,7 +550,8 @@ static void applyTileAndPadPattern(FuncOp funcOp, ArrayRef<int64_t> tileSizes) {
       linalg::LinalgTilingOptions()
           .setTileSizes(tileSizes)
           .setPaddingValueComputationFunction(getNeutralOfLinalgOp);
-  tilingPattern.add<linalg::LinalgTilingPattern<linalg::MatmulI8I8I32Op>>(
+  tilingPattern.add<linalg::LinalgTilingPattern<linalg::MatmulI8I8I32Op>,
+                    linalg::LinalgTilingPattern<linalg::GenericOp>>(
       context, linalgTilingOptions,
       linalg::LinalgTransformationFilter(
           Identifier::get("tile-and-pad", context)));
@@ -611,9 +618,7 @@ void TestLinalgTransforms::runOnFunction() {
 namespace mlir {
 namespace test {
 void registerTestLinalgTransforms() {
-  PassRegistration<TestLinalgTransforms> testTransformPatternsPass(
-      "test-linalg-transform-patterns",
-      "Test Linalg transformation patterns by applying them greedily.");
+  PassRegistration<TestLinalgTransforms>();
 }
 } // namespace test
 } // namespace mlir

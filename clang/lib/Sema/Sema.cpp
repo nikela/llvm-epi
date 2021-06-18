@@ -812,8 +812,21 @@ static void checkUndefinedButUsed(Sema &S) {
       // FIXME: We can promote this to an error. The function or variable can't
       // be defined anywhere else, so the program must necessarily violate the
       // one definition rule.
-      S.Diag(VD->getLocation(), diag::warn_undefined_internal)
-        << isa<VarDecl>(VD) << VD;
+      bool IsImplicitBase = false;
+      if (const auto *BaseD = dyn_cast<FunctionDecl>(VD)) {
+        auto *DVAttr = BaseD->getAttr<OMPDeclareVariantAttr>();
+        if (DVAttr && !DVAttr->getTraitInfo().isExtensionActive(
+                          llvm::omp::TraitProperty::
+                              implementation_extension_disable_implicit_base)) {
+          const auto *Func = cast<FunctionDecl>(
+              cast<DeclRefExpr>(DVAttr->getVariantFuncRef())->getDecl());
+          IsImplicitBase = BaseD->isImplicit() &&
+                           Func->getIdentifier()->isMangledOpenMPVariantName();
+        }
+      }
+      if (!S.getLangOpts().OpenMP || !IsImplicitBase)
+        S.Diag(VD->getLocation(), diag::warn_undefined_internal)
+            << isa<VarDecl>(VD) << VD;
     } else if (auto *FD = dyn_cast<FunctionDecl>(VD)) {
       (void)FD;
       assert(FD->getMostRecentDecl()->isInlined() &&
@@ -1942,6 +1955,9 @@ void Sema::RecordParsingTemplateParameterDepth(unsigned Depth) {
 
 // Check that the type of the VarDecl has an accessible copy constructor and
 // resolve its destructor's exception specification.
+// This also performs initialization of block variables when they are moved
+// to the heap. It uses the same rules as applicable for implicit moves
+// according to the C++ standard in effect ([class.copy.elision]p3).
 static void checkEscapingByref(VarDecl *VD, Sema &S) {
   QualType T = VD->getType();
   EnterExpressionEvaluationContext scope(
@@ -1950,8 +1966,9 @@ static void checkEscapingByref(VarDecl *VD, Sema &S) {
   Expr *VarRef =
       new (S.Context) DeclRefExpr(S.Context, VD, false, T, VK_LValue, Loc);
   ExprResult Result = S.PerformMoveOrCopyInitialization(
-      InitializedEntity::InitializeBlock(Loc, T, false), VD, VD->getType(),
-      VarRef, /*AllowNRVO=*/true);
+      InitializedEntity::InitializeBlock(Loc, T, false),
+      Sema::NamedReturnInfo{VD, Sema::NamedReturnInfo::MoveEligible}, VarRef);
+
   if (!Result.isInvalid()) {
     Result = S.MaybeCreateExprWithCleanups(Result);
     Expr *Init = Result.getAs<Expr>();
