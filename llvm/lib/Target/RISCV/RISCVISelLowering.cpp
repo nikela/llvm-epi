@@ -7615,8 +7615,7 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
     SDValue ArgValue = OutVals[i];
     ISD::ArgFlagsTy Flags = Outs[i].Flags;
 
-    // Handle passing f64 on RV32D with a soft float or hard float single ABI as
-    // a special case.
+    // Handle passing f64 on RV32D with a soft float ABI as a special case.
     bool IsF64OnRV32DSoftABI =
         VA.getLocVT() == MVT::i32 && VA.getValVT() == MVT::f64;
     if (IsF64OnRV32DSoftABI && VA.isRegLoc()) {

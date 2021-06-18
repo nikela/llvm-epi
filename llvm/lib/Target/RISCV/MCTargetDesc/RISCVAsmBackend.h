@@ -15,7 +15,6 @@
 #include "llvm/MC/MCAsmBackend.h"
 #include "llvm/MC/MCFixupKindInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/MC/MCSymbol.h"
 
 namespace llvm {
 class MCAssembler;
@@ -42,29 +41,6 @@ public:
   ~RISCVAsmBackend() override {}
 
   void setForceRelocs() { ForceRelocs = true; }
-
-  // Returns true if relocations will be forced for shouldForceRelocation by
-  // default. This will be true if relaxation is enabled or had previously
-  // been enabled.
-  bool willForceRelocations() const {
-    return ForceRelocs || STI.getFeatureBits()[RISCV::FeatureRelax];
-  }
-
-  // Generate diff expression relocations if the relax feature is enabled or had
-  // previously been enabled, otherwise it is safe for the assembler to
-  // calculate these internally.
-  bool requiresDiffExpressionRelocations(
-      ArrayRef<const MCSymbol *> Symbols) const override {
-    // If any of the symbols is not in a code section, do not require a diff
-    // expression relocation.
-    if (std::any_of(Symbols.begin(), Symbols.end(),
-                    [](const MCSymbol *Sym) -> bool {
-                      assert(Sym && "Invalid symbol");
-                      return !Sym->isInCodeSection();
-                    }))
-      return false;
-    return willForceRelocations();
-  }
 
   // Return Size with extra Nop Bytes for alignment directive in code section.
   bool shouldInsertExtraNopBytesForCodeAlign(const MCAlignFragment &AF,
@@ -117,6 +93,11 @@ public:
 
   void relaxInstruction(MCInst &Inst,
                         const MCSubtargetInfo &STI) const override;
+
+  bool relaxDwarfLineAddr(MCDwarfLineAddrFragment &DF, MCAsmLayout &Layout,
+                          bool &WasRelaxed) const override;
+  bool relaxDwarfCFA(MCDwarfCallFrameFragment &DF, MCAsmLayout &Layout,
+                     bool &WasRelaxed) const override;
 
   bool writeNopData(raw_ostream &OS, uint64_t Count) const override;
 
