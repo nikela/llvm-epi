@@ -25,6 +25,7 @@ namespace llvm {
 class RISCVSubtarget;
 
 class RISCVInstrInfo : public RISCVGenInstrInfo {
+
 public:
   explicit RISCVInstrInfo(RISCVSubtarget &STI);
 

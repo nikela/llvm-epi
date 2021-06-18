@@ -84,7 +84,6 @@ public:
 
   static VariantKind getVariantKindForName(StringRef name);
   static StringRef getVariantKindName(VariantKind Kind);
-
 };
 
 } // end namespace llvm.

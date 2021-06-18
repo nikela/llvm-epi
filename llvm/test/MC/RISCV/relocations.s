@@ -12,7 +12,8 @@
 # RELOC: R_RISCV_32 foo
 
 .word foo - . + 8
-# RELOC: R_RISCV_32_PCREL foo 0x8
+# RELOC: R_RISCV_ADD32 foo 0x8
+# RELOC: R_RISCV_SUB32 - 0x0
 
 .quad foo
 # RELOC: R_RISCV_64 foo

@@ -234,7 +234,6 @@ def BareSymbol : AsmOperandClass {
   let ParserMethod = "parseBareSymbol";
 }
 
-
 // A bare symbol.
 def bare_symbol : Operand<XLenVT> {
   let ParserMatchClass = BareSymbol;
