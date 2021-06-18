@@ -637,17 +637,18 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
   SDValue VTypeIOp;
   if (!FlagsIndex ||
       (Flags.hasValue() &&
-       (Flags.getValue() == 0 || Flags.getValue() == RISCVVType::EPI_NT))) {
+       (Flags.getValue() == 0 || Flags.getValue() == RISCVVType::NT))) {
     unsigned VTypeI = RISCVVType::encodeVTYPE(
-        VLMul, SEW, /*TailAgnostic*/ true,
-        /*TailAgnostic*/ false,
-        /*Nontemporal*/ FlagsIndex && Flags.getValue() == RISCVVType::EPI_NT);
+        VLMul, SEW, /* TailAgnostic */ true,
+        /* MaskAgnostic */ false,
+        /* Nontemporal */ FlagsIndex && Flags.getValue() == RISCVVType::NT);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   } else {
     UsePseudoVSETVLEXT = true;
-    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                                              /*TailAgnostic*/ false,
-                                              /*Nontemporal*/ false);
+    unsigned VTypeI =
+        RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
+                                /* MaskAgnostic */ false,
+                                /* Nontemporal */ false);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
     SDValue Flags = Node->getOperand(FlagsIndex);
     VTypeIOp = SDValue(
@@ -696,17 +697,18 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
   SDValue VTypeIOp;
   if (!FlagsIndex ||
       (Flags.hasValue() &&
-       (Flags.getValue() == 0 || Flags.getValue() == RISCVVType::EPI_NT))) {
+       (Flags.getValue() == 0 || Flags.getValue() == RISCVVType::NT))) {
     unsigned VTypeI = RISCVVType::encodeVTYPE(
-        VLMul, SEW, /*TailAgnostic*/ true,
-        /*TailAgnostic*/ false,
-        /*Nontemporal*/ FlagsIndex && Flags.getValue() == RISCVVType::EPI_NT);
+        VLMul, SEW, /* TailAgnostic */ true,
+        /* MaskAgnostic */ false,
+        /* Nontemporal */ FlagsIndex && Flags.getValue() == RISCVVType::NT);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   } else {
     UsePseudoVSETVLEXT = true;
-    unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                                              /*TailAgnostic*/ false,
-                                              /*Nontemporal*/ false);
+    unsigned VTypeI =
+        RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
+                                /* MaskAgnostic */ false,
+                                /* Nontemporal */ false);
     VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
     SDValue Flags = Node->getOperand(FlagsIndex);
     VTypeIOp = SDValue(
@@ -934,8 +936,8 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         break;
       }
       SDValue VTypeIOp = CurDAG->getTargetConstant(
-          RISCVVType::encodeVTYPE(LMulBits, SEW, /*TailAgnostic*/ true,
-                                  /*MaskAgnostic*/ false,
+          RISCVVType::encodeVTYPE(LMulBits, SEW, /* TailAgnostic */ true,
+                                  /* MaskAgnostic */ false,
                                   /* Nontemporal */ false),
           DL, XLenVT);
       SDValue VLMax =
@@ -1174,7 +1176,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
           Node->getConstantOperandVal(Offset + 1) & 0x7);
 
       unsigned VTypeI = RISCVVType::encodeVTYPE(
-          VLMul, SEW, /*TailAgnostic*/ true, /*MaskAgnostic*/ false,
+          VLMul, SEW, /* TailAgnostic */ true, /* MaskAgnostic */ false,
           /* Nontemporal */ false);
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
 
