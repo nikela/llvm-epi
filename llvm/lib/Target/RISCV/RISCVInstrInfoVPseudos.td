@@ -3328,6 +3328,9 @@ foreach lmul = MxList.m in {
 let hasSideEffects = 1, mayLoad = 0, mayStore = 0, Defs = [VL, VTYPE] in {
 def PseudoVSETVLI : Pseudo<(outs GPR:$rd), (ins GPR:$rs1, VTypeIOp:$vtypei), []>;
 def PseudoVSETIVLI : Pseudo<(outs GPR:$rd), (ins uimm5:$rs1, VTypeIOp:$vtypei), []>;
+// Pseudo for NonTemporal
+let Constraints = "@earlyclobber $rd" in
+def PseudoVSETVLEXT : Pseudo<(outs GPR:$rd), (ins GPR:$rs1, VTypeIOp:$vtypei, GPR:$rs2), []>;
 }
 
 //===----------------------------------------------------------------------===//
