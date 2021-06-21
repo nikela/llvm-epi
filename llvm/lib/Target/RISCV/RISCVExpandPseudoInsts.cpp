@@ -60,7 +60,8 @@ private:
                               MachineBasicBlock::iterator MBBI,
                               MachineBasicBlock::iterator &NextMBBI);
   bool expandVSetVL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
-  bool expandVSetVLExt(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
+  bool expandVSetVLExt(MachineBasicBlock &MBB,
+                       MachineBasicBlock::iterator MBBI);
   bool expandVMSET_VMCLR(MachineBasicBlock &MBB,
                          MachineBasicBlock::iterator MBBI, unsigned Opcode);
   bool expandVSPILL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
@@ -109,7 +110,7 @@ bool RISCVExpandPseudo::expandMI(MachineBasicBlock &MBB,
   case RISCV::PseudoVSETIVLI:
     return expandVSetVL(MBB, MBBI);
   case RISCV::PseudoVSETVLEXT:
-	return expandVSetVLExt(MBB, MBBI);
+    return expandVSetVLExt(MBB, MBBI);
   case RISCV::PseudoVMCLR_M_B1:
   case RISCV::PseudoVMCLR_M_B2:
   case RISCV::PseudoVMCLR_M_B4:
@@ -271,7 +272,7 @@ bool RISCVExpandPseudo::expandVSetVL(MachineBasicBlock &MBB,
 }
 
 bool RISCVExpandPseudo::expandVSetVLExt(MachineBasicBlock &MBB,
-                                     MachineBasicBlock::iterator MBBI) {
+                                        MachineBasicBlock::iterator MBBI) {
   assert(MBBI->getNumExplicitOperands() == 4 && MBBI->getNumOperands() >= 6 &&
          "Unexpected instruction format");
   assert(MBBI->getOpcode() == RISCV::PseudoVSETVLEXT &&
@@ -285,9 +286,9 @@ bool RISCVExpandPseudo::expandVSetVLExt(MachineBasicBlock &MBB,
 
   // RISCV::ORI, vtype, extra
   BuildMI(MBB, MBBI, DL, TII->get(RISCV::ORI))
-    .addReg(DstReg, RegState::Define)
-	.addReg(MBBI->getOperand(3).getReg())
-	.addImm(MBBI->getOperand(2).getImm());
+      .addReg(DstReg, RegState::Define)
+      .addReg(MBBI->getOperand(3).getReg())
+      .addImm(MBBI->getOperand(2).getImm());
 
   // RISCV::VSETVL, vl, vtype
   BuildMI(MBB, MBBI, DL, Desc)

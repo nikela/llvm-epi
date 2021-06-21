@@ -633,18 +633,18 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
   bool NonTemporal = false;
   bool UsePseudoVSETVLEXT = false;
   if (FlagsIndex) {
-	  if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
-		  unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
-		  NonTemporal = Flags == RISCVVType::NT;
-		  UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
-	  } else {
-		  UsePseudoVSETVLEXT = true;
-	  }
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
+      unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
+      NonTemporal = Flags == RISCVVType::NT;
+      UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
+    } else {
+      UsePseudoVSETVLEXT = true;
+    }
   }
 
   unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
-                                /* MaskAgnostic */ false,
-                                /* Nontemporal */ NonTemporal);
+                                            /* MaskAgnostic */ false,
+                                            /* Nontemporal */ NonTemporal);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   SDValue VLOperand = Node->getOperand(1);
   if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
@@ -665,7 +665,7 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
-	Ops.push_back(Node->getOperand(FlagsIndex));
+    Ops.push_back(Node->getOperand(FlagsIndex));
   }
   ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, XLenVT, Ops));
   return;
@@ -684,18 +684,18 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
   bool NonTemporal = false;
   bool UsePseudoVSETVLEXT = false;
   if (FlagsIndex) {
-	  if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
-		  unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
-		  NonTemporal = Flags == RISCVVType::NT;
-		  UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
-	  } else {
-		  UsePseudoVSETVLEXT = true;
-	  }
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
+      unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
+      NonTemporal = Flags == RISCVVType::NT;
+      UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
+    } else {
+      UsePseudoVSETVLEXT = true;
+    }
   }
 
   unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
-                                /* MaskAgnostic */ false,
-                                /* Nontemporal */ NonTemporal);
+                                            /* MaskAgnostic */ false,
+                                            /* Nontemporal */ NonTemporal);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   // FIXME DstReg for VLMAX must be != X0
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
@@ -708,7 +708,7 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
-	Ops.push_back(Node->getOperand(FlagsIndex));
+    Ops.push_back(Node->getOperand(FlagsIndex));
   }
   ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, XLenVT, Ops));
   return;

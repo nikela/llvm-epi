@@ -564,7 +564,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
     // If this is an explicit VSETVLI or VSETIVLI, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
-		MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
+        MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       HadVectorOp = true;
       BBInfo.Change = getInfoForVSETVLI(MI);
       continue;
@@ -692,7 +692,7 @@ bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
     MachineInstr *DefMI = MRI->getVRegDef(InReg);
     if (!DefMI || (DefMI->getOpcode() != RISCV::PseudoVSETVLI &&
                    DefMI->getOpcode() != RISCV::PseudoVSETIVLI &&
-				   DefMI->getOpcode() != RISCV::PseudoVSETVLEXT))
+                   DefMI->getOpcode() != RISCV::PseudoVSETVLEXT))
       return true;
 
     // We found a VSET(I)VLI make sure it matches the output of the
@@ -725,7 +725,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       continue;
     }
     // If this is an explicit PseudoVSETVLEXT, update our state.
-	if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
+    if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       // Conservatively, mark the VL and VTYPE as live.
       assert(MI.getOperand(4).getReg() == RISCV::VL &&
              MI.getOperand(5).getReg() == RISCV::VTYPE &&
@@ -734,7 +734,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       MI.getOperand(5).setIsDead(false);
       CurInfo = getInfoForVSETVLI(MI);
       continue;
-	}
+    }
 
     uint64_t TSFlags = MI.getDesc().TSFlags;
     if (RISCVII::hasSEWOp(TSFlags)) {
