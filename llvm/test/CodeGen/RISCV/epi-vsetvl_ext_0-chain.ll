@@ -31,16 +31,16 @@ declare void @use(i64)
 define void @test_vsetvl_chain(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -52,16 +52,16 @@ define void @test_vsetvl_chain(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -102,10 +102,10 @@ define void @test_vsetvl_chain(<vscale x 1 x double>* %v, i64 %avl) nounwind
 define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -117,10 +117,10 @@ define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -161,7 +161,7 @@ define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 define void @test_vsetvl_chain_3(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -173,7 +173,7 @@ define void @test_vsetvl_chain_3(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -211,22 +211,22 @@ define void @test_vsetvl_chain_3(<vscale x 1 x double>* %v, i64 %avl) nounwind
 define void @test_vsetvl_chain_4(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain_4:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e8,m8,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e16,m8,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e8,m4,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m8,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e16,m4,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e8,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m8,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m4,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e16,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m4,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e8, m8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e16, m8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e8, m4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e16, m4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e8, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e16, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vle64.v v26, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -238,22 +238,22 @@ define void @test_vsetvl_chain_4(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain_4:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e8,m8,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e16,m8,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e8,m4,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e32,m8,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e16,m4,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e8,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m8,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e32,m4,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e16,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m4,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e32,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e8, m8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e16, m8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e8, m4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e32, m8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e16, m4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e8, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e32, m4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e16, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e32, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v25, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -330,26 +330,26 @@ define void @test_vsetvl_chain_6(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -32
 ; CHECK-O0-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
 ; CHECK-O0-NEXT:    sd a0, 16(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld a0, 16(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a1, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a1, e32,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64,m4,ta,mu
+; CHECK-O0-NEXT:    vsetvli a1, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a1, e32, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m4, ta, mu
 ; CHECK-O0-NEXT:    sd a1, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld a0, 16(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 32
@@ -361,21 +361,21 @@ define void @test_vsetvl_chain_6(i64 %avl) nounwind
 ; CHECK-O2-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; CHECK-O2-NEXT:    sd s0, 16(sp) # 8-byte Folded Spill
 ; CHECK-O2-NEXT:    sd s1, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli s1, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, s1, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli s1, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, s1, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    vsetvli a1, s1, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a1, e32,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli s0, a1, e64,m4,ta,mu
+; CHECK-O2-NEXT:    vsetvli a1, s1, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a1, e32, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli s0, a1, e64, m4, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    mv a0, s0
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    vsetvli a0, s0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, s0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    vsetvli a0, s1, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, s1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld s1, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
@@ -406,9 +406,9 @@ define void @test_vsetvl_chain_7(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -418,9 +418,9 @@ define void @test_vsetvl_chain_7(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -438,9 +438,9 @@ define void @test_vsetvl_chain_8(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -450,9 +450,9 @@ define void @test_vsetvl_chain_8(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -470,10 +470,10 @@ define void @test_vsetvl_chain_9(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -483,10 +483,10 @@ define void @test_vsetvl_chain_9(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -505,10 +505,10 @@ define void @test_vsetvl_chain_10(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -518,10 +518,10 @@ define void @test_vsetvl_chain_10(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -540,14 +540,14 @@ define void @test_vsetvl_chain_11(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -557,14 +557,14 @@ define void @test_vsetvl_chain_11(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -587,10 +587,10 @@ define void @test_vsetvl_chain_12(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -600,10 +600,10 @@ define void @test_vsetvl_chain_12(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -622,9 +622,9 @@ define void @test_vsetvl_chain_13(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -634,9 +634,9 @@ define void @test_vsetvl_chain_13(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -654,11 +654,11 @@ define void @test_vsetvl_chain_14(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -668,11 +668,11 @@ define void @test_vsetvl_chain_14(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -692,10 +692,10 @@ define void @test_vsetvl_chain_15(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -705,10 +705,10 @@ define void @test_vsetvl_chain_15(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -727,8 +727,8 @@ define void @test_vsetvl_chain_16(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -738,8 +738,8 @@ define void @test_vsetvl_chain_16(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -758,11 +758,11 @@ define void @test_vsetvl_chain_17(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m2,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m2, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -772,11 +772,11 @@ define void @test_vsetvl_chain_17(i64 %avl) nounwind
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e32,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m2,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e32, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m2, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
@@ -799,15 +799,15 @@ define void @test_vsetvl_chain_18(i64 %avl) nounwind
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    sd a0, 0(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli a0, a0, e32,m1,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld a0, 0(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    vsetvli a0, a0, e16,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m2,ta,mu
-; CHECK-O0-NEXT:    vsetvli a0, a0, e8,m4,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e16, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli a0, a0, e8, m4, ta, mu
 ; CHECK-O0-NEXT:    call use@plt
 ; CHECK-O0-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -818,13 +818,13 @@ define void @test_vsetvl_chain_18(i64 %avl) nounwind
 ; CHECK-O2-NEXT:    addi sp, sp, -16
 ; CHECK-O2-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-O2-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
-; CHECK-O2-NEXT:    vsetvli s0, a0, e64,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, s0, e32,m1,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e16,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli s0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, s0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    vsetvli a0, s0, e16,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m2,ta,mu
-; CHECK-O2-NEXT:    vsetvli a0, a0, e8,m4,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, s0, e16, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m4, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
 ; CHECK-O2-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
@@ -845,12 +845,12 @@ define void @test_vsetvl_chain_18(i64 %avl) nounwind
 define i64 @test_vsetvl_chain_19() nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain_19:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
+; CHECK-O0-NEXT:    vsetvli a0, zero, e8, m1, ta, mu
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain_19:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8,m1,ta,mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, m1, ta, mu
 ; CHECK-O2-NEXT:    ret
 {
   %1 = call i64 @llvm.epi.vsetvlmax.ext(i64 0, i64 0, i64 0)
