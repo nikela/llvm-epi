@@ -27,6 +27,14 @@ define i8* @bitcast_opaque_to_typed(ptr %a) {
   ret i8* %b
 }
 
+@g = global i8 0
+define ptr @bitcast_typed_to_opaque_constexpr() {
+; CHECK-LABEL: @bitcast_typed_to_opaque_constexpr(
+; CHECK-NEXT:    ret ptr bitcast (i8* @g to ptr)
+;
+  ret ptr bitcast (i8* @g to ptr)
+}
+
 ;define ptr @addrspacecast_opaque_to_opaque(ptr addrspace(1) %a) {
 ;  %b = addrspacecast ptr addrspace(1) %a to ptr
 ;  ret ptr %b
@@ -41,3 +49,17 @@ define i8* @bitcast_opaque_to_typed(ptr %a) {
 ;  %b = addrspacecast ptr addrspace(1) %a to i8*
 ;  ret i8* %b
 ;}
+
+define ptr @gep_constexpr_1(ptr %a) {
+; CHECK-LABEL: @gep_constexpr_1(
+; CHECK-NEXT:    ret ptr inttoptr (i64 6 to ptr)
+;
+  ret ptr getelementptr (i16, ptr null, i32 3)
+}
+
+define ptr @gep_constexpr_2(ptr %a) {
+; CHECK-LABEL: @gep_constexpr_2(
+; CHECK-NEXT:    ret ptr bitcast (i8* getelementptr (i8, i8* @g, i64 3) to ptr)
+;
+  ret ptr getelementptr (i8, ptr bitcast (i8* @g to ptr), i32 3)
+}
