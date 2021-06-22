@@ -288,9 +288,10 @@ class EPINulBuiltin<string suffix, string prototype, string type_range>
 // Builtin definitions.
 //===----------------------------------------------------------------------===//
 let HasVL = 0, HasMask = 0, HasSideEffects = 1, LMUL = [1],
-    EPIRVVHeader = 1, ManualCodegen = [{}] in
+    ManualCodegen = [{}] in
 {
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(rvl, sew, lmul) \
+  let EPIRVVHeader = 1,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(rvl, sew, lmul) \
         __builtin_epi_${FullName}_compat(rvl, sew, lmul)
 
 static inline __attribute__((__always_inline__))
@@ -375,7 +376,8 @@ static inline __attribute__((__always_inline__))
 }] in
   def vsetvl : EPIBuiltin<"", "UeUeKUeKUe", "l">;
 
-  let CompatibilityCode = [{#define __builtin_epi_${FullName}(sew, lmul) \
+  let EPIRVVHeader = 1,
+      CompatibilityCode = [{#define __builtin_epi_${FullName}(sew, lmul) \
         __builtin_epi_${FullName}_compat(sew, lmul)
 
 static inline __attribute__((__always_inline__))
@@ -459,6 +461,9 @@ static inline __attribute__((__always_inline__))
 }
 }] in
   def vsetvlmax : EPIBuiltin<"", "UeKUeKUe", "l">;
+
+  def vsetvl_ext : EPIBuiltin<"", "UeUeKUeKUeUe", "l">;
+  def vsetvlmax_ext : EPIBuiltin<"", "UeKUeKUeUe", "l">;
 }
 
 let ManualCodegen = [{
