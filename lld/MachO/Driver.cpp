@@ -252,8 +252,10 @@ static InputFile *addFile(StringRef path, bool forceLoadArchive,
     // Avoid loading archives twice. If the archives are being force-loaded,
     // loading them twice would create duplicate symbol errors. In the
     // non-force-loading case, this is just a minor performance optimization.
-    ArchiveFile *&cachedFile = loadedArchives[path];
-    if (cachedFile)
+    // We don't take a reference to cachedFile here because the
+    // loadArchiveMember() call below may recursively call addFile() and
+    // invalidate this reference.
+    if (ArchiveFile *cachedFile = loadedArchives[path])
       return cachedFile;
 
     std::unique_ptr<object::Archive> file = CHECK(
@@ -295,7 +297,7 @@ static InputFile *addFile(StringRef path, bool forceLoadArchive,
       }
     }
 
-    newFile = cachedFile = make<ArchiveFile>(std::move(file));
+    newFile = loadedArchives[path] = make<ArchiveFile>(std::move(file));
     break;
   }
   case file_magic::macho_object:
@@ -700,22 +702,22 @@ getUndefinedSymbolTreatment(const ArgList &args) {
 
 static ICFLevel getICFLevel(const ArgList &args) {
   bool noDeduplicate = args.hasArg(OPT_no_deduplicate);
-  StringRef icfLevelStr = args.getLastArgValue(OPT_icf);
+  StringRef icfLevelStr = args.getLastArgValue(OPT_icf_eq);
   auto icfLevel = StringSwitch<ICFLevel>(icfLevelStr)
                       .Cases("none", "", ICFLevel::none)
                       .Case("safe", ICFLevel::safe)
                       .Case("all", ICFLevel::all)
                       .Default(ICFLevel::unknown);
   if (icfLevel == ICFLevel::unknown) {
-    warn(Twine("unknown -icf OPTION `") + icfLevelStr +
+    warn(Twine("unknown --icf=OPTION `") + icfLevelStr +
          "', defaulting to `none'");
     icfLevel = ICFLevel::none;
   } else if (icfLevel != ICFLevel::none && noDeduplicate) {
-    warn(Twine("`-icf " + icfLevelStr +
+    warn(Twine("`--icf=" + icfLevelStr +
                "' conflicts with -no_deduplicate, setting to `none'"));
     icfLevel = ICFLevel::none;
   } else if (icfLevel == ICFLevel::safe) {
-    warn(Twine("`-icf safe' is not yet implemented, reverting to `none'"));
+    warn(Twine("`--icf=safe' is not yet implemented, reverting to `none'"));
     icfLevel = ICFLevel::none;
   }
   return icfLevel;
@@ -1073,9 +1075,11 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
   config->deadStripDylibs = args.hasArg(OPT_dead_strip_dylibs);
   config->demangle = args.hasArg(OPT_demangle);
   config->implicitDylibs = !args.hasArg(OPT_no_implicit_dylibs);
-  config->emitFunctionStarts = !args.hasArg(OPT_no_function_starts);
+  config->emitFunctionStarts =
+      args.hasFlag(OPT_function_starts, OPT_no_function_starts, true);
   config->emitBitcodeBundle = args.hasArg(OPT_bitcode_bundle);
-  config->emitDataInCodeInfo = !args.hasArg(OPT_no_data_in_code_info);
+  config->emitDataInCodeInfo =
+      args.hasFlag(OPT_data_in_code_info, OPT_no_data_in_code_info, true);
   config->dedupLiterals = args.hasArg(OPT_deduplicate_literals);
 
   // FIXME: Add a commandline flag for this too.
@@ -1336,6 +1340,7 @@ bool macho::link(ArrayRef<const char *> argsArr, bool canExitEarly,
           }
         }
       }
+      assert(inputSections.size() < UnspecifiedInputOrder);
     }
 
     if (config->deadStrip)
