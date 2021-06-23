@@ -20,16 +20,11 @@ using namespace llvm;
 
 LLT llvm::getLLTForType(Type &Ty, const DataLayout &DL) {
   if (auto VTy = dyn_cast<VectorType>(&Ty)) {
-    auto NumElements = isa<FixedVectorType>(VTy)
-                           ? cast<FixedVectorType>(VTy)->getNumElements()
-                           : cast<ScalableVectorType>(VTy)->getMinNumElements();
-    bool Scalable = isa<ScalableVectorType>(VTy);
+    auto EC = VTy->getElementCount();
     LLT ScalarTy = getLLTForType(*VTy->getElementType(), DL);
-    // FIXME: This does not seem right for scalable vectors but it's been like
-    // this for long so this may have further impact.
-    if (NumElements == 1)
+    if (EC.isScalar())
       return ScalarTy;
-    return LLT::vector(NumElements, ScalarTy, Scalable);
+    return LLT::vector(EC.getKnownMinValue(), ScalarTy, EC.isScalable());
   }
 
   if (auto PTy = dyn_cast<PointerType>(&Ty)) {
