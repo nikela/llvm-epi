@@ -1645,6 +1645,31 @@ entry:
 }
 """
 
+    pattern_vm = """
+declare <vscale x ${result_type_scale} x ${llvm_result_type}> @llvm.epi.${intrinsic}.nxv${result_type_scale}${value_result_type}${vector_value_lhs_type}.nxv${rhs_type_scale}${value_rhs_type}(
+  <vscale x ${lhs_type_scale} x ${llvm_lhs_type}>,
+  <vscale x ${rhs_type_scale} x ${llvm_rhs_type}>,
+  i64);
+
+define void @intrinsic_${intrinsic}_mask_${suffix}_nxv${result_type_scale}${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}_${value_rhs_type}() nounwind {
+entry:
+; CHECK-LABEL: intrinsic_${intrinsic}_mask_${suffix}_nxv${result_type_scale}${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}_${value_rhs_type}
+; CHECK:       vsetvli {{.*}}, a0, ${sew}, ${vlmul}, ta, mu
+; CHECK:       ${instruction}.${suffix} {{v[0-9]+}}, {{v[0-9]+}}, 9, v0.t
+  %a = call <vscale x ${result_type_scale} x ${llvm_result_type}> @llvm.epi.${intrinsic}.mask.nxv${result_type_scale}${value_result_type}${vector_value_lhs_type}.${value_rhs_type}(
+    <vscale x ${result_type_scale} x ${llvm_result_type}> undef,
+    <vscale x ${lhs_type_scale} x ${llvm_lhs_type}> undef,
+    ${llvm_rhs_type} 9,
+    <vscale x ${lhs_type_scale} x i1> undef,
+    i64 undef)
+
+  %p = bitcast i8* @scratch to <vscale x ${result_type_scale} x ${llvm_result_type}>*
+  store <vscale x ${result_type_scale} x ${llvm_result_type}> %a, <vscale x ${result_type_scale} x ${llvm_result_type}>* %p
+
+  ret void
+}
+"""
+
     def __init__(self, intr_name, type_generator, **extra_info):
         self.generates_mask = extra_info.get("generates_mask", False)
         self.is_widening = extra_info.get("widening", False)
@@ -2306,7 +2331,7 @@ intrinsics = [
         BinaryIntrinsic("vmnor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmxnor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
 
-        #BinaryIntrinsic("vcompress", type_generator = generate_binary_any_and_mask_types, variants = vm, mask = False),
+        BinaryIntrinsic("vcompress", type_generator = generate_binary_any_and_mask_types, variants = vm, mask = False),
 
         BinaryIntrinsic("vrgather", type_generator = generate_binary_any_and_integer_types, variants = vv_vx_vi),
 

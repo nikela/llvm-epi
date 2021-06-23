@@ -645,6 +645,17 @@ multiclass pseudo_binary_v_vs {
   }
 }
 
+multiclass pseudo_binary_v_vm_nomask {
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  foreach m = MxList.m in
+  {
+    let VLMul = m.value in
+    {
+      defm _VM : pseudo_binary_nomask<m.vrclass, m.vrclass, VR, m, "">;
+    }
+  }
+}
+
 multiclass pseudo_binary_v_vv_vx {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
@@ -1237,6 +1248,8 @@ defm PseudoEPIVMADC       : pseudo_binary_m_vv_vx_vi_nomask;
 defm PseudoEPIVSBC        : pseudo_binary_v_vvm_vxm;
 defm PseudoEPIVMSBC       : pseudo_binary_m_vvm_vxm;
 defm PseudoEPIVMSBC       : pseudo_binary_m_vv_vx_nomask;
+
+defm PseudoEPIVCOMPRESS   : pseudo_binary_v_vm_nomask;
 
 defm PseudoEPIVWMULU      : pseudo_binary_w_vv_vx;
 defm PseudoEPIVWMULSU     : pseudo_binary_w_vv_vx;
@@ -2858,9 +2871,13 @@ foreach mti = EPIAllMasks in {
 //def : Pat<(int_epi_vmsof_mask VR:$rs1, V0),
 //        (VMSOF_M_MASK $rs1, vmask_only_true.Value)>;
 
-//foreach vtp = EPIAllVectors in
-//def : Pat<(vtp.Vector (int_epi_vcompress (vtp.Vector VR:$rs2), (nxv1i1 VR:$rs1))),
-//          (VCOMPRESS_VM $rs2, $rs1)>;
+foreach vtp = EPIAllVectors in {
+def : Pat<(vtp.Vector (int_epi_vcompress (vtp.Vector vtp.MInfo.vrclass:$rs2),
+                                         (vtp.Mask VR:$rs1),
+                                         GPR:$vl)),
+          (!cast<Instruction>("PseudoEPIVCOMPRESS_VM_" # vtp.MInfo.MX)
+                   $rs2, $rs1, (NoX0 GPR:$vl), vtp.SEW)>;
+}
 
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmandnot", "PseudoEPIVMANDNOT">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmand", "PseudoEPIVMAND">;
