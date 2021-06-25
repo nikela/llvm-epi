@@ -316,7 +316,6 @@ public:
     }
   }
 
-  bool enableInterleavedAccessVectorization() { return true; }
   unsigned getMaxInterleaveFactor(unsigned VF) {
     return ST->getMaxInterleaveFactor();
   }

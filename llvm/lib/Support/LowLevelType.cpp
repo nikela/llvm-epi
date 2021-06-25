@@ -18,15 +18,14 @@ using namespace llvm;
 LLT::LLT(MVT VT) {
   if (VT.isVector()) {
     init(/*IsPointer=*/false, VT.getVectorNumElements() > 1,
-         VT.getVectorNumElements(), VT.getVectorElementType().getSizeInBits(),
-         /*AddressSpace=*/0, VT.isScalableVector());
+         VT.getVectorElementCount(), VT.getVectorElementType().getSizeInBits(),
+         /*AddressSpace=*/0);
   } else if (VT.isValid()) {
     // Aggregates are no different from real scalars as far as GlobalISel is
     // concerned.
     assert(VT.getSizeInBits().isNonZero() && "invalid zero-sized type");
-    init(/*IsPointer=*/false, /*IsVector=*/false, /*NumElements=*/0,
-         VT.getSizeInBits(), /*AddressSpace=*/0,
-         /*isScalable=*/0);
+    init(/*IsPointer=*/false, /*IsVector=*/false, ElementCount::getFixed(0),
+         VT.getSizeInBits(), /*AddressSpace=*/0);
   } else {
     IsPointer = false;
     IsVector = false;
@@ -37,12 +36,8 @@ LLT::LLT(MVT VT) {
 void LLT::print(raw_ostream &OS) const {
   if (isVector()) {
     OS << "<";
-    if (isScalable())
-      OS << "scalable ";
-
-    OS << getNumElements() << " x " << getElementType() << ">";
-  }
-  else if (isPointer())
+    OS << getElementCount() << " x " << getElementType() << ">";
+  } else if (isPointer())
     OS << "p" << getAddressSpace();
   else if (isValid()) {
     assert(isScalar() && "unexpected type");

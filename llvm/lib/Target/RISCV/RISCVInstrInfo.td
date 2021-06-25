@@ -234,7 +234,6 @@ def BareSymbol : AsmOperandClass {
   let ParserMethod = "parseBareSymbol";
 }
 
-
 // A bare symbol.
 def bare_symbol : Operand<XLenVT> {
   let ParserMatchClass = BareSymbol;
@@ -894,6 +893,10 @@ def SLLIUWPat : PatFrag<(ops node:$A, node:$B),
 }]>;
 
 def add_oneuse : PatFrag<(ops node:$A, node:$B), (add node:$A, node:$B), [{
+  return N->hasOneUse();
+}]>;
+
+def mul_oneuse : PatFrag<(ops node:$A, node:$B), (mul node:$A, node:$B), [{
   return N->hasOneUse();
 }]>;
 

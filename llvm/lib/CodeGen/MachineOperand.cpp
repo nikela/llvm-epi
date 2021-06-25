@@ -1038,7 +1038,7 @@ MachineMemOperand::MachineMemOperand(MachinePointerInfo ptrinfo, Flags f,
   AtomicInfo.SSID = static_cast<unsigned>(SSID);
   assert(getSyncScopeID() == SSID && "Value truncated");
   AtomicInfo.Ordering = static_cast<unsigned>(Ordering);
-  assert(getOrdering() == Ordering && "Value truncated");
+  assert(getSuccessOrdering() == Ordering && "Value truncated");
   AtomicInfo.FailureOrdering = static_cast<unsigned>(FailureOrdering);
   assert(getFailureOrdering() == FailureOrdering && "Value truncated");
 }
@@ -1109,8 +1109,8 @@ void MachineMemOperand::print(raw_ostream &OS, ModuleSlotTracker &MST,
 
   printSyncScope(OS, Context, getSyncScopeID(), SSNs);
 
-  if (getOrdering() != AtomicOrdering::NotAtomic)
-    OS << toIRString(getOrdering()) << ' ';
+  if (getSuccessOrdering() != AtomicOrdering::NotAtomic)
+    OS << toIRString(getSuccessOrdering()) << ' ';
   if (getFailureOrdering() != AtomicOrdering::NotAtomic)
     OS << toIRString(getFailureOrdering()) << ' ';
 
