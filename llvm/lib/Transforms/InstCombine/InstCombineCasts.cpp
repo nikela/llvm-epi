@@ -751,9 +751,6 @@ Instruction *InstCombinerImpl::visitTrunc(TruncInst &Trunc) {
   unsigned DestWidth = DestTy->getScalarSizeInBits();
   unsigned SrcWidth = SrcTy->getScalarSizeInBits();
 
-  if (isa<ScalableVectorType>(Trunc.getType()))
-    return nullptr;
-
   // Attempt to truncate the entire input expression tree to the destination
   // type.   Only do this if the dest type is a simple type, don't convert the
   // expression tree to something weird like i93 unless the source is also
@@ -1241,9 +1238,6 @@ Instruction *InstCombinerImpl::visitZExt(ZExtInst &CI) {
 
   Value *Src = CI.getOperand(0);
   Type *SrcTy = Src->getType(), *DestTy = CI.getType();
-
-  if (isa<ScalableVectorType>(CI.getType()))
-    return nullptr;
 
   // Try to extend the entire expression tree to the wide destination type.
   unsigned BitsToClear;
@@ -2300,10 +2294,7 @@ static bool collectInsertionElements(Value *V, unsigned Shift,
 /// Into two insertelements that do "buildvector{%inc, %inc5}".
 static Value *optimizeIntegerToVectorInsertions(BitCastInst &CI,
                                                 InstCombinerImpl &IC) {
-  if (isa<ScalableVectorType>(CI.getType()))
-    return nullptr;
   auto *DestVecTy = cast<FixedVectorType>(CI.getType());
-
   Value *IntInput = CI.getOperand(0);
 
   SmallVector<Value*, 8> Elements(DestVecTy->getNumElements());
@@ -2701,8 +2692,7 @@ Instruction *InstCombinerImpl::visitBitCast(BitCastInst &CI) {
 
   if (FixedVectorType *DestVTy = dyn_cast<FixedVectorType>(DestTy)) {
     // Beware: messing with this target-specific oddity may cause trouble.
-    if (DestVTy->getNumElements() == 1 && !SrcTy->isVectorTy() &&
-        !isa<ScalableVectorType>(DestVTy) && SrcTy->isX86_MMXTy()) {
+    if (DestVTy->getNumElements() == 1 && SrcTy->isX86_MMXTy()) {
       Value *Elem = Builder.CreateBitCast(Src, DestVTy->getElementType());
       return InsertElementInst::Create(PoisonValue::get(DestTy), Elem,
                      Constant::getNullValue(Type::getInt32Ty(CI.getContext())));

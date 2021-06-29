@@ -1026,7 +1026,7 @@ AliasResult BasicAAResult::aliasGEP(
     // to a struct and the indices are <0, X> where X != 0, then this is
     // NoAlias.
     auto IsPointerToStruct = [](Type *Ty) {
-      return isa<PointerType>(Ty) &&
+      return isa<PointerType>(Ty) && !cast<PointerType>(Ty)->isOpaque() &&
              isa<StructType>(cast<PointerType>(Ty)->getElementType());
     };
     auto GEPIndexesScalableVectorField = [](const GEPOperator *GEP) {

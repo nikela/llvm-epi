@@ -11843,6 +11843,21 @@ QualType Sema::CheckCompareOperands(ExprResult &LHS, ExprResult &RHS,
                                    LHS.get()->getSourceRange());
   }
 
+  if (IsOrdered && LHSType->isFunctionPointerType() &&
+      RHSType->isFunctionPointerType()) {
+    // Valid unless a relational comparison of function pointers
+    bool IsError = Opc == BO_Cmp;
+    auto DiagID =
+        IsError ? diag::err_typecheck_ordered_comparison_of_function_pointers
+        : getLangOpts().CPlusPlus
+            ? diag::warn_typecheck_ordered_comparison_of_function_pointers
+            : diag::ext_typecheck_ordered_comparison_of_function_pointers;
+    Diag(Loc, DiagID) << LHSType << RHSType << LHS.get()->getSourceRange()
+                      << RHS.get()->getSourceRange();
+    if (IsError)
+      return QualType();
+  }
+
   if ((LHSType->isIntegerType() && !LHSIsNull) ||
       (RHSType->isIntegerType() && !RHSIsNull)) {
     // Skip normal pointer conversion checks in this case; we have better
@@ -11909,12 +11924,6 @@ QualType Sema::CheckCompareOperands(ExprResult &LHS, ExprResult &RHS,
               << LHS.get()->getSourceRange() << RHS.get()->getSourceRange()
               << LHSType << RHSType << LCanPointeeTy->isIncompleteType()
               << RCanPointeeTy->isIncompleteType();
-        }
-        if (LCanPointeeTy->isFunctionType()) {
-          // Valid unless a relational comparison of function pointers
-          Diag(Loc, diag::ext_typecheck_ordered_comparison_of_function_pointers)
-              << LHSType << RHSType << LHS.get()->getSourceRange()
-              << RHS.get()->getSourceRange();
         }
       }
     } else if (!IsRelational &&
@@ -16763,8 +16772,10 @@ void Sema::PopExpressionEvaluationContext() {
 
   if (!Rec.Lambdas.empty()) {
     using ExpressionKind = ExpressionEvaluationContextRecord::ExpressionKind;
-    if (Rec.ExprContext == ExpressionKind::EK_TemplateArgument || Rec.isUnevaluated() ||
-        (Rec.isConstantEvaluated() && !getLangOpts().CPlusPlus17)) {
+    if (!getLangOpts().CPlusPlus20 &&
+        (Rec.ExprContext == ExpressionKind::EK_TemplateArgument ||
+         Rec.isUnevaluated() ||
+         (Rec.isConstantEvaluated() && !getLangOpts().CPlusPlus17))) {
       unsigned D;
       if (Rec.isUnevaluated()) {
         // C++11 [expr.prim.lambda]p2:
