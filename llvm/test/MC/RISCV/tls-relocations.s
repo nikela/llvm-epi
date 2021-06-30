@@ -1,7 +1,7 @@
 # RUN: llvm-mc -filetype obj -triple riscv64 < %s \
 # RUN:    | llvm-objdump -d -r - | FileCheck %s
 # RUN: llvm-mc -filetype obj -triple riscv64 < %s \
-# RUN:    | llvm-readobj -r -t - | FileCheck --check-prefix=CHECK-ELF %s
+# RUN:    | llvm-readobj -r -s - | FileCheck --check-prefix=CHECK-ELF %s
 
 # CHECK: lui	a0, 0
 # CHECK: R_RISCV_TPREL_HI20	a
