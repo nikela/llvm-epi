@@ -344,8 +344,8 @@ bool RISCVTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
   return true;
 }
 
-void RISCVTargetInfo::adjust(LangOptions &Opts) {
-  TargetInfo::adjust(Opts);
+void RISCVTargetInfo::adjust(DiagnosticsEngine &Diags, LangOptions &Opts) {
+  TargetInfo::adjust(Diags, Opts);
 }
 
 bool RISCV32TargetInfo::isValidCPUName(StringRef Name) const {
