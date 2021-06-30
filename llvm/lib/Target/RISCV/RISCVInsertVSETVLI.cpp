@@ -248,7 +248,7 @@ public:
     if (!Other.isValid())
       return *this;
 
-    // If this value isn't valid, this must be the first predecessor, use it.
+    // If this value isn't valid, Other must be the first predecessor, use it.
     if (!isValid())
       return Other;
 
@@ -536,9 +536,9 @@ bool RISCVInsertVSETVLI::needVSETVLI(const VSETVLIInfo &Require,
     return false;
 
   // We didn't find a compatible value. If our AVL is a virtual register,
-  // it might be defined by a VSET(I)VLI. If it has the same VTYPE we need
-  // and the last VL/VTYPE we observed is the same, we don't need a
-  // VSETVLI here.
+  // it might be defined by a VSET(I)VLI(EXT). If it has the same VTYPE
+  // we need and the last VL/VTYPE we observed is the same, we don't need
+  // a VSETVLI here.
   if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
       Require.getAVLReg().isVirtual() && !CurInfo.hasSEWLMULRatioOnly() &&
       Require.hasSameVTYPE(CurInfo)) {
@@ -561,7 +561,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
 
   BlockData &BBInfo = BlockInfo[MBB.getNumber()];
   for (const MachineInstr &MI : MBB) {
-    // If this is an explicit VSETVLI or VSETIVLI, update our state.
+    // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
@@ -688,14 +688,14 @@ bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
     if (PBBInfo.Exit.isUnknown() || !PBBInfo.Exit.hasSameVTYPE(Require))
       return true;
 
-    // We need the PHI input to the be the output of a VSET(I)VLI.
+    // We need the PHI input to the be the output of a VSET(I)VLI(EXT).
     MachineInstr *DefMI = MRI->getVRegDef(InReg);
     if (!DefMI || (DefMI->getOpcode() != RISCV::PseudoVSETVLI &&
                    DefMI->getOpcode() != RISCV::PseudoVSETIVLI &&
                    DefMI->getOpcode() != RISCV::PseudoVSETVLEXT))
       return true;
 
-    // We found a VSET(I)VLI make sure it matches the output of the
+    // We found a VSET(I)VLI(EXT) make sure it matches the output of the
     // predecessor block.
     VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
     if (!DefInfo.hasSameAVL(PBBInfo.Exit) ||
@@ -712,26 +712,17 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
   VSETVLIInfo CurInfo;
 
   for (MachineInstr &MI : MBB) {
-    // If this is an explicit VSETVLI or VSETIVLI, update our state.
+    // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETIVLI) {
+        MI.getOpcode() == RISCV::PseudoVSETIVLI ||
+        MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       // Conservatively, mark the VL and VTYPE as live.
-      assert(MI.getOperand(3).getReg() == RISCV::VL &&
-             MI.getOperand(4).getReg() == RISCV::VTYPE &&
+      unsigned NumOperands = MI.getNumOperands();
+      assert(MI.getOperand(NumOperands - 2).getReg() == RISCV::VL &&
+             MI.getOperand(NumOperands - 1).getReg() == RISCV::VTYPE &&
              "Unexpected operands where VL and VTYPE should be");
-      MI.getOperand(3).setIsDead(false);
-      MI.getOperand(4).setIsDead(false);
-      CurInfo = getInfoForVSETVLI(MI);
-      continue;
-    }
-    // If this is an explicit PseudoVSETVLEXT, update our state.
-    if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
-      // Conservatively, mark the VL and VTYPE as live.
-      assert(MI.getOperand(4).getReg() == RISCV::VL &&
-             MI.getOperand(5).getReg() == RISCV::VTYPE &&
-             "Unexpected operands where VL and VTYPE should be");
-      MI.getOperand(4).setIsDead(false);
-      MI.getOperand(5).setIsDead(false);
+      MI.getOperand(NumOperands - 2).setIsDead(false);
+      MI.getOperand(NumOperands - 1).setIsDead(false);
       CurInfo = getInfoForVSETVLI(MI);
       continue;
     }
@@ -797,7 +788,8 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         assert(BlockInfo[MBB.getNumber()].Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred)) {
+        if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
+            needVSETVLIPHI(NewInfo, MBB)) {
           insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
           CurInfo = NewInfo;
         }
