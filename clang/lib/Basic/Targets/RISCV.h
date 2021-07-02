@@ -109,7 +109,7 @@ public:
   bool handleTargetFeatures(std::vector<std::string> &Features,
                             DiagnosticsEngine &Diags) override;
 
-  void adjust(LangOptions &Opts) override;
+  void adjust(DiagnosticsEngine &Diags, LangOptions &Opts) override;
 
   bool hasExtIntType() const override { return true; }
 };

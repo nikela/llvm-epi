@@ -1979,11 +1979,7 @@ static Instruction *canonicalizeSelectToShuffle(SelectInst &SI) {
   if (!CondValTy || !match(CondVal, m_Constant(CondC)))
     return nullptr;
 
-  if (isa<ScalableVectorType>(CondVal->getType()))
-    return nullptr;
-
-  unsigned NumElts =
-      cast<FixedVectorType>(CondVal->getType())->getNumElements();
+  unsigned NumElts = CondValTy->getNumElements();
   SmallVector<int, 16> Mask;
   Mask.reserve(NumElts);
   for (unsigned i = 0; i != NumElts; ++i) {
