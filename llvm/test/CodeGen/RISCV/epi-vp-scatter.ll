@@ -11,7 +11,7 @@ define void @nxv1i64_1(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v25, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
-  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, <vscale x 1 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -21,7 +21,7 @@ define void @nxv1i64_2(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vsc
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vsuxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
-  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vscale x 1 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -35,7 +35,7 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
   %splat = shufflevector <vscale x 1 x i64*> %head, <vscale x 1 x i64*> undef, <vscale x 1 x i32> zeroinitializer
-  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %splat, i32 8, <vscale x 1 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %splat, <vscale x 1 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -49,7 +49,7 @@ define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i3
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v26, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
-  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %1, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %1, <vscale x 2 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -59,7 +59,7 @@ define void @nxv2f32_2(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, 
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vsuxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
-  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -73,45 +73,45 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
   %splat = shufflevector <vscale x 2 x float*> %head, <vscale x 2 x float*> undef, <vscale x 2 x i32> zeroinitializer
-  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %splat, i32 4, <vscale x 2 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %splat, <vscale x 2 x i1> %mask, i32 %evl)
   ret void
 }
 
 ; FIXME: Unsupported.
 ;define void @nxv16i8_1(<vscale x 16 x i8> %data, i8* %ptr, <vscale x 16 x i8> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
 ;  %1 = getelementptr i8, i8* %ptr, <vscale x 16 x i8> %indices
-;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %1, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %1, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
 ;define void @nxv16i8_2(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
-;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %ptrs, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
 ;define void @nxv16i8_3(<vscale x 16 x i8> %data, i8* %ptr, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
 ;  %head = insertelement <vscale x 16 x i8*> undef, i8* %ptr, i32 0
 ;  %splat = shufflevector <vscale x 16 x i8*> %head, <vscale x 16 x i8*> undef, <vscale x 16 x i32> zeroinitializer
-;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %splat, i32 1, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8> %data, <vscale x 16 x i8*> %splat, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
 ; FIXME: Unsupported.
 ;define void @nxv16i16_1(<vscale x 16 x i16> %data, i16* %ptr, <vscale x 16 x i16> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
 ;  %1 = getelementptr i16, i16* %ptr, <vscale x 16 x i16> %indices
-;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %1, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %1, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
 ;define void @nxv16i16_2(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
-;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %ptrs, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %ptrs, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
 ;define void @nxv16i16_3(<vscale x 16 x i16> %data, i16* %ptr, <vscale x 16 x i16> %indices, <vscale x 16 x i1> %mask, i32 %evl) nounwind {
 ;  %head = insertelement <vscale x 16 x i16*> undef, i16* %ptr, i32 0
 ;  %splat = shufflevector <vscale x 16 x i16*> %head, <vscale x 16 x i16*> undef, <vscale x 16 x i32> zeroinitializer
-;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %splat, i32 2, <vscale x 16 x i1> %mask, i32 %evl)
+;  call void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16> %data, <vscale x 16 x i16*> %splat, <vscale x 16 x i1> %mask, i32 %evl)
 ;  ret void
 ;}
 
@@ -124,7 +124,7 @@ define void @nxv8f64_1(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x 
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
-  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %1, <vscale x 8 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -134,7 +134,7 @@ define void @nxv8f64_2(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
 ; CHECK-NEXT:    vsuxei64.v v8, (zero), v16, v0.t
 ; CHECK-NEXT:    ret
-  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs, <vscale x 8 x i1> %mask, i32 %evl)
   ret void
 }
 
@@ -148,15 +148,15 @@ define void @nxv8f64_3(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x 
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
   %splat = shufflevector <vscale x 8 x double*> %head, <vscale x 8 x double*> undef, <vscale x 8 x i32> zeroinitializer
-  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %splat, i32 8, <vscale x 8 x i1> %mask, i32 %evl)
+  call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %splat, <vscale x 8 x i1> %mask, i32 %evl)
   ret void
 }
 
 ; LMUL=1
-declare void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64>, <vscale x 1 x i64*>, i32, <vscale x 1 x i1>, i32)
-declare void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float>, <vscale x 2 x float*>, i32, <vscale x 2 x i1>, i32)
+declare void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64>, <vscale x 1 x i64*>, <vscale x 1 x i1>, i32)
+declare void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float>, <vscale x 2 x float*>, <vscale x 2 x i1>, i32)
 
 ; LMUL>1
-declare void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8>, <vscale x 16 x i8*>, i32, <vscale x 16 x i1>, i32)
-declare void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16>, <vscale x 16 x i16*>, i32, <vscale x 16 x i1>, i32)
-declare void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double>, <vscale x 8 x double*>, i32, <vscale x 8 x i1>, i32)
+declare void @llvm.vp.scatter.nxv16i8.nxv16p0i8(<vscale x 16 x i8>, <vscale x 16 x i8*>, <vscale x 16 x i1>, i32)
+declare void @llvm.vp.scatter.nxv16i16.nxv16p0i16(<vscale x 16 x i16>, <vscale x 16 x i16*>, <vscale x 16 x i1>, i32)
+declare void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double>, <vscale x 8 x double*>, <vscale x 8 x i1>, i32)

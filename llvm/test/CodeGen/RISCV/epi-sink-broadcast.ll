@@ -16,11 +16,11 @@ define dso_local void @saxpy(i64 %N, double %d, double* noalias nocapture %c, do
 ; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP1]], i64 3, i64 0)
 ; CHECK-NEXT:    [[TMP3:%.*]] = bitcast double* [[TMP0]] to <vscale x 1 x double>*
 ; CHECK-NEXT:    [[TMP4:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP3]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP4]]), !tbaa [[TBAA4:![0-9]+]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP3]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP4]]), !tbaa [[TBAA4:![0-9]+]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[B:%.*]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP6:%.*]] = bitcast double* [[TMP5]] to <vscale x 1 x double>*
 ; CHECK-NEXT:    [[TMP7:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    [[VP_OP_LOAD14:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP6]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !tbaa [[TBAA4]]
+; CHECK-NEXT:    [[VP_OP_LOAD14:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP6]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !tbaa [[TBAA4]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = trunc i64 [[TMP2]] to i32
 ; CHECK-NEXT:    [[TMP9:%.*]] = insertelement <vscale x 1 x double> undef, double [[D:%.*]], i32 0
 ; CHECK-NEXT:    [[TMP10:%.*]] = shufflevector <vscale x 1 x double> [[TMP9]], <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer
@@ -30,7 +30,7 @@ define dso_local void @saxpy(i64 %N, double %d, double* noalias nocapture %c, do
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds double, double* [[C:%.*]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = bitcast double* [[TMP12]] to <vscale x 1 x double>*
 ; CHECK-NEXT:    [[TMP14:%.*]] = trunc i64 [[TMP2]] to i32
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> [[VP_OP21]], <vscale x 1 x double>* [[TMP13]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP14]]), !tbaa [[TBAA4]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> [[VP_OP21]], <vscale x 1 x double>* [[TMP13]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 [[TMP14]]), !tbaa [[TBAA4]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP2]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
 ; CHECK-NEXT:    br i1 [[TMP15]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
@@ -53,11 +53,11 @@ vector.body:                                      ; preds = %vector.body, %vecto
   %2 = call i64 @llvm.epi.vsetvl(i64 %1, i64 3, i64 0)
   %3 = bitcast double* %0 to <vscale x 1 x double>*
   %4 = trunc i64 %2 to i32
-  %vp.op.load = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %3, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4), !tbaa !4
+  %vp.op.load = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %3, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4), !tbaa !4
   %5 = getelementptr inbounds double, double* %b, i64 %index
   %6 = bitcast double* %5 to <vscale x 1 x double>*
   %7 = trunc i64 %2 to i32
-  %vp.op.load14 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %6, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %7), !tbaa !4
+  %vp.op.load14 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %6, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %7), !tbaa !4
   %8 = trunc i64 %2 to i32
   %vp.op = call <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> %vp.op.load14, <vscale x 1 x double> %broadcast.splat16, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %8)
   %9 = trunc i64 %2 to i32
@@ -65,7 +65,7 @@ vector.body:                                      ; preds = %vector.body, %vecto
   %10 = getelementptr inbounds double, double* %c, i64 %index
   %11 = bitcast double* %10 to <vscale x 1 x double>*
   %12 = trunc i64 %2 to i32
-  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op21, <vscale x 1 x double>* %11, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %12), !tbaa !4
+  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op21, <vscale x 1 x double>* %11, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %12), !tbaa !4
   %index.next = add i64 %index, %2
   %13 = icmp eq i64 %index.next, %N
   br i1 %13, label %for.end, label %vector.body, !llvm.loop !8
@@ -76,13 +76,13 @@ for.end:                                          ; preds = %vector.body, %entry
 
 declare i64 @llvm.epi.vsetvl(i64, i64, i64) #1
 
-declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* nocapture, i32 immarg, <vscale x 1 x i1>, i32) #2
+declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* nocapture, <vscale x 1 x i1>, i32) #2
 
 declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #3
 
 declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #3
 
-declare void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i32 immarg, <vscale x 1 x i1>, i32) #4
+declare void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, <vscale x 1 x i1>, i32) #4
 
 attributes #0 = { nofree norecurse nounwind "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+experimental-v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { nounwind readnone }

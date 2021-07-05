@@ -6371,10 +6371,19 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     return;
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #include "llvm/IR/VPIntrinsics.def"
-    if (!DisableVPRedIntrinsics)
+    {
+    // FIXME: There is a problem when expanding those into SDNodes
+    auto DisabledVPNode = [Intrinsic]() {
+      return Intrinsic == Intrinsic::vp_load ||
+             Intrinsic == Intrinsic::vp_store ||
+             Intrinsic == Intrinsic::vp_gather ||
+             Intrinsic == Intrinsic::vp_scatter;
+    };
+    if (!DisableVPRedIntrinsics && !DisabledVPNode())
       visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
     else
       visitTargetIntrinsic(I, Intrinsic);
+    }
     return;
   case Intrinsic::fmuladd: {
     EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());

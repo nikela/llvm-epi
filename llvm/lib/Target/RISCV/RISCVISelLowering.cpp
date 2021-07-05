@@ -4107,10 +4107,10 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
   default:
     llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_load: {
-    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
+    assert(Op.getOperand(4).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
-    const SDValue &MaskOp = Op.getOperand(4);
+    const SDValue &MaskOp = Op.getOperand(3);
     ConstantSDNode *C;
     if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
         (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
@@ -4122,7 +4122,7 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
           Op.getOperand(2), // Address.
           // FIXME Alignment ignored.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5)) // EVL.
+                      Op.getOperand(4)) // EVL.
       };
     else
       Operands = {
@@ -4130,10 +4130,9 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
           DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL, MVT::i64),
           DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
           Op.getOperand(2),                               // Address.
-          // FIXME Alignment ignored.
-          Op.getOperand(4), // Mask.
+          Op.getOperand(3), // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5)) // EVL.
+                      Op.getOperand(4)) // EVL.
       };
 
     SDValue Result =
@@ -4150,16 +4149,15 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
     SDValue Addresses = Op.getOperand(2);
     GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
 
-    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(4));
 
-    // FIXME Address alignment operand (3) ignored.
     SDValue VLXEOperands[] = {
         Op.getOperand(0), // Chain.
         DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL, MVT::i64),
         DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
         BaseAddr,
         Offsets,
-        Op.getOperand(4), // Mask.
+        Op.getOperand(3), // Mask.
         VL};
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
@@ -4213,10 +4211,10 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
   default:
     llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_store: {
-    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
+    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
-    const SDValue &MaskOp = Op.getOperand(5);
+    const SDValue &MaskOp = Op.getOperand(4);
     ConstantSDNode *C;
     if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
         (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
@@ -4229,7 +4227,7 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
           Op.getOperand(3), // Address.
           // FIXME Alignment ignored.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)), // EVL.
+                      Op.getOperand(5)), // EVL.
       };
     else
       Operands = {
@@ -4237,10 +4235,9 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
           DAG.getTargetConstant(Intrinsic::epi_vstore_mask, DL, MVT::i64),
           Op.getOperand(2), // Value.
           Op.getOperand(3), // Address.
-          // FIXME Alignment ignored.
           MaskOp, // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)), // EVL.
+                      Op.getOperand(5)), // EVL.
       };
 
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
@@ -4255,16 +4252,15 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
     SDValue Addresses = Op.getOperand(3);
     GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
 
-    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(6));
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
 
-    // FIXME Address alignment operand (4) ignored.
     SDValue VSXEOperands[] = {
         Op.getOperand(0), // Chain.
         DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
         Data,
         BaseAddr,
         Offsets,
-        Op.getOperand(5), // Mask.
+        Op.getOperand(4), // Mask.
         VL};
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);

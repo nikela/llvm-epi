@@ -381,10 +381,10 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x double>*
 
-  %i0 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a0, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  %i1 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a1, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  %i2 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a2, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  %i3 = call <vscale x 1 x i64> @llvm.vp.load.nxv1i64(<vscale x 1 x i64>* %a3, i32 8, <vscale x 1 x i1> %m, i32 %n)
+  %i0 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a0, <vscale x 1 x i1> %m, i32 %n)
+  %i1 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a1, <vscale x 1 x i1> %m, i32 %n)
+  %i2 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a2, <vscale x 1 x i1> %m, i32 %n)
+  %i3 = call <vscale x 1 x i64> @llvm.vp.load.nxv1i64(<vscale x 1 x i64>* %a3, <vscale x 1 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %i0, <vscale x 1 x double> %i1, <vscale x 1 x i1> %m, i32 %n)
   %r1 = call <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> %i0, <vscale x 1 x double> %i1, <vscale x 1 x i1> %m, i32 %n)
@@ -395,14 +395,14 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
   %r6 = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> %i0, <vscale x 1 x i1> %m, i32 %n)
   %r7 = call <vscale x 1 x double> @llvm.vp.sitofp.nxv1f64.nxv1i64(<vscale x 1 x i64> %i3, <vscale x 1 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r0, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r1, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r2, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r3, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r4, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r5, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r6, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r7, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r0, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r1, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r2, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r3, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r4, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r5, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r6, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r7, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
 
   ret void
 }
@@ -672,10 +672,10 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 
   %store_addr = bitcast i8* @scratch to <vscale x 2 x float>*
 
-  %i0 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a0, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  %i1 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a1, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  %i2 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a2, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  %i3 = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32(<vscale x 2 x i32>* %a3, i32 8, <vscale x 2 x i1> %allones, i32 %n)
+  %i0 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a0, <vscale x 2 x i1> %allones, i32 %n)
+  %i1 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a1, <vscale x 2 x i1> %allones, i32 %n)
+  %i2 = call <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>* %a2, <vscale x 2 x i1> %allones, i32 %n)
+  %i3 = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32(<vscale x 2 x i32>* %a3, <vscale x 2 x i1> %allones, i32 %n)
 
   %r0 = call <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> %i0, <vscale x 2 x float> %i1, <vscale x 2 x i1> %allones, i32 %n)
   %r1 = call <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float> %i0, <vscale x 2 x float> %i1, <vscale x 2 x i1> %allones, i32 %n)
@@ -686,14 +686,14 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
   %r6 = call <vscale x 2 x float> @llvm.vp.fneg.nxv2f32(<vscale x 2 x float> %i0, <vscale x 2 x i1> %allones, i32 %n)
   %r7 = call <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(<vscale x 2 x i32> %i3, <vscale x 2 x i1> %allones, i32 %n)
 
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r0, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r1, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r2, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r3, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r4, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r5, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r6, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
-  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r7, <vscale x 2 x float>* %store_addr, i32 8, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r0, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r1, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r2, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r3, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r4, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r5, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r6, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
+  call void @llvm.vp.store.nxv2f32(<vscale x 2 x float> %r7, <vscale x 2 x float>* %store_addr, <vscale x 2 x i1> %allones, i32 %n)
 
   ret void
 }
@@ -1081,10 +1081,10 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x double>*
 
-  %i0 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a0, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  %i1 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a1, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  %i2 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a2, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  %i3 = call <vscale x 2 x i64> @llvm.vp.load.nxv2i64(<vscale x 2 x i64>* %a3, i32 8, <vscale x 2 x i1> %m, i32 %n)
+  %i0 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a0, <vscale x 2 x i1> %m, i32 %n)
+  %i1 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a1, <vscale x 2 x i1> %m, i32 %n)
+  %i2 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a2, <vscale x 2 x i1> %m, i32 %n)
+  %i3 = call <vscale x 2 x i64> @llvm.vp.load.nxv2i64(<vscale x 2 x i64>* %a3, <vscale x 2 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 2 x double> @llvm.vp.fadd.nxv2f64(<vscale x 2 x double> %i0, <vscale x 2 x double> %i1, <vscale x 2 x i1> %m, i32 %n)
   %r1 = call <vscale x 2 x double> @llvm.vp.fsub.nxv2f64(<vscale x 2 x double> %i0, <vscale x 2 x double> %i1, <vscale x 2 x i1> %m, i32 %n)
@@ -1095,22 +1095,22 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
   %r6 = call <vscale x 2 x double> @llvm.vp.fneg.nxv2f64(<vscale x 2 x double> %i0, <vscale x 2 x i1> %m, i32 %n)
   %r7 = call <vscale x 2 x double> @llvm.vp.sitofp.nxv2f64.nxv2i64(<vscale x 2 x i64> %i3, <vscale x 2 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r0, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r1, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r2, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r3, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r4, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r5, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r6, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r7, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r0, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r1, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r2, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r3, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r4, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r5, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r6, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r7, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
 
   ret void
 }
 
 ; load/store (m1)
-declare <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>*, i32, <vscale x 1 x i1>, i32)
-declare <vscale x 1 x i64> @llvm.vp.load.nxv1i64(<vscale x 1 x i64>*, i32, <vscale x 1 x i1>, i32)
-declare void @llvm.vp.store.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>*, i32, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>*, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x i64> @llvm.vp.load.nxv1i64(<vscale x 1 x i64>*, <vscale x 1 x i1>, i32)
+declare void @llvm.vp.store.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>*, <vscale x 1 x i1>, i32)
 ; float arith (double, m1)
 declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 declare <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
@@ -1122,9 +1122,9 @@ declare <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double>, <vsca
 declare <vscale x 1 x double> @llvm.vp.sitofp.nxv1f64.nxv1i64(<vscale x 1 x i64>, <vscale x 1 x i1>, i32)
 
 ; load/store (m1)
-declare <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>*, i32, <vscale x 2 x i1>, i32)
-declare <vscale x 2 x i32> @llvm.vp.load.nxv2i32(<vscale x 2 x i32>*, i32, <vscale x 2 x i1>, i32)
-declare void @llvm.vp.store.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>*, i32, <vscale x 2 x i1>, i32)
+declare <vscale x 2 x float> @llvm.vp.load.nxv2f32(<vscale x 2 x float>*, <vscale x 2 x i1>, i32)
+declare <vscale x 2 x i32> @llvm.vp.load.nxv2i32(<vscale x 2 x i32>*, <vscale x 2 x i1>, i32)
+declare void @llvm.vp.store.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>*, <vscale x 2 x i1>, i32)
 ; float arith (float, m1)
 declare <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x i1>, i32)
 declare <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>, <vscale x 2 x i1>, i32)
@@ -1136,9 +1136,9 @@ declare <vscale x 2 x float> @llvm.vp.fneg.nxv2f32(<vscale x 2 x float>, <vscale
 declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i32(<vscale x 2 x i32>, <vscale x 2 x i1>, i32)
 
 ; load/store (m2)
-declare <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>*, i32, <vscale x 2 x i1>, i32)
-declare <vscale x 2 x i64> @llvm.vp.load.nxv2i64(<vscale x 2 x i64>*, i32, <vscale x 2 x i1>, i32)
-declare void @llvm.vp.store.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>*, i32, <vscale x 2 x i1>, i32)
+declare <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>*, <vscale x 2 x i1>, i32)
+declare <vscale x 2 x i64> @llvm.vp.load.nxv2i64(<vscale x 2 x i64>*, <vscale x 2 x i1>, i32)
+declare void @llvm.vp.store.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>*, <vscale x 2 x i1>, i32)
 ; float arith (double, m2)
 declare <vscale x 2 x double> @llvm.vp.fadd.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>, <vscale x 2 x i1>, i32)
 declare <vscale x 2 x double> @llvm.vp.fsub.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>, <vscale x 2 x i1>, i32)

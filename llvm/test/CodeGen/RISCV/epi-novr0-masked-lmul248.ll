@@ -32,18 +32,18 @@ define void @test_lmul_1(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1,
   ; CHECK:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 1 x double>*
 
-  %i0 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a0, i32 8, <vscale x 1 x i1> %m, i32 %n)
-  %i1 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a1, i32 8, <vscale x 1 x i1> %m, i32 %n)
+  %i0 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a0, <vscale x 1 x i1> %m, i32 %n)
+  %i1 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a1, <vscale x 1 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %i0, <vscale x 1 x double> %i1, <vscale x 1 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r0, <vscale x 1 x double>* %store_addr, i32 8, <vscale x 1 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv1f64(<vscale x 1 x double> %r0, <vscale x 1 x double>* %store_addr, <vscale x 1 x i1> %m, i32 %n)
 
   ret void
 }
 
-declare <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>*, i32, <vscale x 1 x i1>, i32)
-declare void @llvm.vp.store.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>*, i32, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>*, <vscale x 1 x i1>, i32)
+declare void @llvm.vp.store.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>*, <vscale x 1 x i1>, i32)
 declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
 define void @test_lmul_2(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1, <vscale x 2 x double>* %a2, <vscale x 2 x i64>* %a3, <vscale x 2 x i1> %m, i32 %n) nounwind {
@@ -74,18 +74,18 @@ define void @test_lmul_2(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1,
   ; CHECK:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 2 x double>*
 
-  %i0 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a0, i32 8, <vscale x 2 x i1> %m, i32 %n)
-  %i1 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a1, i32 8, <vscale x 2 x i1> %m, i32 %n)
+  %i0 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a0, <vscale x 2 x i1> %m, i32 %n)
+  %i1 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a1, <vscale x 2 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 2 x double> @llvm.vp.fadd.nxv2f64(<vscale x 2 x double> %i0, <vscale x 2 x double> %i1, <vscale x 2 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r0, <vscale x 2 x double>* %store_addr, i32 8, <vscale x 2 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv2f64(<vscale x 2 x double> %r0, <vscale x 2 x double>* %store_addr, <vscale x 2 x i1> %m, i32 %n)
 
   ret void
 }
 
-declare <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>*, i32, <vscale x 2 x i1>, i32)
-declare void @llvm.vp.store.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>*, i32, <vscale x 2 x i1>, i32)
+declare <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>*, <vscale x 2 x i1>, i32)
+declare void @llvm.vp.store.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>*, <vscale x 2 x i1>, i32)
 declare <vscale x 2 x double> @llvm.vp.fadd.nxv2f64(<vscale x 2 x double>, <vscale x 2 x double>, <vscale x 2 x i1>, i32)
 
 define void @test_lmul_4(<vscale x 4 x double>* %a0, <vscale x 4 x double>* %a1, <vscale x 4 x double>* %a2, <vscale x 4 x i64>* %a3, <vscale x 4 x i1> %m, i32 %n) nounwind {
@@ -116,18 +116,18 @@ define void @test_lmul_4(<vscale x 4 x double>* %a0, <vscale x 4 x double>* %a1,
   ; CHECK:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 4 x double>*
 
-  %i0 = call <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>* %a0, i32 8, <vscale x 4 x i1> %m, i32 %n)
-  %i1 = call <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>* %a1, i32 8, <vscale x 4 x i1> %m, i32 %n)
+  %i0 = call <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>* %a0, <vscale x 4 x i1> %m, i32 %n)
+  %i1 = call <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>* %a1, <vscale x 4 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 4 x double> @llvm.vp.fadd.nxv4f64(<vscale x 4 x double> %i0, <vscale x 4 x double> %i1, <vscale x 4 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv4f64(<vscale x 4 x double> %r0, <vscale x 4 x double>* %store_addr, i32 8, <vscale x 4 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv4f64(<vscale x 4 x double> %r0, <vscale x 4 x double>* %store_addr, <vscale x 4 x i1> %m, i32 %n)
 
   ret void
 }
 
-declare <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>*, i32, <vscale x 4 x i1>, i32)
-declare void @llvm.vp.store.nxv4f64(<vscale x 4 x double>, <vscale x 4 x double>*, i32, <vscale x 4 x i1>, i32)
+declare <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>*, <vscale x 4 x i1>, i32)
+declare void @llvm.vp.store.nxv4f64(<vscale x 4 x double>, <vscale x 4 x double>*, <vscale x 4 x i1>, i32)
 declare <vscale x 4 x double> @llvm.vp.fadd.nxv4f64(<vscale x 4 x double>, <vscale x 4 x double>, <vscale x 4 x i1>, i32)
 
 define void @test_lmul_8(<vscale x 8 x double>* %a0, <vscale x 8 x double>* %a1, <vscale x 8 x double>* %a2, <vscale x 8 x i64>* %a3, <vscale x 8 x i1> %m, i32 %n) nounwind {
@@ -158,16 +158,16 @@ define void @test_lmul_8(<vscale x 8 x double>* %a0, <vscale x 8 x double>* %a1,
   ; CHECK:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 8 x double>*
 
-  %i0 = call <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>* %a0, i32 8, <vscale x 8 x i1> %m, i32 %n)
-  %i1 = call <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>* %a1, i32 8, <vscale x 8 x i1> %m, i32 %n)
+  %i0 = call <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>* %a0, <vscale x 8 x i1> %m, i32 %n)
+  %i1 = call <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>* %a1, <vscale x 8 x i1> %m, i32 %n)
 
   %r0 = call <vscale x 8 x double> @llvm.vp.fadd.nxv8f64(<vscale x 8 x double> %i0, <vscale x 8 x double> %i1, <vscale x 8 x i1> %m, i32 %n)
 
-  call void @llvm.vp.store.nxv8f64(<vscale x 8 x double> %r0, <vscale x 8 x double>* %store_addr, i32 8, <vscale x 8 x i1> %m, i32 %n)
+  call void @llvm.vp.store.nxv8f64(<vscale x 8 x double> %r0, <vscale x 8 x double>* %store_addr, <vscale x 8 x i1> %m, i32 %n)
 
   ret void
 }
 
-declare <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>*, i32, <vscale x 8 x i1>, i32)
-declare void @llvm.vp.store.nxv8f64(<vscale x 8 x double>, <vscale x 8 x double>*, i32, <vscale x 8 x i1>, i32)
+declare <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>*, <vscale x 8 x i1>, i32)
+declare void @llvm.vp.store.nxv8f64(<vscale x 8 x double>, <vscale x 8 x double>*, <vscale x 8 x i1>, i32)
 declare <vscale x 8 x double> @llvm.vp.fadd.nxv8f64(<vscale x 8 x double>, <vscale x 8 x double>, <vscale x 8 x i1>, i32)
