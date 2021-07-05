@@ -3076,9 +3076,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           Value *BlockInMaskPart = isMaskRequired
                                        ? BlockInMaskParts[Part]
                                        : Builder.getTrueVector(NumElts);
-          Value *Operands[] = {StoredVal, VectorGep,
-                               Builder.getInt32(Alignment.value()),
-                               BlockInMaskPart, EVLPart};
+          Value *Operands[] = {StoredVal, VectorGep, BlockInMaskPart, EVLPart};
           NewSI = Builder.CreateIntrinsic(Intrinsic::vp_scatter,
                                           {DataTy, PtrsTy}, Operands);
 
@@ -3110,8 +3108,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
                   : Builder.getTrueVector(StoredValTy->getElementCount());
 
           NewSI = Builder.CreateCall(
-              VPIntr, {StoredVal, VecPtr, Builder.getInt32(Alignment.value()),
-                       BlockInMaskPart, EVLPart});
+              VPIntr, {StoredVal, VecPtr, BlockInMaskPart, EVLPart});
         } else if (isMaskRequired)
           NewSI = Builder.CreateMaskedStore(StoredVal, VecPtr, Alignment,
                                             BlockInMaskParts[Part]);
@@ -3140,8 +3137,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         Value *BlockInMaskPart = isMaskRequired
                                      ? BlockInMaskParts[Part]
                                      : Builder.getTrueVector(NumElts);
-        Value *Operands[] = {VectorGep, Builder.getInt32(Alignment.value()),
-                             BlockInMaskPart, EVLPart};
+        Value *Operands[] = {VectorGep, BlockInMaskPart, EVLPart};
         NewLI = Builder.CreateIntrinsic(Intrinsic::vp_gather, {DataTy, PtrsTy},
                                         Operands, nullptr, "vp.gather");
       } else {
@@ -3167,9 +3163,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
             isMaskRequired ? MaskValue(Part, VecTy->getElementCount())
                            : Builder.getTrueVector(VecTy->getElementCount());
 
-        NewLI = Builder.CreateCall(VPIntr,
-                                   {VecPtr, Builder.getInt32(Alignment.value()),
-                                    BlockInMaskPart, EVLPart},
+        NewLI = Builder.CreateCall(VPIntr, {VecPtr, BlockInMaskPart, EVLPart},
                                    "vp.op.load");
       } else if (isMaskRequired)
         NewLI = Builder.CreateMaskedLoad(
