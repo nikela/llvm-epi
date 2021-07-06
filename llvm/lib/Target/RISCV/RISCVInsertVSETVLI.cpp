@@ -605,19 +605,21 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     Register ExtraReg;
     // Check if we have more than one predecessor, so that we need the PHI
     if (PrevInfo.getExtras().size() > 1) {
-      ExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
+      Register FakeExtraReg;
       if (PrevInfo.hasFakeExtraOperand()) {
         // Set virtual register to 0
-        BuildMI(MBB, MI, DL, TII->get(RISCV::ADDI))
-            .addReg(ExtraReg, RegState::Define)
+		FakeExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
+        BuildMI(MBB, MI, DL, TII->get(RISCV::ADD))
+            .addReg(FakeExtraReg, RegState::Define)
             .addReg(RISCV::X0, RegState::Kill)
-            .addImm(0);
+            .addReg(RISCV::X0, RegState::Kill);
       }
       // Add PHI instruction
+      ExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
       MachineInstrBuilder MIB =
           BuildMI(MBB, MI, DL, TII->get(RISCV::PHI), ExtraReg);
       for (const ExtraOperand &EO : PrevInfo.getExtras()) {
-        MIB.addReg(EO.Reg != RISCV::NoRegister ? EO.Reg : ExtraReg);
+        MIB.addReg(EO.Reg != RISCV::NoRegister ? EO.Reg : FakeExtraReg);
         MIB.addMBB(EO.MBB);
       }
     } else { // Otherwise just retrive the Extra operand register
