@@ -216,7 +216,7 @@ class LLVMVectorOfAnyPointersToElt<int num> : LLVMMatchType<num>;
 class LLVMVectorElementType<int num> : LLVMMatchType<num>;
 
 // Match the type of another intrinsic parameter that is expected to be a
-// vector type, but change the element count to be half as many
+// vector type, but change the element count to be half as many.
 class LLVMHalfElementsVectorType<int num> : LLVMMatchType<num>;
 
 // Match the type of another intrinsic parameter that is expected to be a
@@ -1368,6 +1368,32 @@ def int_experimental_stepvector : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
                                                         [], [IntrNoMem]>;
 
 //===---------------- Vector Predication Intrinsics --------------===//
+// Memory Intrinsics
+def int_vp_store : DefaultAttrsIntrinsic<[],
+                             [ llvm_anyvector_ty,
+                               LLVMAnyPointerType<LLVMMatchType<0>>,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty],
+                             [ NoCapture<ArgIndex<1>>, IntrNoSync, IntrWriteMem, IntrArgMemOnly, IntrWillReturn ]>;
+
+def int_vp_load  : DefaultAttrsIntrinsic<[ llvm_anyvector_ty],
+                             [ LLVMAnyPointerType<LLVMMatchType<0>>,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty],
+                             [ NoCapture<ArgIndex<0>>, IntrNoSync, IntrReadMem, IntrWillReturn, IntrArgMemOnly ]>;
+
+def int_vp_gather: DefaultAttrsIntrinsic<[ llvm_anyvector_ty],
+                             [ LLVMVectorOfAnyPointersToElt<0>,
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty],
+                             [ IntrReadMem, IntrNoSync, IntrWillReturn, IntrArgMemOnly ]>;
+
+def int_vp_scatter: DefaultAttrsIntrinsic<[],
+                              [ llvm_anyvector_ty,
+                                LLVMVectorOfAnyPointersToElt<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty],
+                              [ IntrArgMemOnly, IntrNoSync, IntrWillReturn ]>; // TODO allow IntrNoCapture for vectors of pointers
 
 // FIXME: TO BE REPLACED
 // The following Memory Intrinsics and Integer Comparison Intrinsic are copied
@@ -1380,46 +1406,6 @@ def int_experimental_stepvector : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
 // Be very careful while using these - Mask and VectorLength properties are
 // commented out because adding them will necessiate changes in other files that
 // will require significant effort to undo.
-
-// Memory Intrinsics
-def int_vp_store : Intrinsic<[],
-                             [ llvm_anyvector_ty,
-                               LLVMAnyPointerType<LLVMMatchType<0>>,
-                               llvm_i32_ty,
-                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                               llvm_i32_ty],
-                             [ NoCapture<ArgIndex<1>>, IntrNoSync, IntrWriteMem,
-                               IntrArgMemOnly, IntrWillReturn,
-                               ImmArg<ArgIndex<2>>
-                               /*, Mask<2>, VectorLength<3>*/ ]>;
-
-def int_vp_load  : Intrinsic<[ llvm_anyvector_ty],
-                             [ LLVMAnyPointerType<LLVMMatchType<0>>,
-                               llvm_i32_ty,
-                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                               llvm_i32_ty],
-                             [ NoCapture<ArgIndex<0>>, IntrNoSync, IntrReadMem,
-                               IntrWillReturn, IntrArgMemOnly,
-                               ImmArg<ArgIndex<1>>
-                               /*, Mask<1>, VectorLength<2>*/ ]>;
-
-def int_vp_gather: Intrinsic<[ llvm_anyvector_ty],
-                             [ LLVMVectorOfAnyPointersToElt<0>, llvm_i32_ty,
-                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                               llvm_i32_ty],
-                             [ IntrReadMem, IntrNoSync, IntrWillReturn,
-                               IntrArgMemOnly, ImmArg<ArgIndex<1>>
-                               /*, Mask<1>, VectorLength<2>*/ ]>;
-
-def int_vp_scatter: Intrinsic<[],
-                              [ llvm_anyvector_ty,
-                                LLVMVectorOfAnyPointersToElt<0>, llvm_i32_ty,
-                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                llvm_i32_ty],
-                              [ IntrWriteMem, IntrArgMemOnly, IntrNoSync,
-                                IntrWillReturn, ImmArg<ArgIndex<2>>
-                                /*, Mask<2>, VectorLength<3>*/ ]>;
-// TODO allow IntrNoCapture for vectors of pointers
 
 // standard fp-math intrinsics.
 // Note: rounding mode and exception control is planned to be integrated using
