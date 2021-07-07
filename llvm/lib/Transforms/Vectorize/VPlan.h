@@ -1202,6 +1202,8 @@ public:
     addOperand(&Start);
   }
 
+  ~VPReductionPHIRecipe() override = default;
+
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *R) {
     return R->getVPDefID() == VPRecipeBase::VPReductionPHISC;

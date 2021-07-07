@@ -1592,7 +1592,7 @@ public:
 
   /// Returns true if the target machine supports all of the reduction
   /// variables found for the given VF.
-  bool canVectorizeReductions(ElementCount VF) {
+  bool canVectorizeReductions(ElementCount VF) const {
     return (all_of(Legal->getReductionVars(), [&](auto &Reduction) -> bool {
       const RecurrenceDescriptor &RdxDesc = Reduction.second;
       return TTI.isLegalToVectorizeReduction(RdxDesc, VF);
@@ -6149,17 +6149,30 @@ LoopVectorizationCostModel::getMaxLegalScalableVF(unsigned MaxSafeElements) {
   auto MaxScalableVF = ElementCount::getScalable(
       std::numeric_limits<ElementCount::ScalarTy>::max());
 
-  // Disable scalable vectorization if the loop contains unsupported reductions.
   // Test that the loop-vectorizer can legalize all operations for this MaxVF.
   // FIXME: While for scalable vectors this is currently sufficient, this should
   // be replaced by a more detailed mechanism that filters out specific VFs,
   // instead of invalidating vectorization for a whole set of VFs based on the
   // MaxVF.
+
+  // Disable scalable vectorization if the loop contains unsupported reductions.
   if (!canVectorizeReductions(MaxScalableVF)) {
     reportVectorizationInfo(
         "Scalable vectorization not supported for the reduction "
         "operations found in this loop.",
         "ScalableVFUnfeasible", ORE, TheLoop);
+    return ElementCount::getScalable(0);
+  }
+
+  // Disable scalable vectorization if the loop contains any instructions
+  // with element types not supported for scalable vectors.
+  if (any_of(ElementTypesInLoop, [&](Type *Ty) {
+        return !Ty->isVoidTy() &&
+               !this->TTI.isElementTypeLegalForScalableVector(Ty);
+      })) {
+    reportVectorizationInfo("Scalable vectorization is not supported "
+                            "for all element types found in this loop.",
+                            "ScalableVFUnfeasible", ORE, TheLoop);
     return ElementCount::getScalable(0);
   }
 
@@ -6882,6 +6895,12 @@ bool LoopVectorizationCostModel::isCandidateForEpilogueVectorization(
         return !(this->isScalarAfterVectorization(Entry.first, VF) ||
                  this->isProfitableToScalarize(Entry.first, VF));
       }))
+    return false;
+
+  // Epilogue vectorization code has not been auditted to ensure it handles
+  // non-latch exits properly.  It may be fine, but it needs auditted and
+  // tested.
+  if (L.getExitingBlock() != L.getLoopLatch())
     return false;
 
   return true;
