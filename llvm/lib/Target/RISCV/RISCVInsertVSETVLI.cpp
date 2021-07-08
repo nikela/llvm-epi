@@ -39,10 +39,7 @@ static cl::opt<bool> DisableInsertVSETVLPHIOpt(
 
 namespace {
 
-struct ExtraOperand {
-  Register Reg;
-  MachineBasicBlock *MBB;
-};
+using ExtraOrigin = std::pair<Register, MachineBasicBlock *>;
 
 class VSETVLIInfo {
   union {
@@ -67,7 +64,7 @@ class VSETVLIInfo {
   uint8_t Nontemporal : 1;
 
   // Extra Operand
-  SmallVector<ExtraOperand> Extras;
+  SmallVector<ExtraOrigin> Extras;
 
 public:
   VSETVLIInfo()
@@ -140,59 +137,72 @@ public:
     Nontemporal = NT;
   }
 
+  const SmallVector<ExtraOrigin> &getExtras() const { return Extras; }
+
+  bool containsExtra(const ExtraOrigin &P) {
+    for (ExtraOrigin &EO : Extras) {
+      if (EO.first == P.first &&
+          EO.second->getNumber() == P.second->getNumber()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void addExtra(Register Reg, const MachineBasicBlock *MBB) {
-    ExtraOperand EO;
-    EO.Reg = Reg;
-    EO.MBB = const_cast<MachineBasicBlock *>(MBB);
-    Extras.push_back(EO);
+    ExtraOrigin EO(Reg, const_cast<MachineBasicBlock *>(MBB));
+    addExtra(EO);
   }
 
-  bool isExtrasEmpty() const { return Extras.empty(); }
-
-  // Checks if the Extras vector contains at least one actual register value
-  bool hasExtraOperand() const {
-    for (const ExtraOperand &EO : getExtras()) {
-      if (EO.Reg != RISCV::NoRegister) {
-        return true;
-      }
+  void addExtra(const ExtraOrigin &EO) {
+    if (!containsExtra(EO)) {
+      Extras.push_back(EO);
     }
-    return false;
   }
 
-  // Checks if the Extras vector contains at least one "fake" Extra operand
-  bool hasFakeExtraOperand() const {
-    for (const ExtraOperand &EO : getExtras()) {
-      if (EO.Reg == RISCV::NoRegister) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  const SmallVector<ExtraOperand> &getExtras() const { return Extras; }
-
-  VSETVLIInfo appendExtrasFrom(const VSETVLIInfo &Other) {
-    for (const ExtraOperand &EO : Other.getExtras()) {
-      addExtra(EO.Reg, EO.MBB);
+  VSETVLIInfo addExtrasFrom(const VSETVLIInfo &Other) {
+    for (const ExtraOrigin &EO : Other.getExtras()) {
+      addExtra(EO);
     }
     return *this;
   }
 
-  VSETVLIInfo replaceExtrasWith(const VSETVLIInfo &Other) {
+  VSETVLIInfo replaceExtras(const VSETVLIInfo &Other) {
     Extras.clear();
-    return appendExtrasFrom(Other);
+    Extras.append(Other.getExtras());
+    return *this;
+  }
+
+  bool isExtrasEmpty() const { return Extras.empty(); }
+
+  // Checks if the Extras vector contains at least one "fake" Extra operand
+  bool hasFakeExtraOperand() const {
+    for (const ExtraOrigin &P : getExtras()) {
+      if (P.first == RISCV::NoRegister) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Checks if the Extras vector contains at least one actual register value
+  bool hasExtraOperand() const {
+    for (const ExtraOrigin &P : getExtras()) {
+      if (P.first != RISCV::NoRegister) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool hasSameExtrasOf(const VSETVLIInfo &Other) {
-    const SmallVector<ExtraOperand> &OtherExtras = Other.getExtras();
-    if (Extras.size() != OtherExtras.size()) {
+    if (Extras.size() != Other.getExtras().size()) {
       return false;
     }
-    for (size_t Index = 0; Index < Extras.size(); Index++) {
-      const ExtraOperand &ThisEO = Extras[Index];
-      const ExtraOperand &OtherEO = OtherExtras[Index];
-      if (ThisEO.Reg != OtherEO.Reg || ThisEO.MBB != OtherEO.MBB)
+    for (const ExtraOrigin &EO : Other.getExtras()) {
+      if (!containsExtra(EO)) {
         return false;
+      }
     }
     return true;
   }
@@ -331,7 +341,7 @@ public:
       if (OtherIsEmpty) {
         this->addExtra(RISCV::NoRegister, MBB);
       } else {
-        this->appendExtrasFrom(Other);
+        this->addExtrasFrom(Other);
       }
       return *this;
     }
@@ -346,11 +356,11 @@ public:
 
     // Otherwise the result is unknown.
     VSETVLIInfo Unknown = VSETVLIInfo::getUnknown();
-    Unknown.appendExtrasFrom(*this);
+    Unknown.addExtrasFrom(*this);
     if (OtherIsEmpty) {
       Unknown.addExtra(RISCV::NoRegister, MBB);
     } else {
-      Unknown.appendExtrasFrom(Other);
+      Unknown.addExtrasFrom(Other);
     }
     return Unknown;
   }
@@ -367,16 +377,10 @@ public:
     // If the change is compatible with the input, we won't create a VSETVLI
     // and should keep the predecessor.
     if (isCompatible(Other)) {
-      if (Other.hasExtraOperand()) {
-        this->replaceExtrasWith(Other);
-      }
-      return *this;
+      return this->replaceExtras(Other);
     }
 
     // Otherwise just use whatever is in this block.
-    if (!Other.hasExtraOperand()) {
-      Other.replaceExtrasWith(*this);
-    }
     return Other;
   }
 };
@@ -403,6 +407,7 @@ struct BlockData {
 class RISCVInsertVSETVLI : public MachineFunctionPass {
   const TargetInstrInfo *TII;
   MachineRegisterInfo *MRI;
+  Optional<Register> FakeExtraReg;
 
   std::vector<BlockData> BlockInfo;
   std::queue<const MachineBasicBlock *> WorkList;
@@ -431,6 +436,7 @@ private:
   bool computeVLVTYPEChanges(const MachineBasicBlock &MBB);
   void computeIncomingVLVTYPE(const MachineBasicBlock &MBB);
   void emitVSETVLIs(MachineBasicBlock &MBB);
+  Register &getFakeRegister(MachineBasicBlock &MBB, DebugLoc DL);
 };
 
 } // end anonymous namespace
@@ -439,6 +445,21 @@ char RISCVInsertVSETVLI::ID = 0;
 
 INITIALIZE_PASS(RISCVInsertVSETVLI, DEBUG_TYPE, RISCV_INSERT_VSETVLI_NAME,
                 false, false)
+
+Register &RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock &MBB,
+                                              DebugLoc DL) {
+  if (!FakeExtraReg.hasValue()) {
+    // Create virtual register and assign 0 to it
+    Register TmpReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
+    MachineBasicBlock &EntryBB = MBB.getParent()->front();
+    BuildMI(EntryBB, EntryBB.getFirstTerminator(), DL, TII->get(RISCV::ADDI))
+        .addReg(TmpReg, RegState::Define)
+        .addReg(RISCV::X0, RegState::Kill)
+        .addImm(0);
+    FakeExtraReg = TmpReg;
+  }
+  return FakeExtraReg.getValue();
+}
 
 static MachineInstr *elideCopies(MachineInstr *MI,
                                  const MachineRegisterInfo *MRI) {
@@ -605,60 +626,27 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     Register ExtraReg;
     // Check if we have more than one predecessor, so that we need the PHI
     if (PrevInfo.getExtras().size() > 1) {
-      Register FakeExtraReg;
-      if (PrevInfo.hasFakeExtraOperand()) {
-        // Set virtual register to 0
-		FakeExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
-        BuildMI(MBB, MI, DL, TII->get(RISCV::ADD))
-            .addReg(FakeExtraReg, RegState::Define)
-            .addReg(RISCV::X0, RegState::Kill)
-            .addReg(RISCV::X0, RegState::Kill);
-      }
       // Add PHI instruction
       ExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
       MachineInstrBuilder MIB =
-          BuildMI(MBB, MI, DL, TII->get(RISCV::PHI), ExtraReg);
-      for (const ExtraOperand &EO : PrevInfo.getExtras()) {
-        MIB.addReg(EO.Reg != RISCV::NoRegister ? EO.Reg : FakeExtraReg);
-        MIB.addMBB(EO.MBB);
+          BuildMI(MBB, MBB.begin(), DL, TII->get(RISCV::PHI), ExtraReg);
+      for (const ExtraOrigin &P : PrevInfo.getExtras()) {
+        MIB.addReg(P.first != RISCV::NoRegister ? P.first
+                                                : getFakeRegister(MBB, DL));
+        MIB.addMBB(P.second);
       }
     } else { // Otherwise just retrive the Extra operand register
-      ExtraReg = PrevInfo.getExtras()[0].Reg;
+      ExtraReg = (*PrevInfo.getExtras().begin()).first;
     }
 
-    // Use X0, X0 form if the AVL is the same and the SEW+LMUL gives the same
-    // VLMAX.
-    if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
-        Info.hasSameAVL(PrevInfo) && Info.hasSameVLMAX(PrevInfo)) {
-      BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLEXT))
-          .addReg(RISCV::X0, RegState::Define | RegState::Dead)
-          .addReg(RISCV::X0, RegState::Kill)
-          .addImm(Info.encodeVTYPE())
-          .addReg(ExtraReg)
-          .addReg(RISCV::VL, RegState::Implicit);
-      return;
-    }
+    // We do not handle the case where the VL is an immediate, since
+    // it never happens in EPI
+    assert(!Info.hasAVLImm() && "AVL should be in a register");
 
-    // FIXME? Skipping the case of AVLImm
-
-    Register AVLReg = Info.getAVLReg();
-    if (AVLReg == RISCV::NoRegister) {
-      BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLEXT))
-          .addReg(RISCV::X0, RegState::Define | RegState::Dead)
-          .addReg(RISCV::X0, RegState::Kill)
-          .addImm(Info.encodeVTYPE())
-          .addReg(ExtraReg)
-          .addReg(RISCV::VL, RegState::Implicit);
-      return;
-    }
-
-    // Use X0 as the DestReg unless AVLReg is X0.
-    Register DestReg = RISCV::X0;
-    if (AVLReg == RISCV::X0)
-      DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
+    Register DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
     BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLEXT))
         .addReg(DestReg, RegState::Define | RegState::Dead)
-        .addReg(AVLReg)
+        .addReg(Info.getAVLReg())
         .addImm(Info.encodeVTYPE())
         .addReg(ExtraReg);
   }
@@ -721,11 +709,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       HadVectorOp = true;
-      VSETVLIInfo Tmp = getInfoForVSETVLI(MI);
-      if (!Tmp.hasExtraOperand()) {
-        Tmp.replaceExtrasWith(BBInfo.Change);
-      }
-      BBInfo.Change = Tmp;
+      BBInfo.Change = getInfoForVSETVLI(MI);
       continue;
     }
 
@@ -741,7 +725,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         if (needVSETVLI(NewInfo, BBInfo.Change))
-          BBInfo.Change = NewInfo.appendExtrasFrom(BBInfo.Change);
+          BBInfo.Change = NewInfo.addExtrasFrom(BBInfo.Change);
       }
     }
 
@@ -763,7 +747,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         if (needVSETVLI(NewInfo, BBInfo.Change))
-          BBInfo.Change = NewInfo.appendExtrasFrom(BBInfo.Change);
+          BBInfo.Change = NewInfo.addExtrasFrom(BBInfo.Change);
       }
     }
 
@@ -771,7 +755,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
     // the state to unknown.
     if (MI.isCall() || MI.isInlineAsm() || MI.modifiesRegister(RISCV::VL) ||
         MI.modifiesRegister(RISCV::VTYPE)) {
-      BBInfo.Change = VSETVLIInfo::getUnknown().appendExtrasFrom(BBInfo.Change);
+      BBInfo.Change = VSETVLIInfo::getUnknown().addExtrasFrom(BBInfo.Change);
     }
   }
 
@@ -884,11 +868,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
              "Unexpected operands where VL and VTYPE should be");
       MI.getOperand(NumOperands - 2).setIsDead(false);
       MI.getOperand(NumOperands - 1).setIsDead(false);
-      VSETVLIInfo Tmp = getInfoForVSETVLI(MI);
-      if (!Tmp.hasExtraOperand()) {
-        Tmp.replaceExtrasWith(CurInfo);
-      }
-      CurInfo = Tmp;
+      CurInfo = getInfoForVSETVLI(MI);
       continue;
     }
 
@@ -916,14 +896,14 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
             needVSETVLIPHI(NewInfo, MBB)) {
           insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
-          CurInfo = NewInfo.appendExtrasFrom(CurInfo);
+          CurInfo = NewInfo.addExtrasFrom(CurInfo);
         }
       } else {
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         if (needVSETVLI(NewInfo, CurInfo)) {
           insertVSETVLI(MBB, MI, NewInfo, CurInfo);
-          CurInfo = NewInfo.appendExtrasFrom(CurInfo);
+          CurInfo = NewInfo.addExtrasFrom(CurInfo);
         }
       }
     }
@@ -956,14 +936,14 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
             needVSETVLIPHI(NewInfo, MBB)) {
           insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
-          CurInfo = NewInfo.appendExtrasFrom(CurInfo);
+          CurInfo = NewInfo.addExtrasFrom(CurInfo);
         }
       } else {
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         if (needVSETVLI(NewInfo, CurInfo)) {
           insertVSETVLI(MBB, MI, NewInfo, CurInfo);
-          CurInfo = NewInfo.appendExtrasFrom(CurInfo);
+          CurInfo = NewInfo.addExtrasFrom(CurInfo);
         }
       }
     }
@@ -972,7 +952,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     // the state to unknown.
     if (MI.isCall() || MI.isInlineAsm() || MI.modifiesRegister(RISCV::VL) ||
         MI.modifiesRegister(RISCV::VTYPE)) {
-      CurInfo = VSETVLIInfo::getUnknown().appendExtrasFrom(CurInfo);
+      CurInfo = VSETVLIInfo::getUnknown().addExtrasFrom(CurInfo);
     }
   }
 }
