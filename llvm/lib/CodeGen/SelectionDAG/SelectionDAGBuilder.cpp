@@ -4422,7 +4422,7 @@ static bool getUniformBase(const Value *Ptr, SDValue &Base, SDValue &Index,
 
     Base = SDB->getValue(C);
 
-    unsigned NumElts = cast<FixedVectorType>(Ptr->getType())->getNumElements();
+    ElementCount NumElts = cast<VectorType>(Ptr->getType())->getElementCount();
     EVT VT = EVT::getVectorVT(*DAG.getContext(), TLI.getPointerTy(DL), NumElts);
     Index = DAG.getConstant(0, SDB->getCurSDLoc(), VT);
     IndexType = ISD::SIGNED_SCALED;
@@ -9663,18 +9663,14 @@ TargetLowering::LowerCallTo(TargetLowering::CallLoweringInfo &CLI) const {
       }
       Align MemAlign;
       if (Args[i].IsByVal || Args[i].IsInAlloca || Args[i].IsPreallocated) {
-        PointerType *Ty = cast<PointerType>(Args[i].Ty);
-        Type *ElementTy = Ty->getElementType();
-
-        unsigned FrameSize = DL.getTypeAllocSize(
-            Args[i].ByValType ? Args[i].ByValType : ElementTy);
+        unsigned FrameSize = DL.getTypeAllocSize(Args[i].IndirectType);
         Flags.setByValSize(FrameSize);
 
         // info is not there but there are cases it cannot get right.
         if (auto MA = Args[i].Alignment)
           MemAlign = *MA;
         else
-          MemAlign = Align(getByValTypeAlignment(ElementTy, DL));
+          MemAlign = Align(getByValTypeAlignment(Args[i].IndirectType, DL));
       } else if (auto MA = Args[i].Alignment) {
         MemAlign = *MA;
       } else {
