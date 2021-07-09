@@ -315,6 +315,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   if (Subtarget.hasStdExtZfh()) {
     setOperationAction(ISD::FMINNUM, MVT::f16, Legal);
     setOperationAction(ISD::FMAXNUM, MVT::f16, Legal);
+    setOperationAction(ISD::LRINT, MVT::f16, Legal);
+    setOperationAction(ISD::LLRINT, MVT::f16, Legal);
+    setOperationAction(ISD::LROUND, MVT::f16, Legal);
+    setOperationAction(ISD::LLROUND, MVT::f16, Legal);
     for (auto CC : FPCCToExpand)
       setCondCodeAction(CC, MVT::f16, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f16, Expand);
@@ -327,6 +331,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   if (Subtarget.hasStdExtF()) {
     setOperationAction(ISD::FMINNUM, MVT::f32, Legal);
     setOperationAction(ISD::FMAXNUM, MVT::f32, Legal);
+    setOperationAction(ISD::LRINT, MVT::f32, Legal);
+    setOperationAction(ISD::LLRINT, MVT::f32, Legal);
+    setOperationAction(ISD::LROUND, MVT::f32, Legal);
+    setOperationAction(ISD::LLROUND, MVT::f32, Legal);
     for (auto CC : FPCCToExpand)
       setCondCodeAction(CC, MVT::f32, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f32, Expand);
@@ -344,6 +352,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   if (Subtarget.hasStdExtD()) {
     setOperationAction(ISD::FMINNUM, MVT::f64, Legal);
     setOperationAction(ISD::FMAXNUM, MVT::f64, Legal);
+    setOperationAction(ISD::LRINT, MVT::f64, Legal);
+    setOperationAction(ISD::LLRINT, MVT::f64, Legal);
+    setOperationAction(ISD::LROUND, MVT::f64, Legal);
+    setOperationAction(ISD::LLROUND, MVT::f64, Legal);
     for (auto CC : FPCCToExpand)
       setCondCodeAction(CC, MVT::f64, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f64, Expand);
@@ -4107,10 +4119,10 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
   default:
     llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_load: {
-    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
+    assert(Op.getOperand(4).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
-    const SDValue &MaskOp = Op.getOperand(4);
+    const SDValue &MaskOp = Op.getOperand(3);
     ConstantSDNode *C;
     if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
         (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
@@ -4122,7 +4134,7 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
           Op.getOperand(2), // Address.
           // FIXME Alignment ignored.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5)) // EVL.
+                      Op.getOperand(4)) // EVL.
       };
     else
       Operands = {
@@ -4130,10 +4142,9 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
           DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL, MVT::i64),
           DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
           Op.getOperand(2),                               // Address.
-          // FIXME Alignment ignored.
-          Op.getOperand(4), // Mask.
+          Op.getOperand(3), // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(5)) // EVL.
+                      Op.getOperand(4)) // EVL.
       };
 
     SDValue Result =
@@ -4150,16 +4161,15 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
     SDValue Addresses = Op.getOperand(2);
     GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
 
-    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(4));
 
-    // FIXME Address alignment operand (3) ignored.
     SDValue VLXEOperands[] = {
         Op.getOperand(0), // Chain.
         DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL, MVT::i64),
         DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
         BaseAddr,
         Offsets,
-        Op.getOperand(4), // Mask.
+        Op.getOperand(3), // Mask.
         VL};
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
@@ -4213,10 +4223,10 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
   default:
     llvm_unreachable("Unexpected intrinsic");
   case Intrinsic::vp_store: {
-    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
+    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
-    const SDValue &MaskOp = Op.getOperand(5);
+    const SDValue &MaskOp = Op.getOperand(4);
     ConstantSDNode *C;
     if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
         (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
@@ -4229,7 +4239,7 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
           Op.getOperand(3), // Address.
           // FIXME Alignment ignored.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)), // EVL.
+                      Op.getOperand(5)), // EVL.
       };
     else
       Operands = {
@@ -4237,10 +4247,9 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
           DAG.getTargetConstant(Intrinsic::epi_vstore_mask, DL, MVT::i64),
           Op.getOperand(2), // Value.
           Op.getOperand(3), // Address.
-          // FIXME Alignment ignored.
           MaskOp, // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                      Op.getOperand(6)), // EVL.
+                      Op.getOperand(5)), // EVL.
       };
 
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
@@ -4255,16 +4264,15 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
     SDValue Addresses = Op.getOperand(3);
     GetBaseAddressAndOffsets(Addresses, OffsetsVT, DL, DAG, BaseAddr, Offsets);
 
-    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(6));
+    SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
 
-    // FIXME Address alignment operand (4) ignored.
     SDValue VSXEOperands[] = {
         Op.getOperand(0), // Chain.
         DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
         Data,
         BaseAddr,
         Offsets,
-        Op.getOperand(5), // Mask.
+        Op.getOperand(4), // Mask.
         VL};
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
@@ -7876,6 +7884,47 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
     }
     break;
   }
+  case RISCVISD::MUL_VL: {
+    // Try to form VWMUL or VWMULU.
+    // FIXME: Look for splat of extended scalar as well.
+    // FIXME: Support VWMULSU.
+    SDValue Op0 = N->getOperand(0);
+    SDValue Op1 = N->getOperand(1);
+    bool IsSignExt = Op0.getOpcode() == RISCVISD::VSEXT_VL;
+    bool IsZeroExt = Op0.getOpcode() == RISCVISD::VZEXT_VL;
+    if ((!IsSignExt && !IsZeroExt) || Op0.getOpcode() != Op1.getOpcode())
+      return SDValue();
+
+    // Make sure the extends have a single use.
+    if (!Op0.hasOneUse() || !Op1.hasOneUse())
+      return SDValue();
+
+    SDValue Mask = N->getOperand(2);
+    SDValue VL = N->getOperand(3);
+    if (Op0.getOperand(1) != Mask || Op1.getOperand(1) != Mask ||
+        Op0.getOperand(2) != VL || Op1.getOperand(2) != VL)
+      return SDValue();
+
+    Op0 = Op0.getOperand(0);
+    Op1 = Op1.getOperand(0);
+
+    MVT VT = N->getSimpleValueType(0);
+    MVT NarrowVT =
+        MVT::getVectorVT(MVT::getIntegerVT(VT.getScalarSizeInBits() / 2),
+                         VT.getVectorElementCount());
+
+    SDLoc DL(N);
+
+    // Re-introduce narrower extends if needed.
+    unsigned ExtOpc = IsSignExt ? RISCVISD::VSEXT_VL : RISCVISD::VZEXT_VL;
+    if (Op0.getValueType() != NarrowVT)
+      Op0 = DAG.getNode(ExtOpc, DL, NarrowVT, Op0, Mask, VL);
+    if (Op1.getValueType() != NarrowVT)
+      Op1 = DAG.getNode(ExtOpc, DL, NarrowVT, Op1, Mask, VL);
+
+    unsigned WMulOpc = IsSignExt ? RISCVISD::VWMUL_VL : RISCVISD::VWMULU_VL;
+    return DAG.getNode(WMulOpc, DL, VT, Op0, Op1, Mask, VL);
+  }
   }
 
   return SDValue();
@@ -10252,6 +10301,8 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(UINT_TO_FP_VL)
   NODE_NAME_CASE(FP_EXTEND_VL)
   NODE_NAME_CASE(FP_ROUND_VL)
+  NODE_NAME_CASE(VWMUL_VL)
+  NODE_NAME_CASE(VWMULU_VL)
   NODE_NAME_CASE(SETCC_VL)
   NODE_NAME_CASE(VSELECT_VL)
   NODE_NAME_CASE(VMAND_VL)

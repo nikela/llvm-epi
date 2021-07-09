@@ -1,14 +1,14 @@
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
-; RUN:    -loop-vectorize < %s -o - | FileCheck %s --check-prefix=CHECK-IR
+; RUN:    -loop-vectorize -scalable-vectorization=only < %s -o - | FileCheck %s --check-prefix=CHECK-IR
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
-; RUN:    -loop-vectorize \
+; RUN:    -loop-vectorize -scalable-vectorization=only \
 ; RUN:    -prefer-predicate-over-epilogue=predicate-dont-vectorize < %s -o - \
 ; RUN:    | FileCheck %s --check-prefix=CHECK-IR
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
-; RUN:    -loop-vectorize -debug-only=loop-vectorize \
+; RUN:    -loop-vectorize -scalable-vectorization=only -debug-only=loop-vectorize \
 ; RUN:    < %s -o - 2>&1 | FileCheck %s --check-prefix=CHECK-DBG
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
-; RUN:    -loop-vectorize -debug-only=loop-vectorize \
+; RUN:    -loop-vectorize -scalable-vectorization=only -debug-only=loop-vectorize \
 ; RUN:    -prefer-predicate-over-epilogue=predicate-dont-vectorize < %s -o - \
 ; RUN:    2>&1 | FileCheck %s --check-prefix=CHECK-DBG
 

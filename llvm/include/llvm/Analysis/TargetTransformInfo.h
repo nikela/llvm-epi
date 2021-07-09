@@ -859,8 +859,11 @@ public:
     SK_ExtractSubvector, ///< ExtractSubvector Index indicates start offset.
     SK_PermuteTwoSrc,    ///< Merge elements from two source vectors into one
                          ///< with any shuffle mask.
-    SK_PermuteSingleSrc  ///< Shuffle elements of single source vector with any
+    SK_PermuteSingleSrc, ///< Shuffle elements of single source vector with any
                          ///< shuffle mask.
+    SK_Splice            ///< Concatenates elements from the first input vector
+                         ///< with elements of the second input vector. Returning
+                         ///< a vector of the same type as the input vectors.
   };
 
   /// Kind of the reduction data.
@@ -944,7 +947,8 @@ public:
 
   std::pair<ElementCount, ElementCount> getFeasibleMaxVFRange(
       RegisterKind K, unsigned SmallestType, unsigned WidestType,
-      unsigned MaxSafeRegisterWidth = -1U, unsigned RegWidthFactor = 1) const;
+      unsigned MaxSafeRegisterWidth = -1U, unsigned RegWidthFactor = 1,
+      bool IsScalable = false) const;
 
   /// \return The maximum value of vscale if the target specifies an
   ///  architectural maximum vector length, and None otherwise.
@@ -1336,6 +1340,9 @@ public:
   bool isLegalToVectorizeReduction(const RecurrenceDescriptor &RdxDesc,
                                    ElementCount VF) const;
 
+  /// \returns True if the given type is supported for scalable vectors
+  bool isElementTypeLegalForScalableVector(Type *Ty) const;
+
   /// \returns The new vector factor value if the target doesn't support \p
   /// SizeInBytes loads or has a better vector factor.
   unsigned getLoadVectorFactor(unsigned VF, unsigned LoadSize,
@@ -1381,9 +1388,6 @@ public:
   /// \returns the size cost of rematerializing a GlobalValue address relative
   /// to a stack reload.
   unsigned getGISelRematGlobalCost() const;
-
-  /// \returns True if the target wants to use Scalable vectors.
-  bool useScalableVectorType() const;
 
   /// \returns True if the target prefers using vector predication for all Ops
   /// instead of just loads and stores.
@@ -1600,7 +1604,8 @@ public:
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const = 0;
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const = 0;
   virtual Optional<unsigned> getMaxVScale() const = 0;
   virtual bool shouldMaximizeVectorBandwidth() const = 0;
   virtual ElementCount getMinimumVF(unsigned ElemWidth,
@@ -1735,6 +1740,7 @@ public:
                                             unsigned AddrSpace) const = 0;
   virtual bool isLegalToVectorizeReduction(const RecurrenceDescriptor &RdxDesc,
                                            ElementCount VF) const = 0;
+  virtual bool isElementTypeLegalForScalableVector(Type *Ty) const = 0;
   virtual unsigned getLoadVectorFactor(unsigned VF, unsigned LoadSize,
                                        unsigned ChainSizeInBytes,
                                        VectorType *VecTy) const = 0;
@@ -1749,7 +1755,6 @@ public:
   virtual unsigned getGISelRematGlobalCost() const = 0;
   virtual bool supportsScalableVectors() const = 0;
   virtual bool hasActiveVectorLength() const = 0;
-  virtual bool useScalableVectorType() const = 0;
   virtual bool preferPredicatedVectorOps() const = 0;
   virtual InstructionCost getInstructionLatency(const Instruction *I) = 0;
   virtual VPLegalization
@@ -2066,9 +2071,11 @@ public:
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const override {
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const override {
     return Impl.getFeasibleMaxVFRange(K, SmallestType, WidestType,
-                                      MaxSafeRegisterWidth, RegWidthFactor);
+                                      MaxSafeRegisterWidth, RegWidthFactor,
+                                      IsScalable);
   }
   Optional<unsigned> getMaxVScale() const override {
     return Impl.getMaxVScale();
@@ -2305,6 +2312,9 @@ public:
                                    ElementCount VF) const override {
     return Impl.isLegalToVectorizeReduction(RdxDesc, VF);
   }
+  bool isElementTypeLegalForScalableVector(Type *Ty) const override {
+    return Impl.isElementTypeLegalForScalableVector(Ty);
+  }
   unsigned getLoadVectorFactor(unsigned VF, unsigned LoadSize,
                                unsigned ChainSizeInBytes,
                                VectorType *VecTy) const override {
@@ -2341,10 +2351,6 @@ public:
 
   InstructionCost getInstructionLatency(const Instruction *I) override {
     return Impl.getInstructionLatency(I);
-  }
-
-  bool useScalableVectorType() const override {
-    return Impl.useScalableVectorType();
   }
 
   bool preferPredicatedVectorOps() const override {

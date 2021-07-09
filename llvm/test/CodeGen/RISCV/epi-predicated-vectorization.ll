@@ -57,22 +57,22 @@ vector.body:                                      ; preds = %vector.body, %for.b
   %2 = call i64 @llvm.epi.vsetvl(i64 %1, i64 3, i64 0)
   %3 = bitcast double* %0 to <vscale x 1 x double>*
   %4 = trunc i64 %2 to i32
-  %vp.op.load = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %3, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
+  %vp.op.load = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %3, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %vp.op.fcmp = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %vp.op.load, <vscale x 1 x double> shufflevector (<vscale x 1 x double> insertelement (<vscale x 1 x double> undef, double 3.000000e+00, i32 0), <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer), i8 4, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %5 = and <vscale x 1 x i1> %vp.op.fcmp, shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer)
   %6 = getelementptr inbounds double, double* %a, i64 %index
   %7 = bitcast double* %6 to <vscale x 1 x double>*
-  %vp.op.load30 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %7, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
+  %vp.op.load30 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %7, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %8 = getelementptr inbounds double, double* %b, i64 %index
   %9 = bitcast double* %8 to <vscale x 1 x double>*
-  %vp.op.load33 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %9, i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
+  %vp.op.load33 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %9, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %10 = xor <vscale x 1 x i1> %5, shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer)
   %vp.op = call <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, <vscale x 1 x i1> %10, i32 %4)
   %11 = getelementptr inbounds double, double* %d, i64 %index
   %12 = bitcast double* %11 to <vscale x 1 x double>*
-  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op, <vscale x 1 x double>* %12, i32 8, <vscale x 1 x i1> %10, i32 %4)
+  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op, <vscale x 1 x double>* %12, <vscale x 1 x i1> %10, i32 %4)
   %vp.op36 = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %vp.op.load30, <vscale x 1 x double> %vp.op.load33, <vscale x 1 x i1> %5, i32 %4)
-  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op36, <vscale x 1 x double>* %3, i32 8, <vscale x 1 x i1> %5, i32 %4)
+  call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %vp.op36, <vscale x 1 x double>* %3, <vscale x 1 x i1> %5, i32 %4)
   %index.next = add i64 %index, %2
   %13 = icmp eq i64 %index.next, %wide.trip.count
   br i1 %13, label %for.cond.cleanup, label %vector.body
@@ -85,7 +85,7 @@ for.cond.cleanup:                                 ; preds = %vector.body, %entry
 declare i64 @llvm.epi.vsetvl(i64, i64, i64) #1
 
 ; Function Attrs: argmemonly nosync nounwind readonly willreturn
-declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* nocapture, i32 immarg, <vscale x 1 x i1>, i32) #2
+declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* nocapture, <vscale x 1 x i1>, i32) #2
 
 ; Function Attrs: nosync nounwind readnone willreturn
 declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, i8 immarg, <vscale x 1 x i1>, i32) #3
@@ -94,7 +94,7 @@ declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x
 declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #4
 
 ; Function Attrs: argmemonly nosync nounwind willreturn writeonly
-declare void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i32 immarg, <vscale x 1 x i1>, i32) #5
+declare void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, <vscale x 1 x i1>, i32) #5
 
 ; Function Attrs: nounwind readnone willreturn
 declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #4

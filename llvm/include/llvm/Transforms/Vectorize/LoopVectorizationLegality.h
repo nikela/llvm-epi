@@ -110,6 +110,8 @@ public:
     /// Vectorize loops using scalable vectors or fixed-width  vectors, but
     /// favor fixed-width vectors when the cost is inconclusive.
     SK_PreferFixedWidth = 2,
+    /// Disables vectorization with fixed size vectors.
+    SK_ScalableOnly = 3,
   };
 
   LoopVectorizeHints(const Loop *L, bool InterleaveOnlyWhenForced,
@@ -156,12 +158,19 @@ public:
   /// \return true if scalable vectorization has been explicitly enabled.
   bool isScalableVectorizationExplicitlyEnabled() const {
     return Scalable.Value == SK_PreferFixedWidth ||
-           Scalable.Value == SK_PreferScalable;
+           Scalable.Value == SK_PreferScalable ||
+           Scalable.Value == SK_ScalableOnly;
   }
 
   /// \return true if scalable vectorization has been explicitly disabled.
   bool isScalableVectorizationDisabled() const {
     return Scalable.Value == SK_FixedWidthOnly;
+  }
+
+  /// \return true if fixed vectorization has been explicitly disabled (and only
+  /// scalable vectorization can be used).
+  bool isFixedVectorizationDisabled() const {
+    return Scalable.Value == SK_ScalableOnly;
   }
 
   /// If hints are provided that force vectorization, use the AlwaysPrint

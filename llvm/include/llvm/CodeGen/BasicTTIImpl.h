@@ -666,11 +666,11 @@ public:
   getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                         unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const {
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const {
     unsigned WidestRegister =
         static_cast<const T *>(this)->getRegisterBitWidth(K).getFixedSize();
     WidestRegister = std::min(WidestRegister, MaxSafeRegisterWidth);
-    bool IsScalable = static_cast<const T *>(this)->useScalableVectorType();
 
     unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
     ElementCount LowerBoundVF =
@@ -810,6 +810,27 @@ public:
       return LT.first * 2 * OpCost;
     }
 
+    // An 'Expand' of URem and SRem is special because it may default
+    // to expanding the operation into a sequence of sub-operations
+    // i.e. X % Y -> X-(X/Y)*Y.
+    if (ISD == ISD::UREM || ISD == ISD::SREM) {
+      bool IsSigned = ISD == ISD::SREM;
+      if (TLI->isOperationLegalOrCustom(IsSigned ? ISD::SDIVREM : ISD::UDIVREM,
+                                        LT.second) ||
+          TLI->isOperationLegalOrCustom(IsSigned ? ISD::SDIV : ISD::UDIV,
+                                        LT.second)) {
+        unsigned DivOpc = IsSigned ? Instruction::SDiv : Instruction::UDiv;
+        InstructionCost DivCost = thisT()->getArithmeticInstrCost(
+            DivOpc, Ty, CostKind, Opd1Info, Opd2Info, Opd1PropInfo,
+            Opd2PropInfo);
+        InstructionCost MulCost =
+            thisT()->getArithmeticInstrCost(Instruction::Mul, Ty, CostKind);
+        InstructionCost SubCost =
+            thisT()->getArithmeticInstrCost(Instruction::Sub, Ty, CostKind);
+        return DivCost + MulCost + SubCost;
+      }
+    }
+
     // We cannot scalarize scalable vectors, so return Invalid.
     if (isa<ScalableVectorType>(Ty))
       return InstructionCost::getInvalid();
@@ -859,6 +880,7 @@ public:
     case TTI::SK_Transpose:
     case TTI::SK_InsertSubvector:
     case TTI::SK_ExtractSubvector:
+    case TTI::SK_Splice:
       break;
     }
     return Kind;
@@ -872,6 +894,7 @@ public:
     case TTI::SK_Broadcast:
       return getBroadcastShuffleOverhead(cast<FixedVectorType>(Tp));
     case TTI::SK_Select:
+    case TTI::SK_Splice:
     case TTI::SK_Reverse:
     case TTI::SK_Transpose:
     case TTI::SK_PermuteSingleSrc:
@@ -1404,6 +1427,12 @@ public:
       return thisT()->getShuffleCost(TTI::SK_Reverse,
                                      cast<VectorType>(Args[0]->getType()), None,
                                      0, cast<VectorType>(RetTy));
+    }
+    case Intrinsic::experimental_vector_splice: {
+      unsigned Index = cast<ConstantInt>(Args[2])->getZExtValue();
+      return thisT()->getShuffleCost(TTI::SK_Splice,
+                                     cast<VectorType>(Args[0]->getType()), None,
+                                     Index, cast<VectorType>(RetTy));
     }
     case Intrinsic::vector_reduce_add:
     case Intrinsic::vector_reduce_mul:
@@ -2192,8 +2221,6 @@ public:
   }
 
   InstructionCost getVectorSplitCost() { return 1; }
-
-  bool useScalableVectorType() const { return false; }
 
   bool preferPredicatedVectorOps() const { return false; }
 

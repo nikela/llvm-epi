@@ -2104,6 +2104,11 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
 
   if (Args.hasArg(options::OPT_mepi)) {
     CmdArgs.push_back("-mepi");
+
+    // We are only interested in scalable vectorization in EPI.
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("--scalable-vectorization=only");
+
     // Predicates are preferred when vectorising in EPI.
     CmdArgs.push_back("-mllvm");
     if (Args.hasArg(options::OPT_mno_prefer_predicate_over_epilog))
@@ -5071,7 +5076,9 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
           << A->getValue() << A->getOption().getName();
   }
 
-  if (!TC.useIntegratedAs())
+  // If toolchain choose to use MCAsmParser for inline asm don't pass the
+  // option to disable integrated-as explictly.
+  if (!TC.useIntegratedAs() && !TC.parseInlineAsmUsingAsmParser())
     CmdArgs.push_back("-no-integrated-as");
 
   if (Args.hasArg(options::OPT_fdebug_pass_structure)) {

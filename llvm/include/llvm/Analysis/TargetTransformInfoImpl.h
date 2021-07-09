@@ -413,10 +413,10 @@ public:
   getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                         unsigned SmallestType, unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
-                        unsigned RegWidthFactor = 1) const {
+                        unsigned RegWidthFactor = 1,
+                        bool IsScalable = false) const {
     unsigned WidestRegister = std::min<unsigned>(
         getRegisterBitWidth(K).getFixedSize(), MaxSafeRegisterWidth);
-    bool IsScalable = useScalableVectorType();
 
     unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
     ElementCount LowerBoundVF =
@@ -756,6 +756,8 @@ public:
     return true;
   }
 
+  bool isElementTypeLegalForScalableVector(Type *Ty) const { return true; }
+
   unsigned getLoadVectorFactor(unsigned VF, unsigned LoadSize,
                                unsigned ChainSizeInBytes,
                                VectorType *VecTy) const {
@@ -781,8 +783,6 @@ public:
   bool shouldExpandReduction(const IntrinsicInst *II) const { return true; }
 
   unsigned getGISelRematGlobalCost() const { return 1; }
-
-  bool useScalableVectorType() const { return false; }
 
   bool preferPredicatedVectorOps() const { return false; }
 
