@@ -644,8 +644,10 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     assert(!Info.hasAVLImm() && "AVL should be in a register");
 
     Register DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
+    Register ScratchReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
     BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLEXT))
         .addReg(DestReg, RegState::Define | RegState::Dead)
+        .addReg(ScratchReg, RegState::Define | RegState::Dead)
         .addReg(Info.getAVLReg())
         .addImm(Info.encodeVTYPE())
         .addReg(ExtraReg);
@@ -661,14 +663,16 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
     assert((AVLReg != RISCV::X0 || MI.getOperand(0).getReg() != RISCV::X0) &&
            "Can't handle X0, X0 vsetvli yet");
     NewInfo.setAVLReg(AVLReg);
+	NewInfo.setVTYPE(MI.getOperand(2).getImm());
   } else if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
-    NewInfo.setAVLReg(MI.getOperand(1).getReg());
-    NewInfo.addExtra(MI.getOperand(3).getReg(), MI.getParent());
+    NewInfo.setAVLReg(MI.getOperand(2).getReg());
+	NewInfo.setVTYPE(MI.getOperand(3).getImm());
+    NewInfo.addExtra(MI.getOperand(4).getReg(), MI.getParent());
   } else {
     assert(MI.getOpcode() == RISCV::PseudoVSETIVLI);
     NewInfo.setAVLImm(MI.getOperand(1).getImm());
+	NewInfo.setVTYPE(MI.getOperand(2).getImm());
   }
-  NewInfo.setVTYPE(MI.getOperand(2).getImm());
 
   return NewInfo;
 }

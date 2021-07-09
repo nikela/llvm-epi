@@ -657,7 +657,9 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
     }
   }
 
-  SmallVector<SDValue, 3> Ops;
+  SmallVector<EVT>  VTs;
+  VTs.push_back(XLenVT);
+  SmallVector<SDValue> Ops;
   Ops.push_back(VLOperand);
   Ops.push_back(VTypeIOp);
   unsigned OpCode;
@@ -665,9 +667,10 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
+	VTs.push_back(XLenVT);
     Ops.push_back(Node->getOperand(FlagsIndex));
   }
-  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, XLenVT, Ops));
+  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
   return;
 }
 
@@ -700,7 +703,9 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
   // FIXME DstReg for VLMAX must be != X0
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
 
-  SmallVector<SDValue, 3> Ops;
+  SmallVector<EVT>  VTs;
+  VTs.push_back(XLenVT);
+  SmallVector<SDValue> Ops;
   Ops.push_back(VLOperand);
   Ops.push_back(VTypeIOp);
   unsigned OpCode;
@@ -708,9 +713,10 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
+	VTs.push_back(XLenVT);
     Ops.push_back(Node->getOperand(FlagsIndex));
   }
-  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, XLenVT, Ops));
+  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
   return;
 }
 
@@ -875,12 +881,12 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     }
     case Intrinsic::epi_vsetvl_ext: {
       assert(Node->getNumOperands() == 5);
-      selectVSETVL(Node, XLenVT, 4);
+      selectVSETVL(Node, XLenVT, Node->getNumOperands() - 1);
       return;
     }
     case Intrinsic::epi_vsetvlmax_ext: {
       assert(Node->getNumOperands() == 4);
-      selectVSETVLMAX(Node, XLenVT, 3);
+      selectVSETVLMAX(Node, XLenVT, Node->getNumOperands() - 1);
       return;
     }
     case Intrinsic::experimental_vector_vp_slideleftfill: {
