@@ -1120,7 +1120,7 @@ struct Attributor {
       : Allocator(InfoCache.Allocator), Functions(Functions),
         InfoCache(InfoCache), CGUpdater(CGUpdater), Allowed(Allowed),
         DeleteFns(DeleteFns), RewriteSignatures(RewriteSignatures),
-        MaxFixpointIterations(None), OREGetter(None), PassName("") {}
+        MaxFixpointIterations(None), OREGetter(None), PassName("")  {}
 
   /// Constructor
   ///
@@ -1529,7 +1529,6 @@ public:
   ///
   /// If \p LivenessAA is not provided it is queried.
   bool isAssumedDead(const AbstractAttribute &AA, const AAIsDead *LivenessAA,
-                     bool &UsedAssumedInformation,
                      bool CheckBBLivenessOnly = false,
                      DepClassTy DepClass = DepClassTy::OPTIONAL);
 
@@ -1537,7 +1536,7 @@ public:
   ///
   /// If \p LivenessAA is not provided it is queried.
   bool isAssumedDead(const Instruction &I, const AbstractAttribute *QueryingAA,
-                     const AAIsDead *LivenessAA, bool &UsedAssumedInformation,
+                     const AAIsDead *LivenessAA,
                      bool CheckBBLivenessOnly = false,
                      DepClassTy DepClass = DepClassTy::OPTIONAL);
 
@@ -1545,7 +1544,7 @@ public:
   ///
   /// If \p FnLivenessAA is not provided it is queried.
   bool isAssumedDead(const Use &U, const AbstractAttribute *QueryingAA,
-                     const AAIsDead *FnLivenessAA, bool &UsedAssumedInformation,
+                     const AAIsDead *FnLivenessAA,
                      bool CheckBBLivenessOnly = false,
                      DepClassTy DepClass = DepClassTy::OPTIONAL);
 
@@ -1553,7 +1552,7 @@ public:
   ///
   /// If \p FnLivenessAA is not provided it is queried.
   bool isAssumedDead(const IRPosition &IRP, const AbstractAttribute *QueryingAA,
-                     const AAIsDead *FnLivenessAA, bool &UsedAssumedInformation,
+                     const AAIsDead *FnLivenessAA,
                      bool CheckBBLivenessOnly = false,
                      DepClassTy DepClass = DepClassTy::OPTIONAL);
 
@@ -1736,7 +1735,6 @@ public:
   bool checkForAllInstructions(function_ref<bool(Instruction &)> Pred,
                                const AbstractAttribute &QueryingAA,
                                const ArrayRef<unsigned> &Opcodes,
-                               bool &UsedAssumedInformation,
                                bool CheckBBLivenessOnly = false,
                                bool CheckPotentiallyDead = false);
 
@@ -1745,14 +1743,13 @@ public:
   /// See checkForAllCallLikeInstructions(...) for more information.
   bool checkForAllCallLikeInstructions(function_ref<bool(Instruction &)> Pred,
                                        const AbstractAttribute &QueryingAA,
-                                       bool &UsedAssumedInformation,
                                        bool CheckBBLivenessOnly = false,
                                        bool CheckPotentiallyDead = false) {
-    return checkForAllInstructions(
-        Pred, QueryingAA,
-        {(unsigned)Instruction::Invoke, (unsigned)Instruction::CallBr,
-         (unsigned)Instruction::Call},
-        UsedAssumedInformation, CheckBBLivenessOnly, CheckPotentiallyDead);
+    return checkForAllInstructions(Pred, QueryingAA,
+                                   {(unsigned)Instruction::Invoke,
+                                    (unsigned)Instruction::CallBr,
+                                    (unsigned)Instruction::Call},
+                                   CheckBBLivenessOnly, CheckPotentiallyDead);
   }
 
   /// Check \p Pred on all Read/Write instructions.
@@ -1761,8 +1758,7 @@ public:
   /// to memory present in the information cache and return true if \p Pred
   /// holds on all of them.
   bool checkForAllReadWriteInstructions(function_ref<bool(Instruction &)> Pred,
-                                        AbstractAttribute &QueryingAA,
-                                        bool &UsedAssumedInformation);
+                                        AbstractAttribute &QueryingAA);
 
   /// Create a shallow wrapper for \p F such that \p F has internal linkage
   /// afterwards. It also sets the original \p F 's name to anonymous
