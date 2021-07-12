@@ -240,8 +240,7 @@ static std::vector<ArchiveMember> getArchiveMembers(MemoryBufferRef mb) {
 static DenseMap<StringRef, ArchiveFile *> loadedArchives;
 
 static InputFile *addFile(StringRef path, bool forceLoadArchive,
-                          bool isExplicit = true,
-                          bool isBundleLoader = false) {
+                          bool isExplicit = true, bool isBundleLoader = false) {
   Optional<MemoryBufferRef> buffer = readFile(path);
   if (!buffer)
     return nullptr;
@@ -308,7 +307,7 @@ static InputFile *addFile(StringRef path, bool forceLoadArchive,
   case file_magic::macho_dynamically_linked_shared_lib:
   case file_magic::macho_dynamically_linked_shared_lib_stub:
   case file_magic::tapi_file:
-    if (DylibFile * dylibFile = loadDylib(mbref)) {
+    if (DylibFile *dylibFile = loadDylib(mbref)) {
       if (isExplicit)
         dylibFile->explicitlyLinked = true;
       newFile = dylibFile;
@@ -914,7 +913,7 @@ bool SymbolPatterns::matchLiteral(StringRef symbolName) const {
 }
 
 bool SymbolPatterns::matchGlob(StringRef symbolName) const {
-  for (const llvm::GlobPattern &glob : globs)
+  for (const GlobPattern &glob : globs)
     if (glob.match(symbolName))
       return true;
   return false;
