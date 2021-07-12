@@ -62,5 +62,11 @@ Value *getConstrainedFPExcept(LLVMContext &, fp::ExceptionBehavior);
 /// Return the IR Value representation of any RoundingMode.
 Value *getConstrainedFPRounding(LLVMContext &, RoundingMode);
 
-} // namespace llvm
+/// Returns true if the exception handling behavior and rounding mode
+/// match what is used in the default floating point environment.
+inline bool isDefaultFPEnvironment(fp::ExceptionBehavior EB, RoundingMode RM) {
+  return EB == fp::ebIgnore && RM == RoundingMode::NearestTiesToEven;
+}
+
+}
 #endif

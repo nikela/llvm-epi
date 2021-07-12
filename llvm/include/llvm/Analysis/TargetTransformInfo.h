@@ -866,40 +866,6 @@ public:
                          ///< a vector of the same type as the input vectors.
   };
 
-  /// Kind of the reduction data.
-  enum ReductionKind {
-    RK_None,           /// Not a reduction.
-    RK_Arithmetic,     /// Binary reduction data.
-    RK_MinMax,         /// Min/max reduction data.
-    RK_UnsignedMinMax, /// Unsigned min/max reduction data.
-  };
-
-  /// Contains opcode + LHS/RHS parts of the reduction operations.
-  struct ReductionData {
-    ReductionData() = delete;
-    ReductionData(ReductionKind Kind, unsigned Opcode, Value *LHS, Value *RHS)
-        : Opcode(Opcode), LHS(LHS), RHS(RHS), Kind(Kind) {
-      assert(Kind != RK_None && "expected binary or min/max reduction only.");
-    }
-    unsigned Opcode = 0;
-    Value *LHS = nullptr;
-    Value *RHS = nullptr;
-    ReductionKind Kind = RK_None;
-    bool hasSameData(ReductionData &RD) const {
-      return Kind == RD.Kind && Opcode == RD.Opcode;
-    }
-  };
-
-  static ReductionKind matchPairwiseReduction(
-    const ExtractElementInst *ReduxRoot, unsigned &Opcode, VectorType *&Ty);
-
-  static ReductionKind matchVectorSplittingReduction(
-    const ExtractElementInst *ReduxRoot, unsigned &Opcode, VectorType *&Ty);
-
-  static ReductionKind matchVectorReduction(const ExtractElementInst *ReduxRoot,
-                                            unsigned &Opcode, VectorType *&Ty,
-                                            bool &IsPairwise);
-
   /// Additional information about an operand's possible values.
   enum OperandValueKind {
     OK_AnyValue,               // Operand can have any value.
@@ -940,10 +906,6 @@ public:
 
   /// \return The width of the smallest vector register type.
   unsigned getMinVectorRegisterBitWidth() const;
-
-  unsigned getVectorRegisterUsage(RegisterKind K, unsigned VFKnownMin,
-                                  unsigned ElementTypeSize,
-                                  unsigned SafeDepDist = -1U) const;
 
   std::pair<ElementCount, ElementCount> getFeasibleMaxVFRange(
       RegisterKind K, unsigned SmallestType, unsigned WidestType,
@@ -1193,25 +1155,16 @@ public:
       TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
       bool UseMaskForCond = false, bool UseMaskForGaps = false) const;
 
-  /// Calculate the cost of performing a vector reduction.
+  /// Calculate the cost of vector reduction intrinsics.
   ///
   /// This is the cost of reducing the vector value of type \p Ty to a scalar
-  /// value using the operation denoted by \p Opcode. The form of the reduction
-  /// can either be a pairwise reduction or a reduction that splits the vector
-  /// at every reduction level.
-  ///
-  /// Pairwise:
-  ///  (v0, v1, v2, v3)
-  ///  ((v0+v1), (v2+v3), undef, undef)
-  /// Split:
-  ///  (v0, v1, v2, v3)
-  ///  ((v0+v2), (v1+v3), undef, undef)
+  /// value using the operation denoted by \p Opcode.
   InstructionCost getArithmeticReductionCost(
-      unsigned Opcode, VectorType *Ty, bool IsPairwiseForm,
+      unsigned Opcode, VectorType *Ty,
       TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput) const;
 
   InstructionCost getMinMaxReductionCost(
-      VectorType *Ty, VectorType *CondTy, bool IsPairwiseForm, bool IsUnsigned,
+      VectorType *Ty, VectorType *CondTy, bool IsUnsigned,
       TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput) const;
 
   /// Calculate the cost of an extended reduction pattern, similar to
@@ -1597,9 +1550,6 @@ public:
   virtual TypeSize getRegisterBitWidth(RegisterKind K) const = 0;
   virtual unsigned getMaxElementWidth() const = 0;
   virtual unsigned getMinVectorRegisterBitWidth() = 0;
-  virtual unsigned getVectorRegisterUsage(RegisterKind K, unsigned VFKnownMin,
-                                          unsigned ElementTypeSize,
-                                          unsigned SafeDepDist = -1U) const = 0;
   virtual std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
@@ -1688,11 +1638,9 @@ public:
       bool UseMaskForCond = false, bool UseMaskForGaps = false) = 0;
   virtual InstructionCost
   getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
-                             bool IsPairwiseForm,
                              TTI::TargetCostKind CostKind) = 0;
   virtual InstructionCost
-  getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                         bool IsPairwiseForm, bool IsUnsigned,
+  getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy, bool IsUnsigned,
                          TTI::TargetCostKind CostKind) = 0;
   virtual InstructionCost getExtendedAddReductionCost(
       bool IsMLA, bool IsUnsigned, Type *ResTy, VectorType *Ty,
@@ -2061,12 +2009,6 @@ public:
   unsigned getMinVectorRegisterBitWidth() override {
     return Impl.getMinVectorRegisterBitWidth();
   }
-  unsigned getVectorRegisterUsage(RegisterKind K, unsigned VFKnownMin,
-                                  unsigned ElementTypeSize,
-                                  unsigned SafeDepDist = -1U) const override {
-    return Impl.getVectorRegisterUsage(K, VFKnownMin, ElementTypeSize,
-                                       SafeDepDist);
-  }
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
@@ -2211,17 +2153,13 @@ public:
   }
   InstructionCost
   getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
-                             bool IsPairwiseForm,
                              TTI::TargetCostKind CostKind) override {
-    return Impl.getArithmeticReductionCost(Opcode, Ty, IsPairwiseForm,
-                                           CostKind);
+    return Impl.getArithmeticReductionCost(Opcode, Ty, CostKind);
   }
   InstructionCost
-  getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                         bool IsPairwiseForm, bool IsUnsigned,
+  getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy, bool IsUnsigned,
                          TTI::TargetCostKind CostKind) override {
-    return Impl.getMinMaxReductionCost(Ty, CondTy, IsPairwiseForm, IsUnsigned,
-                                       CostKind);
+    return Impl.getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
   }
   InstructionCost getExtendedAddReductionCost(
       bool IsMLA, bool IsUnsigned, Type *ResTy, VectorType *Ty,

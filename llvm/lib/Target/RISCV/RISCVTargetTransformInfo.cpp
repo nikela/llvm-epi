@@ -279,14 +279,20 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
              : ElementCount::getNull();
 }
 
-unsigned RISCVTTIImpl::getVectorRegisterUsage(
-    TargetTransformInfo::RegisterKind K, unsigned VFKnownMin,
-    unsigned ElementTypeSize, unsigned SafeDepDist) const {
-  // FIXME: For the time being we assume dependency distance is always safe.
-  // Once we have dependency distance computations for scalable vectors, we need
-  // to figure out its relationship with register group usage;
-  unsigned RegisterWidth = getMinVectorRegisterBitWidth();
-  return std::max<unsigned>(1, VFKnownMin * ElementTypeSize / RegisterWidth);
+InstructionCost RISCVTTIImpl::getRegUsageForType(Type *Ty) {
+  if (!ST->hasStdExtV()) {
+    return BaseT::getRegUsageForType(Ty);
+  }
+
+  // FIXME: May need some thought for fixed vectors.
+  VectorType *VTy = cast<VectorType>(Ty);
+  Type *ETy = VTy->getElementType();
+  // Size in bits of this vector type.
+  unsigned VectorSizeBits =
+      ETy->getScalarSizeInBits() * VTy->getElementCount().getKnownMinValue();
+
+  unsigned RegisterBitSize = getMinVectorRegisterBitWidth();
+  return std::max<unsigned>(1, VectorSizeBits / RegisterBitSize);
 }
 
 std::pair<ElementCount, ElementCount>
@@ -371,16 +377,9 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
 
 InstructionCost
 RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                         bool IsPairwiseForm,
                                          TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(ValTy))
-    return BaseT::getArithmeticReductionCost(Opcode, ValTy, IsPairwiseForm,
-                                             CostKind);
-
-  // Following what AArch64 does here.
-  if (IsPairwiseForm)
-    return BaseT::getArithmeticReductionCost(Opcode, ValTy, IsPairwiseForm,
-                                             CostKind);
+    return BaseT::getArithmeticReductionCost(Opcode, ValTy, CostKind);
 
   std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
   InstructionCost LegalizationCost = 0;
@@ -408,11 +407,10 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
 // Taken from AArch64.
 InstructionCost
 RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                                     bool IsPairwise, bool IsUnsigned,
+                                     bool IsUnsigned,
                                      TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(Ty))
-    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsPairwise, IsUnsigned,
-                                         CostKind);
+    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   assert((isa<ScalableVectorType>(Ty) && isa<ScalableVectorType>(CondTy)) &&
          "Both vectors need to be scalable");

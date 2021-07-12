@@ -181,10 +181,9 @@ public:
   bool supportsScalableVectors() const { return ST->hasStdExtV(); }
   Optional<unsigned> getMaxVScale() const;
   InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                             bool IsPairwiseForm,
                                              TTI::TargetCostKind CostKind);
   InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                                         bool IsPairwise, bool IsUnsigned,
+                                         bool IsUnsigned,
                                          TTI::TargetCostKind CostKind);
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
     switch (K) {
@@ -319,6 +318,8 @@ public:
   unsigned getMaxInterleaveFactor(unsigned VF) {
     return ST->getMaxInterleaveFactor();
   }
+
+  InstructionCost getRegUsageForType(Type *Ty);
 };
 
 } // end namespace llvm

@@ -6775,8 +6775,8 @@ ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
 
 bool LoopVectorizationCostModel::isMoreProfitable(
     const VectorizationFactor &A, const VectorizationFactor &B) const {
-  InstructionCost::CostType CostA = *A.Cost.getValue();
-  InstructionCost::CostType CostB = *B.Cost.getValue();
+  InstructionCost CostA = A.Cost;
+  InstructionCost CostB = B.Cost;
 
   unsigned MaxTripCount = PSE.getSE()->getSmallConstantMaxTripCount(TheLoop);
 
@@ -6789,8 +6789,8 @@ bool LoopVectorizationCostModel::isMoreProfitable(
     // be PerIterationCost*floor(TC/VF) + Scalar remainder cost, and so is
     // approximated with the per-lane cost below instead of using the tripcount
     // as here.
-    int64_t RTCostA = CostA * divideCeil(MaxTripCount, A.Width.getFixedValue());
-    int64_t RTCostB = CostB * divideCeil(MaxTripCount, B.Width.getFixedValue());
+    auto RTCostA = CostA * divideCeil(MaxTripCount, A.Width.getFixedValue());
+    auto RTCostB = CostB * divideCeil(MaxTripCount, B.Width.getFixedValue());
     return RTCostA < RTCostB;
   }
 
@@ -6827,7 +6827,7 @@ VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
     // Ignore scalar width, because the user explicitly wants vectorization.
     // Initialize cost to max so that VF = 2 is, at least, chosen during cost
     // evaluation.
-    ChosenFactor.Cost = std::numeric_limits<InstructionCost::CostType>::max();
+    ChosenFactor.Cost = InstructionCost::getMax();
   }
 
   for (const auto &i : VFCandidates) {
@@ -7378,27 +7378,25 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   unsigned MaxSafeDepDist = -1U;
   if (Legal->getMaxSafeDepDistBytes() != -1U)
     MaxSafeDepDist = Legal->getMaxSafeDepDistBytes() * 8;
-  const DataLayout &DL = TheFunction->getParent()->getDataLayout();
+
   // FIXME: This is wrong. Register grouping is not necessary if using scalable
   // vector type. We need another TTI method to indicate it.
-
   SmallVector<RegisterUsage, 8> RUs(VFs.size());
   SmallVector<SmallMapVector<unsigned, unsigned, 4>, 8> MaxUsages(VFs.size());
 
   LLVM_DEBUG(dbgs() << "LV(REG): Calculating max register usage:\n");
 
   // A lambda that gets the register usage for the given type and VF.
-  auto GetRegUsage = [&DL, MaxSafeDepDist, this](Type *Ty, ElementCount VF) {
-    if (Ty->isTokenTy())
-      return 0U;
-    unsigned TypeSize = DL.getTypeSizeInBits(Ty->getScalarType());
-    return TTI.getVectorRegisterUsage(
-        Hints->isFixedVectorizationDisabled() // FIXME
-            ? TargetTransformInfo::RGK_ScalableVector
-            : TargetTransformInfo::RGK_FixedWidthVector,
-        VF.getKnownMinValue(), TypeSize, MaxSafeDepDist);
+  const auto &TTICapture = TTI;
+  auto GetRegUsage = [&TTICapture](Type *Ty, ElementCount VF) -> unsigned {
+    if (Ty->isTokenTy() || !VectorType::isValidElementType(Ty))
+      return 0;
+    InstructionCost::CostType RegUsage =
+        *TTICapture.getRegUsageForType(VectorType::get(Ty, VF)).getValue();
+    assert(RegUsage >= 0 && RegUsage <= std::numeric_limits<unsigned>::max() &&
+           "Nonsensical values for register usage.");
+    return RegUsage;
   };
-
 
   for (unsigned int i = 0, s = IdxToInstr.size(); i < s; ++i) {
     Instruction *I = IdxToInstr[i];
@@ -7548,7 +7546,7 @@ void LoopVectorizationCostModel::collectInstsToScalarize(ElementCount VF) {
         // for emulated masked memrefs.
         if (!useEmulatedMaskMemRefHack(&I)) {
           auto D = computePredInstDiscount(&I, ScalarCosts, VF);
-          if (D.isValid() && D.getValue() >= 0)
+          if (D.isValid() && *D.getValue() >= 0)
             ScalarCostsVF.insert(ScalarCosts.begin(), ScalarCosts.end());
         }
         // Remember that BB will remain after vectorization.
@@ -8021,8 +8019,8 @@ InstructionCost LoopVectorizationCostModel::getReductionPatternCost(
 
   const RecurrenceDescriptor &RdxDesc =
       Legal->getReductionVars()[cast<PHINode>(ReductionPhi)];
-  InstructionCost BaseCost = TTI.getArithmeticReductionCost(
-      RdxDesc.getOpcode(), VectorTy, false, CostKind);
+  InstructionCost BaseCost =
+      TTI.getArithmeticReductionCost(RdxDesc.getOpcode(), VectorTy, CostKind);
 
   // Get the operand that was not the reduction chain and match it to one of the
   // patterns, returning the better cost if it is found.
