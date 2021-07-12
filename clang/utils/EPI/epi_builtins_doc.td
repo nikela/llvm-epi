@@ -3429,6 +3429,57 @@ to use in other builtins that require it.}];
   }];
 }
 
+def : DocEPIBuiltin<vsetvl_ext>
+{
+  let Category = DocEPIVectorConfiguration;
+  let Title = "Change the granted vector length";
+  let Description = [{Use this builtin to set the granted vector length given a requested
+vector length (`rvl`), a single element width (`sew`), a length multiplier (`lmul`) and
+an additional argument (`extra`) representing one (or more) bit to be set.
+
+This builtin returns the granted vector length. This granted vector length is
+suitable to use in other builtins that require it.
+
+At the moment, valid values for the `extra` parameter are:
+
+- `0`, which is equivalent to invoking `vsetvl`
+- `__epi_nt`, which is used to set the `NonTemporal` bit
+
+In both cases, the builtin is lowered to `vsetvli`. When the `extra` parameter has a
+different value, the builtin is lowered to `vsetvl` instead, using as `vtype` argument
+the result of a `ori` instruction between the `vtype` value obtained by the `sew` and
+`lmul` parameters and the `extra` parameter.
+}];
+  let Instruction = "vsetvl/vsetvli";
+
+  let ParameterNames = ["rvl", "sew", "lmul", "extra"];
+
+  let Operation = [{
+    gvl = compute_vector_length(rvl, sew, lmul, extra)
+    result = gvl
+  }];
+}
+
+def : DocEPIBuiltin<vsetvlmax_ext>
+{
+  let Category = DocEPIVectorConfiguration;
+  let Title = "Set the granted vector length to the maximum length";
+  let Description = [{Use this builtin to set the granted vector length to the maximum value
+allowed given a single element width (`sew`), a length multiplier (`lmul`) and an additional
+argument (`extra`) representing one (or more) bit to be set.
+
+This builtin returns the granted vector length. This granted vector length is suitable
+to use in other builtins that require it.}];
+  let Instruction = "vsetvl/vsetvli";
+
+  let ParameterNames = ["sew", "lmul", "extra"];
+
+  let Operation = [{
+    gvl = compute_vlmax(sew, lmul, extra)
+    result = gvl
+  }];
+}
+
 def : DocEPIBuiltin<vslidedown>
 {
   let Category = DocEPILaneManipulation;
@@ -5793,7 +5844,7 @@ def : DocEPIBuiltin<vtrn>
   let Category = DocEPIExtensions;
   let Title = "Transpose two vectors into a tuple of two vectors";
 
-  let Description = [{Use these builtins to "transpose" two vectors into a 
+  let Description = [{Use these builtins to "transpose" two vectors into a
 tuple of vectors. This is similar to 'zip' but first the even-numbered elements
 of the vectors are zipped followed by the odd-numbered elements.
 
