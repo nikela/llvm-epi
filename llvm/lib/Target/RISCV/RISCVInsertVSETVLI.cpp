@@ -333,10 +333,18 @@ public:
     }
 
     // If either is unknown, the result is unknown.
-    if (isUnknown() || Other.isUnknown())
-      return VSETVLIInfo::getUnknown();
+    if (isUnknown() || Other.isUnknown()) {
+      VSETVLIInfo Unknown = VSETVLIInfo::getUnknown();
+      Unknown.addExtrasFrom(*this);
+      if (OtherIsEmpty) {
+        Unknown.addExtra(RISCV::NoRegister, MBB);
+      } else {
+        Unknown.addExtrasFrom(Other);
+      }
+      return Unknown;
+    }
 
-    // If we have an exact, match return this.
+    // If we have an exact match, return this.
     if (*this == Other) {
       if (OtherIsEmpty) {
         this->addExtra(RISCV::NoRegister, MBB);
@@ -351,6 +359,11 @@ public:
     if (hasSameAVL(Other) && hasSameVLMAX(Other)) {
       VSETVLIInfo MergeInfo = *this;
       MergeInfo.SEWLMULRatioOnly = true;
+      if (OtherIsEmpty) {
+        MergeInfo.addExtra(RISCV::NoRegister, MBB);
+      } else {
+        MergeInfo.addExtrasFrom(Other);
+      }
       return MergeInfo;
     }
 
@@ -663,15 +676,15 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
     assert((AVLReg != RISCV::X0 || MI.getOperand(0).getReg() != RISCV::X0) &&
            "Can't handle X0, X0 vsetvli yet");
     NewInfo.setAVLReg(AVLReg);
-	NewInfo.setVTYPE(MI.getOperand(2).getImm());
+    NewInfo.setVTYPE(MI.getOperand(2).getImm());
   } else if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
     NewInfo.setAVLReg(MI.getOperand(2).getReg());
-	NewInfo.setVTYPE(MI.getOperand(3).getImm());
+    NewInfo.setVTYPE(MI.getOperand(3).getImm());
     NewInfo.addExtra(MI.getOperand(4).getReg(), MI.getParent());
   } else {
     assert(MI.getOpcode() == RISCV::PseudoVSETIVLI);
     NewInfo.setAVLImm(MI.getOperand(1).getImm());
-	NewInfo.setVTYPE(MI.getOperand(2).getImm());
+    NewInfo.setVTYPE(MI.getOperand(2).getImm());
   }
 
   return NewInfo;

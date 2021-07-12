@@ -657,7 +657,7 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
     }
   }
 
-  SmallVector<EVT>  VTs;
+  SmallVector<EVT> VTs;
   VTs.push_back(XLenVT);
   SmallVector<SDValue> Ops;
   Ops.push_back(VLOperand);
@@ -667,7 +667,7 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
-	VTs.push_back(XLenVT);
+    VTs.push_back(XLenVT);
     Ops.push_back(Node->getOperand(FlagsIndex));
   }
   ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
@@ -703,7 +703,7 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
   // FIXME DstReg for VLMAX must be != X0
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
 
-  SmallVector<EVT>  VTs;
+  SmallVector<EVT> VTs;
   VTs.push_back(XLenVT);
   SmallVector<SDValue> Ops;
   Ops.push_back(VLOperand);
@@ -713,7 +713,7 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
     OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
-	VTs.push_back(XLenVT);
+    VTs.push_back(XLenVT);
     Ops.push_back(Node->getOperand(FlagsIndex));
   }
   ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
