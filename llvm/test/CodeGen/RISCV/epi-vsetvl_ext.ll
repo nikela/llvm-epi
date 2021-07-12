@@ -139,37 +139,38 @@ define i64 @test_extra_is_nt(i64 %rvl) {
 define i64 @test_extra_is_other(i64 %rvl, i64 %extra) {
 ; CHECK-O0-LABEL: test_extra_is_other:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    ori a2, a1, 64
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 72
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 80
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 88
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 65
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 73
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 81
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 89
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 66
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 74
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 82
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 90
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 67
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 75
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a2, a1, 83
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    ori a1, a1, 91
+; CHECK-O0-NEXT:    mv a2, a1
+; CHECK-O0-NEXT:    ori a1, a2, 64
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 72
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 80
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 88
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 65
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 73
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 81
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 89
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 66
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 74
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 82
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 90
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 67
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 75
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 83
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    ori a1, a2, 91
 ; CHECK-O0-NEXT:    vsetvl a0, a0, a1
 ; CHECK-O0-NEXT:    ret
 ;
@@ -205,8 +206,8 @@ define i64 @test_extra_is_other(i64 %rvl, i64 %extra) {
 ; CHECK-O2-NEXT:    vsetvl a0, a0, a2
 ; CHECK-O2-NEXT:    ori a2, a1, 83
 ; CHECK-O2-NEXT:    vsetvl a0, a0, a2
-; CHECK-O2-NEXT:    ori a1, a1, 91
-; CHECK-O2-NEXT:    vsetvl a0, a0, a1
+; CHECK-O2-NEXT:    ori a2, a1, 91
+; CHECK-O2-NEXT:    vsetvl a0, a0, a2
 ; CHECK-O2-NEXT:    ret
 
   ; LMUL = 1
