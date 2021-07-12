@@ -418,7 +418,7 @@ struct BlockData {
 };
 
 class RISCVInsertVSETVLI : public MachineFunctionPass {
-  const TargetInstrInfo *TII;
+  const RISCVInstrInfo *TII;
   MachineRegisterInfo *MRI;
   Optional<Register> FakeExtraReg;
 
@@ -465,10 +465,7 @@ Register &RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock &MBB,
     // Create virtual register and assign 0 to it
     Register TmpReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
     MachineBasicBlock &EntryBB = MBB.getParent()->front();
-    BuildMI(EntryBB, EntryBB.getFirstTerminator(), DL, TII->get(RISCV::ADDI))
-        .addReg(TmpReg, RegState::Define)
-        .addReg(RISCV::X0, RegState::Kill)
-        .addImm(0);
+    TII->movImm(EntryBB, EntryBB.getFirstTerminator(), DL, TmpReg, 0);
     FakeExtraReg = TmpReg;
   }
   return FakeExtraReg.getValue();
