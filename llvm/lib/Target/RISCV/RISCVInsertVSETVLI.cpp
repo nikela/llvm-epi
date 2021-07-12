@@ -969,6 +969,7 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
 
   TII = ST.getInstrInfo();
   MRI = &MF.getRegInfo();
+  FakeExtraReg.reset();
 
   assert(BlockInfo.empty() && "Expect empty block infos");
   BlockInfo.resize(MF.getNumBlockIDs());
