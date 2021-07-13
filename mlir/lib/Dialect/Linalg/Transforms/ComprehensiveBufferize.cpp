@@ -2115,6 +2115,22 @@ static LogicalResult bufferize(OpBuilder &b, linalg::YieldOp yieldOp,
     return success();
   llvm_unreachable("unexpected yieldOp");
 }
+
+/// Bufferization for tensor::ExtractOp just translate to memref.load, it only
+/// reads the tensor.
+static LogicalResult bufferize(OpBuilder &b, tensor::ExtractOp extractOp,
+                               BlockAndValueMapping &bvm,
+                               BufferizationAliasInfo &aliasInfo) {
+  // Take a guard before anything else.
+  OpBuilder::InsertionGuard g(b);
+  b.setInsertionPoint(extractOp);
+
+  Location loc = extractOp.getLoc();
+  Value srcMemref = lookup(bvm, extractOp.tensor());
+  Value l = b.create<memref::LoadOp>(loc, srcMemref, extractOp.indices());
+  extractOp.replaceAllUsesWith(l);
+  return success();
+}
 //===----------------------------------------------------------------------===//
 // Bufferization analyses.
 //===----------------------------------------------------------------------===//
@@ -2310,6 +2326,7 @@ static LogicalResult bufferizeFuncOpInternals(
             scf::ForOp,
             InitTensorOp,
             InsertSliceOp,
+            tensor::ExtractOp,
             LinalgOp,
             ReturnOp,
             TiledLoopOp,
@@ -2379,6 +2396,8 @@ static Operation *getEquivalentAlloc(Value value,
 static BlockArgument
 getEquivalentEnclosingFuncBBArg(Value v,
                                 const BufferizationAliasInfo &aliasInfo) {
+  if (!v.getType().isa<RankedTensorType>())
+    return nullptr;
   Operation *op = v.getParentBlock()->getParentOp();
   FuncOp funcOp = dyn_cast<FuncOp>(op);
   if (!funcOp)
@@ -2455,6 +2474,12 @@ static LogicalResult bufferizeFuncOpBoundary(
   // 1. For each FuncOp result, keep track of which inplace argument it reuses.
   SmallVector<Value> returnValues;
   for (OpOperand &returnOperand : returnOp->getOpOperands()) {
+    // If not a renturn tensor type just forward it.
+    if (!returnOperand.get().getType().isa<RankedTensorType>()) {
+      returnValues.push_back(returnOperand.get());
+      continue;
+    }
+
     // If return operand is equivalent to some bbArg, no need to return it.
     Value returnVal = returnOperand.get();
     if (getEquivalentEnclosingFuncBBArg(returnVal, aliasInfo))
@@ -2627,6 +2652,7 @@ static void layoutPostProcessing(ModuleOp moduleOp) {
   SmallVector<FuncOp> orderedFuncOps;
   DenseMap<FuncOp, DenseSet<Operation *>> callerMap;
   auto res = getFuncOpsOrderedByCalls(moduleOp, orderedFuncOps, callerMap);
+  (void) res;
   assert(succeeded(res) && "unexpected getFuncOpsOrderedByCalls failure");
 
   for (FuncOp funcOp : orderedFuncOps) {
