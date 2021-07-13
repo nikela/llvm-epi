@@ -323,12 +323,8 @@ public:
     if (!Other.isValid())
       return *this;
 
-    bool OtherIsEmpty = Other.isExtrasEmpty();
     // If this value isn't valid, Other must be the first predecessor, use it.
     if (!isValid()) {
-      if (OtherIsEmpty) {
-        Other.addExtra(RISCV::NoRegister, MBB);
-      }
       return Other;
     }
 
@@ -336,21 +332,13 @@ public:
     if (isUnknown() || Other.isUnknown()) {
       VSETVLIInfo Unknown = VSETVLIInfo::getUnknown();
       Unknown.addExtrasFrom(*this);
-      if (OtherIsEmpty) {
-        Unknown.addExtra(RISCV::NoRegister, MBB);
-      } else {
-        Unknown.addExtrasFrom(Other);
-      }
+      Unknown.addExtrasFrom(Other);
       return Unknown;
     }
 
     // If we have an exact match, return this.
     if (*this == Other) {
-      if (OtherIsEmpty) {
-        this->addExtra(RISCV::NoRegister, MBB);
-      } else {
-        this->addExtrasFrom(Other);
-      }
+      this->addExtrasFrom(Other);
       return *this;
     }
 
@@ -359,22 +347,14 @@ public:
     if (hasSameAVL(Other) && hasSameVLMAX(Other)) {
       VSETVLIInfo MergeInfo = *this;
       MergeInfo.SEWLMULRatioOnly = true;
-      if (OtherIsEmpty) {
-        MergeInfo.addExtra(RISCV::NoRegister, MBB);
-      } else {
-        MergeInfo.addExtrasFrom(Other);
-      }
+      MergeInfo.addExtrasFrom(Other);
       return MergeInfo;
     }
 
     // Otherwise the result is unknown.
     VSETVLIInfo Unknown = VSETVLIInfo::getUnknown();
     Unknown.addExtrasFrom(*this);
-    if (OtherIsEmpty) {
-      Unknown.addExtra(RISCV::NoRegister, MBB);
-    } else {
-      Unknown.addExtrasFrom(Other);
-    }
+    Unknown.addExtrasFrom(Other);
     return Unknown;
   }
 
@@ -771,6 +751,11 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         MI.modifiesRegister(RISCV::VTYPE)) {
       BBInfo.Change = VSETVLIInfo::getUnknown().addExtrasFrom(BBInfo.Change);
     }
+  }
+
+  if (BBInfo.Change.isExtrasEmpty()) {
+    // Add a fake register that we will use if we have to create a PHI.
+    BBInfo.Change.addExtra(RISCV::NoRegister, &MBB);
   }
 
   // Initial exit state is whatever change we found in the block.
