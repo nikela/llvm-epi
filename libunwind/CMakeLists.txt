@@ -167,6 +167,10 @@ elseif(CMAKE_SYSROOT)
   set(LIBUNWIND_SYSROOT "${CMAKE_SYSROOT}")
 endif()
 
+if (LIBUNWIND_TARGET_TRIPLE)
+  set(TARGET_TRIPLE "${LIBUNWIND_TARGET_TRIPLE}")
+endif()
+
 # Configure compiler.
 include(config-ix)
 

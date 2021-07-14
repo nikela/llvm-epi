@@ -4074,26 +4074,26 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
     }
     case Instruction::Load: {
       // Cost of wide load - cost of scalar loads.
-      Align alignment = cast<LoadInst>(VL0)->getAlign();
+      Align Alignment = cast<LoadInst>(VL0)->getAlign();
       InstructionCost ScalarEltCost = TTI->getMemoryOpCost(
-          Instruction::Load, ScalarTy, alignment, 0, CostKind, VL0);
+          Instruction::Load, ScalarTy, Alignment, 0, CostKind, VL0);
       if (NeedToShuffleReuses) {
         ReuseShuffleCost -= (ReuseShuffleNumbers - VL.size()) * ScalarEltCost;
       }
       InstructionCost ScalarLdCost = VecTy->getNumElements() * ScalarEltCost;
       InstructionCost VecLdCost;
       if (E->State == TreeEntry::Vectorize) {
-        VecLdCost = TTI->getMemoryOpCost(Instruction::Load, VecTy, alignment, 0,
+        VecLdCost = TTI->getMemoryOpCost(Instruction::Load, VecTy, Alignment, 0,
                                          CostKind, VL0);
       } else {
         assert(E->State == TreeEntry::ScatterVectorize && "Unknown EntryState");
-        Align CommonAlignment = alignment;
+        Align CommonAlignment = Alignment;
         for (Value *V : VL)
           CommonAlignment =
               commonAlignment(CommonAlignment, cast<LoadInst>(V)->getAlign());
         VecLdCost = TTI->getGatherScatterOpCost(
             Instruction::Load, VecTy, cast<LoadInst>(VL0)->getPointerOperand(),
-            /*VariableMask=*/false, alignment, CostKind, VL0);
+            /*VariableMask=*/false, Alignment, CostKind, VL0);
       }
       if (!NeedToShuffleReuses && !E->ReorderIndices.empty()) {
         SmallVector<int> NewMask;
@@ -5614,17 +5614,17 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       // Also, gather up main and alt scalar ops to propagate IR flags to
       // each vector operation.
       ValueList OpScalars, AltScalars;
-      unsigned e = E->Scalars.size();
-      SmallVector<int, 8> Mask(e);
-      for (unsigned i = 0; i < e; ++i) {
-        auto *OpInst = cast<Instruction>(E->Scalars[i]);
+      unsigned Sz = E->Scalars.size();
+      SmallVector<int> Mask(Sz);
+      for (unsigned I = 0; I < Sz; ++I) {
+        auto *OpInst = cast<Instruction>(E->Scalars[I]);
         assert(E->isOpcodeOrAlt(OpInst) && "Unexpected main/alternate opcode");
         if (OpInst->getOpcode() == E->getAltOpcode()) {
-          Mask[i] = e + i;
-          AltScalars.push_back(E->Scalars[i]);
+          Mask[I] = Sz + I;
+          AltScalars.push_back(E->Scalars[I]);
         } else {
-          Mask[i] = i;
-          OpScalars.push_back(E->Scalars[i]);
+          Mask[I] = I;
+          OpScalars.push_back(E->Scalars[I]);
         }
       }
 
