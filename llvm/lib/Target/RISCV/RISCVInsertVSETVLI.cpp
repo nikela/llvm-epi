@@ -39,7 +39,7 @@ static cl::opt<bool> DisableInsertVSETVLPHIOpt(
 
 namespace {
 
-using ExtraOrigin = std::pair<Register, MachineBasicBlock *>;
+using ExtraOrigin = std::pair<Register, int>;
 
 class VSETVLIInfo {
   union {
@@ -147,15 +147,15 @@ public:
   bool containsExtra(const ExtraOrigin &P) const {
     for (const ExtraOrigin &EO : Extras) {
       if (EO.first == P.first &&
-          EO.second->getNumber() == P.second->getNumber()) {
+          EO.second == P.second) {
         return true;
       }
     }
     return false;
   }
 
-  void addExtra(Register Reg, const MachineBasicBlock *MBB) {
-    ExtraOrigin EO(Reg, const_cast<MachineBasicBlock *>(MBB));
+  void addExtra(Register Reg, int MBBNumber) {
+    ExtraOrigin EO(Reg, MBBNumber);
     addExtra(EO);
   }
 
@@ -517,7 +517,7 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
                      /* Nontemporal */ false);
 
   // Add a fake register for the Extra operand
-  InstrInfo.addExtra(RISCV::NoRegister, MI.getParent());
+  InstrInfo.addExtra(RISCV::NoRegister, MI.getParent()->getNumber());
 
   return InstrInfo;
 }
@@ -585,7 +585,7 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
                      /*MaskAgnostic*/ false, /* MaskRegOp */ false,
                      Nontemporal);
 
-  InstrInfo.addExtra(Extra, MI.getParent());
+  InstrInfo.addExtra(Extra, MI.getParent()->getNumber());
 
   return InstrInfo;
 }
@@ -593,6 +593,7 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
 void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                                        const VSETVLIInfo &Info,
                                        const VSETVLIInfo &PrevInfo) {
+  MachineFunction *MF = MBB.getParent();
   DebugLoc DL = MI.getDebugLoc();
   Register ExtraReg;
 
@@ -606,7 +607,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     for (const ExtraOrigin &P : PrevInfo.getExtras()) {
       MIB.addReg(P.first != RISCV::NoRegister ? P.first
                                               : getFakeRegister(MBB, DL));
-      MIB.addMBB(P.second);
+      MIB.addMBB(MF->getBlockNumbered(P.second));
     }
   } else {
     ExtraReg = Info.getExtraReg();
@@ -692,7 +693,7 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
     VType = MI.getOperand(2).getImm();
   }
   NewInfo.setVTYPE(VType);
-  NewInfo.addExtra(Extra, MI.getParent());
+  NewInfo.addExtra(Extra, MI.getParent()->getNumber());
 
   return NewInfo;
 }
@@ -780,7 +781,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
     if (MI.isCall() || MI.isInlineAsm() || MI.modifiesRegister(RISCV::VL) ||
         MI.modifiesRegister(RISCV::VTYPE)) {
       BBInfo.Change = VSETVLIInfo::getUnknown();
-      BBInfo.Change.addExtra(RISCV::NoRegister, &MBB);
+      BBInfo.Change.addExtra(RISCV::NoRegister, MBB.getNumber());
     }
   }
 
@@ -799,7 +800,7 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   if (MBB.pred_empty()) {
     // There are no predecessors, so use the default starting status.
     InInfo.setUnknown();
-    InInfo.addExtra(RISCV::NoRegister, &MBB);
+    InInfo.addExtra(RISCV::NoRegister, MBB.getNumber());
   } else {
     for (MachineBasicBlock *P : MBB.predecessors()) {
       InInfo = InInfo.intersect(BlockInfo[P->getNumber()].Exit, P);
@@ -979,7 +980,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     if (MI.isCall() || MI.isInlineAsm() || MI.modifiesRegister(RISCV::VL) ||
         MI.modifiesRegister(RISCV::VTYPE)) {
       CurInfo = VSETVLIInfo::getUnknown();
-      CurInfo.addExtra(RISCV::NoRegister, &MBB);
+      CurInfo.addExtra(RISCV::NoRegister, MBB.getNumber());
     }
   }
 }
