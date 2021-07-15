@@ -173,8 +173,7 @@ public:
   }
 
   VSETVLIInfo replaceExtras(const VSETVLIInfo &Other) {
-    Extras.clear();
-    Extras.append(Other.getExtras());
+    Extras = Other.getExtras();
     return *this;
   }
 
@@ -576,6 +575,7 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
         Extra = MIOld->getOperand(4).getReg();
       } /*else if (MIOld->getOpcode() == RISCV::PHI) {
         // TODO: decide how handle this case. At the moment we just ignore it
+        Extra = ??? should use Optional<>?
       }*/
     }
   } else

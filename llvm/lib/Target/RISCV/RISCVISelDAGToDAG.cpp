@@ -633,12 +633,13 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
   bool NonTemporal = false;
   bool UsePseudoVSETVLEXT = false;
   if (FlagsIndex) {
+    UsePseudoVSETVLEXT = true;
     if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
+      // If flags is 0 or just the non-temporal bit
+      // we can use our existing vsetvli
       unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
       NonTemporal = Flags == RISCVVType::NT;
       UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
-    } else {
-      UsePseudoVSETVLEXT = true;
     }
   }
 
