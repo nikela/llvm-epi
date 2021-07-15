@@ -398,13 +398,20 @@ struct BlockData {
   // Keeps track of whether the block is already in the queue.
   bool InQueue = false;
 
+  // Keeps track of whether the block already contains a PHI to recover the value
+  // of the Extra operand from the predecessors
+  Optional<Register> ExtraFromPHIReg;
+
+  // Keeps track of whether the block already contains the definition of a virtual
+  // register (with an assigned value of 0) to be used in a PHI of the successor(s)
+  Optional<Register> FakeExtraReg;
+
   BlockData() {}
 };
 
 class RISCVInsertVSETVLI : public MachineFunctionPass {
   const RISCVInstrInfo *TII;
   MachineRegisterInfo *MRI;
-  Optional<Register> FakeExtraReg;
 
   std::vector<BlockData> BlockInfo;
   std::queue<const MachineBasicBlock *> WorkList;
@@ -433,7 +440,7 @@ private:
   bool computeVLVTYPEChanges(const MachineBasicBlock &MBB);
   void computeIncomingVLVTYPE(const MachineBasicBlock &MBB);
   void emitVSETVLIs(MachineBasicBlock &MBB);
-  Register &getFakeRegister(MachineBasicBlock &MBB, DebugLoc DL);
+  Register &getFakeRegister(MachineBasicBlock *MBB);
 };
 
 } // end anonymous namespace
@@ -443,16 +450,16 @@ char RISCVInsertVSETVLI::ID = 0;
 INITIALIZE_PASS(RISCVInsertVSETVLI, DEBUG_TYPE, RISCV_INSERT_VSETVLI_NAME,
                 false, false)
 
-Register &RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock &MBB,
-                                              DebugLoc DL) {
-  if (!FakeExtraReg.hasValue()) {
+Register &RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock *MBB) {
+  BlockData &BBInfo = BlockInfo[MBB->getNumber()];
+  if (!BBInfo.FakeExtraReg.hasValue()) {
     // Create virtual register and assign 0 to it
+    DebugLoc DL = MBB->findBranchDebugLoc();
     Register TmpReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
-    MachineBasicBlock &EntryBB = MBB.getParent()->front();
-    TII->movImm(EntryBB, EntryBB.getFirstTerminator(), DL, TmpReg, 0);
-    FakeExtraReg = TmpReg;
+    TII->movImm(*MBB, MBB->getFirstTerminator(), DL, TmpReg, 0);
+    BBInfo.FakeExtraReg = TmpReg;
   }
-  return FakeExtraReg.getValue();
+  return BBInfo.FakeExtraReg.getValue();
 }
 
 static MachineInstr *elideCopies(MachineInstr *MI,
@@ -606,7 +613,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
         BuildMI(MBB, MBB.begin(), DL, TII->get(RISCV::PHI), ExtraReg);
     for (const ExtraOrigin &P : PrevInfo.getExtras()) {
       MIB.addReg(P.first != RISCV::NoRegister ? P.first
-                                              : getFakeRegister(MBB, DL));
+                                              : getFakeRegister(MF->getBlockNumbered(P.second)));
       MIB.addMBB(MF->getBlockNumbered(P.second));
     }
   } else {
@@ -993,7 +1000,6 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
 
   TII = ST.getInstrInfo();
   MRI = &MF.getRegInfo();
-  FakeExtraReg.reset();
 
   assert(BlockInfo.empty() && "Expect empty block infos");
   BlockInfo.resize(MF.getNumBlockIDs());
