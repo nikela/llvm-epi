@@ -1549,13 +1549,13 @@ public:
   virtual const char *getRegisterClassName(unsigned ClassID) const = 0;
   virtual TypeSize getRegisterBitWidth(RegisterKind K) const = 0;
   virtual unsigned getMaxElementWidth() const = 0;
-  virtual unsigned getMinVectorRegisterBitWidth() = 0;
   virtual std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(RegisterKind K, unsigned SmallestType,
                         unsigned WidestType,
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1,
                         bool IsScalable = false) const = 0;
+  virtual unsigned getMinVectorRegisterBitWidth() const = 0;
   virtual Optional<unsigned> getMaxVScale() const = 0;
   virtual bool shouldMaximizeVectorBandwidth() const = 0;
   virtual ElementCount getMinimumVF(unsigned ElemWidth,
@@ -2006,7 +2006,7 @@ public:
   unsigned getMaxElementWidth() const override {
     return Impl.getMaxElementWidth();
   }
-  unsigned getMinVectorRegisterBitWidth() override {
+  unsigned getMinVectorRegisterBitWidth() const override {
     return Impl.getMinVectorRegisterBitWidth();
   }
   std::pair<ElementCount, ElementCount>

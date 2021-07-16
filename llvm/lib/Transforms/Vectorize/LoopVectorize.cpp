@@ -6887,11 +6887,22 @@ VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
 
   // Emit a report of VFs with invalid costs in the loop.
   if (!InvalidCosts.empty()) {
-    // Sort/group per instruction
-    llvm::sort(InvalidCosts, [](InstructionVFPair &A, InstructionVFPair &B) {
-      ElementCountComparator ECC;
-      return A.first->comesBefore(B.first) || ECC(A.second, B.second);
-    });
+    // Group the remarks per instruction, keeping the instruction order from
+    // InvalidCosts.
+    std::map<Instruction *, unsigned> Numbering;
+    unsigned I = 0;
+    for (auto &Pair : InvalidCosts)
+      if (!Numbering.count(Pair.first))
+        Numbering[Pair.first] = I++;
+
+    // Sort the list, first on instruction(number) then on VF.
+    llvm::sort(InvalidCosts,
+               [&Numbering](InstructionVFPair &A, InstructionVFPair &B) {
+                 if (Numbering[A.first] != Numbering[B.first])
+                   return Numbering[A.first] < Numbering[B.first];
+                 ElementCountComparator ECC;
+                 return ECC(A.second, B.second);
+               });
 
     // For a list of ordered instruction-vf pairs:
     //   [(load, vf1), (load, vf2), (store, vf1)]
