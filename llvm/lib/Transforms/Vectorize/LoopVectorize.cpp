@@ -9562,7 +9562,24 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   return EdgeMaskCache[Edge] = EdgeMask;
 }
 
-VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
+VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
+  IVCacheTy::iterator IVEntryIt = IVCache.find(VPBB);
+  if (IVEntryIt != IVCache.end())
+    return IVEntryIt->second;
+
+  VPValue *IV = nullptr;
+  if (Legal->getPrimaryInduction())
+    IV = Plan->getOrAddVPValue(Legal->getPrimaryInduction());
+  else {
+    auto *IVRecipe = new VPWidenCanonicalIVRecipe();
+    Builder.getInsertBlock()->insert(IVRecipe, Builder.getInsertPoint());
+    IV = IVRecipe->getVPSingleValue();
+  }
+  return IVCache[VPBB] = IV;
+}
+
+VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
+                                            bool isMemOp /* = false*/) {
   assert(OrigLoop->contains(BB) && "Block is not a part of a loop");
 
   // Look for cached value.
@@ -9578,6 +9595,15 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     if (!CM.blockNeedsPredication(BB))
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
 
+    // To be really conservative, for memory ops we do not generate AllTrueMask
+    // recipe. The mask for load/stores might prevent memory access exception
+    // and for gather/scatter there is no non-masked version in the IR so if the
+    // cost model decides to widen to gather/scatter the mask is important.
+    if (!isMemOp && preferPredicatedWiden()) {
+      BlockMask = Builder.createNaryOp(VPInstruction::AllTrueMask, {});
+      return BlockMaskCache[BB] = BlockMask;
+    }
+
     // Create the block in mask as the first non-phi instruction in the block.
     VPBuilder::InsertPointGuard Guard(Builder);
     auto NewInsertionPoint = Builder.getInsertBlock()->getFirstNonPhi();
@@ -9586,14 +9612,7 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     // Introduce the early-exit compare IV <= BTC to form header block mask.
     // This is used instead of IV < TC because TC may wrap, unlike BTC.
     // Start by constructing the desired canonical IV.
-    VPValue *IV = nullptr;
-    if (Legal->getPrimaryInduction())
-      IV = Plan->getOrAddVPValue(Legal->getPrimaryInduction());
-    else {
-      auto IVRecipe = new VPWidenCanonicalIVRecipe();
-      Builder.getInsertBlock()->insert(IVRecipe, NewInsertionPoint);
-      IV = IVRecipe->getVPSingleValue();
-    }
+    VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
     VPValue *BTC = Plan->getOrCreateBackedgeTakenCount();
     bool TailFolded = !CM.isScalarEpilogueAllowed();
 
@@ -9627,11 +9646,14 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
 }
 
 VPValue *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
-  if (!EVL) {
-    auto *EVLRecipe = new VPWidenEVLRecipe();
-    Builder.getInsertBlock()->appendRecipe(EVLRecipe);
-    EVL = EVLRecipe->getEVL();
-  }
+  if (EVL)
+    return EVL;
+
+  VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
+  VPValue *TC = Plan->getOrCreateTripCount();
+  auto *EVLRecipe = new VPWidenEVLRecipe(IV, TC);
+  Builder.getInsertBlock()->insert(EVLRecipe, Builder.getInsertPoint());
+  EVL = EVLRecipe->getEVL();
   return EVL;
 }
 
@@ -9645,8 +9667,8 @@ VPValue *VPRecipeBuilder::getOrCreateEVLMask(VPlanPtr &Plan) {
   return EVLMask;
 }
 
-
-bool VPRecipeBuilder::validateWidenMemory(Instruction *I, VFRange &Range) {
+bool VPRecipeBuilder::validateWidenMemory(Instruction *I,
+                                          VFRange &Range) const {
   assert((isa<LoadInst>(I) || isa<StoreInst>(I)) &&
          "Must be called with either a load or store");
 
@@ -9665,19 +9687,13 @@ bool VPRecipeBuilder::validateWidenMemory(Instruction *I, VFRange &Range) {
     return Decision != LoopVectorizationCostModel::CM_Scalarize;
   };
 
-  if (!LoopVectorizationPlanner::getDecisionAndClampRange(willWiden, Range))
-    return false;
-
-  return true;
+  return LoopVectorizationPlanner::getDecisionAndClampRange(willWiden, Range);
 }
 
 VPRecipeBase *VPRecipeBuilder::tryToWidenMemory(Instruction *I,
                                                 ArrayRef<VPValue *> Operands,
                                                 VFRange &Range,
                                                 VPlanPtr &Plan) {
-  assert((isa<LoadInst>(I) || isa<StoreInst>(I)) &&
-         "Must be called with either a load or store");
-
   if (!validateWidenMemory(I, Range))
     return nullptr;
 
@@ -9693,28 +9709,22 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenMemory(Instruction *I,
                                             Mask);
 }
 
-VPRecipeBase *VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
-                                                          VFRange &Range,
-                                                          VPlanPtr &Plan) {
+VPRecipeBase *
+VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
+                                            ArrayRef<VPValue *> Operands,
+                                            VFRange &Range, VPlanPtr &Plan) {
   if (!validateWidenMemory(I, Range))
     return nullptr;
 
   VPValue *Mask = createBlockInMask(I->getParent(), Plan);
-
-  // If tail folding by masking is enabled, memory instructions should be marked
-  // as masked ops ( LoopVectorizationLegality::blockCanBePredicated()).
-  // However, unlike general instructions (arithmetic, comparison, select,
-  // etc.), presence of mask does not guarantee TTI's preference to use
-  // predicated vector instructions.
   VPValue *EVL = getOrCreateEVL(Plan);
-  VPValue *Addr = Plan->getOrAddVPValue(getLoadStorePointerOperand(I));
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
-    return new VPPredicatedWidenMemoryInstructionRecipe(*Load, Addr, Mask, EVL);
+    return new VPPredicatedWidenMemoryInstructionRecipe(*Load, Operands[0],
+                                                        Mask, EVL);
 
   StoreInst *Store = cast<StoreInst>(I);
-  VPValue *StoredValue = Plan->getOrAddVPValue(Store->getValueOperand());
-  return new VPPredicatedWidenMemoryInstructionRecipe(*Store, Addr, StoredValue,
-                                                      Mask, EVL);
+  return new VPPredicatedWidenMemoryInstructionRecipe(*Store, Operands[1],
+                                                      Operands[0], Mask, EVL);
 }
 
 VPWidenIntOrFpInductionRecipe *
@@ -9848,7 +9858,7 @@ bool VPRecipeBuilder::shouldWiden(Instruction *I, VFRange &Range) const {
                                                              Range);
 }
 
-bool VPRecipeBuilder::preferPredicatedWiden() {
+bool VPRecipeBuilder::preferPredicatedWiden() const {
   return CM.foldTailByMasking() && Legal->preferPredicatedVectorOps();
 }
 
@@ -9894,10 +9904,7 @@ bool VPRecipeBuilder::validateWiden(Instruction *I) const {
     return false;
   };
 
-  if (!IsVectorizableOpcode(I->getOpcode()))
-    return false;
-
-  return true;
+  return IsVectorizableOpcode(I->getOpcode());
 }
 
 VPWidenRecipe *VPRecipeBuilder::tryToWiden(Instruction *I,
@@ -9909,16 +9916,6 @@ VPWidenRecipe *VPRecipeBuilder::tryToWiden(Instruction *I,
   return new VPWidenRecipe(*I, make_range(Operands.begin(), Operands.end()));
 }
 
-VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(Instruction *I,
-                                                               VPlanPtr &Plan) {
-  if (!validateWiden(I))
-    return nullptr;
-
-  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
-  return new VPPredicatedWidenRecipe(*I, Plan->mapToVPValues(I->operands()),
-                                     Mask, getOrCreateEVL(Plan));
-}
-
 void VPRecipeBuilder::fixHeaderPhis() {
   BasicBlock *OrigLatch = OrigLoop->getLoopLatch();
   for (VPWidenPHIRecipe *R : PhisToFix) {
@@ -9927,6 +9924,17 @@ void VPRecipeBuilder::fixHeaderPhis() {
         getRecipe(cast<Instruction>(PN->getIncomingValueForBlock(OrigLatch)));
     R->addOperand(IncR->getVPSingleValue());
   }
+}
+
+VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(
+    Instruction *I, ArrayRef<VPValue *> Operands, VPlanPtr &Plan) {
+  if (!validateWiden(I))
+    return nullptr;
+
+  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
+  VPValue *EVL = getOrCreateEVL(Plan);
+  return new VPPredicatedWidenRecipe(
+      *I, make_range(Operands.begin(), Operands.end()), Mask, EVL);
 }
 
 VPBasicBlock *VPRecipeBuilder::handleReplication(
@@ -10020,7 +10028,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
   if (isa<LoadInst>(Instr) || isa<StoreInst>(Instr)) {
     if (preferPredicatedWiden())
       return toVPRecipeResult(
-          tryToPredicatedWidenMemory(Instr, /* Operands, */ Range, Plan));
+          tryToPredicatedWidenMemory(Instr, Operands, Range, Plan));
     return toVPRecipeResult(tryToWidenMemory(Instr, Operands, Range, Plan));
   }
 
@@ -10081,7 +10089,8 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
   }
 
   if (preferPredicatedWiden())
-    return toVPRecipeResult(tryToPredicatedWiden(Instr, /* Operands, */ Plan));
+    return toVPRecipeResult(tryToPredicatedWiden(Instr, Operands, Plan));
+
   return toVPRecipeResult(tryToWiden(Instr, Operands));
 }
 

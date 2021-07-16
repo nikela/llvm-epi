@@ -57,6 +57,11 @@ class VPRecipeBuilder {
   EdgeMaskCacheTy EdgeMaskCache;
   BlockMaskCacheTy BlockMaskCache;
 
+  /// Hold a mapping of Basic block to the canonical vector induction VPValue
+  /// inserted for that block or the primary induction if it exists.
+  using IVCacheTy = DenseMap<VPBasicBlock *, VPValue *>;
+  IVCacheTy IVCache;
+
   // VPlan-VPlan transformations support: Hold a mapping from ingredients to
   // their recipe. To save on memory, only do so for selected ingredients,
   // marked by having a nullptr entry in this map.
@@ -78,9 +83,15 @@ class VPRecipeBuilder {
   VPRecipeBase *tryToWidenMemory(Instruction *I, ArrayRef<VPValue *> Operands,
                                  VFRange &Range, VPlanPtr &Plan);
 
-  /// Similar to tryToWidenMemory, but create a predicated recipe.
-  VPRecipeBase *tryToPredicatedWidenMemory(Instruction *I, VFRange &Range,
-                                           VPlanPtr &Plan);
+  /// Similar to tryToWidenMemory, but create a predicated recipe. The
+  /// predicated recipe takes mandatory mask and EVL VPInstructions.
+  VPRecipeBase *tryToPredicatedWidenMemory(Instruction *I,
+                                           ArrayRef<VPValue *> Operands,
+                                           VFRange &Range, VPlanPtr &Plan);
+
+  /// Helper method used by tryToWidenMemory and tryToPredicatedWidenMemory to
+  /// validate if a memory instructions can be widened.
+  bool validateWidenMemory(Instruction *I, VFRange &Range) const;
 
   /// Check if an induction recipe should be constructed for \I. If so build and
   /// return it. If not, return null.
@@ -111,18 +122,25 @@ class VPRecipeBuilder {
   /// that widening should be performed.
   VPWidenRecipe *tryToWiden(Instruction *I, ArrayRef<VPValue *> Operands) const;
 
-  /// Similar to \p tryToWiden but widen instruction using vector predication
-  /// intrinsics.
-  VPPredicatedWidenRecipe *tryToPredicatedWiden(Instruction *I, VPlanPtr &Plan);
+  /// Similar to tryToWiden, but widen to VP intrinsics.
+  VPPredicatedWidenRecipe *tryToPredicatedWiden(Instruction *I,
+                                                ArrayRef<VPValue *> Operands,
+                                                VPlanPtr &Plan);
 
-  /// Check if we want to use vector predicated intrinsics for widening.
-  bool preferPredicatedWiden();
-
-  /// Check if it is valid to widen a given instruction.
+  /// Helper method used by tryToWiden and tryToPredicatedWiden to validate if
+  /// an instruction can be widened.
   bool validateWiden(Instruction *I) const;
 
-  /// Return a VPRecipeOrValueTy with VPRecipeBase * being set. This can be used to force the use as VPRecipeBase* for recipe sub-types that also inherit from VPValue.
+  /// Return a VPRecipeOrValueTy with VPRecipeBase * being set. This can be used
+  /// to force the use as VPRecipeBase* for recipe sub-types that also inherit
+  /// from VPValue.
   VPRecipeOrVPValueTy toVPRecipeResult(VPRecipeBase *R) const { return R; }
+
+  /// Check if we want to use vector predicated intrinsics for widening.
+  bool preferPredicatedWiden() const;
+
+  /// Insert and Cache Induction Variable
+  VPValue *getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan);
 
 public:
   VPRecipeBuilder(Loop *OrigLoop, const TargetLibraryInfo *TLI,
@@ -153,23 +171,20 @@ public:
   /// A helper function that computes the predicate of the block BB, assuming
   /// that the header block of the loop is set to True. It returns the *entry*
   /// mask for the block BB.
-  VPValue *createBlockInMask(BasicBlock *BB, VPlanPtr &Plan);
+  VPValue *createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
+                             bool isMemOp = false);
 
   /// A helper function that computes the predicate of the edge between SRC
   /// and DST.
   VPValue *createEdgeMask(BasicBlock *Src, BasicBlock *Dst, VPlanPtr &Plan);
 
-  /// A helper function that computes the EVL for the Instruction I. By default
-  /// it sets the EVL to whole vector register length.
+  /// A helper function that computes the Explicit(Active) Vector Length for the
+  /// current vector iteration.
   VPValue *getOrCreateEVL(VPlanPtr &Plan);
 
   /// A helper function to compute runtime EVL mask per vector iteration by
   /// current EVL and step vector.
   VPValue *getOrCreateEVLMask(VPlanPtr &Plan);
-
-  /// A helper function that validates if the memory instruction can be widened
-  /// and sets the widening decision.
-  bool validateWidenMemory(Instruction *I, VFRange &Range);
 
   /// Mark given ingredient for recording its recipe once one is created for
   /// it.

@@ -584,6 +584,7 @@ bool VPRecipeBase::mayHaveSideEffects() const {
   case VPWidenPHISC:
   case VPBlendSC:
   case VPWidenSC:
+  case VPPredicatedWidenSC:
   case VPWidenGEPSC:
   case VPReductionSC:
   case VPWidenSelectSC: {
@@ -697,6 +698,12 @@ void VPInstruction::generateInstruction(VPTransformState &State,
   case Instruction::Call: {
     llvm_unreachable("This opcode is handled by the VPCallInstruction recipe");
   }
+  case VPInstruction::AllTrueMask: {
+    Value *AllTrueMask = Builder.getTrueVector(State.VF);
+    State.set(this, AllTrueMask, Part);
+    break;
+  }
+
   default:
     llvm_unreachable("Unsupported opcode for instruction");
   }
@@ -739,7 +746,9 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
   case VPInstruction::ActiveLaneMask:
     O << "active lane mask";
     break;
-
+  case VPInstruction::AllTrueMask:
+    O << "all true mask";
+    break;
   default:
     O << Instruction::getOpcodeName(getOpcode());
   }
@@ -755,16 +764,26 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
 /// LoopVectorBody basic-block was created for this. Introduce additional
 /// basic-blocks as needed, and fill them all.
 void VPlan::execute(VPTransformState *State) {
-  // -2. Check if the trip count is needed, and if so build it.
+  IRBuilder<> Builder(State->CFG.PrevBB->getTerminator());
+
+  // -3 Check if the trip count is needed, if so build it.
   if (TripCount && TripCount->getNumUsers()) {
     Value *TC = State->TripCount;
-    Value2VPValue[TC] = TripCount;
+    for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part)
+      State->set(TripCount, TC, Part);
+  }
+
+  // -2 Set the runtime VF if it is needed.
+  if (RuntimeVF && RuntimeVF->getNumUsers()) {
+    Value *RuntimeVFVal =
+        getRuntimeVF(Builder, Builder.getInt32Ty(), State->VF);
+    for (unsigned Part = 0, UF = State->UF; Part < UF; ++Part)
+      State->set(RuntimeVF, RuntimeVFVal, Part);
   }
 
   // -1. Check if the backedge taken count is needed, and if so build it.
   if (BackedgeTakenCount && BackedgeTakenCount->getNumUsers()) {
     Value *TC = State->TripCount;
-    IRBuilder<> Builder(State->CFG.PrevBB->getTerminator());
     auto *TCMO = Builder.CreateSub(TC, ConstantInt::get(TC->getType(), 1),
                                    "trip.count.minus.1");
     auto VF = State->VF;
@@ -929,17 +948,20 @@ void VPlanPrinter::dump() {
   OS << "graph [labelloc=t, fontsize=30; label=\"Vectorization Plan";
   if (!Plan.getName().empty())
     OS << "\\n" << DOT::EscapeString(Plan.getName());
-  if (Plan.BackedgeTakenCount || Plan.TripCount) {
+  if (Plan.BackedgeTakenCount) {
     OS << ", where:\\n";
-    if (Plan.BackedgeTakenCount) {
       Plan.BackedgeTakenCount->print(OS, SlotTracker);
       OS << " := BackedgeTakenCount, ";
-    }
-    if (Plan.TripCount) {
-      Plan.TripCount->print(OS, SlotTracker);
-      OS << " := TripCount";
-    } else
-      OS << "\b\b";
+  }
+  if (Plan.TripCount) {
+    OS << "\\n";
+    Plan.RuntimeVF->print(OS, SlotTracker);
+    OS << " := TripCount";
+  }
+  if (Plan.RuntimeVF) {
+    OS << "\\n";
+    Plan.RuntimeVF->print(OS, SlotTracker);
+    OS << " := RuntimeVF";
   }
   OS << "\"]\n";
   OS << "node [shape=rect, fontname=Courier, fontsize=30]\n";
@@ -1104,11 +1126,6 @@ void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
   printAsOperand(O, SlotTracker);
   O << " = " << getUnderlyingInstr()->getOpcodeName() << " ";
   printOperands(O, SlotTracker);
-
-  // Improve this.
-  VPValue *Mask = getMask();
-  if (isOuterMask(Mask))
-    O << " (ALL-ONES-MASK)";
 }
 
 void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
@@ -1229,6 +1246,19 @@ void VPWidenMemoryInstructionRecipe::print(raw_ostream &O, const Twine &Indent,
 }
 #endif
 
+void VPPredicatedWidenMemoryInstructionRecipe::print(
+    raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
+  O << "PREDICATED-WIDEN ";
+
+  if (!isStore()) {
+    getVPValue(0)->printAsOperand(O, SlotTracker);
+    O << " = ";
+  }
+  O << Instruction::getOpcodeName(Ingredient.getOpcode()) << " ";
+
+  printOperands(O, SlotTracker);
+}
+
 void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.CanonicalIV;
   Type *STy = CanonicalIV->getType();
@@ -1302,24 +1332,6 @@ void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
   O << "EMIT ";
   getEVLMask()->printAsOperand(O, SlotTracker);
   O << " = GENERATE-ULT-STEPVECTOR-EVL-MASK";
-}
-
-void VPPredicatedWidenMemoryInstructionRecipe::print(
-    raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
-  O << "PREDICATED-WIDEN ";
-
-  if (!isStore()) {
-    getVPValue(0)->printAsOperand(O, SlotTracker);
-    O << " = ";
-  }
-  O << Instruction::getOpcodeName(Ingredient.getOpcode()) << " ";
-
-  printOperands(O, SlotTracker);
-
-  // Improve this.
-  VPValue *Mask = getMask();
-  if (isOuterMask(Mask))
-    O << " (ALL-ONES-MASK)";
 }
 
 void VPReductionPHIRecipe::execute(VPTransformState &State) {
@@ -1492,6 +1504,12 @@ void VPSlotTracker::assignSlots(const VPlan &Plan) {
 
   if (Plan.BackedgeTakenCount)
     assignSlot(Plan.BackedgeTakenCount);
+
+  if (Plan.TripCount)
+    assignSlot(Plan.TripCount);
+
+  if (Plan.RuntimeVF)
+    assignSlot(Plan.RuntimeVF);
 
   ReversePostOrderTraversal<
       VPBlockRecursiveTraversalWrapper<const VPBlockBase *>>
