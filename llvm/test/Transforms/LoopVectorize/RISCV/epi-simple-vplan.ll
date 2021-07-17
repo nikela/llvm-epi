@@ -14,15 +14,15 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK: VPlan 'Initial VPlan for VF={vscale x 1,vscale x 2,vscale x 4,vscale x 8,vscale x 16},UF>=1' {
 ; CHECK-NEXT: for.body:
 ; CHECK-NEXT:   WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next
-; CHECK-NEXT:   EMIT vp<%2> = icmp ule ir<%indvars.iv> vp<%0>
+; CHECK-NEXT:   EMIT vp<%3> = icmp ule ir<%indvars.iv> vp<%0>
 ; CHECK-NEXT:   CLONE ir<%arrayidx> = getelementptr ir<%a>, ir<%indvars.iv>
-; CHECK-NEXT: EMIT vp<%4> = GENERATE-EXPLICIT-VECTOR-LENGTH
-; CHECK-NEXT: PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%4>, vp<%2> (ALL-ONES-MASK)
+; CHECK-NEXT:   EMIT vp<%5> = GENERATE-EXPLICIT-VECTOR-LENGTH
+; CHECK-NEXT:   PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%3>, vp<%5> (ALL-ONES-MASK)
 ; CHECK-NEXT:   CLONE ir<%arrayidx2> = getelementptr ir<%b>, ir<%indvars.iv>
-; CHECK-NEXT: PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%4>, vp<%2> (ALL-ONES-MASK)
-; CHECK-NEXT: PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%4>, vp<%2> (ALL-ONES-MASK)
+; CHECK-NEXT:   PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%3>, vp<%5> (ALL-ONES-MASK)
+; CHECK-NEXT:   PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%3>, vp<%5>
 ; CHECK-NEXT:   CLONE ir<%arrayidx4> = getelementptr ir<%c>, ir<%indvars.iv>
-; CHECK-NEXT: PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%4>, vp<%2> (ALL-ONES-MASK)
+; CHECK-NEXT:   PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%3>, vp<%5> (ALL-ONES-MASK)
 ; CHECK-NEXT: No successors
 ; CHECK-NEXT: }
 

@@ -9595,6 +9595,8 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
     if (!CM.blockNeedsPredication(BB))
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
 
+    // FIXME: There is probably a better way than to be conservative for all mem
+    // ops. For eg. we can check for Legal->blockNeedsPredication().
     // To be really conservative, for memory ops we do not generate AllTrueMask
     // recipe. The mask for load/stores might prevent memory access exception
     // and for gather/scatter there is no non-masked version in the IR so if the
@@ -9716,7 +9718,7 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
   if (!validateWidenMemory(I, Range))
     return nullptr;
 
-  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
+  VPValue *Mask = createBlockInMask(I->getParent(), Plan, true);
   VPValue *EVL = getOrCreateEVL(Plan);
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
     return new VPPredicatedWidenMemoryInstructionRecipe(*Load, Operands[0],
