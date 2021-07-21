@@ -471,6 +471,7 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
     MachineInstrBuilder MIB =
         BuildMI(*MBB, MBB->begin(), DL, TII->get(RISCV::PHI), ExtraReg);
     BBInfo.ExtraFromPHIReg = ExtraReg;
+    // Add operands to the PHI instruction
     for (const auto &EFM : BBInfo.Pred.getExtrasForPHI()) {
       MachineBasicBlock *PredMBB = MF->getBlockNumbered(EFM.first);
       Register PredExtra;
@@ -488,8 +489,11 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
         PredExtra = EFM.second.ExtraReg;
         break;
       }
-      MIB.addReg(PredExtra);
-      MIB.addMBB(PredMBB);
+      MIB.addReg(PredExtra); // Extra operand register
+      MIB.addMBB(PredMBB);   // Machine Basic Block
+
+      // Assure that PredExtra is not being killed in the predecessor MBB
+      MRI->clearKillFlags(PredExtra);
     }
   }
   return BBInfo.ExtraFromPHIReg.getValue();
@@ -662,6 +666,9 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
         .addReg(Info.getAVLReg())
         .addImm(Info.encodeVTYPE())
         .addReg(ExtraReg);
+
+    // Assure that ExtraReg is not being killed in the predecessor MBB
+    MRI->clearKillFlags(ExtraReg);
 
     return;
   } // End of PseudoVSETVLEXT
