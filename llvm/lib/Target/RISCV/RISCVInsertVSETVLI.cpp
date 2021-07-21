@@ -195,35 +195,25 @@ public:
     return getSEWLMULRatio() == Other.getSEWLMULRatio();
   }
 
-  bool hasExtra() const {
-    return this->Extra.Tag != isEmpty;
-  }
+  bool hasExtra() const { return this->Extra.Tag != isEmpty; }
 
   void setExtra(ExtraTag ET = isEmpty, Register ExtraReg = RISCV::NoRegister) {
     this->Extra.Tag = ET;
     this->Extra.ExtraReg = ExtraReg;
   }
 
-  const ExtraOperand getExtraOperand() const {
-    return this->Extra;
-  }
+  const ExtraOperand getExtraOperand() const { return this->Extra; }
 
-  void inheritExtraFrom(const VSETVLIInfo &Other) {
-    this->Extra = Other.Extra;
-  }
+  void inheritExtraFrom(const VSETVLIInfo &Other) { this->Extra = Other.Extra; }
 
   bool hasSameExtraOperand(const VSETVLIInfo &Other) const {
     return this->Extra.Tag == Other.Extra.Tag &&
            this->Extra.ExtraReg == Other.Extra.ExtraReg;
   }
 
-  bool isExtrasForPHIEmpty() const {
-    return this->ExtrasForPHI.empty();
-  }
+  bool isExtrasForPHIEmpty() const { return this->ExtrasForPHI.empty(); }
 
-  size_t sizeOfExtrasForPHI() const {
-    return this->ExtrasForPHI.size();
-  }
+  size_t sizeOfExtrasForPHI() const { return this->ExtrasForPHI.size(); }
 
   void insertExtra(MBBNumber MBBN, ExtraOperand EO) {
     this->ExtrasForPHI.insert(std::make_pair(MBBN, EO));
@@ -233,9 +223,7 @@ public:
     return this->ExtrasForPHI;
   }
 
-  void resetExtrasForPHI() {
-    this->ExtrasForPHI.clear();
-  }
+  void resetExtrasForPHI() { this->ExtrasForPHI.clear(); }
 
   void inheritExtrasForPHIFrom(const VSETVLIInfo &Other) {
     this->ExtrasForPHI = Other.ExtrasForPHI;
@@ -398,12 +386,13 @@ struct BlockData {
   // Keeps track of whether the block is already in the queue.
   bool InQueue = false;
 
-  // Keeps track of whether the block already contains a PHI to recover the value
-  // of the Extra operand from the predecessors
+  // Keeps track of whether the block already contains a PHI to recover the
+  // value of the Extra operand from the predecessors
   Optional<Register> ExtraFromPHIReg;
 
-  // Keeps track of whether the block already contains the definition of a virtual
-  // register (with an assigned value of 0) to be used in a PHI of the successor(s)
+  // Keeps track of whether the block already contains the definition of a
+  // virtual register (with an assigned value of 0) to be used in a PHI of the
+  // successor(s)
   Optional<Register> FakeExtraReg;
 
   BlockData() {}
@@ -730,7 +719,7 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
     if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
       Register AVLReg = MI.getOperand(1).getReg();
       assert((AVLReg != RISCV::X0 || MI.getOperand(0).getReg() != RISCV::X0) &&
-          "Can't handle X0, X0 vsetvli yet");
+             "Can't handle X0, X0 vsetvli yet");
       NewInfo.setAVLReg(AVLReg);
     } else {
       assert(MI.getOpcode() == RISCV::PseudoVSETIVLI);
@@ -863,10 +852,14 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
 
   // Check the result of the intersection of all predecessors:
   // - if ExtrasForPHI is empty => no predecessors (nothing to do)
-  // - else if all ExtraOperands stored in ExtrasForPHI are empty or zero, we can remove it
-  // - else if ExtrasForPHI.size() == 1, then we can use the Extra of the only predecessor
-  // - otherwise, set ExtraOperand to isFromPHI (=> we need a PHI to recover its value)
-  assert(!InInfo.hasExtra() && "The output of intersect should not have an Extra operand");
+  // - else if all ExtraOperands stored in ExtrasForPHI are empty or zero, we
+  // can remove it
+  // - else if ExtrasForPHI.size() == 1, then we can use the Extra of the only
+  // predecessor
+  // - otherwise, set ExtraOperand to isFromPHI (=> we need a PHI to recover its
+  // value)
+  assert(!InInfo.hasExtra() &&
+         "The output of intersect should not have an Extra operand");
   if (!InInfo.isExtrasForPHIEmpty()) {
     if (!InInfo.hasExtrasForPHIValues()) {
       InInfo.resetExtrasForPHI();
@@ -878,7 +871,8 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
       InInfo.setExtra(isFromPHI);
     }
   }
-  // Here Pred has ExtrasForPHI only if we actually need a PHI to recover the Extra value
+  // Here Pred has ExtrasForPHI only if we actually need a PHI to recover the
+  // Extra value
   BBInfo.Pred = InInfo;
 
   VSETVLIInfo TmpStatus = BBInfo.Pred.merge(BBInfo.Change);
