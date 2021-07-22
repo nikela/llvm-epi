@@ -644,16 +644,17 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   DebugLoc DL = MI.getDebugLoc();
 
   // If Info has an Extra register, we use PseudoVSETVLEXT
-  if (Info.getExtraOperand().Tag != isZero) {
+  ExtraTag ExtraRegIs = Info.getExtraOperand().Tag;
+  if (!(ExtraRegIs == isZero || ExtraRegIs == isEmpty)) {
     // We do not handle the case where the VL is an immediate,
     // since it should never happen in EPI
     assert(!Info.hasAVLImm() && "AVL should be in a register");
 
     Register ExtraReg;
-    if (Info.getExtraOperand().Tag == isFromPHI)
+    if (ExtraRegIs == isFromPHI)
       ExtraReg = getRegisterFromPHI(&MBB);
     else {
-      assert(Info.getExtraOperand().Tag == isRegister);
+      assert(ExtraRegIs == isRegister);
       ExtraReg = Info.getExtraOperand().ExtraReg;
     }
 
