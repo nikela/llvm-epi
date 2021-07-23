@@ -72,6 +72,11 @@ class VSETVLIInfo {
   ExtraOperand Extra;
   SmallMapVector<MBBNumber, ExtraOperand, 4> ExtrasForPHI;
 
+  static bool hasExtraValue(const std::pair<MBBNumber, ExtraOperand> Elem) {
+    ExtraOperand EO = Elem.second;
+    return EO.Tag != isEmpty && EO.Tag != isZero;
+  }
+
 public:
   VSETVLIInfo()
       : AVLImm(0), TailAgnostic(false), MaskAgnostic(false), MaskRegOp(false),
@@ -230,12 +235,9 @@ public:
   }
 
   bool hasExtrasForPHIValues() const {
-    for (const auto &EFPPair : ExtrasForPHI) {
-      ExtraOperand EO = EFPPair.second;
-      if (EO.Tag != isEmpty && EO.Tag != isZero)
-        return true;
-    }
-    return false;
+    const auto *const IterPos = std::find_if(
+        this->ExtrasForPHI.begin(), this->ExtrasForPHI.end(), hasExtraValue);
+    return IterPos != this->ExtrasForPHI.end();
   }
 
   // Determine whether the vector instructions requirements represented by
