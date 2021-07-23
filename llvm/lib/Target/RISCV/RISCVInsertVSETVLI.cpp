@@ -481,9 +481,12 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
     BBInfo.ExtraFromPHIReg = ExtraReg;
     // Add operands to the PHI instruction
     for (const auto &EFM : BBInfo.Pred.getExtrasForPHI()) {
-      MachineBasicBlock *PredMBB = MF->getBlockNumbered(EFM.first);
+      MBBNumber MBBN;
+      ExtraOperand EO;
+      std::tie(MBBN, EO) = EFM;
+      MachineBasicBlock *PredMBB = MF->getBlockNumbered(MBBN);
       Register PredExtra;
-      switch (EFM.second.Tag) {
+      switch (EO.Tag) {
       case isEmpty:
       case isZero:
         // We need a fake register
@@ -494,7 +497,7 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
         PredExtra = getRegisterFromPHI(PredMBB);
         break;
       case isRegister:
-        PredExtra = EFM.second.ExtraReg;
+        PredExtra = EO.ExtraReg;
         break;
       }
       MIB.addReg(PredExtra); // Extra operand register
@@ -563,7 +566,7 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
       InstrInfo.setAVLReg(VLOp.getReg());
       // Try to recover the Extra operand value linked to this VL
       assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
-             "We can not have phisical registers here");
+             "We cannot have phisical registers here");
       if (VLOp.getReg() != RISCV::X0) {
         if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
           switch (DefMI->getOpcode()) {
@@ -575,6 +578,9 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
             InstrInfo.setExtra(isZero);
             break;
           case RISCV::PHI: {
+            // We go only one level up in the tree in order to check if the
+            // predecessors do have Extra register values or not, even in the
+            // case we meet another VL defined by a MI with Opcode == RISCV::PHI
             bool NeedPHI = false;
             for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
                  PHIOp != NumOps; PHIOp += 2) {
@@ -598,7 +604,8 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
           }
           // In all other cases, we consider the information unrecoverable,
           // hence we fallback to the default case (isEmpty)
-          default:;
+          default:
+            break;
           }
         } // also in this case we fallback to isEmpty
       }   // also in this case we fallback to isEmpty
@@ -661,7 +668,7 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
     InstrInfo.setAVLReg(VLOp.getReg());
     // Try to recover the Extra operand value linked to this VL
     assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
-           "We can not have phisical registers here");
+           "We cannot have phisical registers here");
     if (VLOp.getReg() != RISCV::X0) {
       if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
         switch (DefMI->getOpcode()) {
@@ -673,6 +680,9 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
           InstrInfo.setExtra(isZero);
           break;
         case RISCV::PHI: {
+          // We go only one level up in the tree in order to check if the
+          // predecessors do have Extra register values or not, even in the
+          // case we meet another VL defined by a MI with Opcode == RISCV::PHI
           bool NeedPHI = false;
           for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
                PHIOp != NumOps; PHIOp += 2) {
@@ -696,7 +706,8 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
         }
         // In all other cases, we consider the information unrecoverable,
         // hence we fallback to the default case (isEmpty)
-        default:;
+        default:
+          break;
         }
       } // also in this case we fallback to isEmpty
     }   // also in this case we fallback to isEmpty
