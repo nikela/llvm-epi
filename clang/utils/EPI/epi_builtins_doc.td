@@ -164,7 +164,7 @@ exist only to transform the vector types.}];
 def : DocEPIBuiltin<cast_from_mask>
 {
   let Category = DocEPIMaskConversions;
-  let Title = "Reinterpret an integer vector as a vector mask";
+  let Title = "Reinterpret a vector mask as an integer vector";
   let Description = [{Use these builtins when you need to reinterpret the
 contents of an mask vector as a integer vector. These builtins are a no-op and
 exist only to transform the vector types.}];
@@ -819,9 +819,9 @@ be overwritten by the `vfnmacc` instruction.}];
 def : DocEPIBuiltin<vfnmadd>
 {
   let Category = DocEPIFloatingPointArithmetic;
-  let Title = "Floating-point multiply and add (overwrite multiplicand)";
+  let Title = "Floating-point negate multiply and add (overwrite multiplicand)";
   let Description = [{Use these builtins to do an elementwise floating-point
-multiply and add.
+negate multiply and add.
 
 At low level, the parameter `a` will be located in a vector register that will
 be overwritten by the `vfnmadd` instruction.}];
