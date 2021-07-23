@@ -53,7 +53,7 @@ bool isRuntimeInitialized() {
 //
 // Called in Generic Execution Mode only.
 int GetMasterThreadID() {
-  return (GetNumberOfThreadsInBlock() - 1) & ~(WARPSIZE - 1);
+  return (__kmpc_get_hardware_num_threads_in_block() - 1) & ~(WARPSIZE - 1);
 }
 
 // The last warp is reserved for the master; other warps are workers.
@@ -70,7 +70,7 @@ int GetNumberOfWorkersInTeam() { return GetMasterThreadID(); }
 int GetLogicalThreadIdInBlock() {
   // Implemented using control flow (predication) instead of with a modulo
   // operation.
-  int tid = GetThreadIdInBlock();
+  int tid = __kmpc_get_hardware_thread_id_in_block();
   if (__kmpc_is_generic_main_thread(tid))
     return 0;
   else
@@ -84,7 +84,7 @@ int GetLogicalThreadIdInBlock() {
 ////////////////////////////////////////////////////////////////////////////////
 
 int GetOmpThreadId() {
-  int tid = GetThreadIdInBlock();
+  int tid = __kmpc_get_hardware_thread_id_in_block();
   if (__kmpc_is_generic_main_thread(tid))
     return 0;
   // omp_thread_num
@@ -109,7 +109,7 @@ int GetNumberOfOmpThreads(bool isSPMDExecutionMode) {
   if (Level != OMP_ACTIVE_PARALLEL_LEVEL + 1) {
     rc = 1;
   } else if (isSPMDExecutionMode) {
-    rc = GetNumberOfThreadsInBlock();
+    rc = __kmpc_get_hardware_num_threads_in_block();
   } else {
     rc = threadsInTeam;
   }
@@ -127,7 +127,7 @@ int GetOmpTeamId() {
 
 int GetNumberOfOmpTeams() {
   // omp_num_teams
-  return GetNumberOfBlocksInKernel(); // assume 1 block per team
+  return __kmpc_get_hardware_num_blocks(); // assume 1 block per team
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ void DecParallelLevel(bool ActiveParallel, __kmpc_impl_lanemask_t Mask) {
 int GetNumberOfProcsInDevice(bool isSPMDExecutionMode) {
   if (!isSPMDExecutionMode)
     return GetNumberOfWorkersInTeam();
-  return GetNumberOfThreadsInBlock();
+  return __kmpc_get_hardware_num_threads_in_block();
 }
 
 int GetNumberOfProcsInTeam(bool isSPMDExecutionMode) {
@@ -220,17 +220,9 @@ char *GetTeamsReductionScratchpad() {
 void __kmp_invoke_microtask(kmp_int32 global_tid, kmp_int32 bound_tid, void *fn,
                             void **args, size_t nargs) {
   switch (nargs) {
-  case 1:
-    ((void (*)(kmp_int32 *, kmp_int32 *, void *))fn)(&global_tid, &bound_tid,
-                                                     args[0]);
-    break;
-  case 3:
-    ((void (*)(kmp_int32 *, kmp_int32 *, void *, void *, void *))fn)(
-        &global_tid, &bound_tid, args[0], args[1], args[2]);
-    break;
+#include "common/generated_microtask_cases.gen"
   default:
-    printf("Invalid number of arguments in kmp_invoke_microtask, expects 1 or "
-           "3 (for combined constructs), aborting execution.\n");
+    printf("Too many arguments in kmp_invoke_microtask, aborting execution.\n");
     __builtin_trap();
   }
 }

@@ -47,6 +47,7 @@ class Writer {
 public:
   Writer() : buffer(errorHandler().outputBuffer) {}
 
+  void treatSpecialUndefineds();
   void scanRelocations();
   void scanSymbols();
   template <class LP> void createOutputSections();
@@ -238,10 +239,7 @@ public:
     c->maxprot = seg->maxProt;
     c->initprot = seg->initProt;
 
-    if (seg->getSections().empty())
-      return;
-
-    c->vmaddr = seg->firstSection()->addr;
+    c->vmaddr = seg->addr;
     c->vmsize = seg->vmSize;
     c->filesize = seg->fileSize;
     c->nsects = seg->numNonHiddenSections();
@@ -550,6 +548,27 @@ public:
 
 } // namespace
 
+void Writer::treatSpecialUndefineds() {
+  if (config->entry)
+    if (auto *undefined = dyn_cast<Undefined>(config->entry))
+      treatUndefinedSymbol(*undefined, "the entry point");
+
+  // FIXME: This prints symbols that are undefined both in input files and
+  // via -u flag twice.
+  for (const Symbol *sym : config->explicitUndefineds) {
+    if (const auto *undefined = dyn_cast<Undefined>(sym))
+      treatUndefinedSymbol(*undefined, "-u");
+  }
+  // Literal exported-symbol names must be defined, but glob
+  // patterns need not match.
+  for (const CachedHashStringRef &cachedName :
+       config->exportedSymbols.literals) {
+    if (const Symbol *sym = symtab->find(cachedName))
+      if (const auto *undefined = dyn_cast<Undefined>(sym))
+        treatUndefinedSymbol(*undefined, "-exported_symbol(s_list)");
+  }
+}
+
 // Add stubs and bindings where necessary (e.g. if the symbol is a
 // DylibSymbol.)
 static void prepareBranchTarget(Symbol *sym) {
@@ -589,6 +608,7 @@ static bool needsBinding(const Symbol *sym) {
 
 static void prepareSymbolRelocation(Symbol *sym, const InputSection *isec,
                                     const Reloc &r) {
+  assert(sym->isLive());
   const RelocAttrs &relocAttrs = target->getRelocAttrs(r.type);
 
   if (relocAttrs.hasAttr(RelocAttrBits::BRANCH)) {
@@ -690,10 +710,6 @@ template <class LP> void Writer::createLoadCommands() {
       make<LCDysymtab>(symtabSection, indirectSymtabSection));
   if (!config->umbrella.empty())
     in.header->addLoadCommand(make<LCSubFramework>(config->umbrella));
-  if (functionStartsSection)
-    in.header->addLoadCommand(make<LCFunctionStarts>(functionStartsSection));
-  if (dataInCodeSection)
-    in.header->addLoadCommand(make<LCDataInCode>(dataInCodeSection));
   if (config->emitEncryptionInfo)
     in.header->addLoadCommand(make<LCEncryptionInfo<LP>>());
   for (StringRef path : config->runtimePaths)
@@ -702,7 +718,6 @@ template <class LP> void Writer::createLoadCommands() {
   switch (config->outputType) {
   case MH_EXECUTE:
     in.header->addLoadCommand(make<LCLoadDylinker>());
-    in.header->addLoadCommand(make<LCMain>());
     break;
   case MH_DYLIB:
     in.header->addLoadCommand(make<LCDylib>(LC_ID_DYLIB, config->installName,
@@ -722,6 +737,10 @@ template <class LP> void Writer::createLoadCommands() {
     in.header->addLoadCommand(make<LCBuildVersion>(config->platformInfo));
   else
     in.header->addLoadCommand(make<LCMinVersion>(config->platformInfo));
+
+  // This is down here to match ld64's load command order.
+  if (config->outputType == MH_EXECUTE)
+    in.header->addLoadCommand(make<LCMain>());
 
   int64_t dylibOrdinal = 1;
   DenseMap<StringRef, int64_t> ordinalForInstallName;
@@ -789,6 +808,10 @@ template <class LP> void Writer::createLoadCommands() {
     }
   }
 
+  if (functionStartsSection)
+    in.header->addLoadCommand(make<LCFunctionStarts>(functionStartsSection));
+  if (dataInCodeSection)
+    in.header->addLoadCommand(make<LCDataInCode>(dataInCodeSection));
   if (codeSignatureSection)
     in.header->addLoadCommand(make<LCCodeSignature>(codeSignatureSection));
 
@@ -821,6 +844,9 @@ static DenseMap<const InputSection *, size_t> buildInputSectionPriorities() {
     return sectionPriorities;
 
   auto addSym = [&](Defined &sym) {
+    if (sym.isAbsolute())
+      return;
+
     auto it = config->priorities.find(sym.getName());
     if (it == config->priorities.end())
       return;
@@ -951,6 +977,7 @@ void Writer::finalizeAddresses() {
   for (OutputSegment *seg : outputSegments) {
     if (seg == linkEditSegment)
       continue;
+    seg->addr = addr;
     assignAddresses(seg);
     // codesign / libstuff checks for segment ordering by verifying that
     // `fileOff + fileSize == next segment fileOff`. So we call alignTo() before
@@ -958,7 +985,7 @@ void Writer::finalizeAddresses() {
     // contiguous. We handle addr / vmSize similarly for the same reason.
     fileOff = alignTo(fileOff, pageSize);
     addr = alignTo(addr, pageSize);
-    seg->vmSize = addr - seg->firstSection()->addr;
+    seg->vmSize = addr - seg->addr;
     seg->fileSize = fileOff - seg->fileOff;
   }
 }
@@ -984,9 +1011,10 @@ void Writer::finalizeLinkEditSegment() {
 
   // Now that __LINKEDIT is filled out, do a proper calculation of its
   // addresses and offsets.
+  linkEditSegment->addr = addr;
   assignAddresses(linkEditSegment);
   // No need to page-align fileOff / addr here since this is the last segment.
-  linkEditSegment->vmSize = addr - linkEditSegment->firstSection()->addr;
+  linkEditSegment->vmSize = addr - linkEditSegment->addr;
   linkEditSegment->fileSize = fileOff - linkEditSegment->fileOff;
 }
 
@@ -1063,6 +1091,7 @@ void Writer::writeOutputFile() {
 }
 
 template <class LP> void Writer::run() {
+  treatSpecialUndefineds();
   if (config->entry && !isa<Undefined>(config->entry))
     prepareBranchTarget(config->entry);
   scanRelocations();
