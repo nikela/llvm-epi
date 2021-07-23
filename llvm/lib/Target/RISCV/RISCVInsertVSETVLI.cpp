@@ -315,7 +315,6 @@ public:
     if (!isValid()) {
       VSETVLIInfo ResultInfo = Other;
       ResultInfo.insertExtra(MBBN, Other.getExtraOperand());
-      ResultInfo.setExtra();
       return ResultInfo;
     }
 
@@ -455,16 +454,23 @@ Register &RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock *MBB) {
 Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
   BlockData &BBInfo = BlockInfo[MBB->getNumber()];
 
-  // If this MBB has a .Pred VSETVLIInfo with an empty ExtrasForPHI,
-  // it means the Extra operand has been inherited from the (only) predecessor,
-  // which needs to introduce a PHI in order to recover the Extra register.
-  if (BBInfo.Pred.isExtrasForPHIEmpty()) {
-    assert(BBInfo.Exit.getExtraOperand().Tag == isFromPHI &&
-           "Wrong Tag: expected isFromPHI");
-    return getRegisterFromPHI(*(MBB->pred_begin()));
-  }
-
   if (!BBInfo.ExtraFromPHIReg.hasValue()) {
+    // If this MBB has a .Pred VSETVLIInfo with an empty ExtrasForPHI,
+    // it can either be because none of the predecessor use an actual value for
+    // the Extra operand (so we fallback to isZero) or because we had
+    // only a predecessor; in this case, we need to introduce a PHI in the
+    // predecessor in order to recover the Extra register.
+    if (BBInfo.Pred.isExtrasForPHIEmpty()) {
+      if (BBInfo.Pred.getExtraOperand().Tag == isZero) {
+        BBInfo.ExtraFromPHIReg = RISCV::NoRegister;
+        return BBInfo.ExtraFromPHIReg.getValue();
+      }
+      assert(!MBB->pred_empty() && "This MBB should have one predecessor");
+      BBInfo.ExtraFromPHIReg = getRegisterFromPHI(*(MBB->pred_begin()));
+      return BBInfo.ExtraFromPHIReg.getValue();
+    }
+
+    // Otherwise, we create the PHI
     MachineFunction *MF = MBB->getParent();
     DebugLoc DL = MBB->findBranchDebugLoc();
     Register ExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
@@ -551,8 +557,50 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
     const MachineOperand &VLOp = MI.getOperand(MI.getNumExplicitOperands() - 2);
     if (VLOp.isImm())
       InstrInfo.setAVLImm(VLOp.getImm());
-    else
+    else {
       InstrInfo.setAVLReg(VLOp.getReg());
+      // Try to recover the Extra operand value linked to this VL
+      assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
+             "We can not have phisical registers here");
+      if (VLOp.getReg() != RISCV::X0) {
+        if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
+          switch (DefMI->getOpcode()) {
+          case RISCV::PseudoVSETVLEXT:
+            InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
+            break;
+          case RISCV::PseudoVSETVLI:
+          case RISCV::PseudoVSETIVLI:
+            InstrInfo.setExtra(isZero);
+            break;
+          case RISCV::PHI: {
+            bool NeedPHI = false;
+            for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
+                 PHIOp != NumOps; PHIOp += 2) {
+              assert(DefMI->getOperand(PHIOp).isReg() &&
+                     "PHIOp is not a register");
+              Register InReg = DefMI->getOperand(PHIOp).getReg();
+              MachineInstr *PrevDefMI = MRI->getVRegDef(InReg);
+              if (PrevDefMI &&
+                  (PrevDefMI->getOpcode() == RISCV::PseudoVSETVLEXT ||
+                   PrevDefMI->getOpcode() == RISCV::PHI)) {
+                NeedPHI = true;
+              }
+            }
+
+            if (NeedPHI)
+              InstrInfo.setExtra(isFromPHI);
+            else
+              InstrInfo.setExtra(isZero);
+
+            break;
+          }
+          // In all other cases, we consider the information unrecoverable,
+          // hence we fallback to the default case (isEmpty)
+          default:;
+          }
+        } // also in this case we fallback to isEmpty
+      }   // also in this case we fallback to isEmpty
+    }
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
@@ -610,26 +658,48 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
     const MachineOperand &VLOp = MI.getOperand(VLIndex);
     InstrInfo.setAVLReg(VLOp.getReg());
     // Try to recover the Extra operand value linked to this VL
-    if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
-      unsigned Opcode = DefMI->getOpcode();
-      switch (Opcode) {
-      case RISCV::PseudoVSETVLEXT:
-        InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
-        break;
-      case RISCV::PseudoVSETVLI:
-      case RISCV::PseudoVSETIVLI:
-        InstrInfo.setExtra(isZero);
-        break;
-      case RISCV::PHI:
-        InstrInfo.setExtra(isFromPHI);
-        break;
-      // In all other cases, we consider the information unrecoverable,
-      // hence we fallback to the default case
-      default:;
-      }
-    } else
-      InstrInfo.setAVLReg(RISCV::NoRegister);
-  }
+    assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
+           "We can not have phisical registers here");
+    if (VLOp.getReg() != RISCV::X0) {
+      if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
+        switch (DefMI->getOpcode()) {
+        case RISCV::PseudoVSETVLEXT:
+          InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
+          break;
+        case RISCV::PseudoVSETVLI:
+        case RISCV::PseudoVSETIVLI:
+          InstrInfo.setExtra(isZero);
+          break;
+        case RISCV::PHI: {
+          bool NeedPHI = false;
+          for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
+               PHIOp != NumOps; PHIOp += 2) {
+            assert(DefMI->getOperand(PHIOp).isReg() &&
+                   "PHIOp is not a register");
+            Register InReg = DefMI->getOperand(PHIOp).getReg();
+            MachineInstr *PrevDefMI = MRI->getVRegDef(InReg);
+            if (PrevDefMI &&
+                (PrevDefMI->getOpcode() == RISCV::PseudoVSETVLEXT ||
+                 PrevDefMI->getOpcode() == RISCV::PHI)) {
+              NeedPHI = true;
+            }
+          }
+
+          if (NeedPHI)
+            InstrInfo.setExtra(isFromPHI);
+          else
+            InstrInfo.setExtra(isZero);
+
+          break;
+        }
+        // In all other cases, we consider the information unrecoverable,
+        // hence we fallback to the default case (isEmpty)
+        default:;
+        }
+      } // also in this case we fallback to isEmpty
+    }   // also in this case we fallback to isEmpty
+  } else
+    InstrInfo.setAVLReg(RISCV::NoRegister);
 
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
                      /*MaskAgnostic*/ false, /* MaskRegOp */ false,
@@ -643,20 +713,25 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                                        const VSETVLIInfo &PrevInfo) {
   DebugLoc DL = MI.getDebugLoc();
 
-  // If Info has an Extra register, we use PseudoVSETVLEXT
+  Register ExtraReg = RISCV::NoRegister;
   ExtraTag ExtraRegIs = Info.getExtraOperand().Tag;
-  if (!(ExtraRegIs == isZero || ExtraRegIs == isEmpty)) {
+  switch (ExtraRegIs) {
+  case isRegister:
+    ExtraReg = Info.getExtraOperand().ExtraReg;
+    break;
+  case isFromPHI:
+    ExtraReg = getRegisterFromPHI(&MBB);
+    break;
+  case isZero:
+  case isEmpty:
+    break;
+  }
+
+  // If ExtraReg is a valid register, we use PseudoVSETVLEXT
+  if (ExtraReg != RISCV::NoRegister) {
     // We do not handle the case where the VL is an immediate,
     // since it should never happen in EPI
     assert(!Info.hasAVLImm() && "AVL should be in a register");
-
-    Register ExtraReg;
-    if (ExtraRegIs == isFromPHI)
-      ExtraReg = getRegisterFromPHI(&MBB);
-    else {
-      assert(ExtraRegIs == isRegister);
-      ExtraReg = Info.getExtraOperand().ExtraReg;
-    }
 
     // Invoke PseudoVSETVLEXT
     Register DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
@@ -861,16 +936,15 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   // Check the result of the intersection of all predecessors:
   // - if ExtrasForPHI is empty => no predecessors (nothing to do)
   // - else if all ExtraOperands stored in ExtrasForPHI are empty or zero, we
-  // can remove it
+  // can remove it (set ExtraTag to isZero)
   // - else if ExtrasForPHI.size() == 1, then we can use the Extra of the only
   // predecessor
-  // - otherwise, set ExtraOperand to isFromPHI (=> we need a PHI to recover its
+  // - otherwise, set ExtraTag to isFromPHI (=> we need a PHI to recover its
   // value)
-  assert(!InInfo.hasExtra() &&
-         "The output of intersect should not have an Extra operand");
   if (!InInfo.isExtrasForPHIEmpty()) {
     if (!InInfo.hasExtrasForPHIValues()) {
       InInfo.resetExtrasForPHI();
+      InInfo.setExtra(isZero);
     } else if (InInfo.sizeOfExtrasForPHI() == 1) {
       ExtraOperand EO = InInfo.getExtrasForPHI().front().second;
       InInfo.setExtra(EO.Tag, EO.ExtraReg);
