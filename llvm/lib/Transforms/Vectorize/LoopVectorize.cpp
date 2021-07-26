@@ -3079,10 +3079,9 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           auto PtrsTy = cast<VectorType>(VectorGep->getType());
           auto DataTy = cast<VectorType>(StoredVal->getType());
           ElementCount NumElts = PtrsTy->getElementCount();
-          // Conservatively use the mask emitted by VPlan instead of all-ones.
-          Value *BlockInMaskPart = isMaskRequired
-                                       ? BlockInMaskParts[Part]
-                                       : Builder.getTrueVector(NumElts);
+          Value *BlockInMaskPart =
+              isMaskRequired ? MaskValue(Part, NumElts)
+                             : Builder.getTrueVector(NumElts);
           Value *Operands[] = {StoredVal, VectorGep, BlockInMaskPart, EVLPart};
           NewSI = Builder.CreateIntrinsic(Intrinsic::vp_scatter,
                                           {DataTy, PtrsTy}, Operands);
@@ -3140,10 +3139,9 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         auto PtrTy = cast<PointerType>(PtrsTy->getElementType());
         ElementCount NumElts = PtrsTy->getElementCount();
         Type *DataTy = VectorType::get(PtrTy->getElementType(), NumElts);
-        // Conservatively use the mask emitted by VPlan instead of all-ones.
-        Value *BlockInMaskPart = isMaskRequired
-                                     ? BlockInMaskParts[Part]
-                                     : Builder.getTrueVector(NumElts);
+        Value *BlockInMaskPart =
+            isMaskRequired ? MaskValue(Part, NumElts)
+                           : Builder.getTrueVector(NumElts);
         Value *Operands[] = {VectorGep, BlockInMaskPart, EVLPart};
         NewLI = Builder.CreateIntrinsic(Intrinsic::vp_gather, {DataTy, PtrsTy},
                                         Operands, nullptr, "vp.gather");
@@ -9579,8 +9577,7 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
   return IVCache[VPBB] = IV;
 }
 
-VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
-                                            bool isMemOp /* = false*/) {
+VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
   assert(OrigLoop->contains(BB) && "Block is not a part of a loop");
 
   // Look for cached value.
@@ -9595,17 +9592,6 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
   if (OrigLoop->getHeader() == BB) {
     if (!CM.blockNeedsPredication(BB))
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
-
-    // FIXME: There is probably a better way than to be conservative for all mem
-    // ops. For eg. we can check for Legal->blockNeedsPredication().
-    // To be really conservative, for memory ops we do not generate AllTrueMask
-    // recipe. The mask for load/stores might prevent memory access exception
-    // and for gather/scatter there is no non-masked version in the IR so if the
-    // cost model decides to widen to gather/scatter the mask is important.
-    if (!isMemOp && preferPredicatedWiden()) {
-      BlockMask = Builder.createNaryOp(VPInstruction::AllTrueMask, {});
-      return BlockMaskCache[BB] = BlockMask;
-    }
 
     // Create the block in mask as the first non-phi instruction in the block.
     VPBuilder::InsertPointGuard Guard(Builder);
@@ -9719,7 +9705,7 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
   if (!validateWidenMemory(I, Range))
     return nullptr;
 
-  VPValue *Mask = createBlockInMask(I->getParent(), Plan, true);
+  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
   VPValue *EVL = getOrCreateEVL(Plan);
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
     return new VPPredicatedWidenMemoryInstructionRecipe(*Load, Operands[0],

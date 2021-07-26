@@ -4258,7 +4258,7 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
           DAG.getTargetConstant(Intrinsic::epi_vload_mask, DL, MVT::i64),
           DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
           Op.getOperand(2),                               // Address.
-          Op.getOperand(3), // Mask.
+          Op.getOperand(3),                               // Mask.
           DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
                       Op.getOperand(4)) // EVL.
       };
@@ -4279,16 +4279,29 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
 
     SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(4));
 
-    SDValue VLXEOperands[] = {
-        Op.getOperand(0), // Chain.
-        DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL, MVT::i64),
-        DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
-        BaseAddr,
-        Offsets,
-        Op.getOperand(3), // Mask.
-        VL};
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(3);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1) {
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_indexed, DL, MVT::i64),
+          BaseAddr, Offsets, VL};
+    } else {
+      Operands = {Op.getOperand(0), // Chain.
+                  DAG.getTargetConstant(Intrinsic::epi_vload_indexed_mask, DL,
+                                        MVT::i64),
+                  DAG.getNode(ISD::UNDEF, DL, VT), // Merge.
+                  BaseAddr,
+                  Offsets,
+                  MaskOp,
+                  VL};
+    }
     SDValue Result =
-        DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), VLXEOperands);
+        DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), Operands);
 
     return Result;
   }
@@ -4382,16 +4395,33 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
 
     SDValue VL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(5));
 
-    SDValue VSXEOperands[] = {
-        Op.getOperand(0), // Chain.
-        DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL, MVT::i64),
-        Data,
-        BaseAddr,
-        Offsets,
-        Op.getOperand(4), // Mask.
-        VL};
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(4);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1) {
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_indexed, DL, MVT::i64),
+          Data,
+          BaseAddr,
+          Offsets,
+          VL};
+    } else {
+      Operands = {Op.getOperand(0), // Chain.
+                  DAG.getTargetConstant(Intrinsic::epi_vstore_indexed_mask, DL,
+                                        MVT::i64),
+                  Data,
+                  BaseAddr,
+                  Offsets,
+                  MaskOp, // Mask.
+                  VL};
+    }
+
     SDValue Result =
-        DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), VSXEOperands);
+        DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
 
     return Result;
   }

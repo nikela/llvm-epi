@@ -698,12 +698,6 @@ void VPInstruction::generateInstruction(VPTransformState &State,
   case Instruction::Call: {
     llvm_unreachable("This opcode is handled by the VPCallInstruction recipe");
   }
-  case VPInstruction::AllTrueMask: {
-    Value *AllTrueMask = Builder.getTrueVector(State.VF);
-    State.set(this, AllTrueMask, Part);
-    break;
-  }
-
   default:
     llvm_unreachable("Unsupported opcode for instruction");
   }
@@ -745,9 +739,6 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
     break;
   case VPInstruction::ActiveLaneMask:
     O << "active lane mask";
-    break;
-  case VPInstruction::AllTrueMask:
-    O << "all true mask";
     break;
   default:
     O << Instruction::getOpcodeName(getOpcode());

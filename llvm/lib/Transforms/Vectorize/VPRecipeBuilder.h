@@ -171,8 +171,7 @@ public:
   /// A helper function that computes the predicate of the block BB, assuming
   /// that the header block of the loop is set to True. It returns the *entry*
   /// mask for the block BB.
-  VPValue *createBlockInMask(BasicBlock *BB, VPlanPtr &Plan,
-                             bool isMemOp = false);
+  VPValue *createBlockInMask(BasicBlock *BB, VPlanPtr &Plan);
 
   /// A helper function that computes the predicate of the edge between SRC
   /// and DST.

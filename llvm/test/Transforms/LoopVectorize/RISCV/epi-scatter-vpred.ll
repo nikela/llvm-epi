@@ -13,29 +13,21 @@ define dso_local void @simple_add(i32 signext %N, i8* noalias nocapture %isA, i6
 ; CHECK-NEXT:    br i1 [[CMP5]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
-; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = add nsw i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
-; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
-; CHECK-NEXT:    [[TMP0:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[FOR_BODY_PREHEADER]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i32 0
-; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
-; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> [[BROADCAST_SPLAT2]], [[TMP0]]
-; CHECK-NEXT:    [[TMP1:%.*]] = icmp ule <vscale x 8 x i64> [[INDUCTION]], [[BROADCAST_SPLAT]]
-; CHECK-NEXT:    [[TMP2:%.*]] = getelementptr inbounds i64, i64* [[B:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP3:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
-; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 3, i64 3)
-; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
-; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i64* [[TMP2]] to <vscale x 8 x i64>*
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i64> @llvm.vp.load.nxv8i64.p0nxv8i64(<vscale x 8 x i64>* [[TMP6]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> undef, i1 true, i32 0), <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
-; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds i8, i8* [[ISA:%.*]], <vscale x 8 x i64> [[VP_OP_LOAD]]
-; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8i8.nxv8p0i8(<vscale x 8 x i8> shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> poison, i8 0, i32 0), <vscale x 8 x i8> poison, <vscale x 8 x i32> zeroinitializer), <vscale x 8 x i8*> [[TMP7]], <vscale x 8 x i1> [[TMP1]], i32 [[TMP5]])
-; CHECK-NEXT:    [[TMP8:%.*]] = and i64 [[TMP4]], 4294967295
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP8]]
-; CHECK-NEXT:    [[TMP9:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[TMP9]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK-NEXT:    [[TMP0:%.*]] = getelementptr inbounds i64, i64* [[B:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    [[TMP1:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
+; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP1]], i64 3, i64 3)
+; CHECK-NEXT:    [[TMP3:%.*]] = trunc i64 [[TMP2]] to i32
+; CHECK-NEXT:    [[TMP4:%.*]] = bitcast i64* [[TMP0]] to <vscale x 8 x i64>*
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i64> @llvm.vp.load.nxv8i64.p0nxv8i64(<vscale x 8 x i64>* [[TMP4]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> undef, i1 true, i32 0), <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i8, i8* [[ISA:%.*]], <vscale x 8 x i64> [[VP_OP_LOAD]]
+; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8i8.nxv8p0i8(<vscale x 8 x i8> shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> poison, i8 0, i32 0), <vscale x 8 x i8> poison, <vscale x 8 x i32> zeroinitializer), <vscale x 8 x i8*> [[TMP5]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> undef, i1 true, i32 0), <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK-NEXT:    [[TMP6:%.*]] = and i64 [[TMP2]], 4294967295
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
+; CHECK-NEXT:    [[TMP7:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-NEXT:    br i1 [[TMP7]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       for.cond.cleanup:
 ; CHECK-NEXT:    ret void
 ;
