@@ -8,7 +8,7 @@ define <vscale x 1 x i64> @nxv1i64(i64* %ptr, <vscale x 1 x i64> %indices, <vsca
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vsll.vi v25, v8, 3
 ; CHECK-NEXT:    vsetvli zero, zero, e64, m1, tu, mu
-; CHECK-NEXT:    vloxei64.v v9, (a0), v25, v0.t
+; CHECK-NEXT:    vluxei64.v v9, (a0), v25, v0.t
 ; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
@@ -42,7 +42,7 @@ define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices,
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; CHECK-NEXT:    vsll.vi v8, v8, 3
 ; CHECK-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
-; CHECK-NEXT:    vloxei64.v v16, (a0), v8, v0.t
+; CHECK-NEXT:    vluxei64.v v16, (a0), v8, v0.t
 ; CHECK-NEXT:    vmv8r.v v8, v16
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
@@ -56,7 +56,7 @@ define <vscale x 2 x i32> @nxv2xi32(i32* %ptr, <vscale x 2 x i64> %indices, <vsc
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vsll.vi v26, v8, 2
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m1, tu, mu
-; CHECK-NEXT:    vloxei64.v v10, (a0), v26, v0.t
+; CHECK-NEXT:    vluxei64.v v10, (a0), v26, v0.t
 ; CHECK-NEXT:    vmv1r.v v8, v10
 ; CHECK-NEXT:    ret
   %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices
@@ -68,7 +68,7 @@ define <vscale x 2 x i32> @nxv2xi32_full(<vscale x 2 x i32*> %ptr, <vscale x 2 x
 ; CHECK-LABEL: nxv2xi32_full:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m1, tu, mu
-; CHECK-NEXT:    vloxei64.v v10, (zero), v8, v0.t
+; CHECK-NEXT:    vluxei64.v v10, (zero), v8, v0.t
 ; CHECK-NEXT:    vmv1r.v v8, v10
 ; CHECK-NEXT:    ret
 entry:
