@@ -377,9 +377,10 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
 
 InstructionCost
 RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
+                                         Optional<FastMathFlags> FMF,
                                          TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(ValTy))
-    return BaseT::getArithmeticReductionCost(Opcode, ValTy, CostKind);
+    return BaseT::getArithmeticReductionCost(Opcode, ValTy, FMF, CostKind);
 
   std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
   InstructionCost LegalizationCost = 0;
