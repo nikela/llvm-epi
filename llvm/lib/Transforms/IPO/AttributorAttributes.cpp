@@ -21,8 +21,10 @@
 #include "llvm/Analysis/AssumeBundleQueries.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/CaptureTracking.h"
+#include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/Analysis/LazyValueInfo.h"
 #include "llvm/Analysis/MemoryBuiltins.h"
+#include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/ValueTracking.h"
@@ -3253,10 +3255,10 @@ struct AAIsDeadValueImpl : public AAIsDead {
   AAIsDeadValueImpl(const IRPosition &IRP, Attributor &A) : AAIsDead(IRP, A) {}
 
   /// See AAIsDead::isAssumedDead().
-  bool isAssumedDead() const override { return getAssumed(); }
+  bool isAssumedDead() const override { return isAssumed(IS_DEAD); }
 
   /// See AAIsDead::isKnownDead().
-  bool isKnownDead() const override { return getKnown(); }
+  bool isKnownDead() const override { return isKnown(IS_DEAD); }
 
   /// See AAIsDead::isAssumedDead(BasicBlock *).
   bool isAssumedDead(const BasicBlock *BB) const override { return false; }
@@ -3271,7 +3273,7 @@ struct AAIsDeadValueImpl : public AAIsDead {
 
   /// See AAIsDead::isKnownDead(Instruction *I).
   bool isKnownDead(const Instruction *I) const override {
-    return isAssumedDead(I) && getKnown();
+    return isAssumedDead(I) && isKnownDead();
   }
 
   /// See AbstractAttribute::getAsStr().
@@ -3343,17 +3345,38 @@ struct AAIsDeadFloating : public AAIsDeadValueImpl {
     }
 
     Instruction *I = dyn_cast<Instruction>(&getAssociatedValue());
-    if (!isAssumedSideEffectFree(A, I))
-      indicatePessimisticFixpoint();
+    if (!isAssumedSideEffectFree(A, I)) {
+      if (!isa_and_nonnull<StoreInst>(I))
+        indicatePessimisticFixpoint();
+      else
+        removeAssumedBits(HAS_NO_EFFECT);
+    }
+  }
+
+  bool isDeadStore(Attributor &A, StoreInst &SI) {
+    bool UsedAssumedInformation = false;
+    SmallSetVector<Value *, 4> PotentialCopies;
+    if (!AA::getPotentialCopiesOfStoredValue(A, SI, PotentialCopies, *this,
+                                             UsedAssumedInformation))
+      return false;
+    return llvm::all_of(PotentialCopies, [&](Value *V) {
+      return A.isAssumedDead(IRPosition::value(*V), this, nullptr,
+                             UsedAssumedInformation);
+    });
   }
 
   /// See AbstractAttribute::updateImpl(...).
   ChangeStatus updateImpl(Attributor &A) override {
     Instruction *I = dyn_cast<Instruction>(&getAssociatedValue());
-    if (!isAssumedSideEffectFree(A, I))
-      return indicatePessimisticFixpoint();
-    if (!areAllUsesAssumedDead(A, getAssociatedValue()))
-      return indicatePessimisticFixpoint();
+    if (auto *SI = dyn_cast_or_null<StoreInst>(I)) {
+      if (!isDeadStore(A, *SI))
+        return indicatePessimisticFixpoint();
+    } else {
+      if (!isAssumedSideEffectFree(A, I))
+        return indicatePessimisticFixpoint();
+      if (!areAllUsesAssumedDead(A, getAssociatedValue()))
+        return indicatePessimisticFixpoint();
+    }
     return ChangeStatus::UNCHANGED;
   }
 
@@ -3365,7 +3388,8 @@ struct AAIsDeadFloating : public AAIsDeadValueImpl {
       // isAssumedSideEffectFree returns true here again because it might not be
       // the case and only the users are dead but the instruction (=call) is
       // still needed.
-      if (isAssumedSideEffectFree(A, I) && !isa<InvokeInst>(I)) {
+      if (isa<StoreInst>(I) ||
+          (isAssumedSideEffectFree(A, I) && !isa<InvokeInst>(I))) {
         A.deleteAfterManifest(*I);
         return ChangeStatus::CHANGED;
       }
@@ -4736,10 +4760,29 @@ struct AACaptureUseTracker final : public CaptureTracker {
       return valueMayBeCaptured(UInst);
     }
 
-    // Explicitly catch return instructions.
-    if (isa<ReturnInst>(UInst))
+    // For stores we check if we can follow the value through memory or not.
+    if (auto *SI = dyn_cast<StoreInst>(UInst)) {
+      if (SI->isVolatile())
+        return isCapturedIn(/* Memory */ true, /* Integer */ false,
+                            /* Return */ false);
+      bool UsedAssumedInformation = false;
+      if (!AA::getPotentialCopiesOfStoredValue(
+              A, *SI, PotentialCopies, NoCaptureAA, UsedAssumedInformation))
+        return isCapturedIn(/* Memory */ true, /* Integer */ false,
+                            /* Return */ false);
+      // Not captured directly, potential copies will be checked.
       return isCapturedIn(/* Memory */ false, /* Integer */ false,
+                          /* Return */ false);
+    }
+
+    // Explicitly catch return instructions.
+    if (isa<ReturnInst>(UInst)) {
+      if (UInst->getFunction() == NoCaptureAA.getAnchorScope())
+        return isCapturedIn(/* Memory */ false, /* Integer */ false,
+                            /* Return */ true);
+      return isCapturedIn(/* Memory */ true, /* Integer */ true,
                           /* Return */ true);
+    }
 
     // For now we only use special logic for call sites. However, the tracker
     // itself knows about a lot of other non-capturing cases already.
@@ -5462,6 +5505,57 @@ struct AAValueSimplifyFloating : AAValueSimplifyImpl {
     return handleLoad(A, *this, L, Union);
   }
 
+  /// Use the generic, non-optimistic InstSimplfy functionality if we managed to
+  /// simplify any operand of the instruction \p I. Return true if successful,
+  /// in that case SimplifiedAssociatedValue will be updated.
+  bool handleGenericInst(Attributor &A, Instruction &I) {
+    bool SomeSimplified = false;
+    bool UsedAssumedInformation = false;
+
+    SmallVector<Value *, 8> NewOps(I.getNumOperands());
+    int Idx = 0;
+    for (Value *Op : I.operands()) {
+      const auto &SimplifiedOp =
+          A.getAssumedSimplified(IRPosition::value(*Op, getCallBaseContext()),
+                                 *this, UsedAssumedInformation);
+      // If we are not sure about any operand we are not sure about the entire
+      // instruction, we'll wait.
+      if (!SimplifiedOp.hasValue())
+        return true;
+
+      if (SimplifiedOp.getValue())
+        NewOps[Idx] = SimplifiedOp.getValue();
+      else
+        NewOps[Idx] = Op;
+
+      SomeSimplified |= (NewOps[Idx] != Op);
+      ++Idx;
+    }
+
+    // We won't bother with the InstSimplify interface if we didn't simplify any
+    // operand ourselves.
+    if (!SomeSimplified)
+      return false;
+
+    InformationCache &InfoCache = A.getInfoCache();
+    Function *F = I.getFunction();
+    const auto *DT =
+        InfoCache.getAnalysisResultForFunction<DominatorTreeAnalysis>(*F);
+    const auto *TLI = A.getInfoCache().getTargetLibraryInfoForFunction(*F);
+    auto *AC = InfoCache.getAnalysisResultForFunction<AssumptionAnalysis>(*F);
+    OptimizationRemarkEmitter *ORE = nullptr;
+
+    const DataLayout &DL = I.getModule()->getDataLayout();
+    SimplifyQuery Q(DL, TLI, DT, AC, &I);
+    if (Value *SimplifiedI =
+            SimplifyInstructionWithOperands(&I, NewOps, Q, ORE)) {
+      SimplifiedAssociatedValue = AA::combineOptionalValuesInAAValueLatice(
+          SimplifiedAssociatedValue, SimplifiedI, I.getType());
+      return SimplifiedAssociatedValue != Optional<Value *>(nullptr);
+    }
+    return false;
+  }
+
   /// See AbstractAttribute::updateImpl(...).
   ChangeStatus updateImpl(Attributor &A) override {
     auto Before = SimplifiedAssociatedValue;
@@ -5472,10 +5566,17 @@ struct AAValueSimplifyFloating : AAValueSimplifyImpl {
           *this, IRPosition::value(V, getCallBaseContext()),
           DepClassTy::REQUIRED);
       if (!Stripped && this == &AA) {
-        if (auto *LI = dyn_cast<LoadInst>(&V))
-          return updateWithLoad(A, *LI);
-        if (auto *Cmp = dyn_cast<CmpInst>(&V))
-          return handleCmp(A, *Cmp);
+
+        if (auto *I = dyn_cast<Instruction>(&V)) {
+          if (auto *LI = dyn_cast<LoadInst>(&V))
+            if (updateWithLoad(A, *LI))
+              return true;
+          if (auto *Cmp = dyn_cast<CmpInst>(&V))
+            if (handleCmp(A, *Cmp))
+              return true;
+          if (handleGenericInst(A, *I))
+            return true;
+        }
         // TODO: Look the instruction and check recursively.
 
         LLVM_DEBUG(dbgs() << "[ValueSimplify] Can't be stripped more : " << V
