@@ -535,7 +535,9 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(uitofp)                                                         \
   VP_INTRINSIC(urem)                                                           \
   VP_INTRINSIC(xor)                                                            \
-  VP_INTRINSIC(zext)
+  VP_INTRINSIC(zext)                                                           \
+  VP_INTRINSIC(strided_load)                                                   \
+  VP_INTRINSIC(strided_store)
 #define VP_INTRINSIC(name) case Intrinsic::vp_##name:
     VP_INTRINSIC_LIST
     // EPI-specific

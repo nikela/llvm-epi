@@ -201,7 +201,8 @@ Value *llvm::getUniqueCastUse(Value *Ptr, Loop *Lp, Type *Ty) {
 
 /// Get the stride of a pointer access in a loop. Looks for symbolic
 /// strides "a[i*stride]". Returns the symbolic stride, or null otherwise.
-Value *llvm::getStrideFromPointer(Value *Ptr, ScalarEvolution *SE, Loop *Lp) {
+Value *llvm::getStrideFromPointer(Value *Ptr, ScalarEvolution *SE, Loop *Lp,
+                                  bool AllowConstants) {
   auto *PtrTy = dyn_cast<PointerType>(Ptr->getType());
   if (!PtrTy || PtrTy->isAggregateType())
     return nullptr;
@@ -257,13 +258,20 @@ Value *llvm::getStrideFromPointer(Value *Ptr, ScalarEvolution *SE, Loop *Lp) {
     V = C->getOperand();
   }
 
+  Value *Stride = nullptr;
   // Look for the loop invariant symbolic value.
-  const SCEVUnknown *U = dyn_cast<SCEVUnknown>(V);
-  if (!U)
-    return nullptr;
-
-  Value *Stride = U->getValue();
-  if (!Lp->isLoopInvariant(Stride))
+  if (const SCEVUnknown *U = dyn_cast<SCEVUnknown>(V)) {
+    Stride = U->getValue();
+    if (!Lp->isLoopInvariant(Stride))
+      return nullptr;
+  } else if (const SCEVConstant *C =
+                 (AllowConstants ? dyn_cast<SCEVConstant>(V) : nullptr)) {
+    Stride = C->getValue();
+    // A constant of 1 does not define a stride.
+    if (cast<Constant>(Stride)->isOneValue())
+      return nullptr;
+    // This is trivially loop invariant.
+  } else
     return nullptr;
 
   // If we have stripped off the recurrence cast we have to make sure that we

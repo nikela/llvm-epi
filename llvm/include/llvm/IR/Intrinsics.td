@@ -1405,6 +1405,22 @@ def int_vp_scatter: DefaultAttrsIntrinsic<[],
                                 llvm_i32_ty],
                               [ IntrArgMemOnly, IntrNoSync, IntrWillReturn ]>; // TODO allow IntrNoCapture for vectors of pointers
 
+// Experimental strided memory accesses.
+def int_vp_strided_store : DefaultAttrsIntrinsic<[],
+                             [ llvm_anyvector_ty,
+                               LLVMAnyPointerType<LLVMMatchType<0>>,
+                               llvm_anyint_ty, // Offset in bytes
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty],
+                             [ NoCapture<ArgIndex<1>>, IntrNoSync, IntrWriteMem, IntrArgMemOnly, IntrWillReturn ]>;
+
+def int_vp_strided_load  : DefaultAttrsIntrinsic<[ llvm_anyvector_ty],
+                             [ LLVMAnyPointerType<LLVMMatchType<0>>,
+                               llvm_anyint_ty, // Offset in bytes
+                               LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                               llvm_i32_ty],
+                             [ NoCapture<ArgIndex<0>>, IntrNoSync, IntrReadMem, IntrWillReturn, IntrArgMemOnly ]>;
+
 // FIXME: TO BE REPLACED
 // The following Memory Intrinsics and Integer Comparison Intrinsic are copied
 // from the main Vector Predication proposal at revision id D57504, diff id

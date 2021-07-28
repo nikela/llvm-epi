@@ -1050,6 +1050,9 @@ public:
   /// Generate the gep nodes.
   void execute(VPTransformState &State) override;
 
+  bool getIsPtrLoopInvariant() const { return IsPtrLoopInvariant; }
+  bool getIsIndexLoopInvariantr(int i) const { return IsIndexLoopInvariant[i]; }
+
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,

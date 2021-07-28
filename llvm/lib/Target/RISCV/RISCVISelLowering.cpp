@@ -3766,10 +3766,12 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
 
 #define VP_INTRINSIC_W_CHAIN_SET                                               \
   VP_INTRINSIC(vp_load)                                                        \
+  VP_INTRINSIC(vp_strided_load)                                                \
   VP_INTRINSIC(vp_gather)
 
 #define VP_INTRINSIC_VOID_SET                                                  \
   VP_INTRINSIC(vp_store)                                                       \
+  VP_INTRINSIC(vp_strided_store)                                               \
   VP_INTRINSIC(vp_scatter)
 
 static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
@@ -4451,6 +4453,42 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
 
     return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
   }
+  case Intrinsic::vp_strided_load: {
+    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
+
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(4);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1)
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_strided, DL, MVT::i64),
+          Op.getOperand(2), // Address.
+          Op.getOperand(3), // Stride.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(5)) // EVL.
+      };
+    else
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_strided_mask, DL,
+                                MVT::i64),
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
+          Op.getOperand(2),                               // Address.
+          Op.getOperand(3),                               // Stride.
+          MaskOp,                                         // Mask.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(5)) // EVL.
+      };
+
+    SDValue Result =
+        DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), Operands);
+
+    return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
+  }
   case Intrinsic::vp_gather: {
     EVT VT = Op.getValueType();
     EVT OffsetsVT = VT.changeVectorElementTypeToInteger();
@@ -4567,6 +4605,41 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
     break;
   }
+  case Intrinsic::vp_strided_store: {
+    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
+
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(5);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1)
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_strided, DL, MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          Op.getOperand(4), // Stride.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+    else
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_strided_mask, DL,
+                                MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          Op.getOperand(4), // Stride.
+          MaskOp,           // Mask.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+
+    return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
+    break;
+  }
   case Intrinsic::vp_scatter: {
     SDValue Data = Op.getOperand(2);
     EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
@@ -4605,7 +4678,6 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
 
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
-
     return Result;
   }
   }
@@ -4663,9 +4735,11 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_sext:
     return LowerVPIntrinsicConversion(Op, DAG);
   case Intrinsic__vp_load:
+  case Intrinsic__vp_strided_load:
   case Intrinsic__vp_gather:
     return LowerVPINTRINSIC_W_CHAIN(Op, DAG, Subtarget);
   case Intrinsic__vp_store:
+  case Intrinsic__vp_strided_store:
   case Intrinsic__vp_scatter:
     return LowerVPINTRINSIC_VOID(Op, DAG, Subtarget);
   }
