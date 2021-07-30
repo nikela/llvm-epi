@@ -3689,7 +3689,7 @@ contiguous locations in memory.}];
     for element = 0 to gvl - 1
       if mask[element] then
         store_element(address, value[element])
-        address = address + SEW / 8
+      address = address + SEW / 8
   }];
 }
 
@@ -3716,7 +3716,7 @@ This intrinsic will set vtype to use a nontemporal memory access.}];
     for element = 0 to gvl - 1
       if mask[element] then
         store_element(address, value[element])
-        address = address + SEW / 8
+      address = address + SEW / 8
   }];
 }
 
@@ -3741,7 +3741,7 @@ contiguous locations in memory.}];
     for element = 0 to gvl - 1
       if mask[element] then
         store_element(address, value[element])
-        address = address + SEW / 8
+      address = address + SEW / 8
   }];
 }
 
@@ -3768,7 +3768,7 @@ This intrinsic will set vtype to use a nontemporal memory access.}];
     for element = 0 to gvl - 1
       if mask[element] then
         store_element(address, value[element])
-        address = address + SEW / 8
+      address = address + SEW / 8
   }];
 }
 
