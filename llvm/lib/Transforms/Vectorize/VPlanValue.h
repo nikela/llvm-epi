@@ -94,16 +94,15 @@ public:
     VPValueSC,
     VPVInstructionSC,
     VPVMemoryInstructionSC,
+    VPVPredicatedMemoryInstructionSC,
+    VPVPredicatedWidenSC,
     VPVReductionSC,
     VPVReplicateSC,
     VPVWidenSC,
     VPVWidenCallSC,
+    VPVWidenEVLSC,
     VPVWidenGEPSC,
     VPVWidenSelectSC,
-    // Predication.
-    VPVPredicatedWidenSC,
-    VPVPredicatedMemoryInstructionSC,
-    VPVWidenEVLSC,
     VPVWidenEVLMaskSC,
 
     // Phi-like VPValues. Need to be kept together.
@@ -328,18 +327,17 @@ public:
     VPBranchOnMaskSC,
     VPInstructionSC,
     VPInterleaveSC,
+    VPPredicatedWidenMemoryInstructionSC,
+    VPPredicatedWidenSC,
     VPReductionSC,
     VPReplicateSC,
     VPWidenCallSC,
+    VPWidenEVLSC,
+    VPWidenEVLMaskSC,
     VPWidenGEPSC,
     VPWidenMemoryInstructionSC,
     VPWidenSC,
     VPWidenSelectSC,
-    // Predication support
-    VPPredicatedWidenSC,
-    VPPredicatedWidenMemoryInstructionSC,
-    VPWidenEVLSC,
-    VPWidenEVLMaskSC,
 
     // Phi-like recipes. Need to be kept together.
     VPBlendSC,

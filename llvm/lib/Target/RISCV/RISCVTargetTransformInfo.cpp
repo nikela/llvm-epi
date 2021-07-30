@@ -32,7 +32,7 @@ InstructionCost RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
   // Otherwise, we check how many instructions it will take to materialise.
   const DataLayout &DL = getDataLayout();
   return RISCVMatInt::getIntMatCost(Imm, DL.getTypeSizeInBits(Ty),
-                                    getST()->is64Bit());
+                                    getST()->getFeatureBits());
 }
 
 InstructionCost RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
@@ -377,9 +377,10 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
 
 InstructionCost
 RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
+                                         Optional<FastMathFlags> FMF,
                                          TTI::TargetCostKind CostKind) {
   if (!isa<ScalableVectorType>(ValTy))
-    return BaseT::getArithmeticReductionCost(Opcode, ValTy, CostKind);
+    return BaseT::getArithmeticReductionCost(Opcode, ValTy, FMF, CostKind);
 
   std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
   InstructionCost LegalizationCost = 0;

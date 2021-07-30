@@ -119,11 +119,11 @@ unsigned RISCVVType::encodeVTYPE(RISCVII::VLMUL VLMUL, unsigned SEW,
   unsigned VSEWBits = Log2_32(SEW) - 3;
   unsigned VTypeI = (VSEWBits << 3) | (VLMULBits & 0x7);
   if (TailAgnostic)
-    VTypeI |= 0x40;
+    VTypeI |= RISCVVType::TA;
   if (MaskAgnostic)
-    VTypeI |= 0x80;
+    VTypeI |= RISCVVType::MA;
   if (Nontemporal)
-    VTypeI |= 0x200;
+    VTypeI |= RISCVVType::NT;
 
   return VTypeI;
 }

@@ -708,6 +708,10 @@ Type *AttributeSet::getInAllocaType() const {
   return SetNode ? SetNode->getAttributeType(Attribute::InAlloca) : nullptr;
 }
 
+Type *AttributeSet::getElementType() const {
+  return SetNode ? SetNode->getAttributeType(Attribute::ElementType) : nullptr;
+}
+
 std::pair<unsigned, Optional<unsigned>> AttributeSet::getAllocSizeArgs() const {
   return SetNode ? SetNode->getAllocSizeArgs()
                  : std::pair<unsigned, Optional<unsigned>>(0, 0);
@@ -1331,17 +1335,6 @@ AttributeList AttributeList::removeAttributes(LLVMContext &C,
   return getImpl(C, AttrSets);
 }
 
-AttributeList
-AttributeList::removeParamUndefImplyingAttributes(LLVMContext &C,
-                                                  unsigned ArgNo) const {
-  AttrBuilder B;
-  B.addAttribute(Attribute::NoUndef);
-  B.addAttribute(Attribute::NonNull);
-  B.addDereferenceableAttr(1);
-  B.addDereferenceableOrNullAttr(1);
-  return removeParamAttributes(C, ArgNo, B);
-}
-
 AttributeList AttributeList::addDereferenceableAttr(LLVMContext &C,
                                                     unsigned Index,
                                                     uint64_t Bytes) const {
@@ -1461,6 +1454,10 @@ Type *AttributeList::getParamPreallocatedType(unsigned Index) const {
 
 Type *AttributeList::getParamInAllocaType(unsigned Index) const {
   return getAttributes(Index + FirstArgIndex).getInAllocaType();
+}
+
+Type *AttributeList::getParamElementType(unsigned Index) const {
+  return getAttributes(Index + FirstArgIndex).getElementType();
 }
 
 MaybeAlign AttributeList::getStackAlignment(unsigned Index) const {
@@ -1909,13 +1906,22 @@ AttrBuilder AttributeFuncs::typeIncompatible(Type *Ty) {
         .addInAllocaAttr(Ty)
         .addByValAttr(Ty)
         .addStructRetAttr(Ty)
-        .addByRefAttr(Ty);
+        .addByRefAttr(Ty)
+        .addTypeAttr(Attribute::ElementType, Ty);
 
   // Some attributes can apply to all "values" but there are no `void` values.
   if (Ty->isVoidTy())
     Incompatible.addAttribute(Attribute::NoUndef);
 
   return Incompatible;
+}
+
+AttrBuilder AttributeFuncs::getUBImplyingAttributes() {
+  AttrBuilder B;
+  B.addAttribute(Attribute::NoUndef);
+  B.addDereferenceableAttr(1);
+  B.addDereferenceableOrNullAttr(1);
+  return B;
 }
 
 template<typename AttrClass>

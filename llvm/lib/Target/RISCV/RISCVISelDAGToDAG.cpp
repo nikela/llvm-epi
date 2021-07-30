@@ -114,8 +114,10 @@ void RISCVDAGToDAGISel::PostprocessISelDAG() {
 }
 
 static SDNode *selectImm(SelectionDAG *CurDAG, const SDLoc &DL, int64_t Imm,
-                         MVT XLenVT) {
-  RISCVMatInt::InstSeq Seq = RISCVMatInt::generateInstSeq(Imm, XLenVT == MVT::i64);
+                         const RISCVSubtarget &Subtarget) {
+  MVT XLenVT = Subtarget.getXLenVT();
+  RISCVMatInt::InstSeq Seq =
+      RISCVMatInt::generateInstSeq(Imm, Subtarget.getFeatureBits());
 
   SDNode *Result = nullptr;
   SDValue SrcReg = CurDAG->getRegister(RISCV::X0, XLenVT);
@@ -123,6 +125,9 @@ static SDNode *selectImm(SelectionDAG *CurDAG, const SDLoc &DL, int64_t Imm,
     SDValue SDImm = CurDAG->getTargetConstant(Inst.Imm, DL, XLenVT);
     if (Inst.Opc == RISCV::LUI)
       Result = CurDAG->getMachineNode(RISCV::LUI, DL, XLenVT, SDImm);
+    else if (Inst.Opc == RISCV::ADDUW)
+      Result = CurDAG->getMachineNode(RISCV::ADDUW, DL, XLenVT, SrcReg,
+                                      CurDAG->getRegister(RISCV::X0, XLenVT));
     else
       Result = CurDAG->getMachineNode(Inst.Opc, DL, XLenVT, SrcReg, SDImm);
 
@@ -615,6 +620,107 @@ void RISCVDAGToDAGISel::selectVLXSEG(SDNode *Node, bool IsMasked,
   CurDAG->RemoveDeadNode(Node);
 }
 
+// FlagsIndex represent the node operand in which flags value is saved
+// FlagsIndex == 0 => no operand
+void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
+                                     uint8_t FlagsIndex) {
+  SDLoc DL(Node);
+  unsigned SEWBits = Node->getConstantOperandVal(2) & 0x7;
+  unsigned SEW = RISCVVType::decodeVSEW(SEWBits);
+  unsigned VMulBits = Node->getConstantOperandVal(3) & 0x7;
+  RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VMulBits);
+
+  bool NonTemporal = false;
+  bool UsePseudoVSETVLEXT = false;
+  if (FlagsIndex) {
+    UsePseudoVSETVLEXT = true;
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
+      // If flags is 0 or just the non-temporal bit
+      // we can use our existing vsetvli
+      unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
+      NonTemporal = Flags == RISCVVType::NT;
+      UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
+    }
+  }
+
+  unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
+                                            /* MaskAgnostic */ false,
+                                            /* Nontemporal */ NonTemporal);
+  SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+  SDValue VLOperand = Node->getOperand(1);
+  if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
+    if (C->isNullValue()) {
+      VLOperand = SDValue(
+          CurDAG->getMachineNode(RISCV::ADDI, DL, XLenVT,
+                                 CurDAG->getRegister(RISCV::X0, XLenVT),
+                                 CurDAG->getTargetConstant(0, DL, XLenVT)),
+          0);
+    }
+  }
+
+  SmallVector<EVT> VTs;
+  VTs.push_back(XLenVT);
+  SmallVector<SDValue> Ops;
+  Ops.push_back(VLOperand);
+  Ops.push_back(VTypeIOp);
+  unsigned OpCode;
+  if (!UsePseudoVSETVLEXT) {
+    OpCode = RISCV::PseudoVSETVLI;
+  } else {
+    OpCode = RISCV::PseudoVSETVLEXT;
+    VTs.push_back(XLenVT);
+    Ops.push_back(Node->getOperand(FlagsIndex));
+  }
+  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
+  return;
+}
+
+// FlagsIndex represent the node operand in which flags value is saved
+// FlagsIndex == 0 => no operand
+void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
+                                        uint8_t FlagsIndex) {
+  SDLoc DL(Node);
+  unsigned SEWBits = Node->getConstantOperandVal(1) & 0x7;
+  unsigned SEW = RISCVVType::decodeVSEW(SEWBits);
+  unsigned VMulBits = Node->getConstantOperandVal(2) & 0x7;
+  RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VMulBits);
+
+  bool NonTemporal = false;
+  bool UsePseudoVSETVLEXT = false;
+  if (FlagsIndex) {
+    if (isa<ConstantSDNode>(Node->getOperand(FlagsIndex))) {
+      unsigned Flags = Node->getConstantOperandVal(FlagsIndex);
+      NonTemporal = Flags == RISCVVType::NT;
+      UsePseudoVSETVLEXT = !NonTemporal && Flags != 0;
+    } else {
+      UsePseudoVSETVLEXT = true;
+    }
+  }
+
+  unsigned VTypeI = RISCVVType::encodeVTYPE(VLMul, SEW, /* TailAgnostic */ true,
+                                            /* MaskAgnostic */ false,
+                                            /* Nontemporal */ NonTemporal);
+  SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
+  // FIXME DstReg for VLMAX must be != X0
+  SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
+
+  SmallVector<EVT> VTs;
+  VTs.push_back(XLenVT);
+  SmallVector<SDValue> Ops;
+  Ops.push_back(VLOperand);
+  Ops.push_back(VTypeIOp);
+  unsigned OpCode;
+  if (!UsePseudoVSETVLEXT) {
+    OpCode = RISCV::PseudoVSETVLI;
+  } else {
+    OpCode = RISCV::PseudoVSETVLEXT;
+    VTs.push_back(XLenVT);
+    Ops.push_back(Node->getOperand(FlagsIndex));
+  }
+  ReplaceNode(Node, CurDAG->getMachineNode(OpCode, DL, VTs, Ops));
+  return;
+}
+
 void RISCVDAGToDAGISel::selectVSSEG(SDNode *Node, bool IsMasked,
                                     bool IsStrided) {
   SDLoc DL(Node);
@@ -709,7 +815,8 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       ReplaceNode(Node, New.getNode());
       return;
     }
-    ReplaceNode(Node, selectImm(CurDAG, DL, ConstNode->getSExtValue(), XLenVT));
+    ReplaceNode(Node,
+                selectImm(CurDAG, DL, ConstNode->getSExtValue(), *Subtarget));
     return;
   }
   case ISD::FrameIndex: {
@@ -757,6 +864,125 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     }
     break;
   }
+  case ISD::AND: {
+    auto *N1C = dyn_cast<ConstantSDNode>(Node->getOperand(1));
+    if (!N1C)
+      break;
+
+    SDValue N0 = Node->getOperand(0);
+
+    bool LeftShift = N0.getOpcode() == ISD::SHL;
+    if (!LeftShift && N0.getOpcode() != ISD::SRL)
+      break;
+
+    auto *C = dyn_cast<ConstantSDNode>(N0.getOperand(1));
+    if (!C)
+      break;
+    uint64_t C2 = C->getZExtValue();
+    unsigned XLen = Subtarget->getXLen();
+    if (!C2 || C2 >= XLen)
+      break;
+
+    uint64_t C1 = N1C->getZExtValue();
+
+    // Keep track of whether this is a andi, zext.h, or zext.w.
+    bool ZExtOrANDI = isInt<12>(N1C->getSExtValue());
+    if (C1 == UINT64_C(0xFFFF) &&
+        (Subtarget->hasStdExtZbb() || Subtarget->hasStdExtZbp()))
+      ZExtOrANDI = true;
+    if (C1 == UINT64_C(0xFFFFFFFF) && Subtarget->hasStdExtZba())
+      ZExtOrANDI = true;
+
+    // Clear irrelevant bits in the mask.
+    if (LeftShift)
+      C1 &= maskTrailingZeros<uint64_t>(C2);
+    else
+      C1 &= maskTrailingOnes<uint64_t>(XLen - C2);
+
+    // Some transforms should only be done if the shift has a single use or
+    // the AND would become (srli (slli X, 32), 32)
+    bool OneUseOrZExtW = N0.hasOneUse() || C1 == UINT64_C(0xFFFFFFFF);
+
+    SDValue X = N0.getOperand(0);
+
+    // Turn (and (srl x, c2) c1) -> (srli (slli x, c3-c2), c3) if c1 is a mask
+    // with c3 leading zeros.
+    if (!LeftShift && isMask_64(C1)) {
+      uint64_t C3 = XLen - (64 - countLeadingZeros(C1));
+      if (C2 < C3) {
+        // If the number of leading zeros is C2+32 this can be SRLIW.
+        if (C2 + 32 == C3) {
+          SDNode *SRLIW =
+              CurDAG->getMachineNode(RISCV::SRLIW, DL, XLenVT, X,
+                                     CurDAG->getTargetConstant(C2, DL, XLenVT));
+          ReplaceNode(Node, SRLIW);
+          return;
+        }
+
+        // (and (srl (sexti32 Y), c2), c1) -> (srliw (sraiw Y, 31), c3 - 32) if
+        // c1 is a mask with c3 leading zeros and c2 >= 32 and c3-c2==1.
+        //
+        // This pattern occurs when (i32 (srl (sra 31), c3 - 32)) is type
+        // legalized and goes through DAG combine.
+        SDValue Y;
+        if (C2 >= 32 && (C3 - C2) == 1 && N0.hasOneUse() &&
+            selectSExti32(X, Y)) {
+          SDNode *SRAIW =
+              CurDAG->getMachineNode(RISCV::SRAIW, DL, XLenVT, Y,
+                                     CurDAG->getTargetConstant(31, DL, XLenVT));
+          SDNode *SRLIW = CurDAG->getMachineNode(
+              RISCV::SRLIW, DL, XLenVT, SDValue(SRAIW, 0),
+              CurDAG->getTargetConstant(C3 - 32, DL, XLenVT));
+          ReplaceNode(Node, SRLIW);
+          return;
+        }
+
+        // (srli (slli x, c3-c2), c3).
+        if (OneUseOrZExtW && !ZExtOrANDI) {
+          SDNode *SLLI = CurDAG->getMachineNode(
+              RISCV::SLLI, DL, XLenVT, X,
+              CurDAG->getTargetConstant(C3 - C2, DL, XLenVT));
+          SDNode *SRLI =
+              CurDAG->getMachineNode(RISCV::SRLI, DL, XLenVT, SDValue(SLLI, 0),
+                                     CurDAG->getTargetConstant(C3, DL, XLenVT));
+          ReplaceNode(Node, SRLI);
+          return;
+        }
+      }
+    }
+
+    // Turn (and (shl x, c2) c1) -> (srli (slli c2+c3), c3) if c1 is a mask
+    // shifted by c2 bits with c3 leading zeros.
+    if (LeftShift && isShiftedMask_64(C1)) {
+      uint64_t C3 = XLen - (64 - countLeadingZeros(C1));
+
+      if (C2 + C3 < XLen &&
+          C1 == (maskTrailingOnes<uint64_t>(XLen - (C2 + C3)) << C2)) {
+        // Use slli.uw when possible.
+        if ((XLen - (C2 + C3)) == 32 && Subtarget->hasStdExtZba()) {
+          SDNode *SLLIUW =
+              CurDAG->getMachineNode(RISCV::SLLIUW, DL, XLenVT, X,
+                                     CurDAG->getTargetConstant(C2, DL, XLenVT));
+          ReplaceNode(Node, SLLIUW);
+          return;
+        }
+
+        // (srli (slli c2+c3), c3)
+        if (OneUseOrZExtW && !ZExtOrANDI) {
+          SDNode *SLLI = CurDAG->getMachineNode(
+              RISCV::SLLI, DL, XLenVT, X,
+              CurDAG->getTargetConstant(C2 + C3, DL, XLenVT));
+          SDNode *SRLI =
+              CurDAG->getMachineNode(RISCV::SRLI, DL, XLenVT, SDValue(SLLI, 0),
+                                     CurDAG->getTargetConstant(C3, DL, XLenVT));
+          ReplaceNode(Node, SRLI);
+          return;
+        }
+      }
+    }
+
+    break;
+  }
   case ISD::INTRINSIC_WO_CHAIN: {
     unsigned IntNo = Node->getConstantOperandVal(0);
     switch (IntNo) {
@@ -765,53 +991,22 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       break;
     case Intrinsic::epi_vsetvl: {
       assert(Node->getNumOperands() == 4);
-      auto *SEW = cast<ConstantSDNode>(Node->getOperand(2));
-      auto *VMul = cast<ConstantSDNode>(Node->getOperand(3));
-
-      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
-      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
-
-      uint64_t VTypeI = RISCVVType::encodeVTYPE(
-          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
-          /* TailAgnostic */ true,
-          /* MaskAgnostic */ false,
-          /* Nontemporal */ false);
-      SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
-
-      SDValue VLOperand = Node->getOperand(1);
-      if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
-        if (C->isNullValue()) {
-          VLOperand = SDValue(CurDAG->getMachineNode(
-                                  RISCV::ADDI, DL, MVT::i64,
-                                  CurDAG->getRegister(RISCV::X0, MVT::i64),
-                                  CurDAG->getTargetConstant(0, DL, MVT::i64)),
-                              0);
-        }
-      }
-
-      ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL,
-                                               MVT::i64, VLOperand, VTypeIOp));
+      selectVSETVL(Node, XLenVT, /*no flags*/ 0);
       return;
     }
     case Intrinsic::epi_vsetvlmax: {
       assert(Node->getNumOperands() == 3);
-      auto *SEW = cast<ConstantSDNode>(Node->getOperand(1));
-      auto *VMul = cast<ConstantSDNode>(Node->getOperand(2));
-
-      uint64_t SEWBits = RISCVVType::decodeVSEW(SEW->getZExtValue() & 0x7);
-      uint64_t LMulBits = VMul->getZExtValue() & 0x7;
-
-      uint64_t VTypeI = RISCVVType::encodeVTYPE(
-          static_cast<RISCVII::VLMUL>(LMulBits), SEWBits,
-          /* TailAgnostic */ true,
-          /* MaskAgnostic */ false,
-          /* Nontemporal */ false);
-      SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
-
-      // FIXME DstReg for VLMAX must be != X0
-      SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
-      ReplaceNode(Node, CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL,
-                                               MVT::i64, VLOperand, VTypeIOp));
+      selectVSETVLMAX(Node, XLenVT, /*no flags*/ 0);
+      return;
+    }
+    case Intrinsic::epi_vsetvl_ext: {
+      assert(Node->getNumOperands() == 5);
+      selectVSETVL(Node, XLenVT, Node->getNumOperands() - 1);
+      return;
+    }
+    case Intrinsic::epi_vsetvlmax_ext: {
+      assert(Node->getNumOperands() == 4);
+      selectVSETVLMAX(Node, XLenVT, Node->getNumOperands() - 1);
       return;
     }
     case Intrinsic::experimental_vector_vp_slideleftfill: {
@@ -850,8 +1045,8 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         break;
       }
       SDValue VTypeIOp = CurDAG->getTargetConstant(
-          RISCVVType::encodeVTYPE(LMulBits, SEW, /*TailAgnostic*/ true,
-                                  /*MaskAgnostic*/ false,
+          RISCVVType::encodeVTYPE(LMulBits, SEW, /* TailAgnostic */ true,
+                                  /* MaskAgnostic */ false,
                                   /* Nontemporal */ false),
           DL, XLenVT);
       SDValue VLMax =
@@ -1090,7 +1285,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
           Node->getConstantOperandVal(Offset + 1) & 0x7);
 
       unsigned VTypeI = RISCVVType::encodeVTYPE(
-          VLMul, SEW, /*TailAgnostic*/ true, /*MaskAgnostic*/ false,
+          VLMul, SEW, /* TailAgnostic */ true, /* MaskAgnostic */ false,
           /* Nontemporal */ false);
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
 
@@ -1742,41 +1937,6 @@ bool RISCVDAGToDAGISel::selectZExti32(SDValue N, SDValue &Val) {
   }
 
   return false;
-}
-
-// Check that it is a SLLIUW (Shift Logical Left Immediate Unsigned i32
-// on RV64).
-// SLLIUW is the same as SLLI except for the fact that it clears the bits
-// XLEN-1:32 of the input RS1 before shifting.
-// A PatFrag has already checked that it has the right structure:
-//
-//  (AND (SHL RS1, VC2), VC1)
-//
-// We check that VC2, the shamt is less than 32, otherwise the pattern is
-// exactly the same as SLLI and we give priority to that.
-// Eventually we check that VC1, the mask used to clear the upper 32 bits
-// of RS1, is correct:
-//
-//  VC1 == (0xFFFFFFFF << VC2)
-//
-bool RISCVDAGToDAGISel::MatchSLLIUW(SDNode *N) const {
-  assert(N->getOpcode() == ISD::AND);
-  assert(N->getOperand(0).getOpcode() == ISD::SHL);
-  assert(isa<ConstantSDNode>(N->getOperand(1)));
-  assert(isa<ConstantSDNode>(N->getOperand(0).getOperand(1)));
-
-  // The IsRV64 predicate is checked after PatFrag predicates so we can get
-  // here even on RV32.
-  if (!Subtarget->is64Bit())
-    return false;
-
-  SDValue Shl = N->getOperand(0);
-  uint64_t VC1 = N->getConstantOperandVal(1);
-  uint64_t VC2 = Shl.getConstantOperandVal(1);
-
-  // Immediate range should be enforced by uimm5 predicate.
-  assert(VC2 < 32 && "Unexpected immediate");
-  return (VC1 >> VC2) == UINT64_C(0xFFFFFFFF);
 }
 
 // Select VL as a 5 bit immediate or a value that will become a register. This

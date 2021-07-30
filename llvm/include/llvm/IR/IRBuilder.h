@@ -1778,8 +1778,10 @@ public:
     return Insert(new AtomicRMWInst(Op, Ptr, Val, *Align, Ordering, SSID));
   }
 
-  Value *CreateGEP(Value *Ptr, ArrayRef<Value *> IdxList,
-                   const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateGEP(Value *Ptr, ArrayRef<Value *> IdxList,
+                       const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateGEP(Ptr->getType()->getScalarType()->getPointerElementType(),
                      Ptr, IdxList, Name);
   }
@@ -1798,8 +1800,10 @@ public:
     return Insert(GetElementPtrInst::Create(Ty, Ptr, IdxList), Name);
   }
 
-  Value *CreateInBoundsGEP(Value *Ptr, ArrayRef<Value *> IdxList,
-                           const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateInBoundsGEP(Value *Ptr, ArrayRef<Value *> IdxList,
+                               const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateInBoundsGEP(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, IdxList,
         Name);
@@ -1820,11 +1824,6 @@ public:
     return Insert(GetElementPtrInst::CreateInBounds(Ty, Ptr, IdxList), Name);
   }
 
-  Value *CreateGEP(Value *Ptr, Value *Idx, const Twine &Name = "") {
-    return CreateGEP(Ptr->getType()->getScalarType()->getPointerElementType(),
-                     Ptr, Idx, Name);
-  }
-
   Value *CreateGEP(Type *Ty, Value *Ptr, Value *Idx, const Twine &Name = "") {
     if (auto *PC = dyn_cast<Constant>(Ptr))
       if (auto *IC = dyn_cast<Constant>(Idx))
@@ -1840,7 +1839,10 @@ public:
     return Insert(GetElementPtrInst::CreateInBounds(Ty, Ptr, Idx), Name);
   }
 
-  Value *CreateConstGEP1_32(Value *Ptr, unsigned Idx0, const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateConstGEP1_32(Value *Ptr, unsigned Idx0,
+                                const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstGEP1_32(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, Idx0,
         Name);
@@ -1902,7 +1904,10 @@ public:
     return Insert(GetElementPtrInst::Create(Ty, Ptr, Idx), Name);
   }
 
-  Value *CreateConstGEP1_64(Value *Ptr, uint64_t Idx0, const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateConstGEP1_64(Value *Ptr, uint64_t Idx0,
+                                const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstGEP1_64(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, Idx0,
         Name);
@@ -1918,8 +1923,10 @@ public:
     return Insert(GetElementPtrInst::CreateInBounds(Ty, Ptr, Idx), Name);
   }
 
-  Value *CreateConstInBoundsGEP1_64(Value *Ptr, uint64_t Idx0,
-                                    const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateConstInBoundsGEP1_64(Value *Ptr, uint64_t Idx0,
+                                        const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstInBoundsGEP1_64(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, Idx0,
         Name);
@@ -1938,8 +1945,10 @@ public:
     return Insert(GetElementPtrInst::Create(Ty, Ptr, Idxs), Name);
   }
 
-  Value *CreateConstGEP2_64(Value *Ptr, uint64_t Idx0, uint64_t Idx1,
-                            const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateConstGEP2_64(Value *Ptr, uint64_t Idx0, uint64_t Idx1,
+                                const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstGEP2_64(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, Idx0,
         Idx1, Name);
@@ -1958,8 +1967,10 @@ public:
     return Insert(GetElementPtrInst::CreateInBounds(Ty, Ptr, Idxs), Name);
   }
 
-  Value *CreateConstInBoundsGEP2_64(Value *Ptr, uint64_t Idx0, uint64_t Idx1,
-                                    const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateConstInBoundsGEP2_64(Value *Ptr, uint64_t Idx0,
+                                        uint64_t Idx1, const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstInBoundsGEP2_64(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, Idx0,
         Idx1, Name);
@@ -1970,7 +1981,9 @@ public:
     return CreateConstInBoundsGEP2_32(Ty, Ptr, 0, Idx, Name);
   }
 
-  Value *CreateStructGEP(Value *Ptr, unsigned Idx, const Twine &Name = "") {
+  LLVM_ATTRIBUTE_DEPRECATED(
+      Value *CreateStructGEP(Value *Ptr, unsigned Idx, const Twine &Name = ""),
+      "Use the version with explicit element type instead") {
     return CreateConstInBoundsGEP2_32(
         Ptr->getType()->getScalarType()->getPointerElementType(), Ptr, 0, Idx,
         Name);

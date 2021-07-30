@@ -387,6 +387,12 @@ void validate(const Triple &TT, const FeatureBitset &FeatureBits);
 } // namespace RISCVFeatures
 
 namespace RISCVVType {
+enum {
+  TA = 0x40UL,  // TailAgnostic
+  MA = 0x80UL,  // MaskAgnostic
+  NT = 0x200UL, // NonTemporal
+};
+
 // Is this a SEW value that can be encoded into the VTYPE format.
 inline static bool isValidSEW(unsigned SEW) {
   return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;
@@ -418,11 +424,17 @@ inline static unsigned getSEW(unsigned VType) {
   return decodeVSEW(VSEW);
 }
 
-inline static bool isTailAgnostic(unsigned VType) { return VType & 0x40; }
+inline static bool isTailAgnostic(unsigned VType) {
+  return VType & RISCVVType::TA;
+}
 
-inline static bool isMaskAgnostic(unsigned VType) { return VType & 0x80; }
+inline static bool isMaskAgnostic(unsigned VType) {
+  return VType & RISCVVType::MA;
+}
 
-inline static bool isNontemporal(unsigned VType) { return VType & 0x200; }
+inline static bool isNontemporal(unsigned VType) {
+  return VType & RISCVVType::NT;
+}
 
 void printVType(unsigned VType, raw_ostream &OS);
 
