@@ -219,7 +219,7 @@ public:
 
   /// Add the incoming values from the backedge to reduction & first-order
   /// recurrence cross-iteration phis.
-  void fixHeaderPhis();
+  void fixHeaderPhis(VPlanPtr &Plan);
 };
 } // end namespace llvm
 

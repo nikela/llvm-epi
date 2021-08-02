@@ -697,9 +697,57 @@ void VPInstruction::generateInstruction(VPTransformState &State,
   // Call opcode that is now supported by the new VPCallInstruction recipe.
   case Instruction::Call: {
     llvm_unreachable("This opcode is handled by the VPCallInstruction recipe");
+  case VPInstruction::FirstOrderRecurrenceSplice: {
+    // Generate code to combine the previous and current values in vector v3.
+    //
+    //   vector.ph:
+    //     v_init = vector(..., ..., ..., a[-1])
+    //     br vector.body
+    //
+    //   vector.body
+    //     i = phi [0, vector.ph], [i+4, vector.body]
+    //     v1 = phi [v_init, vector.ph], [v2, vector.body]
+    //     v2 = a[i, i+1, i+2, i+3];
+    //     v3 = vector(v1(3), v2(0, 1, 2))
+
+    // For the first part, use the recurrence phi (v1), otherwise v2.
+    auto *V1 = State.get(getOperand(0), 0);
+    Value *PartMinus1 = Part == 0 ? V1 : State.get(getOperand(1), Part - 1);
+    if (!PartMinus1->getType()->isVectorTy()) {
+      State.set(this, PartMinus1, Part);
+    } else {
+      Value *V2 = State.get(getOperand(1), Part);
+      State.set(this, Builder.CreateVectorSplice(PartMinus1, V2, -1), Part);
+    }
+    break;
+  }
+  case VPInstruction::PredicatedFirstOrderRecurrenceSplice: {
+    auto *V1 = State.get(getOperand(0), 0);
+    Value *PartMinus1 = Part == 0 ? V1 : State.get(getOperand(1), Part - 1);
+    if (!PartMinus1->getType()->isVectorTy()) {
+      State.set(this, PartMinus1, Part);
+    } else {
+      Value *V2 = State.get(getOperand(1), Part);
+      Value *EVL = State.get(getOperand(2), Part);
+      Value *EVLPhi = State.get(getOperand(3), Part);
+
+      auto *IdxTy = Builder.getInt32Ty();
+      Value *Vlen = Builder.CreateVScale(
+          ConstantInt::get(IdxTy, State.VF.getKnownMinValue()));
+      Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(IdxTy, 1));
+
+      Value *SlideLeftFill = Builder.CreateIntrinsic(
+          Intrinsic::experimental_vector_vp_slideleftfill,
+          {PartMinus1->getType()}, {PartMinus1, V2, Shift, EVLPhi, EVL},
+          nullptr);
+
+      State.set(this, SlideLeftFill, Part);
+    }
+    break;
   }
   default:
     llvm_unreachable("Unsupported opcode for instruction");
+  }
   }
 }
 
@@ -739,6 +787,12 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
     break;
   case VPInstruction::ActiveLaneMask:
     O << "active lane mask";
+    break;
+  case VPInstruction::FirstOrderRecurrenceSplice:
+    O << "first-order splice";
+    break;
+  case VPInstruction::PredicatedFirstOrderRecurrenceSplice:
+    O << "predicated-first-order splice";
     break;
   default:
     O << Instruction::getOpcodeName(getOpcode());
@@ -814,6 +868,32 @@ void VPlan::execute(VPTransformState *State) {
 
   for (VPBlockBase *Block : depth_first(Entry))
     Block->execute(State);
+
+  // Fix the latch value of the first-order recurrences in the vector loop. Only
+  // a single part is generated, regardless of the UF.
+  VPBasicBlock *Header = Entry->getEntryBasicBlock();
+  for (VPRecipeBase &R : Header->phis()) {
+    if (auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R)) {
+      auto *VecPhi = cast<PHINode>(State->get(FOR, 0));
+
+      VPValue *PreviousDef = FOR->getBackedgeValue();
+      Value *Incoming = State->get(PreviousDef, State->UF - 1);
+      VecPhi->addIncoming(Incoming, VectorLatchBB);
+    } else if (auto *FOR =
+                   dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
+      auto *VecPhi = cast<PHINode>(State->get(FOR, 0));
+
+      VPValue *PreviousDef = FOR->getBackedgeValue();
+      Value *Incoming = State->get(PreviousDef, State->UF - 1);
+      VecPhi->addIncoming(Incoming, VectorLatchBB);
+    } else if (auto *EVL = dyn_cast<VPEVLPHIRecipe>(&R)) {
+      auto *VecPhi = cast<PHINode>(State->get(EVL, 0));
+
+      VPValue *PreviousDef = EVL->getOperand(0);
+      Value *Incoming = State->get(PreviousDef, State->UF - 1);
+      VecPhi->addIncoming(Incoming, VectorLatchBB);
+    }
+  }
 
   // Setup branch terminator successors for VPBBs in VPBBsToFix based on
   // VPBB's successors.
@@ -1106,11 +1186,6 @@ void VPWidenRecipe::print(raw_ostream &O, const Twine &Indent,
   printOperands(O, SlotTracker);
 }
 
-static bool isOuterMask(VPValue *V) {
-  return isa<VPInstruction>(V) &&
-         cast<VPInstruction>(V)->getOpcode() == VPInstruction::ICmpULE;
-}
-
 void VPPredicatedWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                                     VPSlotTracker &SlotTracker) const {
   O << Indent << "PREDICATED-WIDEN ";
@@ -1316,7 +1391,8 @@ void VPWidenEVLRecipe::print(raw_ostream &O, const Twine &Indent,
                              VPSlotTracker &SlotTracker) const {
   O << Indent << "EMIT ";
   getEVL()->printAsOperand(O, SlotTracker);
-  O << " = GENERATE-EXPLICIT-VECTOR-LENGTH";
+  O << " = GENERATE-EXPLICIT-VECTOR-LENGTH ";
+  printOperands(O, SlotTracker);
 }
 
 void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
@@ -1325,6 +1401,102 @@ void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
   getEVLMask()->printAsOperand(O, SlotTracker);
   O << " = GENERATE-ULT-STEPVECTOR-EVL-MASK";
 }
+
+void VPFirstOrderRecurrencePHIRecipe::execute(VPTransformState &State) {
+  auto &Builder = State.Builder;
+  // Create a vector from the initial value.
+  auto *VectorInit = getStartValue()->getLiveInIRValue();
+
+  Type *VecTy = State.VF.isScalar()
+                    ? VectorInit->getType()
+                    : VectorType::get(VectorInit->getType(), State.VF);
+
+  if (State.VF.isVector()) {
+    auto *IdxTy = Builder.getInt32Ty();
+    auto *One = ConstantInt::get(IdxTy, 1);
+    IRBuilder<>::InsertPointGuard Guard(Builder);
+    Builder.SetInsertPoint(State.CFG.VectorPreHeader->getTerminator());
+    auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, State.VF);
+    auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
+    VectorInit = Builder.CreateInsertElement(
+        PoisonValue::get(VecTy), VectorInit, LastIdx, "vector.recur.init");
+  }
+
+  // Create a phi node for the new recurrence.
+  PHINode *EntryPart = PHINode::Create(
+      VecTy, 2, "vector.recur", &*State.CFG.PrevBB->getFirstInsertionPt());
+  EntryPart->addIncoming(VectorInit, State.CFG.VectorPreHeader);
+  State.set(this, EntryPart, 0);
+}
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+void VPFirstOrderRecurrencePHIRecipe::print(raw_ostream &O, const Twine &Indent,
+                                            VPSlotTracker &SlotTracker) const {
+  O << Indent << "FIRST-ORDER-RECURRENCE-PHI ";
+  printAsOperand(O, SlotTracker);
+  O << " = phi ";
+  printOperands(O, SlotTracker);
+}
+#endif
+
+void VPEVLPHIRecipe::execute(VPTransformState &State) {
+  auto &Builder = State.Builder;
+  auto *IdxTy = Builder.getInt32Ty();
+  PHINode *EVLEntryPart = PHINode::Create(
+      IdxTy, 2, "prev.evl", &*State.CFG.PrevBB->getFirstInsertionPt());
+  IRBuilder<>::InsertPointGuard Guard(Builder);
+  Builder.SetInsertPoint(State.CFG.VectorPreHeader->getTerminator());
+  auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, State.VF);
+  EVLEntryPart->addIncoming(RuntimeVF, State.CFG.VectorPreHeader);
+
+  State.set(this, EVLEntryPart, 0);
+}
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+void VPEVLPHIRecipe::print(
+    raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
+  O << Indent << "EVL-PHI ";
+  printAsOperand(O, SlotTracker);
+  O << " = evl-phi ";
+}
+#endif
+
+void VPPredicatedFirstOrderRecurrencePHIRecipe::execute(VPTransformState &State) {
+  auto &Builder = State.Builder;
+  // Create a vector from the initial value.
+  auto *VectorInit = getStartValue()->getLiveInIRValue();
+
+  Type *VecTy = State.VF.isScalar()
+                    ? VectorInit->getType()
+                    : VectorType::get(VectorInit->getType(), State.VF);
+
+  if (State.VF.isVector()) {
+    auto *IdxTy = Builder.getInt32Ty();
+    auto *One = ConstantInt::get(IdxTy, 1);
+    IRBuilder<>::InsertPointGuard Guard(Builder);
+    Builder.SetInsertPoint(State.CFG.VectorPreHeader->getTerminator());
+    auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, State.VF);
+    auto *LastIdx = Builder.CreateSub(RuntimeVF, One);
+    VectorInit = Builder.CreateInsertElement(
+        PoisonValue::get(VecTy), VectorInit, LastIdx, "vector.recur.init");
+  }
+
+  // Create a phi node for the new recurrence.
+  PHINode *EntryPart = PHINode::Create(
+      VecTy, 2, "vector.recur", &*State.CFG.PrevBB->getFirstInsertionPt());
+  EntryPart->addIncoming(VectorInit, State.CFG.VectorPreHeader);
+  State.set(this, EntryPart, 0);
+}
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+void VPPredicatedFirstOrderRecurrencePHIRecipe::print(
+    raw_ostream &O, const Twine &Indent, VPSlotTracker &SlotTracker) const {
+  O << Indent << "PREDICATED-FIRST-ORDER-RECURRENCE-PHI ";
+  printAsOperand(O, SlotTracker);
+  O << " = phi ";
+  printOperands(O, SlotTracker);
+}
+#endif
 
 void VPReductionPHIRecipe::execute(VPTransformState &State) {
   PHINode *PN = cast<PHINode>(getUnderlyingValue());
