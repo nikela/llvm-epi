@@ -130,6 +130,9 @@ std::string Linux::getMultiarchTriple(const Driver &D,
     return "sparc64-linux-gnu";
   case llvm::Triple::systemz:
     return "s390x-linux-gnu";
+  case llvm::Triple::riscv64:
+    if (D.getVFS().exists(SysRoot + "/lib/riscv64-linux-gnu"))
+      return "riscv64-linux-gnu";
   }
   return TargetTriple.str();
 }
