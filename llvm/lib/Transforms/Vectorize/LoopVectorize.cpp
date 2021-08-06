@@ -5419,7 +5419,7 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
         case Intrinsic::lifetime_end:
           if (TheLoop->hasLoopInvariantOperands(&I))
             addToWorklistIfAllowed(&I);
-          LLVM_FALLTHROUGH;
+          break;
         default:
           break;
         }
