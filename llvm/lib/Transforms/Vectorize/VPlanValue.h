@@ -107,6 +107,9 @@ public:
 
     // Phi-like VPValues. Need to be kept together.
     VPVBlendSC,
+    VPVFirstOrderRecurrencePHISC,
+    VPVPredicatedFirstOrderRecurrencePHISC,
+    VPVEVLPHISC,
     VPVWidenPHISC,
     VPVWidenCanonicalIVSC,
     VPVWidenIntOrFpInductionSC,
@@ -341,6 +344,9 @@ public:
 
     // Phi-like recipes. Need to be kept together.
     VPBlendSC,
+    VPFirstOrderRecurrencePHISC,
+    VPPredicatedFirstOrderRecurrencePHISC,
+    VPEVLPHISC,
     VPWidenPHISC,
     VPWidenCanonicalIVSC,
     VPWidenIntOrFpInductionSC,

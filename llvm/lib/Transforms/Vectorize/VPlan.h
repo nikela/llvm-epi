@@ -772,6 +772,7 @@ inline bool VPUser::classof(const VPDef *Def) {
          Def->getVPDefID() == VPRecipeBase::VPBranchOnMaskSC ||
          Def->getVPDefID() ==
              VPRecipeBase::VPPredicatedWidenMemoryInstructionSC ||
+         Def->getVPDefID() == VPRecipeBase::VPEVLPHISC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC;
 }
 
@@ -785,7 +786,11 @@ class VPInstruction : public VPRecipeBase, public VPValue {
 public:
   /// VPlan opcodes, extending LLVM IR with idiomatics instructions.
   enum {
-    Not = Instruction::OtherOpsEnd + 1,
+    FirstOrderRecurrenceSplice =
+        Instruction::OtherOpsEnd + 1, // Combines the incoming and previous
+                                      // values of a first-order recurrence.
+    PredicatedFirstOrderRecurrenceSplice, // Same as above but predicated
+    Not,
     ICmpULE,
     SLPLoad,
     SLPStore,
@@ -1116,8 +1121,12 @@ class VPWidenPHIRecipe : public VPRecipeBase, public VPValue {
   SmallVector<VPBasicBlock *, 2> IncomingBlocks;
 
 protected:
-  VPWidenPHIRecipe(unsigned char VPVID, unsigned char VPDefID, PHINode *Phi)
-      : VPRecipeBase(VPDefID, {}), VPValue(VPVID, Phi, this) {}
+  VPWidenPHIRecipe(unsigned char VPVID, unsigned char VPDefID, PHINode *Phi,
+                   VPValue *Start = nullptr)
+      : VPRecipeBase(VPDefID, {}), VPValue(VPVID, Phi, this) {
+    if (Start)
+      addOperand(Start);
+  }
 
 public:
   /// Create a VPWidenPHIRecipe for \p Phi
@@ -1134,10 +1143,16 @@ public:
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *B) {
     return B->getVPDefID() == VPRecipeBase::VPWidenPHISC ||
+           B->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC ||
+           B->getVPDefID() ==
+               VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC ||
            B->getVPDefID() == VPRecipeBase::VPReductionPHISC;
   }
   static inline bool classof(const VPValue *V) {
     return V->getVPValueID() == VPValue::VPVWidenPHISC ||
+           V->getVPValueID() == VPValue::VPVFirstOrderRecurrencePHISC ||
+           V->getVPValueID() ==
+               VPValue::VPVPredicatedFirstOrderRecurrencePHISC ||
            V->getVPValueID() == VPValue::VPVReductionPHISC;
   }
 
@@ -1162,6 +1177,12 @@ public:
     return getOperand(1);
   }
 
+  /// Returns the backedge value as a recipe. The backedge value is guaranteed
+  /// to be a recipe.
+  VPRecipeBase *getBackedgeRecipe() {
+    return cast<VPRecipeBase>(getBackedgeValue()->getDef());
+  }
+
   /// Adds a pair (\p IncomingV, \p IncomingBlock) to the phi.
   void addIncoming(VPValue *IncomingV, VPBasicBlock *IncomingBlock) {
     addOperand(IncomingV);
@@ -1173,6 +1194,96 @@ public:
 
   /// Returns the \p I th incoming VPBasicBlock.
   VPBasicBlock *getIncomingBlock(unsigned I) { return IncomingBlocks[I]; }
+};
+
+/// A recipe for handling first-order recurrence phis. The start value is the
+/// first operand of the recipe and the incoming value from the backedge is the
+/// second operand.
+struct VPFirstOrderRecurrencePHIRecipe : public VPWidenPHIRecipe {
+  VPFirstOrderRecurrencePHIRecipe(PHINode *Phi, VPValue &Start)
+      : VPWidenPHIRecipe(VPVFirstOrderRecurrencePHISC,
+                         VPFirstOrderRecurrencePHISC, Phi, &Start) {}
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPRecipeBase *R) {
+    return R->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC;
+  }
+  static inline bool classof(const VPWidenPHIRecipe *D) {
+    return D->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVFirstOrderRecurrencePHISC;
+  }
+
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+};
+
+/// A recipe to create a recurrence of EVL with the previous iteration so
+/// we can handle first order recurrences.
+struct VPEVLPHIRecipe : public VPRecipeBase, public VPValue {
+  VPEVLPHIRecipe()
+      : VPRecipeBase(VPEVLPHISC, {}), VPValue(VPVEVLPHISC, nullptr, this) {}
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPRecipeBase *R) {
+    return R->getVPDefID() == VPRecipeBase::VPEVLPHISC;
+  }
+  static inline bool classof(const VPWidenPHIRecipe *D) {
+    return D->getVPDefID() == VPRecipeBase::VPEVLPHISC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVEVLPHISC;
+  }
+
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+};
+
+/// A recipe for handling first-order recurrence phis under predication. The
+/// start value is the first operand of the recipe and the incoming value from
+/// the backedge is the second operand.
+struct VPPredicatedFirstOrderRecurrencePHIRecipe : public VPWidenPHIRecipe {
+  VPPredicatedFirstOrderRecurrencePHIRecipe(PHINode *Phi, VPValue &Start)
+      : VPWidenPHIRecipe(VPVPredicatedFirstOrderRecurrencePHISC,
+                         VPPredicatedFirstOrderRecurrencePHISC, Phi, &Start) {}
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPRecipeBase *R) {
+    return R->getVPDefID() ==
+           VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC;
+  }
+  static inline bool classof(const VPWidenPHIRecipe *D) {
+    return D->getVPDefID() ==
+           VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVPredicatedFirstOrderRecurrencePHISC;
+  }
+
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+
+  // When fixing the recurrences phi, we add an additional EVL phi for this one
+  // linked to the value generated by VPEVLPHIRecipe.
+  VPValue *getEVLPhi() const { return getOperand(getNumOperands() - 1); }
+
+private:
 };
 
 /// A recipe for handling reduction phis. The start value is the first operand
@@ -1194,10 +1305,9 @@ public:
   VPReductionPHIRecipe(PHINode *Phi, RecurrenceDescriptor &RdxDesc,
                        VPValue &Start, bool IsInLoop = false,
                        bool IsOrdered = false)
-      : VPWidenPHIRecipe(VPVReductionPHISC, VPReductionPHISC, Phi),
+      : VPWidenPHIRecipe(VPVReductionPHISC, VPReductionPHISC, Phi, &Start),
         RdxDesc(RdxDesc), IsInLoop(IsInLoop), IsOrdered(IsOrdered) {
     assert((!IsOrdered || IsInLoop) && "IsOrdered requires IsInLoop");
-    addOperand(&Start);
   }
 
   ~VPReductionPHIRecipe() override = default;

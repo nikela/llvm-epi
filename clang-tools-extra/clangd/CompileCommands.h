@@ -12,6 +12,7 @@
 #include "clang/Tooling/ArgumentsAdjusters.h"
 #include "clang/Tooling/CompilationDatabase.h"
 #include "llvm/ADT/StringMap.h"
+#include "llvm/ADT/StringRef.h"
 #include <deque>
 #include <string>
 #include <vector>
@@ -25,10 +26,6 @@ namespace clangd {
 //  - forcing the use of clangd's builtin headers rather than clang's
 //  - resolving argv0 as cc1 expects
 //  - injecting -isysroot flags on mac as the system clang does
-// FIXME: This is currently not used in all code paths that create invocations.
-// Make use of these adjusters and buildCompilerInvocation in clangd-indexer as
-// well. It should be possible to hook it up by overriding RunInvocation in
-// FrontendActionFactory.
 struct CommandMangler {
   // Absolute path to clang.
   llvm::Optional<std::string> ClangPath;
@@ -46,7 +43,7 @@ struct CommandMangler {
   //  - on mac, find clang and isysroot by querying the `xcrun` launcher
   static CommandMangler detect();
 
-  void adjust(std::vector<std::string> &Cmd) const;
+  void adjust(std::vector<std::string> &Cmd, llvm::StringRef File) const;
   explicit operator clang::tooling::ArgumentsAdjuster() &&;
 
 private:
