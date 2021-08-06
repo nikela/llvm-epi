@@ -869,29 +869,38 @@ void VPlan::execute(VPTransformState *State) {
   for (VPBlockBase *Block : depth_first(Entry))
     Block->execute(State);
 
-  // Fix the latch value of the first-order recurrences in the vector loop. Only
-  // a single part is generated, regardless of the UF.
+  // Fix the latch value of reduction and first-order recurrences phis in the
+  // vector loop.
   VPBasicBlock *Header = Entry->getEntryBasicBlock();
   for (VPRecipeBase &R : Header->phis()) {
-    if (auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R)) {
-      auto *VecPhi = cast<PHINode>(State->get(FOR, 0));
-
-      VPValue *PreviousDef = FOR->getBackedgeValue();
-      Value *Incoming = State->get(PreviousDef, State->UF - 1);
-      VecPhi->addIncoming(Incoming, VectorLatchBB);
-    } else if (auto *FOR =
-                   dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
-      auto *VecPhi = cast<PHINode>(State->get(FOR, 0));
-
-      VPValue *PreviousDef = FOR->getBackedgeValue();
-      Value *Incoming = State->get(PreviousDef, State->UF - 1);
-      VecPhi->addIncoming(Incoming, VectorLatchBB);
-    } else if (auto *EVL = dyn_cast<VPEVLPHIRecipe>(&R)) {
+    // Special handling for EVL PHI recipes.
+    if (auto *EVL = dyn_cast<VPEVLPHIRecipe>(&R)) {
       auto *VecPhi = cast<PHINode>(State->get(EVL, 0));
 
       VPValue *PreviousDef = EVL->getOperand(0);
       Value *Incoming = State->get(PreviousDef, State->UF - 1);
       VecPhi->addIncoming(Incoming, VectorLatchBB);
+      continue;
+    }
+
+    auto *PhiR = dyn_cast<VPWidenPHIRecipe>(&R);
+    if (!PhiR || !(isa<VPFirstOrderRecurrencePHIRecipe>(&R) ||
+                   isa<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R) ||
+                   isa<VPReductionPHIRecipe>(&R)))
+      continue;
+    // For first-order recurrences and in-order reduction phis, only a single
+    // part is generated, which provides the last part from the previous
+    // iteration. Otherwise all UF parts are generated.
+    bool SinglePartNeeded =
+        isa<VPFirstOrderRecurrencePHIRecipe>(&R) ||
+        isa<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R) ||
+        cast<VPReductionPHIRecipe>(&R)->isOrdered();
+    unsigned LastPartForNewPhi = SinglePartNeeded ? 1 : State->UF;
+    for (unsigned Part = 0; Part < LastPartForNewPhi; ++Part) {
+      Value *VecPhi = State->get(PhiR, Part);
+      Value *Val = State->get(PhiR->getBackedgeValue(),
+                              SinglePartNeeded ? State->UF - 1 : Part);
+      cast<PHINode>(VecPhi)->addIncoming(Val, VectorLatchBB);
     }
   }
 
@@ -1519,6 +1528,9 @@ void VPReductionPHIRecipe::execute(VPTransformState &State) {
         PHINode::Create(VecTy, 2, "vec.phi", &*HeaderBB->getFirstInsertionPt());
     State.set(this, EntryPart, Part);
   }
+
+  // Reductions do not have to start at zero. They can start with
+  // any loop invariant values.
   VPValue *StartVPV = getStartValue();
   Value *StartV = StartVPV->getLiveInIRValue();
 
