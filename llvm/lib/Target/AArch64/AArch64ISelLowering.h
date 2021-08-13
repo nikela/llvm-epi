@@ -701,12 +701,11 @@ public:
   bool isIntDivCheap(EVT VT, AttributeList Attr) const override;
 
   bool canMergeStoresTo(unsigned AddressSpace, EVT MemVT,
-                        const SelectionDAG &DAG) const override {
+                        const MachineFunction &MF) const override {
     // Do not merge to float value size (128 bytes) if no implicit
     // float attribute is set.
 
-    bool NoFloat = DAG.getMachineFunction().getFunction().hasFnAttribute(
-        Attribute::NoImplicitFloat);
+    bool NoFloat = MF.getFunction().hasFnAttribute(Attribute::NoImplicitFloat);
 
     if (NoFloat)
       return (MemVT.getSizeInBits() <= 64);
@@ -966,6 +965,7 @@ private:
   SDValue LowerCTPOP(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCTTZ(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerBitreverse(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerMinMax(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFCOPYSIGN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFP_EXTEND(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const;

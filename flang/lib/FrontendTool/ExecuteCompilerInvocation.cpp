@@ -13,6 +13,7 @@
 
 #include "flang/Frontend/CompilerInstance.h"
 #include "flang/Frontend/FrontendActions.h"
+#include "flang/Frontend/FrontendPluginRegistry.h"
 #include "clang/Driver/Options.h"
 #include "llvm/Option/OptTable.h"
 #include "llvm/Option/Option.h"
@@ -24,7 +25,7 @@ namespace Fortran::frontend {
 static std::unique_ptr<FrontendAction> CreateFrontendBaseAction(
     CompilerInstance &ci) {
 
-  ActionKind ak = ci.frontendOpts().programAction_;
+  ActionKind ak = ci.frontendOpts().programAction;
   switch (ak) {
   case InputOutputTest:
     return std::make_unique<InputOutputTestAction>();
@@ -62,6 +63,19 @@ static std::unique_ptr<FrontendAction> CreateFrontendBaseAction(
     return std::make_unique<GetSymbolsSourcesAction>();
   case InitOnly:
     return std::make_unique<InitOnlyAction>();
+  case PluginAction: {
+    for (const FrontendPluginRegistry::entry &plugin :
+        FrontendPluginRegistry::entries()) {
+      if (plugin.getName() == ci.frontendOpts().ActionName) {
+        std::unique_ptr<PluginParseTreeAction> p(plugin.instantiate());
+        return std::move(p);
+      }
+    }
+    unsigned diagID = ci.diagnostics().getCustomDiagID(
+        clang::DiagnosticsEngine::Error, "unable to find plugin '%0'");
+    ci.diagnostics().Report(diagID) << ci.frontendOpts().ActionName;
+    return nullptr;
+  }
   default:
     break;
     // TODO:
@@ -82,9 +96,10 @@ std::unique_ptr<FrontendAction> CreateFrontendAction(CompilerInstance &ci) {
 
   return act;
 }
+
 bool ExecuteCompilerInvocation(CompilerInstance *flang) {
   // Honor -help.
-  if (flang->frontendOpts().showHelp_) {
+  if (flang->frontendOpts().showHelp) {
     clang::driver::getDriverOptTable().printHelp(llvm::outs(),
         "flang-new -fc1 [options] file...", "LLVM 'Flang' Compiler",
         /*Include=*/clang::driver::options::FC1Option,
@@ -94,9 +109,25 @@ bool ExecuteCompilerInvocation(CompilerInstance *flang) {
   }
 
   // Honor -version.
-  if (flang->frontendOpts().showVersion_) {
+  if (flang->frontendOpts().showVersion) {
     llvm::cl::PrintVersionMessage();
     return true;
+  }
+
+  // Load any requested plugins.
+  for (const std::string &Path : flang->frontendOpts().plugins) {
+    std::string Error;
+    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently(
+            Path.c_str(), &Error)) {
+      unsigned diagID = flang->diagnostics().getCustomDiagID(
+          clang::DiagnosticsEngine::Error, "unable to load plugin '%0': '%1'");
+      flang->diagnostics().Report(diagID) << Path << Error;
+    }
+  }
+
+  // If there were errors in processing arguments, don't do anything else.
+  if (flang->diagnostics().hasErrorOccurred()) {
+    return false;
   }
 
   // Create and execute the frontend action.

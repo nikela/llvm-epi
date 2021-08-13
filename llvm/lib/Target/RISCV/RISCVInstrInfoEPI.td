@@ -684,9 +684,12 @@ multiclass pseudo_binary_v_vx_vi<DAGOperand imm_kind = simm5,
 
 multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
                                     bit force_earlyclobber = 0,
-                                    list<SchedReadWrite> sched_vv = [WriteVPUIALU, ReadVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE],
-                                    list<SchedReadWrite> sched_vx = [WriteVPUIALU, ReadVPUIALU, ReadVPUScalarIALU, ReadVL, ReadVTYPE],
-                                    list<SchedReadWrite> sched_vi = [WriteVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE]> {
+                                    list<SchedReadWrite> sched_vv = [],
+                                    list<SchedReadWrite> sched_vx = [],
+                                    list<SchedReadWrite> sched_vi = []> {
+                                    // list<SchedReadWrite> sched_vv = [WriteVPUIALU, ReadVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE],
+                                    // list<SchedReadWrite> sched_vx = [WriteVPUIALU, ReadVPUIALU, ReadVPUScalarIALU, ReadVL, ReadVTYPE],
+                                    // list<SchedReadWrite> sched_vi = [WriteVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
@@ -885,8 +888,10 @@ multiclass pseudo_binary_v_vfm {
   }
 }
 
-multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
-                                 list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
+multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [],
+                                 list<SchedReadWrite> sched_vf = []> {
+// multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
+//                                  list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
@@ -983,8 +988,10 @@ multiclass pseudo_ternary_v_vv_vx {
   }
 }
 
-multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
-                                  list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
+multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [],
+                                  list<SchedReadWrite> sched_vf = []> {
+// multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
+//                                   list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
   foreach m = MxList.m in
   {
@@ -1380,7 +1387,8 @@ foreach m = MxList.m in
                     ixlenimm:$sew),
                    []>,
             EPIPseudo,
-            Sched<[WriteVPULoad, ReadMemBase, ReadVL, ReadVTYPE]>;
+            // Sched<[WriteVPULoad, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
 
     let Uses = [VL, VTYPE], VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
         MaskOpIndex = 4,
@@ -1391,7 +1399,8 @@ foreach m = MxList.m in
                     GPR:$vl, ixlenimm:$sew),
                    []>,
             EPIPseudo,
-            Sched<[WriteVPULoadStrided, ReadMemBase, ReadVL, ReadVTYPE]>;
+            // Sched<[WriteVPULoadStrided, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
 
     foreach ieew = AllowedEEW<vlmul, /* sew= */ eew>.allowed_sew in {
       defvar ievr = RegisterClassForIndex<vlmul, /* sew= */ eew, /* eew */ ieew, evr>.r;
@@ -1404,7 +1413,8 @@ foreach m = MxList.m in
                       GPR:$vl, ixlenimm:$sew),
                      []>,
               EPIPseudo,
-              Sched<[WriteVPULoadIndexed, ReadMemBase, ReadVL, ReadVTYPE]>;
+              // Sched<[WriteVPULoadIndexed, ReadMemBase, ReadVL, ReadVTYPE]>;
+              Sched<[]>;
     }
   }
 
@@ -1423,7 +1433,8 @@ foreach m = MxList.m in
                         ixlenimm:$sew),
                    []>,
             EPIPseudo,
-            Sched<[WriteVPUStore, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            // Sched<[WriteVPUStore, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
 
     // Masked stores do not have a merge operand as merge is done in memory
     let Uses = [VL, VTYPE],
@@ -1436,7 +1447,8 @@ foreach m = MxList.m in
                         ixlenimm:$sew),
                    []>,
             EPIPseudo,
-            Sched<[WriteVPUStoreStrided, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            // Sched<[WriteVPUStoreStrided, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
 
     foreach ieew = AllowedEEW<vlmul, /* sew= */ eew>.allowed_sew in {
       defvar ievr = RegisterClassForIndex<vlmul, /* sew= */ eew, /* eew */ ieew, evr>.r;
@@ -1451,7 +1463,8 @@ foreach m = MxList.m in
                           ixlenimm:$sew),
                      []>,
               EPIPseudo,
-              Sched<[WriteVPUStoreIndexed, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+              // Sched<[WriteVPUStoreIndexed, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+              Sched<[]>;
     }
   }
 }

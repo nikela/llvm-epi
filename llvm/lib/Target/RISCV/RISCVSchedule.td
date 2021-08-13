@@ -230,30 +230,4 @@ def : ReadAdvance<ReadFSqrt16, 0>;
 
 // Include the scheduler resources for other instruction extensions.
 include "RISCVScheduleB.td"
-
-//===----------------------------------------------------------------------===//
-// V-extension Scheduling.
-//===----------------------------------------------------------------------===//
-def WriteVL              : SchedWrite;
-def WriteVTYPE           : SchedWrite;
-def WriteVPUIALU         : SchedWrite;
-def WriteVPUFALU         : SchedWrite;
-def WriteVPULoad         : SchedWrite;
-def WriteVPUStore        : SchedWrite;
-def WriteVPULoadStrided  : SchedWrite;
-def WriteVPUStoreStrided : SchedWrite;
-def WriteVPULoadIndexed  : SchedWrite;
-def WriteVPUStoreIndexed : SchedWrite;
-def WriteVPUScalarIALU   : SchedWrite; // .x.v
-def WriteVPUScalarFALU   : SchedWrite; // .f.v
-def WriteVPUScalar       : SchedWrite; // .vs and .s.{x,f}
-
-def ReadVL            : SchedRead;
-def ReadVTYPE         : SchedRead;
-def ReadVPUScalarIALU : SchedRead;
-def ReadVPUScalarFALU : SchedRead;
-def ReadVPUIALU       : SchedRead; // .vx
-def ReadVPUFALU       : SchedRead; // .vf
-def ReadVPUScalar     : SchedRead; // .vs
-def ReadVPUMem        : SchedRead;
-def ReadVPUStoreData  : SchedRead;
+include "RISCVScheduleV.td"
