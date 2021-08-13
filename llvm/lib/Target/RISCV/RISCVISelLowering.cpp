@@ -4297,7 +4297,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     assert(Op.getValueType().getSizeInBits() ==
                Op.getOperand(1).getValueType().getSizeInBits() &&
            "Unable to bitcast values of unmatching sizes");
-    return Op.getOperand(1);
+    return DAG.getNode(ISD::BITCAST, DL, Op.getValueType(), Op.getOperand(1));
   }
   }
 
