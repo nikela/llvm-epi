@@ -4072,10 +4072,15 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
 
     unsigned FCmp = cast<ConstantSDNode>(Op.getOperand(3))->getZExtValue();
     switch (FCmp) {
-    case FCmpInst::FCMP_FALSE:
-      // FIXME Lower to vmclr.
-      report_fatal_error("Unimplemented case FCMP_FALSE for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_FALSE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 && "Unexpected operand");
+      SDValue AnyExtEVL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      return DAG.getNode(
+          ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+          {DAG.getTargetConstant(Intrinsic::riscv_vmclr, DL, MVT::i64),
+           AnyExtEVL});
+    }
     case FCmpInst::FCMP_OEQ:
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfeq_mask : Intrinsic::epi_vmfeq;
@@ -4120,16 +4125,72 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       }
       break;
     }
-    case FCmpInst::FCMP_ONE:
-      report_fatal_error("Unimplemented case FCMP_ONE for intrinsic vp_fcmp");
-      break;
-    case FCmpInst::FCMP_ORD:
-      report_fatal_error("Unimplemented case FCMP_ORD for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_ONE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue FirstAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      SDValue And = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         FirstAndOperands);
+
+      SDValue FCmpOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfne_mask, DL, MVT::i64),
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
+          Op.getOperand(1), Op.getOperand(2), And, AnyExtEVL
+      };
+      SDValue FCmp = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                                 FCmpOperands);
+
+      SDValue SecondAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FCmp, And,
+          AnyExtEVL
+      };
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         SecondAndOperands);
+    }
+    case FCmpInst::FCMP_ORD: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue FirstAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         FirstAndOperands);
+    }
+    // FIXME: Fold scalar operands also in unordered comparisons.
     case FCmpInst::FCMP_UEQ:
-      report_fatal_error("Unimplemented case FCMP_UEQ for intrinsic vp_fcmp");
-      break;
-      // FIXME: Fold scalar operands also in unordered comparisons.
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmfeq_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_UGT:
       return LowerVPUnorderedFCmp(Intrinsic::epi_vmfgt_mask, Op.getOperand(1),
                                   Op.getOperand(2), Op.getOperand(EVLOpNo),
@@ -4150,13 +4211,38 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
       break;
-    case FCmpInst::FCMP_UNO:
-      report_fatal_error("Unimplemented case FCMP_UNO for intrinsic vp_fcmp");
-      break;
-    case FCmpInst::FCMP_TRUE:
-      // FIXME Lower to vmset.
-      report_fatal_error("Unimplemented case FCMP_TRUE for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_UNO: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue NandOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmnand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         NandOperands);
+    }
+    case FCmpInst::FCMP_TRUE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 && "Unexpected operand");
+      SDValue AnyExtEVL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      return DAG.getNode(
+          ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+          {DAG.getTargetConstant(Intrinsic::riscv_vmset, DL, MVT::i64),
+           AnyExtEVL});
+    }
     }
     break;
   }
