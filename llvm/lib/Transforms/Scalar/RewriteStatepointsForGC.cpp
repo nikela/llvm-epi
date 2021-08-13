@@ -1377,11 +1377,11 @@ static AttributeList legalizeCallAttributes(LLVMContext &Ctx,
     return AL;
 
   // Remove the readonly, readnone, and statepoint function attributes.
-  AttrBuilder FnAttrs = AL.getFnAttributes();
+  AttrBuilder FnAttrs = AL.getFnAttrs();
   for (auto Attr : FnAttrsToStrip)
     FnAttrs.removeAttribute(Attr);
 
-  for (Attribute A : AL.getFnAttributes()) {
+  for (Attribute A : AL.getFnAttrs()) {
     if (isStatepointDirectiveAttr(A))
       FnAttrs.remove(A);
   }
@@ -1533,7 +1533,7 @@ static StringRef getDeoptLowering(CallBase *Call) {
     // FIXME: Calls have a *really* confusing interface around attributes
     // with values.
     const AttributeList &CSAS = Call->getAttributes();
-    if (CSAS.hasAttribute(AttributeList::FunctionIndex, DeoptLowering))
+    if (CSAS.hasFnAttr(DeoptLowering))
       return CSAS.getAttribute(AttributeList::FunctionIndex, DeoptLowering)
           .getValueAsString();
     Function *F = Call->getCalledFunction();
@@ -1801,7 +1801,7 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
       CallInst *GCResult = Builder.CreateGCResult(Token, Call->getType(), Name);
       GCResult->setAttributes(
           AttributeList::get(GCResult->getContext(), AttributeList::ReturnIndex,
-                             Call->getAttributes().getRetAttributes()));
+                             Call->getAttributes().getRetAttrs()));
 
       // We cannot RAUW or delete CS.getInstruction() because it could be in the
       // live set of some other safepoint, in which case that safepoint's
