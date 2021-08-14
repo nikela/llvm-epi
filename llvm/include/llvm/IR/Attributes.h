@@ -657,6 +657,11 @@ public:
     return hasAttribute(ReturnIndex, Kind);
   }
 
+  /// Return true if the attribute exists for the return value.
+  bool hasRetAttr(StringRef Kind) const {
+    return hasAttribute(ReturnIndex, Kind);
+  }
+
   /// Return true if attributes exist for the return value.
   bool hasRetAttrs() const { return hasAttributes(ReturnIndex); }
 
@@ -689,6 +694,16 @@ public:
   /// Return the attribute object that exists at the given index.
   Attribute getParamAttr(unsigned ArgNo, StringRef Kind) const {
     return getAttribute(ArgNo + FirstArgIndex, Kind);
+  }
+
+  /// Return the attribute object that exists for the function.
+  Attribute getFnAttr(Attribute::AttrKind Kind) const {
+    return getAttribute(FunctionIndex, Kind);
+  }
+
+  /// Return the attribute object that exists for the function.
+  Attribute getFnAttr(StringRef Kind) const {
+    return getAttribute(FunctionIndex, Kind);
   }
 
   /// Return the alignment of the return value.
