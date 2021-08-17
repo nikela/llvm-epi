@@ -9114,14 +9114,6 @@ emitVBuildVRM1Tuple(MachineInstr &MI, MachineBasicBlock *BB,
 MachineBasicBlock *
 RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
-  if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
-          RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode())) {
-    // Don't do anything with them now.
-    // FIXME - Remove custom inserter bit from those.
-    return BB;
-  }
-
-  // Other EPI pseudo-instructions.
   switch (MI.getOpcode()) {
   default:
     break;
