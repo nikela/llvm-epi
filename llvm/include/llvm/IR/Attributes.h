@@ -475,6 +475,55 @@ public:
   LLVM_NODISCARD AttributeList addAttributes(LLVMContext &C, unsigned Index,
                                              const AttrBuilder &B) const;
 
+  /// Add a function attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addFnAttribute(LLVMContext &C,
+                                              Attribute::AttrKind Kind) const {
+    return addAttribute(C, FunctionIndex, Kind);
+  }
+
+  /// Add a function attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addFnAttribute(LLVMContext &C,
+                                              Attribute Attr) const {
+    return addAttribute(C, FunctionIndex, Attr);
+  }
+
+  /// Add a function attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addFnAttribute(
+      LLVMContext &C, StringRef Kind, StringRef Value = StringRef()) const {
+    return addAttribute(C, FunctionIndex, Kind, Value);
+  }
+
+  /// Add function attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addFnAttributes(LLVMContext &C,
+                                               const AttrBuilder &B) const {
+    return addAttributes(C, FunctionIndex, B);
+  }
+
+  /// Add a return value attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addRetAttribute(LLVMContext &C,
+                                               Attribute::AttrKind Kind) const {
+    return addAttribute(C, ReturnIndex, Kind);
+  }
+
+  /// Add a return value attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addRetAttribute(LLVMContext &C,
+                                               Attribute Attr) const {
+    return addAttribute(C, ReturnIndex, Attr);
+  }
+
+  /// Add a return value attribute to the list. Returns a new list because
+  /// attribute lists are immutable.
+  LLVM_NODISCARD AttributeList addRetAttributes(LLVMContext &C,
+                                                const AttrBuilder &B) const {
+    return addAttributes(C, ReturnIndex, B);
+  }
+
   /// Add an argument attribute to the list. Returns a new list because
   /// attribute lists are immutable.
   LLVM_NODISCARD AttributeList addParamAttribute(
@@ -523,6 +572,48 @@ public:
   /// attribute list. Returns a new list because attribute lists are immutable.
   LLVM_NODISCARD AttributeList removeAttributes(LLVMContext &C,
                                                 unsigned Index) const;
+
+  /// Remove the specified attribute at the function index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList
+  removeFnAttribute(LLVMContext &C, Attribute::AttrKind Kind) const {
+    return removeAttribute(C, FunctionIndex, Kind);
+  }
+
+  /// Remove the specified attribute at the function index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList removeFnAttribute(LLVMContext &C,
+                                                 StringRef Kind) const {
+    return removeAttribute(C, FunctionIndex, Kind);
+  }
+
+  /// Remove the specified attribute at the function index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList
+  removeFnAttributes(LLVMContext &C, const AttrBuilder &AttrsToRemove) const {
+    return removeAttributes(C, FunctionIndex, AttrsToRemove);
+  }
+
+  /// Remove the specified attribute at the return value index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList
+  removeRetAttribute(LLVMContext &C, Attribute::AttrKind Kind) const {
+    return removeAttribute(C, ReturnIndex, Kind);
+  }
+
+  /// Remove the specified attribute at the return value index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList removeRetAttribute(LLVMContext &C,
+                                                  StringRef Kind) const {
+    return removeAttribute(C, ReturnIndex, Kind);
+  }
+
+  /// Remove the specified attribute at the return value index from this
+  /// attribute list. Returns a new list because attribute lists are immutable.
+  LLVM_NODISCARD AttributeList
+  removeRetAttributes(LLVMContext &C, const AttrBuilder &AttrsToRemove) const {
+    return removeAttributes(C, ReturnIndex, AttrsToRemove);
+  }
 
   /// Remove the specified attribute at the specified arg index from this
   /// attribute list. Returns a new list because attribute lists are immutable.
@@ -620,13 +711,13 @@ public:
 
   /// The attributes for the argument or parameter at the given index are
   /// returned.
-  AttributeSet getParamAttributes(unsigned ArgNo) const;
+  AttributeSet getParamAttrs(unsigned ArgNo) const;
 
   /// The attributes for the ret value are returned.
-  AttributeSet getRetAttributes() const;
+  AttributeSet getRetAttrs() const;
 
   /// The function attributes are returned.
-  AttributeSet getFnAttributes() const;
+  AttributeSet getFnAttrs() const;
 
   /// Return true if the attribute exists at the given index.
   bool hasAttribute(unsigned Index, Attribute::AttrKind Kind) const;
@@ -652,16 +743,27 @@ public:
     return hasAttributes(ArgNo + FirstArgIndex);
   }
 
-  /// Equivalent to hasAttribute(AttributeList::FunctionIndex, Kind) but
-  /// may be faster.
-  bool hasFnAttribute(Attribute::AttrKind Kind) const;
+  /// Return true if the attribute exists for the return value.
+  bool hasRetAttr(Attribute::AttrKind Kind) const {
+    return hasAttribute(ReturnIndex, Kind);
+  }
 
-  /// Equivalent to hasAttribute(AttributeList::FunctionIndex, Kind) but
-  /// may be faster.
-  bool hasFnAttribute(StringRef Kind) const;
+  /// Return true if the attribute exists for the return value.
+  bool hasRetAttr(StringRef Kind) const {
+    return hasAttribute(ReturnIndex, Kind);
+  }
 
-  /// Equivalent to hasAttribute(ArgNo + FirstArgIndex, Kind).
-  bool hasParamAttribute(unsigned ArgNo, Attribute::AttrKind Kind) const;
+  /// Return true if attributes exist for the return value.
+  bool hasRetAttrs() const { return hasAttributes(ReturnIndex); }
+
+  /// Return true if the attribute exists for the function.
+  bool hasFnAttr(Attribute::AttrKind Kind) const;
+
+  /// Return true if the attribute exists for the function.
+  bool hasFnAttr(StringRef Kind) const;
+
+  /// Return true the attributes exist for the function.
+  bool hasFnAttrs() const { return hasAttributes(FunctionIndex); }
 
   /// Return true if the specified attribute is set for at least one
   /// parameter or for the return value. If Index is not nullptr, the index
@@ -683,6 +785,16 @@ public:
   /// Return the attribute object that exists at the given index.
   Attribute getParamAttr(unsigned ArgNo, StringRef Kind) const {
     return getAttribute(ArgNo + FirstArgIndex, Kind);
+  }
+
+  /// Return the attribute object that exists for the function.
+  Attribute getFnAttr(Attribute::AttrKind Kind) const {
+    return getAttribute(FunctionIndex, Kind);
+  }
+
+  /// Return the attribute object that exists for the function.
+  Attribute getFnAttr(StringRef Kind) const {
+    return getAttribute(FunctionIndex, Kind);
   }
 
   /// Return the alignment of the return value.
