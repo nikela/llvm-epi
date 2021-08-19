@@ -9,7 +9,7 @@ define dso_local void @foo() nounwind {
 ; CHECK-NEXT:    lui a0, %tprel_hi(y)
 ; CHECK-NEXT:    add a0, a0, tp, %tprel_add(y)
 ; CHECK-NEXT:    lw a1, %tprel_lo(y)(a0)
-; CHECK-NEXT:    addi a1, a1, 1
+; CHECK-NEXT:    addiw a1, a1, 1
 ; CHECK-NEXT:    sw a1, %tprel_lo(y)(a0)
 ; CHECK-NEXT:    ret
 entry:

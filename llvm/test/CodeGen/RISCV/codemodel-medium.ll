@@ -10,7 +10,7 @@ define void @foo() nounwind {
 ; SMALL:       # %bb.0: # %entry
 ; SMALL-NEXT:    lui a0, %hi(x)
 ; SMALL-NEXT:    lw a1, %lo(x)(a0)
-; SMALL-NEXT:    addi a1, a1, 1
+; SMALL-NEXT:    addiw a1, a1, 1
 ; SMALL-NEXT:    sw a1, %lo(x)(a0)
 ; SMALL-NEXT:    ret
 ;
@@ -21,7 +21,7 @@ define void @foo() nounwind {
 ; MEDIUM-NEXT:    auipc a0, %pcrel_hi(x)
 ; MEDIUM-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
 ; MEDIUM-NEXT:    lw a1, 0(a0)
-; MEDIUM-NEXT:    addi a1, a1, 1
+; MEDIUM-NEXT:    addiw a1, a1, 1
 ; MEDIUM-NEXT:    sw a1, 0(a0)
 ; MEDIUM-NEXT:    ret
 entry:

@@ -18,13 +18,13 @@ define dso_local void @foo(i32 signext %n) nounwind {
 ; CHECK-NEXT:    sub a0, sp, a0
 ; CHECK-NEXT:    mv sp, a0
 ; CHECK-NEXT:    lw a1, 4(a0)
-; CHECK-NEXT:    addi a1, a1, 1
+; CHECK-NEXT:    addiw a1, a1, 1
 ; CHECK-NEXT:    sw a1, 4(a0)
 ; CHECK-NEXT:    lw a0, 32(s1)
-; CHECK-NEXT:    addi a0, a0, 1
+; CHECK-NEXT:    addiw a0, a0, 1
 ; CHECK-NEXT:    sw a0, 32(s1)
 ; CHECK-NEXT:    lw a0, 28(s1)
-; CHECK-NEXT:    addi a0, a0, 1
+; CHECK-NEXT:    addiw a0, a0, 1
 ; CHECK-NEXT:    sw a0, 28(s1)
 ; CHECK-NEXT:    addi sp, s0, -64
 ; CHECK-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
