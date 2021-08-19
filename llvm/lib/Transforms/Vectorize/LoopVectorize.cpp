@@ -2085,7 +2085,6 @@ public:
     // may be used by SCEVExpander. The blocks will be un-linked from their
     // predecessors and removed from LI & DT at the end of the function.
     if (!UnionPred.isAlwaysTrue()) {
-      UnionPred.print(llvm::dbgs(), 0);
       SCEVCheckBlock = SplitBlock(Preheader, Preheader->getTerminator(), DT, LI,
                                   nullptr, "vector.scevcheck");
 
