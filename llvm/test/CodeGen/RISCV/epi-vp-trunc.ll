@@ -32,3 +32,51 @@ define <vscale x 2 x i32> @trunc.i32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2
 }
 
 declare <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(<vscale x 2 x i64>, <vscale x 2 x i1>, i32) #3
+
+define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i32 %evl) {
+; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i32:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
+; CHECK-NEXT:    vnsrl.wi v25, v8, 0
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vnsrl.wi v8, v25, 0
+; CHECK-NEXT:    ret
+    %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
+    %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
+    %x = call <vscale x 4 x i8> @llvm.vp.trunc.nxv4i8.nxv4i32(<vscale x 4 x i32> %a, <vscale x 4 x i1> %m.splat, i32 %evl)
+    ret <vscale x 4 x i8> %x
+}
+
+define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i32 %evl) {
+; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vnsrl.wi v26, v8, 0
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vnsrl.wi v25, v26, 0
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vnsrl.wi v8, v25, 0
+; CHECK-NEXT:    ret
+    %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
+    %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
+    %x = call <vscale x 4 x i8> @llvm.vp.trunc.nxv4i8.nxv4i64(<vscale x 4 x i64> %a, <vscale x 4 x i1> %m.splat, i32 %evl)
+    ret <vscale x 4 x i8> %x
+}
+
+define <vscale x 4 x i16> @test_vp_trunc_nxv4i16_nxv4i64(<vscale x 4 x i64> %a, i32 %evl) {
+; CHECK-LABEL: test_vp_trunc_nxv4i16_nxv4i64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vnsrl.wi v26, v8, 0
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vnsrl.wi v8, v26, 0
+; CHECK-NEXT:    ret
+    %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
+    %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
+    %x = call <vscale x 4 x i16> @llvm.vp.trunc.nxv4i16.nxv4i64(<vscale x 4 x i64> %a, <vscale x 4 x i1> %m.splat, i32 %evl)
+    ret <vscale x 4 x i16> %x
+}
+
+declare <vscale x 4 x i8> @llvm.vp.trunc.nxv4i8.nxv4i32(<vscale x 4 x i32> %op, <vscale x 4 x i1> %mask, i32 %evl)
+declare <vscale x 4 x i8> @llvm.vp.trunc.nxv4i8.nxv4i64(<vscale x 4 x i64> %op, <vscale x 4 x i1> %mask, i32 %evl)
+declare <vscale x 4 x i16> @llvm.vp.trunc.nxv4i16.nxv4i64(<vscale x 4 x i64> %op, <vscale x 4 x i1> %mask, i32 %evl)
