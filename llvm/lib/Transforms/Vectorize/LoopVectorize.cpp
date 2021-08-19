@@ -2091,8 +2091,6 @@ public:
 
       SCEVCheckCond = SCEVExp.expandCodeForPredicate(
           &UnionPred, SCEVCheckBlock->getTerminator());
-
-      SCEVCheckCond->dump();
     }
 
     const auto &RtPtrChecking = *LAI.getRuntimePointerChecking();
