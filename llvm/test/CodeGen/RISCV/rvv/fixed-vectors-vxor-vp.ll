@@ -402,7 +402,7 @@ define <9 x i8> @vxor_vi_v9i8_unmasked_1(<9 x i8> %va, i32 zeroext %evl) {
 ; CHECK-LABEL: vxor_vi_v9i8_unmasked_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vxor.vi v8, v8, -1
+; CHECK-NEXT:    vnot.v v8, v8
 ; CHECK-NEXT:    ret
   %elt.head = insertelement <9 x i8> undef, i8 -1, i32 0
   %vb = shufflevector <9 x i8> %elt.head, <9 x i8> undef, <9 x i32> zeroinitializer
