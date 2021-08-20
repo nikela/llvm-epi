@@ -3549,7 +3549,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   bool IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
   unsigned EPIIntNo;
   // Further instrinsic to use to correctly widen/narrow the source operand
-  unsigned FurtherEPIIntNo;
+  unsigned FurtherEPIIntNo = Intrinsic::not_intrinsic;
 
   switch (IntNo) {
   default:
