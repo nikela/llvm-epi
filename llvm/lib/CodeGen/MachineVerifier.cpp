@@ -1589,11 +1589,8 @@ void MachineVerifier::verifyPreISelGenericInstruction(const MachineInstr *MI) {
   case TargetOpcode::G_VECREDUCE_UMAX:
   case TargetOpcode::G_VECREDUCE_UMIN: {
     LLT DstTy = MRI->getType(MI->getOperand(0).getReg());
-    LLT SrcTy = MRI->getType(MI->getOperand(1).getReg());
     if (!DstTy.isScalar())
       report("Vector reduction requires a scalar destination type", MI);
-    if (!SrcTy.isVector())
-      report("Vector reduction requires vector source=", MI);
     break;
   }
 
@@ -1615,6 +1612,13 @@ void MachineVerifier::verifyPreISelGenericInstruction(const MachineInstr *MI) {
              MI);
       break;
     }
+    break;
+  }
+
+  case TargetOpcode::G_LROUND: {
+    if (!MRI->getType(MI->getOperand(0).getReg()).isScalar() ||
+        !MRI->getType(MI->getOperand(1).getReg()).isScalar())
+      report("lround only supports scalars", MI);
     break;
   }
 
