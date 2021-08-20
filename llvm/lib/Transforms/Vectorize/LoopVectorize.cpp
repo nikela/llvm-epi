@@ -5987,6 +5987,8 @@ bool LoopVectorizationCostModel::isScalarWithPredication(Instruction *I) const {
   case Instruction::SDiv:
   case Instruction::SRem:
   case Instruction::URem:
+    if (Legal->preferPredicatedVectorOps())
+      return false;
     return mayDivideByZero(*I);
   }
   return false;
