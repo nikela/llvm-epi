@@ -430,7 +430,7 @@ multiclass pseudo_nullary<VReg result_reg_class,
 }
 
 multiclass pseudo_nullary_v {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -489,7 +489,7 @@ multiclass pseudo_unary_nomask<VReg result_reg_class,
 }
 
 multiclass pseudo_unary_v_m {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -500,7 +500,7 @@ multiclass pseudo_unary_v_m {
 }
 
 multiclass pseudo_unary_v_v {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -512,7 +512,7 @@ multiclass pseudo_unary_v_v {
 
 multiclass pseudo_unary_v_v_x_i_nomask
 {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -525,7 +525,7 @@ multiclass pseudo_unary_v_v_x_i_nomask
 }
 
 multiclass pseudo_unary_v_f_nomask {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -536,7 +536,7 @@ multiclass pseudo_unary_v_f_nomask {
 }
 
 multiclass pseudo_unary_w_v {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -548,7 +548,7 @@ multiclass pseudo_unary_w_v {
 }
 
 multiclass pseudo_unary_v_w {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -623,7 +623,7 @@ multiclass pseudo_binary_v_vv {
 }
 
 multiclass pseudo_binary_v_vx<bit force_earlyclobber = 0> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
@@ -635,7 +635,7 @@ multiclass pseudo_binary_v_vx<bit force_earlyclobber = 0> {
 }
 
 multiclass pseudo_binary_v_vs {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -646,7 +646,7 @@ multiclass pseudo_binary_v_vs {
 }
 
 multiclass pseudo_binary_v_vm_nomask {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -657,7 +657,7 @@ multiclass pseudo_binary_v_vm_nomask {
 }
 
 multiclass pseudo_binary_v_vv_vx {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -670,7 +670,7 @@ multiclass pseudo_binary_v_vv_vx {
 
 multiclass pseudo_binary_v_vx_vi<DAGOperand imm_kind = simm5,
                                  bit force_earlyclobber = 0> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
@@ -690,7 +690,7 @@ multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
                                     // list<SchedReadWrite> sched_vv = [WriteVPUIALU, ReadVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE],
                                     // list<SchedReadWrite> sched_vx = [WriteVPUIALU, ReadVPUIALU, ReadVPUScalarIALU, ReadVL, ReadVTYPE],
                                     // list<SchedReadWrite> sched_vi = [WriteVPUIALU, ReadVPUIALU, ReadVL, ReadVTYPE]> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = !if(force_earlyclobber, "@earlyclobber $rd", "");
@@ -704,7 +704,7 @@ multiclass pseudo_binary_v_vv_vx_vi<DAGOperand imm_kind = simm5,
 }
 
 multiclass pseudo_binary_v_wv_wx_wi<DAGOperand imm_kind = simm5> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -721,7 +721,7 @@ multiclass pseudo_binary_v_wv_wx_wi<DAGOperand imm_kind = simm5> {
 }
 
 multiclass pseudo_binary_v_vvm_vxm {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -733,7 +733,7 @@ multiclass pseudo_binary_v_vvm_vxm {
 }
 
 multiclass pseudo_binary_v_vvm_vxm_vim {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -746,7 +746,7 @@ multiclass pseudo_binary_v_vvm_vxm_vim {
 }
 
 multiclass pseudo_binary_m_vvm_vxm {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -759,7 +759,7 @@ multiclass pseudo_binary_m_vvm_vxm {
 }
 
 multiclass pseudo_binary_m_vvm_vxm_vim {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -773,7 +773,7 @@ multiclass pseudo_binary_m_vvm_vxm_vim {
 }
 
 multiclass pseudo_binary_w_vv_vx {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -788,7 +788,7 @@ multiclass pseudo_binary_w_vv_vx {
 }
 
 multiclass pseudo_binary_w_wv_wx {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -803,7 +803,7 @@ multiclass pseudo_binary_w_wv_wx {
 }
 
 multiclass pseudo_binary_m_vv_vx {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -815,7 +815,7 @@ multiclass pseudo_binary_m_vv_vx {
 }
 
 multiclass pseudo_binary_m_vv_vx_nomask {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -828,7 +828,7 @@ multiclass pseudo_binary_m_vv_vx_nomask {
 }
 
 multiclass pseudo_binary_m_vx_vi {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -840,7 +840,7 @@ multiclass pseudo_binary_m_vx_vi {
 }
 
 multiclass pseudo_binary_m_vv_vx_vi {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -853,7 +853,7 @@ multiclass pseudo_binary_m_vv_vx_vi {
 }
 
 multiclass pseudo_binary_m_vv_vx_vi_nomask {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -867,7 +867,7 @@ multiclass pseudo_binary_m_vv_vx_vi_nomask {
 }
 
 multiclass pseudo_binary_v_vf {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -878,7 +878,7 @@ multiclass pseudo_binary_v_vf {
 }
 
 multiclass pseudo_binary_v_vfm {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -892,7 +892,7 @@ multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [],
                                  list<SchedReadWrite> sched_vf = []> {
 // multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
 //                                  list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -904,7 +904,7 @@ multiclass pseudo_binary_v_vv_vf<list<SchedReadWrite> sched_vv = [],
 }
 
 multiclass pseudo_binary_w_vv_vf {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -919,7 +919,7 @@ multiclass pseudo_binary_w_vv_vf {
 }
 
 multiclass pseudo_binary_w_wv_wf {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     defvar constraints = "@earlyclobber $rd";
@@ -934,7 +934,7 @@ multiclass pseudo_binary_w_wv_wf {
 }
 
 multiclass pseudo_binary_m_vf {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -945,7 +945,7 @@ multiclass pseudo_binary_m_vf {
 }
 
 multiclass pseudo_binary_m_vv_vf {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -977,7 +977,7 @@ multiclass pseudo_ternary<VReg result_reg_class,
 }
 
 multiclass pseudo_ternary_v_vv_vx {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -992,7 +992,7 @@ multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [],
                                   list<SchedReadWrite> sched_vf = []> {
 // multiclass pseudo_ternary_v_vv_vf<list<SchedReadWrite> sched_vv = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVL, ReadVTYPE],
 //                                   list<SchedReadWrite> sched_vf = [WriteVPUFALU, ReadVPUFALU, ReadVPUFALU, ReadVPUScalarFALU, ReadVL, ReadVTYPE]> {
-  let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1 in
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
   {
     let VLMul = m.value in
@@ -1008,8 +1008,7 @@ multiclass pseudo_unary_x_m {
   // is used in all of them.
   foreach m = MxList.m in
   {
-    let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
-        VLMul = m.value in
+    let mayLoad = 0, mayStore = 0, hasSideEffects = 0, VLMul = m.value in
     {
       defm _M : pseudo_unary_nomerge<GPR, VR, m>;
     }
@@ -1021,8 +1020,7 @@ multiclass pseudo_binary_m_mm {
   // are used in all of them.
   foreach m = MxList.m in
   {
-    let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
-        VLMul = m.value in
+    let mayLoad = 0, mayStore = 0, hasSideEffects = 0, VLMul = m.value in
     {
       defm _MM : pseudo_binary_nomask<VR, VR, VR, m>;
     }
@@ -1200,8 +1198,7 @@ defm PseudoEPIVREDMIN     : pseudo_binary_v_vs;
 defm PseudoEPIVREDMAXU    : pseudo_binary_v_vs;
 defm PseudoEPIVREDMAX     : pseudo_binary_v_vs;
 
-let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
-    Uses = [VL, VTYPE], VLMul = 0b000 in
+let mayLoad = 0, mayStore = 0, hasSideEffects = 0, Uses = [VL, VTYPE], VLMul = 0b000 in
 foreach m = MxList.m in
 {
   let VLMul = m.value in
@@ -1274,8 +1271,7 @@ defm PseudoEPIVFSGNJ      : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFSGNJN     : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFSGNJX     : pseudo_binary_v_vv_vf;
 
-let mayLoad = 0, mayStore = 0, hasSideEffects = 0, usesCustomInserter = 1,
-    Uses = [VL, VTYPE], VLMul = 0b000, MergeOpIndex = -1 in
+let mayLoad = 0, mayStore = 0, hasSideEffects = 0, Uses = [VL, VTYPE], VLMul = 0b000, MergeOpIndex = -1 in
 foreach m = MxList.m in
 {
   let VLMul = m.value in
@@ -1374,7 +1370,6 @@ foreach m = MxList.m in
   defvar evr = m.vrclass;
 
   let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
-      usesCustomInserter = 1,
       VLMul = vlmul,
       Constraints = "$rd = $merge" in
   {
@@ -1419,7 +1414,6 @@ foreach m = MxList.m in
   }
 
   let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
-      usesCustomInserter = 1,
       VLMul = vlmul in
   {
     // Masked stores do not have a merge operand as merge is done in memory
@@ -1502,8 +1496,7 @@ foreach eew = AllEEW in
 {
   defvar TupleRegClass = !cast<RegisterClass>("VRN"#tsize#"M1");
 
-  let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
-      usesCustomInserter = 1, VLMul = 0 in
+  let mayLoad = 1, mayStore = 0, hasSideEffects = 0, VLMul = 0 in
   {
     let Uses = [VL, VTYPE], VLIndex = 4, SEWIndex = 5, MergeOpIndex = 1,
         MaskOpIndex = 3,
@@ -1536,8 +1529,7 @@ foreach eew = AllEEW in
             EPIPseudo;
   }
 
-  let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
-      usesCustomInserter = 1, VLMul = 0 in
+  let mayLoad = 0, mayStore = 1, hasSideEffects = 0, VLMul = 0 in
   {
     let Uses = [VL, VTYPE],
         VLIndex = 3, SEWIndex = 4, MergeOpIndex = -1,
@@ -4069,8 +4061,7 @@ def PseudoEPIVBuildVRN#tsize#M1 :
 //===----------------------------------------------------------------------===//
 let Predicates = [HasStdExtV] in {
 
-let VLMul = 0, hasSideEffects = 0, mayLoad = 0, mayStore = 0,
-    usesCustomInserter = 1 in {
+let VLMul = 0, hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 
 defm PseudoEPIVZIP2_VV : pseudo_binary<VRN2M1, VR, VR, V_M1, "">;
 defm PseudoEPIVUNZIP2_VV : pseudo_binary<VRN2M1, VR, VR, V_M1, "">;

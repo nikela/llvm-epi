@@ -27,7 +27,7 @@ define void @foo() nounwind {
 ; RV64-NEXT:    ld a0, %pcrel_lo(.LBB0_1)(a0)
 ; RV64-NEXT:    add a0, a0, tp
 ; RV64-NEXT:    lw a1, 0(a0)
-; RV64-NEXT:    addi a1, a1, 1
+; RV64-NEXT:    addiw a1, a1, 1
 ; RV64-NEXT:    sw a1, 0(a0)
 ; RV64-NEXT:    ret
 entry:

@@ -3766,10 +3766,12 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
 
 #define VP_INTRINSIC_W_CHAIN_SET                                               \
   VP_INTRINSIC(vp_load)                                                        \
+  VP_INTRINSIC(vp_strided_load)                                                \
   VP_INTRINSIC(vp_gather)
 
 #define VP_INTRINSIC_VOID_SET                                                  \
   VP_INTRINSIC(vp_store)                                                       \
+  VP_INTRINSIC(vp_strided_store)                                               \
   VP_INTRINSIC(vp_scatter)
 
 static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
@@ -3876,8 +3878,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     if (IsLogical) {
       ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmand;
-      if (IsMasked)
-        report_fatal_error("Unimplemented masked logical AND operation");
+      // For masks operations, we ignore the mask (if present)
+      IsMasked = false;
     } else
       EPIIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
     break;
@@ -3890,8 +3892,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     if (IsLogical) {
       ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmor;
-      if (IsMasked)
-        report_fatal_error("Unimplemented masked logical OR operation");
+      // For masks operations, we ignore the mask (if present)
+      IsMasked = false;
     } else
       EPIIntNo = IsMasked ? Intrinsic::epi_vor_mask : Intrinsic::epi_vor;
     break;
@@ -3904,8 +3906,8 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     if (IsLogical) {
       ScalarOpNo = 0;
       EPIIntNo = Intrinsic::epi_vmxor;
-      if (IsMasked)
-        report_fatal_error("Unimplemented masked logical XOR operation");
+      // For masks operations, we ignore the mask (if present)
+      IsMasked = false;
     } else
       EPIIntNo = IsMasked ? Intrinsic::epi_vxor_mask : Intrinsic::epi_vxor;
     break;
@@ -4072,10 +4074,15 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
 
     unsigned FCmp = cast<ConstantSDNode>(Op.getOperand(3))->getZExtValue();
     switch (FCmp) {
-    case FCmpInst::FCMP_FALSE:
-      // FIXME Lower to vmclr.
-      report_fatal_error("Unimplemented case FCMP_FALSE for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_FALSE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 && "Unexpected operand");
+      SDValue AnyExtEVL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      return DAG.getNode(
+          ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+          {DAG.getTargetConstant(Intrinsic::riscv_vmclr, DL, MVT::i64),
+           AnyExtEVL});
+    }
     case FCmpInst::FCMP_OEQ:
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfeq_mask : Intrinsic::epi_vmfeq;
@@ -4120,16 +4127,72 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       }
       break;
     }
-    case FCmpInst::FCMP_ONE:
-      report_fatal_error("Unimplemented case FCMP_ONE for intrinsic vp_fcmp");
-      break;
-    case FCmpInst::FCMP_ORD:
-      report_fatal_error("Unimplemented case FCMP_ORD for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_ONE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue FirstAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      SDValue And = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         FirstAndOperands);
+
+      SDValue FCmpOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfne_mask, DL, MVT::i64),
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
+          Op.getOperand(1), Op.getOperand(2), And, AnyExtEVL
+      };
+      SDValue FCmp = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                                 FCmpOperands);
+
+      SDValue SecondAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FCmp, And,
+          AnyExtEVL
+      };
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         SecondAndOperands);
+    }
+    case FCmpInst::FCMP_ORD: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue FirstAndOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         FirstAndOperands);
+    }
+    // FIXME: Fold scalar operands also in unordered comparisons.
     case FCmpInst::FCMP_UEQ:
-      report_fatal_error("Unimplemented case FCMP_UEQ for intrinsic vp_fcmp");
-      break;
-      // FIXME: Fold scalar operands also in unordered comparisons.
+      return LowerVPUnorderedFCmp(Intrinsic::epi_vmfeq_mask, Op.getOperand(1),
+                                  Op.getOperand(2), Op.getOperand(EVLOpNo),
+                                  Op.getValueType(), DAG, DL);
     case FCmpInst::FCMP_UGT:
       return LowerVPUnorderedFCmp(Intrinsic::epi_vmfgt_mask, Op.getOperand(1),
                                   Op.getOperand(2), Op.getOperand(EVLOpNo),
@@ -4150,13 +4213,38 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       VOpsPerm = GetCanonicalCommutativePerm({1, 2});
       EPIIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
       break;
-    case FCmpInst::FCMP_UNO:
-      report_fatal_error("Unimplemented case FCMP_UNO for intrinsic vp_fcmp");
-      break;
-    case FCmpInst::FCMP_TRUE:
-      // FIXME Lower to vmset.
-      report_fatal_error("Unimplemented case FCMP_TRUE for intrinsic vp_fcmp");
-      break;
+    case FCmpInst::FCMP_UNO: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+             "Unexpected operand");
+      SDValue AnyExtEVL =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      SDValue FeqOp1Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(1), Op.getOperand(1), AnyExtEVL};
+      SDValue FeqOp2Operands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmfeq, DL, MVT::i64),
+          Op.getOperand(2), Op.getOperand(2), AnyExtEVL};
+      SDValue FeqOp1 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp1Operands);
+      SDValue FeqOp2 = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL,
+                                   Op.getValueType(), FeqOp2Operands);
+
+      SDValue NandOperands[] = {
+          DAG.getTargetConstant(Intrinsic::epi_vmnand, DL, MVT::i64), FeqOp1,
+          FeqOp2, AnyExtEVL};
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+                         NandOperands);
+    }
+    case FCmpInst::FCMP_TRUE: {
+      assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 && "Unexpected operand");
+      SDValue AnyExtEVL = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, Op.getOperand(EVLOpNo));
+
+      return DAG.getNode(
+          ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
+          {DAG.getTargetConstant(Intrinsic::riscv_vmset, DL, MVT::i64),
+           AnyExtEVL});
+    }
     }
     break;
   }
@@ -4211,7 +4299,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     assert(Op.getValueType().getSizeInBits() ==
                Op.getOperand(1).getValueType().getSizeInBits() &&
            "Unable to bitcast values of unmatching sizes");
-    return Op.getOperand(1);
+    return DAG.getNode(ISD::BITCAST, DL, Op.getValueType(), Op.getOperand(1));
   }
   }
 
@@ -4365,6 +4453,42 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
 
     return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
   }
+  case Intrinsic::vp_strided_load: {
+    assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
+
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(4);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1)
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_strided, DL, MVT::i64),
+          Op.getOperand(2), // Address.
+          Op.getOperand(3), // Stride.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(5)) // EVL.
+      };
+    else
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vload_strided_mask, DL,
+                                MVT::i64),
+          DAG.getNode(ISD::UNDEF, DL, Op.getValueType()), // Merge.
+          Op.getOperand(2),                               // Address.
+          Op.getOperand(3),                               // Stride.
+          MaskOp,                                         // Mask.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(5)) // EVL.
+      };
+
+    SDValue Result =
+        DAG.getNode(ISD::INTRINSIC_W_CHAIN, DL, Op->getVTList(), Operands);
+
+    return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
+  }
   case Intrinsic::vp_gather: {
     EVT VT = Op.getValueType();
     EVT OffsetsVT = VT.changeVectorElementTypeToInteger();
@@ -4481,6 +4605,41 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
     break;
   }
+  case Intrinsic::vp_strided_store: {
+    assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
+
+    std::vector<SDValue> Operands;
+    const SDValue &MaskOp = Op.getOperand(5);
+    ConstantSDNode *C;
+    if (MaskOp.getOpcode() == ISD::SPLAT_VECTOR &&
+        (C = dyn_cast<ConstantSDNode>(MaskOp.getOperand(0))) &&
+        C->getZExtValue() == 1)
+      // Unmasked.
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_strided, DL, MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          Op.getOperand(4), // Stride.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+    else
+      Operands = {
+          Op.getOperand(0), // Chain.
+          DAG.getTargetConstant(Intrinsic::epi_vstore_strided_mask, DL,
+                                MVT::i64),
+          Op.getOperand(2), // Value.
+          Op.getOperand(3), // Address.
+          Op.getOperand(4), // Stride.
+          MaskOp,           // Mask.
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                      Op.getOperand(6)), // EVL.
+      };
+
+    return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
+    break;
+  }
   case Intrinsic::vp_scatter: {
     SDValue Data = Op.getOperand(2);
     EVT OffsetsVT = Data.getValueType().changeVectorElementTypeToInteger();
@@ -4519,7 +4678,6 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
 
     SDValue Result =
         DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
-
     return Result;
   }
   }
@@ -4577,9 +4735,11 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_sext:
     return LowerVPIntrinsicConversion(Op, DAG);
   case Intrinsic__vp_load:
+  case Intrinsic__vp_strided_load:
   case Intrinsic__vp_gather:
     return LowerVPINTRINSIC_W_CHAIN(Op, DAG, Subtarget);
   case Intrinsic__vp_store:
+  case Intrinsic__vp_strided_store:
   case Intrinsic__vp_scatter:
     return LowerVPINTRINSIC_VOID(Op, DAG, Subtarget);
   }
@@ -6730,8 +6890,6 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
   case ISD::SUB:
     assert(N->getValueType(0) == MVT::i32 && Subtarget.is64Bit() &&
            "Unexpected custom legalisation");
-    if (N->getOperand(1).getOpcode() == ISD::Constant)
-      return;
     Results.push_back(customLegalizeToWOpWithSExt(N, DAG));
     break;
   case ISD::SHL:
@@ -7731,6 +7889,20 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                                                DAGCombinerInfo &DCI) const {
   SelectionDAG &DAG = DCI.DAG;
 
+  // Helper to call SimplifyDemandedBits on an operand of N where only some low
+  // bits are demanded. N will be added to the Worklist if it was not deleted.
+  // Caller should return SDValue(N, 0) if this returns true.
+  auto SimplifyDemandedLowBitsHelper = [&](unsigned OpNo, unsigned LowBits) {
+    SDValue Op = N->getOperand(OpNo);
+    APInt Mask = APInt::getLowBitsSet(Op.getValueSizeInBits(), LowBits);
+    if (!SimplifyDemandedBits(Op, Mask, DCI))
+      return false;
+
+    if (N->getOpcode() != ISD::DELETED_NODE)
+      DCI.AddToWorklist(N);
+    return true;
+  };
+
   switch (N->getOpcode()) {
   default:
     break;
@@ -7782,136 +7954,85 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   case RISCVISD::ROLW:
   case RISCVISD::RORW: {
     // Only the lower 32 bits of LHS and lower 5 bits of RHS are read.
-    SDValue LHS = N->getOperand(0);
-    SDValue RHS = N->getOperand(1);
-    APInt LHSMask = APInt::getLowBitsSet(LHS.getValueSizeInBits(), 32);
-    APInt RHSMask = APInt::getLowBitsSet(RHS.getValueSizeInBits(), 5);
-    if (SimplifyDemandedBits(N->getOperand(0), LHSMask, DCI) ||
-        SimplifyDemandedBits(N->getOperand(1), RHSMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32) ||
+        SimplifyDemandedLowBitsHelper(1, 5))
       return SDValue(N, 0);
-    }
     break;
   }
   case RISCVISD::CLZW:
   case RISCVISD::CTZW: {
     // Only the lower 32 bits of the first operand are read
-    SDValue Op0 = N->getOperand(0);
-    APInt Mask = APInt::getLowBitsSet(Op0.getValueSizeInBits(), 32);
-    if (SimplifyDemandedBits(Op0, Mask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32))
       return SDValue(N, 0);
-    }
     break;
   }
   case RISCVISD::FSL:
   case RISCVISD::FSR: {
     // Only the lower log2(Bitwidth)+1 bits of the the shift amount are read.
-    SDValue ShAmt = N->getOperand(2);
-    unsigned BitWidth = ShAmt.getValueSizeInBits();
+    unsigned BitWidth = N->getOperand(2).getValueSizeInBits();
     assert(isPowerOf2_32(BitWidth) && "Unexpected bit width");
-    APInt ShAmtMask(BitWidth, (BitWidth * 2) - 1);
-    if (SimplifyDemandedBits(ShAmt, ShAmtMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(2, Log2_32(BitWidth) + 1))
       return SDValue(N, 0);
-    }
     break;
   }
   case RISCVISD::FSLW:
   case RISCVISD::FSRW: {
     // Only the lower 32 bits of Values and lower 6 bits of shift amount are
     // read.
-    SDValue Op0 = N->getOperand(0);
-    SDValue Op1 = N->getOperand(1);
-    SDValue ShAmt = N->getOperand(2);
-    APInt OpMask = APInt::getLowBitsSet(Op0.getValueSizeInBits(), 32);
-    APInt ShAmtMask = APInt::getLowBitsSet(ShAmt.getValueSizeInBits(), 6);
-    if (SimplifyDemandedBits(Op0, OpMask, DCI) ||
-        SimplifyDemandedBits(Op1, OpMask, DCI) ||
-        SimplifyDemandedBits(ShAmt, ShAmtMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32) ||
+        SimplifyDemandedLowBitsHelper(1, 32) ||
+        SimplifyDemandedLowBitsHelper(2, 6))
       return SDValue(N, 0);
-    }
     break;
   }
   case RISCVISD::GREV:
   case RISCVISD::GORC: {
     // Only the lower log2(Bitwidth) bits of the the shift amount are read.
-    SDValue ShAmt = N->getOperand(1);
-    unsigned BitWidth = ShAmt.getValueSizeInBits();
+    unsigned BitWidth = N->getOperand(1).getValueSizeInBits();
     assert(isPowerOf2_32(BitWidth) && "Unexpected bit width");
-    APInt ShAmtMask(BitWidth, BitWidth - 1);
-    if (SimplifyDemandedBits(ShAmt, ShAmtMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(1, Log2_32(BitWidth)))
       return SDValue(N, 0);
-    }
 
     return combineGREVI_GORCI(N, DCI.DAG);
   }
   case RISCVISD::GREVW:
   case RISCVISD::GORCW: {
     // Only the lower 32 bits of LHS and lower 5 bits of RHS are read.
-    SDValue LHS = N->getOperand(0);
-    SDValue RHS = N->getOperand(1);
-    APInt LHSMask = APInt::getLowBitsSet(LHS.getValueSizeInBits(), 32);
-    APInt RHSMask = APInt::getLowBitsSet(RHS.getValueSizeInBits(), 5);
-    if (SimplifyDemandedBits(LHS, LHSMask, DCI) ||
-        SimplifyDemandedBits(RHS, RHSMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32) ||
+        SimplifyDemandedLowBitsHelper(1, 5))
       return SDValue(N, 0);
-    }
 
     return combineGREVI_GORCI(N, DCI.DAG);
   }
   case RISCVISD::SHFL:
   case RISCVISD::UNSHFL: {
-    // Only the lower log2(Bitwidth) bits of the the shift amount are read.
-    SDValue ShAmt = N->getOperand(1);
-    unsigned BitWidth = ShAmt.getValueSizeInBits();
+    // Only the lower log2(Bitwidth)-1 bits of the the shift amount are read.
+    unsigned BitWidth = N->getOperand(1).getValueSizeInBits();
     assert(isPowerOf2_32(BitWidth) && "Unexpected bit width");
-    APInt ShAmtMask(BitWidth, (BitWidth / 2) - 1);
-    if (SimplifyDemandedBits(ShAmt, ShAmtMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(1, Log2_32(BitWidth) - 1))
       return SDValue(N, 0);
-    }
 
     break;
   }
   case RISCVISD::SHFLW:
   case RISCVISD::UNSHFLW: {
-    // Only the lower 32 bits of LHS and lower 5 bits of RHS are read.
+    // Only the lower 32 bits of LHS and lower 4 bits of RHS are read.
     SDValue LHS = N->getOperand(0);
     SDValue RHS = N->getOperand(1);
     APInt LHSMask = APInt::getLowBitsSet(LHS.getValueSizeInBits(), 32);
     APInt RHSMask = APInt::getLowBitsSet(RHS.getValueSizeInBits(), 4);
-    if (SimplifyDemandedBits(LHS, LHSMask, DCI) ||
-        SimplifyDemandedBits(RHS, RHSMask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32) ||
+        SimplifyDemandedLowBitsHelper(1, 4))
       return SDValue(N, 0);
-    }
 
     break;
   }
   case RISCVISD::BCOMPRESSW:
   case RISCVISD::BDECOMPRESSW: {
     // Only the lower 32 bits of LHS and RHS are read.
-    SDValue LHS = N->getOperand(0);
-    SDValue RHS = N->getOperand(1);
-    APInt Mask = APInt::getLowBitsSet(LHS.getValueSizeInBits(), 32);
-    if (SimplifyDemandedBits(LHS, Mask, DCI) ||
-        SimplifyDemandedBits(RHS, Mask, DCI)) {
-      if (N->getOpcode() != ISD::DELETED_NODE)
-        DCI.AddToWorklist(N);
+    if (SimplifyDemandedLowBitsHelper(0, 32) ||
+        SimplifyDemandedLowBitsHelper(1, 32))
       return SDValue(N, 0);
-    }
 
     break;
   }
@@ -8484,6 +8605,12 @@ unsigned RISCVTargetLowering::ComputeNumSignBitsForTargetNode(
   switch (Op.getOpcode()) {
   default:
     break;
+  case RISCVISD::SELECT_CC: {
+    unsigned Tmp = DAG.ComputeNumSignBits(Op.getOperand(3), DemandedElts, Depth + 1);
+    if (Tmp == 1) return 1;  // Early out.
+    unsigned Tmp2 = DAG.ComputeNumSignBits(Op.getOperand(4), DemandedElts, Depth + 1);
+    return std::min(Tmp, Tmp2);
+  }
   case RISCVISD::SLLW:
   case RISCVISD::SRAW:
   case RISCVISD::SRLW:
@@ -9028,14 +9155,6 @@ emitVBuildVRM1Tuple(MachineInstr &MI, MachineBasicBlock *BB,
 MachineBasicBlock *
 RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
                                                  MachineBasicBlock *BB) const {
-  if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
-          RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode())) {
-    // Don't do anything with them now.
-    // FIXME - Remove custom inserter bit from those.
-    return BB;
-  }
-
-  // Other EPI pseudo-instructions.
   switch (MI.getOpcode()) {
   default:
     break;

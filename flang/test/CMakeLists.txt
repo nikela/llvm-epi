@@ -9,13 +9,23 @@ llvm_canonicalize_cmake_booleans(
 
 set(FLANG_TOOLS_DIR ${FLANG_BINARY_DIR}/bin)
 
+# FIXME In out-of-tree builds, "SHLIBDIR" is undefined and passing it to
+# `configure_lit_site_cfg` leads to a configuration error. This is currently
+# only required by plugins/examples, which are not supported in out-of-tree
+# builds.
+if (FLANG_STANDALONE_BUILD)
+  set(PATHS_FOR_PLUGINS "")
+else ()
+  set(PATHS_FOR_PLUGINS "SHLIBDIR")
+endif ()
+
 configure_lit_site_cfg(
   ${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.py.in
   ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py
   MAIN_CONFIG
   ${CMAKE_CURRENT_SOURCE_DIR}/lit.cfg.py
   PATHS
-  "SHLIBDIR"
+  ${PATHS_FOR_PLUGINS}
 )
 
 configure_lit_site_cfg(
@@ -46,7 +56,9 @@ if (FLANG_INCLUDE_TESTS)
 endif()
 
 if (FLANG_BUILD_EXAMPLES)
-  list(APPEND FLANG_TEST_DEPENDS flangHelloWorldPlugin)
+  list(APPEND FLANG_TEST_DEPENDS
+    flangPrintFunctionNames
+    )
 endif ()
 
 add_custom_target(flang-test-depends DEPENDS ${FLANG_TEST_DEPENDS})

@@ -57,8 +57,15 @@ InstructionCost RISCVTTIImpl::getIntImmCostInst(unsigned Opcode, unsigned Idx,
     // split up large offsets in GEP into better parts than ConstantHoisting
     // can.
     return TTI::TCC_Free;
-  case Instruction::Add:
   case Instruction::And:
+    // zext.h
+    if (Imm == UINT64_C(0xffff) && ST->hasStdExtZbb())
+      return TTI::TCC_Free;
+    // zext.w
+    if (Imm == UINT64_C(0xffffffff) && ST->hasStdExtZbb())
+      return TTI::TCC_Free;
+    LLVM_FALLTHROUGH;
+  case Instruction::Add:
   case Instruction::Or:
   case Instruction::Xor:
   case Instruction::Mul:
@@ -535,7 +542,9 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(uitofp)                                                         \
   VP_INTRINSIC(urem)                                                           \
   VP_INTRINSIC(xor)                                                            \
-  VP_INTRINSIC(zext)
+  VP_INTRINSIC(zext)                                                           \
+  VP_INTRINSIC(strided_load)                                                   \
+  VP_INTRINSIC(strided_store)
 #define VP_INTRINSIC(name) case Intrinsic::vp_##name:
     VP_INTRINSIC_LIST
     // EPI-specific

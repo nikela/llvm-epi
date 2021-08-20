@@ -28,12 +28,12 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    vmv.x.s a0, v26
 ; CHECK-NEXT:    vredxor.vs v25, v8, v25
 ; CHECK-NEXT:    vmv.x.s a2, v25
-; CHECK-NEXT:    add a1, a6, a7
+; CHECK-NEXT:    addw a1, a6, a7
 ; CHECK-NEXT:    addw a1, a1, t0
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    add a1, a1, a4
-; CHECK-NEXT:    add a1, a1, a5
-; CHECK-NEXT:    add a0, a0, a1
+; CHECK-NEXT:    addw a1, a1, a3
+; CHECK-NEXT:    addw a1, a1, a4
+; CHECK-NEXT:    addw a1, a1, a5
+; CHECK-NEXT:    addw a0, a0, a1
 ; CHECK-NEXT:    addw a0, a0, a2
 ; CHECK-NEXT:    ret
   %add = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> %a)
