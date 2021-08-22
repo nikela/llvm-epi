@@ -10643,6 +10643,9 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
     }
   }
 
+  // Adjust the recipes for any inloop reductions.
+  adjustRecipesForReductions(VPBB, Plan, RecipeBuilder, Range.Start);
+
   // Introduce a recipe to combine the incoming and previous values of a
   // first-order recurrence.
   for (VPRecipeBase &R : Plan->getEntry()->getEntryBasicBlock()->phis()) {
@@ -10714,9 +10717,6 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
         RecipeBuilder.getRecipe(Member)->eraseFromParent();
       }
   }
-
-  // Adjust the recipes for any inloop reductions.
-  adjustRecipesForReductions(VPBB, Plan, RecipeBuilder, Range.Start);
 
   VPlanTransforms::sinkScalarOperands(*Plan);
   VPlanTransforms::mergeReplicateRegions(*Plan);
