@@ -12566,18 +12566,15 @@ SDValue DAGCombiner::CombineConsecutiveLoads(SDNode *N, EVT VT) {
       LD1->getAddressSpace() != LD2->getAddressSpace())
     return SDValue();
 
+  bool LD1Fast = false;
   EVT LD1VT = LD1->getValueType(0);
   unsigned LD1Bytes = LD1VT.getStoreSize();
-  if (DAG.areNonVolatileConsecutiveLoads(LD2, LD1, LD1Bytes, 1)) {
-    Align Alignment = LD1->getAlign();
-    Align NewAlign = DAG.getDataLayout().getABITypeAlign(
-        VT.getTypeForEVT(*DAG.getContext()));
-
-    if (NewAlign <= Alignment &&
-        (!LegalOperations || TLI.isOperationLegal(ISD::LOAD, VT)))
-      return DAG.getLoad(VT, SDLoc(N), LD1->getChain(), LD1->getBasePtr(),
-                         LD1->getPointerInfo(), Alignment);
-  }
+  if ((!LegalOperations || TLI.isOperationLegal(ISD::LOAD, VT)) &&
+      DAG.areNonVolatileConsecutiveLoads(LD2, LD1, LD1Bytes, 1) &&
+      TLI.allowsMemoryAccess(*DAG.getContext(), DAG.getDataLayout(), VT,
+                             *LD1->getMemOperand(), &LD1Fast) && LD1Fast)
+    return DAG.getLoad(VT, SDLoc(N), LD1->getChain(), LD1->getBasePtr(),
+                       LD1->getPointerInfo(), LD1->getAlign());
 
   return SDValue();
 }
@@ -16803,27 +16800,26 @@ SDValue DAGCombiner::TransformFPLoadStorePair(SDNode *N) {
     if (VTSize.isScalable())
       return SDValue();
 
+    bool FastLD = false, FastST = false;
     EVT IntVT = EVT::getIntegerVT(*DAG.getContext(), VTSize.getFixedSize());
     if (!TLI.isOperationLegal(ISD::LOAD, IntVT) ||
         !TLI.isOperationLegal(ISD::STORE, IntVT) ||
         !TLI.isDesirableToTransformToIntegerOp(ISD::LOAD, VT) ||
-        !TLI.isDesirableToTransformToIntegerOp(ISD::STORE, VT))
-      return SDValue();
-
-    Align LDAlign = LD->getAlign();
-    Align STAlign = ST->getAlign();
-    Type *IntVTTy = IntVT.getTypeForEVT(*DAG.getContext());
-    Align ABIAlign = DAG.getDataLayout().getABITypeAlign(IntVTTy);
-    if (LDAlign < ABIAlign || STAlign < ABIAlign)
+        !TLI.isDesirableToTransformToIntegerOp(ISD::STORE, VT) ||
+        !TLI.allowsMemoryAccess(*DAG.getContext(), DAG.getDataLayout(), IntVT,
+                                *LD->getMemOperand(), &FastLD) ||
+        !TLI.allowsMemoryAccess(*DAG.getContext(), DAG.getDataLayout(), IntVT,
+                                *ST->getMemOperand(), &FastST) ||
+        !FastLD || !FastST)
       return SDValue();
 
     SDValue NewLD =
         DAG.getLoad(IntVT, SDLoc(Value), LD->getChain(), LD->getBasePtr(),
-                    LD->getPointerInfo(), LDAlign);
+                    LD->getPointerInfo(), LD->getAlign());
 
     SDValue NewST =
         DAG.getStore(ST->getChain(), SDLoc(N), NewLD, ST->getBasePtr(),
-                     ST->getPointerInfo(), STAlign);
+                     ST->getPointerInfo(), ST->getAlign());
 
     AddToWorklist(NewLD.getNode());
     AddToWorklist(NewST.getNode());
