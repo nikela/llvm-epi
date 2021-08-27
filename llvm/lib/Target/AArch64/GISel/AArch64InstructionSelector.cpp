@@ -22,6 +22,7 @@
 #include "MCTargetDesc/AArch64AddressingModes.h"
 #include "MCTargetDesc/AArch64MCTargetDesc.h"
 #include "llvm/ADT/Optional.h"
+#include "llvm/CodeGen/GlobalISel/GenericMachineInstrs.h"
 #include "llvm/CodeGen/GlobalISel/InstructionSelector.h"
 #include "llvm/CodeGen/GlobalISel/InstructionSelectorImpl.h"
 #include "llvm/CodeGen/GlobalISel/MachineIRBuilder.h"
@@ -104,7 +105,7 @@ private:
   bool earlySelectSHL(MachineInstr &I, MachineRegisterInfo &MRI);
 
   /// Eliminate same-sized cross-bank copies into stores before selectImpl().
-  bool contractCrossBankCopyIntoStore(MachineInstr &I,
+  bool contractCrossBankCopyIntoStore(GStore &I,
                                       MachineRegisterInfo &MRI);
 
   bool convertPtrAddToAdd(MachineInstr &I, MachineRegisterInfo &MRI);
@@ -171,6 +172,14 @@ private:
   bool selectExtractElt(MachineInstr &I, MachineRegisterInfo &MRI);
   bool selectConcatVectors(MachineInstr &I, MachineRegisterInfo &MRI);
   bool selectSplitVectorUnmerge(MachineInstr &I, MachineRegisterInfo &MRI);
+
+  /// Helper function to select vector load intrinsics like
+  /// @llvm.aarch64.neon.ld2.*, @llvm.aarch64.neon.ld4.*, etc.
+  /// \p Opc is the opcode that the selected instruction should use.
+  /// \p NumVecs is the number of vector destinations for the instruction.
+  /// \p I is the original G_INTRINSIC_W_SIDE_EFFECTS instruction.
+  bool selectVectorLoadIntrinsic(unsigned Opc, unsigned NumVecs,
+                                 MachineInstr &I);
   bool selectIntrinsicWithSideEffects(MachineInstr &I,
                                       MachineRegisterInfo &MRI);
   bool selectIntrinsic(MachineInstr &I, MachineRegisterInfo &MRI);
@@ -1934,8 +1943,9 @@ bool AArch64InstructionSelector::preISelLower(MachineInstr &I) {
     return true;
   }
   case TargetOpcode::G_STORE: {
-    bool Changed = contractCrossBankCopyIntoStore(I, MRI);
-    MachineOperand &SrcOp = I.getOperand(0);
+    auto &StoreMI = cast<GStore>(I);
+    bool Changed = contractCrossBankCopyIntoStore(StoreMI, MRI);
+    MachineOperand &SrcOp = StoreMI.getOperand(0);
     if (MRI.getType(SrcOp.getReg()).isPointer()) {
       // Allow matching with imported patterns for stores of pointers. Unlike
       // G_LOAD/G_PTR_ADD, we may not have selected all users. So, emit a copy
@@ -1946,6 +1956,28 @@ bool AArch64InstructionSelector::preISelLower(MachineInstr &I) {
       RBI.constrainGenericRegister(NewSrc, AArch64::GPR64RegClass, MRI);
       Changed = true;
     }
+#if 0
+    // Now look for truncating stores to the FPR bank. We don't support these,
+    // but since truncating store formation happens before RBS, we can only
+    // split them up again here. We don't want to assign truncstores to GPR only
+    // since that would have a perf impact due to extra moves.
+    LLT SrcTy = MRI.getType(SrcReg);
+    if (RBI.getRegBank(SrcReg, MRI, TRI)->getID() == AArch64::FPRRegBankID) {
+      if (SrcTy.isScalar() &&
+          SrcTy.getSizeInBits() > StoreMI.getMemSizeInBits()) {
+        // Generate an explicit truncate and make this into a non-truncating
+        // store.
+        auto Trunc =
+            MIB.buildTrunc(LLT::scalar(StoreMI.getMemSizeInBits()), SrcReg);
+        MRI.setRegBank(Trunc.getReg(0), RBI.getRegBank(AArch64::FPRRegBankID));
+        if (!select(*Trunc)) {
+          return false;
+        }
+        SrcOp.setReg(Trunc.getReg(0));
+        return true;
+      }
+    }
+#endif
     return Changed;
   }
   case TargetOpcode::G_PTR_ADD:
@@ -2081,8 +2113,7 @@ bool AArch64InstructionSelector::earlySelectSHL(MachineInstr &I,
 }
 
 bool AArch64InstructionSelector::contractCrossBankCopyIntoStore(
-    MachineInstr &I, MachineRegisterInfo &MRI) {
-  assert(I.getOpcode() == TargetOpcode::G_STORE && "Expected G_STORE");
+    GStore &StoreMI, MachineRegisterInfo &MRI) {
   // If we're storing a scalar, it doesn't matter what register bank that
   // scalar is on. All that matters is the size.
   //
@@ -2097,11 +2128,11 @@ bool AArch64InstructionSelector::contractCrossBankCopyIntoStore(
   // G_STORE %x:gpr(s32)
   //
   // And then continue the selection process normally.
-  Register DefDstReg = getSrcRegIgnoringCopies(I.getOperand(0).getReg(), MRI);
+  Register DefDstReg = getSrcRegIgnoringCopies(StoreMI.getValueReg(), MRI);
   if (!DefDstReg.isValid())
     return false;
   LLT DefDstTy = MRI.getType(DefDstReg);
-  Register StoreSrcReg = I.getOperand(0).getReg();
+  Register StoreSrcReg = StoreMI.getValueReg();
   LLT StoreSrcTy = MRI.getType(StoreSrcReg);
 
   // If we get something strange like a physical register, then we shouldn't
@@ -2113,12 +2144,16 @@ bool AArch64InstructionSelector::contractCrossBankCopyIntoStore(
   if (DefDstTy.getSizeInBits() != StoreSrcTy.getSizeInBits())
     return false;
 
+  // Is this store a truncating one?
+  if (StoreSrcTy.getSizeInBits() != StoreMI.getMemSizeInBits())
+    return false;
+
   if (RBI.getRegBank(StoreSrcReg, MRI, TRI) ==
       RBI.getRegBank(DefDstReg, MRI, TRI))
     return false;
 
   // We have a cross-bank copy, which is entering a store. Let's fold it.
-  I.getOperand(0).setReg(DefDstReg);
+  StoreMI.getOperand(0).setReg(DefDstReg);
   return true;
 }
 
@@ -5023,6 +5058,35 @@ static unsigned findIntrinsicID(MachineInstr &I) {
   return IntrinOp->getIntrinsicID();
 }
 
+bool AArch64InstructionSelector::selectVectorLoadIntrinsic(unsigned Opc,
+                                                           unsigned NumVecs,
+                                                           MachineInstr &I) {
+  assert(I.getOpcode() == TargetOpcode::G_INTRINSIC_W_SIDE_EFFECTS);
+  assert(Opc && "Expected an opcode?");
+  assert(NumVecs > 1 && NumVecs < 5 && "Only support 2, 3, or 4 vectors");
+  auto &MRI = *MIB.getMRI();
+  LLT Ty = MRI.getType(I.getOperand(0).getReg());
+  unsigned Size = Ty.getSizeInBits();
+  assert((Size == 64 || Size == 128) &&
+         "Destination must be 64 bits or 128 bits?");
+  unsigned SubReg = Size == 64 ? AArch64::dsub0 : AArch64::qsub0;
+  auto Ptr = I.getOperand(I.getNumOperands() - 1).getReg();
+  assert(MRI.getType(Ptr).isPointer() && "Expected a pointer type?");
+  auto Load = MIB.buildInstr(Opc, {Ty}, {Ptr});
+  Load.cloneMemRefs(I);
+  constrainSelectedInstRegOperands(*Load, TII, TRI, RBI);
+  Register SelectedLoadDst = Load->getOperand(0).getReg();
+  for (unsigned Idx = 0; Idx < NumVecs; ++Idx) {
+    auto Vec = MIB.buildInstr(TargetOpcode::COPY, {I.getOperand(Idx)}, {})
+                   .addReg(SelectedLoadDst, 0, SubReg + Idx);
+    // Emit the subreg copies and immediately select them.
+    // FIXME: We should refactor our copy code into an emitCopy helper and
+    // clean up uses of this pattern elsewhere in the selector.
+    selectCopy(*Vec, TII, MRI, TRI, RBI);
+  }
+  return true;
+}
+
 bool AArch64InstructionSelector::selectIntrinsicWithSideEffects(
     MachineInstr &I, MachineRegisterInfo &MRI) {
   // Find the intrinsic ID.
@@ -5030,6 +5094,11 @@ bool AArch64InstructionSelector::selectIntrinsicWithSideEffects(
   if (!IntrinID)
     return false;
 
+  const LLT S8 = LLT::scalar(8);
+  const LLT S16 = LLT::scalar(16);
+  const LLT S32 = LLT::scalar(32);
+  const LLT S64 = LLT::scalar(64);
+  const LLT P0 = LLT::pointer(0, 64);
   // Select the instruction.
   switch (IntrinID) {
   default:
@@ -5054,16 +5123,59 @@ bool AArch64InstructionSelector::selectIntrinsicWithSideEffects(
     MIB.buildInstr(AArch64::BRK, {}, {})
         .addImm(I.getOperand(1).getImm() | ('U' << 8));
     break;
+  case Intrinsic::aarch64_neon_ld2: {
+    LLT Ty = MRI.getType(I.getOperand(0).getReg());
+    unsigned Opc = 0;
+    if (Ty == LLT::fixed_vector(8, S8))
+      Opc = AArch64::LD2Twov8b;
+    else if (Ty == LLT::fixed_vector(16, S8))
+      Opc = AArch64::LD2Twov16b;
+    else if (Ty == LLT::fixed_vector(4, S16))
+      Opc = AArch64::LD2Twov4h;
+    else if (Ty == LLT::fixed_vector(8, S16))
+      Opc = AArch64::LD2Twov8h;
+    else if (Ty == LLT::fixed_vector(2, S32))
+      Opc = AArch64::LD2Twov2s;
+    else if (Ty == LLT::fixed_vector(4, S32))
+      Opc = AArch64::LD2Twov4s;
+    else if (Ty == LLT::fixed_vector(2, S64) || Ty == LLT::fixed_vector(2, P0))
+      Opc = AArch64::LD2Twov2d;
+    else if (Ty == S64 || Ty == P0)
+      Opc = AArch64::LD1Twov1d;
+    else
+      llvm_unreachable("Unexpected type for ld2!");
+    selectVectorLoadIntrinsic(Opc, 2, I);
+    break;
+  }
+  case Intrinsic::aarch64_neon_ld4: {
+    LLT Ty = MRI.getType(I.getOperand(0).getReg());
+    unsigned Opc = 0;
+    if (Ty == LLT::fixed_vector(8, S8))
+      Opc = AArch64::LD4Fourv8b;
+    else if (Ty == LLT::fixed_vector(16, S8))
+      Opc = AArch64::LD4Fourv16b;
+    else if (Ty == LLT::fixed_vector(4, S16))
+      Opc = AArch64::LD4Fourv4h;
+    else if (Ty == LLT::fixed_vector(8, S16))
+      Opc = AArch64::LD4Fourv8h;
+    else if (Ty == LLT::fixed_vector(2, S32))
+      Opc = AArch64::LD4Fourv2s;
+    else if (Ty == LLT::fixed_vector(4, S32))
+      Opc = AArch64::LD4Fourv4s;
+    else if (Ty == LLT::fixed_vector(2, S64) || Ty == LLT::fixed_vector(2, P0))
+      Opc = AArch64::LD4Fourv2d;
+    else if (Ty == S64 || Ty == P0)
+      Opc = AArch64::LD1Fourv1d;
+    else
+      llvm_unreachable("Unexpected type for ld4!");
+    selectVectorLoadIntrinsic(Opc, 4, I);
+    break;
+  }
   case Intrinsic::aarch64_neon_st2: {
     Register Src1 = I.getOperand(1).getReg();
     Register Src2 = I.getOperand(2).getReg();
     Register Ptr = I.getOperand(3).getReg();
     LLT Ty = MRI.getType(Src1);
-    const LLT S8 = LLT::scalar(8);
-    const LLT S16 = LLT::scalar(16);
-    const LLT S32 = LLT::scalar(32);
-    const LLT S64 = LLT::scalar(64);
-    const LLT P0 = LLT::pointer(0, 64);
     unsigned Opc;
     if (Ty == LLT::fixed_vector(8, S8))
       Opc = AArch64::ST2Twov8b;

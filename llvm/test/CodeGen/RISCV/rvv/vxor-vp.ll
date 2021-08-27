@@ -504,7 +504,7 @@ define <vscale x 15 x i8> @vxor_vi_nxv15i8_unmasked_1(<vscale x 15 x i8> %va, i3
 ; CHECK-LABEL: vxor_vi_nxv15i8_unmasked_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m2, ta, mu
-; CHECK-NEXT:    vxor.vi v8, v8, -1
+; CHECK-NEXT:    vnot.v v8, v8
 ; CHECK-NEXT:    ret
   %elt.head = insertelement <vscale x 15 x i8> undef, i8 -1, i32 0
   %vb = shufflevector <vscale x 15 x i8> %elt.head, <vscale x 15 x i8> undef, <vscale x 15 x i32> zeroinitializer

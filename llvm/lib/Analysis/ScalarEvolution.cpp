@@ -2390,6 +2390,19 @@ StrengthenNoWrapFlags(ScalarEvolution *SE, SCEVTypes Type,
     }
   }
 
+  // <0,+,nonnegative><nw> is also nuw
+  // <INT_MIN,+,nonnegative><nw> is also nsw
+  if (Type == scAddRecExpr && ScalarEvolution::hasFlags(Flags, SCEV::FlagNW) &&
+      Ops.size() == 2) {
+    if (!ScalarEvolution::hasFlags(Flags, SCEV::FlagNUW) && Ops[0]->isZero() &&
+        IsKnownNonNegative(Ops[1]))
+      Flags = ScalarEvolution::setFlags(Flags, SCEV::FlagNUW);
+    if (!ScalarEvolution::hasFlags(Flags, SCEV::FlagNSW) &&
+        isa<SCEVConstant>(Ops[0]) &&
+        cast<SCEVConstant>(Ops[0])->getAPInt().isMinSignedValue())
+      Flags = ScalarEvolution::setFlags(Flags, SCEV::FlagNSW);
+  }
+
   return Flags;
 }
 
@@ -2562,8 +2575,7 @@ const SCEV *ScalarEvolution::getAddExpr(SmallVectorImpl<const SCEV *> &Ops,
       APInt ConstAdd = C1 + C2;
       auto AddFlags = AddExpr->getNoWrapFlags();
       // Adding a smaller constant is NUW if the original AddExpr was NUW.
-      if (ScalarEvolution::maskFlags(AddFlags, SCEV::FlagNUW) ==
-              SCEV::FlagNUW &&
+      if (ScalarEvolution::hasFlags(AddFlags, SCEV::FlagNUW) &&
           ConstAdd.ule(C1)) {
         PreservedFlags =
             ScalarEvolution::setFlags(PreservedFlags, SCEV::FlagNUW);
@@ -2571,8 +2583,7 @@ const SCEV *ScalarEvolution::getAddExpr(SmallVectorImpl<const SCEV *> &Ops,
 
       // Adding a constant with the same sign and small magnitude is NSW, if the
       // original AddExpr was NSW.
-      if (ScalarEvolution::maskFlags(AddFlags, SCEV::FlagNSW) ==
-              SCEV::FlagNSW &&
+      if (ScalarEvolution::hasFlags(AddFlags, SCEV::FlagNSW) &&
           C1.isSignBitSet() == ConstAdd.isSignBitSet() &&
           ConstAdd.abs().ule(C1.abs())) {
         PreservedFlags =
@@ -4207,7 +4218,7 @@ const SCEV *ScalarEvolution::getMinusSCEV(const SCEV *LHS, const SCEV *RHS,
   auto AddFlags = SCEV::FlagAnyWrap;
   const bool RHSIsNotMinSigned =
       !getSignedRangeMin(RHS).isMinSignedValue();
-  if (maskFlags(Flags, SCEV::FlagNSW) == SCEV::FlagNSW) {
+  if (hasFlags(Flags, SCEV::FlagNSW)) {
     // Let M be the minimum representable signed value. Then (-1)*RHS
     // signed-wraps if and only if RHS is M. That can happen even for
     // a NSW subtraction because e.g. (-1)*M signed-wraps even though

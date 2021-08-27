@@ -3537,194 +3537,228 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   SDValue SrcOp = Op.getOperand(1);
   EVT SrcType = SrcOp.getValueType();
   uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
-
   assert(isPowerOf2_64(DstTypeSize) && isPowerOf2_64(SrcTypeSize) &&
          "Types must be powers of two");
   int Ratio =
       std::max(DstTypeSize, SrcTypeSize) / std::min(DstTypeSize, SrcTypeSize);
 
-  unsigned MaskOpNo;
-  unsigned EVLOpNo;
-  bool IsMasked;
+  unsigned MaskOpNo = 2;
+  unsigned EVLOpNo = 3;
+  assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+         "Unexpected operand");
+  bool IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
   unsigned EPIIntNo;
+  // Further instrinsic to use to correctly widen/narrow the source operand
+  unsigned FurtherEPIIntNo = Intrinsic::not_intrinsic;
 
-  if (Ratio == 1) {
-    switch (IntNo) {
-    default:
-      llvm_unreachable("Unexpected intrinsic");
-      break;
-    case Intrinsic::vp_sitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+  switch (IntNo) {
+  default:
+    llvm_unreachable("Unexpected intrinsic");
+    break;
+  case Intrinsic::vp_sitofp:
+    if (Ratio == 1) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfcvt_f_x_mask : Intrinsic::epi_vfcvt_f_x;
-      break;
-    case Intrinsic::vp_uitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+    } else {
+      if (DstTypeSize > SrcTypeSize) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_x_mask
+                            : Intrinsic::epi_vfwcvt_f_x;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vwadd_mask : Intrinsic::epi_vwadd;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_x_mask
+                            : Intrinsic::epi_vfncvt_f_x;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vnsrl_mask : Intrinsic::epi_vnsrl;
+      }
+    }
+    break;
+  case Intrinsic::vp_uitofp:
+    if (Ratio == 1) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfcvt_f_xu_mask : Intrinsic::epi_vfcvt_f_xu;
-      break;
-    case Intrinsic::vp_fptosi:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+    } else {
+      if (DstTypeSize > SrcTypeSize) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_xu_mask
+                            : Intrinsic::epi_vfwcvt_f_xu;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vwaddu_mask : Intrinsic::epi_vwaddu;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_xu_mask
+                            : Intrinsic::epi_vfncvt_f_xu;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vnsrl_mask : Intrinsic::epi_vnsrl;
+      }
+    }
+    break;
+  case Intrinsic::vp_fptosi:
+    if (Ratio == 1) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfcvt_x_f_mask : Intrinsic::epi_vfcvt_x_f;
-      break;
-    case Intrinsic::vp_fptoui:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+    } else {
+      if (DstTypeSize > SrcTypeSize) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_x_f_mask
+                            : Intrinsic::epi_vfwcvt_x_f;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vwadd_mask : Intrinsic::epi_vwadd;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_x_f_mask
+                            : Intrinsic::epi_vfncvt_x_f;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vnsrl_mask : Intrinsic::epi_vnsrl;
+      }
+    }
+    break;
+  case Intrinsic::vp_fptoui:
+    if (Ratio == 1) {
       EPIIntNo =
           IsMasked ? Intrinsic::epi_vfcvt_xu_f_mask : Intrinsic::epi_vfcvt_xu_f;
-      break;
+    } else {
+      if (DstTypeSize > SrcTypeSize) {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_xu_f_mask
+                            : Intrinsic::epi_vfwcvt_xu_f;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vwaddu_mask : Intrinsic::epi_vwaddu;
+      } else {
+        EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_xu_f_mask
+                            : Intrinsic::epi_vfncvt_xu_f;
+        FurtherEPIIntNo =
+            IsMasked ? Intrinsic::epi_vnsrl_mask : Intrinsic::epi_vnsrl;
+      }
     }
-  } else if (Ratio == 2 && DstTypeSize > SrcTypeSize) {
-    switch (IntNo) {
-    default:
-      llvm_unreachable("Unexpected intrinsic");
-      break;
-    case Intrinsic::vp_sitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfwcvt_f_x_mask : Intrinsic::epi_vfwcvt_f_x;
-      break;
-    case Intrinsic::vp_uitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_xu_mask
-                          : Intrinsic::epi_vfwcvt_f_xu;
-      break;
-    case Intrinsic::vp_fpext:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vfwcvt_f_f_mask
-                          : Intrinsic::epi_vfwcvt_f_f;
-      break;
-    case Intrinsic::vp_fptosi:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfwcvt_x_f_mask : Intrinsic::epi_vfwcvt_x_f;
-      break;
-    case Intrinsic::vp_fptoui:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfwcvt_xu_f_mask : Intrinsic::epi_vfwcvt_xu_f;
-      break;
-    case Intrinsic::vp_sext:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vwadd_mask
-                          : Intrinsic::epi_vwadd;
-      break;
-    case Intrinsic::vp_zext:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vwaddu_mask
-                          : Intrinsic::epi_vwaddu;
-      break;
-    }
-  } else if (Ratio == 2 && DstTypeSize < SrcTypeSize) {
-    switch (IntNo) {
-    default:
-      llvm_unreachable("Unexpected intrinsic");
-      break;
-    case Intrinsic::vp_sitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfncvt_f_x_mask : Intrinsic::epi_vfncvt_f_x;
-      break;
-    case Intrinsic::vp_uitofp:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_xu_mask
-                          : Intrinsic::epi_vfncvt_f_xu;
-      break;
-    case Intrinsic::vp_fptrunc:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vfncvt_f_f_mask
-                          : Intrinsic::epi_vfncvt_f_f;
-      break;
-    case Intrinsic::vp_fptosi:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfncvt_x_f_mask : Intrinsic::epi_vfncvt_x_f;
-      break;
-    case Intrinsic::vp_fptoui:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo =
-          IsMasked ? Intrinsic::epi_vfncvt_xu_f_mask : Intrinsic::epi_vfncvt_xu_f;
-      break;
-    case Intrinsic::vp_trunc:
-      MaskOpNo = 2;
-      EVLOpNo = 3;
-      IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
-      EPIIntNo = IsMasked ? Intrinsic::epi_vnsrl_mask
-                          : Intrinsic::epi_vnsrl;
-      break;
-    }
+    break;
+  case Intrinsic::vp_sext:
+    assert(DstTypeSize > SrcTypeSize && "vp_sext can be used only when widening");
+    assert(Ratio > 1 && "Ratio must be bigger than 1 to invoke a widening");
+    EPIIntNo = IsMasked ? Intrinsic::epi_vwadd_mask : Intrinsic::epi_vwadd;
+    FurtherEPIIntNo = EPIIntNo;
+    break;
+  case Intrinsic::vp_zext:
+    assert(DstTypeSize > SrcTypeSize && "vp_zext can be used only when widening");
+    assert(Ratio > 1 && "Ratio must be bigger than 1 to invoke a widening");
+    EPIIntNo = IsMasked ? Intrinsic::epi_vwaddu_mask : Intrinsic::epi_vwaddu;
+    FurtherEPIIntNo = EPIIntNo;
+    break;
+  case Intrinsic::vp_trunc:
+    assert(DstTypeSize < SrcTypeSize && "vp_trunc can be used only when narrowing");
+    assert(Ratio > 1 && "Ratio must be bigger than 1 to invoke a narrowing");
+    EPIIntNo = IsMasked ? Intrinsic::epi_vnsrl_mask : Intrinsic::epi_vnsrl;
+    FurtherEPIIntNo = EPIIntNo;
+    break;
+  case Intrinsic::vp_fpext:
+    assert(DstTypeSize > SrcTypeSize && "vp_fpext can be used only when widening");
+    // NOTE: to be modified when adding support for f16
+    assert(Ratio == 2 && "No widening possible for floats with ratio not equal to 2");
+    EPIIntNo =
+        IsMasked ? Intrinsic::epi_vfwcvt_f_f_mask : Intrinsic::epi_vfwcvt_f_f;
+    // FurtherEPIIntNo not used since Ratio == 2
+    break;
+  case Intrinsic::vp_fptrunc:
+    assert(DstTypeSize < SrcTypeSize && "vp_fptrunc can be used only when narrowing");
+    // NOTE: to be modified when adding support for f16
+    assert(Ratio == 2 && "No narrowing possible for floats with ratio not equal to 2");
+    EPIIntNo =
+        IsMasked ? Intrinsic::epi_vfncvt_f_f_mask : Intrinsic::epi_vfncvt_f_f;
+    // FurtherEPIIntNo not used since Ratio == 2
+    break;
   }
 
-  // Straightforward cases.
-  if (Ratio == 1 || Ratio == 2) {
-    std::vector<SDValue> Operands;
-    Operands.reserve(3 + IsMasked * 2);
-
-    Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
-
-    if (IsMasked)
-      Operands.push_back(
-          DAG.getNode(ISD::UNDEF, DL, Op.getValueType())); // Merge.
-
-    Operands.push_back(SrcOp);
-
-    // Special case because there is no unary narrowing instruction.
-    if (IntNo == Intrinsic::vp_trunc || IntNo == Intrinsic::vp_zext ||
-        IntNo == Intrinsic::vp_sext) {
+  SDValue FromOperand = SrcOp;
+  // NOTE: widenIntegerVectorElementType can be used because we do not need to
+  // expand floats with a Ratio > 2; when we add in EPI support for f16,
+  // then we need to use another (custom) method
+  // (like we already do for narrowing, see below)
+  if (Ratio > 2 && DstTypeSize > SrcTypeSize) {
+    // Invoke the FurtherEPIIntNo intrinsic to widen the source operand
+    // as many times as needed, without changing the type
+    EVT FromType = SrcType;
+    for (int i = 0; i < Ratio/4; i++) {
+      EVT ToType = FromType.widenIntegerVectorElementType(*DAG.getContext());
+      std::vector<SDValue> Operands;
+      Operands.reserve(4 + IsMasked * 2);
+      Operands.push_back(DAG.getTargetConstant(FurtherEPIIntNo, DL, MVT::i64));
+      if (IsMasked)
+        Operands.push_back(
+            DAG.getNode(ISD::UNDEF, DL, ToType)); // Merge.
+      Operands.push_back(FromOperand);
       Operands.push_back(DAG.getConstant(0, DL, MVT::i64));
+      if (IsMasked)
+        Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
+      Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo))); // EVL.
+
+      FromOperand = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, ToType, Operands);
+      FromType = ToType;
     }
-
-    if (IsMasked)
-      Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
-
-    assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
-           "Unexpected operand");
-    Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                                   Op.getOperand(EVLOpNo))); // EVL.
-
-    SDValue Result = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, Op.getValueType(),
-                       Operands);
-
-    return Result;
   }
 
-  // Ideas to implement this? Use a narrowing/widening operation and then
-  // the required number of truncations/extensions.
-  report_fatal_error("FP conversions not mappable to "
-                     "widenings/narrowings not implemented yet");
-  return SDValue();
+  auto narrowVectorElementType = [&](EVT SrcVT) -> EVT {
+    EVT SrcEltVT = SrcVT.getVectorElementType();
+    const ElementCount EltCount = SrcVT.getVectorElementCount();
+    MVT ToEltVT;
+    // When narrowing AND converting, the first instruction is the conversion
+    // (together with the first narrowing, if possible), so ToType always has
+    // the same type as the Dst operand
+    if (DstType.isInteger()) {
+      ToEltVT = MVT::getIntegerVT(SrcEltVT.getSizeInBits() / 2);
+    } else if (SrcEltVT.isFloatingPoint()) {
+      ToEltVT = MVT::getFloatingPointVT(SrcEltVT.getSizeInBits() / 2);
+    } else {
+      llvm_unreachable("Vector Element type must be Integer of Floating Point");
+    }
+    return EVT::getVectorVT(*DAG.getContext(), ToEltVT, EltCount);
+  };
+
+  // Invoke EPIIntNo intrinsic
+  EVT ToType = DstType;
+  if (Ratio > 2 && DstTypeSize < SrcTypeSize) {
+    ToType = narrowVectorElementType(SrcType);
+  }
+  std::vector<SDValue> Operands;
+  Operands.reserve(4 + IsMasked * 2);
+  Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
+  if (IsMasked)
+    Operands.push_back(
+        DAG.getNode(ISD::UNDEF, DL, ToType)); // Merge.
+  Operands.push_back(FromOperand);
+  // Special case because there is no unary narrowing instruction.
+  if (IntNo == Intrinsic::vp_trunc || IntNo == Intrinsic::vp_zext ||
+      IntNo == Intrinsic::vp_sext) {
+    Operands.push_back(DAG.getConstant(0, DL, MVT::i64));
+  }
+  if (IsMasked)
+    Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
+  Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                 Op.getOperand(EVLOpNo))); // EVL.
+
+  SDValue Result =
+      DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, ToType, Operands);
+
+  if (Ratio > 2 && DstTypeSize < SrcTypeSize) {
+    // Invoke the FurtherEPIIntNo intrinsic to narrow the Result operand
+    // as many times as needed, without changing the type
+    EVT ResultType = ToType;
+    for (int i = 0; i < Ratio/4; i++) {
+      ToType = narrowVectorElementType(ResultType);
+      std::vector<SDValue> Operands;
+      Operands.reserve(4 + IsMasked * 2);
+      Operands.push_back(DAG.getTargetConstant(FurtherEPIIntNo, DL, MVT::i64));
+      if (IsMasked)
+        Operands.push_back(
+            DAG.getNode(ISD::UNDEF, DL, ToType)); // Merge.
+      Operands.push_back(Result);
+      Operands.push_back(DAG.getConstant(0, DL, MVT::i64));
+      if (IsMasked)
+        Operands.push_back(Op.getOperand(MaskOpNo)); // Mask.
+      Operands.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo))); // EVL.
+
+      Result = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, ToType, Operands);
+      ResultType = ToType;
+    }
+  }
+
+  return Result;
 }
 
 // This exists to tame complexity when lowering VP intrinsics to EPI. Not ideal.
@@ -11275,6 +11309,29 @@ bool RISCVTargetLowering::decomposeMulByConstant(LLVMContext &Context, EVT VT,
   }
 
   return false;
+}
+
+bool RISCVTargetLowering::isMulAddWithConstProfitable(
+    const SDValue &AddNode, const SDValue &ConstNode) const {
+  // Let the DAGCombiner decide for vectors.
+  EVT VT = AddNode.getValueType();
+  if (VT.isVector())
+    return true;
+
+  // Let the DAGCombiner decide for larger types.
+  if (VT.getScalarSizeInBits() > Subtarget.getXLen())
+    return true;
+
+  // It is worse if c1 is simm12 while c1*c2 is not.
+  ConstantSDNode *C1Node = cast<ConstantSDNode>(AddNode.getOperand(1));
+  ConstantSDNode *C2Node = cast<ConstantSDNode>(ConstNode);
+  const APInt &C1 = C1Node->getAPIntValue();
+  const APInt &C2 = C2Node->getAPIntValue();
+  if (C1.isSignedIntN(12) && !(C1 * C2).isSignedIntN(12))
+    return false;
+
+  // Default to true and let the DAGCombiner decide.
+  return true;
 }
 
 bool RISCVTargetLowering::allowsMisalignedMemoryAccesses(
