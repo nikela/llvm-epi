@@ -4783,29 +4783,12 @@ void InnerLoopVectorizer::fixReduction(VPReductionPHIRecipe *PhiR,
       if (PreferPredicatedReductionSelect ||
           TTI->preferPredicatedReductionSelect(
               RdxDesc.getOpcode(), PhiTy,
-              TargetTransformInfo::ReductionFlags())) {
+              TargetTransformInfo::ReductionFlags())
+          || preferPredicatedVectorOps()) {
         auto *VecRdxPhi =
             cast<PHINode>(State.get(PhiR->getVPSingleValue(), Part));
         VecRdxPhi->setIncomingValueForBlock(
             LI->getLoopFor(LoopVectorBody)->getLoopLatch(), Sel);
-      }
-
-      // If using preferPredicatedVectorOps, replace incoming value of the
-      // reduction phi node for vector.body with the above select instruction.
-      if (preferPredicatedVectorOps()) {
-        auto *VecRdxPhi =
-            cast<PHINode>(State.get(PhiR->getVPSingleValue(), Part));
-        BasicBlock *VectorBodyLatch =
-            LI->getLoopFor(LoopVectorBody)->getLoopLatch();
-        Value *CurrIncoming =
-            cast<PHINode>(VecRdxPhi)->getIncomingValueForBlock(VectorBodyLatch);
-        // By definition of LoopVal above, it is not guaranteed to be the
-        // LoopExitInst. Replace only if it is.
-        if (CurrIncoming == VecLoopExitInst) {
-          cast<PHINode>(VecRdxPhi)->setIncomingValueForBlock(
-              VectorBodyLatch,
-              State.get(State.Plan->getVPValue(LoopExitInst), Part));
-        }
       }
     }
   }
