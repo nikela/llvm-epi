@@ -500,6 +500,11 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
     }
     return Cost;
   }
+  case Intrinsic::nearbyint: {
+    if (isa<ScalableVectorType>(RetTy))
+      return InstructionCost::getInvalid();
+    break;
+  }
   // This is not ideal but untill all VP intrinsics are in upstream we can't use
   // the IsVPIntrinsic getter, so build the list manually from
   // IntrinsicEnums.inc.
