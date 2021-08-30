@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "atmi_runtime.h"
+#include "impl_runtime.h"
 #include "hsa_api.h"
 #include "internal.h"
 #include "rt.h"
@@ -21,7 +21,7 @@ namespace core {
 hsa_status_t Runtime::HostMalloc(void **ptr, size_t size,
                                  hsa_amd_memory_pool_t MemoryPool) {
   hsa_status_t err = hsa_amd_memory_pool_allocate(MemoryPool, size, 0, ptr);
-  DEBUG_PRINT("Malloced [CPU %d] %p\n", DeviceId, *ptr);
+  DEBUG_PRINT("Malloced %p\n", *ptr);
 
   if (err == HSA_STATUS_SUCCESS) {
     err = core::allow_access_to_all_gpu_agents(*ptr);
