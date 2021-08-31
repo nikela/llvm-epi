@@ -12155,6 +12155,96 @@ __epi_8xi64 test_vwmulu_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8
     return __builtin_epi_vwmulu_8xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
+__epi_8xi16 test_vwredsum_8xi16(__epi_8xi8 arg_0, __epi_8xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_8xi16(arg_0, arg_1, arg_2);
+}
+
+__epi_8xi16 test_vwredsum_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_8xi16_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_4xi32 test_vwredsum_4xi32(__epi_4xi16 arg_0, __epi_4xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_4xi32(arg_0, arg_1, arg_2);
+}
+
+__epi_4xi32 test_vwredsum_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_4xi32_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_2xi64 test_vwredsum_2xi64(__epi_2xi32 arg_0, __epi_2xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_2xi64(arg_0, arg_1, arg_2);
+}
+
+__epi_2xi64 test_vwredsum_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_2xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_16xi16 test_vwredsum_16xi16(__epi_16xi8 arg_0, __epi_16xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_16xi16(arg_0, arg_1, arg_2);
+}
+
+__epi_16xi16 test_vwredsum_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_16xi16_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_8xi32 test_vwredsum_8xi32(__epi_8xi16 arg_0, __epi_8xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_8xi32(arg_0, arg_1, arg_2);
+}
+
+__epi_8xi32 test_vwredsum_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_8xi32_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_4xi64 test_vwredsum_4xi64(__epi_4xi32 arg_0, __epi_4xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_4xi64(arg_0, arg_1, arg_2);
+}
+
+__epi_4xi64 test_vwredsum_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_4xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_32xi16 test_vwredsum_32xi16(__epi_32xi8 arg_0, __epi_32xi16 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_32xi16(arg_0, arg_1, arg_2);
+}
+
+__epi_32xi16 test_vwredsum_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi16 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_32xi16_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_16xi32 test_vwredsum_16xi32(__epi_16xi16 arg_0, __epi_16xi32 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_16xi32(arg_0, arg_1, arg_2);
+}
+
+__epi_16xi32 test_vwredsum_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi32 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_16xi32_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
+__epi_8xi64 test_vwredsum_8xi64(__epi_8xi32 arg_0, __epi_8xi64 arg_1, unsigned long int arg_2)
+{
+    return __builtin_epi_vwredsum_8xi64(arg_0, arg_1, arg_2);
+}
+
+__epi_8xi64 test_vwredsum_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi64 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
+{
+    return __builtin_epi_vwredsum_8xi64_mask(arg_0, arg_1, arg_2, arg_3, arg_4);
+}
+
 __epi_8xi16 test_vwsub_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2)
 {
     return __builtin_epi_vwsub_8xi16(arg_0, arg_1, arg_2);
