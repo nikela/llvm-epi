@@ -1466,15 +1466,6 @@ def int_vp_fcmp : Intrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
                               /*Mask<3>, VectorLength<4>,*/
                               ImmArg<ArgIndex<2>> ]>;
 
-// Select
-def int_vp_select : Intrinsic<[ llvm_anyvector_ty ],
-                              [ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                LLVMMatchType<0>,
-                                LLVMMatchType<0>,
-                                llvm_i32_ty],
-                              [ IntrNoMem, IntrNoSync, IntrWillReturn
-                                /*, Passthru<2>, Mask<0>, VectorLength<3>*/ ]>;
-
 // Cast
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<1>, VectorLength<2>*/ ] in {
 def int_vp_sext : Intrinsic<[ llvm_anyvector_ty ],
@@ -1647,11 +1638,14 @@ let IntrProperties =
                                 llvm_i32_ty]>;
 }
 // Shuffles.
+let IntrProperties =
+    [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {
 def int_vp_select : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                               [ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 LLVMMatchType<0>,
                                 LLVMMatchType<0>,
                                 llvm_i32_ty]>;
+}
 
 // Reductions
 let IntrProperties = [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {

@@ -6413,7 +6413,8 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
       return Intrinsic == Intrinsic::vp_load ||
              Intrinsic == Intrinsic::vp_store ||
              Intrinsic == Intrinsic::vp_gather ||
-             Intrinsic == Intrinsic::vp_scatter;
+             Intrinsic == Intrinsic::vp_scatter ||
+             Intrinsic == Intrinsic::vp_select;
     };
     if (!DisableVPRedIntrinsics && !DisabledVPNode())
       visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
