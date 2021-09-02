@@ -270,12 +270,6 @@ bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
   return ST->hasStdExtV();
 }
 
-unsigned RISCVTTIImpl::getMinVectorRegisterBitWidth() const {
-  // Actual min vector register bitwidth is <vscale x ELEN>.
-  // getMaxElementWidth() simply return ELEN.
-  return ST->hasStdExtV() ? getMaxElementWidth() : 0;
-}
-
 ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
                                         bool IsScalable) const {
   return ST->hasStdExtV() && IsScalable

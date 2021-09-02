@@ -159,7 +159,6 @@ public:
                                    TTI::TargetCostKind CostKind,
                                    const Instruction *I = nullptr);
   bool shouldMaximizeVectorBandwidth() const;
-  unsigned getMinVectorRegisterBitWidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
                                   unsigned VFKnownMin, unsigned ElementTypeSize,
@@ -205,6 +204,9 @@ public:
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
                                         Align Alignment, unsigned AddressSpace,
                                         TTI::TargetCostKind CostKind);
+  unsigned getMinVectorRegisterBitWidth() const {
+    return ST->hasStdExtV() ? ST->getMinRVVVectorSizeInBits() : 0;
+  }
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,
