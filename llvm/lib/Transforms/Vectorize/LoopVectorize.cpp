@@ -3092,6 +3092,9 @@ InnerLoopVectorizer::computeStrideAccessInfo(Value *Ptr) {
     }
   }
 
+  if (!SAI.BaseAddr)
+    return SAI;
+
   SAI.Valid = true;
   LLVM_DEBUG(llvm::dbgs() << SAI << "\n");
   return SAI;
