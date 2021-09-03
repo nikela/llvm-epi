@@ -518,6 +518,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setLoadExtAction(ISD::SEXTLOAD, OtherVT, VT, Expand);
         setLoadExtAction(ISD::ZEXTLOAD, OtherVT, VT, Expand);
       }
+
+      // VP bitwise operations nodes
+      setOperationAction(ISD::VP_AND, VT, Custom);
+      setOperationAction(ISD::VP_OR, VT, Custom);
+      setOperationAction(ISD::VP_XOR, VT, Custom);
     }
 
     for (MVT VT : IntVecVTs) {
@@ -3148,12 +3153,21 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::SREM_VL);
   case ISD::VP_UREM:
     return lowerVPOp(Op, DAG, RISCVISD::UREM_VL);
-  case ISD::VP_AND:
+  case ISD::VP_AND: {
+    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPMaskOp(Op, DAG, RISCVISD::VMAND_VL);
     return lowerVPOp(Op, DAG, RISCVISD::AND_VL);
-  case ISD::VP_OR:
+  }
+  case ISD::VP_OR: {
+    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPMaskOp(Op, DAG, RISCVISD::VMOR_VL);
     return lowerVPOp(Op, DAG, RISCVISD::OR_VL);
-  case ISD::VP_XOR:
+  }
+  case ISD::VP_XOR: {
+    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPMaskOp(Op, DAG, RISCVISD::VMXOR_VL);
     return lowerVPOp(Op, DAG, RISCVISD::XOR_VL);
+  }
   case ISD::VP_ASHR:
     return lowerVPOp(Op, DAG, RISCVISD::SRA_VL);
   case ISD::VP_LSHR:
@@ -6921,6 +6935,45 @@ SDValue RISCVTargetLowering::lowerVPOp(SDValue Op, SelectionDAG &DAG,
   SmallVector<SDValue, 4> Ops;
 
   for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  if (!VT.isFixedLengthVector())
+    return DAG.getNode(RISCVISDOpc, DL, VT, Ops);
+
+  MVT ContainerVT = getContainerForFixedLengthVector(VT);
+
+  SDValue VPOp = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+
+  return convertFromScalableVector(VT, VPOp, DAG, Subtarget);
+}
+
+// Lower a VP_* ISD node to the corresponding RISCVISD::VM*_VL node:
+// * Operands of each node are assumed to be in the same order.
+// * The EVL operand is promoted from i32 to i64 on RV64.
+// * Fixed-length vectors are converted to their scalable-vector container
+//   types.
+SDValue RISCVTargetLowering::lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
+                                       unsigned RISCVISDOpc) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  SmallVector<SDValue, 3> Ops;
+
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    if (OpIdx.index() == 2) // Ignore the mask argument
+      continue;
     SDValue V = OpIdx.value();
     assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
     // Pass through operands which aren't fixed-length vectors.
