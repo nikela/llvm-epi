@@ -645,6 +645,17 @@ multiclass pseudo_binary_v_vs {
   }
 }
 
+multiclass pseudo_binary_w_vs {
+  let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
+  foreach m = MxList.m in
+  {
+    let VLMul = m.value in
+    {
+      defm _VS : pseudo_binary<m.wvrclass, m.vrclass, m.wvrclass, m, "">;
+    }
+  }
+}
+
 multiclass pseudo_binary_v_vm_nomask {
   let mayLoad = 0, mayStore = 0, hasSideEffects = 0 in
   foreach m = MxList.m in
@@ -1259,6 +1270,9 @@ defm PseudoEPIVWMULU      : pseudo_binary_w_vv_vx;
 defm PseudoEPIVWMULSU     : pseudo_binary_w_vv_vx;
 defm PseudoEPIVWMUL       : pseudo_binary_w_vv_vx;
 
+defm PseudoEPIVWREDSUM    : pseudo_binary_w_vs;
+defm PseudoEPIVWREDSUMU   : pseudo_binary_w_vs;
+
 defm PseudoEPIVFADD       : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFREDSUM    : pseudo_binary_v_vs;
 defm PseudoEPIVFSUB       : pseudo_binary_v_vv_vf;
@@ -1321,6 +1335,10 @@ defm PseudoEPIVFWADD      : pseudo_binary_w_wv_wf;
 defm PseudoEPIVFWSUB      : pseudo_binary_w_vv_vf;
 defm PseudoEPIVFWSUB      : pseudo_binary_w_wv_wf;
 defm PseudoEPIVFWMUL      : pseudo_binary_w_vv_vf;
+
+defm PseudoEPIVFWREDSUM   : pseudo_binary_w_vs;
+defm PseudoEPIVFWREDOSUM  : pseudo_binary_w_vs;
+  
 // FIXME EDIV instructions disabled
 //defm PseudoEPIVFDOT       : pseudo_binary_v_vv;
 
@@ -2038,6 +2056,21 @@ multiclass pat_intrinsic_binary_int_v_vs<string intrinsic_name,
   }
 }
 
+multiclass pat_intrinsic_binary_int_w_vs<string intrinsic_name,
+                                         string instruction_name>
+{
+  foreach vtiToWti = AllWideableIntVectors in
+  {
+    defvar vti = vtiToWti.Vti;
+    defvar wti = vtiToWti.Wti;
+
+    defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VS",
+                                wti.Vector, vti.Vector, wti.Vector, vti.Mask,
+                                vti.SEW, vti.MInfo, wti.MInfo.vrclass,
+                                vti.MInfo.vrclass, wti.MInfo.vrclass>;
+  }
+}
+
 multiclass pat_intrinsic_binary_int_w_vv_vx<string intrinsic_name,
                                             string instruction_name>
 {
@@ -2276,6 +2309,21 @@ multiclass pat_intrinsic_binary_fp_v_vs<string intrinsic_name,
                                 fvti.Vector, fvti.Vector, fvti.Vector,
                                 fvti.Mask, fvti.SEW, fvti.MInfo,
                                 fvti.MInfo.vrclass, fvti.MInfo.vrclass, fvti.MInfo.vrclass>;
+  }
+}
+
+multiclass pat_intrinsic_binary_fp_w_vs<string intrinsic_name,
+                                        string instruction_name>
+{
+  foreach fvtiToFWti = AllWideableFloatVectors in
+  {
+    defvar fvti = fvtiToFWti.FVti;
+    defvar fwti = fvtiToFWti.FWti;
+
+    defm : pat_intrinsic_binary<intrinsic_name, instruction_name, "VS",
+                                fwti.Vector, fvti.Vector, fwti.Vector,
+                                fvti.Mask, fvti.SEW, fvti.MInfo,
+                                fwti.MInfo.vrclass, fvti.MInfo.vrclass, fwti.MInfo.vrclass>;
   }
 }
 
@@ -2800,10 +2848,6 @@ defm "" : pat_intrinsic_binary_int_v_wv_wx_wi<"int_epi_vnsra", "PseudoEPIVNSRA",
 //defm "" : pat_intrinsic_binary_int_vv_vx_vi<"int_epi_vnclipu", "VNCLIPU", uimm5>;
 //defm "" : pat_intrinsic_binary_int_vv_vx_vi<"int_epi_vnclip", "VNCLIP", uimm5>;
 
-//// FIXME: These patterns are wrong
-//defm "" : pat_intrinsic_binary_int_vs<"int_epi_vwredsumu", "VWREDSUMU">;
-//defm "" : pat_intrinsic_binary_int_vs<"int_epi_vwredsum", "VWREDSUM">;
-
 // FIXME EDIV patterns disabled
 //defm "" : pat_intrinsic_binary_int_v_vv<"int_epi_vdotu", "PseudoEPIVDOTU">;
 //defm "" : pat_intrinsic_binary_int_v_vv<"int_epi_vdot", "PseudoEPIVDOT">;
@@ -2920,6 +2964,9 @@ defm "" : pat_intrinsic_binary_int_w_vv_vx<"int_epi_vwmulu", "PseudoEPIVWMULU">;
 defm "" : pat_intrinsic_binary_int_w_vv_vx<"int_epi_vwmulsu", "PseudoEPIVWMULSU">;
 defm "" : pat_intrinsic_binary_int_w_vv_vx<"int_epi_vwmul", "PseudoEPIVWMUL">;
 
+defm "" : pat_intrinsic_binary_int_w_vs<"int_epi_vwredsumu", "PseudoEPIVWREDSUMU">;
+defm "" : pat_intrinsic_binary_int_w_vs<"int_epi_vwredsum", "PseudoEPIVWREDSUM">;
+
 //// FIXME: These patterns are wrong
 //defm "" : pat_intrinsic_binary_int_vv_vx<"int_epi_vwmaccu", "VWMACCU">;
 //defm "" : pat_intrinsic_binary_int_vv_vx<"int_epi_vwmacc", "VWMACC">;
@@ -2985,10 +3032,10 @@ defm "" : pat_intrinsic_ternary_fp_v_vv_vf<"int_epi_vfnmsac", "PseudoEPIVFNMSAC"
 
 defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwadd", "PseudoEPIVFWADD">;
 defm "" : pat_intrinsic_binary_fp_w_wv_wf<"int_epi_vfwadd_w", "PseudoEPIVFWADD">;
-//defm "" : pat_intrinsic_binary_fp_vs<"int_epi_vfwredsum", "VFWREDSUM">;
+defm "" : pat_intrinsic_binary_fp_w_vs<"int_epi_vfwredsum", "PseudoEPIVFWREDSUM">;
 defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwsub", "PseudoEPIVFWSUB">;
 defm "" : pat_intrinsic_binary_fp_w_wv_wf<"int_epi_vfwsub_w", "PseudoEPIVFWSUB">;
-//defm "" : pat_intrinsic_binary_fp_vs<"int_epi_vfwredosum", "VFWREDOSUM">;
+defm "" : pat_intrinsic_binary_fp_w_vs<"int_epi_vfwredosum", "PseudoEPIVFWREDOSUM">;
 defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwmul", "PseudoEPIVFWMUL">;
 // FIXME EDIV patterns disabled
 //defm "" : pat_intrinsic_binary_fp_v_vv<"int_epi_vfdot", "PseudoEPIVFDOT">;

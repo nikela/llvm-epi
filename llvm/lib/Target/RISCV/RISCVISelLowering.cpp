@@ -200,6 +200,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::USUBO, MVT::i32, Custom);
     setOperationAction(ISD::UADDSAT, MVT::i32, Custom);
     setOperationAction(ISD::USUBSAT, MVT::i32, Custom);
+  } else {
+    setLibcallName(RTLIB::MUL_I128, nullptr);
+    setLibcallName(RTLIB::MULO_I64, nullptr);
   }
 
   if (!Subtarget.hasStdExtM()) {
@@ -797,6 +800,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setOperationAction(ISD::EXTRACT_SUBVECTOR, VT, Custom);
 
         setOperationAction(ISD::BUILD_VECTOR, VT, Custom);
+        setOperationAction(ISD::CONCAT_VECTORS, VT, Custom);
         setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
         setOperationAction(ISD::INSERT_VECTOR_ELT, VT, Custom);
         setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
@@ -1451,8 +1455,10 @@ static bool useRVVForFixedLengthVectorVT(MVT VT,
 
   unsigned MinVLen = Subtarget.getMinRVVVectorSizeInBits();
 
+  MVT EltVT = VT.getVectorElementType();
+
   // Don't use RVV for vectors we cannot scalarize if required.
-  switch (VT.getVectorElementType().SimpleTy) {
+  switch (EltVT.SimpleTy) {
   // i1 is supported but has different rules.
   default:
     return false;
@@ -1481,6 +1487,10 @@ static bool useRVVForFixedLengthVectorVT(MVT VT,
     break;
   }
 
+  // Reject elements larger than ELEN.
+  if (EltVT.getSizeInBits() > Subtarget.getMaxELENForFixedLengthVectors())
+    return false;
+
   unsigned LMul = divideCeil(VT.getSizeInBits(), MinVLen);
   // Don't use RVV for types that don't fit.
   if (LMul > Subtarget.getMaxLMULForFixedLengthVectors())
@@ -1507,6 +1517,7 @@ static MVT getContainerForFixedLengthVector(const TargetLowering &TLI, MVT VT,
          "Expected legal fixed length vector!");
 
   unsigned MinVLen = Subtarget.getMinRVVVectorSizeInBits();
+  unsigned MaxELen = Subtarget.getMaxELENForFixedLengthVectors();
 
   MVT EltVT = VT.getVectorElementType();
   switch (EltVT.SimpleTy) {
@@ -1521,10 +1532,12 @@ static MVT getContainerForFixedLengthVector(const TargetLowering &TLI, MVT VT,
   case MVT::f32:
   case MVT::f64: {
     // We prefer to use LMUL=1 for VLEN sized types. Use fractional lmuls for
-    // narrower types, but we can't have a fractional LMUL with demoninator less
-    // than 64/SEW.
+    // narrower types. The smallest fractional LMUL we support is 8/ELEN. Within
+    // each fractional LMUL we support SEW between 8 and LMUL*ELEN.
     unsigned NumElts =
-        divideCeil(VT.getVectorNumElements(), MinVLen / RISCV::RVVBitsPerBlock);
+        (VT.getVectorNumElements() * RISCV::RVVBitsPerBlock) / MinVLen;
+    NumElts = std::max(NumElts, RISCV::RVVBitsPerBlock / MaxELen);
+    assert(isPowerOf2_32(NumElts) && "Expected power of 2 NumElts");
     return MVT::getScalableVectorVT(EltVT, NumElts);
   }
   }
@@ -6931,9 +6944,26 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
   case ISD::SRL:
     assert(N->getValueType(0) == MVT::i32 && Subtarget.is64Bit() &&
            "Unexpected custom legalisation");
-    if (N->getOperand(1).getOpcode() == ISD::Constant)
-      return;
-    Results.push_back(customLegalizeToWOp(N, DAG));
+    if (N->getOperand(1).getOpcode() != ISD::Constant) {
+      Results.push_back(customLegalizeToWOp(N, DAG));
+      break;
+    }
+
+    // Custom legalize ISD::SHL by placing a SIGN_EXTEND_INREG after. This is
+    // similar to customLegalizeToWOpWithSExt, but we must zero_extend the
+    // shift amount.
+    if (N->getOpcode() == ISD::SHL) {
+      SDLoc DL(N);
+      SDValue NewOp0 =
+          DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, N->getOperand(0));
+      SDValue NewOp1 =
+          DAG.getNode(ISD::ZERO_EXTEND, DL, MVT::i64, N->getOperand(1));
+      SDValue NewWOp = DAG.getNode(ISD::SHL, DL, MVT::i64, NewOp0, NewOp1);
+      SDValue NewRes = DAG.getNode(ISD::SIGN_EXTEND_INREG, DL, MVT::i64, NewWOp,
+                                   DAG.getValueType(MVT::i32));
+      Results.push_back(DAG.getNode(ISD::TRUNCATE, DL, MVT::i32, NewRes));
+    }
+
     break;
   case ISD::ROTL:
   case ISD::ROTR:
@@ -8131,6 +8161,13 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
     // Transform
     SDValue LHS = N->getOperand(0);
     SDValue RHS = N->getOperand(1);
+    SDValue TrueV = N->getOperand(3);
+    SDValue FalseV = N->getOperand(4);
+
+    // If the True and False values are the same, we don't need a select_cc.
+    if (TrueV == FalseV)
+      return TrueV;
+
     ISD::CondCode CCVal = cast<CondCodeSDNode>(N->getOperand(2))->get();
     if (!ISD::isIntEqualitySetCC(CCVal))
       break;
@@ -8153,9 +8190,8 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       translateSetCCForBranch(DL, LHS, RHS, CCVal, DAG);
 
       SDValue TargetCC = DAG.getCondCode(CCVal);
-      return DAG.getNode(
-          RISCVISD::SELECT_CC, DL, N->getValueType(0),
-          {LHS, RHS, TargetCC, N->getOperand(3), N->getOperand(4)});
+      return DAG.getNode(RISCVISD::SELECT_CC, DL, N->getValueType(0),
+                         {LHS, RHS, TargetCC, TrueV, FalseV});
     }
 
     // Fold (select_cc (xor X, Y), 0, eq/ne, trueV, falseV) ->
@@ -8163,8 +8199,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
     if (LHS.getOpcode() == ISD::XOR && isNullConstant(RHS))
       return DAG.getNode(RISCVISD::SELECT_CC, SDLoc(N), N->getValueType(0),
                          {LHS.getOperand(0), LHS.getOperand(1),
-                          N->getOperand(2), N->getOperand(3),
-                          N->getOperand(4)});
+                          N->getOperand(2), TrueV, FalseV});
     // (select_cc X, 1, setne, trueV, falseV) ->
     // (select_cc X, 0, seteq, trueV, falseV) if we can prove X is 0/1.
     // This can occur when legalizing some floating point comparisons.
@@ -8174,9 +8209,8 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       CCVal = ISD::getSetCCInverse(CCVal, LHS.getValueType());
       SDValue TargetCC = DAG.getCondCode(CCVal);
       RHS = DAG.getConstant(0, DL, LHS.getValueType());
-      return DAG.getNode(
-          RISCVISD::SELECT_CC, DL, N->getValueType(0),
-          {LHS, RHS, TargetCC, N->getOperand(3), N->getOperand(4)});
+      return DAG.getNode(RISCVISD::SELECT_CC, DL, N->getValueType(0),
+                         {LHS, RHS, TargetCC, TrueV, FalseV});
     }
 
     break;

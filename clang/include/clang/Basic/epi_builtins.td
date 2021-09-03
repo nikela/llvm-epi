@@ -1447,18 +1447,19 @@ def vredmaxu : EPIBinBuiltin<"v", "vvv", "csil">;
 def vredminu : EPIBinBuiltin<"v", "vvv", "csil">;
 }
 
-// FIXME: we forgot these ones
-// def vwredsum : EPIWidenBinBuiltin<"w", "wvw", "csi">;
-// def vwredsumu : EPIWidenBinBuiltin<"w", "wvw", "csi">;
-
 let EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
         vlmul_ext_v_${WidenedType}m1_${WidenedType}${WidenedLMul}(${Name}_vs_${Type}${LMul}_${WidenedType}m1(vundefined_${WidenedType}m1(), (a), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(b), (vl)))}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
         vlmul_ext_v_${WidenedType}m1_${WidenedType}${WidenedLMul}(${Name}_vs_${Type}${LMul}_${WidenedType}m1_m((mask), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(merge), (a), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(b), (vl)))}] in {
+def vwredsum : EPIWidenBinBuiltin<"w", "wvw", "csi">;
+
 def vfwredosum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 def vfwredsum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 }
+
+// FIXME: add compatibility code for vwredsumu
+def vwredsumu : EPIWidenBinBuiltin<"w", "wvw", "csi">;
 
 let HasMask = 0, EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \

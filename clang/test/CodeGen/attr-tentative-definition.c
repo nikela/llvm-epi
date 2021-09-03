@@ -1,4 +1,4 @@
-// RUN: %clang_cc1 -emit-llvm < %s | FileCheck %s
+// RUN: %clang_cc1 -emit-llvm -triple x86_64-linux-unknown < %s | FileCheck %s
 
 char arr[10];
 char arr[10] __attribute__((section("datadata")));

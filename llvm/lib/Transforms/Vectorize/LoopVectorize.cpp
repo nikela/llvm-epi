@@ -3092,6 +3092,9 @@ InnerLoopVectorizer::computeStrideAccessInfo(Value *Ptr) {
     }
   }
 
+  if (!SAI.BaseAddr)
+    return SAI;
+
   SAI.Valid = true;
   LLVM_DEBUG(llvm::dbgs() << SAI << "\n");
   return SAI;
@@ -3837,7 +3840,7 @@ Value *InnerLoopVectorizer::emitTransformedIndex(
     assert(isa<SCEVConstant>(Step) &&
            "Expected constant step for pointer induction");
     return B.CreateGEP(
-        StartValue->getType()->getPointerElementType(), StartValue,
+        ID.getElementType(), StartValue,
         CreateMul(Index,
                   Exp.expandCodeFor(Step, Index->getType()->getScalarType(),
                                     GetInsertPoint())));
@@ -4378,7 +4381,8 @@ void InnerLoopVectorizer::truncateToMinimalBitwidths(VPTransformState &State) {
     // If the value wasn't vectorized, we must maintain the original scalar
     // type. The absence of the value from State indicates that it
     // wasn't vectorized.
-    VPValue *Def = State.Plan->getVPValue(KV.first);
+    // FIXME: Should not rely on getVPValue at this point.
+    VPValue *Def = State.Plan->getVPValue(KV.first, true);
     if (!State.hasAnyVectorValue(Def))
       continue;
     for (unsigned Part = 0; Part < UF; ++Part) {
@@ -4485,7 +4489,8 @@ void InnerLoopVectorizer::truncateToMinimalBitwidths(VPTransformState &State) {
     // If the value wasn't vectorized, we must maintain the original scalar
     // type. The absence of the value from State indicates that it
     // wasn't vectorized.
-    VPValue *Def = State.Plan->getVPValue(KV.first);
+    // FIXME: Should not rely on getVPValue at this point.
+    VPValue *Def = State.Plan->getVPValue(KV.first, true);
     if (!State.hasAnyVectorValue(Def))
       continue;
     for (unsigned Part = 0; Part < UF; ++Part) {
@@ -4781,29 +4786,12 @@ void InnerLoopVectorizer::fixReduction(VPReductionPHIRecipe *PhiR,
       if (PreferPredicatedReductionSelect ||
           TTI->preferPredicatedReductionSelect(
               RdxDesc.getOpcode(), PhiTy,
-              TargetTransformInfo::ReductionFlags())) {
+              TargetTransformInfo::ReductionFlags())
+          || preferPredicatedVectorOps()) {
         auto *VecRdxPhi =
             cast<PHINode>(State.get(PhiR->getVPSingleValue(), Part));
         VecRdxPhi->setIncomingValueForBlock(
             LI->getLoopFor(LoopVectorBody)->getLoopLatch(), Sel);
-      }
-
-      // If using preferPredicatedVectorOps, replace incoming value of the
-      // reduction phi node for vector.body with the above select instruction.
-      if (preferPredicatedVectorOps()) {
-        auto *VecRdxPhi =
-            cast<PHINode>(State.get(PhiR->getVPSingleValue(), Part));
-        BasicBlock *VectorBodyLatch =
-            LI->getLoopFor(LoopVectorBody)->getLoopLatch();
-        Value *CurrIncoming =
-            cast<PHINode>(VecRdxPhi)->getIncomingValueForBlock(VectorBodyLatch);
-        // By definition of LoopVal above, it is not guaranteed to be the
-        // LoopExitInst. Replace only if it is.
-        if (CurrIncoming == VecLoopExitInst) {
-          cast<PHINode>(VecRdxPhi)->setIncomingValueForBlock(
-              VectorBodyLatch,
-              State.get(State.Plan->getVPValue(LoopExitInst), Part));
-        }
       }
     }
   }
@@ -4928,7 +4916,8 @@ void InnerLoopVectorizer::clearReductionWrapFlags(const RecurrenceDescriptor &Rd
     Instruction *Cur = Worklist.pop_back_val();
     if (isa<OverflowingBinaryOperator>(Cur))
       for (unsigned Part = 0; Part < UF; ++Part) {
-        Value *V = State.get(State.Plan->getVPValue(Cur), Part);
+        // FIXME: Should not rely on getVPValue at this point.
+        Value *V = State.get(State.Plan->getVPValue(Cur, true), Part);
         cast<Instruction>(V)->dropPoisonGeneratingFlags();
       }
 
@@ -4959,11 +4948,12 @@ void InnerLoopVectorizer::fixLCSSAPHIs(VPTransformState &State) {
 
     // Can be a loop invariant incoming value or the last scalar value to be
     // extracted from the vectorized loop.
+    // FIXME: Should not rely on getVPValue at this point.
     Builder.SetInsertPoint(LoopMiddleBlock->getTerminator());
     Value *lastIncomingValue =
         OrigLoop->isLoopInvariant(IncomingValue)
             ? IncomingValue
-            : State.get(State.Plan->getVPValue(IncomingValue),
+            : State.get(State.Plan->getVPValue(IncomingValue, true),
                         VPIteration(UF - 1, Lane));
     LCSSAPhi.addIncoming(lastIncomingValue, LoopMiddleBlock);
   }
@@ -5253,7 +5243,7 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
     Value *NumUnrolledElems =
         Builder.CreateMul(RuntimeVF, ConstantInt::get(PhiType, State.UF));
     Value *InductionGEP = GetElementPtrInst::Create(
-        ScStValueType->getPointerElementType(), NewPointerPhi,
+        II.getElementType(), NewPointerPhi,
         Builder.CreateMul(ScalarStepValue, NumUnrolledElems), "ptr.ind",
         InductionLoc);
     NewPointerPhi->addIncoming(InductionGEP, LoopLatch);
@@ -5272,7 +5262,7 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
           Builder.CreateAdd(StartOffset, Builder.CreateStepVector(VecPhiType));
 
       Value *GEP = Builder.CreateGEP(
-          ScStValueType->getPointerElementType(), NewPointerPhi,
+          II.getElementType(), NewPointerPhi,
           Builder.CreateMul(
               StartOffset, Builder.CreateVectorSplat(State.VF, ScalarStepValue),
               "vector.gep"));
@@ -10716,6 +10706,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
         RecipeBuilder.getRecipe(Member)->eraseFromParent();
       }
   }
+
+  // From this point onwards, VPlan-to-VPlan transformations may change the plan
+  // in ways that accessing values using original IR values is incorrect.
+  Plan->disableValue2VPValue();
 
   VPlanTransforms::sinkScalarOperands(*Plan);
   VPlanTransforms::mergeReplicateRegions(*Plan);

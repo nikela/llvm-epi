@@ -18,6 +18,7 @@
 
 #include "RISCVSubtarget.h"
 #include "RISCVTargetMachine.h"
+#include "llvm/Analysis/IVDescriptors.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -158,7 +159,6 @@ public:
                                    TTI::TargetCostKind CostKind,
                                    const Instruction *I = nullptr);
   bool shouldMaximizeVectorBandwidth() const;
-  unsigned getMinVectorRegisterBitWidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
                                   unsigned VFKnownMin, unsigned ElementTypeSize,
@@ -204,6 +204,9 @@ public:
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
                                         Align Alignment, unsigned AddressSpace,
                                         TTI::TargetCostKind CostKind);
+  unsigned getMinVectorRegisterBitWidth() const {
+    return ST->hasStdExtV() ? ST->getMinRVVVectorSizeInBits() : 0;
+  }
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,
@@ -237,6 +240,12 @@ public:
     if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
       return false;
 
+    // Don't allow elements larger than the ELEN.
+    // FIXME: How to limit for scalable vectors?
+    if (isa<FixedVectorType>(DataType) &&
+        DataType->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+      return false;
+
     if (Alignment <
         DL.getTypeStoreSize(DataType->getScalarType()).getFixedSize())
       return false;
@@ -257,6 +266,12 @@ public:
 
     // Only support fixed vectors if we know the minimum vector size.
     if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
+      return false;
+
+    // Don't allow elements larger than the ELEN.
+    // FIXME: How to limit for scalable vectors?
+    if (isa<FixedVectorType>(DataType) &&
+        DataType->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
       return false;
 
     if (Alignment <
