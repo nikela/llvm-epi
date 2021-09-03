@@ -7,11 +7,13 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    blez a0, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
-; CHECK-NEXT:    lui a5, %hi(.LCPI0_0)
-; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a5)
 ; CHECK-NEXT:    mv a5, zero
-; CHECK-NEXT:    slli a0, a0, 32
-; CHECK-NEXT:    srli a6, a0, 32
+; CHECK-NEXT:    slli a6, a0, 32
+; CHECK-NEXT:    lui a0, %hi(.LCPI0_0)
+; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a0)
+; CHECK-NEXT:    srli a6, a6, 32
+; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    vmset.m v25
 ; CHECK-NEXT:  .LBB0_2: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    slli t0, a5, 3
