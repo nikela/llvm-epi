@@ -31,6 +31,9 @@ def err_drv_invalid_riscv_ext_arch_name : Error<
   "invalid arch name '%0', %1 '%2'">;
 def err_drv_invalid_riscv_epi_ext : Error<
   "EPI extension is only valid in rv64mfad">;
+def warn_drv_invalid_arch_name_with_suggestion : Warning<
+  "ignoring invalid /arch: argument '%0'; for %select{64|32}1-bit expected one of %2">,
+  InGroup<UnusedCommandLineArgument>;
 def warn_drv_avr_mcu_not_specified : Warning<
   "no target microcontroller specified on command line, cannot "
   "link standard libraries, please pass -mmcu=<mcu name>">,
