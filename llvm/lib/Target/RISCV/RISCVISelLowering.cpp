@@ -8994,79 +8994,6 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
   return TailMBB;
 }
 
-static MachineBasicBlock *addEPISetVL(MachineInstr &MI, MachineBasicBlock *BB,
-                                      int VLIndex, unsigned SEWIndex,
-                                      int MaskOpIdx, unsigned VLMul) {
-  MachineFunction &MF = *BB->getParent();
-  DebugLoc DL = MI.getDebugLoc();
-  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
-
-  unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
-  unsigned SEW = MI.getOperand(SEWIndex).getImm() & ~(0x1 << 9);
-  assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
-
-  // LMUL should already be encoded correctly.
-  RISCVII::VLMUL Multiplier = static_cast<RISCVII::VLMUL>(VLMul);
-
-  MachineRegisterInfo &MRI = MF.getRegInfo();
-
-  // VL and VTYPE are alive here.
-  MachineInstrBuilder MIB =
-      BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoVSETVLI));
-
-  if (VLIndex >= 0) {
-    // Set VL (rs1 != X0).
-    Register DestReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-    MIB.addReg(DestReg, RegState::Define | RegState::Dead)
-        .addReg(MI.getOperand(VLIndex).getReg());
-  } else
-    // With no VL operator in the pseudo, do not modify VL (rd = X0, rs1 = X0).
-    MIB.addReg(RISCV::X0, RegState::Define | RegState::Dead)
-        .addReg(RISCV::X0, RegState::Kill);
-
-  // For simplicity we reuse the vtype representation here.
-  MIB.addImm(RISCVVType::encodeVTYPE(Multiplier, SEW,
-                                     /*TailAgnostic*/ true,
-                                     /*MaskAgnostic*/ false,
-                                     Nontemporal));
-
-  // Masked instructions under LMUL > 1 are a bit problematic as we don't want
-  // the destination to overlap the mask. So if they are VR register classes,
-  // make sure we use one that does not include V0.
-  bool LMULOver1 = Multiplier == RISCVII::LMUL_2 ||
-                   Multiplier == RISCVII::LMUL_4 ||
-                   Multiplier == RISCVII::LMUL_8;
-  if (LMULOver1 && MaskOpIdx >= 0 && MI.getOperand(MaskOpIdx).isReg() &&
-      MI.getOperand(MaskOpIdx).getReg() != RISCV::NoRegister &&
-      MI.getNumExplicitDefs() != 0) {
-    assert(MI.getNumExplicitDefs() == 1 && "Too many explicit definitions!");
-    assert(MI.getOperand(0).isDef() && "Expecting a def here");
-    if (MI.getOperand(0).isReg()) {
-      Register Def = MI.getOperand(0).getReg();
-      assert(Register::isVirtualRegister(Def) && "Def should be virtual here");
-      const TargetRegisterClass *RC = MRI.getRegClass(Def);
-       // FIXME: what about tuples?
-      if (RC->hasSuperClassEq(&RISCV::VRRegClass)) {
-        MRI.setRegClass(Def, &RISCV::VRNoV0RegClass);
-      } else if (RC->hasSuperClassEq(&RISCV::VRM2RegClass)) {
-        MRI.setRegClass(Def, &RISCV::VRM2NoV0RegClass);
-      } else if (RC->hasSuperClassEq(&RISCV::VRM4RegClass)) {
-        MRI.setRegClass(Def, &RISCV::VRM4NoV0RegClass);
-      } else if (RC->hasSuperClassEq(&RISCV::VRM8RegClass)) {
-        MRI.setRegClass(Def, &RISCV::VRM8NoV0RegClass);
-      }
-    }
-  }
-
-  // Remove (now) redundant operands from pseudo
-  if (VLIndex >= 0) {
-    MI.getOperand(VLIndex).setReg(RISCV::NoRegister);
-    MI.getOperand(VLIndex).setIsKill(false);
-  }
-
-  return BB;
-}
-
 static MachineBasicBlock *emitComputeVSCALE(MachineInstr &MI,
                                             MachineBasicBlock *BB) {
   MachineFunction &MF = *BB->getParent();
@@ -9122,18 +9049,16 @@ static MachineBasicBlock *emitComputeEPIVMSET(MachineInstr &MI,
   Register DestReg = MI.getOperand(0).getReg();
   unsigned SEW = MI.getOperand(2).getImm();
 
-  MachineInstr *NewMI =
-      BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoEPIVMXNOR_MM_M1), DestReg)
-          .addReg(DestReg, RegState::Undef)
-          .addReg(DestReg, RegState::Undef)
-          .addReg(MI.getOperand(1).getReg())
-          .addImm(SEW);
+  BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoEPIVMXNOR_MM_M1), DestReg)
+      .addReg(DestReg, RegState::Undef)
+      .addReg(DestReg, RegState::Undef)
+      .addReg(MI.getOperand(1).getReg())
+      .addImm(SEW);
 
   // The pseudo instruction is gone now.
   MI.eraseFromParent();
 
-  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4,
-                     /* MaskOpIdx */ -1, VLMul);
+  return BB;
 }
 
 static MachineBasicBlock *emitComputeEPIVMCLR(MachineInstr &MI,
@@ -9163,18 +9088,16 @@ static MachineBasicBlock *emitComputeEPIVMCLR(MachineInstr &MI,
   Register DestReg = MI.getOperand(0).getReg();
   unsigned SEW = MI.getOperand(2).getImm();
 
-  MachineInstr *NewMI =
-      BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoEPIVMXOR_MM_M1), DestReg)
-          .addReg(DestReg, RegState::Undef)
-          .addReg(DestReg, RegState::Undef)
-          .addReg(MI.getOperand(1).getReg())
-          .addImm(SEW);
+  BuildMI(*BB, MI, DL, TII.get(RISCV::PseudoEPIVMXOR_MM_M1), DestReg)
+      .addReg(DestReg, RegState::Undef)
+      .addReg(DestReg, RegState::Undef)
+      .addReg(MI.getOperand(1).getReg())
+      .addImm(SEW);
 
   // The pseudo instruction is gone now.
   MI.eraseFromParent();
 
-  return addEPISetVL(*NewMI, BB, /* VLIndex */ 3, /* SEWIndex */ 4,
-                     /* MaskOpIdx */ -1, VLMul);
+  return BB;
 }
 
 static MachineBasicBlock *emitImplicitVRM1Tuple(MachineInstr &MI,
