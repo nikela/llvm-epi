@@ -662,13 +662,6 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
                                             /* Nontemporal */ NonTemporal);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   SDValue VLOperand = Node->getOperand(1);
-  bool IsVLMax = false;
-  if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
-    if (C->isNullValue()) {
-      IsVLMax = true;
-      VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
-    }
-  }
 
   SmallVector<EVT> VTs;
   VTs.push_back(XLenVT);
@@ -677,7 +670,7 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
   Ops.push_back(VTypeIOp);
   unsigned OpCode;
   if (!UsePseudoVSETVLEXT) {
-    OpCode = IsVLMax ? RISCV::PseudoVSETVLIX0 : RISCV::PseudoVSETVLI;
+    OpCode = RISCV::PseudoVSETVLI;
   } else {
     OpCode = RISCV::PseudoVSETVLEXT;
     VTs.push_back(XLenVT);
