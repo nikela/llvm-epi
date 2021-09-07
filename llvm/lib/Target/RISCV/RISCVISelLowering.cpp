@@ -6971,8 +6971,10 @@ SDValue RISCVTargetLowering::lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
   MVT VT = Op.getSimpleValueType();
   SmallVector<SDValue, 3> Ops;
 
+  Optional<unsigned> MaskIndex = ISD::getVPMaskIdx(Op.getOpcode());
+  assert(MaskIndex.hasValue() && "RISCVISD::VM*_VL node does not have a mask");
   for (const auto &OpIdx : enumerate(Op->ops())) {
-    if (OpIdx.index() == 2) // Ignore the mask argument
+    if (OpIdx.index() == MaskIndex.getValue()) // Ignore the mask argument
       continue;
     SDValue V = OpIdx.value();
     assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
