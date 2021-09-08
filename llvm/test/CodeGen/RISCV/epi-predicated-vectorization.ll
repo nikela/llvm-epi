@@ -18,25 +18,25 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    add a7, a1, t0
 ; CHECK-NEXT:    sub a0, a6, a5
 ; CHECK-NEXT:    vsetvli t1, a0, e64, m1, ta, mu
+; CHECK-NEXT:    slli a0, t1, 32
+; CHECK-NEXT:    srli t3, a0, 32
+; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a7)
+; CHECK-NEXT:    vsetvli zero, t1, e64, m1, ta, mu
 ; CHECK-NEXT:    vmflt.vf v28, v25, ft0
-; CHECK-NEXT:    add a0, a2, t0
-; CHECK-NEXT:    vle64.v v25, (a0)
+; CHECK-NEXT:    add t2, a2, t0
+; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
+; CHECK-NEXT:    vle64.v v25, (t2)
 ; CHECK-NEXT:    add a0, a3, t0
 ; CHECK-NEXT:    vle64.v v26, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-NEXT:    vmnand.mm v0, v28, v28
-; CHECK-NEXT:    slli a0, t1, 32
-; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v27, v25, v26, v0.t
-; CHECK-NEXT:    add t0, t0, a4
-; CHECK-NEXT:    vsetvli zero, t1, e64, m1, ta, mu
-; CHECK-NEXT:    vse64.v v27, (t0), v0.t
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    add a0, a4, t0
+; CHECK-NEXT:    vse64.v v27, (a0), v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v28
 ; CHECK-NEXT:    vfadd.vv v25, v25, v26, v0.t
-; CHECK-NEXT:    vsetvli zero, t1, e64, m1, ta, mu
 ; CHECK-NEXT:    add a5, a5, t1
 ; CHECK-NEXT:    vse64.v v25, (a7), v0.t
 ; CHECK-NEXT:    bne a5, a6, .LBB0_2

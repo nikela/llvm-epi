@@ -6365,17 +6365,36 @@ SDValue RISCVTargetLowering::lowerMaskedLoad(SDValue Op,
   if (!VL)
     VL = getDefaultVLOps(VT, ContainerVT, DL, DAG, Subtarget).second;
 
-  SDVTList VTs = DAG.getVTList({ContainerVT, MVT::Other});
-  SDValue IntID = DAG.getTargetConstant(Intrinsic::riscv_vle_mask, DL, XLenVT);
-  SDValue Ops[] = {Chain, IntID, PassThru, BasePtr, Mask, VL};
-  SDValue Result =
-      DAG.getMemIntrinsicNode(ISD::INTRINSIC_W_CHAIN, DL, VTs, Ops, MemVT, MMO);
-  Chain = Result.getValue(1);
+  // If the mask is known to be all ones, optimize to an unmasked intrinsic;
+  // the selection of the masked intrinsics doesn't do this for us.
+  bool IsUnmasked = ISD::isConstantSplatVectorAllOnes(Mask.getNode());
 
-  if (VT.isFixedLengthVector())
-    Result = convertFromScalableVector(VT, Result, DAG, Subtarget);
+  if (IsUnmasked) {
+    SDVTList VTs = DAG.getVTList({ContainerVT, MVT::Other});
+    SDValue IntID = DAG.getTargetConstant(Intrinsic::riscv_vle, DL, XLenVT);
+    SDValue Ops[] = {Chain, IntID, BasePtr, VL};
+    SDValue Result = DAG.getMemIntrinsicNode(ISD::INTRINSIC_W_CHAIN, DL, VTs,
+                                             Ops, MemVT, MMO);
+    Chain = Result.getValue(1);
 
-  return DAG.getMergeValues({Result, Chain}, DL);
+    if (VT.isFixedLengthVector())
+      Result = convertFromScalableVector(VT, Result, DAG, Subtarget);
+
+    return DAG.getMergeValues({Result, Chain}, DL);
+  } else {
+    SDVTList VTs = DAG.getVTList({ContainerVT, MVT::Other});
+    SDValue IntID =
+        DAG.getTargetConstant(Intrinsic::riscv_vle_mask, DL, XLenVT);
+    SDValue Ops[] = {Chain, IntID, PassThru, BasePtr, Mask, VL};
+    SDValue Result = DAG.getMemIntrinsicNode(ISD::INTRINSIC_W_CHAIN, DL, VTs,
+                                             Ops, MemVT, MMO);
+    Chain = Result.getValue(1);
+
+    if (VT.isFixedLengthVector())
+      Result = convertFromScalableVector(VT, Result, DAG, Subtarget);
+
+    return DAG.getMergeValues({Result, Chain}, DL);
+  }
 }
 
 SDValue RISCVTargetLowering::lowerMaskedStore(SDValue Op,
@@ -6414,10 +6433,22 @@ SDValue RISCVTargetLowering::lowerMaskedStore(SDValue Op,
   if (!VL)
     VL = getDefaultVLOps(VT, ContainerVT, DL, DAG, Subtarget).second;
 
-  SDValue IntID = DAG.getTargetConstant(Intrinsic::riscv_vse_mask, DL, XLenVT);
-  return DAG.getMemIntrinsicNode(
-      ISD::INTRINSIC_VOID, DL, DAG.getVTList(MVT::Other),
-      {Chain, IntID, Val, BasePtr, Mask, VL}, MemVT, MMO);
+  // If the mask is known to be all ones, optimize to an unmasked intrinsic;
+  // the selection of the masked intrinsics doesn't do this for us.
+  bool IsUnmasked = ISD::isConstantSplatVectorAllOnes(Mask.getNode());
+
+  if (IsUnmasked) {
+    SDValue IntID = DAG.getTargetConstant(Intrinsic::riscv_vse, DL, XLenVT);
+    return DAG.getMemIntrinsicNode(
+        ISD::INTRINSIC_VOID, DL, DAG.getVTList(MVT::Other),
+        {Chain, IntID, Val, BasePtr, VL}, MemVT, MMO);
+  } else {
+    SDValue IntID =
+        DAG.getTargetConstant(Intrinsic::riscv_vse_mask, DL, XLenVT);
+    return DAG.getMemIntrinsicNode(
+        ISD::INTRINSIC_VOID, DL, DAG.getVTList(MVT::Other),
+        {Chain, IntID, Val, BasePtr, Mask, VL}, MemVT, MMO);
+  }
 }
 
 SDValue
