@@ -4086,7 +4086,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       SDValue RHS = Op.getOperand(2);
       if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
         EPIIntNo =
-            IsMasked ? Intrinsic::epi_vmsgtu_mask : Intrinsic::epi_vmsgtu_mask;
+            IsMasked ? Intrinsic::epi_vmsgtu_mask : Intrinsic::epi_vmsgtu;
       } else {
         VOpsPerm = {2, 1};
         EPIIntNo =
@@ -4120,7 +4120,7 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
       SDValue RHS = Op.getOperand(2);
       if (RHS.getOpcode() == ISD::SPLAT_VECTOR) {
         EPIIntNo =
-            IsMasked ? Intrinsic::epi_vmsgt_mask : Intrinsic::epi_vmsgt_mask;
+            IsMasked ? Intrinsic::epi_vmsgt_mask : Intrinsic::epi_vmsgt;
       } else {
         VOpsPerm = {2, 1};
         EPIIntNo = IsMasked ? Intrinsic::epi_vmslt_mask : Intrinsic::epi_vmslt;
