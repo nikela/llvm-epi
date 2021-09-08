@@ -150,7 +150,7 @@ static inline std::string getSecName(SecType Type) {
   case SecLBRProfile:
     return "LBRProfileSection";
   }
-  llvm_unreachable("A SecType has no name for output");
+  llvm_unreachable("");
 }
 
 // Entry type of section header table used by SampleProfileExtBinaryBaseReader
