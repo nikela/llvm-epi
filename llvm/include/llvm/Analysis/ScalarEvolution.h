@@ -1104,19 +1104,6 @@ public:
   bool invalidate(Function &F, const PreservedAnalyses &PA,
                   FunctionAnalysisManager::Invalidator &Inv);
 
-  /// Gathers the individual index expressions from a GEP instruction.
-  ///
-  /// This function optimistically assumes the GEP references into a fixed size
-  /// array. If this is actually true, this function returns a list of array
-  /// subscript expressions in \p Subscripts and a list of integers describing
-  /// the size of the individual array dimensions in \p Sizes. Both lists have
-  /// either equal length or the size list is one element shorter in case there
-  /// is no known size available for the outermost array dimension. Returns true
-  /// if successful and false otherwise.
-  bool getIndexExpressionsFromGEP(const GetElementPtrInst *GEP,
-                                  SmallVectorImpl<const SCEV *> &Subscripts,
-                                  SmallVectorImpl<int> &Sizes);
-
   /// Return the DataLayout associated with the module this SCEV instance is
   /// operating on.
   const DataLayout &getDataLayout() const {
@@ -2005,14 +1992,8 @@ private:
   bool matchURem(const SCEV *Expr, const SCEV *&LHS, const SCEV *&RHS);
 
   /// Look for a SCEV expression with type `SCEVType` and operands `Ops` in
-  /// `UniqueSCEVs`.
-  ///
-  /// The first component of the returned tuple is the SCEV if found and null
-  /// otherwise.  The second component is the `FoldingSetNodeID` that was
-  /// constructed to look up the SCEV and the third component is the insertion
-  /// point.
-  std::tuple<SCEV *, FoldingSetNodeID, void *>
-  findExistingSCEVInCache(SCEVTypes SCEVType, ArrayRef<const SCEV *> Ops);
+  /// `UniqueSCEVs`.  Return if found, else nullptr.
+  SCEV *findExistingSCEVInCache(SCEVTypes SCEVType, ArrayRef<const SCEV *> Ops);
 
   FoldingSet<SCEV> UniqueSCEVs;
   FoldingSet<SCEVPredicate> UniquePreds;
