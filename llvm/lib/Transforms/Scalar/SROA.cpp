@@ -706,10 +706,12 @@ private:
       return markAsDead(BC);
 
     // Don't consider casts between scalable types and other things.
-    if (isa<ScalableVectorType>(
-            cast<PointerType>(BC.getSrcTy())->getElementType()) !=
-        isa<ScalableVectorType>(
-            cast<PointerType>(BC.getDestTy())->getElementType()))
+    if (!cast<PointerType>(BC.getSrcTy())->isOpaquePointerTy() &&
+        !cast<PointerType>(BC.getDestTy())->isOpaquePointerTy() &&
+        (isa<ScalableVectorType>(
+             cast<PointerType>(BC.getSrcTy())->getElementType()) !=
+         isa<ScalableVectorType>(
+             cast<PointerType>(BC.getDestTy())->getElementType())))
       return PI.setAborted(&BC);
 
     return Base::visitBitCastInst(BC);
