@@ -300,13 +300,13 @@ static SDNode *SelectInsertVectorElement(SDNode *Node, SelectionDAG *CurDAG) {
   SDValue SEWOperand = CurDAG->getTargetConstant(SEW, DL, MVT::i64);
   SDValue NoRegMask = CurDAG->getRegister(RISCV::NoRegister, VTMask);
 
-  SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
+  SDValue VLMax = CurDAG->getTargetConstant(RISCV::VLMaxSentinel, DL, MVT::i64);
   auto *VID = CurDAG->getMachineNode(VIDInst, DL, VT,
-                                     {Undef, NoRegMask, VLOperand, SEWOperand});
+                                     {Undef, NoRegMask, VLMax, SEWOperand});
 
   auto *VMSEQ = CurDAG->getMachineNode(
       VMSetEqualInst, DL, VTMask,
-      {UndefMask, SDValue(VID, 0), Index, NoRegMask, VLOperand, SEWOperand});
+      {UndefMask, SDValue(VID, 0), Index, NoRegMask, VLMax, SEWOperand});
   SDValue VMSEQ_V0 = CurDAG->getCopyToReg(CurDAG->getEntryNode(), DL, RISCV::V0,
                                           SDValue(VMSEQ, 0), SDValue());
   SDValue V0GlueCopy = SDValue(VMSEQ_V0.getNode(), 1);
@@ -321,7 +321,7 @@ static SDNode *SelectInsertVectorElement(SDNode *Node, SelectionDAG *CurDAG) {
   SDValue V0Reg = CurDAG->getRegister(RISCV::V0, VTMask);
   auto *VMV = CurDAG->getMachineNode(
       VMergeInst, DL, VT,
-      {Vector, Value, V0Reg, VLOperand, SEWOperand, V0GlueCopy});
+      {Vector, Value, V0Reg, VLMax, SEWOperand, V0GlueCopy});
 
   return VMV;
 }
@@ -376,9 +376,9 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
       /* MaskAgnostic */ false,
       /* Nontemporal */ false);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, MVT::i64);
-  SDValue VLOperand = CurDAG->getRegister(RISCV::X0, MVT::i64);
-  auto *VSETVLI = CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, MVT::i64,
-                                         VLOperand, VTypeIOp);
+  SDValue VLMax = CurDAG->getRegister(RISCV::X0, MVT::i64);
+  auto *VSETVLI = CurDAG->getMachineNode(RISCV::PseudoVSETVLIX0, DL, MVT::i64,
+                                         VLMax, VTypeIOp);
 
   auto *ADDI =
       CurDAG->getMachineNode(RISCV::ADDI, DL, MVT::i64, SDValue(VSETVLI, 0),
@@ -391,16 +391,16 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
   SDValue SEWOperand = CurDAG->getTargetConstant(SEW, DL, MVT::i64);
 
   auto *VID = CurDAG->getMachineNode(VIDInst, DL, VT,
-                                     {Undef, NoRegMask, VLOperand, SEWOperand});
+                                     {Undef, NoRegMask, VLMax, SEWOperand});
 
   auto *VRSUB =
       CurDAG->getMachineNode(VRSUBInst, DL, VT,
                              {Undef, SDValue(VID, 0), SDValue(ADDI, 0),
-                              NoRegMask, VLOperand, SEWOperand});
+                              NoRegMask, VLMax, SEWOperand});
 
   auto *VRGATHER = CurDAG->getMachineNode(
       VRGATHERInst, DL, VT,
-      {Undef, Op, SDValue(VRSUB, 0), NoRegMask, VLOperand, SEWOperand});
+      {Undef, Op, SDValue(VRSUB, 0), NoRegMask, VLMax, SEWOperand});
 
   return VRGATHER;
 }
@@ -662,15 +662,6 @@ void RISCVDAGToDAGISel::selectVSETVL(SDNode *Node, MVT XLenVT,
                                             /* Nontemporal */ NonTemporal);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
   SDValue VLOperand = Node->getOperand(1);
-  if (auto *C = dyn_cast<ConstantSDNode>(VLOperand)) {
-    if (C->isNullValue()) {
-      VLOperand = SDValue(
-          CurDAG->getMachineNode(RISCV::ADDI, DL, XLenVT,
-                                 CurDAG->getRegister(RISCV::X0, XLenVT),
-                                 CurDAG->getTargetConstant(0, DL, XLenVT)),
-          0);
-    }
-  }
 
   SmallVector<EVT> VTs;
   VTs.push_back(XLenVT);
@@ -715,7 +706,6 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
                                             /* MaskAgnostic */ false,
                                             /* Nontemporal */ NonTemporal);
   SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
-  // FIXME DstReg for VLMAX must be != X0
   SDValue VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
 
   SmallVector<EVT> VTs;
@@ -725,8 +715,10 @@ void RISCVDAGToDAGISel::selectVSETVLMAX(SDNode *Node, MVT XLenVT,
   Ops.push_back(VTypeIOp);
   unsigned OpCode;
   if (!UsePseudoVSETVLEXT) {
-    OpCode = RISCV::PseudoVSETVLI;
+    OpCode = RISCV::PseudoVSETVLIX0;
   } else {
+    // FIXME: It looks like we'd need a PseudoVSETVLEXTX0 similar to
+    // PseudoVSETVLIX0.
     OpCode = RISCV::PseudoVSETVLEXT;
     VTs.push_back(XLenVT);
     Ops.push_back(Node->getOperand(FlagsIndex));
@@ -823,7 +815,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
   switch (Opcode) {
   case ISD::Constant: {
     auto *ConstNode = cast<ConstantSDNode>(Node);
-    if (VT == XLenVT && ConstNode->isNullValue()) {
+    if (VT == XLenVT && ConstNode->isZero()) {
       SDValue New =
           CurDAG->getCopyFromReg(CurDAG->getEntryNode(), DL, RISCV::X0, XLenVT);
       ReplaceNode(Node, New.getNode());
@@ -1074,7 +1066,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
                                   /* Nontemporal */ false),
           DL, XLenVT);
       SDValue VLMax =
-          SDValue(CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
+          SDValue(CurDAG->getMachineNode(RISCV::PseudoVSETVLIX0, DL, XLenVT,
                                          CurDAG->getRegister(RISCV::X0, XLenVT),
                                          VTypeIOp),
                   0);
@@ -1314,8 +1306,10 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       SDValue VTypeIOp = CurDAG->getTargetConstant(VTypeI, DL, XLenVT);
 
       SDValue VLOperand;
+      unsigned Opcode = RISCV::PseudoVSETVLI;
       if (VLMax) {
         VLOperand = CurDAG->getRegister(RISCV::X0, XLenVT);
+        Opcode = RISCV::PseudoVSETVLIX0;
       } else {
         VLOperand = Node->getOperand(2);
 
@@ -1333,7 +1327,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       }
 
       ReplaceNode(Node,
-                  CurDAG->getMachineNode(RISCV::PseudoVSETVLI, DL, XLenVT,
+                  CurDAG->getMachineNode(Opcode, DL, XLenVT,
                                          MVT::Other, VLOperand, VTypeIOp,
                                          /* Chain */ Node->getOperand(0)));
       return;
@@ -1977,6 +1971,7 @@ bool RISCVDAGToDAGISel::selectZExti32(SDValue N, SDValue &Val) {
 bool RISCVDAGToDAGISel::hasAllNBitUsers(SDNode *Node, unsigned Bits) const {
   assert((Node->getOpcode() == ISD::ADD || Node->getOpcode() == ISD::SUB ||
           Node->getOpcode() == ISD::MUL || Node->getOpcode() == ISD::SHL ||
+          Node->getOpcode() == ISD::SIGN_EXTEND_INREG ||
           isa<ConstantSDNode>(Node)) &&
          "Unexpected opcode");
 

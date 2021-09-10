@@ -595,9 +595,14 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
 
   if (RISCVII::hasVLOp(TSFlags)) {
     const MachineOperand &VLOp = MI.getOperand(NumOperands - 2);
-    if (VLOp.isImm())
-      InstrInfo.setAVLImm(VLOp.getImm());
-    else {
+    if (VLOp.isImm()) {
+      int64_t Imm = VLOp.getImm();
+      // Conver the VLMax sentintel to X0 register.
+      if (Imm == RISCV::VLMaxSentinel)
+        InstrInfo.setAVLReg(RISCV::X0);
+      else
+        InstrInfo.setAVLImm(Imm);
+    } else {
       InstrInfo.setAVLReg(VLOp.getReg());
       // Try to recover the Extra operand value linked to this VL
       assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
@@ -700,12 +705,19 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
 
   if (VLIndex >= 0) {
     const MachineOperand &VLOp = MI.getOperand(VLIndex);
-    InstrInfo.setAVLReg(VLOp.getReg());
+    Register R = RISCV::NoRegister;
+    if (VLOp.isImm()) {
+      assert(VLOp.getImm() == RISCV::VLMaxSentinel &&
+             "Only the VLMAX sentinel can appear as an immediate operand");
+      R = RISCV::X0;
+    } else
+      R = VLOp.getReg();
+    InstrInfo.setAVLReg(R);
     // Try to recover the Extra operand value linked to this VL
-    assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
-           "We cannot have phisical registers here");
-    if (VLOp.getReg() != RISCV::X0) {
-      if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
+    assert((!R.isPhysical() || R == RISCV::X0) &&
+           "We cannot have physical registers here");
+    if (R != RISCV::X0) {
+      if (MachineInstr *DefMI = MRI->getVRegDef(R)) {
         switch (DefMI->getOpcode()) {
         case RISCV::PseudoVSETVLEXT:
           InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
@@ -801,7 +813,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   // VLMAX.
   if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
       Info.hasSameAVL(PrevInfo) && Info.hasSameVLMAX(PrevInfo)) {
-    BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLI))
+    BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addReg(RISCV::X0, RegState::Kill)
         .addImm(Info.encodeVTYPE())
@@ -823,7 +835,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     // the previous vl to become invalid.
     if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
         Info.hasSameVLMAX(PrevInfo)) {
-      BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLI))
+      BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
           .addReg(RISCV::X0, RegState::Define | RegState::Dead)
           .addReg(RISCV::X0, RegState::Kill)
           .addImm(Info.encodeVTYPE())
@@ -838,11 +850,19 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     return;
   }
 
-  // Use X0 as the DestReg unless AVLReg is X0.
+  if (AVLReg.isVirtual())
+    MRI->constrainRegClass(AVLReg, &RISCV::GPRNoX0RegClass);
+
+  // Use X0 as the DestReg unless AVLReg is X0. We also need to change the
+  // opcode if the AVLReg is X0 as they have different register classes for
+  // the AVL operand.
   Register DestReg = RISCV::X0;
-  if (AVLReg == RISCV::X0)
+  unsigned Opcode = RISCV::PseudoVSETVLI;
+  if (AVLReg == RISCV::X0) {
     DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
-  BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLI))
+    Opcode = RISCV::PseudoVSETVLIX0;
+  }
+  BuildMI(MBB, MI, DL, TII->get(Opcode))
       .addReg(DestReg, RegState::Define | RegState::Dead)
       .addReg(AVLReg)
       .addImm(Info.encodeVTYPE());
@@ -852,22 +872,21 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
 // VSETIVLI instruction.
 static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
   VSETVLIInfo NewInfo;
-
   if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
     NewInfo.setAVLReg(MI.getOperand(2).getReg());
     NewInfo.setVTYPE(MI.getOperand(3).getImm());
     NewInfo.setExtra(isRegister, MI.getOperand(4).getReg());
   } else {
-    if (MI.getOpcode() == RISCV::PseudoVSETVLI) {
+    if (MI.getOpcode() == RISCV::PseudoVSETIVLI) {
+      NewInfo.setAVLImm(MI.getOperand(1).getImm());
+    } else {
+      assert(MI.getOpcode() == RISCV::PseudoVSETVLI ||
+             MI.getOpcode() == RISCV::PseudoVSETVLIX0);
       Register AVLReg = MI.getOperand(1).getReg();
       assert((AVLReg != RISCV::X0 || MI.getOperand(0).getReg() != RISCV::X0) &&
              "Can't handle X0, X0 vsetvli yet");
       NewInfo.setAVLReg(AVLReg);
-    } else {
-      assert(MI.getOpcode() == RISCV::PseudoVSETIVLI);
-      NewInfo.setAVLImm(MI.getOperand(1).getImm());
     }
-
     NewInfo.setVTYPE(MI.getOperand(2).getImm());
     NewInfo.setExtra(isZero);
   }
@@ -889,6 +908,7 @@ bool RISCVInsertVSETVLI::needVSETVLI(const VSETVLIInfo &Require,
       Require.hasSameVTYPE(CurInfo)) {
     if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
       if (DefMI->getOpcode() == RISCV::PseudoVSETVLI ||
+          DefMI->getOpcode() == RISCV::PseudoVSETVLIX0 ||
           DefMI->getOpcode() == RISCV::PseudoVSETIVLI ||
           DefMI->getOpcode() == RISCV::PseudoVSETVLEXT) {
         VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
@@ -1104,6 +1124,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   for (const MachineInstr &MI : MBB) {
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
+        MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       HadVectorOp = true;
@@ -1276,6 +1297,7 @@ bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
     // We need the PHI input to the be the output of a VSET(I)VLI(EXT).
     MachineInstr *DefMI = MRI->getVRegDef(InReg);
     if (!DefMI || (DefMI->getOpcode() != RISCV::PseudoVSETVLI &&
+                   DefMI->getOpcode() != RISCV::PseudoVSETVLIX0 &&
                    DefMI->getOpcode() != RISCV::PseudoVSETIVLI &&
                    DefMI->getOpcode() != RISCV::PseudoVSETVLEXT))
       return true;
@@ -1301,6 +1323,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
   for (MachineInstr &MI : MBB) {
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
+        MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
       // Conservatively, mark the VL and VTYPE as live.
@@ -1393,10 +1416,14 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       if (VLIndex >= 0) {
         MachineOperand &VLOp = MI.getOperand(VLIndex);
         // We don't lower to VL immediates in EPI yet.
-        assert(VLOp.isReg());
-        // Erase the AVL operand from the instruction.
-        VLOp.setReg(RISCV::NoRegister);
-        VLOp.setIsKill(false);
+        assert((VLOp.isReg() ||
+                (VLOp.isImm() && VLOp.getImm() == RISCV::VLMaxSentinel)) &&
+               "Invalid AVL operand");
+        if (VLOp.isReg()) {
+          // Erase the AVL operand from the instruction.
+          VLOp.setReg(RISCV::NoRegister);
+          VLOp.setIsKill(false);
+        }
       }
 
       if (!CurInfo.isValid()) {

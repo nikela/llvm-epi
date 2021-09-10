@@ -339,6 +339,12 @@ Value *llvm::findScalarElement(Value *V, unsigned EltNo) {
       if (Elt->isNullValue())
         return findScalarElement(Val, EltNo);
 
+  // If the vector is a splat then we can trivially find the scalar element.
+  if (isa<ScalableVectorType>(VTy))
+    if (Value *Splat = getSplatValue(V))
+      if (EltNo < VTy->getElementCount().getKnownMinValue())
+        return Splat;
+
   // Otherwise, we don't know.
   return nullptr;
 }
@@ -948,7 +954,7 @@ APInt llvm::possiblyDemandedEltsInMask(Value *Mask) {
 
   const unsigned VWidth =
       cast<FixedVectorType>(Mask->getType())->getNumElements();
-  APInt DemandedElts = APInt::getAllOnesValue(VWidth);
+  APInt DemandedElts = APInt::getAllOnes(VWidth);
   if (auto *CV = dyn_cast<ConstantVector>(Mask))
     for (unsigned i = 0; i < VWidth; i++)
       if (CV->getAggregateElement(i)->isNullValue())

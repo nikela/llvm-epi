@@ -706,10 +706,12 @@ private:
       return markAsDead(BC);
 
     // Don't consider casts between scalable types and other things.
-    if (isa<ScalableVectorType>(
-            cast<PointerType>(BC.getSrcTy())->getElementType()) !=
-        isa<ScalableVectorType>(
-            cast<PointerType>(BC.getDestTy())->getElementType()))
+    if (!cast<PointerType>(BC.getSrcTy())->isOpaquePointerTy() &&
+        !cast<PointerType>(BC.getDestTy())->isOpaquePointerTy() &&
+        (isa<ScalableVectorType>(
+             cast<PointerType>(BC.getSrcTy())->getElementType()) !=
+         isa<ScalableVectorType>(
+             cast<PointerType>(BC.getDestTy())->getElementType())))
       return PI.setAborted(&BC);
 
     return Base::visitBitCastInst(BC);
@@ -1612,6 +1614,15 @@ static Value *getNaturalGEPWithOffset(IRBuilderTy &IRB, const DataLayout &DL,
 static Value *getAdjustedPtr(IRBuilderTy &IRB, const DataLayout &DL, Value *Ptr,
                              APInt Offset, Type *PointerTy,
                              const Twine &NamePrefix) {
+  // Create i8 GEP for opaque pointers.
+  if (Ptr->getType()->isOpaquePointerTy()) {
+    if (Offset != 0)
+      Ptr = IRB.CreateInBoundsGEP(IRB.getInt8Ty(), Ptr, IRB.getInt(Offset),
+                                  NamePrefix + "sroa_idx");
+    return IRB.CreatePointerBitCastOrAddrSpaceCast(Ptr, PointerTy,
+                                                   NamePrefix + "sroa_cast");
+  }
+
   // Even though we don't look through PHI nodes, we could be called on an
   // instruction in an unreachable block, which may be on a cycle.
   SmallPtrSet<Value *, 4> Visited;
@@ -1878,13 +1889,13 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
   } else if (IntrinsicInst *II = dyn_cast<IntrinsicInst>(U->getUser())) {
     if (!II->isLifetimeStartOrEnd() && !II->isDroppable())
       return false;
-  } else if (U->get()->getType()->getPointerElementType()->isStructTy()) {
-    // Disable vector promotion when there are loads or stores of an FCA.
-    return false;
   } else if (LoadInst *LI = dyn_cast<LoadInst>(U->getUser())) {
     if (LI->isVolatile())
       return false;
     Type *LTy = LI->getType();
+    // Disable vector promotion when there are loads or stores of an FCA.
+    if (LTy->isStructTy())
+      return false;
     if (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset()) {
       assert(LTy->isIntegerTy());
       LTy = SplitIntTy;
@@ -1895,6 +1906,9 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
     if (SI->isVolatile())
       return false;
     Type *STy = SI->getValueOperand()->getType();
+    // Disable vector promotion when there are loads or stores of an FCA.
+    if (STy->isStructTy())
+      return false;
     if (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset()) {
       assert(STy->isIntegerTy());
       STy = SplitIntTy;
@@ -2774,7 +2788,9 @@ private:
     deleteIfTriviallyDead(OldOp);
 
     LLVM_DEBUG(dbgs() << "          to: " << *NewSI << "\n");
-    return NewSI->getPointerOperand() == &NewAI && !SI.isVolatile();
+    return NewSI->getPointerOperand() == &NewAI &&
+           NewSI->getValueOperand()->getType() == NewAllocaTy &&
+           !SI.isVolatile();
   }
 
   /// Compute an integer value from splatting an i8 across the given
