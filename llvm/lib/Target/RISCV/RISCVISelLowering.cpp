@@ -3713,6 +3713,38 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   // then we need to use another (custom) method
   // (like we already do for narrowing, see below)
   if (Ratio > 2 && DstTypeSize > SrcTypeSize) {
+    // If SrcType is MVT::i1, then use the same lowering as the llvm IR opcode
+    if (SrcType.getVectorElementType() == MVT::i1) {
+      switch (IntNo) {
+      default:
+        llvm_unreachable("SrcType == i1 not handled for intrinsics other than "
+                         "vp_zext/vp_sext");
+      // NOTE: for both vp_sext and vp_zext we do not handle the masked cases
+      // because they are not trivial (and the unmasked cases generate a correct
+      // result anyway)
+      case Intrinsic::vp_sext:
+      case Intrinsic::vp_zext: {
+        uint64_t ExtValue = IntNo == Intrinsic::vp_zext ? 1 : -1;
+
+        SmallVector<SDValue, 3> VMVOps;
+        VMVOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmv_v_x, DL, MVT::i64));
+        VMVOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+        VMVOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+        SDValue VMV = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMVOps);
+
+        SmallVector<SDValue, 5> VMERGEOps;
+        VMERGEOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmerge, DL, MVT::i64));
+        VMERGEOps.push_back(VMV);
+        VMERGEOps.push_back(DAG.getConstant(ExtValue, DL, MVT::i64));
+        VMERGEOps.push_back(SrcOp);
+        VMERGEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMERGEOps);
+      }
+      }
+    }
     // Invoke the FurtherEPIIntNo intrinsic to widen the source operand
     // as many times as needed, without changing the type
     EVT FromType = SrcType;
@@ -3736,7 +3768,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     }
   }
 
-  auto narrowVectorElementType = [&](EVT SrcVT) -> EVT {
+  auto NarrowVectorElementType = [&](EVT SrcVT) -> EVT {
     EVT SrcEltVT = SrcVT.getVectorElementType();
     const ElementCount EltCount = SrcVT.getVectorElementCount();
     MVT ToEltVT;
@@ -3756,7 +3788,45 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   // Invoke EPIIntNo intrinsic
   EVT ToType = DstType;
   if (Ratio > 2 && DstTypeSize < SrcTypeSize) {
-    ToType = narrowVectorElementType(SrcType);
+    // If DstType is MVT::i1, then use the same lowering as the llvm IR opcode
+    if (DstType.getVectorElementType() == MVT::i1) {
+      switch (IntNo) {
+      default:
+        llvm_unreachable("DstType == i1 not handled for intrinsics other than "
+                         "vp_trunc");
+      case Intrinsic::vp_trunc: {
+        unsigned VANDIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
+        unsigned VMSNEIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
+
+        SmallVector<SDValue, 6> VANDOps;
+        VANDOps.push_back(DAG.getTargetConstant(VANDIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(DAG.getNode(ISD::UNDEF, DL, SrcType)); // Merge
+        VANDOps.push_back(SrcOp);
+        VANDOps.push_back(DAG.getConstant(1, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VANDOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+        SDValue VAND = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, SrcType, VANDOps);
+
+        SmallVector<SDValue, 6> VMSNEOps;
+        VMSNEOps.push_back(DAG.getTargetConstant(VMSNEIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(DAG.getNode(ISD::UNDEF, DL, DstType)); // Merge
+        VMSNEOps.push_back(VAND);
+        VMSNEOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VMSNEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMSNEOps);
+      }
+      }
+    }
+
+    ToType = NarrowVectorElementType(SrcType);
   }
   std::vector<SDValue> Operands;
   Operands.reserve(4 + IsMasked * 2);
@@ -3783,7 +3853,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     // as many times as needed, without changing the type
     EVT ResultType = ToType;
     for (int i = 0; i < Ratio/4; i++) {
-      ToType = narrowVectorElementType(ResultType);
+      ToType = NarrowVectorElementType(ResultType);
       std::vector<SDValue> Operands;
       Operands.reserve(4 + IsMasked * 2);
       Operands.push_back(DAG.getTargetConstant(FurtherEPIIntNo, DL, MVT::i64));
