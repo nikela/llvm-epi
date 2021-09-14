@@ -199,29 +199,16 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_int_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -16
-; CHECK-O0-NEXT:    csrr a3, vlenb
-; CHECK-O0-NEXT:    sub sp, sp, a3
 ; CHECK-O0-NEXT:    mv a3, a2
 ; CHECK-O0-NEXT:    mv a2, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x13
-; CHECK-O0-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmset.m v0
-; CHECK-O0-NEXT:    addi a0, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    slli a3, a3, 32
 ; CHECK-O0-NEXT:    srli a3, a3, 32
-; CHECK-O0-NEXT:    # implicit-def: $v25
 ; CHECK-O0-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vle32.v v25, (a2), v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v14
-; CHECK-O0-NEXT:    vle32.v v14, (a1), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vle32.v v25, (a2)
+; CHECK-O0-NEXT:    vle32.v v14, (a1)
 ; CHECK-O0-NEXT:    vadd.vv v13, v25, v14
 ; CHECK-O0-NEXT:    vsub.vv v12, v25, v14
 ; CHECK-O0-NEXT:    vmul.vv v11, v25, v14
@@ -235,57 +222,28 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    vsra.vv v27, v25, v14
 ; CHECK-O0-NEXT:    vsrl.vv v26, v25, v14
 ; CHECK-O0-NEXT:    vsll.vv v25, v25, v14
-; CHECK-O0-NEXT:    vse32.v v13, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v12, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v11, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v10, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v9, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v8, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v31, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v30, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v29, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v28, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v27, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v26, (a0), v0.t
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vse32.v v25, (a0), v0.t
-; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 16
+; CHECK-O0-NEXT:    vse32.v v13, (a0)
+; CHECK-O0-NEXT:    vse32.v v12, (a0)
+; CHECK-O0-NEXT:    vse32.v v11, (a0)
+; CHECK-O0-NEXT:    vse32.v v10, (a0)
+; CHECK-O0-NEXT:    vse32.v v9, (a0)
+; CHECK-O0-NEXT:    vse32.v v8, (a0)
+; CHECK-O0-NEXT:    vse32.v v31, (a0)
+; CHECK-O0-NEXT:    vse32.v v30, (a0)
+; CHECK-O0-NEXT:    vse32.v v29, (a0)
+; CHECK-O0-NEXT:    vse32.v v28, (a0)
+; CHECK-O0-NEXT:    vse32.v v27, (a0)
+; CHECK-O0-NEXT:    vse32.v v26, (a0)
+; CHECK-O0-NEXT:    vse32.v v25, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_int_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmset.m v0
 ; CHECK-O2-NEXT:    slli a2, a2, 32
 ; CHECK-O2-NEXT:    srli a2, a2, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vle32.v v25, (a0), v0.t
-; CHECK-O2-NEXT:    vle32.v v26, (a1), v0.t
+; CHECK-O2-NEXT:    vle32.v v25, (a0)
+; CHECK-O2-NEXT:    vle32.v v26, (a1)
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vadd.vv v27, v25, v26
@@ -301,19 +259,19 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O2-NEXT:    vsra.vv v13, v25, v26
 ; CHECK-O2-NEXT:    vsrl.vv v14, v25, v26
 ; CHECK-O2-NEXT:    vsll.vv v25, v25, v26
-; CHECK-O2-NEXT:    vse32.v v27, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v28, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v29, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v30, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v31, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v8, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v9, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v10, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v11, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v12, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v13, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v14, (a0), v0.t
-; CHECK-O2-NEXT:    vse32.v v25, (a0), v0.t
+; CHECK-O2-NEXT:    vse32.v v27, (a0)
+; CHECK-O2-NEXT:    vse32.v v28, (a0)
+; CHECK-O2-NEXT:    vse32.v v29, (a0)
+; CHECK-O2-NEXT:    vse32.v v30, (a0)
+; CHECK-O2-NEXT:    vse32.v v31, (a0)
+; CHECK-O2-NEXT:    vse32.v v8, (a0)
+; CHECK-O2-NEXT:    vse32.v v9, (a0)
+; CHECK-O2-NEXT:    vse32.v v10, (a0)
+; CHECK-O2-NEXT:    vse32.v v11, (a0)
+; CHECK-O2-NEXT:    vse32.v v12, (a0)
+; CHECK-O2-NEXT:    vse32.v v13, (a0)
+; CHECK-O2-NEXT:    vse32.v v14, (a0)
+; CHECK-O2-NEXT:    vse32.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
