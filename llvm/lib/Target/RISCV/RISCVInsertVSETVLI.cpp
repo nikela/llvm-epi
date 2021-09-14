@@ -65,6 +65,7 @@ class VSETVLIInfo {
   uint8_t TailAgnostic : 1;
   uint8_t MaskAgnostic : 1;
   uint8_t MaskRegOp : 1;
+  uint8_t StoreOp : 1;
   uint8_t SEWLMULRatioOnly : 1;
   uint8_t Nontemporal : 1;
 
@@ -80,7 +81,7 @@ class VSETVLIInfo {
 public:
   VSETVLIInfo()
       : AVLImm(0), TailAgnostic(false), MaskAgnostic(false), MaskRegOp(false),
-        SEWLMULRatioOnly(false) {
+        StoreOp(false), SEWLMULRatioOnly(false) {
     this->setExtra();
   }
 
@@ -140,7 +141,7 @@ public:
   }
 
   void setVTYPE(RISCVII::VLMUL L, unsigned S, bool TA, bool MA, bool MRO,
-                bool NT) {
+                bool IsStore, bool NT) {
     assert(isValid() && !isUnknown() &&
            "Can't set VTYPE for uninitialized or unknown");
     VLMul = L;
@@ -148,6 +149,7 @@ public:
     TailAgnostic = TA;
     MaskAgnostic = MA;
     MaskRegOp = MRO;
+    StoreOp = IsStore;
     Nontemporal = NT;
   }
 
@@ -266,17 +268,28 @@ public:
         return true;
     }
 
-    // VTypes must match unless the instruction is a mask reg operation, then it
-    // only care about VLMAX.
-    // FIXME: Mask reg operations are probably ok if "this" VLMAX is larger
-    // than "InstrInfo".
-    if (!hasSameVTYPE(InstrInfo) &&
-        !(InstrInfo.MaskRegOp && hasSameVLMAX(InstrInfo) &&
-          TailAgnostic == InstrInfo.TailAgnostic &&
-          MaskAgnostic == InstrInfo.MaskAgnostic))
+    // The AVL must match.
+    if (!hasSameAVL(InstrInfo))
       return false;
 
-    return hasSameAVL(InstrInfo);
+    // Simple case, see if full VTYPE matches.
+    if (hasSameVTYPE(InstrInfo))
+      return true;
+
+    // If this is a mask reg operation, it only cares about VLMAX.
+    // FIXME: Mask reg operations are probably ok if "this" VLMAX is larger
+    // than "InstrInfo".
+    if (InstrInfo.MaskRegOp && hasSameVLMAX(InstrInfo) &&
+        TailAgnostic == InstrInfo.TailAgnostic &&
+        MaskAgnostic == InstrInfo.MaskAgnostic)
+      return true;
+
+    // Store instructions don't use the policy fields.
+    if (InstrInfo.StoreOp && VLMul == InstrInfo.VLMul && SEW == InstrInfo.SEW)
+      return true;
+
+    // Anything else is not compatible.
+    return false;
   }
 
   bool isCompatibleWithLoadStoreEEW(unsigned EEW,
@@ -293,10 +306,9 @@ public:
     if (!hasSameAVL(InstrInfo))
       return false;
 
-    // TODO: This check isn't required for stores. But we should ignore for all
-    // stores not just unit-stride and strided so leaving it for now.
-    if (TailAgnostic != InstrInfo.TailAgnostic ||
-        MaskAgnostic != InstrInfo.MaskAgnostic)
+    // Stores can ignore the tail and mask policies.
+    if (!InstrInfo.StoreOp && (TailAgnostic != InstrInfo.TailAgnostic ||
+                               MaskAgnostic != InstrInfo.MaskAgnostic))
       return false;
 
     return getSEWLMULRatio() == getSEWLMULRatio(EEW, InstrInfo.VLMul);
@@ -593,6 +605,10 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
   unsigned SEW = Log2SEW ? 1 << Log2SEW : 8;
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
 
+  // If there are no explicit defs, this is a store instruction which can
+  // ignore the tail and mask policies.
+  bool StoreOp = MI.getNumExplicitDefs() == 0;
+
   if (RISCVII::hasVLOp(TSFlags)) {
     const MachineOperand &VLOp = MI.getOperand(NumOperands - 2);
     if (VLOp.isImm()) {
@@ -654,7 +670,7 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ TailAgnostic,
-                     /*MaskAgnostic*/ false, MaskRegOp,
+                     /*MaskAgnostic*/ false, MaskRegOp, StoreOp,
                      /* Nontemporal */ false);
 
   return InstrInfo;
@@ -673,6 +689,10 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
 
   // LMUL should already be encoded correctly.
   RISCVII::VLMUL VLMul = static_cast<RISCVII::VLMUL>(VLMUL);
+
+  // If there are no explicit defs, this is a store instruction which can
+  // ignore the tail and mask policies.
+  bool StoreOp = MI.getNumExplicitDefs() == 0;
 
   // We used to do this in the custom inserter but as long as it happens before
   // regalloc we should be fine.
@@ -762,7 +782,7 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                     /*MaskAgnostic*/ false, /* MaskRegOp */ false,
+                     /*MaskAgnostic*/ false, /* MaskRegOp */ false, StoreOp,
                      Nontemporal);
 
   return InstrInfo;

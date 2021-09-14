@@ -13333,6 +13333,9 @@ static SDValue performSVEAndCombine(SDNode *N,
 
     SDLoc DL(N);
     ConstantSDNode *C = dyn_cast<ConstantSDNode>(Dup->getOperand(0));
+    if (!C)
+      return SDValue();
+
     uint64_t ExtVal = C->getZExtValue();
 
     // If the mask is fully covered by the unpack, we don't need to push
@@ -18159,9 +18162,6 @@ static SDValue convertFixedMaskToScalableVector(SDValue Mask,
 SDValue AArch64TargetLowering::LowerFixedLengthVectorMLoadToSVE(
     SDValue Op, SelectionDAG &DAG) const {
   auto Load = cast<MaskedLoadSDNode>(Op);
-
-  if (Load->getExtensionType() != ISD::LoadExtType::NON_EXTLOAD)
-    return SDValue();
 
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
