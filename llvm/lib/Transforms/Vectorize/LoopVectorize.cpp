@@ -7247,6 +7247,9 @@ LoopVectorizationCostModel::getSmallestAndWidestTypes() {
     MaxWidth = std::max<unsigned>(
         MaxWidth, DL.getTypeSizeInBits(T->getScalarType()).getFixedSize());
   }
+  // Adjust MinWidth in degenerated cases.
+  if (MinWidth == -1U)
+    MinWidth = MaxWidth;
   return {MinWidth, MaxWidth};
 }
 
@@ -10538,6 +10541,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       }
     }
   }
+
+  // Ensure EVL is available.
+  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
+    RecipeBuilder.getOrCreateEVL(Plan);
 
   RecipeBuilder.fixHeaderPhis(Plan);
 
