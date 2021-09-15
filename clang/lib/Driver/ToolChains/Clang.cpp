@@ -2120,6 +2120,13 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
     CmdArgs.push_back("-mllvm");
     CmdArgs.push_back("-riscv-v-vector-bits-min=64");
 
+    // IndVarSimplify will not expand the loop count because we do not have
+    // an implementation of getCastInstrCost, a zext appears that is given
+    // a cost of 1 and then this may exceed the default budget of 4. Raise
+    // the budget to 8.
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-scev-cheap-expansion-budget=8");
+
     // FIXME: Remove this.
     CmdArgs.push_back("-mllvm");
     CmdArgs.push_back("-disable-vpred-sdags");
