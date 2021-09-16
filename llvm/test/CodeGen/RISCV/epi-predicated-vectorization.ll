@@ -19,19 +19,17 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    sub a0, a6, a5
 ; CHECK-NEXT:    vsetvli t1, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    slli a0, t1, 32
-; CHECK-NEXT:    srli t3, a0, 32
-; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
+; CHECK-NEXT:    srli t2, a0, 32
+; CHECK-NEXT:    vsetvli zero, t2, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v25, (a7)
-; CHECK-NEXT:    vsetvli zero, t1, e64, m1, ta, mu
 ; CHECK-NEXT:    vmflt.vf v25, v25, ft0
-; CHECK-NEXT:    add t2, a2, t0
-; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v26, (t2)
+; CHECK-NEXT:    add a0, a2, t0
+; CHECK-NEXT:    vle64.v v26, (a0)
 ; CHECK-NEXT:    add a0, a3, t0
 ; CHECK-NEXT:    vle64.v v27, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-NEXT:    vmnand.mm v0, v25, v25
-; CHECK-NEXT:    vsetvli zero, t3, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, t2, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v28, v26, v27, v0.t
 ; CHECK-NEXT:    add a0, a4, t0
 ; CHECK-NEXT:    vse64.v v28, (a0), v0.t

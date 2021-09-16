@@ -442,6 +442,9 @@ public:
   Value *getMemoryDataParam() const;
   static Optional<unsigned> getMemoryDataParamPos(Intrinsic::ID);
 
+  /// \returns The comparison predicate.
+  CmpInst::Predicate getCmpPredicate() const;
+
   // Methods for support type inquiry through isa, cast, and dyn_cast:
   static bool classof(const IntrinsicInst *I) {
     return isVPIntrinsic(I->getIntrinsicID());

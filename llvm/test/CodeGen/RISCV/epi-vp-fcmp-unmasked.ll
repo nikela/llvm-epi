@@ -6,91 +6,55 @@
 
 @scratch = global i8 0, align 16
 
-define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
+define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fcmp:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    add a1, sp, a1
-; CHECK-O0-NEXT:    addi a1, a1, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    slli a1, a0, 32
 ; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmclr.m v25
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmclr.m v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v9, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v9, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v9, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v9, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v26, v9, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v8, v0.t
-; CHECK-O0-NEXT:    vmand.mm v0, v25, v26
+; CHECK-O0-NEXT:    vmfeq.vv v27, v9, v9
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v8
+; CHECK-O0-NEXT:    vmand.mm v0, v26, v27
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfne.vv v25, v8, v9, v0.t
+; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v0
+; CHECK-O0-NEXT:    vmand.mm v26, v26, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v0, (a0)
 ; CHECK-O0-NEXT:    vmnand.mm v27, v0, v0
-; CHECK-O0-NEXT:    vmset.m v25
 ; CHECK-O0-NEXT:    vse1.v v27, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
@@ -127,58 +91,52 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <v
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmfle.vv v26, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vmor.mm v26, v26, v27
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9, v0.t
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fcmp:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vmv1r.v v25, v0
 ; CHECK-O2-NEXT:    slli a0, a0, 32
 ; CHECK-O2-NEXT:    srli a1, a0, 32
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vmset.m v25
 ; CHECK-O2-NEXT:    vmclr.m v26
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v9, v9, v0.t
-; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v9, v9
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
 ; CHECK-O2-NEXT:    vmfne.vv v26, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vmand.mm v26, v26, v0
@@ -186,178 +144,143 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <v
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vse1.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v26, v0, v0
-; CHECK-O2-NEXT:    vmset.m v27
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v9, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v9, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v26, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v26, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmfne.vv v25, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v26, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v26, v8, v9
+; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
-  %false = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 0, <vscale x 1 x i1> %m, i32 %n)
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
+  %false = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 0, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %false, <vscale x 1 x i1>* %store_addr
 
-  %oeq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 1, <vscale x 1 x i1> %m, i32 %n)
+  %oeq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 1, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %oeq, <vscale x 1 x i1>* %store_addr
 
-  %ogt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 2, <vscale x 1 x i1> %m, i32 %n)
+  %ogt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 2, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ogt, <vscale x 1 x i1>* %store_addr
 
-  %oge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 3, <vscale x 1 x i1> %m, i32 %n)
+  %oge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 3, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %oge, <vscale x 1 x i1>* %store_addr
 
-  %olt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 4, <vscale x 1 x i1> %m, i32 %n)
+  %olt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 4, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %olt, <vscale x 1 x i1>* %store_addr
 
-  %ole = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 5, <vscale x 1 x i1> %m, i32 %n)
+  %ole = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 5, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ole, <vscale x 1 x i1>* %store_addr
 
-  %one = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 6, <vscale x 1 x i1> %m, i32 %n)
+  %one = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 6, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %one, <vscale x 1 x i1>* %store_addr
 
-  %ord = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 7, <vscale x 1 x i1> %m, i32 %n)
+  %ord = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 7, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ord, <vscale x 1 x i1>* %store_addr
 
-  %uno = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 8, <vscale x 1 x i1> %m, i32 %n)
+  %uno = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 8, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %uno, <vscale x 1 x i1>* %store_addr
 
-  %ueq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 9, <vscale x 1 x i1> %m, i32 %n)
+  %ueq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 9, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ueq, <vscale x 1 x i1>* %store_addr
 
-  %ugt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 10, <vscale x 1 x i1> %m, i32 %n)
+  %ugt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 10, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ugt, <vscale x 1 x i1>* %store_addr
 
-  %uge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 11, <vscale x 1 x i1> %m, i32 %n)
+  %uge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 11, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %uge, <vscale x 1 x i1>* %store_addr
 
-  %ult = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 12, <vscale x 1 x i1> %m, i32 %n)
+  %ult = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 12, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ult, <vscale x 1 x i1>* %store_addr
 
-  %ule = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 13, <vscale x 1 x i1> %m, i32 %n)
+  %ule = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 13, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ule, <vscale x 1 x i1>* %store_addr
 
-  %une = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 14, <vscale x 1 x i1> %m, i32 %n)
+  %une = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 14, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %une, <vscale x 1 x i1>* %store_addr
 
-  %true = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 15, <vscale x 1 x i1> %m, i32 %n)
+  %true = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i8 15, <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %true, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
 
-define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fcmp_2:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    add a1, sp, a1
-; CHECK-O0-NEXT:    addi a1, a1, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    slli a1, a0, 32
 ; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmclr.m v25
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmclr.m v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v9, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v9, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v9, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v9, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v26, v9, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v8, v0.t
-; CHECK-O0-NEXT:    vmand.mm v0, v25, v26
+; CHECK-O0-NEXT:    vmfeq.vv v27, v9, v9
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v8
+; CHECK-O0-NEXT:    vmand.mm v0, v26, v27
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfne.vv v25, v8, v9, v0.t
+; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v0
+; CHECK-O0-NEXT:    vmand.mm v26, v26, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v0, (a0)
 ; CHECK-O0-NEXT:    vmnand.mm v27, v0, v0
-; CHECK-O0-NEXT:    vmset.m v25
 ; CHECK-O0-NEXT:    vse1.v v27, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
@@ -394,58 +317,52 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <v
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    vmfle.vv v26, v8, v9, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vmor.mm v26, v26, v27
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9, v0.t
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fcmp_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vmv1r.v v25, v0
 ; CHECK-O2-NEXT:    slli a0, a0, 32
 ; CHECK-O2-NEXT:    srli a1, a0, 32
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vmset.m v25
 ; CHECK-O2-NEXT:    vmclr.m v26
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v9, v9, v0.t
-; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v9, v9
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
 ; CHECK-O2-NEXT:    vmfne.vv v26, v8, v9, v0.t
 ; CHECK-O2-NEXT:    vmand.mm v26, v26, v0
@@ -453,178 +370,143 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <v
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vse1.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v26, v0, v0
-; CHECK-O2-NEXT:    vmset.m v27
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v9, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v9, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v8, v9, v0.t
-; CHECK-O2-NEXT:    vmor.mm v26, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v26, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmfne.vv v25, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v9, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v8, v9, v0.t
+; CHECK-O2-NEXT:    vmor.mm v26, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v26, v8, v9
+; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
-  %false = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 0, <vscale x 2 x i1> %m, i32 %n)
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %false = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 0, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %false, <vscale x 2 x i1>* %store_addr
 
-  %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 1, <vscale x 2 x i1> %m, i32 %n)
+  %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 1, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oeq, <vscale x 2 x i1>* %store_addr
 
-  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 2, <vscale x 2 x i1> %m, i32 %n)
+  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 2, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ogt, <vscale x 2 x i1>* %store_addr
 
-  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 3, <vscale x 2 x i1> %m, i32 %n)
+  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 3, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oge, <vscale x 2 x i1>* %store_addr
 
-  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 4, <vscale x 2 x i1> %m, i32 %n)
+  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 4, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %olt, <vscale x 2 x i1>* %store_addr
 
-  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 5, <vscale x 2 x i1> %m, i32 %n)
+  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 5, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ole, <vscale x 2 x i1>* %store_addr
 
-  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 6, <vscale x 2 x i1> %m, i32 %n)
+  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 6, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %one, <vscale x 2 x i1>* %store_addr
 
-  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 7, <vscale x 2 x i1> %m, i32 %n)
+  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 7, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ord, <vscale x 2 x i1>* %store_addr
 
-  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 8, <vscale x 2 x i1> %m, i32 %n)
+  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 8, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uno, <vscale x 2 x i1>* %store_addr
 
-  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 9, <vscale x 2 x i1> %m, i32 %n)
+  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 9, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ueq, <vscale x 2 x i1>* %store_addr
 
-  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
+  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 10, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
 
-  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
+  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 11, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
 
-  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
+  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 12, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
 
-  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
+  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 13, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
 
-  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 14, <vscale x 2 x i1> %m, i32 %n)
+  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 14, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %une, <vscale x 2 x i1>* %store_addr
 
-  %true = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 15, <vscale x 2 x i1> %m, i32 %n)
+  %true = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i8 15, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %true, <vscale x 2 x i1>* %store_addr
 
   ret void
 }
 
-define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fcmp_3:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    add a1, sp, a1
-; CHECK-O0-NEXT:    addi a1, a1, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    slli a1, a0, 32
 ; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmclr.m v25
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmclr.m v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v10, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v10
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v10, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v10, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v10, v8, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v10, v8
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v25, v8, v10, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmflt.vv v26, v8, v10
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v25, v8, v10, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vmfle.vv v26, v8, v10
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v26, v10, v10, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfeq.vv v25, v8, v8, v0.t
-; CHECK-O0-NEXT:    vmand.mm v0, v25, v26
+; CHECK-O0-NEXT:    vmfeq.vv v27, v10, v10
+; CHECK-O0-NEXT:    vmfeq.vv v26, v8, v8
+; CHECK-O0-NEXT:    vmand.mm v0, v26, v27
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vmfne.vv v25, v8, v10, v0.t
+; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v0
+; CHECK-O0-NEXT:    vmand.mm v26, v26, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vse1.v v25, (a0)
+; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v0, (a0)
 ; CHECK-O0-NEXT:    vmnand.mm v27, v0, v0
-; CHECK-O0-NEXT:    vmset.m v25
 ; CHECK-O0-NEXT:    vse1.v v27, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
@@ -661,58 +543,52 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
 ; CHECK-O0-NEXT:    vmfle.vv v26, v8, v10, v0.t
-; CHECK-O0-NEXT:    csrr a2, vlenb
-; CHECK-O0-NEXT:    add a2, sp, a2
-; CHECK-O0-NEXT:    addi a2, a2, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vmor.mm v26, v26, v27
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v26
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v26, v8, v10, v0.t
+; CHECK-O0-NEXT:    vmfne.vv v26, v8, v10
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vse1.v v26, (a0)
 ; CHECK-O0-NEXT:    vse1.v v25, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fcmp_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vmv1r.v v25, v0
 ; CHECK-O2-NEXT:    slli a0, a0, 32
 ; CHECK-O2-NEXT:    srli a1, a0, 32
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vmset.m v25
 ; CHECK-O2-NEXT:    vmclr.m v26
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v8, v10
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v10, v8, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v10, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v10, v8, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v10, v8
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v26, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmflt.vv v26, v8, v10
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v26, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmfle.vv v26, v8, v10
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v26, v10, v10, v0.t
-; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8, v0.t
+; CHECK-O2-NEXT:    vmfeq.vv v26, v10, v10
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v27, v26
 ; CHECK-O2-NEXT:    vmfne.vv v26, v8, v10, v0.t
 ; CHECK-O2-NEXT:    vmand.mm v26, v26, v0
@@ -720,94 +596,94 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vse1.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v26, v0, v0
-; CHECK-O2-NEXT:    vmset.m v27
 ; CHECK-O2-NEXT:    vse1.v v26, (a0)
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v28, v8, v10, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
+; CHECK-O2-NEXT:    vmfeq.vv v27, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v10, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v10, v8, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v28, v8, v10, v0.t
-; CHECK-O2-NEXT:    vmor.mm v28, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v28, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v28, v8, v10, v0.t
-; CHECK-O2-NEXT:    vmor.mm v26, v28, v26
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v26, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmv1r.v v0, v25
-; CHECK-O2-NEXT:    vmfne.vv v25, v8, v10, v0.t
-; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v10, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v10, v8, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v27, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmor.mm v27, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v27, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v27, v8, v10, v0.t
+; CHECK-O2-NEXT:    vmor.mm v26, v27, v26
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v26, v8, v10
+; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vse1.v v26, (a0)
+; CHECK-O2-NEXT:    vse1.v v25, (a0)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
-  %false = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 0, <vscale x 2 x i1> %m, i32 %n)
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %false = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 0, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %false, <vscale x 2 x i1>* %store_addr
 
-  %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 1, <vscale x 2 x i1> %m, i32 %n)
+  %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 1, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oeq, <vscale x 2 x i1>* %store_addr
 
-  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 2, <vscale x 2 x i1> %m, i32 %n)
+  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 2, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ogt, <vscale x 2 x i1>* %store_addr
 
-  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 3, <vscale x 2 x i1> %m, i32 %n)
+  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 3, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oge, <vscale x 2 x i1>* %store_addr
 
-  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 4, <vscale x 2 x i1> %m, i32 %n)
+  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 4, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %olt, <vscale x 2 x i1>* %store_addr
 
-  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 5, <vscale x 2 x i1> %m, i32 %n)
+  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 5, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ole, <vscale x 2 x i1>* %store_addr
 
-  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 6, <vscale x 2 x i1> %m, i32 %n)
+  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 6, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %one, <vscale x 2 x i1>* %store_addr
 
-  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 7, <vscale x 2 x i1> %m, i32 %n)
+  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 7, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ord, <vscale x 2 x i1>* %store_addr
 
-  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 8, <vscale x 2 x i1> %m, i32 %n)
+  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 8, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uno, <vscale x 2 x i1>* %store_addr
 
-  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 9, <vscale x 2 x i1> %m, i32 %n)
+  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 9, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ueq, <vscale x 2 x i1>* %store_addr
 
-  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 10, <vscale x 2 x i1> %m, i32 %n)
+  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 10, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
 
-  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 11, <vscale x 2 x i1> %m, i32 %n)
+  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 11, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
 
-  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 12, <vscale x 2 x i1> %m, i32 %n)
+  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 12, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
 
-  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 13, <vscale x 2 x i1> %m, i32 %n)
+  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 13, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
 
-  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 14, <vscale x 2 x i1> %m, i32 %n)
+  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 14, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %une, <vscale x 2 x i1>* %store_addr
 
-  %true = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 15, <vscale x 2 x i1> %m, i32 %n)
+  %true = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i8 15, <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %true, <vscale x 2 x i1>* %store_addr
 
   ret void
 }
 
-; FIXME use VP stores
 ; store
 declare void @llvm.vp.store.nxv1i1(<vscale x 1 x i1>, <vscale x 1 x i1>*, i1, <vscale x 1 x i1>, i32)
 declare void @llvm.vp.store.nxv2i1(<vscale x 2 x i1>, <vscale x 2 x i1>*, i1, <vscale x 2 x i1>, i32)

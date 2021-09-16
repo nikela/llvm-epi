@@ -1638,6 +1638,7 @@ bool DAGTypeLegalizer::PromoteIntegerOperand(SDNode *N, unsigned OpNo) {
   case ISD::VP_REDUCE_UMIN: Res = PromoteIntOp_VP_REDUCE(N, OpNo); break;
 
   case ISD::SET_ROUNDING: Res = PromoteIntOp_SET_ROUNDING(N); break;
+  case ISD::VP_SETCC: Res = PromoteIntOp_VP_SETCC(N, OpNo); break;
   }
 
   // If the result is null, the sub-method took care of registering results etc.
@@ -2187,6 +2188,15 @@ SDValue DAGTypeLegalizer::PromoteIntOp_VP_REDUCE(SDNode *N, unsigned OpNo) {
 SDValue DAGTypeLegalizer::PromoteIntOp_SET_ROUNDING(SDNode *N) {
   SDValue Op = ZExtPromotedInteger(N->getOperand(1));
   return SDValue(DAG.UpdateNodeOperands(N, N->getOperand(0), Op), 0);
+}
+
+SDValue DAGTypeLegalizer::PromoteIntOp_VP_SETCC(SDNode *N, unsigned OpNo) {
+  assert(OpNo == 4 && "Only know how to promote the VLOp");
+
+  SmallVector<SDValue, 5> NewOps(N->op_begin(), N->op_end());
+  NewOps[4] = ZExtPromotedInteger(N->getOperand(4));
+
+  return SDValue(DAG.UpdateNodeOperands(N, NewOps), 0);
 }
 
 //===----------------------------------------------------------------------===//

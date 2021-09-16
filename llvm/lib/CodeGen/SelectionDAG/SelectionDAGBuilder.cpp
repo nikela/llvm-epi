@@ -7374,7 +7374,7 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   switch (VPIntrin.getIntrinsicID()) {
 #define BEGIN_REGISTER_VP_INTRINSIC(INTRIN, ...) case Intrinsic::INTRIN:
 #define BEGIN_REGISTER_VP_SDNODE(VPSDID, ...) ResOPC = ISD::VPSDID;
-#define END_REGISTER_VP_INTRINSIC(...) break;
+#define END_REGISTER_VP_SDNODE(...) break;
 #include "llvm/IR/VPIntrinsics.def"
   }
 
@@ -7504,6 +7504,31 @@ void SelectionDAGBuilder::visitVPStoreScatter(const VPIntrinsic &VPIntrin,
   setValue(&VPIntrin, ST);
 }
 
+void SelectionDAGBuilder::visitCmpVP(const VPIntrinsic &I) {
+  ISD::CondCode Condition;
+  CmpInst::Predicate Predicate = I.getCmpPredicate();
+  bool IsFP = I.getOperand(0)->getType()->isFPOrFPVectorTy();
+  if (IsFP) {
+    Condition = getFCmpCondCode(Predicate);
+    auto *FPMO = dyn_cast<FPMathOperator>(&I);
+    if ((FPMO && FPMO->hasNoNaNs()) || TM.Options.NoNaNsFPMath)
+      Condition = getFCmpCodeWithoutNaN(Condition);
+
+  } else {
+    Condition = getICmpCondCode(Predicate);
+  }
+
+  EVT DestVT = DAG.getTargetLoweringInfo().getValueType(DAG.getDataLayout(),
+                                                        I.getType());
+  SDValue Op1 = getValue(I.getOperand(0));
+  SDValue Op2 = getValue(I.getOperand(1));
+  // #2 is the condition code
+  SDValue MaskOp = getValue(I.getOperand(3));
+  SDValue LenOp = getValue(I.getOperand(4));
+  setValue(&I, DAG.getVPSetCC(getCurSDLoc(), DestVT, Op1, Op2, Condition,
+                              MaskOp, LenOp));
+}
+
 void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     const VPIntrinsic &VPIntrin) {
   SDLoc DL = getCurSDLoc();
@@ -7544,6 +7569,9 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
   case ISD::VP_STORE:
   case ISD::VP_SCATTER:
     visitVPStoreScatter(VPIntrin, OpValues, Opcode == ISD::VP_SCATTER);
+    break;
+  case ISD::VP_SETCC:
+    visitCmpVP(VPIntrin);
     break;
   }
 }

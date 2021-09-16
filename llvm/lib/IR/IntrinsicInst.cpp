@@ -495,6 +495,11 @@ bool VPIntrinsic::canIgnoreVectorLengthParam() const {
   return false;
 }
 
+CmpInst::Predicate VPIntrinsic::getCmpPredicate() const {
+  return static_cast<CmpInst::Predicate>(
+      cast<ConstantInt>(getArgOperand(2))->getZExtValue());
+}
+
 Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
                                                ArrayRef<Value *> Params) {
   assert(isVPIntrinsic(VPID) && "not a VP intrinsic");
