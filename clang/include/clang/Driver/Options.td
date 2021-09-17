@@ -2369,6 +2369,11 @@ def fobjc_disable_direct_methods_for_testing :
   Group<f_Group>, Flags<[CC1Option]>,
   HelpText<"Ignore attribute objc_direct so that direct methods can be tested">,
   MarshallingInfoFlag<LangOpts<"ObjCDisableDirectMethodsForTesting">>;
+defm objc_avoid_heapify_local_blocks : BoolFOption<"objc-avoid-heapify-local-blocks",
+  CodeGenOpts<"ObjCAvoidHeapifyLocalBlocks">, DefaultFalse,
+  PosFlag<SetTrue, [], "Try">,
+  NegFlag<SetFalse, [], "Don't try">,
+  BothFlags<[CC1Option, NoDriverOption], " to avoid heapifying local blocks">>;
 
 def fomit_frame_pointer : Flag<["-"], "fomit-frame-pointer">, Group<f_Group>;
 def fopenmp : Flag<["-"], "fopenmp">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused, FlangOption, FC1Option]>,
@@ -2411,6 +2416,10 @@ def fopenmp_cuda_blocks_per_sm_EQ : Joined<["-"], "fopenmp-cuda-blocks-per-sm=">
   Flags<[CC1Option, NoArgumentUnused, HelpHidden]>;
 def fopenmp_cuda_teams_reduction_recs_num_EQ : Joined<["-"], "fopenmp-cuda-teams-reduction-recs-num=">, Group<f_Group>,
   Flags<[CC1Option, NoArgumentUnused, HelpHidden]>;
+def fopenmp_target_debug : Flag<["-"], "fopenmp-target-debug">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused]>,
+  HelpText<"Enable debugging in the OpenMP offloading device RTL">;
+def fno_openmp_target_debug : Flag<["-"], "fno-openmp-target-debug">, Group<f_Group>, Flags<[NoArgumentUnused]>;
+def fopenmp_target_debug_EQ : Joined<["-"], "fopenmp-target-debug=">, Group<f_Group>, Flags<[CC1Option, NoArgumentUnused, HelpHidden]>;
 defm openmp_target_new_runtime: BoolFOption<"openmp-target-new-runtime",
   LangOpts<"OpenMPTargetNewRuntime">, DefaultFalse,
   PosFlag<SetTrue, [CC1Option], "Use the new bitcode library for OpenMP offloading">,

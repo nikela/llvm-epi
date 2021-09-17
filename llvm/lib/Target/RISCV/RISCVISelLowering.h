@@ -364,6 +364,8 @@ public:
   bool isSExtCheaperThanZExt(EVT SrcVT, EVT DstVT) const override;
   bool isCheapToSpeculateCttz() const override;
   bool isCheapToSpeculateCtlz() const override;
+  bool shouldSinkOperands(Instruction *I,
+                          SmallVectorImpl<Use *> &Ops) const override;
   bool isFPImmLegal(const APFloat &Imm, EVT VT,
                     bool ForCodeSize) const override;
 
@@ -528,9 +530,6 @@ public:
                                           Value *NewVal, Value *Mask,
                                           AtomicOrdering Ord) const override;
 
-
-  bool shouldSinkOperands(Instruction *I,
-                          SmallVectorImpl<Use *> &Ops) const override;
 
   TargetLoweringBase::LegalizeTypeAction
   getPreferredVectorAction(MVT VT) const override;

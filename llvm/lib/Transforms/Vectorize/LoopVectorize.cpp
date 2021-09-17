@@ -946,14 +946,14 @@ protected:
   // Strided accesses.
   struct StrideAccessInfo {
     bool Valid = false;
-    Value *BaseAddr = nullptr;
-    Value *Stride = nullptr;
-    Value *Offset = nullptr;
+    const SCEV *SCEVExpr = nullptr;
 
     explicit operator bool() const {
-      assert((!Valid || (Stride && BaseAddr)) &&
-             "Invalid stride information computed");
       return Valid;
+    }
+
+    const SCEV* getSCEVExpr() const {
+      return SCEVExpr;
     }
 
     void print(raw_ostream &OS) const {
@@ -961,19 +961,16 @@ protected:
       if (!Valid) {
         OS << "<<invalid>> ";
       }
-      OS << "BaseAddr: ";
-      if (BaseAddr) {
-        OS << *BaseAddr;
-      } else {
-        OS << "<<unknown>>";
-      }
-      OS << "| Stride: " << *Stride << " | Offset: ";
-      if (Offset) {
-        OS << *Offset;
+      OS << "SCEV: ";
+      if (SCEVExpr) {
+        OS << *SCEVExpr;
       } else {
         OS << "<<unknown>>";
       }
     }
+
+    Value *emitStride();
+    Value *emitBaseAddress();
   };
 
   friend raw_ostream &operator<<(raw_ostream &OS, const StrideAccessInfo &SAI) {
@@ -981,10 +978,17 @@ protected:
     return OS;
   }
 
-  StrideAccessInfo computeStrideAccessInfo(Value *Addr);
+  struct StridedAccessValues
+  {
+    Value* BaseAddress;
+    Value* Stride;
+  };
 
-  Value *computeStrideBaseAddress(VPTransformState &State, VPValue *Addr,
-                                  const StrideAccessInfo &SAI, Type *PtrTy);
+  StrideAccessInfo computeStrideAccessInfo(Value *Addr);
+  StridedAccessValues computeStrideAddressing(VPTransformState &State,
+                                               VPValue *Addr,
+                                               const StrideAccessInfo &SAI,
+                                               Type *PtrTy);
 };
 
 
@@ -1025,10 +1029,9 @@ struct EpilogueLoopVectorizationInfo {
   Value *TripCount = nullptr;
   Value *VectorTripCount = nullptr;
 
-  EpilogueLoopVectorizationInfo(unsigned MVF, unsigned MUF, unsigned EVF,
-                                unsigned EUF)
-      : MainLoopVF(ElementCount::getFixed(MVF)), MainLoopUF(MUF),
-        EpilogueVF(ElementCount::getFixed(EVF)), EpilogueUF(EUF) {
+  EpilogueLoopVectorizationInfo(ElementCount MVF, unsigned MUF,
+                                ElementCount EVF, unsigned EUF)
+      : MainLoopVF(MVF), MainLoopUF(MUF), EpilogueVF(EVF), EpilogueUF(EUF) {
     assert(EUF == 1 &&
            "A high UF for the epilogue loop is likely not beneficial.");
   }
@@ -1617,14 +1620,14 @@ public:
   /// Returns true if the target machine supports masked store operation
   /// for the given \p DataType and kind of access to \p Ptr.
   bool isLegalMaskedStore(Type *DataType, Value *Ptr, Align Alignment) const {
-    return Legal->isConsecutivePtr(Ptr) &&
+    return Legal->isConsecutivePtr(DataType, Ptr) &&
            TTI.isLegalMaskedStore(DataType, Alignment);
   }
 
   /// Returns true if the target machine supports masked load operation
   /// for the given \p DataType and kind of access to \p Ptr.
   bool isLegalMaskedLoad(Type *DataType, Value *Ptr, Align Alignment) const {
-    return Legal->isConsecutivePtr(Ptr) &&
+    return Legal->isConsecutivePtr(DataType, Ptr) &&
            TTI.isLegalMaskedLoad(DataType, Alignment);
   }
 
@@ -3040,120 +3043,83 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
   }
 }
 
-InnerLoopVectorizer::StrideAccessInfo
-InnerLoopVectorizer::computeStrideAccessInfo(Value *Ptr) {
-  StrideAccessInfo SAI;
+// Reorganise this
+static const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE) {
+  auto *PtrTy = dyn_cast<PointerType>(Ptr->getType());
+  if (!PtrTy || PtrTy->isAggregateType())
+    return nullptr;
 
-  ScalarEvolution *SE = PSE.getSE();
   const SCEV *V = SE->getSCEV(Ptr);
 
   const SCEVAddRecExpr *S = dyn_cast<SCEVAddRecExpr>(V);
   if (!S)
-    return SAI;
-
-  V = S->getStepRecurrence(*SE);
-  if (!V)
-    return SAI;
+    return nullptr;
 
   if (!S->isAffine())
-    return SAI;
+    return nullptr;
 
-  LLVM_DEBUG(llvm::dbgs() << "SCEV " << *S << " is affine\n");
+  return V;
+}
 
-  V = S->getStepRecurrence(*SE);
-  if (!V)
-    return SAI;
-  if (const SCEVUnknown *U = dyn_cast<SCEVUnknown>(V)) {
-    SAI.Stride = U->getValue();
-    if (!OrigLoop->isLoopInvariant(SAI.Stride))
-      return SAI;
-  } else if (const SCEVConstant *C = dyn_cast<SCEVConstant>(V)) {
-    SAI.Stride = C->getValue();
-  }
+InnerLoopVectorizer::StrideAccessInfo
+InnerLoopVectorizer::computeStrideAccessInfo(Value *Ptr) {
+  StrideAccessInfo SAI;
 
-  V = S->getStart();
+  const SCEV *V = isStridedAddressing(Ptr, PSE.getSE());
+  assert(V && "The SCEV should be valid at this point");
 
-  if (const SCEVUnknown *U = dyn_cast<SCEVUnknown>(V)) {
-    SAI.BaseAddr = U->getValue();
-  } else if (const SCEVAddExpr *A = dyn_cast<SCEVAddExpr>(V)) {
-    const SCEV *LHS = A->getOperand(0);
-    const SCEV *RHS = A->getOperand(1);
-    if (const SCEVUnknown *U = dyn_cast<SCEVUnknown>(RHS)) {
-      SAI.BaseAddr = U->getValue();
-    } else
-      return SAI;
-
-    if (const SCEVUnknown *U = dyn_cast<SCEVUnknown>(LHS)) {
-      SAI.Offset = U->getValue();
-      if (!OrigLoop->isLoopInvariant(SAI.Offset))
-        return SAI;
-    } else if (const SCEVConstant *C = dyn_cast<SCEVConstant>(LHS)) {
-      SAI.Offset = C->getValue();
-    }
-  }
-
-  if (!SAI.BaseAddr)
-    return SAI;
-
+  SAI.SCEVExpr = V;
+  // Remove this.
   SAI.Valid = true;
-  LLVM_DEBUG(llvm::dbgs() << SAI << "\n");
+
   return SAI;
 }
 
-Value *InnerLoopVectorizer::computeStrideBaseAddress(
-    VPTransformState &State, VPValue *Addr, const StrideAccessInfo &SAI,
-    Type *PtrTy) {
-  auto *VR = cast<VPWidenGEPRecipe>(Addr->getDef());
-  auto *GEP = cast<GetElementPtrInst>(Addr->getUnderlyingValue());
+InnerLoopVectorizer::StridedAccessValues
+InnerLoopVectorizer::computeStrideAddressing(VPTransformState &State,
+                                             VPValue *Addr,
+                                             const StrideAccessInfo &SAI,
+                                             Type *PtrTy) {
+  // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
+  // what part of it should. We should be using Addr but AFAIU it represents
+  // the vectorised address already, which is not useful. When doing
+  // interleaving, we should use the Part to adjust the access correctly.
+  // Perhaps we should not have received a WIDEN-GEP here in the first place
+  // and make the VP build process aware of the stride access option?
   LLVMContext &Context = PtrTy->getContext();
+  auto &DL = OrigLoop->getHeader()->getModule()->getDataLayout();
+  ScalarEvolution &SE = *PSE.getSE();
 
-  assert(VR->getIsPtrLoopInvariant() &&
-         "This address is expected to be loop invariant");
-  auto *Ptr = State.get(VR->getOperand(0), VPIteration(0, 0));
+  SCEVExpander Exp(SE, DL, "stride");
+  const SCEVAddRecExpr *S = cast<SCEVAddRecExpr>(SAI.getSCEVExpr());
 
-  // Collect the prefix of loop invariant indices.
-  SmallVector<Value *, 4> Indices;
-  for (unsigned I = 1, E = VR->getNumOperands(); I < E; I++) {
-    VPValue *Operand = VR->getOperand(I);
-    if (VR->getIsIndexLoopInvariantr(I - 1))
-      Indices.push_back(State.get(Operand, VPIteration(0, 0)));
-    else
-      break;
-  }
+  LLVM_DEBUG(llvm::dbgs() << "SCEV = " << *S << "\n";);
 
-  // FIXME: we are not using SAI.BaseAddr
-  // OK: Ideally the loop above would just use VPIteration(0, 0) for all the
-  // operands of the GEP. However if we do this, due to limitations of VPred
-  // at the moment, we compute a whole scaled iota vector just to extract
-  // the first element. Hence this is the reason we manually build this GEP
-  // so it uses the offset we have extracted.
-  //
-  // First let's index correctly the first element of the strided vector
-  // without taking into account any offset.
-  auto *StrideBaseAddress =
-      Builder.CreateGEP(GEP->getSourceElementType(), Ptr, Indices);
+  const SCEV *Stride = S->getStepRecurrence(SE);
+  assert(Stride);
+  LLVM_DEBUG(llvm::dbgs() << "Stride = " << *Stride << "\n";);
 
-  // Stride in bytes of the current iteration.
-  Value *BytesStride = Builder.CreateMul(
-      Induction, Builder.CreateZExtOrTrunc(SAI.Stride, Induction->getType()));
-  // Add it to the current base address.
-  StrideBaseAddress = Builder.CreateGEP(
+  const SCEV *Start = S->getStart();
+  auto *PointerStart =
+      Exp.expandCodeFor(Start, Start->getType(), &*Builder.GetInsertPoint());
+  LLVM_DEBUG(llvm::dbgs() << "PointerStart = " << *PointerStart << "\n";);
+  auto *BytesStride =
+      Exp.expandCodeFor(Stride, Stride->getType(), &*Builder.GetInsertPoint());
+  LLVM_DEBUG(llvm::dbgs() << "BytesStride = " << *BytesStride << "\n";);
+
+  auto *BytesStrideIter = Builder.CreateMul(
+      Induction, Builder.CreateZExtOrTrunc(BytesStride, Induction->getType()));
+  auto *StrideBaseAddress = Builder.CreateGEP(
       Type::getInt8Ty(Context),
-      Builder.CreatePointerCast(StrideBaseAddress, Type::getInt8PtrTy(Context)),
-      BytesStride);
-
-  if (SAI.Offset) {
-    // Add now the offset (in bytes) if any.
-    StrideBaseAddress =
-        Builder.CreateGEP(Type::getInt8Ty(Context),
-                          Builder.CreatePointerCast(
-                              StrideBaseAddress, Type::getInt8PtrTy(Context)),
-                          SAI.Offset);
-  }
-
-  // Convert this to what vp.strided.{load/store} expect.
+      Builder.CreatePointerCast(PointerStart, Type::getInt8PtrTy(Context)),
+      BytesStrideIter);
   StrideBaseAddress = Builder.CreateBitCast(StrideBaseAddress, PtrTy);
-  return StrideBaseAddress;
+
+  StridedAccessValues Ret;
+  Ret.BaseAddress = StrideBaseAddress;
+  Ret.Stride = BytesStride;
+
+  return Ret;
 }
 
 void InnerLoopVectorizer::vectorizeMemoryInstruction(
@@ -3271,7 +3237,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
                                        ? MaskValue(Part, NumElts)
                                        : Builder.getTrueVector(NumElts);
           if (NonConsecutiveStride) {
-            LLVM_DEBUG(llvm::dbgs() << "It should be possible to stride this store!\n");
+            LLVM_DEBUG(llvm::dbgs()
+                       << "It should be possible to stride this store!\n");
             LLVM_DEBUG(llvm::dbgs() << "Addr = " << *Addr << "\n");
 
             if (StrideAccessInfo SAI =
@@ -3280,18 +3247,23 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
               // FIXME: This should be using VPValues rather than doing
               // this by hand. This is not taking into account Part!
               auto PtrTy = cast<PointerType>(PtrsTy->getElementType());
-              Value *StrideBaseAddress =
-                  computeStrideBaseAddress(State, Addr, SAI, PtrTy);
-              Value *Operands[] = {StoredVal, StrideBaseAddress, SAI.Stride,
+              StridedAccessValues SAV =
+                  computeStrideAddressing(State, Addr, SAI, PtrTy);
+              Value *Operands[] = {StoredVal, SAV.BaseAddress, SAV.Stride,
                                    BlockInMaskPart, EVLPart};
               NewSI = Builder.CreateIntrinsic(
                   Intrinsic::vp_strided_store,
-                  {StoredVal->getType(), PtrTy, SAI.Stride->getType()},
+                  {StoredVal->getType(), PtrTy, SAV.Stride->getType()},
                   Operands);
               EmittedStridedAccess = true;
             } else {
-              LLVM_DEBUG(llvm::dbgs() << "Cannot stride store\n");
+              LLVM_DEBUG(llvm::dbgs() << "Cannot stride store: "
+                                      << *Addr->getUnderlyingValue()
+                                      << "SAI=" << SAI << "\n");
             }
+          } else {
+            LLVM_DEBUG(llvm::dbgs()
+                       << "Not consecutive stride store for " << *Addr << "\n");
           }
           if (!EmittedStridedAccess) {
             Value *Operands[] = {StoredVal, VectorGep, BlockInMaskPart,
@@ -3365,19 +3337,23 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           if (StrideAccessInfo SAI =
                   computeStrideAccessInfo(Addr->getUnderlyingValue())) {
             LLVM_DEBUG(llvm::dbgs() << "Found stride for load\n");
-            Value *StrideBaseAddress =
-                computeStrideBaseAddress(State, Addr, SAI, PtrTy);
-            Value *Operands[] = {StrideBaseAddress, SAI.Stride, BlockInMaskPart,
+            StridedAccessValues SAV =
+                computeStrideAddressing(State, Addr, SAI, PtrTy);
+            Value *Operands[] = {SAV.BaseAddress, SAV.Stride, BlockInMaskPart,
                                  EVLPart};
             NewLI =
                 Builder.CreateIntrinsic(Intrinsic::vp_strided_load,
-                                        {DataTy, PtrTy, SAI.Stride->getType()},
+                                        {DataTy, PtrTy, SAV.Stride->getType()},
                                         Operands, nullptr, "vp.strided.load");
             EmittedStridedAccess = true;
           } else {
             LLVM_DEBUG(llvm::dbgs()
-                       << "Cannot stride load. SAI=" << SAI << "\n");
+                       << "Cannot stride load: " << *Addr->getUnderlyingValue()
+                       << "SAI=" << SAI << "\n");
           }
+        } else {
+          LLVM_DEBUG(llvm::dbgs()
+                     << "Not consecutive stride load for " << *Addr << "\n");
         }
         if (!EmittedStridedAccess) {
           Type *DataTy = VectorType::get(PtrTy->getElementType(), NumElts);
@@ -5197,6 +5173,14 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
             Builder, ConstantInt::get(PtrInd->getType(), Part), VF);
 
         if (NeedsVectorIndex) {
+          // Here we cache the whole vector, which means we can support the
+          // extraction of any lane. However, in some cases the extractelement
+          // instruction that is generated for scalar uses of this vector (e.g.
+          // a load instruction) is not folded away. Therefore we still
+          // calculate values for the first n lanes to avoid redundant moves
+          // (when extracting the 0th element) and to produce scalar code (i.e.
+          // additional add/gep instructions instead of expensive extractelement
+          // instructions) when extracting higher-order elements.
           Value *PartStartSplat = Builder.CreateVectorSplat(VF, PartStart);
           Value *Indices = Builder.CreateAdd(PartStartSplat, UnitStepVec);
           Value *GlobalIndices = Builder.CreateAdd(PtrIndSplat, Indices);
@@ -5204,9 +5188,6 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
               emitTransformedIndex(Builder, GlobalIndices, PSE.getSE(), DL, II);
           SclrGep->setName("next.gep");
           State.set(PhiR, SclrGep, Part);
-          // We've cached the whole vector, which means we can support the
-          // extraction of any lane.
-          continue;
         }
 
         for (unsigned Lane = 0; Lane < Lanes; ++Lane) {
@@ -6031,14 +6012,13 @@ bool LoopVectorizationCostModel::interleavedAccessCanBeWidened(
 bool LoopVectorizationCostModel::memoryInstructionCanBeWidened(
     Instruction *I, ElementCount VF) {
   // Get and ensure we have a valid memory instruction.
-  LoadInst *LI = dyn_cast<LoadInst>(I);
-  StoreInst *SI = dyn_cast<StoreInst>(I);
-  assert((LI || SI) && "Invalid memory instruction");
+  assert((isa<LoadInst, StoreInst>(I)) && "Invalid memory instruction");
 
   auto *Ptr = getLoadStorePointerOperand(I);
+  auto *ScalarTy = getLoadStoreType(I);
 
   // In order to be widened, the pointer should be consecutive, first of all.
-  if (!Legal->isConsecutivePtr(Ptr))
+  if (!Legal->isConsecutivePtr(ScalarTy, Ptr))
     return false;
 
   // If the instruction is a store located in a predicated block, it will be
@@ -6049,7 +6029,6 @@ bool LoopVectorizationCostModel::memoryInstructionCanBeWidened(
   // If the instruction's allocated size doesn't equal it's type size, it
   // requires padding and will be scalarized.
   auto &DL = I->getModule()->getDataLayout();
-  auto *ScalarTy = LI ? LI->getType() : SI->getValueOperand()->getType();
   if (hasIrregularType(ScalarTy, DL))
     return false;
 
@@ -7268,6 +7247,9 @@ LoopVectorizationCostModel::getSmallestAndWidestTypes() {
     MaxWidth = std::max<unsigned>(
         MaxWidth, DL.getTypeSizeInBits(T->getScalarType()).getFixedSize());
   }
+  // Adjust MinWidth in degenerated cases.
+  if (MinWidth == -1U)
+    MinWidth = MaxWidth;
   return {MinWidth, MaxWidth};
 }
 
@@ -8111,7 +8093,7 @@ LoopVectorizationCostModel::getConsecutiveMemOpCost(Instruction *I,
   auto *VectorTy = cast<VectorType>(ToVectorTy(ValTy, VF));
   Value *Ptr = getLoadStorePointerOperand(I);
   unsigned AS = getLoadStoreAddressSpace(I);
-  int ConsecutiveStride = Legal->isConsecutivePtr(Ptr);
+  int ConsecutiveStride = Legal->isConsecutivePtr(ValTy, Ptr);
   enum TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
 
   assert((ConsecutiveStride == 1 || ConsecutiveStride == -1) &&
@@ -8494,19 +8476,18 @@ LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
   return Cost + TTI.getOperandsScalarizationOverhead(
                     filterExtractingOperands(Ops, VF), Tys);
 }
+
 bool LoopVectorizationCostModel::canUseStridedAccess(Instruction *I) {
+  Value *Ptr = nullptr;
   if (LoadInst *LI = dyn_cast<LoadInst>(I)) {
-    Value *Ptr = LI->getPointerOperand();
-    return getStrideFromPointer(Ptr, PSE.getSE(), TheLoop,
-                                /* AllowConstants = */ true);
+    Ptr = LI->getPointerOperand();
   } else if (StoreInst *SI = dyn_cast<StoreInst>(I)) {
-    Value *Ptr = SI->getPointerOperand();
-    return getStrideFromPointer(Ptr, PSE.getSE(), TheLoop,
-                                /* AllowConstants = */ true);
+    Ptr = SI->getPointerOperand();
   } else {
     llvm_unreachable("Unexpected instruction");
   }
-  return false;
+  assert(Ptr && "Invalid pointer");
+  return isStridedAddressing(Ptr, PSE.getSE());
 }
 
 void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
@@ -8536,9 +8517,14 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         if (isa<StoreInst>(&I) && VF.isScalable() &&
             isLegalGatherOrScatter(&I)) {
           Cost = getGatherScatterCost(&I, VF);
-          if (canUseStridedAccess(&I)) {
+          if (UseStridedAccesses && canUseStridedAccess(&I)) {
             setWideningDecision(&I, VF, CM_Strided, Cost);
+            LLVM_DEBUG(llvm::dbgs() << "Can use strided access " << I << "\n");
           } else {
+            if (UseStridedAccesses) {
+              LLVM_DEBUG(llvm::dbgs()
+                         << "Cannot use strided access " << I << "\n");
+            }
             setWideningDecision(&I, VF, CM_GatherScatter, Cost);
           }
         } else {
@@ -8553,8 +8539,8 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
       // We assume that widening is the best solution when possible.
       if (memoryInstructionCanBeWidened(&I, VF)) {
         InstructionCost Cost = getConsecutiveMemOpCost(&I, VF);
-        int ConsecutiveStride =
-            Legal->isConsecutivePtr(getLoadStorePointerOperand(&I));
+        int ConsecutiveStride = Legal->isConsecutivePtr(
+            getLoadStoreType(&I), getLoadStorePointerOperand(&I));
         assert((ConsecutiveStride == 1 || ConsecutiveStride == -1) &&
                "Expected consecutive stride.");
         InstWidening Decision =
@@ -8601,10 +8587,16 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         Decision = CM_GatherScatter;
         Cost = GatherScatterCost;
 
-        if (UseStridedAccesses && canUseStridedAccess(&I)) {
-          // FIXME
-          // Cost = StridedAccessCost;
-          Decision = CM_Strided;
+        if (UseStridedAccesses) {
+          if (canUseStridedAccess(&I)) {
+            // FIXME
+            // Cost = StridedAccessCost;
+            Decision = CM_Strided;
+            LLVM_DEBUG(llvm::dbgs() << "Can use strided access " << I << "\n");
+          } else {
+            LLVM_DEBUG(llvm::dbgs()
+                       << "Cannot use strided access " << I << "\n");
+          }
         }
       } else {
         Decision = CM_Scalarize;
@@ -9071,7 +9063,7 @@ bool LoopVectorizationCostModel::isConsecutiveLoadOrStore(Instruction *Inst) {
   // Check if the pointer operand of a load or store instruction is
   // consecutive.
   if (auto *Ptr = getLoadStorePointerOperand(Inst))
-    return Legal->isConsecutivePtr(Ptr);
+    return Legal->isConsecutivePtr(getLoadStoreType(Inst), Ptr);
   return false;
 }
 
@@ -9506,9 +9498,9 @@ BasicBlock *EpilogueVectorizerMainLoop::createEpilogueVectorizedLoopSkeleton() {
 void EpilogueVectorizerMainLoop::printDebugTracesAtStart() {
   LLVM_DEBUG({
     dbgs() << "Create Skeleton for epilogue vectorized loop (first pass)\n"
-           << "Main Loop VF:" << EPI.MainLoopVF.getKnownMinValue()
+           << "Main Loop VF:" << EPI.MainLoopVF
            << ", Main Loop UF:" << EPI.MainLoopUF
-           << ", Epilogue Loop VF:" << EPI.EpilogueVF.getKnownMinValue()
+           << ", Epilogue Loop VF:" << EPI.EpilogueVF
            << ", Epilogue Loop UF:" << EPI.EpilogueUF << "\n";
   });
 }
@@ -9523,8 +9515,7 @@ BasicBlock *EpilogueVectorizerMainLoop::emitMinimumIterationCountCheck(
     Loop *L, BasicBlock *Bypass, bool ForEpilogue) {
   assert(L && "Expected valid Loop.");
   assert(Bypass && "Expected valid bypass basic block.");
-  unsigned VFactor =
-      ForEpilogue ? EPI.EpilogueVF.getKnownMinValue() : VF.getKnownMinValue();
+  ElementCount VFactor = ForEpilogue ? EPI.EpilogueVF : VF;
   unsigned UFactor = ForEpilogue ? EPI.EpilogueUF : UF;
   Value *Count = getOrCreateTripCount(L);
   // Reuse existing vector loop preheader for TC checks.
@@ -9538,7 +9529,7 @@ BasicBlock *EpilogueVectorizerMainLoop::emitMinimumIterationCountCheck(
       ICmpInst::ICMP_ULE : ICmpInst::ICMP_ULT;
 
   Value *CheckMinIters = Builder.CreateICmp(
-      P, Count, ConstantInt::get(Count->getType(), VFactor * UFactor),
+      P, Count, getRuntimeVF(Builder, Count->getType(), VFactor * UFactor),
       "min.iters.check");
 
   if (!ForEpilogue)
@@ -9692,8 +9683,7 @@ EpilogueVectorizerEpilogueLoop::emitMinimumVectorEpilogueIterCountCheck(
 
   Value *CheckMinIters = Builder.CreateICmp(
       P, Count,
-      ConstantInt::get(Count->getType(),
-                       EPI.EpilogueVF.getKnownMinValue() * EPI.EpilogueUF),
+      getRuntimeVF(Builder, Count->getType(), EPI.EpilogueVF * EPI.EpilogueUF),
       "min.epilog.iters.check");
 
   ReplaceInstWithInst(
@@ -9707,7 +9697,7 @@ EpilogueVectorizerEpilogueLoop::emitMinimumVectorEpilogueIterCountCheck(
 void EpilogueVectorizerEpilogueLoop::printDebugTracesAtStart() {
   LLVM_DEBUG({
     dbgs() << "Create Skeleton for epilogue vectorized loop (second pass)\n"
-           << "Epilogue Loop VF:" << EPI.EpilogueVF.getKnownMinValue()
+           << "Epilogue Loop VF:" << EPI.EpilogueVF
            << ", Epilogue Loop UF:" << EPI.EpilogueUF << "\n";
   });
 }
@@ -10551,6 +10541,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       }
     }
   }
+
+  // Ensure EVL is available.
+  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
+    RecipeBuilder.getOrCreateEVL(Plan);
 
   RecipeBuilder.fixHeaderPhis(Plan);
 
@@ -11717,9 +11711,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
         // The first pass vectorizes the main loop and creates a scalar epilogue
         // to be vectorized by executing the plan (potentially with a different
         // factor) again shortly afterwards.
-        EpilogueLoopVectorizationInfo EPI(VF.Width.getKnownMinValue(), IC,
-                                          EpilogueVF.Width.getKnownMinValue(),
-                                          1);
+        EpilogueLoopVectorizationInfo EPI(VF.Width, IC, EpilogueVF.Width, 1);
         EpilogueVectorizerMainLoop MainILV(L, PSE, LI, DT, TLI, TTI, AC, ORE,
                                            EPI, &LVL, &CM, BFI, PSI, Checks);
 
@@ -11892,4 +11884,15 @@ PreservedAnalyses LoopVectorizePass::run(Function &F,
     if (!Result.MadeCFGChange)
       PA.preserveSet<CFGAnalyses>();
     return PA;
+}
+
+void LoopVectorizePass::printPipeline(
+    raw_ostream &OS, function_ref<StringRef(StringRef)> MapClassName2PassName) {
+  static_cast<PassInfoMixin<LoopVectorizePass> *>(this)->printPipeline(
+      OS, MapClassName2PassName);
+
+  OS << "<";
+  OS << (InterleaveOnlyWhenForced ? "" : "no-") << "interleave-forced-only;";
+  OS << (VectorizeOnlyWhenForced ? "" : "no-") << "vectorize-forced-only;";
+  OS << ">";
 }

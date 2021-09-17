@@ -28,9 +28,10 @@
 #include "llvm/CodeGen/ValueTypes.h"
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/DiagnosticPrinter.h"
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/IntrinsicsRISCV.h"
 #include "llvm/IR/IntrinsicsEPI.h"
-#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/PatternMatch.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
@@ -1165,6 +1166,86 @@ bool RISCVTargetLowering::isCheapToSpeculateCttz() const {
 
 bool RISCVTargetLowering::isCheapToSpeculateCtlz() const {
   return Subtarget.hasStdExtZbb();
+}
+
+/// Check if sinking \p I's operands to I's basic block is profitable, because
+/// the operands can be folded into a target instruction, e.g.
+/// splats of scalars can fold into vector instructions.
+bool RISCVTargetLowering::shouldSinkOperands(
+    Instruction *I, SmallVectorImpl<Use *> &Ops) const {
+  using namespace llvm::PatternMatch;
+
+  if (isa<ScalableVectorType>(I->getType())) {
+    // Sinking broadcasts is always beneficial because it avoids keeping
+    // vector registers alive and often they can be folded into the operand.
+    for (unsigned OpI = 0, E = I->getNumOperands(); OpI < E; OpI++) {
+      Use &U = I->getOperandUse(OpI);
+      if (auto *SI = dyn_cast<ShuffleVectorInst>(&U)) {
+        if (SI->isZeroEltSplat()) {
+          Ops.push_back(&SI->getOperandUse(0));
+          Ops.push_back(&U);
+        }
+      } else if (auto *II = dyn_cast<IntrinsicInst>(&U)) {
+        switch (II->getIntrinsicID()) {
+        case Intrinsic::epi_vmv_v_x:
+        case Intrinsic::epi_vfmv_v_f: {
+          Ops.push_back(&U);
+          break;
+        }
+        default:
+          break;
+        }
+      }
+      if (!Ops.empty())
+        return true;
+    }
+  }
+
+  if (!I->getType()->isVectorTy() || !Subtarget.hasStdExtV())
+    return false;
+
+  auto IsSinker = [&](Instruction *I, int Operand) {
+    switch (I->getOpcode()) {
+    case Instruction::Add:
+    case Instruction::Sub:
+    case Instruction::Mul:
+      return true;
+    case Instruction::Shl:
+    case Instruction::LShr:
+    case Instruction::AShr:
+      return Operand == 1;
+    default:
+      return false;
+    }
+  };
+
+  for (auto OpIdx : enumerate(I->operands())) {
+    if (!IsSinker(I, OpIdx.index()))
+      continue;
+
+    Instruction *Op = dyn_cast<Instruction>(OpIdx.value().get());
+    // Make sure we are not already sinking this operand
+    if (!Op || any_of(Ops, [&](Use *U) { return U->get() == Op; }))
+      continue;
+
+    // We are looking for a splat that can be sunk.
+    if (!match(Op, m_Shuffle(m_InsertElt(m_Undef(), m_Value(), m_ZeroInt()),
+                             m_Undef(), m_ZeroMask())))
+      continue;
+
+    // All uses of the shuffle should be sunk to avoid duplicating it across gpr
+    // and vector registers
+    for (Use &U : Op->uses()) {
+      Instruction *Insn = cast<Instruction>(U.getUser());
+      if (!IsSinker(Insn, U.getOperandNo()))
+        return false;
+    }
+
+    Ops.push_back(&Op->getOperandUse(0));
+    Ops.push_back(&OpIdx.value());
+  }
+
+  return true;
 }
 
 bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
@@ -3713,6 +3794,38 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   // then we need to use another (custom) method
   // (like we already do for narrowing, see below)
   if (Ratio > 2 && DstTypeSize > SrcTypeSize) {
+    // If SrcType is MVT::i1, then use the same lowering as the llvm IR opcode
+    if (SrcType.getVectorElementType() == MVT::i1) {
+      switch (IntNo) {
+      default:
+        llvm_unreachable("SrcType == i1 not handled for intrinsics other than "
+                         "vp_zext/vp_sext");
+      // NOTE: for both vp_sext and vp_zext we do not handle the masked cases
+      // because they are not trivial (and the unmasked cases generate a correct
+      // result anyway)
+      case Intrinsic::vp_sext:
+      case Intrinsic::vp_zext: {
+        uint64_t ExtValue = IntNo == Intrinsic::vp_zext ? 1 : -1;
+
+        SmallVector<SDValue, 3> VMVOps;
+        VMVOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmv_v_x, DL, MVT::i64));
+        VMVOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+        VMVOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+        SDValue VMV = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMVOps);
+
+        SmallVector<SDValue, 5> VMERGEOps;
+        VMERGEOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmerge, DL, MVT::i64));
+        VMERGEOps.push_back(VMV);
+        VMERGEOps.push_back(DAG.getConstant(ExtValue, DL, MVT::i64));
+        VMERGEOps.push_back(SrcOp);
+        VMERGEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMERGEOps);
+      }
+      }
+    }
     // Invoke the FurtherEPIIntNo intrinsic to widen the source operand
     // as many times as needed, without changing the type
     EVT FromType = SrcType;
@@ -3736,7 +3849,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     }
   }
 
-  auto narrowVectorElementType = [&](EVT SrcVT) -> EVT {
+  auto NarrowVectorElementType = [&](EVT SrcVT) -> EVT {
     EVT SrcEltVT = SrcVT.getVectorElementType();
     const ElementCount EltCount = SrcVT.getVectorElementCount();
     MVT ToEltVT;
@@ -3756,7 +3869,45 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   // Invoke EPIIntNo intrinsic
   EVT ToType = DstType;
   if (Ratio > 2 && DstTypeSize < SrcTypeSize) {
-    ToType = narrowVectorElementType(SrcType);
+    // If DstType is MVT::i1, then use the same lowering as the llvm IR opcode
+    if (DstType.getVectorElementType() == MVT::i1) {
+      switch (IntNo) {
+      default:
+        llvm_unreachable("DstType == i1 not handled for intrinsics other than "
+                         "vp_trunc");
+      case Intrinsic::vp_trunc: {
+        unsigned VANDIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
+        unsigned VMSNEIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
+
+        SmallVector<SDValue, 6> VANDOps;
+        VANDOps.push_back(DAG.getTargetConstant(VANDIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(DAG.getNode(ISD::UNDEF, DL, SrcType)); // Merge
+        VANDOps.push_back(SrcOp);
+        VANDOps.push_back(DAG.getConstant(1, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VANDOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+        SDValue VAND = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, SrcType, VANDOps);
+
+        SmallVector<SDValue, 6> VMSNEOps;
+        VMSNEOps.push_back(DAG.getTargetConstant(VMSNEIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(DAG.getNode(ISD::UNDEF, DL, DstType)); // Merge
+        VMSNEOps.push_back(VAND);
+        VMSNEOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VMSNEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMSNEOps);
+      }
+      }
+    }
+
+    ToType = NarrowVectorElementType(SrcType);
   }
   std::vector<SDValue> Operands;
   Operands.reserve(4 + IsMasked * 2);
@@ -3783,7 +3934,7 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
     // as many times as needed, without changing the type
     EVT ResultType = ToType;
     for (int i = 0; i < Ratio/4; i++) {
-      ToType = narrowVectorElementType(ResultType);
+      ToType = NarrowVectorElementType(ResultType);
       std::vector<SDValue> Operands;
       Operands.reserve(4 + IsMasked * 2);
       Operands.push_back(DAG.getTargetConstant(FurtherEPIIntNo, DL, MVT::i64));
@@ -11560,38 +11711,6 @@ RISCVTargetLowering::getRegisterByName(const char *RegName, LLT VT,
     report_fatal_error(Twine("Trying to obtain non-reserved register \"" +
                              StringRef(RegName) + "\"."));
   return Reg;
-}
-
-bool RISCVTargetLowering::shouldSinkOperands(
-    Instruction *I, SmallVectorImpl<Use *> &Ops) const {
-  if (!isa<ScalableVectorType>(I->getType()))
-    return false;
-
-  // Sinking broadcasts is always beneficial because it avoids keeping
-  // vector registers alive and often they can be folded into the operand.
-  for (unsigned OpI = 0, E = I->getNumOperands(); OpI < E; OpI++) {
-    Use &U = I->getOperandUse(OpI);
-    if (auto *SI = dyn_cast<ShuffleVectorInst>(&U)) {
-      if (SI->isZeroEltSplat()) {
-        Ops.push_back(&SI->getOperandUse(0));
-        Ops.push_back(&U);
-      }
-    } else if (auto *II = dyn_cast<IntrinsicInst>(&U)) {
-      switch (II->getIntrinsicID()) {
-      case Intrinsic::epi_vmv_v_x:
-      case Intrinsic::epi_vfmv_v_f: {
-        Ops.push_back(&U);
-        break;
-      }
-      default:
-        break;
-      }
-    }
-    if (!Ops.empty())
-      return true;
-  }
-
-  return false;
 }
 
 TargetLoweringBase::LegalizeTypeAction

@@ -342,8 +342,7 @@ Value *getUniqueCastUse(Value *Ptr, Loop *Lp, Type *Ty);
 /// Get the stride of a pointer access in a loop. Looks for symbolic
 /// strides "a[i*stride]". Returns the symbolic stride, or null otherwise.
 /// \p AllowConstants Use this to compute constants strides as well.
-Value *getStrideFromPointer(Value *Ptr, ScalarEvolution *SE, Loop *Lp,
-                            bool AllowConstants = false);
+Value *getStrideFromPointer(Value *Ptr, ScalarEvolution *SE, Loop *Lp);
 
 /// Given a vector and an element number, see if the scalar value is
 /// already around as a register, for example if it were inserted then extracted

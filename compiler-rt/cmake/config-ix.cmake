@@ -61,6 +61,7 @@ endif ()
 
 # CodeGen options.
 check_c_compiler_flag(-ffreestanding         COMPILER_RT_HAS_FFREESTANDING_FLAG)
+check_c_compiler_flag(-fomit-frame-pointer   COMPILER_RT_HAS_OMIT_FRAME_POINTER_FLAG)
 check_c_compiler_flag(-std=c11               COMPILER_RT_HAS_STD_C11_FLAG)
 check_cxx_compiler_flag(-fPIC                COMPILER_RT_HAS_FPIC_FLAG)
 check_cxx_compiler_flag(-fPIE                COMPILER_RT_HAS_FPIE_FLAG)
@@ -564,8 +565,19 @@ else()
 endif()
 
 if (MSVC)
+  # Allow setting clang-cl's /winsysroot flag.
+  set(LLVM_WINSYSROOT "" CACHE STRING
+    "If set, argument to clang-cl's /winsysroot")
+
+  if (LLVM_WINSYSROOT)
+    set(MSVC_DIA_SDK_DIR "${LLVM_WINSYSROOT}/DIA SDK" CACHE PATH
+        "Path to the DIA SDK")
+  else()
+    set(MSVC_DIA_SDK_DIR "$ENV{VSINSTALLDIR}DIA SDK" CACHE PATH
+        "Path to the DIA SDK")
+  endif()
+
   # See if the DIA SDK is available and usable.
-  set(MSVC_DIA_SDK_DIR "$ENV{VSINSTALLDIR}DIA SDK")
   if (IS_DIRECTORY ${MSVC_DIA_SDK_DIR})
     set(CAN_SYMBOLIZE 1)
   else()
