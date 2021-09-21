@@ -650,6 +650,12 @@ multiclass VPatExtendSDNode_V_VL<SDNode vop, string inst_name, string suffix,
                                true_mask, VLOpFrag)),
               (!cast<Instruction>(inst_name#"_"#suffix#"_"#vti.LMul.MX)
                   fti.RegClass:$rs2, GPR:$vl, vti.Log2SEW)>;
+    def : Pat<(vti.Vector (vop (fti.Vector fti.RegClass:$rs2),
+                               (fti.Mask V0), VLOpFrag)),
+              (!cast<Instruction>(inst_name#"_"#suffix#"_"#vti.LMul.MX#"_MASK")
+                  (vti.Vector (IMPLICIT_DEF)),
+                  fti.RegClass:$rs2,
+                  (fti.Mask V0), GPR:$vl, vti.Log2SEW)>;
   }
 }
 

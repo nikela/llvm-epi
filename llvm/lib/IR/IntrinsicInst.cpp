@@ -500,7 +500,8 @@ CmpInst::Predicate VPIntrinsic::getCmpPredicate() const {
       cast<ConstantInt>(getArgOperand(2))->getZExtValue());
 }
 
-Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
+Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
+                                               Intrinsic::ID VPID,
                                                ArrayRef<Value *> Params) {
   assert(isVPIntrinsic(VPID) && "not a VP intrinsic");
   Function *VPFunc;
@@ -514,6 +515,10 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
     VPFunc = Intrinsic::getDeclaration(M, VPID, OverloadTy);
     break;
   }
+  case Intrinsic::vp_sext:
+  case Intrinsic::vp_zext:
+    VPFunc = Intrinsic::getDeclaration(M, VPID, {RetType, Params[0]->getType()});
+    break;
   case Intrinsic::vp_select:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {Params[1]->getType()});
     break;
