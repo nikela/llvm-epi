@@ -6390,11 +6390,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #include "llvm/IR/VPIntrinsics.def"
     {
-    // FIXME: There is a problem when expanding those into SDNodes
-    auto DisabledVPNode = [Intrinsic]() {
-      return Intrinsic == Intrinsic::vp_select;
-    };
-    if (!DisableVPRedIntrinsics && !DisabledVPNode())
+    if (!DisableVPRedIntrinsics)
       visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
     else
       visitTargetIntrinsic(I, Intrinsic);

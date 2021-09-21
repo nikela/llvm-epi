@@ -6,7 +6,7 @@
 
 @scratch = global i8 0, align 16
 
-define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -34,7 +34,7 @@ define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <v
   ret void
 }
 
-define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int_2:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -62,7 +62,7 @@ define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, 
   ret void
 }
 
-define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_int_3:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -90,7 +90,7 @@ define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, 
   ret void
 }
 
-define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -118,7 +118,7 @@ define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %
   ret void
 }
 
-define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp_2:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -146,7 +146,7 @@ define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %
   ret void
 }
 
-define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_fp_3:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
@@ -174,14 +174,14 @@ define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double>
   ret void
 }
 
-define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
@@ -193,7 +193,7 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
@@ -208,14 +208,14 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
   ret void
 }
 
-define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_2:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
@@ -227,7 +227,7 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
@@ -242,14 +242,14 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
   ret void
 }
 
-define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 %n) nounwind {
+define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_3:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
@@ -261,7 +261,7 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
 ; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
 ; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25

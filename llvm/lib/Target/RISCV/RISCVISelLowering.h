@@ -658,6 +658,7 @@ private:
   SDValue lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
                         unsigned RISCVISDOpc) const;
   SDValue lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPSelectMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
                                             unsigned ExtendOpc) const;
   SDValue lowerGET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;

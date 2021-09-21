@@ -526,6 +526,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       // Comparisons
       setOperationAction(ISD::VP_SETCC, VT, Custom);
+
+      setOperationAction(ISD::VP_SELECT, VT, Custom);
     }
 
     for (MVT VT : IntVecVTs) {
@@ -614,6 +616,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       // Splice
       setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
+
+      setOperationAction(ISD::VP_SELECT, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -680,6 +684,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       for (unsigned VPOpc : FloatingPointVPOps)
         setOperationAction(VPOpc, VT, Custom);
+
+      setOperationAction(ISD::VP_SELECT, VT, Custom);
     };
 
     // Sets common extload/truncstore actions on RVV floating-point vector
@@ -763,6 +769,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::AND, VT, Custom);
           setOperationAction(ISD::OR, VT, Custom);
           setOperationAction(ISD::XOR, VT, Custom);
+
+          setOperationAction(ISD::VP_SELECT, VT, Custom);
+
           continue;
         }
 
@@ -833,6 +842,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
         for (unsigned VPOpc : IntegerVPOps)
           setOperationAction(VPOpc, VT, Custom);
+
+        setOperationAction(ISD::VP_SELECT, VT, Custom);
       }
 
       for (MVT VT : MVT::fp_fixedlen_vector_valuetypes()) {
@@ -900,6 +911,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
         for (unsigned VPOpc : FloatingPointVPOps)
           setOperationAction(VPOpc, VT, Custom);
+
+        setOperationAction(ISD::VP_SELECT, VT, Custom);
       }
 
       // Custom-legalize bitcasts from fixed-length vectors to scalar types.
@@ -3189,6 +3202,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPCmpOp(Op, DAG);
   case ISD::VECTOR_SPLICE:
     return lowerVECTOR_SPLICE(Op, DAG);
+  case ISD::VP_SELECT:
+    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPSelectMaskOp(Op, DAG);
+    return lowerVPOp(Op, DAG, RISCVISD::VSELECT_VL);
   }
 }
 
@@ -7145,6 +7162,48 @@ SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
 
   SDValue Result = DAG.getNode(RISCVISD::VMOR_VL, DL, ContainerVT, SetCC,
                      DAG.getNOT(DL, NanAnd, ContainerVT), EVL);
+
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+SDValue RISCVTargetLowering::lowerVPSelectMaskOp(SDValue Op,
+                                                 SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  // FIXME
+  assert(!VT.isFixedLengthVector() &&
+         "Fixed length vector masks not implemented yet");
+
+  // Ops indexes: 0->Mask, 1->Op1, 2->Op2, 3->EVL
+  SmallVector<SDValue, 4> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  SDValue XOR =
+      DAG.getNode(RISCVISD::VMXOR_VL, DL, ContainerVT, Ops[2], Ops[1], Ops[3]);
+  SDValue AND =
+      DAG.getNode(RISCVISD::VMAND_VL, DL, ContainerVT, XOR, Ops[0], Ops[3]);
+  SDValue Result =
+      DAG.getNode(RISCVISD::VMXOR_VL, DL, ContainerVT, Ops[2], AND, Ops[3]);
 
   if (!VT.isFixedLengthVector())
     return Result;
