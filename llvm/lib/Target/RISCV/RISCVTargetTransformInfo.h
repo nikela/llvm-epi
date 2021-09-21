@@ -214,24 +214,6 @@ public:
                                          TTI::TargetCostKind CostKind,
                                          const Instruction *I);
 
-  bool isLegalElementTypeForRVV(Type *ScalarTy) const {
-    if (ScalarTy->isPointerTy())
-      return true;
-
-    if (ScalarTy->isIntegerTy(8) || ScalarTy->isIntegerTy(16) ||
-        ScalarTy->isIntegerTy(32) || ScalarTy->isIntegerTy(64))
-      return true;
-
-    if (ScalarTy->isHalfTy())
-      return ST->hasStdExtZfh();
-    if (ScalarTy->isFloatTy())
-      return ST->hasStdExtF();
-    if (ScalarTy->isDoubleTy())
-      return ST->hasStdExtD();
-
-    return false;
-  }
-
   bool isLegalMaskedLoadStore(Type *DataType, Align Alignment) {
     if (!ST->hasStdExtV())
       return false;
@@ -250,7 +232,7 @@ public:
         DL.getTypeStoreSize(DataType->getScalarType()).getFixedSize())
       return false;
 
-    return isLegalElementTypeForRVV(DataType->getScalarType());
+    return TLI->isLegalElementTypeForRVV(DataType->getScalarType());
   }
 
   bool isLegalMaskedLoad(Type *DataType, Align Alignment) {
@@ -278,7 +260,7 @@ public:
         DL.getTypeStoreSize(DataType->getScalarType()).getFixedSize())
       return false;
 
-    return isLegalElementTypeForRVV(DataType->getScalarType());
+    return TLI->isLegalElementTypeForRVV(DataType->getScalarType());
   }
 
   bool isLegalMaskedGather(Type *DataType, Align Alignment) {
@@ -310,7 +292,7 @@ public:
       return true;
 
     Type *Ty = RdxDesc.getRecurrenceType();
-    if (!isLegalElementTypeForRVV(Ty))
+    if (!TLI->isLegalElementTypeForRVV(Ty))
       return false;
 
     switch (RdxDesc.getRecurrenceKind()) {

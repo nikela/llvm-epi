@@ -565,6 +565,8 @@ public:
 
   bool shouldRemoveExtendFromGSIndex(EVT VT) const override;
 
+  bool isLegalElementTypeForRVV(Type *ScalarTy) const;
+
 private:
   /// RISCVCCAssignFn - This target-specific function extends the default
   /// CCValAssign with additional information used to lower RISC-V calling
