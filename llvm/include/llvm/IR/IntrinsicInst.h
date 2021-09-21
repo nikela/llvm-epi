@@ -391,7 +391,7 @@ class VPIntrinsic : public IntrinsicInst {
 public:
   /// \brief Declares a llvm.vp.* intrinsic in \p M that matches the parameters
   /// \p Params.
-  static Function *getDeclarationForParams(Module *M, Intrinsic::ID,
+  static Function *getDeclarationForParams(Type *RetType, Module *M, Intrinsic::ID,
                                            ArrayRef<Value *> Params);
 
   static Optional<unsigned> getMaskParamPos(Intrinsic::ID IntrinsicID);

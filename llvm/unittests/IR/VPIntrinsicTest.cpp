@@ -76,6 +76,9 @@ protected:
     Str << " declare <8 x i32> @llvm.vp.icmp.v8i32(<8 x i32>, <8 x i32>, i8, <8 x i1>, i32)";
     Str << " declare <8 x float> @llvm.vp.fcmp.v8f32(<8 x float>, <8 x float>, i8, <8 x i1>, i32)";
 
+    Str << " declare <8 x i32> @llvm.vp.sext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32> @llvm.vp.zext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
+
     return parseAssemblyString(Str.str(), Err, C);
   }
 };
@@ -267,6 +270,7 @@ TEST_F(VPIntrinsicTest, VPIntrinsicDeclarationForParams) {
 
   for (auto &F : *M) {
     auto *FuncTy = F.getFunctionType();
+    Type *RetType = FuncTy->getReturnType();
 
     // Declare intrinsic anew with explicit types.
     std::vector<Value *> Values;
@@ -275,7 +279,7 @@ TEST_F(VPIntrinsicTest, VPIntrinsicDeclarationForParams) {
 
     ASSERT_NE(F.getIntrinsicID(), Intrinsic::not_intrinsic);
     auto *NewDecl = VPIntrinsic::getDeclarationForParams(
-        OutM.get(), F.getIntrinsicID(), Values);
+        RetType, OutM.get(), F.getIntrinsicID(), Values);
     ASSERT_TRUE(NewDecl);
 
     // Check that 'old decl' == 'new decl'.
