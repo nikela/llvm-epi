@@ -308,14 +308,14 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::SELECT, XLenVT, Custom);
   }
 
-  ISD::CondCode FPCCToExpand[] = {
+  static const ISD::CondCode FPCCToExpand[] = {
       ISD::SETOGT, ISD::SETOGE, ISD::SETONE, ISD::SETUEQ, ISD::SETUGT,
       ISD::SETUGE, ISD::SETULT, ISD::SETULE, ISD::SETUNE, ISD::SETGT,
       ISD::SETGE,  ISD::SETNE,  ISD::SETO,   ISD::SETUO};
 
-  ISD::NodeType FPOpToExpand[] = {
-      ISD::FSIN, ISD::FCOS, ISD::FSINCOS, ISD::FPOW, ISD::FREM, ISD::FP16_TO_FP,
-      ISD::FP_TO_FP16};
+  static const ISD::NodeType FPOpToExpand[] = {
+      ISD::FSIN, ISD::FCOS,       ISD::FSINCOS,   ISD::FPOW,
+      ISD::FREM, ISD::FP16_TO_FP, ISD::FP_TO_FP16};
 
   if (Subtarget.hasStdExtZfh())
     setOperationAction(ISD::BITCAST, MVT::i16, Custom);
@@ -633,7 +633,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     // and we pattern-match those back to the "original", swapping operands once
     // more. This way we catch both operations and both "vf" and "fv" forms with
     // fewer patterns.
-    ISD::CondCode VFPCCToExpand[] = {
+    static const ISD::CondCode VFPCCToExpand[] = {
         ISD::SETO,   ISD::SETONE, ISD::SETUEQ, ISD::SETUGT,
         ISD::SETUGE, ISD::SETULT, ISD::SETULE, ISD::SETUO,
         ISD::SETGT,  ISD::SETOGT, ISD::SETGE,  ISD::SETOGE,
@@ -1281,6 +1281,9 @@ bool RISCVTargetLowering::shouldSinkOperands(
     case Instruction::Add:
     case Instruction::Sub:
     case Instruction::Mul:
+    case Instruction::And:
+    case Instruction::Or:
+    case Instruction::Xor:
     case Instruction::FAdd:
     case Instruction::FSub:
     case Instruction::FMul:
@@ -8763,8 +8766,53 @@ static SDValue combineSelectAndUseCommutative(SDNode *N, SelectionDAG &DAG,
   return SDValue();
 }
 
+// Transform (add (mul x, c0), c1) ->
+//           (add (mul (add x, c1/c0), c0), c1%c0).
+// if c1/c0 and c1%c0 are simm12, while c1 is not.
+// Or transform (add (mul x, c0), c1) ->
+//              (mul (add x, c1/c0), c0).
+// if c1%c0 is zero, and c1/c0 is simm12 while c1 is not.
+static SDValue transformAddImmMulImm(SDNode *N, SelectionDAG &DAG,
+                                     const RISCVSubtarget &Subtarget) {
+  // Skip for vector types and larger types.
+  EVT VT = N->getValueType(0);
+  if (VT.isVector() || VT.getSizeInBits() > Subtarget.getXLen())
+    return SDValue();
+  // The first operand node must be a MUL and has no other use.
+  SDValue N0 = N->getOperand(0);
+  if (!N0->hasOneUse() || N0->getOpcode() != ISD::MUL)
+    return SDValue();
+  // Check if c0 and c1 match above conditions.
+  auto *N0C = dyn_cast<ConstantSDNode>(N0->getOperand(1));
+  auto *N1C = dyn_cast<ConstantSDNode>(N->getOperand(1));
+  if (!N0C || !N1C)
+    return SDValue();
+  int64_t C0 = N0C->getSExtValue();
+  int64_t C1 = N1C->getSExtValue();
+  if (C0 == -1 || C0 == 0 || C0 == 1 || (C1 / C0) == 0 || isInt<12>(C1) ||
+      !isInt<12>(C1 % C0) || !isInt<12>(C1 / C0))
+    return SDValue();
+  // Build new nodes (add (mul (add x, c1/c0), c0), c1%c0).
+  SDLoc DL(N);
+  SDValue New0 = DAG.getNode(ISD::ADD, DL, VT, N0->getOperand(0),
+                             DAG.getConstant(C1 / C0, DL, VT));
+  SDValue New1 =
+      DAG.getNode(ISD::MUL, DL, VT, New0, DAG.getConstant(C0, DL, VT));
+  if ((C1 % C0) == 0)
+    return New1;
+  return DAG.getNode(ISD::ADD, DL, VT, New1, DAG.getConstant(C1 % C0, DL, VT));
+}
+
 static SDValue performADDCombine(SDNode *N, SelectionDAG &DAG,
                                  const RISCVSubtarget &Subtarget) {
+  // Transform (add (mul x, c0), c1) ->
+  //           (add (mul (add x, c1/c0), c0), c1%c0).
+  // if c1/c0 and c1%c0 are simm12, while c1 is not.
+  // Or transform (add (mul x, c0), c1) ->
+  //              (mul (add x, c1/c0), c0).
+  // if c1%c0 is zero, and c1/c0 is simm12 while c1 is not.
+  if (SDValue V = transformAddImmMulImm(N, DAG, Subtarget))
+    return V;
   // Fold (add (shl x, c0), (shl y, c1)) ->
   //      (SLLI (SH*ADD x, y), c0), if c1-c0 equals to [1|2|3].
   if (SDValue V = transformAddShlImm(N, DAG, Subtarget))

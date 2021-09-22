@@ -2596,6 +2596,13 @@ static bool isAllocSiteRemovable(Instruction *AI,
           Users.emplace_back(I);
           continue;
         }
+
+        if (isReallocLikeFn(I, TLI, true)) {
+          Users.emplace_back(I);
+          Worklist.push_back(I);
+          continue;
+        }
+
         return false;
 
       case Instruction::Store: {
@@ -2807,6 +2814,15 @@ Instruction *InstCombinerImpl::visitFree(CallInst &FI) {
   // when lots of inlining happens.
   if (isa<ConstantPointerNull>(Op))
     return eraseInstFromFunction(FI);
+
+  // If we had free(realloc(...)) with no intervening uses, then eliminate the
+  // realloc() entirely.
+  if (CallInst *CI = dyn_cast<CallInst>(Op)) {
+    if (CI->hasOneUse() && isReallocLikeFn(CI, &TLI, true)) {
+      return eraseInstFromFunction(
+          *replaceInstUsesWith(*CI, CI->getOperand(0)));
+    }
+  }
 
   // If we optimize for code size, try to move the call to free before the null
   // test so that simplify cfg can remove the empty block and dead code
@@ -3613,7 +3629,7 @@ Instruction *InstCombinerImpl::visitFreeze(FreezeInst &I) {
 /// instruction past all of the instructions between it and the end of its
 /// block.
 static bool TryToSinkInstruction(Instruction *I, BasicBlock *DestBlock) {
-  assert(I->getSingleUndroppableUse() && "Invariants didn't hold!");
+  assert(I->getUniqueUndroppableUser() && "Invariants didn't hold!");
   BasicBlock *SrcBlock = I->getParent();
 
   // Cannot move control-flow-involving, volatile loads, vaarg, etc.
@@ -3772,18 +3788,27 @@ bool InstCombinerImpl::run() {
         [this](Instruction *I) -> Optional<BasicBlock *> {
       if (!EnableCodeSinking)
         return None;
-      Use *SingleUse = I->getSingleUndroppableUse();
-      if (!SingleUse)
+      auto *UserInst = cast_or_null<Instruction>(I->getUniqueUndroppableUser());
+      if (!UserInst)
         return None;
 
       BasicBlock *BB = I->getParent();
-      Instruction *UserInst = cast<Instruction>(SingleUse->getUser());
-      BasicBlock *UserParent;
+      BasicBlock *UserParent = nullptr;
 
-      // Get the block the use occurs in.
-      if (PHINode *PN = dyn_cast<PHINode>(UserInst))
-        UserParent = PN->getIncomingBlock(*SingleUse);
-      else
+      // Special handling for Phi nodes - get the block the use occurs in.
+      if (PHINode *PN = dyn_cast<PHINode>(UserInst)) {
+        for (unsigned i = 0; i < PN->getNumIncomingValues(); i++) {
+          if (PN->getIncomingValue(i) == I) {
+            // Bail out if we have uses in different blocks. We don't do any
+            // sophisticated analysis (i.e finding NearestCommonDominator of these
+            // use blocks).
+            if (UserParent && UserParent != PN->getIncomingBlock(i))
+              return None;
+            UserParent = PN->getIncomingBlock(i);
+          }
+        }
+        assert(UserParent && "expected to find user block!");
+      } else
         UserParent = UserInst->getParent();
 
       // Try sinking to another block. If that block is unreachable, then do
