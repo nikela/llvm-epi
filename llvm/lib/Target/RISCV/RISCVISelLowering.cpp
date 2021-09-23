@@ -6909,37 +6909,37 @@ SDValue RISCVTargetLowering::lowerMaskedStore(SDValue Op,
     Mask = MStore->getMask();
   }
 
+  bool IsUnmasked = ISD::isConstantSplatVectorAllOnes(Mask.getNode());
+
   MVT VT = Val.getSimpleValueType();
   MVT XLenVT = Subtarget.getXLenVT();
 
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector()) {
     ContainerVT = getContainerForFixedLengthVector(VT);
-    MVT MaskVT = MVT::getVectorVT(MVT::i1, ContainerVT.getVectorElementCount());
 
     Val = convertToScalableVector(ContainerVT, Val, DAG, Subtarget);
-    Mask = convertToScalableVector(MaskVT, Mask, DAG, Subtarget);
+    if (!IsUnmasked) {
+      MVT MaskVT =
+          MVT::getVectorVT(MVT::i1, ContainerVT.getVectorElementCount());
+      Mask = convertToScalableVector(MaskVT, Mask, DAG, Subtarget);
+    }
   }
 
   if (!VL)
     VL = getDefaultVLOps(VT, ContainerVT, DL, DAG, Subtarget).second;
 
-  // If the mask is known to be all ones, optimize to an unmasked intrinsic;
-  // the selection of the masked intrinsics doesn't do this for us.
-  bool IsUnmasked = ISD::isConstantSplatVectorAllOnes(Mask.getNode());
+  unsigned IntID =
+      IsUnmasked ? Intrinsic::riscv_vse : Intrinsic::riscv_vse_mask;
+  SmallVector<SDValue, 8> Ops{Chain, DAG.getTargetConstant(IntID, DL, XLenVT)};
+  Ops.push_back(Val);
+  Ops.push_back(BasePtr);
+  if (!IsUnmasked)
+    Ops.push_back(Mask);
+  Ops.push_back(VL);
 
-  if (IsUnmasked) {
-    SDValue IntID = DAG.getTargetConstant(Intrinsic::riscv_vse, DL, XLenVT);
-    return DAG.getMemIntrinsicNode(
-        ISD::INTRINSIC_VOID, DL, DAG.getVTList(MVT::Other),
-        {Chain, IntID, Val, BasePtr, VL}, MemVT, MMO);
-  } else {
-    SDValue IntID =
-        DAG.getTargetConstant(Intrinsic::riscv_vse_mask, DL, XLenVT);
-    return DAG.getMemIntrinsicNode(
-        ISD::INTRINSIC_VOID, DL, DAG.getVTList(MVT::Other),
-        {Chain, IntID, Val, BasePtr, Mask, VL}, MemVT, MMO);
-  }
+  return DAG.getMemIntrinsicNode(ISD::INTRINSIC_VOID, DL,
+                                 DAG.getVTList(MVT::Other), Ops, MemVT, MMO);
 }
 
 SDValue
