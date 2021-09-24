@@ -1093,3 +1093,31 @@ else:
 }
 
 declare void @capture_and_clobber_multiple(i32*, i32*)
+
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture)
+
+define i64 @earliest_escape_ptrtoint(i64** %p.1) {
+; CHECK-LABEL: @earliest_escape_ptrtoint(
+; CHECK-NEXT:  entry:
+; CHECK-NEXT:    [[A_1:%.*]] = alloca i64, align 8
+; CHECK-NEXT:    [[A_2:%.*]] = alloca i64, align 8
+; CHECK-NEXT:    [[LV_1:%.*]] = load i64*, i64** [[P_1:%.*]], align 8
+; CHECK-NEXT:    [[LV_2:%.*]] = load i64, i64* [[LV_1]], align 4
+; CHECK-NEXT:    store i64* [[A_1]], i64** [[P_1]], align 8
+; CHECK-NEXT:    [[A_2_CAST:%.*]] = bitcast i64* [[A_2]] to i8*
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 8, i8* [[A_2_CAST]])
+; CHECK-NEXT:    ret i64 [[LV_2]]
+;
+entry:
+  %a.1 = alloca i64
+  %a.2 = alloca i64
+  store i64 99, i64* %a.1
+  %lv.1 = load i64*, i64** %p.1
+  %lv.2 = load i64, i64* %lv.1
+  store i64* %a.1, i64** %p.1, align 8
+  %int = ptrtoint i64* %a.2 to i64
+  store i64 %int , i64* %a.2, align 8
+  %a.2.cast = bitcast i64* %a.2 to i8*
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* %a.2.cast)
+  ret i64 %lv.2
+}
