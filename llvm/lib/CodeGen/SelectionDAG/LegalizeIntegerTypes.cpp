@@ -1635,7 +1635,9 @@ bool DAGTypeLegalizer::PromoteIntegerOperand(SDNode *N, unsigned OpNo) {
   case ISD::VP_REDUCE_SMAX:
   case ISD::VP_REDUCE_SMIN:
   case ISD::VP_REDUCE_UMAX:
-  case ISD::VP_REDUCE_UMIN: Res = PromoteIntOp_VP_REDUCE(N, OpNo); break;
+  case ISD::VP_REDUCE_UMIN:
+    Res = PromoteIntOp_VP_REDUCE(N, OpNo);
+    break;
 
   case ISD::SET_ROUNDING: Res = PromoteIntOp_SET_ROUNDING(N); break;
   case ISD::VP_SETCC: Res = PromoteIntOp_VP_SETCC(N, OpNo); break;

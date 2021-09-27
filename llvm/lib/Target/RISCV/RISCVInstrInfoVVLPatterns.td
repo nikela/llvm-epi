@@ -292,7 +292,7 @@ multiclass VPatBinaryVL_VV<SDNode vop,
                      (result_type (IMPLICIT_DEF)),
                      op_reg_class:$rs1,
                      op_reg_class:$rs2,
-                     (mask_type V0), GPR:$vl, sew)>;
+                     (mask_type V0), GPR:$vl, sew, TAIL_AGNOSTIC)>;
 }
 
 multiclass VPatBinaryVL_XI<SDNode vop,
@@ -324,7 +324,7 @@ multiclass VPatBinaryVL_XI<SDNode vop,
                      (result_type (IMPLICIT_DEF)),
                      vop_reg_class:$rs1,
                      xop_kind:$rs2,
-                     (mask_type V0), GPR:$vl, sew)>;
+                     (mask_type V0), GPR:$vl, sew, TAIL_AGNOSTIC)>;
 }
 
 multiclass VPatBinaryVL_VV_VX<SDNode vop, string instruction_name> {
@@ -655,7 +655,7 @@ multiclass VPatExtendSDNode_V_VL<SDNode vop, string inst_name, string suffix,
               (!cast<Instruction>(inst_name#"_"#suffix#"_"#vti.LMul.MX#"_MASK")
                   (vti.Vector (IMPLICIT_DEF)),
                   fti.RegClass:$rs2,
-                  (fti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                  (fti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 
@@ -742,13 +742,12 @@ multiclass VPatReductionVL<SDNode vop, string instruction_name, bit is_float> {
             GPR:$vl, vti.Log2SEW)>;
 
     def: Pat<(vti_m1.Vector (vop (vti_m1.Vector VR:$merge), (vti.Vector vti.RegClass:$rs1), VR:$rs2,
-                                 (vti.Mask VMV0:$vm),
-                                 VLOpFrag)),
+                                 (vti.Mask V0), VLOpFrag)),
         (!cast<Instruction>(instruction_name#"_VS_"#vti.LMul.MX#"_MASK")
             (vti_m1.Vector VR:$merge),
             (vti.Vector vti.RegClass:$rs1),
             (vti_m1.Vector VR:$rs2),
-            VMV0:$vm, GPR:$vl, vti.Log2SEW)>;
+            (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
   }
 }
 
@@ -797,7 +796,7 @@ foreach vti = AllIntegerVectors in {
                           VLOpFrag),
             (!cast<Instruction>("PseudoVRSUB_VX_"# vti.LMul.MX#"_MASK")
                  (vti.Vector (IMPLICIT_DEF)), vti.RegClass:$rs1, GPR:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(riscv_sub_vl (vti.Vector (SplatPat_simm5 simm5:$rs2)),
                           (vti.Vector vti.RegClass:$rs1), (vti.Mask true_mask),
                           VLOpFrag),
@@ -808,7 +807,7 @@ foreach vti = AllIntegerVectors in {
                           VLOpFrag),
             (!cast<Instruction>("PseudoVRSUB_VI_"# vti.LMul.MX#"_MASK")
                  (vti.Vector (IMPLICIT_DEF)), vti.RegClass:$rs1, simm5:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 }
 
 // 12.3. Vector Integer Extension
@@ -1445,10 +1444,10 @@ foreach mti = AllMasks in {
                                     VLOpFrag)),
             (!cast<Instruction>("PseudoVPOPC_M_" # mti.BX)
                  VR:$rs2, GPR:$vl, mti.Log2SEW)>;
-  def : Pat<(XLenVT (riscv_vpopc_vl (mti.Mask VR:$rs2), (mti.Mask VMV0:$vm),
+  def : Pat<(XLenVT (riscv_vpopc_vl (mti.Mask VR:$rs2), (mti.Mask V0),
                                     VLOpFrag)),
             (!cast<Instruction>("PseudoVPOPC_M_" # mti.BX # "_MASK")
-                 VR:$rs2, VMV0:$vm, GPR:$vl, mti.Log2SEW)>;
+                 VR:$rs2, (mti.Mask V0), GPR:$vl, mti.Log2SEW)>;
 }
 
 } // Predicates = [HasStdExtV]
@@ -1490,7 +1489,7 @@ foreach vti = AllIntegerVectors in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVRGATHER_VV_"# vti.LMul.MX#"_MASK")
                  vti.RegClass:$merge, vti.RegClass:$rs2, vti.RegClass:$rs1,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   def : Pat<(vti.Vector (riscv_vselect_vl (vti.Mask V0),
                                           (riscv_vrgather_vx_vl
@@ -1502,7 +1501,7 @@ foreach vti = AllIntegerVectors in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVRGATHER_VI_"# vti.LMul.MX#"_MASK")
                  vti.RegClass:$merge, vti.RegClass:$rs2, uimm5:$imm,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   // emul = lmul * 16 / sew
   defvar vlmul = vti.LMul;
@@ -1529,7 +1528,7 @@ foreach vti = AllIntegerVectors in {
                                             VLOpFrag)),
               (!cast<Instruction>(inst#"_MASK")
                    vti.RegClass:$merge, vti.RegClass:$rs2, ivti.RegClass:$rs1,
-                   (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                   (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 
@@ -1573,7 +1572,7 @@ foreach vti = AllFloatVectors in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVRGATHER_VV_"# vti.LMul.MX#"_MASK")
                  vti.RegClass:$merge, vti.RegClass:$rs2, vti.RegClass:$rs1,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   def : Pat<(vti.Vector (riscv_vselect_vl (vti.Mask V0),
                                           (riscv_vrgather_vx_vl
@@ -1585,7 +1584,7 @@ foreach vti = AllFloatVectors in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVRGATHER_VI_"# vti.LMul.MX#"_MASK")
                  vti.RegClass:$merge, vti.RegClass:$rs2, uimm5:$imm,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   defvar vlmul = vti.LMul;
   defvar octuple_lmul = vlmul.octuple;
@@ -1611,7 +1610,7 @@ foreach vti = AllFloatVectors in {
                                             VLOpFrag)),
               (!cast<Instruction>(inst#"_MASK")
                    vti.RegClass:$merge, vti.RegClass:$rs2, ivti.RegClass:$rs1,
-                   (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                   (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 
