@@ -970,7 +970,7 @@ class UnaryIntrinsicScalarResultNoVL(Intrinsic):
 declare ${llvm_result_type} @llvm.epi.${intrinsic}.${value_result_type}.nxv${lhs_type_scale}${value_lhs_type}(
   <vscale x ${lhs_type_scale} x ${llvm_lhs_type}>);
 
-define void @intrinsic_${intrinsic}_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}() nounwind {
+define ${llvm_lhs_type} @intrinsic_${intrinsic}_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_${intrinsic}_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}
 ; CHECK:       vsetivli zero, 0, ${sew}, ${vlmul}, ta, mu
@@ -978,10 +978,7 @@ entry:
   %a = call ${llvm_result_type} @llvm.epi.${intrinsic}.${value_result_type}.nxv${lhs_type_scale}${value_lhs_type}(
     <vscale x ${lhs_type_scale} x ${llvm_lhs_type}> undef)
 
-  %p = bitcast i8* @scratch to ${llvm_result_type}*
-  store ${llvm_result_type} %a, ${llvm_result_type}* %p
-
-  ret void
+  ret ${llvm_lhs_type} %a
 }
 """
     pattern_v_mask = """
@@ -990,7 +987,7 @@ declare ${llvm_result_type} @llvm.epi.${intrinsic}.mask.${value_result_type}.nxv
   <vscale x ${lhs_type_scale} x i1>,
   i64);
 
-define void @intrinsic_${intrinsic}_mask_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}() nounwind {
+define ${llvm_lhs_type} @intrinsic_${intrinsic}_mask_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_${intrinsic}_mask_${suffix}_${value_result_type}_nxv${lhs_type_scale}${value_lhs_type}
 ; CHECK:       vsetivli zero, 0, ${sew}, ${vlmul}, ta, mu
@@ -999,10 +996,7 @@ entry:
     <vscale x ${lhs_type_scale} x ${llvm_lhs_type}> undef,
     <vscale x ${lhs_type_scale} x i1> undef)
 
-  %p = bitcast i8* @scratch to ${llvm_result_type}*
-  store ${llvm_result_type} %a, ${llvm_result_type}* %p
-
-  ret void
+  ret ${llvm_lhs_type} %a
 }
 """
     def __init__(self, intr_name, type_generator, **extra_info):

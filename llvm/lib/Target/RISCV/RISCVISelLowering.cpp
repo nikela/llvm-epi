@@ -450,9 +450,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN};
 
     static const unsigned FloatingPointVPOps[] = {
-        ISD::VP_FADD,        ISD::VP_FSUB,        ISD::VP_FMUL,
-        ISD::VP_FDIV,        ISD::VP_REDUCE_FADD, ISD::VP_REDUCE_SEQ_FADD,
-        ISD::VP_REDUCE_FMIN, ISD::VP_REDUCE_FMAX};
+        ISD::VP_FADD,            ISD::VP_FSUB,        ISD::VP_FMUL,
+        ISD::VP_FDIV,            ISD::VP_FREM,        ISD::VP_REDUCE_FADD,
+        ISD::VP_REDUCE_SEQ_FADD, ISD::VP_REDUCE_FMIN, ISD::VP_REDUCE_FMAX};
 
     if (!Subtarget.is64Bit()) {
       // We must custom-lower certain vXi64 operations on RV32 due to the vector
@@ -1028,6 +1028,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
     setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
 
+    setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_frem_nxv1f64");
+    setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_frem_nxv2f64");
+    setLibcallName(RTLIB::VP_FREM_NXV4F64, "__epi_vp_frem_nxv4f64");
+    setLibcallName(RTLIB::VP_FREM_NXV8F64, "__epi_vp_frem_nxv8f64");
+    setLibcallName(RTLIB::VP_FREM_NXV1F32, "__epi_vp_frem_nxv1f32");
+    setLibcallName(RTLIB::VP_FREM_NXV2F32, "__epi_vp_frem_nxv2f32");
+    setLibcallName(RTLIB::VP_FREM_NXV4F32, "__epi_vp_frem_nxv4f32");
+    setLibcallName(RTLIB::VP_FREM_NXV8F32, "__epi_vp_frem_nxv8f32");
+    setLibcallName(RTLIB::VP_FREM_NXV16F32, "__epi_vp_frem_nxv16f32");
+
     // Custom-legalize these nodes for fp scalable vectors.
     for (auto VT :
          {MVT::nxv1f32, MVT::nxv2f32, MVT::nxv4f32, MVT::nxv8f32, MVT::nxv16f32,
@@ -1451,7 +1461,7 @@ RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
 }
 
 SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
-    ArrayRef<VTToLibCall> VTToLC) const
+    ArrayRef<RISCVVTToLibCall> VTToLC) const
 {
   SDLoc DL(Op);
   EVT VT = Op.getValueType();
@@ -1469,13 +1479,21 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   SDValue Chain;
   SDValue Result;
   std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
+
+  // We use this function for some intrinsics. Skip the first operand which 
+  // is the opcode for the intrinsic itself.
+  if (Op.getOpcode() == ISD::INTRINSIC_VOID ||
+      Op.getOpcode() == ISD::INTRINSIC_W_CHAIN ||
+      Op.getOpcode() == ISD::INTRINSIC_WO_CHAIN)
+    Operands.erase(Operands.begin());
+
   std::tie(Result, Chain) =
       makeLibCall(DAG, LC, Op.getValueType(), Operands, CallOptions, DL);
   return Result;
 }
 
 SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
-  VTToLibCall VTToLC[] = {
+  RISCVVTToLibCall VTToLC[] = {
       {MVT::nxv1f64, RTLIB::EXP_NXV1F64},   {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
       {MVT::nxv4f64, RTLIB::EXP_NXV4F64},   {MVT::nxv8f64, RTLIB::EXP_NXV8F64},
       {MVT::nxv1f32, RTLIB::EXP_NXV1F32},   {MVT::nxv2f32, RTLIB::EXP_NXV2F32},
@@ -1486,7 +1504,7 @@ SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
-  VTToLibCall VTToLC[] = {
+  RISCVVTToLibCall VTToLC[] = {
       {MVT::nxv1f64, RTLIB::SIN_NXV1F64},   {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
       {MVT::nxv4f64, RTLIB::SIN_NXV4F64},   {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
       {MVT::nxv1f32, RTLIB::SIN_NXV1F32},   {MVT::nxv2f32, RTLIB::SIN_NXV2F32},
@@ -1497,7 +1515,7 @@ SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
-  VTToLibCall VTToLC[] = {
+  RISCVVTToLibCall VTToLC[] = {
       {MVT::nxv1f64, RTLIB::COS_NXV1F64},   {MVT::nxv2f64, RTLIB::COS_NXV2F64},
       {MVT::nxv4f64, RTLIB::COS_NXV4F64},   {MVT::nxv8f64, RTLIB::COS_NXV8F64},
       {MVT::nxv1f32, RTLIB::COS_NXV1F32},   {MVT::nxv2f32, RTLIB::COS_NXV2F32},
@@ -1508,7 +1526,7 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
-  VTToLibCall VTToLC[] = {
+  RISCVVTToLibCall VTToLC[] = {
       {MVT::nxv1f64, RTLIB::FMOD_NXV1F64},
       {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
       {MVT::nxv4f64, RTLIB::FMOD_NXV4F64},
@@ -3277,6 +3295,20 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPExtMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG, RISCVISD::VZEXT_VL);
+  case ISD::VP_FREM: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
+        {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64},
+        {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64},
+        {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64},
+        {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32},
+        {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32},
+        {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32},
+        {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
+        {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC);
+  }
   }
 }
 
@@ -4150,7 +4182,8 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   VP_INTRINSIC(vp_strided_store)                                               \
   VP_INTRINSIC(vp_scatter)
 
-static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
+static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG,
+    const RISCVTargetLowering &Lowering) {
   unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   SDLoc DL(Op);
 
@@ -4343,10 +4376,20 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) {
     IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
     EPIIntNo = IsMasked ? Intrinsic::epi_vfdiv_mask : Intrinsic::epi_vfdiv;
     break;
-  case Intrinsic::vp_frem:
-    // FIXME Needs to be expanded.
-    report_fatal_error("Unimplemented intrinsic vp_frem");
-    break;
+  case Intrinsic::vp_frem: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
+        {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64},
+        {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64},
+        {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64},
+        {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32},
+        {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32},
+        {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32},
+        {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
+        {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
+    };
+    return Lowering.lowerVECLIBCALL(Op, DAG, VTToLC);
+  }
   case Intrinsic::vp_fma:
     VOpsPerm = GetCanonicalCommutativePerm({1, 2, 3});
     ScalarOpNo = 2;
@@ -5069,7 +5112,8 @@ enum VPIntrinsicsSubset {
 };
 
 static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
-                                const RISCVSubtarget &Subtarget) {
+                                const RISCVSubtarget &Subtarget,
+                                const RISCVTargetLowering &TargetLowering) {
   VPIntrinsicsSubset VPIntNo = static_cast<VPIntrinsicsSubset>(IntNo);
   SDLoc DL(Op);
 
@@ -5099,7 +5143,7 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_fcmp:
   case Intrinsic__vp_select:
   case Intrinsic__vp_bitcast:
-    return LowerVPINTRINSIC_WO_CHAIN(Op, DAG);
+    return LowerVPINTRINSIC_WO_CHAIN(Op, DAG, TargetLowering);
   case Intrinsic__vp_sitofp:
   case Intrinsic__vp_uitofp:
   case Intrinsic__vp_fptosi:
@@ -5600,7 +5644,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
 #define VP_INTRINSIC(X) case Intrinsic::X:
     VP_INTRINSIC_WO_CHAIN_SET
 #undef VP_INTRINSIC
-    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget, *this);
   case Intrinsic::riscv_orc_b:
     // Lower to the GORCI encoding for orc.b.
     return DAG.getNode(RISCVISD::GORC, DL, XLenVT, Op.getOperand(1),
@@ -5864,7 +5908,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
 #define VP_INTRINSIC(X) case Intrinsic::X:
     VP_INTRINSIC_W_CHAIN_SET
 #undef VP_INTRINSIC
-    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget, *this);
   case Intrinsic::riscv_masked_strided_load: {
     SDLoc DL(Op);
     MVT XLenVT = Subtarget.getXLenVT();
@@ -6019,7 +6063,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
 #define VP_INTRINSIC(X) case Intrinsic::X:
     VP_INTRINSIC_VOID_SET
 #undef VP_INTRINSIC
-    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget);
+    return LowerVPIntrinsic(IntNo, Op, DAG, Subtarget, *this);
   case Intrinsic::riscv_masked_strided_store: {
     SDLoc DL(Op);
     MVT XLenVT = Subtarget.getXLenVT();

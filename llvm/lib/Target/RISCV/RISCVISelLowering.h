@@ -342,6 +342,9 @@ enum NodeType : unsigned {
 };
 } // namespace RISCVISD
 
+
+using RISCVVTToLibCall = std::pair<EVT, RTLIB::Libcall>;
+
 class RISCVTargetLowering : public TargetLowering {
   const RISCVSubtarget &Subtarget;
 
@@ -567,6 +570,9 @@ public:
 
   bool isLegalElementTypeForRVV(Type *ScalarTy) const;
 
+  // FIXME: This is not ideal.
+  SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
+                          ArrayRef<RISCVVTToLibCall> TypeToCall) const;
 private:
   /// RISCVCCAssignFn - This target-specific function extends the default
   /// CCValAssign with additional information used to lower RISC-V calling
@@ -621,9 +627,6 @@ private:
                                  int Opcode) const;
   SDValue lowerSIGN_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerZERO_EXTEND_VECTOR_INREG(SDValue Op, SelectionDAG &DAG) const;
-  using VTToLibCall = std::pair<EVT, RTLIB::Libcall>;
-  SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
-                          ArrayRef<VTToLibCall> TypeToCall) const;
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFSIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFCOS(SDValue Op, SelectionDAG &DAG) const;
