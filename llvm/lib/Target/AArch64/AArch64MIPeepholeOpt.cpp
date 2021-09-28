@@ -154,16 +154,38 @@ bool AArch64MIPeepholeOpt::visitAND(
   DebugLoc DL = MI.getDebugLoc();
   Register DstReg = MI.getOperand(0).getReg();
   Register SrcReg = MI.getOperand(1).getReg();
-  Register NewTmpReg = MRI->createVirtualRegister(MRI->getRegClass(DstReg));
+  Register NewTmpReg1 = MRI->createVirtualRegister(
+      (RegSize == 32) ? &AArch64::GPR32spRegClass : &AArch64::GPR64spRegClass);
+  Register NewTmpReg2 = MRI->createVirtualRegister(MRI->getRegClass(SrcReg));
+  Register NewTmpReg3 = MRI->createVirtualRegister(
+      (RegSize == 32) ? &AArch64::GPR32spRegClass : &AArch64::GPR64spRegClass);
   unsigned Opcode = (RegSize == 32) ? AArch64::ANDWri : AArch64::ANDXri;
 
-  BuildMI(*MBB, MI, DL, TII->get(Opcode), NewTmpReg)
+  // COPY MIs are generated to align register classes as below.
+  //
+  //  %1:gpr32 = MOVi32imm 2098176
+  //  %2:gpr32common = ANDWrr %0:gpr32, killed %1:gpr32
+  //==>
+  //  %5:gpr32sp = ANDWri %0:gpr32, 1419
+  //  %6:gpr32 = COPY %5:gpr32sp
+  //  %7:gpr32sp = ANDWri %6:gpr32, 725
+  //  %2:gpr32common = COPY %7:gpr32sp
+
+  BuildMI(*MBB, MI, DL, TII->get(Opcode), NewTmpReg1)
       .addReg(SrcReg)
       .addImm(Imm1Enc);
 
-  BuildMI(*MBB, MI, DL, TII->get(Opcode), DstReg)
-      .addReg(NewTmpReg)
+  // Copy from GPRsp to GPR.
+  BuildMI(*MBB, MI, DL, TII->get(TargetOpcode::COPY), NewTmpReg2)
+      .addReg(NewTmpReg1);
+
+  BuildMI(*MBB, MI, DL, TII->get(Opcode), NewTmpReg3)
+      .addReg(NewTmpReg2)
       .addImm(Imm2Enc);
+
+  // Copy from GPR to GPRsp.
+  BuildMI(*MBB, MI, DL, TII->get(TargetOpcode::COPY), DstReg)
+      .addReg(NewTmpReg3);
 
   ToBeRemoved.insert(&MI);
   if (SubregToRegMI)
