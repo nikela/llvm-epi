@@ -245,3 +245,27 @@ define i32 @n6_extrause2(i64 %x, i32 %nbits) {
   %t6 = shl i32 %t5, %t3 ; shift is smaller than mask
   ret i32 %t6
 }
+
+; TODO: shl+ashr of -1 should be reducecd.
+; This is a miscompile if it ends by masking off the high bit of the result.
+
+define i32 @PR51351(i64 %x, i32 %nbits) {
+; CHECK-LABEL: @PR51351(
+; CHECK-NEXT:    [[T0:%.*]] = zext i32 [[NBITS:%.*]] to i64
+; CHECK-NEXT:    [[T1:%.*]] = shl i64 -1, [[T0]]
+; CHECK-NEXT:    [[T2:%.*]] = ashr i64 [[T1]], [[T0]]
+; CHECK-NEXT:    [[T3:%.*]] = add i32 [[NBITS]], -33
+; CHECK-NEXT:    [[T4:%.*]] = and i64 [[T2]], [[X:%.*]]
+; CHECK-NEXT:    [[T5:%.*]] = trunc i64 [[T4]] to i32
+; CHECK-NEXT:    [[T6:%.*]] = shl i32 [[T5]], [[T3]]
+; CHECK-NEXT:    ret i32 [[T6]]
+;
+  %t0 = zext i32 %nbits to i64
+  %t1 = shl i64 -1, %t0
+  %t2 = ashr i64 %t1, %t0
+  %t3 = add i32 %nbits, 4294967263
+  %t4 = and i64 %t2, %x
+  %t5 = trunc i64 %t4 to i32
+  %t6 = shl i32 %t5, %t3
+  ret i32 %t6
+}
