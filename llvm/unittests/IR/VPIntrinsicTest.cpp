@@ -79,6 +79,8 @@ protected:
     Str << " declare <8 x i32> @llvm.vp.sext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
     Str << " declare <8 x i32> @llvm.vp.zext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
 
+    Str << " declare <4 x double> @llvm.vp.fpext.v4f64.v4f32(<4 x float>, <4 x i1>, i32) ";
+
     return parseAssemblyString(Str.str(), Err, C);
   }
 };

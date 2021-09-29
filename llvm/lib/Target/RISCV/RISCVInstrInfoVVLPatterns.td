@@ -1356,6 +1356,12 @@ foreach fvti = AllFloatVectors in {
                                               VLOpFrag)),
               (!cast<Instruction>("PseudoVFWCVT_F_F_V_"#fvti.LMul.MX)
                   fvti.RegClass:$rs1, GPR:$vl, fvti.Log2SEW)>;
+    def : Pat<(fwti.Vector (riscv_fpextend_vl (fvti.Vector fvti.RegClass:$rs1),
+                                              (fvti.Mask V0),
+                                              VLOpFrag)),
+              (!cast<Instruction>("PseudoVFWCVT_F_F_V_"#fvti.LMul.MX#"_MASK")
+                  (fwti.Vector (IMPLICIT_DEF)), fvti.RegClass:$rs1,
+                  (fvti.Mask V0), GPR:$vl, fvti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 
   // 14.19 Narrowing Floating-Point/Integer Type-Convert Instructions
