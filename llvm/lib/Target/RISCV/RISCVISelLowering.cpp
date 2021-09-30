@@ -530,6 +530,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::VP_SETCC, VT, Custom);
 
       setOperationAction(ISD::VP_SELECT, VT, Custom);
+
+      setOperationAction(ISD::VP_TRUNC, VT, Custom);
     }
 
     for (MVT VT : IntVecVTs) {
@@ -624,6 +626,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       // Extensions
       setOperationAction(ISD::VP_SEXT, VT, Custom);
       setOperationAction(ISD::VP_ZEXT, VT, Custom);
+
+      setOperationAction(ISD::VP_TRUNC, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -709,8 +713,12 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         SetCommonVFPActions(VT);
 
     for (MVT VT : F32VecVTs) {
-      if (Subtarget.hasStdExtF())
+      if (Subtarget.hasStdExtF()) {
         SetCommonVFPActions(VT);
+
+        if (Subtarget.hasStdExtD())
+          setOperationAction(ISD::VP_FPTRUNC, VT, Custom);
+      }
       SetCommonVFPExtLoadTruncStoreActions(VT, F16VecVTs);
     }
 
@@ -781,6 +789,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::XOR, VT, Custom);
 
           setOperationAction(ISD::VP_SELECT, VT, Custom);
+
+          setOperationAction(ISD::VP_TRUNC, VT, Custom);
 
           continue;
         }
@@ -858,6 +868,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         // Extensions
         setOperationAction(ISD::VP_SEXT, VT, Custom);
         setOperationAction(ISD::VP_ZEXT, VT, Custom);
+
+        setOperationAction(ISD::VP_TRUNC, VT, Custom);
       }
 
       for (MVT VT : MVT::fp_fixedlen_vector_valuetypes()) {
@@ -3315,6 +3327,12 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC);
   }
+  case ISD::VP_TRUNC:
+    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPTruncToMaskOp(Op, DAG);
+    return lowerVPTruncOp(Op, DAG);
+  case ISD::VP_FPTRUNC:
+    return lowerVPOp(Op, DAG, RISCVISD::FP_ROUND_VL);
   }
 }
 
@@ -7458,6 +7476,106 @@ SDValue RISCVTargetLowering::lowerVPExtMaskOp(SDValue Op,
 
   SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, Ops[0],
                                Splat, ZeroSplat, Ops[2]);
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+// Lower VP_TRUNC nodes
+SDValue RISCVTargetLowering::lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  // Ops indexes: 0->Op1, 1->Mask, 2->EVL
+  SmallVector<SDValue, 3> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  auto NarrowIntegerVectorElementType = [&](EVT SrcVT) -> MVT {
+    EVT SrcEltVT = SrcVT.getVectorElementType();
+    MVT ToEltVT = MVT::getIntegerVT(SrcEltVT.getSizeInBits() / 2);
+    const ElementCount EltCount = SrcVT.getVectorElementCount();
+    return MVT::getVectorVT(ToEltVT, EltCount);
+  };
+
+  SDValue Result;
+  do {
+    MVT DestVT = NarrowIntegerVectorElementType(Ops[0].getValueType());
+    MVT ResultVT = DestVT.isFixedLengthVector()
+                       ? getContainerForFixedLengthVector(DestVT)
+                       : DestVT;
+    Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ResultVT, Ops);
+    Ops[0] = Result;
+  } while (Result.getValueType() != ContainerVT);
+
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+// Lower VP_TRUNC nodes when the destination operand is a mask
+SDValue RISCVTargetLowering::lowerVPTruncToMaskOp(SDValue Op,
+                                                  SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  const MVT XLenVT = Subtarget.getXLenVT();
+
+  // Ops indexes: 0->Op1, 1->Mask, 2->EVL
+  SmallVector<SDValue, 3> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  MVT SrcOpVT = Ops[0].getSimpleValueType();
+  if (SrcOpVT.isFixedLengthVector())
+    SrcOpVT = getContainerForFixedLengthVector(SrcOpVT);
+  SDValue One = DAG.getConstant(1, DL, XLenVT);
+  SDValue SplatOne =
+      DAG.getNode(RISCVISD::VMV_V_X_VL, DL, SrcOpVT, One, Ops[2]);
+
+  SDValue And = DAG.getNode(RISCVISD::AND_VL, DL, SrcOpVT, Ops[0], SplatOne,
+                            Ops[1], Ops[2]);
+
+  SDValue Zero = DAG.getConstant(0, DL, XLenVT);
+  SDValue SplatZero =
+      DAG.getNode(RISCVISD::VMV_V_X_VL, DL, SrcOpVT, Zero, Ops[2]);
+
+  SDValue Result =
+      DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, And, SplatZero,
+                  DAG.getCondCode(ISD::SETNE), Ops[1], Ops[2]);
+
   if (!VT.isFixedLengthVector())
     return Result;
   return convertFromScalableVector(VT, Result, DAG, Subtarget);

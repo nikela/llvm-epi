@@ -398,6 +398,22 @@ HANDLE_VP_TO_OPC(FPExt)
 END_REGISTER_VP_INTRINSIC(vp_fpext)
 ///// } Extensions
 
+///// Truncations {
+// llvm.vp.trunc(x,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_trunc, 1, 2)
+BEGIN_REGISTER_VP_SDNODE(VP_TRUNC, -1, vp_trunc, 1, 2)
+END_REGISTER_VP_SDNODE(VP_TRUNC)
+HANDLE_VP_TO_OPC(Trunc)
+END_REGISTER_VP_INTRINSIC(vp_trunc)
+
+// llvm.vp.fptrunc(x,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_fptrunc, 1, 2)
+BEGIN_REGISTER_VP_SDNODE(VP_FPTRUNC, -1, vp_fptrunc, 1, 2)
+END_REGISTER_VP_SDNODE(VP_FPTRUNC)
+HANDLE_VP_TO_OPC(FPTrunc)
+END_REGISTER_VP_INTRINSIC(vp_fptrunc)
+///// } Truncations
+
 #undef BEGIN_REGISTER_VP
 #undef BEGIN_REGISTER_VP_INTRINSIC
 #undef BEGIN_REGISTER_VP_SDNODE

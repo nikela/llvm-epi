@@ -2,7 +2,7 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+c,+experimental-v < %s -epi-pipeline | \
 ; RUN:     FileCheck %s
 
-define <vscale x 2 x i32> @trunc.i32.i64(<vscale x 2 x i64> %a, i32 %gvl)
+define <vscale x 2 x i32> @trunc.i32.i64(<vscale x 2 x i64> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: trunc.i32.i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
@@ -16,7 +16,7 @@ define <vscale x 2 x i32> @trunc.i32.i64(<vscale x 2 x i64> %a, i32 %gvl)
   ret <vscale x 2 x i32> %b
 }
 
-define <vscale x 2 x i32> @trunc.i32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2 x i1> %mask, i32 %gvl)
+define <vscale x 2 x i32> @trunc.i32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: trunc.i32.i64.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
@@ -31,9 +31,9 @@ define <vscale x 2 x i32> @trunc.i32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2
   ret <vscale x 2 x i32> %b
 }
 
-declare <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(<vscale x 2 x i64>, <vscale x 2 x i1>, i32) #3
+declare <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(<vscale x 2 x i64>, <vscale x 2 x i1>, i32)
 
-define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i32 %evl) {
+define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
@@ -47,7 +47,7 @@ define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i3
     ret <vscale x 4 x i8> %x
 }
 
-define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i32 %evl) {
+define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
@@ -63,7 +63,7 @@ define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i3
     ret <vscale x 4 x i8> %x
 }
 
-define <vscale x 4 x i16> @test_vp_trunc_nxv4i16_nxv4i64(<vscale x 4 x i64> %a, i32 %evl) {
+define <vscale x 4 x i16> @test_vp_trunc_nxv4i16_nxv4i64(<vscale x 4 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i16_nxv4i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
