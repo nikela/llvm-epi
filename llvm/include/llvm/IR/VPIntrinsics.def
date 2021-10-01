@@ -430,6 +430,16 @@ HANDLE_VP_TO_OPC(IntToPtr)
 END_REGISTER_VP_INTRINSIC(vp_inttoptr)
 ///// } Integer-Pointer Conversions
 
+///// Floating-point/Integer Conversions {
+// llvm.vp.sitofp(x,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_sitofp, 1, 2)
+BEGIN_REGISTER_VP_SDNODE(VP_SITOFP, -1, vp_sitofp, 1, 2)
+END_REGISTER_VP_SDNODE(VP_SITOFP)
+HANDLE_VP_TO_OPC(SIToFP)
+END_REGISTER_VP_INTRINSIC(vp_sitofp)
+
+///// } Floating-point/Integer Conversions
+
 #undef BEGIN_REGISTER_VP
 #undef BEGIN_REGISTER_VP_INTRINSIC
 #undef BEGIN_REGISTER_VP_SDNODE

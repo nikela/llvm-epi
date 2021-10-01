@@ -716,6 +716,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       if (Subtarget.hasStdExtF()) {
         SetCommonVFPActions(VT);
 
+        setOperationAction(ISD::VP_SITOFP, VT, Custom);
+
         if (Subtarget.hasStdExtD())
           setOperationAction(ISD::VP_FPTRUNC, VT, Custom);
       }
@@ -725,6 +727,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     for (MVT VT : F64VecVTs) {
       if (Subtarget.hasStdExtD()) {
         SetCommonVFPActions(VT);
+        setOperationAction(ISD::VP_SITOFP, VT, Custom);
 
         if (Subtarget.hasStdExtF())
           setOperationAction(ISD::VP_FPEXT, VT, Custom);
@@ -3325,6 +3328,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     assert(DstSize > SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_EXTEND_VL);
   }
+  case ISD::VP_SITOFP:
+    return lowerVPFPIntConvOp(Op, DAG, RISCVISD::SINT_TO_FP_VL);
   case ISD::VP_FREM: {
     RISCVVTToLibCall VTToLC[] = {
         {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
@@ -7618,6 +7623,127 @@ SDValue RISCVTargetLowering::lowerVPTruncToMaskOp(SDValue Op,
   SDValue Result =
       DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, And, SplatZero,
                   DAG.getCondCode(ISD::SETNE), Ops[1], Ops[2]);
+
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+// Lower Floating-Point/Integer Type-Convert VP SDNodes
+SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
+                                                unsigned RISCVISDOpc) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+
+  // Ops indexes: 0->Op1, 1->Mask, 2->EVL
+  SmallVector<SDValue, 3> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  unsigned RISCVISDExtOpc = (RISCVISDOpc == RISCVISD::SINT_TO_FP_VL |
+                             RISCVISDOpc == RISCVISD::FP_TO_SINT_VL)
+                                ? RISCVISD::VSEXT_VL
+                                : RISCVISD::VZEXT_VL;
+
+  EVT DstType = Op.getValueType();
+  uint64_t DstTypeSize = DstType.getScalarSizeInBits();
+  EVT SrcType = Ops[0].getValueType();
+  uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
+
+  SDValue Result;
+  if (DstTypeSize > SrcTypeSize) { // Widening + Conversion
+    if (SrcType.isInteger()) { // First widen, then convert
+      EVT ExtToType;
+      EVT ToType = SrcType.widenIntegerVectorElementType(*DAG.getContext());
+      while (ToType.getScalarSizeInBits() != DstTypeSize) {
+        ExtToType = ToType;
+        ToType = ToType.widenIntegerVectorElementType(*DAG.getContext());
+      }
+      if (ExtToType != MVT::INVALID_SIMPLE_VALUE_TYPE) {
+        Result = DAG.getNode(RISCVISDExtOpc, DL, ExtToType, Ops);
+        Ops[0] = Result;
+      }
+
+      Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+    } else if (SrcType.isFloatingPoint()) { // First convert, then widen
+      EVT SrcEltType = SrcType.getVectorElementType();
+      const ElementCount EltCount = SrcType.getVectorElementCount();
+      MVT ToEltType = MVT::getFloatingPointVT(SrcEltType.getSizeInBits() * 2);
+      MVT ToType = MVT::getVectorVT(ToEltType, EltCount);
+      if (ToType.isFixedLengthVector())
+        ToType = getContainerForFixedLengthVector(ToType);
+
+      Result = DAG.getNode(RISCVISDOpc, DL, ToType, Ops);
+
+      if (ToType.getScalarSizeInBits() != DstTypeSize) {
+        Ops[0] = Result;
+        Result = DAG.getNode(RISCVISDExtOpc, DL, ContainerVT, Ops);
+      }
+    } else {
+      llvm_unreachable("Vector Element type must be Integer of Floating Point");
+    }
+  } else if (DstTypeSize < SrcTypeSize) { // Narrowing + Conversion
+    if (SrcType.isInteger()) { // First narrow, then convert
+      auto NarrowIntegerVectorElementType = [&](EVT SrcType) -> MVT {
+        EVT SrcEltType = SrcType.getVectorElementType();
+        const ElementCount EltCount = SrcType.getVectorElementCount();
+        MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() / 2);
+        return MVT::getVectorVT(ToEltType, EltCount);
+      };
+
+      MVT ToType = NarrowIntegerVectorElementType(SrcType);
+      if (ToType.isFixedLengthVector())
+        ToType = getContainerForFixedLengthVector(ToType);
+
+      while (ToType.getScalarSizeInBits() != DstTypeSize) {
+        Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ToType, Ops);
+        Ops[0] = Result;
+        ToType = NarrowIntegerVectorElementType(ToType);
+      }
+
+      Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+    } else if (SrcType.isFloatingPoint()) { // First convert, then narrow
+      auto NarrowFloatingPointVectorElementType = [&](EVT SrcType) -> MVT {
+        EVT SrcEltType = SrcType.getVectorElementType();
+        const ElementCount EltCount = SrcType.getVectorElementCount();
+        MVT ToEltType = MVT::getFloatingPointVT(SrcEltType.getSizeInBits() / 2);
+        return MVT::getVectorVT(ToEltType, EltCount);
+      };
+
+      MVT ToType = NarrowFloatingPointVectorElementType(SrcType);
+      if (ToType.isFixedLengthVector())
+        ToType = getContainerForFixedLengthVector(ToType);
+
+      Result = DAG.getNode(RISCVISDOpc, DL, ToType, Ops);
+
+      while (ToType.getScalarSizeInBits() != DstTypeSize) {
+        Ops[0] = Result;
+        ToType = NarrowFloatingPointVectorElementType(ToType);
+        Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ToType, Ops);
+      }
+    } else {
+      llvm_unreachable("Vector Element type must be Integer of Floating Point");
+    }
+  } else { // Conversion only
+    Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+  }
 
   if (!VT.isFixedLengthVector())
     return Result;
