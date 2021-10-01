@@ -667,6 +667,12 @@ multiclass VPatConvertFP2ISDNode_V_VL<SDNode vop, string instruction_name> {
                                 VLOpFrag)),
               (!cast<Instruction>(instruction_name#"_"#ivti.LMul.MX)
                   fvti.RegClass:$rs1, GPR:$vl, ivti.Log2SEW)>;
+    def : Pat<(ivti.Vector (vop (fvti.Vector fvti.RegClass:$rs1),
+                                (fvti.Mask V0),
+                                VLOpFrag)),
+              (!cast<Instruction>(instruction_name#"_"#ivti.LMul.MX#"_MASK")
+                  (ivti.Vector (IMPLICIT_DEF)), fvti.RegClass:$rs1,
+                  (fvti.Mask V0), GPR:$vl, ivti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 
@@ -696,6 +702,12 @@ multiclass VPatWConvertFP2ISDNode_V_VL<SDNode vop, string instruction_name> {
                                 VLOpFrag)),
               (!cast<Instruction>(instruction_name#"_"#fvti.LMul.MX)
                   fvti.RegClass:$rs1, GPR:$vl, fvti.Log2SEW)>;
+    def : Pat<(iwti.Vector (vop (fvti.Vector fvti.RegClass:$rs1),
+                                (fvti.Mask V0),
+                                VLOpFrag)),
+              (!cast<Instruction>(instruction_name#"_"#fvti.LMul.MX#"_MASK")
+                  (iwti.Vector (IMPLICIT_DEF)), fvti.RegClass:$rs1,
+                  (fvti.Mask V0), GPR:$vl, fvti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 
@@ -726,6 +738,12 @@ multiclass VPatNConvertFP2ISDNode_V_VL<SDNode vop, string instruction_name> {
                                VLOpFrag)),
               (!cast<Instruction>(instruction_name#"_"#vti.LMul.MX)
                   fwti.RegClass:$rs1, GPR:$vl, vti.Log2SEW)>;
+    def : Pat<(vti.Vector (vop (fwti.Vector fwti.RegClass:$rs1),
+                               (fwti.Mask V0),
+                               VLOpFrag)),
+              (!cast<Instruction>(instruction_name#"_"#vti.LMul.MX#"_MASK")
+                  (vti.Vector (IMPLICIT_DEF)), fwti.RegClass:$rs1,
+                  (fwti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   }
 }
 

@@ -628,6 +628,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::VP_ZEXT, VT, Custom);
 
       setOperationAction(ISD::VP_TRUNC, VT, Custom);
+
+      setOperationAction(ISD::VP_FPTOSI, VT, Custom);
     }
 
     // Expand various CCs to best match the RVV ISA, which natively supports UNE
@@ -876,6 +878,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setOperationAction(ISD::VP_ZEXT, VT, Custom);
 
         setOperationAction(ISD::VP_TRUNC, VT, Custom);
+
+        setOperationAction(ISD::VP_FPTOSI, VT, Custom);
       }
 
       for (MVT VT : MVT::fp_fixedlen_vector_valuetypes()) {
@@ -3331,6 +3335,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     assert(DstSize > SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_EXTEND_VL);
   }
+  case ISD::VP_FPTOSI:
+    return lowerVPFPIntConvOp(Op, DAG, RISCVISD::FP_TO_SINT_VL);
   case ISD::VP_SITOFP:
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::SINT_TO_FP_VL);
   case ISD::VP_UITOFP:
@@ -7690,7 +7696,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
     } else if (SrcType.isFloatingPoint()) { // First convert, then widen
       EVT SrcEltType = SrcType.getVectorElementType();
       const ElementCount EltCount = SrcType.getVectorElementCount();
-      MVT ToEltType = MVT::getFloatingPointVT(SrcEltType.getSizeInBits() * 2);
+      MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() * 2);
       MVT ToType = MVT::getVectorVT(ToEltType, EltCount);
       if (ToType.isFixedLengthVector())
         ToType = getContainerForFixedLengthVector(ToType);
@@ -7728,7 +7734,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
       auto NarrowFloatingPointVectorElementType = [&](EVT SrcType) -> MVT {
         EVT SrcEltType = SrcType.getVectorElementType();
         const ElementCount EltCount = SrcType.getVectorElementCount();
-        MVT ToEltType = MVT::getFloatingPointVT(SrcEltType.getSizeInBits() / 2);
+        MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() / 2);
         return MVT::getVectorVT(ToEltType, EltCount);
       };
 

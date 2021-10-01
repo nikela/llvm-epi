@@ -524,6 +524,7 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
   case Intrinsic::vp_inttoptr:
   case Intrinsic::vp_sitofp:
   case Intrinsic::vp_uitofp:
+  case Intrinsic::vp_fptosi:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {RetType, Params[0]->getType()});
     break;
   case Intrinsic::vp_select:
