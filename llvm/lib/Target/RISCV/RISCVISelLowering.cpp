@@ -717,6 +717,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         SetCommonVFPActions(VT);
 
         setOperationAction(ISD::VP_SITOFP, VT, Custom);
+        setOperationAction(ISD::VP_UITOFP, VT, Custom);
 
         if (Subtarget.hasStdExtD())
           setOperationAction(ISD::VP_FPTRUNC, VT, Custom);
@@ -727,7 +728,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     for (MVT VT : F64VecVTs) {
       if (Subtarget.hasStdExtD()) {
         SetCommonVFPActions(VT);
+
         setOperationAction(ISD::VP_SITOFP, VT, Custom);
+        setOperationAction(ISD::VP_UITOFP, VT, Custom);
 
         if (Subtarget.hasStdExtF())
           setOperationAction(ISD::VP_FPEXT, VT, Custom);
@@ -3330,6 +3333,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   }
   case ISD::VP_SITOFP:
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::SINT_TO_FP_VL);
+  case ISD::VP_UITOFP:
+    return lowerVPFPIntConvOp(Op, DAG, RISCVISD::UINT_TO_FP_VL);
   case ISD::VP_FREM: {
     RISCVVTToLibCall VTToLC[] = {
         {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
