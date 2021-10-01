@@ -7715,14 +7715,14 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
       llvm_unreachable("Vector Element type must be Integer of Floating Point");
     }
   } else if (DstTypeSize < SrcTypeSize) { // Narrowing + Conversion
-    if (SrcType.isInteger()) { // First narrow, then convert
-      auto NarrowIntegerVectorElementType = [&](EVT SrcType) -> MVT {
-        EVT SrcEltType = SrcType.getVectorElementType();
-        const ElementCount EltCount = SrcType.getVectorElementCount();
-        MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() / 2);
-        return MVT::getVectorVT(ToEltType, EltCount);
-      };
+    auto NarrowIntegerVectorElementType = [&](EVT SrcType) -> MVT {
+      EVT SrcEltType = SrcType.getVectorElementType();
+      const ElementCount EltCount = SrcType.getVectorElementCount();
+      MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() / 2);
+      return MVT::getVectorVT(ToEltType, EltCount);
+    };
 
+    if (SrcType.isInteger()) { // First narrow, then convert
       MVT ToType = NarrowIntegerVectorElementType(SrcType);
       if (ToType.isFixedLengthVector())
         ToType = getContainerForFixedLengthVector(ToType);
@@ -7735,14 +7735,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
 
       Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
     } else if (SrcType.isFloatingPoint()) { // First convert, then narrow
-      auto NarrowFloatingPointVectorElementType = [&](EVT SrcType) -> MVT {
-        EVT SrcEltType = SrcType.getVectorElementType();
-        const ElementCount EltCount = SrcType.getVectorElementCount();
-        MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() / 2);
-        return MVT::getVectorVT(ToEltType, EltCount);
-      };
-
-      MVT ToType = NarrowFloatingPointVectorElementType(SrcType);
+      MVT ToType = NarrowIntegerVectorElementType(SrcType);
       if (ToType.isFixedLengthVector())
         ToType = getContainerForFixedLengthVector(ToType);
 
@@ -7750,7 +7743,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
 
       while (ToType.getScalarSizeInBits() != DstTypeSize) {
         Ops[0] = Result;
-        ToType = NarrowFloatingPointVectorElementType(ToType);
+        ToType = NarrowIntegerVectorElementType(ToType);
         Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ToType, Ops);
       }
     } else {
