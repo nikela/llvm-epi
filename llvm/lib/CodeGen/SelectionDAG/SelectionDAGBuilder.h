@@ -769,6 +769,7 @@ private:
   void visitVPStoreScatter(const VPIntrinsic &VPIntrin,
                            SmallVector<SDValue, 7> &OpValues, bool isScatter);
   void visitVectorPredicationIntrinsic(const VPIntrinsic &VPIntrin);
+  void visitCmpVP(const VPIntrinsic &I);
 
   void visitVAStart(const CallInst &I);
   void visitVAArg(const VAArgInst &I);

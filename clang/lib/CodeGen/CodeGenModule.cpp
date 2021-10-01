@@ -2138,8 +2138,12 @@ void CodeGenModule::SetFunctionAttributes(GlobalDecl GD, llvm::Function *F,
   else if (const auto *SA = FD->getAttr<SectionAttr>())
      F->setSection(SA->getName());
 
-  if (FD->hasAttr<ErrorAttr>())
-    F->addFnAttr("dontcall");
+  if (const auto *EA = FD->getAttr<ErrorAttr>()) {
+    if (EA->isError())
+      F->addFnAttr("dontcall-error", EA->getUserDiagnostic());
+    else if (EA->isWarning())
+      F->addFnAttr("dontcall-warn", EA->getUserDiagnostic());
+  }
 
   // If we plan on emitting this inline builtin, we can't treat it as a builtin.
   if (FD->isInlineBuiltinDeclaration()) {
@@ -3169,6 +3173,11 @@ bool CodeGenModule::shouldEmitFunction(GlobalDecl GD) {
     }
   }
 
+  // Inline builtins declaration must be emitted. They often are fortified
+  // functions.
+  if (F->isInlineBuiltinDeclaration())
+    return true;
+
   // PR9614. Avoid cases where the source code is lying to us. An available
   // externally function should have an equivalent function somewhere else,
   // but a function that calls itself through asm label/`__builtin_` trickery is
@@ -3258,6 +3267,19 @@ TargetMVPriority(const TargetInfo &TI,
   return Priority;
 }
 
+// Multiversion functions should be at most 'WeakODRLinkage' so that a different
+// TU can forward declare the function without causing problems.  Particularly
+// in the cases of CPUDispatch, this causes issues. This also makes sure we
+// work with internal linkage functions, so that the same function name can be
+// used with internal linkage in multiple TUs.
+llvm::GlobalValue::LinkageTypes getMultiversionLinkage(CodeGenModule &CGM,
+                                                       GlobalDecl GD) {
+  const FunctionDecl *FD = cast<FunctionDecl>(GD.getDecl());
+  if (FD->getFormalLinkage() == InternalLinkage)
+    return llvm::GlobalValue::InternalLinkage;
+  return llvm::GlobalValue::WeakODRLinkage;
+}
+
 void CodeGenModule::emitMultiVersionFunctions() {
   std::vector<GlobalDecl> MVFuncsToEmit;
   MultiVersionFuncs.swap(MVFuncsToEmit);
@@ -3298,7 +3320,7 @@ void CodeGenModule::emitMultiVersionFunctions() {
     if (TI.supportsIFunc() || FD->isTargetMultiVersion()) {
       ResolverFunc = cast<llvm::Function>(
           GetGlobalValue((getMangledName(GD) + ".resolver").str()));
-      ResolverFunc->setLinkage(llvm::Function::WeakODRLinkage);
+      ResolverFunc->setLinkage(getMultiversionLinkage(*this, GD));
     } else {
       ResolverFunc = cast<llvm::Function>(GetGlobalValue(getMangledName(GD)));
     }
@@ -3356,7 +3378,7 @@ void CodeGenModule::emitCPUDispatchDefinition(GlobalDecl GD) {
 
   auto *ResolverFunc = cast<llvm::Function>(GetOrCreateLLVMFunction(
       ResolverName, ResolverType, ResolverGD, /*ForVTable=*/false));
-  ResolverFunc->setLinkage(llvm::Function::WeakODRLinkage);
+  ResolverFunc->setLinkage(getMultiversionLinkage(*this, GD));
   if (supportsCOMDAT())
     ResolverFunc->setComdat(
         getModule().getOrInsertComdat(ResolverFunc->getName()));
@@ -3433,9 +3455,9 @@ void CodeGenModule::emitCPUDispatchDefinition(GlobalDecl GD) {
       auto *IFunc = cast<llvm::GlobalIFunc>(GetOrCreateLLVMFunction(
           AliasName, DeclTy, GD, /*ForVTable=*/false, /*DontDefer=*/true,
           /*IsThunk=*/false, llvm::AttributeList(), NotForDefinition));
-      auto *GA = llvm::GlobalAlias::create(
-         DeclTy, 0, getFunctionLinkage(GD), AliasName, IFunc, &getModule());
-      GA->setLinkage(llvm::Function::WeakODRLinkage);
+      auto *GA = llvm::GlobalAlias::create(DeclTy, 0,
+                                           getMultiversionLinkage(*this, GD),
+                                           AliasName, IFunc, &getModule());
       SetCommonAttributes(GD, GA);
     }
   }
@@ -3474,8 +3496,9 @@ llvm::Constant *CodeGenModule::GetOrCreateMultiVersionResolver(
     llvm::Constant *Resolver = GetOrCreateLLVMFunction(
         MangledName + ".resolver", ResolverType, GlobalDecl{},
         /*ForVTable=*/false);
-    llvm::GlobalIFunc *GIF = llvm::GlobalIFunc::create(
-        DeclTy, 0, llvm::Function::WeakODRLinkage, "", Resolver, &getModule());
+    llvm::GlobalIFunc *GIF =
+        llvm::GlobalIFunc::create(DeclTy, 0, getMultiversionLinkage(*this, GD),
+                                  "", Resolver, &getModule());
     GIF->setName(ResolverName);
     SetCommonAttributes(FD, GIF);
 

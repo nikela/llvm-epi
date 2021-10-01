@@ -2411,6 +2411,7 @@ static void writeDIImportedEntity(raw_ostream &Out, const DIImportedEntity *N,
   Printer.printMetadata("entity", N->getRawEntity());
   Printer.printMetadata("file", N->getRawFile());
   Printer.printInt("line", N->getLine());
+  Printer.printMetadata("elements", N->getRawElements());
   Out << ")";
 }
 
@@ -3202,19 +3203,9 @@ static const char *getVisibilityName(GlobalValue::VisibilityTypes Vis) {
 
 void AssemblyWriter::printFunctionSummary(const FunctionSummary *FS) {
   Out << ", insts: " << FS->instCount();
+  if (FS->fflags().anyFlagSet())
+    Out << ", " << FS->fflags();
 
-  FunctionSummary::FFlags FFlags = FS->fflags();
-  if (FFlags.ReadNone | FFlags.ReadOnly | FFlags.NoRecurse |
-      FFlags.ReturnDoesNotAlias | FFlags.NoInline | FFlags.AlwaysInline) {
-    Out << ", funcFlags: (";
-    Out << "readNone: " << FFlags.ReadNone;
-    Out << ", readOnly: " << FFlags.ReadOnly;
-    Out << ", noRecurse: " << FFlags.NoRecurse;
-    Out << ", returnDoesNotAlias: " << FFlags.ReturnDoesNotAlias;
-    Out << ", noInline: " << FFlags.NoInline;
-    Out << ", alwaysInline: " << FFlags.AlwaysInline;
-    Out << ")";
-  }
   if (!FS->calls().empty()) {
     Out << ", calls: (";
     FieldSeparator IFS;

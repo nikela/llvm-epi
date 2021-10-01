@@ -1594,12 +1594,18 @@ example:
     ``disable_sanitizer_instrumentation`` disables all kinds of instrumentation,
     taking precedence over the ``sanitize_<name>`` attributes and other compiler
     flags.
-``"dontcall"``
-    This attribute denotes that a diagnostic should be emitted when a call of a
-    function with this attribute is not eliminated via optimization. Front ends
-    can provide optional ``srcloc`` metadata nodes on call sites of such
-    callees to attach information about where in the source language such a
-    call came from.
+``"dontcall-error"``
+    This attribute denotes that an error diagnostic should be emitted when a
+    call of a function with this attribute is not eliminated via optimization.
+    Front ends can provide optional ``srcloc`` metadata nodes on call sites of
+    such callees to attach information about where in the source language such a
+    call came from. A string value can be provided as a note.
+``"dontcall-warn"``
+    This attribute denotes that a warning diagnostic should be emitted when a
+    call of a function with this attribute is not eliminated via optimization.
+    Front ends can provide optional ``srcloc`` metadata nodes on call sites of
+    such callees to attach information about where in the source language such a
+    call came from. A string value can be provided as a note.
 ``"frame-pointer"``
     This attribute tells the code generator whether the function
     should keep the frame pointer. The code generator may emit the frame pointer
@@ -2605,6 +2611,7 @@ as follows:
     options are
 
     * ``e``: ELF mangling: Private symbols get a ``.L`` prefix.
+    * ``l``: GOFF mangling: Private symbols get a ``@`` prefix.
     * ``m``: Mips mangling: Private symbols get a ``$`` prefix.
     * ``o``: Mach-O mangling: Private symbols get ``L`` prefix. Other
       symbols get a ``_`` prefix.
@@ -5790,12 +5797,16 @@ DIImportedEntity
 """"""""""""""""
 
 ``DIImportedEntity`` nodes represent entities (such as modules) imported into a
-compile unit.
+compile unit. The ``elements`` field is a list of renamed entities (such as
+variables and subprograms) in the imported entity (such as module).
 
 .. code-block:: text
 
    !2 = !DIImportedEntity(tag: DW_TAG_imported_module, name: "foo", scope: !0,
-                          entity: !1, line: 7)
+                          entity: !1, line: 7, elements: !3)
+   !3 = !{!4}
+   !4 = !DIImportedEntity(tag: DW_TAG_imported_declaration, name: "bar", scope: !0,
+                          entity: !5, line: 7)
 
 DIMacro
 """""""

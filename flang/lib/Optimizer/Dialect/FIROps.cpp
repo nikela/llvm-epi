@@ -299,24 +299,8 @@ static mlir::ParseResult parseCallOp(mlir::OpAsmParser &parser,
 }
 
 //===----------------------------------------------------------------------===//
-// CmpfOp
+// CmpOp
 //===----------------------------------------------------------------------===//
-
-// Note: getCmpFPredicateNames() is inline static in StandardOps/IR/Ops.cpp
-mlir::CmpFPredicate fir::CmpfOp::getPredicateByName(llvm::StringRef name) {
-  auto pred = mlir::symbolizeCmpFPredicate(name);
-  assert(pred.hasValue() && "invalid predicate name");
-  return pred.getValue();
-}
-
-void fir::buildCmpFOp(OpBuilder &builder, OperationState &result,
-                      CmpFPredicate predicate, Value lhs, Value rhs) {
-  result.addOperands({lhs, rhs});
-  result.types.push_back(builder.getI1Type());
-  result.addAttribute(
-      CmpfOp::getPredicateAttrName(),
-      builder.getI64IntegerAttr(static_cast<int64_t>(predicate)));
-}
 
 template <typename OPTY>
 static void printCmpOp(OpAsmPrinter &p, OPTY op) {
@@ -334,8 +318,6 @@ static void printCmpOp(OpAsmPrinter &p, OPTY op) {
                           /*elidedAttrs=*/{OPTY::getPredicateAttrName()});
   p << " : " << op.lhs().getType();
 }
-
-static void printCmpfOp(OpAsmPrinter &p, CmpfOp op) { printCmpOp(p, op); }
 
 template <typename OPTY>
 static mlir::ParseResult parseCmpOp(mlir::OpAsmParser &parser,
@@ -358,7 +340,7 @@ static mlir::ParseResult parseCmpOp(mlir::OpAsmParser &parser,
   // Rewrite string attribute to an enum value.
   llvm::StringRef predicateName =
       predicateNameAttr.cast<mlir::StringAttr>().getValue();
-  auto predicate = fir::CmpfOp::getPredicateByName(predicateName);
+  auto predicate = fir::CmpcOp::getPredicateByName(predicateName);
   auto builder = parser.getBuilder();
   mlir::Type i1Type = builder.getI1Type();
   attrs.set(OPTY::getPredicateAttrName(),
@@ -366,11 +348,6 @@ static mlir::ParseResult parseCmpOp(mlir::OpAsmParser &parser,
   result.attributes = attrs;
   result.addTypes({i1Type});
   return success();
-}
-
-mlir::ParseResult fir::parseCmpfOp(mlir::OpAsmParser &parser,
-                                   mlir::OperationState &result) {
-  return parseCmpOp<fir::CmpfOp>(parser, result);
 }
 
 //===----------------------------------------------------------------------===//
@@ -384,6 +361,12 @@ void fir::buildCmpCOp(OpBuilder &builder, OperationState &result,
   result.addAttribute(
       fir::CmpcOp::getPredicateAttrName(),
       builder.getI64IntegerAttr(static_cast<int64_t>(predicate)));
+}
+
+mlir::CmpFPredicate fir::CmpcOp::getPredicateByName(llvm::StringRef name) {
+  auto pred = mlir::symbolizeCmpFPredicate(name);
+  assert(pred.hasValue() && "invalid predicate name");
+  return pred.getValue();
 }
 
 static void printCmpcOp(OpAsmPrinter &p, fir::CmpcOp op) { printCmpOp(p, op); }
@@ -538,7 +521,7 @@ static mlir::LogicalResult verify(fir::EmboxOp op) {
     } else {
       return op.emitOpError("LEN parameters require CHARACTER or derived type");
     }
-    for (auto lp : op.lenParams())
+    for (auto lp : op.typeparams())
       if (!fir::isa_integer(lp.getType()))
         return op.emitOpError("LEN parameters must be integral type");
   }
@@ -673,6 +656,70 @@ mlir::ParseResult fir::GlobalOp::verifyValidLinkage(StringRef linkage) {
   // Supporting only a subset of the LLVM linkage types for now
   static const char *validNames[] = {"common", "internal", "linkonce", "weak"};
   return mlir::success(llvm::is_contained(validNames, linkage));
+}
+
+template <bool AllowFields>
+static void appendAsAttribute(llvm::SmallVectorImpl<mlir::Attribute> &attrs,
+                              mlir::Value val) {
+  if (auto *op = val.getDefiningOp()) {
+    if (auto cop = mlir::dyn_cast<mlir::ConstantOp>(op)) {
+      // append the integer constant value
+      if (auto iattr = cop.getValue().dyn_cast<mlir::IntegerAttr>()) {
+        attrs.push_back(iattr);
+        return;
+      }
+    } else if (auto fld = mlir::dyn_cast<fir::FieldIndexOp>(op)) {
+      if constexpr (AllowFields) {
+        // append the field name and the record type
+        attrs.push_back(fld.field_idAttr());
+        attrs.push_back(fld.on_typeAttr());
+        return;
+      }
+    }
+  }
+  llvm::report_fatal_error("cannot build Op with these arguments");
+}
+
+template <bool AllowFields = true>
+static mlir::ArrayAttr collectAsAttributes(mlir::MLIRContext *ctxt,
+                                           OperationState &result,
+                                           llvm::ArrayRef<mlir::Value> inds) {
+  llvm::SmallVector<mlir::Attribute> attrs;
+  for (auto v : inds)
+    appendAsAttribute<AllowFields>(attrs, v);
+  assert(!attrs.empty());
+  return mlir::ArrayAttr::get(ctxt, attrs);
+}
+
+//===----------------------------------------------------------------------===//
+// InsertOnRangeOp
+//===----------------------------------------------------------------------===//
+
+void fir::InsertOnRangeOp::build(mlir::OpBuilder &builder,
+                                 OperationState &result, mlir::Type resTy,
+                                 mlir::Value aggVal, mlir::Value eleVal,
+                                 llvm::ArrayRef<mlir::Value> inds) {
+  auto aa = collectAsAttributes<false>(builder.getContext(), result, inds);
+  build(builder, result, resTy, aggVal, eleVal, aa);
+}
+
+/// Range bounds must be nonnegative, and the range must not be empty.
+static mlir::LogicalResult verify(fir::InsertOnRangeOp op) {
+  if (op.coor().size() < 2 || op.coor().size() % 2 != 0)
+    return op.emitOpError("has uneven number of values in ranges");
+  bool rangeIsKnownToBeNonempty = false;
+  for (auto i = op.coor().end(), b = op.coor().begin(); i != b;) {
+    int64_t ub = (*--i).cast<IntegerAttr>().getInt();
+    int64_t lb = (*--i).cast<IntegerAttr>().getInt();
+    if (lb < 0 || ub < 0)
+      return op.emitOpError("negative range bound");
+    if (rangeIsKnownToBeNonempty)
+      continue;
+    if (lb > ub)
+      return op.emitOpError("empty range");
+    rangeIsKnownToBeNonempty = lb < ub;
+  }
+  return mlir::success();
 }
 
 //===----------------------------------------------------------------------===//
@@ -1312,6 +1359,63 @@ static mlir::LogicalResult verify(fir::ResultOp op) {
       return op.emitOpError()
              << "types mismatch between result op and its parent";
   return success();
+}
+
+//===----------------------------------------------------------------------===//
+// SaveResultOp
+//===----------------------------------------------------------------------===//
+
+static mlir::LogicalResult verify(fir::SaveResultOp op) {
+  auto resultType = op.value().getType();
+  if (resultType != fir::dyn_cast_ptrEleTy(op.memref().getType()))
+    return op.emitOpError("value type must match memory reference type");
+  if (fir::isa_unknown_size_box(resultType))
+    return op.emitOpError("cannot save !fir.box of unknown rank or type");
+
+  if (resultType.isa<fir::BoxType>()) {
+    if (op.shape() || !op.typeparams().empty())
+      return op.emitOpError(
+          "must not have shape or length operands if the value is a fir.box");
+    return mlir::success();
+  }
+
+  // fir.record or fir.array case.
+  unsigned shapeTyRank = 0;
+  if (auto shapeOp = op.shape()) {
+    auto shapeTy = shapeOp.getType();
+    if (auto s = shapeTy.dyn_cast<fir::ShapeType>())
+      shapeTyRank = s.getRank();
+    else
+      shapeTyRank = shapeTy.cast<fir::ShapeShiftType>().getRank();
+  }
+
+  auto eleTy = resultType;
+  if (auto seqTy = resultType.dyn_cast<fir::SequenceType>()) {
+    if (seqTy.getDimension() != shapeTyRank)
+      op.emitOpError("shape operand must be provided and have the value rank "
+                     "when the value is a fir.array");
+    eleTy = seqTy.getEleTy();
+  } else {
+    if (shapeTyRank != 0)
+      op.emitOpError(
+          "shape operand should only be provided if the value is a fir.array");
+  }
+
+  if (auto recTy = eleTy.dyn_cast<fir::RecordType>()) {
+    if (recTy.getNumLenParams() != op.typeparams().size())
+      op.emitOpError("length parameters number must match with the value type "
+                     "length parameters");
+  } else if (auto charTy = eleTy.dyn_cast<fir::CharacterType>()) {
+    if (op.typeparams().size() > 1)
+      op.emitOpError("no more than one length parameter must be provided for "
+                     "character value");
+  } else {
+    if (!op.typeparams().empty())
+      op.emitOpError(
+          "length parameters must not be provided for this value type");
+  }
+
+  return mlir::success();
 }
 
 //===----------------------------------------------------------------------===//

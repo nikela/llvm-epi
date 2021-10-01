@@ -4,12 +4,7 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+experimental-v -verify-machineinstrs -O2 \
 ; RUN:    < %s -epi-pipeline | FileCheck --check-prefix=CHECK-O2 %s
 
-; RUN: llc -mtriple=riscv64 -mattr=+m,+experimental-v -verify-machineinstrs -O0 \
-; RUN:    < %s -disable-vpred-sdags -epi-pipeline | FileCheck --check-prefix=CHECK-O0 %s
-; RUN: llc -mtriple=riscv64 -mattr=+m,+experimental-v -verify-machineinstrs -O2 \
-; RUN:    < %s -disable-vpred-sdags -epi-pipeline | FileCheck --check-prefix=CHECK-O2 %s
-
-define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %evl) nounwind {
+define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 zeroext %evl) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_gtu:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11
@@ -30,7 +25,7 @@ define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscal
   ret <vscale x 1 x i1> %cmp
 }
 
-define <vscale x 1 x i1> @test_vp_icmp_gt(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %evl) nounwind {
+define <vscale x 1 x i1> @test_vp_icmp_gt(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 zeroext %evl) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_gt:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11

@@ -7,28 +7,29 @@
 define void @test_lmul_1(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, <vscale x 1 x double>* %a2, <vscale x 1 x i64>* %a3, <vscale x 1 x i1> %m, i32 %n) nounwind {
   ; CHECK-LABEL: name: test_lmul_1
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK:   liveins: $x10, $x11, $v0, $x14
-  ; CHECK:   [[COPY:%[0-9]+]]:gpr = COPY $x14
-  ; CHECK:   [[COPY1:%[0-9]+]]:vr = COPY $v0
-  ; CHECK:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
-  ; CHECK:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
-  ; CHECK:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
-  ; CHECK:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
-  ; CHECK:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
-  ; CHECK:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
-  ; CHECK:   dead $x0 = PseudoVSETVLI [[SRLI]], 88, implicit-def $vl, implicit-def $vtype
-  ; CHECK:   [[PseudoVLE64_V_M1_MASK:%[0-9]+]]:vrnov0 = PseudoVLE64_V_M1_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s64) from %ir.a0)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF1:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVLE64_V_M1_MASK1:%[0-9]+]]:vrnov0 = PseudoVLE64_V_M1_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s64) from %ir.a1)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF2:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVFADD_VV_M1_MASK:%[0-9]+]]:vrnov0 = PseudoVFADD_VV_M1_MASK [[DEF2]], killed [[PseudoVLE64_V_M1_MASK]], killed [[PseudoVLE64_V_M1_MASK1]], $v0, $noreg, 6, implicit $vl, implicit $vtype
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   PseudoVSE64_V_M1_MASK killed [[PseudoVFADD_VV_M1_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s64) into %ir.store_addr)
-  ; CHECK:   PseudoRET
+  ; CHECK-NEXT:   liveins: $x10, $x11, $v0, $x14
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr = COPY $x14
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:vr = COPY $v0
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
+  ; CHECK-NEXT:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
+  ; CHECK-NEXT:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
+  ; CHECK-NEXT:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
+  ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 88, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M1_MASK:%[0-9]+]]:vrnov0 = PseudoVLE64_V_M1_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s64) from %ir.a0)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M1_MASK1:%[0-9]+]]:vrnov0 = PseudoVLE64_V_M1_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s64) from %ir.a1)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF2:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVFADD_VV_M1_MASK:%[0-9]+]]:vrnov0 = PseudoVFADD_VV_M1_MASK [[DEF2]], killed [[PseudoVLE64_V_M1_MASK]], killed [[PseudoVLE64_V_M1_MASK1]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   PseudoVSE64_V_M1_MASK killed [[PseudoVFADD_VV_M1_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s64) into %ir.store_addr)
+  ; CHECK-NEXT:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 1 x double>*
 
   %i0 = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %a0, <vscale x 1 x i1> %m, i32 %n)
@@ -48,28 +49,29 @@ declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vsca
 define void @test_lmul_2(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1, <vscale x 2 x double>* %a2, <vscale x 2 x i64>* %a3, <vscale x 2 x i1> %m, i32 %n) nounwind {
   ; CHECK-LABEL: name: test_lmul_2
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK:   liveins: $x10, $x11, $v0, $x14
-  ; CHECK:   [[COPY:%[0-9]+]]:gpr = COPY $x14
-  ; CHECK:   [[COPY1:%[0-9]+]]:vr = COPY $v0
-  ; CHECK:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
-  ; CHECK:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
-  ; CHECK:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
-  ; CHECK:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
-  ; CHECK:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
-  ; CHECK:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
-  ; CHECK:   dead $x0 = PseudoVSETVLI [[SRLI]], 89, implicit-def $vl, implicit-def $vtype
-  ; CHECK:   [[PseudoVLE64_V_M2_MASK:%[0-9]+]]:vrm2nov0 = PseudoVLE64_V_M2_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s128) from %ir.a0)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF1:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVLE64_V_M2_MASK1:%[0-9]+]]:vrm2nov0 = PseudoVLE64_V_M2_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s128) from %ir.a1)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF2:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVFADD_VV_M2_MASK:%[0-9]+]]:vrm2nov0 = PseudoVFADD_VV_M2_MASK [[DEF2]], killed [[PseudoVLE64_V_M2_MASK]], killed [[PseudoVLE64_V_M2_MASK1]], $v0, $noreg, 6, implicit $vl, implicit $vtype
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   PseudoVSE64_V_M2_MASK killed [[PseudoVFADD_VV_M2_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s128) into %ir.store_addr)
-  ; CHECK:   PseudoRET
+  ; CHECK-NEXT:   liveins: $x10, $x11, $v0, $x14
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr = COPY $x14
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:vr = COPY $v0
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
+  ; CHECK-NEXT:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
+  ; CHECK-NEXT:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
+  ; CHECK-NEXT:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
+  ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 89, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M2_MASK:%[0-9]+]]:vrm2nov0 = PseudoVLE64_V_M2_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s128) from %ir.a0)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M2_MASK1:%[0-9]+]]:vrm2nov0 = PseudoVLE64_V_M2_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s128) from %ir.a1)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF2:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVFADD_VV_M2_MASK:%[0-9]+]]:vrm2nov0 = PseudoVFADD_VV_M2_MASK [[DEF2]], killed [[PseudoVLE64_V_M2_MASK]], killed [[PseudoVLE64_V_M2_MASK1]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   PseudoVSE64_V_M2_MASK killed [[PseudoVFADD_VV_M2_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s128) into %ir.store_addr)
+  ; CHECK-NEXT:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 2 x double>*
 
   %i0 = call <vscale x 2 x double> @llvm.vp.load.nxv2f64(<vscale x 2 x double>* %a0, <vscale x 2 x i1> %m, i32 %n)
@@ -89,28 +91,29 @@ declare <vscale x 2 x double> @llvm.vp.fadd.nxv2f64(<vscale x 2 x double>, <vsca
 define void @test_lmul_4(<vscale x 4 x double>* %a0, <vscale x 4 x double>* %a1, <vscale x 4 x double>* %a2, <vscale x 4 x i64>* %a3, <vscale x 4 x i1> %m, i32 %n) nounwind {
   ; CHECK-LABEL: name: test_lmul_4
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK:   liveins: $x10, $x11, $v0, $x14
-  ; CHECK:   [[COPY:%[0-9]+]]:gpr = COPY $x14
-  ; CHECK:   [[COPY1:%[0-9]+]]:vr = COPY $v0
-  ; CHECK:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
-  ; CHECK:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
-  ; CHECK:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
-  ; CHECK:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
-  ; CHECK:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
-  ; CHECK:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
-  ; CHECK:   dead $x0 = PseudoVSETVLI [[SRLI]], 90, implicit-def $vl, implicit-def $vtype
-  ; CHECK:   [[PseudoVLE64_V_M4_MASK:%[0-9]+]]:vrm4nov0 = PseudoVLE64_V_M4_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s256) from %ir.a0, align 16)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF1:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVLE64_V_M4_MASK1:%[0-9]+]]:vrm4nov0 = PseudoVLE64_V_M4_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s256) from %ir.a1, align 16)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF2:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVFADD_VV_M4_MASK:%[0-9]+]]:vrm4nov0 = PseudoVFADD_VV_M4_MASK [[DEF2]], killed [[PseudoVLE64_V_M4_MASK]], killed [[PseudoVLE64_V_M4_MASK1]], $v0, $noreg, 6, implicit $vl, implicit $vtype
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   PseudoVSE64_V_M4_MASK killed [[PseudoVFADD_VV_M4_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s256) into %ir.store_addr, align 16)
-  ; CHECK:   PseudoRET
+  ; CHECK-NEXT:   liveins: $x10, $x11, $v0, $x14
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr = COPY $x14
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:vr = COPY $v0
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
+  ; CHECK-NEXT:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
+  ; CHECK-NEXT:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
+  ; CHECK-NEXT:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
+  ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 90, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M4_MASK:%[0-9]+]]:vrm4nov0 = PseudoVLE64_V_M4_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s256) from %ir.a0, align 16)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M4_MASK1:%[0-9]+]]:vrm4nov0 = PseudoVLE64_V_M4_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s256) from %ir.a1, align 16)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF2:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVFADD_VV_M4_MASK:%[0-9]+]]:vrm4nov0 = PseudoVFADD_VV_M4_MASK [[DEF2]], killed [[PseudoVLE64_V_M4_MASK]], killed [[PseudoVLE64_V_M4_MASK1]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   PseudoVSE64_V_M4_MASK killed [[PseudoVFADD_VV_M4_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s256) into %ir.store_addr, align 16)
+  ; CHECK-NEXT:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 4 x double>*
 
   %i0 = call <vscale x 4 x double> @llvm.vp.load.nxv4f64(<vscale x 4 x double>* %a0, <vscale x 4 x i1> %m, i32 %n)
@@ -130,30 +133,31 @@ declare <vscale x 4 x double> @llvm.vp.fadd.nxv4f64(<vscale x 4 x double>, <vsca
 define void @test_lmul_8(<vscale x 8 x double>* %a0, <vscale x 8 x double>* %a1, <vscale x 8 x double>* %a2, <vscale x 8 x i64>* %a3, <vscale x 8 x i1> %m, i32 %n) nounwind {
   ; CHECK-LABEL: name: test_lmul_8
   ; CHECK: bb.0 (%ir-block.0):
-  ; CHECK:   liveins: $x10, $x11, $v0, $x14
-  ; CHECK:   [[COPY:%[0-9]+]]:gpr = COPY $x14
-  ; CHECK:   [[COPY1:%[0-9]+]]:vr = COPY $v0
-  ; CHECK:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
-  ; CHECK:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
-  ; CHECK:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
-  ; CHECK:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
-  ; CHECK:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
-  ; CHECK:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF:%[0-9]+]]:vrm8 = IMPLICIT_DEF
-  ; CHECK:   [[COPY4:%[0-9]+]]:vrm8nov0 = COPY [[DEF]]
-  ; CHECK:   dead $x0 = PseudoVSETVLI [[SRLI]], 91, implicit-def $vl, implicit-def $vtype
-  ; CHECK:   [[PseudoVLE64_V_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY4]], [[COPY3]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s512) from %ir.a0, align 16)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF1:%[0-9]+]]:vrm8 = IMPLICIT_DEF
-  ; CHECK:   [[COPY5:%[0-9]+]]:vrm8nov0 = COPY [[DEF1]]
-  ; CHECK:   [[PseudoVLE64_V_M8_MASK1:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY5]], [[COPY2]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (load (s512) from %ir.a1, align 16)
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   [[DEF2:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
-  ; CHECK:   [[PseudoVFADD_VV_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVFADD_VV_M8_MASK [[DEF2]], killed [[PseudoVLE64_V_M8_MASK]], killed [[PseudoVLE64_V_M8_MASK1]], $v0, $noreg, 6, implicit $vl, implicit $vtype
-  ; CHECK:   $v0 = COPY [[COPY1]]
-  ; CHECK:   PseudoVSE64_V_M8_MASK killed [[PseudoVFADD_VV_M8_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s512) into %ir.store_addr, align 16)
-  ; CHECK:   PseudoRET
+  ; CHECK-NEXT:   liveins: $x10, $x11, $v0, $x14
+  ; CHECK-NEXT: {{  $}}
+  ; CHECK-NEXT:   [[COPY:%[0-9]+]]:gpr = COPY $x14
+  ; CHECK-NEXT:   [[COPY1:%[0-9]+]]:vr = COPY $v0
+  ; CHECK-NEXT:   [[COPY2:%[0-9]+]]:gpr = COPY $x11
+  ; CHECK-NEXT:   [[COPY3:%[0-9]+]]:gpr = COPY $x10
+  ; CHECK-NEXT:   [[LUI:%[0-9]+]]:gpr = LUI target-flags(riscv-hi) @scratch
+  ; CHECK-NEXT:   [[ADDI:%[0-9]+]]:gpr = ADDI killed [[LUI]], target-flags(riscv-lo) @scratch
+  ; CHECK-NEXT:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
+  ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm8 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[COPY4:%[0-9]+]]:vrm8nov0 = COPY [[DEF]]
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 91, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY4]], [[COPY3]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s512) from %ir.a0, align 16)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm8 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[COPY5:%[0-9]+]]:vrm8nov0 = COPY [[DEF1]]
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK1:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY5]], [[COPY2]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype :: (load (s512) from %ir.a1, align 16)
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   [[DEF2:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVFADD_VV_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVFADD_VV_M8_MASK [[DEF2]], killed [[PseudoVLE64_V_M8_MASK]], killed [[PseudoVLE64_V_M8_MASK1]], $v0, $noreg, 6, 1, implicit $vl, implicit $vtype
+  ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
+  ; CHECK-NEXT:   PseudoVSE64_V_M8_MASK killed [[PseudoVFADD_VV_M8_MASK]], killed [[ADDI]], $v0, $noreg, 6, implicit $vl, implicit $vtype :: (store (s512) into %ir.store_addr, align 16)
+  ; CHECK-NEXT:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 8 x double>*
 
   %i0 = call <vscale x 8 x double> @llvm.vp.load.nxv8f64(<vscale x 8 x double>* %a0, <vscale x 8 x i1> %m, i32 %n)

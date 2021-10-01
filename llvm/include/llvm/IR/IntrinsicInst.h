@@ -391,7 +391,7 @@ class VPIntrinsic : public IntrinsicInst {
 public:
   /// \brief Declares a llvm.vp.* intrinsic in \p M that matches the parameters
   /// \p Params.
-  static Function *getDeclarationForParams(Module *M, Intrinsic::ID,
+  static Function *getDeclarationForParams(Type *RetType, Module *M, Intrinsic::ID,
                                            ArrayRef<Value *> Params);
 
   static Optional<unsigned> getMaskParamPos(Intrinsic::ID IntrinsicID);
@@ -441,6 +441,9 @@ public:
   /// \return The data (payload) operand of this store or scatter.
   Value *getMemoryDataParam() const;
   static Optional<unsigned> getMemoryDataParamPos(Intrinsic::ID);
+
+  /// \returns The comparison predicate.
+  CmpInst::Predicate getCmpPredicate() const;
 
   // Methods for support type inquiry through isa, cast, and dyn_cast:
   static bool classof(const IntrinsicInst *I) {

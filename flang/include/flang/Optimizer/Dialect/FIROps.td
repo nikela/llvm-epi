@@ -352,6 +352,55 @@ def fir_LoadOp : fir_OneResultOp<"load"> {
   }];
 }
 
+def fir_SaveResultOp : fir_Op<"save_result", [AttrSizedOperandSegments]> {
+  let summary = [{
+    save an array, box, or record function result SSA-value to a memory location
+  }];
+
+  let description = [{
+    Save the result of a function returning an array, box, or record type value
+    into a memory location given the shape and length parameters of the result.
+
+    Function results of type fir.box, fir.array, or fir.rec are abstract values
+    that require a storage to be manipulated on the caller side. This operation
+    allows associating such abstract result to a storage. In later lowering of
+    the function interfaces, this storage might be used to pass the result in
+    memory.
+
+    For arrays, result, it is required to provide the shape of the result. For
+    character arrays and derived types with length parameters, the length
+    parameter values must be provided.
+
+    The fir.save_result associated to a function call must immediately follow
+    the call and be in the same block.
+
+    ```mlir
+      %buffer = fir.alloca fir.array<?xf32>, %c100
+      %shape = fir.shape %c100
+      %array_result = fir.call @foo() : () -> fir.array<?xf32>
+      fir.save_result %array_result to %buffer(%shape)
+      %coor = fir.array_coor %buffer%(%shape), %c5
+      %fifth_element = fir.load %coor : f32
+    ```
+
+    The above fir.save_result allows saving a fir.array function result into
+    a buffer to later access its 5th element.
+
+  }];
+
+  let arguments = (ins ArrayOrBoxOrRecord:$value,
+                   Arg<AnyReferenceLike, "", [MemWrite]>:$memref,
+                   Optional<AnyShapeType>:$shape,
+                   Variadic<AnyIntegerType>:$typeparams);
+
+  let assemblyFormat = [{
+    $value `to` $memref (`(` $shape^ `)`)? (`typeparams` $typeparams^)?
+    attr-dict `:` type(operands)
+  }];
+
+  let verifier = [{ return ::verify(*this); }];
+}
+
 def fir_StoreOp : fir_Op<"store", []> {
   let summary = "store an SSA-value to a memory location";
 
@@ -1012,7 +1061,7 @@ def fir_EmboxOp : fir_Op<"embox", [NoSideEffect, AttrSizedOperandSegments]> {
         - shape: emboxing an array may require shape information (an array's
           lower bounds and extents may not be known until runtime),
         - slice: an array section can be described with a slice triple,
-        - lenParams: for emboxing a derived type with LEN type parameters,
+        - typeparams: for emboxing a derived type with LEN type parameters,
         - accessMap: unused/experimental.
   }];
 
@@ -1020,7 +1069,7 @@ def fir_EmboxOp : fir_Op<"embox", [NoSideEffect, AttrSizedOperandSegments]> {
     AnyReferenceLike:$memref,
     Optional<AnyShapeType>:$shape,
     Optional<fir_SliceType>:$slice,
-    Variadic<AnyIntegerType>:$lenParams,
+    Variadic<AnyIntegerType>:$typeparams,
     OptionalAttr<AffineMapAttr>:$accessMap
   );
 
@@ -1036,7 +1085,7 @@ def fir_EmboxOp : fir_Op<"embox", [NoSideEffect, AttrSizedOperandSegments]> {
   ];
 
   let assemblyFormat = [{
-    $memref (`(` $shape^ `)`)? (`[` $slice^ `]`)? (`typeparams` $lenParams^)?
+    $memref (`(` $shape^ `)`)? (`[` $slice^ `]`)? (`typeparams` $typeparams^)?
       (`map` $accessMap^)? attr-dict `:` functional-type(operands, results)
   }];
 
@@ -1045,8 +1094,8 @@ def fir_EmboxOp : fir_Op<"embox", [NoSideEffect, AttrSizedOperandSegments]> {
   let extraClassDeclaration = [{
     mlir::Value getShape() { return shape(); }
     mlir::Value getSlice() { return slice(); }
-    bool hasLenParams() { return !lenParams().empty(); }
-    unsigned numLenParams() { return lenParams().size(); }
+    bool hasLenParams() { return !typeparams().empty(); }
+    unsigned numLenParams() { return typeparams().size(); }
   }];
 }
 
@@ -1523,6 +1572,43 @@ def fir_BoxTypeDescOp : fir_SimpleOneResultOp<"box_tdesc", [NoSideEffect]> {
 // Array value operations
 //===----------------------------------------------------------------------===//
 
+// Array value operations are used to capture the semantics of
+// Fortran's array expressions in FIR. An abstract array expression is
+// evaluated in the following way.
+//
+//  1. Determination of the iteration space under which the assignment
+//     expression is to be evaluated. The iteration space may be implicit
+//     (from the shape of the result array) or explicit (defined by the user).
+//  2. If there are masking expressions, evaluate (and cache) the
+//     masking expression for the iteration space (from 1).
+//  3. The rhs of the assignment is evaluated for the iteration space. If
+//     masking expressions were present then the rhs is only evaluated where
+//     the mask was computed to be true. The entire rhs is completely evaluated
+//     before any results are stored to the lhs.
+//  4. Each of the result values computed in the previous step are merged back
+//     to the lhs array's storage.
+//
+// The model (in pseudo-code) is thus:
+//
+//   !- Load the arrays in the expression
+//   %10 = array_load A
+//   %11 = array_load B
+//   !- optional: compute mask values
+//   %masks = allocmem array<??xlogical>
+//   do_loop_nest %i = ... {
+//     %masks[i] = ...
+//   }
+//   !- Compute every element value "A = B ..."
+//   do_loop_nest %i = ... {
+//     if (%masks[i]) {
+//       array_fetch %11, ...       !- B(...)
+//       %20 = ...                  !- element-by-element computation
+//       array_update %10, %20, ... !- A(...) = ...
+//     }
+//   }
+//   !- Merge the new and old values into the memory for "A"
+//   array_merge_store <updated A> to <A's address>
+
 def fir_ArrayLoadOp : fir_Op<"array_load", [AttrSizedOperandSegments]> {
 
   let summary = "Load an array as a value.";
@@ -1555,13 +1641,14 @@ def fir_ArrayLoadOp : fir_Op<"array_load", [AttrSizedOperandSegments]> {
     Arg<AnyRefOrBox, "", [MemRead]>:$memref,
     Optional<AnyShapeOrShiftType>:$shape,
     Optional<fir_SliceType>:$slice,
-    Variadic<AnyIntegerType>:$lenParams
+    Variadic<AnyIntegerType>:$typeparams
   );
 
   let results = (outs fir_SequenceType);
 
   let assemblyFormat = [{
-    $memref (`(`$shape^`)`)? (`[`$slice^`]`)? (`typeparams` $lenParams^)? attr-dict `:` functional-type(operands, results)
+    $memref (`(`$shape^`)`)? (`[`$slice^`]`)? (`typeparams` $typeparams^)?
+        attr-dict `:` functional-type(operands, results)
   }];
 
   let verifier = [{ return ::verify(*this); }];
@@ -2176,18 +2263,35 @@ def fir_InsertOnRangeOp : fir_OneResultOp<"insert_on_range", [NoSideEffect]> {
   let summary = "insert sub-value into a range on an existing sequence";
 
   let description = [{
-    Insert a constant value into an entity with an array type. Returns a
-    new ssa value where the range of offsets from the original array have been
-    replaced with the constant. The result is an array type entity.
+    Insert copies of a value into an entity with an array type.
+    Returns a new ssa value with the same type as the original entity.
+    The values are inserted at a contiguous range of indices in Fortran
+    row-to-column element order as specified by lower and upper bound
+    coordinates.
+
+    ```mlir
+      %a = fir.undefined !fir.array<10x10xf32>
+      %c = constant 3.0 : f32
+      %1 = fir.insert_on_range %a, %c, [0 : index, 7 : index, 0 : index, 2 : index] : (!fir.array<10x10xf32>, f32) -> !fir.array<10x10xf32>
+    ```
+
+    The first 28 elements of %1, with coordinates from (0,0) to (7,2), have
+    the value 3.0.
   }];
 
-  let arguments = (ins fir_SequenceType:$seq, AnyType:$val,
-                       Variadic<Index>:$coor);
+  let arguments = (ins fir_SequenceType:$seq, AnyType:$val, ArrayAttr:$coor);
   let results = (outs fir_SequenceType);
 
   let assemblyFormat = [{
-    operands attr-dict `:` functional-type(operands, results)
+    $seq `,` $val `,` $coor attr-dict `:` functional-type(operands, results)
   }];
+
+  let builders = [
+    OpBuilder<(ins "mlir::Type":$rty, "mlir::Value":$adt, "mlir::Value":$val,
+      "llvm::ArrayRef<mlir::Value>":$vcoor)>
+  ];
+
+  let verifier = [{ return ::verify(*this); }];
 }
 
 def fir_LenParamIndexOp : fir_OneResultOp<"len_param_index", [NoSideEffect]> {
@@ -2783,41 +2887,6 @@ class RealArithmeticOp<string mnemonic, list<OpTrait> traits = []> :
 
 def fir_ModfOp : RealArithmeticOp<"modf">;
 
-def fir_CmpfOp : fir_Op<"cmpf",
-    [NoSideEffect, SameTypeOperands, SameOperandsAndResultShape]> {
-  let summary = "floating-point comparison operator";
-
-  let description = [{
-    Extends the standard floating-point comparison to handle the extended
-    floating-point types found in FIR.
-  }];
-
-  let arguments = (ins AnyRealLike:$lhs, AnyRealLike:$rhs);
-
-  let results = (outs AnyLogicalLike);
-
-  let builders = [OpBuilder<(ins "mlir::CmpFPredicate":$predicate,
-    "mlir::Value":$lhs, "mlir::Value":$rhs), [{
-      buildCmpFOp($_builder, $_state, predicate, lhs, rhs);
-  }]>];
-
-  let parser = [{ return parseCmpfOp(parser, result); }];
-
-  let printer = [{ printCmpfOp(p, *this); }];
-
-  let extraClassDeclaration = [{
-    static constexpr llvm::StringRef getPredicateAttrName() {
-      return "predicate";
-    }
-    static CmpFPredicate getPredicateByName(llvm::StringRef name);
-
-    CmpFPredicate getPredicate() {
-      return (CmpFPredicate)(*this)->getAttrOfType<mlir::IntegerAttr>(
-          getPredicateAttrName()).getInt();
-    }
-  }];
-}
-
 def fir_ConstcOp : fir_Op<"constc", [NoSideEffect]> {
   let summary = "create a complex constant";
 
@@ -2918,6 +2987,8 @@ def fir_CmpcOp : fir_Op<"cmpc",
       return (CmpFPredicate)(*this)->getAttrOfType<mlir::IntegerAttr>(
           getPredicateAttrName()).getInt();
     }
+
+    static CmpFPredicate getPredicateByName(llvm::StringRef name);
   }];
 }
 

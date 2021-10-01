@@ -556,30 +556,10 @@ static void instantiateDependentAMDGPUWavesPerEUAttr(
 static void instantiateDependentSYCLKernelAttr(
     Sema &S, const MultiLevelTemplateArgumentList &TemplateArgs,
     const SYCLKernelAttr &Attr, Decl *New) {
-  // Functions cannot be partially specialized, so if we are being instantiated,
-  // we are obviously a complete specialization. Since this attribute is only
-  // valid on function template declarations, we know that this is a full
-  // instantiation of a kernel.
-  S.AddSYCLKernelLambda(cast<FunctionDecl>(New));
-
-  // Evaluate whether this would change any of the already evaluated
-  // __builtin_sycl_unique_stable_name values.
-  for (auto &Itr : S.Context.SYCLUniqueStableNameEvaluatedValues) {
-    const std::string &CurName = Itr.first->ComputeName(S.Context);
-    if (Itr.second != CurName) {
-      S.Diag(New->getLocation(),
-             diag::err_kernel_invalidates_sycl_unique_stable_name);
-      S.Diag(Itr.first->getLocation(),
-             diag::note_sycl_unique_stable_name_evaluated_here);
-      // Update this so future diagnostics work correctly.
-      Itr.second = CurName;
-    }
-  }
-
   New->addAttr(Attr.clone(S.getASTContext()));
 }
 
-/// Determine whether the attribute A might be relevent to the declaration D.
+/// Determine whether the attribute A might be relevant to the declaration D.
 /// If not, we can skip instantiating it. The attribute may or may not have
 /// been instantiated yet.
 static bool isRelevantAttr(Sema &S, const Decl *D, const Attr *A) {
@@ -5986,11 +5966,11 @@ NamedDecl *Sema::FindInstantiatedDecl(SourceLocation Loc, NamedDecl *D,
                           const MultiLevelTemplateArgumentList &TemplateArgs,
                           bool FindingInstantiatedContext) {
   DeclContext *ParentDC = D->getDeclContext();
-  // Determine whether our parent context depends on any of the tempalte
+  // Determine whether our parent context depends on any of the template
   // arguments we're currently substituting.
   bool ParentDependsOnArgs = isDependentContextAtLevel(
       ParentDC, TemplateArgs.getNumRetainedOuterLevels());
-  // FIXME: Parmeters of pointer to functions (y below) that are themselves
+  // FIXME: Parameters of pointer to functions (y below) that are themselves
   // parameters (p below) can have their ParentDC set to the translation-unit
   // - thus we can not consistently check if the ParentDC of such a parameter
   // is Dependent or/and a FunctionOrMethod.

@@ -2,7 +2,7 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+c,+experimental-v < %s -epi-pipeline | \
 ; RUN:     FileCheck %s
 
-define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 %gvl)
+define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: fpext.f64.f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
@@ -16,7 +16,7 @@ define <vscale x 2 x double> @fpext.f64.f32(<vscale x 2 x float> %a, i32 %gvl)
   ret <vscale x 2 x double> %b
 }
 
-define <vscale x 2 x double> @fpext.f64.f32.mask(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %gvl)
+define <vscale x 2 x double> @fpext.f64.f32.mask(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: fpext.f64.f32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu

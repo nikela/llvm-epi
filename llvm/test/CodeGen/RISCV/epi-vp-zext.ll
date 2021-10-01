@@ -2,11 +2,11 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+c,+experimental-v < %s -epi-pipeline | \
 ; RUN:     FileCheck %s
 
-define <vscale x 2 x i64> @zext.i64.i32(<vscale x 2 x i32> %a, i32 %gvl)
+define <vscale x 2 x i64> @zext.i64.i32(<vscale x 2 x i32> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: zext.i64.i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vzext.vf2 v26, v8
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
@@ -16,11 +16,11 @@ define <vscale x 2 x i64> @zext.i64.i32(<vscale x 2 x i32> %a, i32 %gvl)
   ret <vscale x 2 x i64> %b
 }
 
-define <vscale x 2 x i64> @zext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 %gvl)
+define <vscale x 2 x i64> @zext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: zext.i64.i32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8, v0.t
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vzext.vf2 v26, v8, v0.t
 ; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
 {
@@ -33,13 +33,12 @@ define <vscale x 2 x i64> @zext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 
 
 declare <vscale x 2 x i64> @llvm.vp.zext.nxv2i64.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 %gvl)
 
-define <vscale x 4 x i32> @test_vp_zext_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, i32 %evl) {
+define <vscale x 4 x i32> @test_vp_zext_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_nxv4i32_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v8
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v8, v25
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vzext.vf4 v26, v8
+; CHECK-NEXT:    vmv2r.v v8, v26
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
@@ -47,15 +46,23 @@ define <vscale x 4 x i32> @test_vp_zext_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, i32
     ret <vscale x 4 x i32> %x
 }
 
-define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, i32 %evl) {
+define <vscale x 4 x i32> @test_vp_zext_masked_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) {
+; CHECK-LABEL: test_vp_zext_masked_nxv4i32_nxv4i8:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vzext.vf4 v26, v8, v0.t
+; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    ret
+    %x = call <vscale x 4 x i32> @llvm.vp.zext.nxv4i32.nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 %evl)
+    ret <vscale x 4 x i32> %x
+}
+
+define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_nxv4i64_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v25, v8
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v25
-; CHECK-NEXT:    vsetvli zero, zero, e32, m2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v8, v26
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vzext.vf8 v28, v8
+; CHECK-NEXT:    vmv4r.v v8, v28
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer
@@ -63,13 +70,23 @@ define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, i32
     ret <vscale x 4 x i64> %x
 }
 
-define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i16(<vscale x 4 x i16> %a, i32 %evl) {
+define <vscale x 4 x i64> @test_vp_zext_masked_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) {
+; CHECK-LABEL: test_vp_zext_masked_nxv4i64_nxv4i8:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vzext.vf8 v28, v8, v0.t
+; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    ret
+    %x = call <vscale x 4 x i64> @llvm.vp.zext.nxv4i64.nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 %evl)
+    ret <vscale x 4 x i64> %x
+}
+
+define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i16(<vscale x 4 x i16> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_nxv4i64_nxv4i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8
-; CHECK-NEXT:    vsetvli zero, zero, e32, m2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v8, v26
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vzext.vf4 v28, v8
+; CHECK-NEXT:    vmv4r.v v8, v28
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <vscale x 4 x i1> %m.first, <vscale x 4 x i1> undef, <vscale x 4 x i32> zeroinitializer

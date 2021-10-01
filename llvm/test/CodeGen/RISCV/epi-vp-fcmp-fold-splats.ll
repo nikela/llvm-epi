@@ -12,10 +12,10 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    addi a0, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    addi a1, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    slli a1, a0, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    # implicit-def: $v25
@@ -51,6 +51,8 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ;
 ; CHECK-O2-LABEL: test_vp_fold_greater_splats:
 ; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
@@ -100,10 +102,10 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    addi a0, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    addi a1, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    slli a1, a0, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    lui a2, %hi(.LCPI1_0)
@@ -141,6 +143,8 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ;
 ; CHECK-O2-LABEL: test_vp_fold_lower_splats:
 ; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(.LCPI1_0)
 ; CHECK-O2-NEXT:    fld ft0, %lo(.LCPI1_0)(a1)
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
