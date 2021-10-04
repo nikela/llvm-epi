@@ -7381,13 +7381,22 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   switch (VPIntrin.getIntrinsicID()) {
 #define BEGIN_REGISTER_VP_INTRINSIC(INTRIN, ...) case Intrinsic::INTRIN:
 #define BEGIN_REGISTER_VP_SDNODE(VPSDID, ...) ResOPC = ISD::VPSDID;
-#define END_REGISTER_VP_SDNODE(...) break;
+#define END_REGISTER_VP_INTRINSIC(...) break;
 #include "llvm/IR/VPIntrinsics.def"
   }
 
-  if (!ResOPC.hasValue())
-    llvm_unreachable(
-        "Inconsistency: no SDNode available for this VPIntrinsic!");
+  if (!ResOPC.hasValue()) {
+    switch (VPIntrin.getIntrinsicID()) {
+    // TODO: vp_ptrtoin and vp_inttoptr
+    case Intrinsic::vp_icmp:
+    case Intrinsic::vp_fcmp:
+      ResOPC = ISD::VP_SETCC;
+      break;
+    default:
+      llvm_unreachable(
+          "Inconsistency: no SDNode available for this VPIntrinsic!");
+    }
+  }
 
   if (*ResOPC == ISD::VP_REDUCE_SEQ_FADD ||
       *ResOPC == ISD::VP_REDUCE_SEQ_FMUL) {
