@@ -680,6 +680,17 @@ static void getCopyToPartsVector(SelectionDAG &DAG, const SDLoc &DL,
 
       // Promoted vector extract
       Val = DAG.getAnyExtOrTrunc(Val, DL, PartVT);
+    } else if (PartEVT.isVector() &&
+               PartEVT.getVectorElementType() !=
+                   ValueVT.getVectorElementType() &&
+               TLI.getTypeAction(*DAG.getContext(), ValueVT) ==
+                   TargetLowering::TypeWidenVector) {
+      // Combination of widening and promotion.
+      EVT WidenVT =
+          EVT::getVectorVT(*DAG.getContext(), ValueVT.getVectorElementType(),
+                           PartVT.getVectorElementCount());
+      SDValue Widened = widenVectorToPartType(DAG, Val, DL, WidenVT);
+      Val = DAG.getAnyExtOrTrunc(Widened, DL, PartVT);
     } else {
       if (ValueVT.getVectorElementCount().isScalar()) {
         Val = DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, PartVT, Val,
@@ -4833,7 +4844,7 @@ void SelectionDAGBuilder::visitTargetIntrinsic(const CallInst &I,
                                         TLI.getPointerTy(DAG.getDataLayout())));
 
   // Add all operands of the call to the operand list.
-  for (unsigned i = 0, e = I.getNumArgOperands(); i != e; ++i) {
+  for (unsigned i = 0, e = I.arg_size(); i != e; ++i) {
     const Value *Arg = I.getArgOperand(i);
 
     // FIXME Skip metadata args for now.
@@ -6939,7 +6950,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
 
     // Directly emit some LOCAL_ESCAPE machine instrs. Label assignment emission
     // is the same on all targets.
-    for (unsigned Idx = 0, E = I.getNumArgOperands(); Idx < E; ++Idx) {
+    for (unsigned Idx = 0, E = I.arg_size(); Idx < E; ++Idx) {
       Value *Arg = I.getArgOperand(Idx)->stripPointerCasts();
       if (isa<ConstantPointerNull>(Arg))
         continue; // Skip null pointers. They represent a hole in index space.
@@ -7109,7 +7120,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     };
     SmallVector<BranchFunnelTarget, 8> Targets;
 
-    for (unsigned Op = 1, N = I.getNumArgOperands(); Op != N; Op += 2) {
+    for (unsigned Op = 1, N = I.arg_size(); Op != N; Op += 2) {
       auto *ElemBase = dyn_cast<GlobalObject>(GetPointerBaseWithConstantOffset(
           I.getArgOperand(Op), Offset, DAG.getDataLayout()));
       if (ElemBase != Base)
@@ -7544,7 +7555,7 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
 
   // Request operands.
   SmallVector<SDValue, 7> OpValues;
-  for (unsigned I = 0; I < VPIntrin.getNumArgOperands(); ++I) {
+  for (unsigned I = 0; I < VPIntrin.arg_size(); ++I) {
     auto Op = getValue(VPIntrin.getArgOperand(I));
     if (I == EVLParamPos)
       Op = DAG.getNode(ISD::ZERO_EXTEND, DL, EVLParamVT, Op);
@@ -8678,12 +8689,12 @@ void SelectionDAGBuilder::visitInlineAsm(const CallBase &Call,
       // Process the call argument. BasicBlocks are labels, currently appearing
       // only in asm's.
       if (isa<CallBrInst>(Call) &&
-          ArgNo - 1 >= (cast<CallBrInst>(&Call)->getNumArgOperands() -
+          ArgNo - 1 >= (cast<CallBrInst>(&Call)->arg_size() -
                         cast<CallBrInst>(&Call)->getNumIndirectDests() -
                         NumMatchingOps) &&
           (NumMatchingOps == 0 ||
-           ArgNo - 1 < (cast<CallBrInst>(&Call)->getNumArgOperands() -
-                        NumMatchingOps))) {
+           ArgNo - 1 <
+               (cast<CallBrInst>(&Call)->arg_size() - NumMatchingOps))) {
         const auto *BA = cast<BlockAddress>(OpInfo.CallOperandVal);
         EVT VT = TLI.getValueType(DAG.getDataLayout(), BA->getType(), true);
         OpInfo.CallOperand = DAG.getTargetBlockAddress(BA, VT);
@@ -9545,7 +9556,7 @@ void SelectionDAGBuilder::visitVectorReduce(const CallInst &I,
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   SDValue Op1 = getValue(I.getArgOperand(0));
   SDValue Op2;
-  if (I.getNumArgOperands() > 1)
+  if (I.arg_size() > 1)
     Op2 = getValue(I.getArgOperand(1));
   SDLoc dl = getCurSDLoc();
   EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
