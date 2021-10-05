@@ -3537,8 +3537,8 @@ def PseudoVSETVLEXT : Pseudo<(outs GPR:$rd, GPR:$scratch), (ins GPR:$rs1, VTypeI
 defm PseudoVL : VPseudoUSLoad</*isFF=*/false>;
 defm PseudoVS : VPseudoUSStore;
 
-defm PseudoVLE1 : VPseudoLoadMask;
-defm PseudoVSE1 : VPseudoStoreMask;
+defm PseudoVLM : VPseudoLoadMask;
+defm PseudoVSM : VPseudoStoreMask;
 
 //===----------------------------------------------------------------------===//
 // 7.5 Vector Strided Instructions
