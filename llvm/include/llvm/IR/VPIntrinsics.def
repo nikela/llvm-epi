@@ -418,6 +418,18 @@ HANDLE_VP_TO_OPC(FPTrunc)
 END_REGISTER_VP_INTRINSIC(vp_fptrunc)
 ///// } Truncations
 
+///// Integer-Pointer Conversions {
+// llvm.vp.ptrtoint(ptr,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_ptrtoint, 1, 2)
+HANDLE_VP_TO_OPC(PtrToInt)
+END_REGISTER_VP_INTRINSIC(vp_ptrtoint)
+
+// llvm.vp.inttoptr(x,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_inttoptr, 1, 2)
+HANDLE_VP_TO_OPC(IntToPtr)
+END_REGISTER_VP_INTRINSIC(vp_inttoptr)
+///// } Integer-Pointer Conversions
+
 #undef BEGIN_REGISTER_VP
 #undef BEGIN_REGISTER_VP_INTRINSIC
 #undef BEGIN_REGISTER_VP_SDNODE

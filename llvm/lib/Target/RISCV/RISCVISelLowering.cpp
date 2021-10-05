@@ -3303,16 +3303,28 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPSelectMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG, RISCVISD::VSELECT_VL);
-  case ISD::VP_SEXT:
+  case ISD::VP_SEXT: {
+    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
+    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
+    assert(DstSize > SrcSize);
     if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPExtMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG, RISCVISD::VSEXT_VL);
-  case ISD::VP_ZEXT:
+  }
+  case ISD::VP_ZEXT: {
+    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
+    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
+    assert(DstSize > SrcSize);
     if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPExtMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG, RISCVISD::VZEXT_VL);
-  case ISD::VP_FPEXT:
+  }
+  case ISD::VP_FPEXT: {
+    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
+    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
+    assert(DstSize > SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_EXTEND_VL);
+  }
   case ISD::VP_FREM: {
     RISCVVTToLibCall VTToLC[] = {
         {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
@@ -3327,12 +3339,20 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC);
   }
-  case ISD::VP_TRUNC:
+  case ISD::VP_TRUNC: {
+    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
+    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
+    assert(DstSize < SrcSize);
     if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPTruncToMaskOp(Op, DAG);
     return lowerVPTruncOp(Op, DAG);
-  case ISD::VP_FPTRUNC:
+  }
+  case ISD::VP_FPTRUNC: {
+    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
+    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
+    assert(DstSize < SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_ROUND_VL);
+  }
   }
 }
 
