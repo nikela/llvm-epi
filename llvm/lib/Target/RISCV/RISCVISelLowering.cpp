@@ -3867,9 +3867,13 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
   assert(isPowerOf2_64(DstTypeSize) && isPowerOf2_64(SrcTypeSize) &&
          "Types must be powers of two");
+  if (IntNo == Intrinsic::vp_ptrtoint || IntNo == Intrinsic::vp_inttoptr) {
+    IntNo =
+        DstTypeSize > SrcTypeSize ? Intrinsic::vp_zext : Intrinsic::vp_trunc;
+  }
+
   int Ratio =
       std::max(DstTypeSize, SrcTypeSize) / std::min(DstTypeSize, SrcTypeSize);
-
   unsigned MaskOpNo = 2;
   unsigned EVLOpNo = 3;
   assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
@@ -3878,7 +3882,6 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   unsigned EPIIntNo;
   // Further instrinsic to use to correctly widen/narrow the source operand
   unsigned FurtherEPIIntNo = Intrinsic::not_intrinsic;
-
   switch (IntNo) {
   default:
     llvm_unreachable("Unexpected intrinsic");
@@ -4194,7 +4197,9 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   VP_INTRINSIC(vp_fptrunc)                                                     \
   VP_INTRINSIC(vp_trunc)                                                       \
   VP_INTRINSIC(vp_zext)                                                        \
-  VP_INTRINSIC(vp_sext)
+  VP_INTRINSIC(vp_sext)                                                        \
+  VP_INTRINSIC(vp_ptrtoint)                                                    \
+  VP_INTRINSIC(vp_inttoptr)
 
 #define VP_INTRINSIC_W_CHAIN_SET                                               \
   VP_INTRINSIC(vp_load)                                                        \
@@ -5126,6 +5131,21 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
   }
 }
 
+static SDValue LowerVPIntegerPointerConversion(SDValue Op, SelectionDAG &DAG) {
+  EVT DstType = Op.getValueType();
+  uint64_t DstTypeSize = DstType.getScalarSizeInBits();
+  SDValue SrcOp = Op.getOperand(1);
+  EVT SrcType = SrcOp.getValueType();
+  uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
+  assert(isPowerOf2_64(DstTypeSize) && isPowerOf2_64(SrcTypeSize) &&
+         "Types must be powers of two");
+
+  if (DstTypeSize == SrcTypeSize)
+    return SrcOp;
+
+  return LowerVPIntrinsicConversion(Op, DAG);
+}
+
 // This is just to make sure we properly dispatch all the VP intrinsics
 // of VP_INTRINSIC_WO_CHAIN_SET in LowerVPIntrinsic
 
@@ -5178,6 +5198,9 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_zext:
   case Intrinsic__vp_sext:
     return LowerVPIntrinsicConversion(Op, DAG);
+  case Intrinsic__vp_ptrtoint:
+  case Intrinsic__vp_inttoptr:
+    return LowerVPIntegerPointerConversion(Op, DAG);
   case Intrinsic__vp_load:
   case Intrinsic__vp_strided_load:
   case Intrinsic__vp_gather:
