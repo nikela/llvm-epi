@@ -52,7 +52,7 @@ static size_t VarAndRedzoneSize(size_t Size, size_t Granularity,
 
 ASanStackFrameLayout
 ComputeASanStackFrameLayout(SmallVectorImpl<ASanStackVariableDescription> &Vars,
-                            uint64_t Granularity, size_t MinHeaderSize) {
+                            size_t Granularity, size_t MinHeaderSize) {
   assert(Granularity >= 8 && Granularity <= 64 &&
          (Granularity & (Granularity - 1)) == 0);
   assert(MinHeaderSize >= 16 && (MinHeaderSize & (MinHeaderSize - 1)) == 0 &&
