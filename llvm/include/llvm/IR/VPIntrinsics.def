@@ -217,6 +217,13 @@ HELPER_REGISTER_BINARY_FP_VP(frem, VP_FREM, FRem)
 
 #undef HELPER_REGISTER_BINARY_FP_VP
 
+// llvm.vp.fneg(f,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_fneg, 1, 2)
+BEGIN_REGISTER_VP_SDNODE(VP_FNEG, -1, vp_fneg, 1, 2)
+END_REGISTER_VP_SDNODE(VP_FNEG)
+HANDLE_VP_TO_OPC(FNeg)
+END_REGISTER_VP_INTRINSIC(vp_fneg)
+
 ///// } Floating-Point Arithmetic
 
 ///// Memory Operations {

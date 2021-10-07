@@ -450,9 +450,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN};
 
     static const unsigned FloatingPointVPOps[] = {
-        ISD::VP_FADD,            ISD::VP_FSUB,        ISD::VP_FMUL,
-        ISD::VP_FDIV,            ISD::VP_FREM,        ISD::VP_REDUCE_FADD,
-        ISD::VP_REDUCE_SEQ_FADD, ISD::VP_REDUCE_FMIN, ISD::VP_REDUCE_FMAX};
+        ISD::VP_FADD,        ISD::VP_FSUB,
+        ISD::VP_FMUL,        ISD::VP_FDIV,
+        ISD::VP_FREM,        ISD::VP_FNEG,
+        ISD::VP_REDUCE_FADD, ISD::VP_REDUCE_SEQ_FADD,
+        ISD::VP_REDUCE_FMIN, ISD::VP_REDUCE_FMAX};
 
     if (!Subtarget.is64Bit()) {
       // We must custom-lower certain vXi64 operations on RV32 due to the vector
@@ -3307,6 +3309,22 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::FMUL_VL);
   case ISD::VP_FDIV:
     return lowerVPOp(Op, DAG, RISCVISD::FDIV_VL);
+  case ISD::VP_FREM: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
+        {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64},
+        {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64},
+        {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64},
+        {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32},
+        {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32},
+        {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32},
+        {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
+        {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC);
+  }
+  case ISD::VP_FNEG:
+    return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
   case ISD::VP_SETCC:
     return lowerVPCmpOp(Op, DAG);
   case ISD::VECTOR_SPLICE:
@@ -3345,20 +3363,6 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::SINT_TO_FP_VL);
   case ISD::VP_UITOFP:
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::UINT_TO_FP_VL);
-  case ISD::VP_FREM: {
-    RISCVVTToLibCall VTToLC[] = {
-        {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
-        {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64},
-        {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64},
-        {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64},
-        {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32},
-        {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32},
-        {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32},
-        {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
-        {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
-    };
-    return lowerVECLIBCALL(Op, DAG, VTToLC);
-  }
   case ISD::VP_TRUNC: {
     uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
