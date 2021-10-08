@@ -188,7 +188,7 @@ Value *InstrProfIncrementInst::getStep() const {
 }
 
 Optional<RoundingMode> ConstrainedFPIntrinsic::getRoundingMode() const {
-  unsigned NumOperands = getNumArgOperands();
+  unsigned NumOperands = arg_size();
   Metadata *MD = nullptr;
   auto *MAV = dyn_cast<MetadataAsValue>(getArgOperand(NumOperands - 2));
   if (MAV)
@@ -200,7 +200,7 @@ Optional<RoundingMode> ConstrainedFPIntrinsic::getRoundingMode() const {
 
 Optional<fp::ExceptionBehavior>
 ConstrainedFPIntrinsic::getExceptionBehavior() const {
-  unsigned NumOperands = getNumArgOperands();
+  unsigned NumOperands = arg_size();
   Metadata *MD = nullptr;
   auto *MAV = dyn_cast<MetadataAsValue>(getArgOperand(NumOperands - 1));
   if (MAV)
@@ -518,6 +518,14 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
   case Intrinsic::vp_sext:
   case Intrinsic::vp_zext:
   case Intrinsic::vp_fpext:
+  case Intrinsic::vp_trunc:
+  case Intrinsic::vp_fptrunc:
+  case Intrinsic::vp_ptrtoint:
+  case Intrinsic::vp_inttoptr:
+  case Intrinsic::vp_sitofp:
+  case Intrinsic::vp_uitofp:
+  case Intrinsic::vp_fptosi:
+  case Intrinsic::vp_fptoui:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {RetType, Params[0]->getType()});
     break;
   case Intrinsic::vp_select:

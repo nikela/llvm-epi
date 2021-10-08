@@ -680,6 +680,17 @@ static void getCopyToPartsVector(SelectionDAG &DAG, const SDLoc &DL,
 
       // Promoted vector extract
       Val = DAG.getAnyExtOrTrunc(Val, DL, PartVT);
+    } else if (PartEVT.isVector() &&
+               PartEVT.getVectorElementType() !=
+                   ValueVT.getVectorElementType() &&
+               TLI.getTypeAction(*DAG.getContext(), ValueVT) ==
+                   TargetLowering::TypeWidenVector) {
+      // Combination of widening and promotion.
+      EVT WidenVT =
+          EVT::getVectorVT(*DAG.getContext(), ValueVT.getVectorElementType(),
+                           PartVT.getVectorElementCount());
+      SDValue Widened = widenVectorToPartType(DAG, Val, DL, WidenVT);
+      Val = DAG.getAnyExtOrTrunc(Widened, DL, PartVT);
     } else {
       if (ValueVT.getVectorElementCount().isScalar()) {
         Val = DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, PartVT, Val,
@@ -4833,7 +4844,7 @@ void SelectionDAGBuilder::visitTargetIntrinsic(const CallInst &I,
                                         TLI.getPointerTy(DAG.getDataLayout())));
 
   // Add all operands of the call to the operand list.
-  for (unsigned i = 0, e = I.getNumArgOperands(); i != e; ++i) {
+  for (unsigned i = 0, e = I.arg_size(); i != e; ++i) {
     const Value *Arg = I.getArgOperand(i);
 
     // FIXME Skip metadata args for now.
@@ -6939,7 +6950,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
 
     // Directly emit some LOCAL_ESCAPE machine instrs. Label assignment emission
     // is the same on all targets.
-    for (unsigned Idx = 0, E = I.getNumArgOperands(); Idx < E; ++Idx) {
+    for (unsigned Idx = 0, E = I.arg_size(); Idx < E; ++Idx) {
       Value *Arg = I.getArgOperand(Idx)->stripPointerCasts();
       if (isa<ConstantPointerNull>(Arg))
         continue; // Skip null pointers. They represent a hole in index space.
@@ -7109,7 +7120,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     };
     SmallVector<BranchFunnelTarget, 8> Targets;
 
-    for (unsigned Op = 1, N = I.getNumArgOperands(); Op != N; Op += 2) {
+    for (unsigned Op = 1, N = I.arg_size(); Op != N; Op += 2) {
       auto *ElemBase = dyn_cast<GlobalObject>(GetPointerBaseWithConstantOffset(
           I.getArgOperand(Op), Offset, DAG.getDataLayout()));
       if (ElemBase != Base)
@@ -7370,13 +7381,21 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   switch (VPIntrin.getIntrinsicID()) {
 #define BEGIN_REGISTER_VP_INTRINSIC(INTRIN, ...) case Intrinsic::INTRIN:
 #define BEGIN_REGISTER_VP_SDNODE(VPSDID, ...) ResOPC = ISD::VPSDID;
-#define END_REGISTER_VP_SDNODE(...) break;
+#define END_REGISTER_VP_INTRINSIC(...) break;
 #include "llvm/IR/VPIntrinsics.def"
   }
 
-  if (!ResOPC.hasValue())
-    llvm_unreachable(
-        "Inconsistency: no SDNode available for this VPIntrinsic!");
+  if (!ResOPC.hasValue()) {
+    switch (VPIntrin.getIntrinsicID()) {
+    case Intrinsic::vp_icmp:
+    case Intrinsic::vp_fcmp:
+      ResOPC = ISD::VP_SETCC;
+      break;
+    default:
+      llvm_unreachable(
+          "Inconsistency: no SDNode available for this VPIntrinsic!");
+    }
+  }
 
   if (*ResOPC == ISD::VP_REDUCE_SEQ_FADD ||
       *ResOPC == ISD::VP_REDUCE_SEQ_FMUL) {
@@ -7525,9 +7544,85 @@ void SelectionDAGBuilder::visitCmpVP(const VPIntrinsic &I) {
                               MaskOp, LenOp));
 }
 
+// VP version of visitPtrToInt()
+void SelectionDAGBuilder::visitVPPtrToInt(const VPIntrinsic &I) {
+  // What to do depends on the size of the integer and the size of the pointer.
+  // We can either truncate, zero extend, or no-op, accordingly.
+  SDLoc DL = getCurSDLoc();
+  auto &TLI = DAG.getTargetLoweringInfo();
+
+  SDValue N = getValue(I.getOperand(0));
+  SDValue Mask = getValue(I.getOperand(1));
+  SDValue EVL = getValue(I.getOperand(2));
+
+  MVT EVLVT = TLI.getVPExplicitVectorLengthTy();
+  assert(EVLVT.isScalarInteger() && EVLVT.bitsGE(MVT::i32) &&
+         "Unexpected target EVL type");
+  EVL = DAG.getNode(ISD::ZERO_EXTEND, DL, EVLVT, EVL);
+
+  EVT DestVT = TLI.getValueType(DAG.getDataLayout(), I.getType());
+  EVT PtrMemVT =
+      TLI.getMemValueType(DAG.getDataLayout(), I.getOperand(0)->getType());
+
+  auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
+    if (VT.bitsGT(V.getValueType()))
+      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+    if (VT.bitsLT(V.getValueType()))
+      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+    return V;
+  };
+
+  N = GetVPZExtOrVPTrunc(N, PtrMemVT);
+  N = GetVPZExtOrVPTrunc(N, DestVT);
+  setValue(&I, N);
+}
+
+// VP version of visitIntToPtr()
+void SelectionDAGBuilder::visitVPIntToPtr(const VPIntrinsic &I) {
+  // What to do depends on the size of the integer and the size of the pointer.
+  // We can either truncate, zero extend, or no-op, accordingly.
+  SDLoc DL = getCurSDLoc();
+  auto &TLI = DAG.getTargetLoweringInfo();
+
+  SDValue N = getValue(I.getOperand(0));
+  SDValue Mask = getValue(I.getOperand(1));
+  SDValue EVL = getValue(I.getOperand(2));
+
+  MVT EVLVT = TLI.getVPExplicitVectorLengthTy();
+  assert(EVLVT.isScalarInteger() && EVLVT.bitsGE(MVT::i32) &&
+         "Unexpected target EVL type");
+  EVL = DAG.getNode(ISD::ZERO_EXTEND, DL, EVLVT, EVL);
+
+  EVT DestVT = TLI.getValueType(DAG.getDataLayout(), I.getType());
+  EVT PtrMemVT = TLI.getMemValueType(DAG.getDataLayout(), I.getType());
+
+  auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
+    if (VT.bitsGT(V.getValueType()))
+      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+    if (VT.bitsLT(V.getValueType()))
+      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+    return V;
+  };
+
+  N = GetVPZExtOrVPTrunc(N, PtrMemVT);
+  N = GetVPZExtOrVPTrunc(N, DestVT);
+  setValue(&I, N);
+}
+
 void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     const VPIntrinsic &VPIntrin) {
   SDLoc DL = getCurSDLoc();
+  switch (VPIntrin.getIntrinsicID()) {
+  default:
+    break;
+  case Intrinsic::vp_ptrtoint:
+    visitVPPtrToInt(VPIntrin);
+    return;
+  case Intrinsic::vp_inttoptr:
+    visitVPIntToPtr(VPIntrin);
+    return;
+  }
+
   unsigned Opcode = getISDForVPIntrinsic(VPIntrin);
 
   SmallVector<EVT, 4> ValueVTs;
@@ -7544,7 +7639,7 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
 
   // Request operands.
   SmallVector<SDValue, 7> OpValues;
-  for (unsigned I = 0; I < VPIntrin.getNumArgOperands(); ++I) {
+  for (unsigned I = 0; I < VPIntrin.arg_size(); ++I) {
     auto Op = getValue(VPIntrin.getArgOperand(I));
     if (I == EVLParamPos)
       Op = DAG.getNode(ISD::ZERO_EXTEND, DL, EVLParamVT, Op);
@@ -8678,12 +8773,12 @@ void SelectionDAGBuilder::visitInlineAsm(const CallBase &Call,
       // Process the call argument. BasicBlocks are labels, currently appearing
       // only in asm's.
       if (isa<CallBrInst>(Call) &&
-          ArgNo - 1 >= (cast<CallBrInst>(&Call)->getNumArgOperands() -
+          ArgNo - 1 >= (cast<CallBrInst>(&Call)->arg_size() -
                         cast<CallBrInst>(&Call)->getNumIndirectDests() -
                         NumMatchingOps) &&
           (NumMatchingOps == 0 ||
-           ArgNo - 1 < (cast<CallBrInst>(&Call)->getNumArgOperands() -
-                        NumMatchingOps))) {
+           ArgNo - 1 <
+               (cast<CallBrInst>(&Call)->arg_size() - NumMatchingOps))) {
         const auto *BA = cast<BlockAddress>(OpInfo.CallOperandVal);
         EVT VT = TLI.getValueType(DAG.getDataLayout(), BA->getType(), true);
         OpInfo.CallOperand = DAG.getTargetBlockAddress(BA, VT);
@@ -9545,7 +9640,7 @@ void SelectionDAGBuilder::visitVectorReduce(const CallInst &I,
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   SDValue Op1 = getValue(I.getArgOperand(0));
   SDValue Op2;
-  if (I.getNumArgOperands() > 1)
+  if (I.arg_size() > 1)
     Op2 = getValue(I.getArgOperand(1));
   SDLoc dl = getCurSDLoc();
   EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
@@ -10717,27 +10812,6 @@ SelectionDAGBuilder::HandlePHINodesInSuccessorBlocks(const BasicBlock *LLVMBB) {
   }
 
   ConstantsOut.clear();
-}
-
-/// Add a successor MBB to ParentMBB< creating a new MachineBB for BB if SuccMBB
-/// is 0.
-MachineBasicBlock *
-SelectionDAGBuilder::StackProtectorDescriptor::
-AddSuccessorMBB(const BasicBlock *BB,
-                MachineBasicBlock *ParentMBB,
-                bool IsLikely,
-                MachineBasicBlock *SuccMBB) {
-  // If SuccBB has not been created yet, create it.
-  if (!SuccMBB) {
-    MachineFunction *MF = ParentMBB->getParent();
-    MachineFunction::iterator BBI(ParentMBB);
-    SuccMBB = MF->CreateMachineBasicBlock(BB);
-    MF->insert(++BBI, SuccMBB);
-  }
-  // Add it as a successor of ParentMBB.
-  ParentMBB->addSuccessor(
-      SuccMBB, BranchProbabilityInfo::getBranchProbStackProtector(IsLikely));
-  return SuccMBB;
 }
 
 MachineBasicBlock *SelectionDAGBuilder::NextBlock(MachineBasicBlock *MBB) {

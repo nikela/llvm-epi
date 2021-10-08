@@ -50,7 +50,6 @@ class RISCVSubtarget : public RISCVGenSubtargetInfo {
   bool HasStdExtZbr = false;
   bool HasStdExtZbs = false;
   bool HasStdExtZbt = false;
-  bool HasStdExtZbproposedc = false;
   bool HasStdExtV = false;
   bool HasStdExtZvlsseg = false;
   bool HasStdExtZvamo = false;
@@ -119,7 +118,6 @@ public:
   bool hasStdExtZbr() const { return HasStdExtZbr; }
   bool hasStdExtZbs() const { return HasStdExtZbs; }
   bool hasStdExtZbt() const { return HasStdExtZbt; }
-  bool hasStdExtZbproposedc() const { return HasStdExtZbproposedc; }
   bool hasStdExtV() const { return HasStdExtV; }
   bool hasStdExtZvlsseg() const { return HasStdExtZvlsseg; }
   bool hasStdExtZvamo() const { return HasStdExtZvamo; }

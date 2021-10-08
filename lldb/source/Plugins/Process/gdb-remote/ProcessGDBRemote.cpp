@@ -251,8 +251,7 @@ bool ProcessGDBRemote::CanDebug(lldb::TargetSP target_sp,
 ProcessGDBRemote::ProcessGDBRemote(lldb::TargetSP target_sp,
                                    ListenerSP listener_sp)
     : Process(target_sp, listener_sp),
-      m_debugserver_pid(LLDB_INVALID_PROCESS_ID), m_last_stop_packet_mutex(),
-      m_register_info_sp(nullptr),
+      m_debugserver_pid(LLDB_INVALID_PROCESS_ID), m_register_info_sp(nullptr),
       m_async_broadcaster(nullptr, "lldb.process.gdb-remote.async-broadcaster"),
       m_async_listener_sp(
           Listener::MakeListener("lldb.process.gdb-remote.async-listener")),
@@ -510,17 +509,6 @@ void ProcessGDBRemote::BuildDynamicRegisterInfo(bool force) {
             SplitCommaSeparatedRegisterNumberString(value, reg_info.value_regs, 16);
           } else if (name.equals("invalidate-regs")) {
             SplitCommaSeparatedRegisterNumberString(value, reg_info.invalidate_regs, 16);
-          } else if (name.equals("dynamic_size_dwarf_expr_bytes")) {
-            size_t dwarf_opcode_len = value.size() / 2;
-            assert(dwarf_opcode_len > 0);
-
-            reg_info.dwarf_opcode_bytes.resize(dwarf_opcode_len);
-
-            StringExtractor opcode_extractor(value);
-            uint32_t ret_val =
-                opcode_extractor.GetHexBytesAvail(reg_info.dwarf_opcode_bytes);
-            assert(dwarf_opcode_len == ret_val);
-            UNUSED_IF_ASSERT_DISABLED(ret_val);
           }
         }
 
@@ -1462,37 +1450,30 @@ bool ProcessGDBRemote::UpdateThreadIDList() {
     // See if we can get the thread IDs from the current stop reply packets
     // that might contain a "threads" key/value pair
 
-    // Lock the thread stack while we access it
-    // Mutex::Locker stop_stack_lock(m_last_stop_packet_mutex);
-    std::unique_lock<std::recursive_mutex> stop_stack_lock(
-        m_last_stop_packet_mutex, std::defer_lock);
-    if (stop_stack_lock.try_lock()) {
-      if (m_last_stop_packet) {
-        // Get the thread stop info
-        StringExtractorGDBRemote &stop_info = *m_last_stop_packet;
-        const std::string &stop_info_str =
-            std::string(stop_info.GetStringRef());
+    if (m_last_stop_packet) {
+      // Get the thread stop info
+      StringExtractorGDBRemote &stop_info = *m_last_stop_packet;
+      const std::string &stop_info_str = std::string(stop_info.GetStringRef());
 
-        m_thread_pcs.clear();
-        const size_t thread_pcs_pos = stop_info_str.find(";thread-pcs:");
-        if (thread_pcs_pos != std::string::npos) {
-          const size_t start = thread_pcs_pos + strlen(";thread-pcs:");
-          const size_t end = stop_info_str.find(';', start);
-          if (end != std::string::npos) {
-            std::string value = stop_info_str.substr(start, end - start);
-            UpdateThreadPCsFromStopReplyThreadsValue(value);
-          }
+      m_thread_pcs.clear();
+      const size_t thread_pcs_pos = stop_info_str.find(";thread-pcs:");
+      if (thread_pcs_pos != std::string::npos) {
+        const size_t start = thread_pcs_pos + strlen(";thread-pcs:");
+        const size_t end = stop_info_str.find(';', start);
+        if (end != std::string::npos) {
+          std::string value = stop_info_str.substr(start, end - start);
+          UpdateThreadPCsFromStopReplyThreadsValue(value);
         }
+      }
 
-        const size_t threads_pos = stop_info_str.find(";threads:");
-        if (threads_pos != std::string::npos) {
-          const size_t start = threads_pos + strlen(";threads:");
-          const size_t end = stop_info_str.find(';', start);
-          if (end != std::string::npos) {
-            std::string value = stop_info_str.substr(start, end - start);
-            if (UpdateThreadIDsFromStopReplyThreadsValue(value))
-              return true;
-          }
+      const size_t threads_pos = stop_info_str.find(";threads:");
+      if (threads_pos != std::string::npos) {
+        const size_t start = threads_pos + strlen(";threads:");
+        const size_t end = stop_info_str.find(';', start);
+        if (end != std::string::npos) {
+          std::string value = stop_info_str.substr(start, end - start);
+          if (UpdateThreadIDsFromStopReplyThreadsValue(value))
+            return true;
         }
       }
     }
@@ -2317,14 +2298,9 @@ void ProcessGDBRemote::RefreshStateAfterStop() {
   // date before we do that or we might overwrite what was computed here.
   UpdateThreadListIfNeeded();
 
-  // Scope for the lock
-  {
-    // Lock the thread stack while we access it
-    std::lock_guard<std::recursive_mutex> guard(m_last_stop_packet_mutex);
-    if (m_last_stop_packet)
-      SetThreadStopInfo(*m_last_stop_packet);
-    m_last_stop_packet.reset();
-  }
+  if (m_last_stop_packet)
+    SetThreadStopInfo(*m_last_stop_packet);
+  m_last_stop_packet.reset();
 
   // If we have queried for a default thread id
   if (m_initial_tid != LLDB_INVALID_THREAD_ID) {
@@ -2571,13 +2547,7 @@ void ProcessGDBRemote::SetLastStopPacket(
     m_gdb_comm.ResetDiscoverableSettings(did_exec);
   }
 
-  // Scope the lock
-  {
-    // Lock the thread stack while we access it
-    std::lock_guard<std::recursive_mutex> guard(m_last_stop_packet_mutex);
-
-    m_last_stop_packet = response;
-  }
+  m_last_stop_packet = response;
 }
 
 void ProcessGDBRemote::SetUnixSignals(const UnixSignalsSP &signals_sp) {
@@ -4276,7 +4246,8 @@ bool ParseRegisters(XMLNode feature_node, GdbServerTargetInfo &target_info,
             reg_info.name.SetString(value);
           } else if (name == "bitsize") {
             if (llvm::to_integer(value, reg_info.byte_size))
-              reg_info.byte_size /= CHAR_BIT;
+              reg_info.byte_size =
+                  llvm::divideCeil(reg_info.byte_size, CHAR_BIT);
           } else if (name == "type") {
             gdb_type = value.str();
           } else if (name == "group") {
@@ -4326,19 +4297,12 @@ bool ParseRegisters(XMLNode feature_node, GdbServerTargetInfo &target_info,
           } else if (name == "invalidate_regnums") {
             SplitCommaSeparatedRegisterNumberString(
                 value, reg_info.invalidate_regs, 0);
-          } else if (name == "dynamic_size_dwarf_expr_bytes") {
-            std::string opcode_string = value.str();
-            size_t dwarf_opcode_len = opcode_string.length() / 2;
-            assert(dwarf_opcode_len > 0);
-
-            reg_info.dwarf_opcode_bytes.resize(dwarf_opcode_len);
-            StringExtractor opcode_extractor(opcode_string);
-            uint32_t ret_val =
-                opcode_extractor.GetHexBytesAvail(reg_info.dwarf_opcode_bytes);
-            assert(dwarf_opcode_len == ret_val);
-            UNUSED_IF_ASSERT_DISABLED(ret_val);
           } else {
-            printf("unhandled attribute %s = %s\n", name.data(), value.data());
+            Log *log(ProcessGDBRemoteLog::GetLogIfAllCategoriesSet(
+                GDBR_LOG_PROCESS));
+            LLDB_LOGF(log,
+                      "ProcessGDBRemote::%s unhandled reg attribute %s = %s",
+                      __FUNCTION__, name.data(), value.data());
           }
           return true; // Keep iterating through all attributes
         });
@@ -4372,8 +4336,15 @@ bool ParseRegisters(XMLNode feature_node, GdbServerTargetInfo &target_info,
           }
         }
 
-        assert(reg_info.byte_size != 0);
-        registers.push_back(reg_info);
+        if (reg_info.byte_size == 0) {
+          Log *log(
+              ProcessGDBRemoteLog::GetLogIfAllCategoriesSet(GDBR_LOG_PROCESS));
+          LLDB_LOGF(log,
+                    "ProcessGDBRemote::%s Skipping zero bitsize register %s",
+                    __FUNCTION__, reg_info.name.AsCString());
+        } else
+          registers.push_back(reg_info);
+
         return true; // Keep iterating through all "reg" elements
       });
   return true;
@@ -4553,10 +4524,6 @@ void ProcessGDBRemote::AddRemoteRegisters(
            local_regnum},
           regs_with_sentinel(remote_reg_info.value_regs),
           regs_with_sentinel(remote_reg_info.invalidate_regs),
-          !remote_reg_info.dwarf_opcode_bytes.empty()
-              ? remote_reg_info.dwarf_opcode_bytes.data()
-              : nullptr,
-          remote_reg_info.dwarf_opcode_bytes.size(),
     };
 
     if (abi_sp)

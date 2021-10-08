@@ -2,7 +2,7 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+f,+d,+c,+experimental-v < %s -epi-pipeline | \
 ; RUN:     FileCheck %s
 
-define <vscale x 2 x float> @fptrunc.f32.f64(<vscale x 2 x double> %a, i32 %gvl)
+define <vscale x 2 x float> @fptrunc.f32.f64(<vscale x 2 x double> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: fptrunc.f32.f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
@@ -16,7 +16,7 @@ define <vscale x 2 x float> @fptrunc.f32.f64(<vscale x 2 x double> %a, i32 %gvl)
   ret <vscale x 2 x float> %b
 }
 
-define <vscale x 2 x float> @fptrunc.f32.f64.mask(<vscale x 2 x double> %a, <vscale x 2 x i1> %mask, i32 %gvl)
+define <vscale x 2 x float> @fptrunc.f32.f64.mask(<vscale x 2 x double> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: fptrunc.f32.f64.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
