@@ -754,14 +754,10 @@ bool llvm::peelLoop(Loop *L, unsigned PeelCount, LoopInfo *LI,
     remapInstructionsInBlocks(NewBlocks, VMap);
 
     // If DT is available, insert edges from cloned exiting blocks to the exits
-    if (DT) {
+    if (DT)
       for (auto Exit : ExitEdges)
         DTUpdates.push_back(
             {DT->Insert, cast<BasicBlock>(LVMap[Exit.first]), Exit.second});
-#ifdef EXPENSIVE_CHECKS
-      assert(DT->verify(DominatorTree::VerificationLevel::Fast));
-#endif
-    }
 
     auto *LatchBRCopy = cast<BranchInst>(VMap[LatchBR]);
     updateBranchWeights(InsertBot, LatchBRCopy, ExitWeight, FallThroughWeight);
