@@ -224,6 +224,12 @@ END_REGISTER_VP_SDNODE(VP_FNEG)
 HANDLE_VP_TO_OPC(FNeg)
 END_REGISTER_VP_INTRINSIC(vp_fneg)
 
+// llvm.vp.fma(x,y,z,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(vp_fma, 3, 4)
+BEGIN_REGISTER_VP_SDNODE(VP_FMA, -1, vp_fma, 3, 4)
+END_REGISTER_VP_SDNODE(VP_FMA)
+HANDLE_VP_TO_CONSTRAINEDFP(1, 1, experimental_constrained_fma)
+END_REGISTER_VP_INTRINSIC(vp_fma)
 ///// } Floating-Point Arithmetic
 
 ///// Memory Operations {
