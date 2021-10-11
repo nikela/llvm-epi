@@ -7977,8 +7977,10 @@ LoopVectorizationCostModel::expectedCost(
   if (Legal->preferPredicatedVectorOps() && foldTailByMasking()) {
     // Add cost of generating a compare instruction to build mask.
     Type *VectorTy = ToVectorTy(Legal->getWidestInductionType(), VF);
-    InstructionCost MaskCost =
-        TTI.getCmpSelInstrCost(Instruction::ICmp, VectorTy);
+    InstructionCost MaskCost = TTI.getCmpSelInstrCost(
+        Instruction::ICmp, VectorTy,
+        ToVectorTy(Type::getInt1Ty(VectorTy->getContext()), VF),
+        CmpInst::BAD_ICMP_PREDICATE);
     bool TypeNotScalarized =
         VF.isVector() && VectorTy->isVectorTy() &&
         (isa<ScalableVectorType>(VectorTy) ||
