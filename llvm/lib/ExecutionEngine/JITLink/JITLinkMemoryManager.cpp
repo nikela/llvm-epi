@@ -352,6 +352,15 @@ void InProcessMemoryManager::allocate(const JITLinkDylib *JD, LinkGraph &G,
     return;
   }
 
+  /// Check that the total size requested (including zero fill) is not larger
+  /// than a size_t.
+  if (SegsSizes->total() > std::numeric_limits<size_t>::max()) {
+    OnAllocated(make_error<JITLinkError>(
+        "Total requested size " + formatv("{0:x}", SegsSizes->total()) +
+        " for graph " + G.getName() + " exceeds address space"));
+    return;
+  }
+
   // Allocate one slab for the whole thing (to make sure everything is
   // in-range), then partition into standard and finalization blocks.
   //
@@ -380,9 +389,10 @@ void InProcessMemoryManager::allocate(const JITLinkDylib *JD, LinkGraph &G,
     // Zero-fill the whole slab up-front.
     memset(Slab.base(), 0, Slab.allocatedSize());
 
-    StandardSegsMem = {Slab.base(), SegsSizes->StandardSegs};
+    StandardSegsMem = {Slab.base(),
+                       static_cast<size_t>(SegsSizes->StandardSegs)};
     FinalizeSegsMem = {(void *)((char *)Slab.base() + SegsSizes->StandardSegs),
-                       SegsSizes->FinalizeSegs};
+                       static_cast<size_t>(SegsSizes->FinalizeSegs)};
   }
 
   auto NextStandardSegAddr = pointerToJITTargetAddress(StandardSegsMem.base());
