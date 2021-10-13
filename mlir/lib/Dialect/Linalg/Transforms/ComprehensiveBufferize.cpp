@@ -878,14 +878,13 @@ bool BufferizationAliasInfo::wouldCreateReadAfterWriteInterference(
 ///      C interleaved between W and R (i.e. W -> C -> R where -> denotes
 ///      dominance).
 bool BufferizationAliasInfo::wouldCreateReadAfterWriteInterference(
-    OpResult result, const DominanceInfo &domInfo) const {
-  Optional<OpOperand *> maybeAliasingOperand = getAliasingOpOperand(result);
-  if (!maybeAliasingOperand)
-    return false;
+    OpOperand &operand, OpResult result, const DominanceInfo &domInfo) const {
+  assert(getAliasingOpOperand(result) == &operand &&
+         "operand and result do not match");
 
   Operation *opToBufferize = result.getDefiningOp();
   Value opResult = result;
-  Value opOperand = (*maybeAliasingOperand)->get();
+  Value opOperand = operand.get();
 
   LDBG("----Start wouldCreateReadAfterWriteInterference\n");
   LDBG("--------consider all aliases to root read: "
@@ -937,16 +936,16 @@ bool BufferizationAliasInfo::wouldCreateReadAfterWriteInterference(
   getAliasingReads(usesRead, opOperand);
   getAliasingInplaceWrites(usesWrite, opResult);
   // Additionally, `result` is not yet bufferized and we need to check for
-  // interferences as if it were bufferized inplace: add `maybeAliasingOperand`
-  // if it is a write. This handles the case:
+  // interferences as if it were bufferized inplace: add `operand` if it is a
+  // write. This handles the case:
   //
   // ```
   //  %0 = op_to_bufferize_maybe_inplace(%1)
   //  %2 = some_alias(%1)
   //  read(%2)
   // ```
-  if (bufferizesToMemoryWrite(**maybeAliasingOperand))
-    usesWrite.insert(*maybeAliasingOperand);
+  if (bufferizesToMemoryWrite(operand))
+    usesWrite.insert(&operand);
   if (wouldCreateReadAfterWriteInterference(opToBufferize, usesRead, usesWrite,
                                             domInfo))
     return true;
@@ -972,27 +971,26 @@ bool BufferizationAliasInfo::wouldCreateReadAfterWriteInterference(
                                                usesWrite, domInfo);
 }
 
-/// Return true if bufferizing `opResult` inplace would create a write to a
-/// non-writable buffer.
+/// Return true if bufferizing `opOperand` inplace with `opResult` would create
+/// a write to a non-writable buffer.
 bool BufferizationAliasInfo::wouldCreateWriteToNonWritableBuffer(
-    OpResult opResult) const {
-  Optional<OpOperand *> maybeAliasingOperand = getAliasingOpOperand(opResult);
-  if (!maybeAliasingOperand || !*maybeAliasingOperand)
-    return false;
+    OpOperand &opOperand, OpResult opResult) const {
+  assert(getAliasingOpOperand(opResult) == &opOperand &&
+         "operand and result do not match");
 
   // Certain buffers are not writeable:
   //   1. A function bbArg that is not inplaceable or
   //   2. A constant op.
   assert(!aliasesNonWritableBuffer(opResult) &&
          "expected that opResult does not alias non-writable buffer");
-  bool nonWritable = aliasesNonWritableBuffer((*maybeAliasingOperand)->get());
+  bool nonWritable = aliasesNonWritableBuffer(opOperand.get());
   if (!nonWritable)
     return false;
 
   // This is a problem only if the buffer is written to via some alias.
   bool hasWrite = aliasesInPlaceWrite(opResult) ||
-                  aliasesInPlaceWrite((*maybeAliasingOperand)->get()) ||
-                  bufferizesToMemoryWrite(**maybeAliasingOperand);
+                  aliasesInPlaceWrite(opOperand.get()) ||
+                  bufferizesToMemoryWrite(opOperand);
   if (!hasWrite)
     return false;
 
@@ -2237,6 +2235,37 @@ static LogicalResult bufferize(OpBuilder &b, tensor::ExtractOp extractOp,
 // Bufferization analyses.
 //===----------------------------------------------------------------------===//
 
+/// Determine if `operand` can be bufferized in-place with `result`. If so, set
+/// InPlaceSpec::True on the result. Otherwise, set InPlaceSpec::False on the
+/// result.
+static LogicalResult
+bufferizableInPlaceAnalysisImpl(OpOperand &operand, OpResult result,
+                                BufferizationAliasInfo &aliasInfo,
+                                const DominanceInfo &domInfo) {
+  assert(getAliasingOpOperand(result) == &operand &&
+         "operand and result do not match");
+
+  int64_t resultNumber = result.getResultNumber();
+  (void)resultNumber;
+  LDBG('\n');
+  LDBG("Inplace analysis for <- #" << resultNumber << " -> #"
+                                   << operand.getOperandNumber() << " in "
+                                   << printValueInfo(result) << '\n');
+
+  bool foundInterference =
+      aliasInfo.wouldCreateWriteToNonWritableBuffer(operand, result) ||
+      aliasInfo.wouldCreateReadAfterWriteInterference(operand, result, domInfo);
+
+  if (foundInterference)
+    aliasInfo.bufferizeOutOfPlace(result);
+  else
+    aliasInfo.bufferizeInPlace(result, operand);
+
+  LDBG("Done inplace analysis for result #" << resultNumber << '\n');
+
+  return success();
+}
+
 ///
 /// Rationale for bufferizing `%1 = tensor.extract_slice %0[...]` inplace.
 /// ===========================================================
@@ -2255,27 +2284,9 @@ static LogicalResult
 bufferizableInPlaceAnalysis(ExtractSliceOp extractSliceOp,
                             BufferizationAliasInfo &aliasInfo,
                             const DominanceInfo &domInfo) {
-  LDBG('\n');
-  LDBG("Inplace analysis for extract_slice: "
-       << printOperationInfo(extractSliceOp) << '\n');
-
-  OpResult r = extractSliceOp->getResult(0);
-  OpOperand &s = extractSliceOp->getOpOperand(0);
-  bool foundInterference =
-      /* If `extractSliceOp` were to be bufferized inplace, it cannot end up
-         aliasing a write into a non-writable buffer.*/
-      aliasInfo.wouldCreateWriteToNonWritableBuffer(r) ||
-      /* In any of extractSliceOp.result's aliases, can we find 2 such that we
-         hit an interfering write? */
-      aliasInfo.wouldCreateReadAfterWriteInterference(r, domInfo);
-  if (foundInterference)
-    aliasInfo.bufferizeOutOfPlace(r);
-  else
-    aliasInfo.bufferizeInPlace(r, s);
-
-  LDBG("Done inplace analysis for extract_slice\n");
-
-  return success();
+  return bufferizableInPlaceAnalysisImpl(extractSliceOp->getOpOperand(0),
+                                         extractSliceOp->getOpResult(0),
+                                         aliasInfo, domInfo);
 }
 
 /// Determine if `operand` can be bufferized in-place with one of the op's
@@ -2288,41 +2299,12 @@ bufferizableInPlaceAnalysis(OpOperand &operand,
   OpResult result = getInplaceableOpResult(operand);
   if (!result)
     return success();
-
-  Operation *op = result.getDefiningOp();
-  assert(result && !isa<ExtractSliceOp>(op) &&
-         "expected OpResult not coming from a ExtractSliceOp");
-  (void)op;
-
-  int64_t resultNumber = result.getResultNumber();
-  (void)resultNumber;
-  LDBG('\n');
-  LDBG("Inplace analysis for <- #" << resultNumber << " -> #"
-                                   << operand.getOperandNumber() << " in "
-                                   << printValueInfo(result) << '\n');
-
-  bool foundInterference =
-      aliasInfo.wouldCreateWriteToNonWritableBuffer(result) ||
-      aliasInfo.wouldCreateReadAfterWriteInterference(result, domInfo);
-
-  if (foundInterference)
-    aliasInfo.bufferizeOutOfPlace(result);
-  else
-    // TODO: Atm, all inplace bufferizations yield equivalent tensors. Support
-    // more cases on a per-need basis.
-    aliasInfo.bufferizeInPlace(result, operand);
-
-  LDBG("Done inplace analysis for result #" << resultNumber << '\n');
-
-  return success();
+  return bufferizableInPlaceAnalysisImpl(operand, result, aliasInfo, domInfo);
 }
 
-/// Analyze the `ops` to determine which OpResults are inplaceable:
-///   1. First, analyze InsertSliceOp greedily: we almost never want to
-///      bufferize the tensor "inserted into" to become out-of-place.
-///   2. Walk the other ops in reverse. This is a good starter heuristic.
-///      ExtractSliceOps are interleaved with other ops in traversal order.
-///
+/// Analyze the `ops` to determine which OpResults are inplaceable. Walk ops in
+/// reverse and bufferize ops greedily. This is a good starter heuristic.
+/// ExtractSliceOps are interleaved with other ops in traversal order.
 LogicalResult mlir::linalg::inPlaceAnalysis(SmallVector<Operation *> &ops,
                                             BufferizationAliasInfo &aliasInfo,
                                             const DominanceInfo &domInfo) {
@@ -2337,13 +2319,12 @@ LogicalResult mlir::linalg::inPlaceAnalysis(SmallVector<Operation *> &ops,
     // to properly capture aliases.
     // Walk ExtractSliceOps in reverse for better clobbering analysis behavior:
     // it is easier to detect clobbers of smaller slices before larger ones.
-    if (auto extractSliceOp = dyn_cast<ExtractSliceOp>(op)) {
+    if (auto extractSliceOp = dyn_cast<ExtractSliceOp>(op))
       if (failed(
               bufferizableInPlaceAnalysis(extractSliceOp, aliasInfo, domInfo)))
         return failure();
-      continue;
-    }
   }
+
   return success();
 }
 
