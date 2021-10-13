@@ -12,6 +12,8 @@ target triple = "riscv64-unknown-linux-gnu"
 
 ; CHECK-LABEL: simple_add
 ; CHECK: VPlan 'Initial VPlan for VF={vscale x 1,vscale x 2,vscale x 4,vscale x 8,vscale x 16},UF>=1' {
+; CHECK-NEXT:  Live-in vp<%0> = backedge-taken count
+; CHECK-EMPTY:
 ; CHECK-NEXT: for.body:
 ; CHECK-NEXT:   WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next
 ; CHECK-NEXT:   EMIT vp<%3> = icmp ule ir<%indvars.iv> vp<%0>

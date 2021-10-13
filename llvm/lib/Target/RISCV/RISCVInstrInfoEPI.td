@@ -1274,7 +1274,7 @@ defm PseudoEPIVWREDSUM    : pseudo_binary_w_vs;
 defm PseudoEPIVWREDSUMU   : pseudo_binary_w_vs;
 
 defm PseudoEPIVFADD       : pseudo_binary_v_vv_vf;
-defm PseudoEPIVFREDSUM    : pseudo_binary_v_vs;
+defm PseudoEPIVFREDUSUM   : pseudo_binary_v_vs;
 defm PseudoEPIVFSUB       : pseudo_binary_v_vv_vf;
 defm PseudoEPIVFREDOSUM   : pseudo_binary_v_vs;
 defm PseudoEPIVFMIN       : pseudo_binary_v_vv_vf;
@@ -1336,9 +1336,9 @@ defm PseudoEPIVFWSUB      : pseudo_binary_w_vv_vf;
 defm PseudoEPIVFWSUB      : pseudo_binary_w_wv_wf;
 defm PseudoEPIVFWMUL      : pseudo_binary_w_vv_vf;
 
-defm PseudoEPIVFWREDSUM   : pseudo_binary_w_vs;
+defm PseudoEPIVFWREDUSUM  : pseudo_binary_w_vs;
 defm PseudoEPIVFWREDOSUM  : pseudo_binary_w_vs;
-  
+
 // FIXME EDIV instructions disabled
 //defm PseudoEPIVFDOT       : pseudo_binary_v_vv;
 
@@ -2963,7 +2963,7 @@ defm "" : pat_intrinsic_binary_int_w_vs<"int_epi_vwredsum", "PseudoEPIVWREDSUM">
 //defm "" : pat_intrinsic_binary_int_vv_vx<"int_epi_vwmsac", "VWMSAC">;
 
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfadd", "PseudoEPIVFADD">;
-defm "" : pat_intrinsic_binary_fp_v_vs<"int_epi_vfredsum", "PseudoEPIVFREDSUM">;
+defm "" : pat_intrinsic_binary_fp_v_vs<"int_epi_vfredsum", "PseudoEPIVFREDUSUM">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfsub", "PseudoEPIVFSUB">;
 defm "" : pat_intrinsic_binary_fp_v_vs<"int_epi_vfredosum", "PseudoEPIVFREDOSUM">;
 defm "" : pat_intrinsic_binary_fp_v_vv_vf<"int_epi_vfmin", "PseudoEPIVFMIN">;
@@ -3021,7 +3021,7 @@ defm "" : pat_intrinsic_ternary_fp_v_vv_vf<"int_epi_vfnmsac", "PseudoEPIVFNMSAC"
 
 defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwadd", "PseudoEPIVFWADD">;
 defm "" : pat_intrinsic_binary_fp_w_wv_wf<"int_epi_vfwadd_w", "PseudoEPIVFWADD">;
-defm "" : pat_intrinsic_binary_fp_w_vs<"int_epi_vfwredsum", "PseudoEPIVFWREDSUM">;
+defm "" : pat_intrinsic_binary_fp_w_vs<"int_epi_vfwredsum", "PseudoEPIVFWREDUSUM">;
 defm "" : pat_intrinsic_binary_fp_w_vv_vf<"int_epi_vfwsub", "PseudoEPIVFWSUB">;
 defm "" : pat_intrinsic_binary_fp_w_wv_wf<"int_epi_vfwsub_w", "PseudoEPIVFWSUB">;
 defm "" : pat_intrinsic_binary_fp_w_vs<"int_epi_vfwredosum", "PseudoEPIVFWREDOSUM">;

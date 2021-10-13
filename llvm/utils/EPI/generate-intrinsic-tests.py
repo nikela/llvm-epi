@@ -2308,12 +2308,12 @@ intrinsics = [
         #BinaryIntrinsic("vwredsumu", type_generator = generate_binary_integer_types_widened, variants = vs),
         #BinaryIntrinsic("vwredsum", type_generator = generate_binary_integer_types_widened, variants = vs),
 
-        BinaryIntrinsic("vfredsum", type_generator = generate_binary_float_types, variants = vs),
+        BinaryIntrinsic("vfredsum", instruction="vfredusum", type_generator = generate_binary_float_types, variants = vs),
         BinaryIntrinsic("vfredosum", type_generator = generate_binary_float_types, variants = vs),
         BinaryIntrinsic("vfredmin", type_generator = generate_binary_float_types, variants = vs),
         BinaryIntrinsic("vfredmax", type_generator = generate_binary_float_types, variants = vs),
 
-        #BinaryIntrinsic("vfwredsum", type_generator = generate_binary_float_types_widened, variants = vs),
+        #BinaryIntrinsic("vfwredsum", instruction="vfwredusum", type_generator = generate_binary_float_types_widened, variants = vs),
         #BinaryIntrinsic("vfwredosum", type_generator = generate_binary_float_types_widened, variants = vs),
 
         BinaryIntrinsic("vmandnot", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
