@@ -391,6 +391,7 @@ def warn_reserved_extern_symbol: Warning<
   "identifier %0 is reserved because %select{"
   "<ERROR>|" // ReservedIdentifierStatus::NotReserved
   "it starts with '_' at global scope|"
+  "it starts with '_' and has C language linkage|"
   "it starts with '__'|"
   "it starts with '_' followed by a capital letter|"
   "it contains '__'}1">,
@@ -3553,6 +3554,9 @@ def warn_availability_swift_unavailable_deprecated_only : Warning<
   InGroup<Availability>;
 def note_protocol_method : Note<
   "protocol method is here">;
+def warn_availability_fuchsia_unavailable_minor : Warning<
+  "Fuchsia API Level prohibits specifying a minor or sub-minor version">,
+  InGroup<Availability>;
 
 def warn_unguarded_availability :
   Warning<"%0 is only available on %1 %2 or newer">,
@@ -10813,6 +10817,10 @@ def err_omp_unroll_full_variable_trip_count : Error<
 def note_omp_directive_here : Note<"'%0' directive found here">;
 def err_omp_instantiation_not_supported
     : Error<"instantiation of '%0' not supported yet">;
+def err_omp_adjust_arg_multiple_clauses : Error<
+  "'adjust_arg' argument %0 used in multiple clauses">;
+def err_omp_clause_requires_dispatch_construct : Error<
+  "'%0' clause requires 'dispatch' context selector">;
 } // end of OpenMP category
 
 let CategoryName = "Related Result Type Issue" in {

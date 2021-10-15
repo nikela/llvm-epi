@@ -425,6 +425,10 @@ X86TargetLowering::X86TargetLowering(const X86TargetMachine &TM,
   setTruncStoreAction(MVT::f128, MVT::f16, Expand);
 
   setOperationAction(ISD::PARITY, MVT::i8, Custom);
+  setOperationAction(ISD::PARITY, MVT::i16, Custom);
+  setOperationAction(ISD::PARITY, MVT::i32, Custom);
+  if (Subtarget.is64Bit())
+    setOperationAction(ISD::PARITY, MVT::i64, Custom);
   if (Subtarget.hasPOPCNT()) {
     setOperationPromotedToType(ISD::CTPOP, MVT::i8, MVT::i32);
   } else {
@@ -435,11 +439,6 @@ X86TargetLowering::X86TargetLowering(const X86TargetMachine &TM,
       setOperationAction(ISD::CTPOP        , MVT::i64  , Expand);
     else
       setOperationAction(ISD::CTPOP        , MVT::i64  , Custom);
-
-    setOperationAction(ISD::PARITY, MVT::i16, Custom);
-    setOperationAction(ISD::PARITY, MVT::i32, Custom);
-    if (Subtarget.is64Bit())
-      setOperationAction(ISD::PARITY, MVT::i64, Custom);
   }
 
   setOperationAction(ISD::READCYCLECOUNTER , MVT::i64  , Custom);
@@ -533,7 +532,10 @@ X86TargetLowering::X86TargetLowering(const X86TargetMachine &TM,
 
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
   setOperationAction(ISD::DEBUGTRAP, MVT::Other, Legal);
-  setOperationAction(ISD::UBSANTRAP, MVT::Other, Legal);
+  if (Subtarget.getTargetTriple().isPS4CPU())
+    setOperationAction(ISD::UBSANTRAP, MVT::Other, Expand);
+  else
+    setOperationAction(ISD::UBSANTRAP, MVT::Other, Legal);
 
   // VASTART needs to be custom lowered to use the VarArgsFrameIndex
   setOperationAction(ISD::VASTART           , MVT::Other, Custom);
@@ -2474,7 +2476,7 @@ static void getMaxByValAlign(Type *Ty, Align &MaxAlign) {
 /// function arguments in the caller parameter area. For X86, aggregates
 /// that contain SSE vectors are placed at 16-byte boundaries while the rest
 /// are at 4-byte boundaries.
-unsigned X86TargetLowering::getByValTypeAlignment(Type *Ty,
+uint64_t X86TargetLowering::getByValTypeAlignment(Type *Ty,
                                                   const DataLayout &DL) const {
   if (Subtarget.is64Bit()) {
     // Max of 8 and alignment of type.
@@ -23146,6 +23148,7 @@ SDValue X86TargetLowering::getSqrtEstimate(SDValue Op,
                                            int &RefinementSteps,
                                            bool &UseOneConstNR,
                                            bool Reciprocal) const {
+  SDLoc DL(Op);
   EVT VT = Op.getValueType();
 
   // SSE1 has rsqrtss and rsqrtps. AVX adds a 256-bit variant for rsqrtps.
@@ -23167,7 +23170,23 @@ SDValue X86TargetLowering::getSqrtEstimate(SDValue Op,
     UseOneConstNR = false;
     // There is no FSQRT for 512-bits, but there is RSQRT14.
     unsigned Opcode = VT == MVT::v16f32 ? X86ISD::RSQRT14 : X86ISD::FRSQRT;
-    return DAG.getNode(Opcode, SDLoc(Op), VT, Op);
+    return DAG.getNode(Opcode, DL, VT, Op);
+  }
+
+  if (VT.getScalarType() == MVT::f16 && isTypeLegal(VT) &&
+      Subtarget.hasFP16()) {
+    if (RefinementSteps == ReciprocalEstimate::Unspecified)
+      RefinementSteps = 0;
+
+    if (VT == MVT::f16) {
+      SDValue Zero = DAG.getIntPtrConstant(0, DL);
+      SDValue Undef = DAG.getUNDEF(MVT::v8f16);
+      Op = DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v8f16, Op);
+      Op = DAG.getNode(X86ISD::RSQRT14S, DL, MVT::v8f16, Undef, Op);
+      return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, MVT::f16, Op, Zero);
+    }
+
+    return DAG.getNode(X86ISD::RSQRT14, DL, VT, Op);
   }
   return SDValue();
 }
@@ -23177,6 +23196,7 @@ SDValue X86TargetLowering::getSqrtEstimate(SDValue Op,
 SDValue X86TargetLowering::getRecipEstimate(SDValue Op, SelectionDAG &DAG,
                                             int Enabled,
                                             int &RefinementSteps) const {
+  SDLoc DL(Op);
   EVT VT = Op.getValueType();
 
   // SSE1 has rcpss and rcpps. AVX adds a 256-bit variant for rcpps.
@@ -23201,7 +23221,23 @@ SDValue X86TargetLowering::getRecipEstimate(SDValue Op, SelectionDAG &DAG,
 
     // There is no FSQRT for 512-bits, but there is RCP14.
     unsigned Opcode = VT == MVT::v16f32 ? X86ISD::RCP14 : X86ISD::FRCP;
-    return DAG.getNode(Opcode, SDLoc(Op), VT, Op);
+    return DAG.getNode(Opcode, DL, VT, Op);
+  }
+
+  if (VT.getScalarType() == MVT::f16 && isTypeLegal(VT) &&
+      Subtarget.hasFP16()) {
+    if (RefinementSteps == ReciprocalEstimate::Unspecified)
+      RefinementSteps = 0;
+
+    if (VT == MVT::f16) {
+      SDValue Zero = DAG.getIntPtrConstant(0, DL);
+      SDValue Undef = DAG.getUNDEF(MVT::v8f16);
+      Op = DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v8f16, Op);
+      Op = DAG.getNode(X86ISD::RCP14S, DL, MVT::v8f16, Undef, Op);
+      return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, MVT::f16, Op, Zero);
+    }
+
+    return DAG.getNode(X86ISD::RCP14, DL, VT, Op);
   }
   return SDValue();
 }
@@ -26724,6 +26760,19 @@ SDValue X86TargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
                        DAG.getTargetConstant(NewIntrinsic, DL,
                                              getPointerTy(DAG.getDataLayout())),
                        Op.getOperand(1), ShAmt);
+  }
+  case Intrinsic::thread_pointer: {
+    if (Subtarget.isTargetELF()) {
+      SDLoc dl(Op);
+      EVT PtrVT = getPointerTy(DAG.getDataLayout());
+      // Get the Thread Pointer, which is %gs:0 (32-bit) or %fs:0 (64-bit).
+      Value *Ptr = Constant::getNullValue(Type::getInt8PtrTy(
+          *DAG.getContext(), Subtarget.is64Bit() ? X86AS::FS : X86AS::GS));
+      return DAG.getLoad(PtrVT, dl, DAG.getEntryNode(),
+                         DAG.getIntPtrConstant(0, dl), MachinePointerInfo(Ptr));
+    }
+    report_fatal_error(
+        "Target OS doesn't support __builtin_thread_pointer() yet.");
   }
   }
 }
@@ -30466,6 +30515,10 @@ static SDValue LowerPARITY(SDValue Op, const X86Subtarget &Subtarget,
     return DAG.getNode(ISD::ZERO_EXTEND, DL, VT, Setnp);
   }
 
+  // If we have POPCNT, use the default expansion.
+  if (Subtarget.hasPOPCNT())
+    return SDValue();
+
   if (VT == MVT::i64) {
     // Xor the high and low 16-bits together using a 32-bit operation.
     SDValue Hi = DAG.getNode(ISD::TRUNCATE, DL, MVT::i32,
@@ -32734,6 +32787,7 @@ bool X86TargetLowering::isBinOp(unsigned Opcode) const {
 bool X86TargetLowering::isCommutativeBinOp(unsigned Opcode) const {
   switch (Opcode) {
   // TODO: Add more X86ISD opcodes once we have test coverage.
+  case X86ISD::AVG:
   case X86ISD::PCMPEQ:
   case X86ISD::PMULDQ:
   case X86ISD::PMULUDQ:
@@ -42812,10 +42866,15 @@ static SDValue combineSelect(SDNode *N, SelectionDAG &DAG,
         getTargetShuffleMask(RHS.getNode(), SimpleVT, true, RHSOps, RHSMask)) {
       int NumElts = VT.getVectorNumElements();
       for (int i = 0; i != NumElts; ++i) {
-        if (CondMask[i] < NumElts)
+        // getConstVector sets negative shuffle mask values as undef, so ensure
+        // we hardcode SM_SentinelZero values to zero (0x80).
+        if (CondMask[i] < NumElts) {
+          LHSMask[i] = (LHSMask[i] == SM_SentinelZero) ? 0x80 : LHSMask[i];
           RHSMask[i] = 0x80;
-        else
+        } else {
           LHSMask[i] = 0x80;
+          RHSMask[i] = (RHSMask[i] == SM_SentinelZero) ? 0x80 : RHSMask[i];
+        }
       }
       LHS = DAG.getNode(X86ISD::PSHUFB, DL, VT, LHS.getOperand(0),
                         getConstVector(LHSMask, SimpleVT, DAG, DL, true));
@@ -46708,6 +46767,11 @@ static SDValue detectAVGPattern(SDValue In, EVT VT, SelectionDAG &DAG,
     });
   };
 
+  auto IsZExtLike = [DAG = &DAG, ScalarVT](SDValue V) {
+    unsigned MaxActiveBits = DAG->computeKnownBits(V).countMaxActiveBits();
+    return MaxActiveBits <= ScalarVT.getSizeInBits();
+  };
+
   // Check if each element of the vector is right-shifted by one.
   SDValue LHS = In.getOperand(0);
   SDValue RHS = In.getOperand(1);
@@ -46726,23 +46790,25 @@ static SDValue detectAVGPattern(SDValue In, EVT VT, SelectionDAG &DAG,
     return DAG.getNode(X86ISD::AVG, DL, Ops[0].getValueType(), Ops);
   };
 
-  auto AVGSplitter = [&](SDValue Op0, SDValue Op1) {
+  auto AVGSplitter = [&](std::array<SDValue, 2> Ops) {
+    for (SDValue &Op : Ops)
+      if (Op.getValueType() != VT)
+        Op = DAG.getNode(ISD::TRUNCATE, DL, VT, Op);
     // Pad to a power-of-2 vector, split+apply and extract the original vector.
     unsigned NumElemsPow2 = PowerOf2Ceil(NumElems);
     EVT Pow2VT = EVT::getVectorVT(*DAG.getContext(), ScalarVT, NumElemsPow2);
     if (NumElemsPow2 != NumElems) {
-      SmallVector<SDValue, 32> Ops0(NumElemsPow2, DAG.getUNDEF(ScalarVT));
-      SmallVector<SDValue, 32> Ops1(NumElemsPow2, DAG.getUNDEF(ScalarVT));
-      for (unsigned i = 0; i != NumElems; ++i) {
-        SDValue Idx = DAG.getIntPtrConstant(i, DL);
-        Ops0[i] = DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, ScalarVT, Op0, Idx);
-        Ops1[i] = DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, ScalarVT, Op1, Idx);
+      for (SDValue &Op : Ops) {
+        SmallVector<SDValue, 32> EltsOfOp(NumElemsPow2, DAG.getUNDEF(ScalarVT));
+        for (unsigned i = 0; i != NumElems; ++i) {
+          SDValue Idx = DAG.getIntPtrConstant(i, DL);
+          EltsOfOp[i] =
+              DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, ScalarVT, Op, Idx);
+        }
+        Op = DAG.getBuildVector(Pow2VT, DL, EltsOfOp);
       }
-      Op0 = DAG.getBuildVector(Pow2VT, DL, Ops0);
-      Op1 = DAG.getBuildVector(Pow2VT, DL, Ops1);
     }
-    SDValue Res =
-        SplitOpsAndApply(DAG, Subtarget, DL, Pow2VT, {Op0, Op1}, AVGBuilder);
+    SDValue Res = SplitOpsAndApply(DAG, Subtarget, DL, Pow2VT, Ops, AVGBuilder);
     if (NumElemsPow2 == NumElems)
       return Res;
     return DAG.getNode(ISD::EXTRACT_SUBVECTOR, DL, VT, Res,
@@ -46752,14 +46818,12 @@ static SDValue detectAVGPattern(SDValue In, EVT VT, SelectionDAG &DAG,
   // Take care of the case when one of the operands is a constant vector whose
   // element is in the range [1, 256].
   if (IsConstVectorInRange(Operands[1], 1, ScalarVT == MVT::i8 ? 256 : 65536) &&
-      Operands[0].getOpcode() == ISD::ZERO_EXTEND &&
-      Operands[0].getOperand(0).getValueType() == VT) {
+      IsZExtLike(Operands[0])) {
     // The pattern is detected. Subtract one from the constant vector, then
     // demote it and emit X86ISD::AVG instruction.
     SDValue VecOnes = DAG.getConstant(1, DL, InVT);
     Operands[1] = DAG.getNode(ISD::SUB, DL, InVT, Operands[1], VecOnes);
-    Operands[1] = DAG.getNode(ISD::TRUNCATE, DL, VT, Operands[1]);
-    return AVGSplitter(Operands[0].getOperand(0), Operands[1]);
+    return AVGSplitter({Operands[0], Operands[1]});
   }
 
   // Matches 'add like' patterns: add(Op0,Op1) + zext(or(Op0,Op1)).
@@ -46798,15 +46862,12 @@ static SDValue detectAVGPattern(SDValue In, EVT VT, SelectionDAG &DAG,
 
     // Check if Operands[0] and Operands[1] are results of type promotion.
     for (int j = 0; j < 2; ++j)
-      if (Operands[j].getValueType() != VT) {
-        if (Operands[j].getOpcode() != ISD::ZERO_EXTEND ||
-            Operands[j].getOperand(0).getValueType() != VT)
+      if (Operands[j].getValueType() != VT)
+        if (!IsZExtLike(Operands[j]))
           return SDValue();
-        Operands[j] = Operands[j].getOperand(0);
-      }
 
     // The pattern is detected, emit X86ISD::AVG instruction(s).
-    return AVGSplitter(Operands[0], Operands[1]);
+    return AVGSplitter({Operands[0], Operands[1]});
   }
 
   return SDValue();

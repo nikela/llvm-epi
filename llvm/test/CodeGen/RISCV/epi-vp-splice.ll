@@ -6,17 +6,15 @@
 define <vscale x 1 x i8> @splice_nxv1i8_offset_zero(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b) {
 ; CHECK-LABEL: splice_nxv1i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i8> @llvm.experimental.vector.splice.nxv1i8(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b, i32 0)
   ret <vscale x 1 x i8> %res
 }
 
-define <vscale x 1 x i8> @splice_nxv1i8_offset_kmv-1(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b) {
+define <vscale x 1 x i8> @splice_nxv1i8_offset_kmv_minus1(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b) {
+; CHECK-LABEL: splice_nxv1i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i8> @llvm.experimental.vector.splice.nxv1i8(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b, i32 0)
   ret <vscale x 1 x i8> %res
 }
@@ -65,7 +63,17 @@ define <vscale x 1 x i8> @splice_nxv1i8_offset_negative_kmv(<vscale x 1 x i8> %a
   ret <vscale x 1 x i8> %res
 }
 
-define <vscale x 1 x i8> @splice_nxv1i8_offset_negative_kmv-1(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b) {
+define <vscale x 1 x i8> @splice_nxv1i8_offset_negative_kmv_minus1(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b) {
+; CHECK-LABEL: splice_nxv1i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i8> @llvm.experimental.vector.splice.nxv1i8(<vscale x 1 x i8> %a, <vscale x 1 x i8> %b, i32 -2)
   ret <vscale x 1 x i8> %res
 }
@@ -76,17 +84,21 @@ declare <vscale x 1 x i8> @llvm.experimental.vector.splice.nxv1i8(<vscale x 1 x 
 define <vscale x 2 x i8> @splice_nxv2i8_offset_zero(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b) {
 ; CHECK-LABEL: splice_nxv2i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i8> @llvm.experimental.vector.splice.nxv2i8(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b, i32 0)
   ret <vscale x 2 x i8> %res
 }
 
-define <vscale x 2 x i8> @splice_nxv2i8_offset_kmv-1(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b) {
+define <vscale x 2 x i8> @splice_nxv2i8_offset_kmv_minus1(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b) {
+; CHECK-LABEL: splice_nxv2i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i8> @llvm.experimental.vector.splice.nxv2i8(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b, i32 1)
   ret <vscale x 2 x i8> %res
 }
@@ -135,7 +147,17 @@ define <vscale x 2 x i8> @splice_nxv2i8_offset_negative_kmv(<vscale x 2 x i8> %a
   ret <vscale x 2 x i8> %res
 }
 
-define <vscale x 2 x i8> @splice_nxv2i8_offset_negative_kmv-1(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b) {
+define <vscale x 2 x i8> @splice_nxv2i8_offset_negative_kmv_minus1(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b) {
+; CHECK-LABEL: splice_nxv2i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i8> @llvm.experimental.vector.splice.nxv2i8(<vscale x 2 x i8> %a, <vscale x 2 x i8> %b, i32 -3)
   ret <vscale x 2 x i8> %res
 }
@@ -146,17 +168,21 @@ declare <vscale x 2 x i8> @llvm.experimental.vector.splice.nxv2i8(<vscale x 2 x 
 define <vscale x 4 x i8> @splice_nxv4i8_offset_zero(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b) {
 ; CHECK-LABEL: splice_nxv4i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i8> @llvm.experimental.vector.splice.nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b, i32 0)
   ret <vscale x 4 x i8> %res
 }
 
-define <vscale x 4 x i8> @splice_nxv4i8_offset_kmv-1(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b) {
+define <vscale x 4 x i8> @splice_nxv4i8_offset_kmv_minus1(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b) {
+; CHECK-LABEL: splice_nxv4i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i8> @llvm.experimental.vector.splice.nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b, i32 3)
   ret <vscale x 4 x i8> %res
 }
@@ -205,7 +231,17 @@ define <vscale x 4 x i8> @splice_nxv4i8_offset_negative_kmv(<vscale x 4 x i8> %a
   ret <vscale x 4 x i8> %res
 }
 
-define <vscale x 4 x i8> @splice_nxv4i8_offset_negative_kmv-1(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b) {
+define <vscale x 4 x i8> @splice_nxv4i8_offset_negative_kmv_minus1(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b) {
+; CHECK-LABEL: splice_nxv4i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i8> @llvm.experimental.vector.splice.nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i8> %b, i32 -5)
   ret <vscale x 4 x i8> %res
 }
@@ -216,16 +252,20 @@ declare <vscale x 4 x i8> @llvm.experimental.vector.splice.nxv4i8(<vscale x 4 x 
 define <vscale x 8 x i8> @splice_nxv8i8_offset_zero(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b) {
 ; CHECK-LABEL: splice_nxv8i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e8, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i8> @llvm.experimental.vector.splice.nxv8i8(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b, i32 0)
   ret <vscale x 8 x i8> %res
 }
 
-define <vscale x 8 x i8> @splice_nxv8i8_offset_kmv-1(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b) {
+define <vscale x 8 x i8> @splice_nxv8i8_offset_kmv_minus1(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b) {
+; CHECK-LABEL: splice_nxv8i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e8, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i8> @llvm.experimental.vector.splice.nxv8i8(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b, i32 7)
   ret <vscale x 8 x i8> %res
 }
@@ -271,7 +311,16 @@ define <vscale x 8 x i8> @splice_nxv8i8_offset_negative_kmv(<vscale x 8 x i8> %a
   ret <vscale x 8 x i8> %res
 }
 
-define <vscale x 8 x i8> @splice_nxv8i8_offset_negative_kmv-1(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b) {
+define <vscale x 8 x i8> @splice_nxv8i8_offset_negative_kmv_minus1(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b) {
+; CHECK-LABEL: splice_nxv8i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e8, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i8> @llvm.experimental.vector.splice.nxv8i8(<vscale x 8 x i8> %a, <vscale x 8 x i8> %b, i32 -9)
   ret <vscale x 8 x i8> %res
 }
@@ -282,17 +331,21 @@ declare <vscale x 8 x i8> @llvm.experimental.vector.splice.nxv8i8(<vscale x 8 x 
 define <vscale x 16 x i8> @splice_nxv16i8_offset_zero(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b) {
 ; CHECK-LABEL: splice_nxv16i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e8, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i8> @llvm.experimental.vector.splice.nxv16i8(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b, i32 0)
   ret <vscale x 16 x i8> %res
 }
 
-define <vscale x 16 x i8> @splice_nxv16i8_offset_kmv-1(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b) {
+define <vscale x 16 x i8> @splice_nxv16i8_offset_kmv_minus1(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b) {
+; CHECK-LABEL: splice_nxv16i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e8, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 15
+; CHECK-NEXT:    addi a0, a0, -15
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i8> @llvm.experimental.vector.splice.nxv16i8(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b, i32 15)
   ret <vscale x 16 x i8> %res
 }
@@ -341,7 +394,17 @@ define <vscale x 16 x i8> @splice_nxv16i8_offset_negative_kmv(<vscale x 16 x i8>
   ret <vscale x 16 x i8> %res
 }
 
-define <vscale x 16 x i8> @splice_nxv16i8_offset_negative_kmv-1(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b) {
+define <vscale x 16 x i8> @splice_nxv16i8_offset_negative_kmv_minus1(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b) {
+; CHECK-LABEL: splice_nxv16i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -17
+; CHECK-NEXT:    vsetvli zero, a0, e8, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i8> @llvm.experimental.vector.splice.nxv16i8(<vscale x 16 x i8> %a, <vscale x 16 x i8> %b, i32 -17)
   ret <vscale x 16 x i8> %res
 }
@@ -352,17 +415,21 @@ declare <vscale x 16 x i8> @llvm.experimental.vector.splice.nxv16i8(<vscale x 16
 define <vscale x 32 x i8> @splice_nxv32i8_offset_zero(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b) {
 ; CHECK-LABEL: splice_nxv32i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e8, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i8> @llvm.experimental.vector.splice.nxv32i8(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b, i32 0)
   ret <vscale x 32 x i8> %res
 }
 
-define <vscale x 32 x i8> @splice_nxv32i8_offset_kmv-1(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b) {
+define <vscale x 32 x i8> @splice_nxv32i8_offset_kmv_minus1(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b) {
+; CHECK-LABEL: splice_nxv32i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e8, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 31
+; CHECK-NEXT:    addi a0, a0, -31
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i8> @llvm.experimental.vector.splice.nxv32i8(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b, i32 31)
   ret <vscale x 32 x i8> %res
 }
@@ -412,7 +479,17 @@ define <vscale x 32 x i8> @splice_nxv32i8_offset_negative_kmv(<vscale x 32 x i8>
   ret <vscale x 32 x i8> %res
 }
 
-define <vscale x 32 x i8> @splice_nxv32i8_offset_negative_kmv-1(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b) {
+define <vscale x 32 x i8> @splice_nxv32i8_offset_negative_kmv_minus1(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b) {
+; CHECK-LABEL: splice_nxv32i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -33
+; CHECK-NEXT:    vsetvli zero, a0, e8, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i8> @llvm.experimental.vector.splice.nxv32i8(<vscale x 32 x i8> %a, <vscale x 32 x i8> %b, i32 -33)
   ret <vscale x 32 x i8> %res
 }
@@ -423,17 +500,22 @@ declare <vscale x 32 x i8> @llvm.experimental.vector.splice.nxv32i8(<vscale x 32
 define <vscale x 64 x i8> @splice_nxv64i8_offset_zero(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b) {
 ; CHECK-LABEL: splice_nxv64i8_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e8, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 64 x i8> @llvm.experimental.vector.splice.nxv64i8(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b, i32 0)
   ret <vscale x 64 x i8> %res
 }
 
-define <vscale x 64 x i8> @splice_nxv64i8_offset_kmv-1(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b) {
+define <vscale x 64 x i8> @splice_nxv64i8_offset_kmv_minus1(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b) {
+; CHECK-LABEL: splice_nxv64i8_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    addi a1, zero, 63
+; CHECK-NEXT:    vsetvli zero, a0, e8, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    addi a0, a0, -63
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 64 x i8> @llvm.experimental.vector.splice.nxv64i8(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b, i32 63)
   ret <vscale x 64 x i8> %res
 }
@@ -483,7 +565,17 @@ define <vscale x 64 x i8> @splice_nxv64i8_offset_negative_kmv(<vscale x 64 x i8>
   ret <vscale x 64 x i8> %res
 }
 
-define <vscale x 64 x i8> @splice_nxv64i8_offset_negative_kmv-1(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b) {
+define <vscale x 64 x i8> @splice_nxv64i8_offset_negative_kmv_minus1(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b) {
+; CHECK-LABEL: splice_nxv64i8_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -65
+; CHECK-NEXT:    vsetvli zero, a0, e8, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 64 x i8> @llvm.experimental.vector.splice.nxv64i8(<vscale x 64 x i8> %a, <vscale x 64 x i8> %b, i32 -65)
   ret <vscale x 64 x i8> %res
 }
@@ -495,17 +587,15 @@ declare <vscale x 64 x i8> @llvm.experimental.vector.splice.nxv64i8(<vscale x 64
 define <vscale x 1 x i16> @splice_nxv1i16_offset_zero(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b) {
 ; CHECK-LABEL: splice_nxv1i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e16, mf4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i16> @llvm.experimental.vector.splice.nxv1i16(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b, i32 0)
   ret <vscale x 1 x i16> %res
 }
 
-define <vscale x 1 x i16> @splice_nxv1i16_offset_kmv-1(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b) {
+define <vscale x 1 x i16> @splice_nxv1i16_offset_kmv_minus1(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b) {
+; CHECK-LABEL: splice_nxv1i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i16> @llvm.experimental.vector.splice.nxv1i16(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b, i32 0)
   ret <vscale x 1 x i16> %res
 }
@@ -554,7 +644,17 @@ define <vscale x 1 x i16> @splice_nxv1i16_offset_negative_kmv(<vscale x 1 x i16>
   ret <vscale x 1 x i16> %res
 }
 
-define <vscale x 1 x i16> @splice_nxv1i16_offset_negative_kmv-1(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b) {
+define <vscale x 1 x i16> @splice_nxv1i16_offset_negative_kmv_minus1(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b) {
+; CHECK-LABEL: splice_nxv1i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e16, mf4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i16> @llvm.experimental.vector.splice.nxv1i16(<vscale x 1 x i16> %a, <vscale x 1 x i16> %b, i32 -2)
   ret <vscale x 1 x i16> %res
 }
@@ -565,17 +665,21 @@ declare <vscale x 1 x i16> @llvm.experimental.vector.splice.nxv1i16(<vscale x 1 
 define <vscale x 2 x i16> @splice_nxv2i16_offset_zero(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b) {
 ; CHECK-LABEL: splice_nxv2i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e16, mf2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i16> @llvm.experimental.vector.splice.nxv2i16(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b, i32 0)
   ret <vscale x 2 x i16> %res
 }
 
-define <vscale x 2 x i16> @splice_nxv2i16_offset_kmv-1(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b) {
+define <vscale x 2 x i16> @splice_nxv2i16_offset_kmv_minus1(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b) {
+; CHECK-LABEL: splice_nxv2i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e16, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i16> @llvm.experimental.vector.splice.nxv2i16(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b, i32 1)
   ret <vscale x 2 x i16> %res
 }
@@ -624,7 +728,17 @@ define <vscale x 2 x i16> @splice_nxv2i16_offset_negative_kmv(<vscale x 2 x i16>
   ret <vscale x 2 x i16> %res
 }
 
-define <vscale x 2 x i16> @splice_nxv2i16_offset_negative_kmv-1(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b) {
+define <vscale x 2 x i16> @splice_nxv2i16_offset_negative_kmv_minus1(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b) {
+; CHECK-LABEL: splice_nxv2i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e16, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i16> @llvm.experimental.vector.splice.nxv2i16(<vscale x 2 x i16> %a, <vscale x 2 x i16> %b, i32 -3)
   ret <vscale x 2 x i16> %res
 }
@@ -635,17 +749,21 @@ declare <vscale x 2 x i16> @llvm.experimental.vector.splice.nxv2i16(<vscale x 2 
 define <vscale x 4 x i16> @splice_nxv4i16_offset_zero(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b) {
 ; CHECK-LABEL: splice_nxv4i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i16> @llvm.experimental.vector.splice.nxv4i16(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b, i32 0)
   ret <vscale x 4 x i16> %res
 }
 
-define <vscale x 4 x i16> @splice_nxv4i16_offset_kmv-1(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b) {
+define <vscale x 4 x i16> @splice_nxv4i16_offset_kmv_minus1(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b) {
+; CHECK-LABEL: splice_nxv4i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i16> @llvm.experimental.vector.splice.nxv4i16(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b, i32 3)
   ret <vscale x 4 x i16> %res
 }
@@ -694,7 +812,17 @@ define <vscale x 4 x i16> @splice_nxv4i16_offset_negative_kmv(<vscale x 4 x i16>
   ret <vscale x 4 x i16> %res
 }
 
-define <vscale x 4 x i16> @splice_nxv4i16_offset_negative_kmv-1(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b) {
+define <vscale x 4 x i16> @splice_nxv4i16_offset_negative_kmv_minus1(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b) {
+; CHECK-LABEL: splice_nxv4i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i16> @llvm.experimental.vector.splice.nxv4i16(<vscale x 4 x i16> %a, <vscale x 4 x i16> %b, i32 -5)
   ret <vscale x 4 x i16> %res
 }
@@ -705,16 +833,20 @@ declare <vscale x 4 x i16> @llvm.experimental.vector.splice.nxv4i16(<vscale x 4 
 define <vscale x 8 x i16> @splice_nxv8i16_offset_zero(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b) {
 ; CHECK-LABEL: splice_nxv8i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e16, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i16> @llvm.experimental.vector.splice.nxv8i16(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b, i32 0)
   ret <vscale x 8 x i16> %res
 }
 
-define <vscale x 8 x i16> @splice_nxv8i16_offset_kmv-1(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b) {
+define <vscale x 8 x i16> @splice_nxv8i16_offset_kmv_minus1(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b) {
+; CHECK-LABEL: splice_nxv8i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e16, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i16> @llvm.experimental.vector.splice.nxv8i16(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b, i32 7)
   ret <vscale x 8 x i16> %res
 }
@@ -760,7 +892,16 @@ define <vscale x 8 x i16> @splice_nxv8i16_offset_negative_kmv(<vscale x 8 x i16>
   ret <vscale x 8 x i16> %res
 }
 
-define <vscale x 8 x i16> @splice_nxv8i16_offset_negative_kmv-1(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b) {
+define <vscale x 8 x i16> @splice_nxv8i16_offset_negative_kmv_minus1(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b) {
+; CHECK-LABEL: splice_nxv8i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e16, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i16> @llvm.experimental.vector.splice.nxv8i16(<vscale x 8 x i16> %a, <vscale x 8 x i16> %b, i32 -9)
   ret <vscale x 8 x i16> %res
 }
@@ -771,17 +912,21 @@ declare <vscale x 8 x i16> @llvm.experimental.vector.splice.nxv8i16(<vscale x 8 
 define <vscale x 16 x i16> @splice_nxv16i16_offset_zero(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b) {
 ; CHECK-LABEL: splice_nxv16i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e16, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i16> @llvm.experimental.vector.splice.nxv16i16(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b, i32 0)
   ret <vscale x 16 x i16> %res
 }
 
-define <vscale x 16 x i16> @splice_nxv16i16_offset_kmv-1(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b) {
+define <vscale x 16 x i16> @splice_nxv16i16_offset_kmv_minus1(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b) {
+; CHECK-LABEL: splice_nxv16i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e16, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 15
+; CHECK-NEXT:    addi a0, a0, -15
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i16> @llvm.experimental.vector.splice.nxv16i16(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b, i32 15)
   ret <vscale x 16 x i16> %res
 }
@@ -830,7 +975,17 @@ define <vscale x 16 x i16> @splice_nxv16i16_offset_negative_kmv(<vscale x 16 x i
   ret <vscale x 16 x i16> %res
 }
 
-define <vscale x 16 x i16> @splice_nxv16i16_offset_negative_kmv-1(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b) {
+define <vscale x 16 x i16> @splice_nxv16i16_offset_negative_kmv_minus1(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b) {
+; CHECK-LABEL: splice_nxv16i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -17
+; CHECK-NEXT:    vsetvli zero, a0, e16, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i16> @llvm.experimental.vector.splice.nxv16i16(<vscale x 16 x i16> %a, <vscale x 16 x i16> %b, i32 -17)
   ret <vscale x 16 x i16> %res
 }
@@ -841,17 +996,21 @@ declare <vscale x 16 x i16> @llvm.experimental.vector.splice.nxv16i16(<vscale x 
 define <vscale x 32 x i16> @splice_nxv32i16_offset_zero(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) {
 ; CHECK-LABEL: splice_nxv32i16_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e16, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i16> @llvm.experimental.vector.splice.nxv32i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b, i32 0)
   ret <vscale x 32 x i16> %res
 }
 
-define <vscale x 32 x i16> @splice_nxv32i16_offset_kmv-1(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) {
+define <vscale x 32 x i16> @splice_nxv32i16_offset_kmv_minus1(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) {
+; CHECK-LABEL: splice_nxv32i16_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e16, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 31
+; CHECK-NEXT:    addi a0, a0, -31
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i16> @llvm.experimental.vector.splice.nxv32i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b, i32 31)
   ret <vscale x 32 x i16> %res
 }
@@ -901,7 +1060,17 @@ define <vscale x 32 x i16> @splice_nxv32i16_offset_negative_kmv(<vscale x 32 x i
   ret <vscale x 32 x i16> %res
 }
 
-define <vscale x 32 x i16> @splice_nxv32i16_offset_negative_kmv-1(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) {
+define <vscale x 32 x i16> @splice_nxv32i16_offset_negative_kmv_minus1(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) {
+; CHECK-LABEL: splice_nxv32i16_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -33
+; CHECK-NEXT:    vsetvli zero, a0, e16, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 32 x i16> @llvm.experimental.vector.splice.nxv32i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b, i32 -33)
   ret <vscale x 32 x i16> %res
 }
@@ -913,17 +1082,15 @@ declare <vscale x 32 x i16> @llvm.experimental.vector.splice.nxv32i16(<vscale x 
 define <vscale x 1 x i32> @splice_nxv1i32_offset_zero(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b) {
 ; CHECK-LABEL: splice_nxv1i32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i32> @llvm.experimental.vector.splice.nxv1i32(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b, i32 0)
   ret <vscale x 1 x i32> %res
 }
 
-define <vscale x 1 x i32> @splice_nxv1i32_offset_kmv-1(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b) {
+define <vscale x 1 x i32> @splice_nxv1i32_offset_kmv_minus1(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b) {
+; CHECK-LABEL: splice_nxv1i32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i32> @llvm.experimental.vector.splice.nxv1i32(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b, i32 0)
   ret <vscale x 1 x i32> %res
 }
@@ -972,7 +1139,17 @@ define <vscale x 1 x i32> @splice_nxv1i32_offset_negative_kmv(<vscale x 1 x i32>
   ret <vscale x 1 x i32> %res
 }
 
-define <vscale x 1 x i32> @splice_nxv1i32_offset_negative_kmv-1(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b) {
+define <vscale x 1 x i32> @splice_nxv1i32_offset_negative_kmv_minus1(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b) {
+; CHECK-LABEL: splice_nxv1i32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i32> @llvm.experimental.vector.splice.nxv1i32(<vscale x 1 x i32> %a, <vscale x 1 x i32> %b, i32 -2)
   ret <vscale x 1 x i32> %res
 }
@@ -983,17 +1160,21 @@ declare <vscale x 1 x i32> @llvm.experimental.vector.splice.nxv1i32(<vscale x 1 
 define <vscale x 2 x i32> @splice_nxv2i32_offset_zero(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b) {
 ; CHECK-LABEL: splice_nxv2i32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i32> @llvm.experimental.vector.splice.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 0)
   ret <vscale x 2 x i32> %res
 }
 
-define <vscale x 2 x i32> @splice_nxv2i32_offset_kmv-1(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b) {
+define <vscale x 2 x i32> @splice_nxv2i32_offset_kmv_minus1(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b) {
+; CHECK-LABEL: splice_nxv2i32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i32> @llvm.experimental.vector.splice.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 1)
   ret <vscale x 2 x i32> %res
 }
@@ -1042,7 +1223,17 @@ define <vscale x 2 x i32> @splice_nxv2i32_offset_negative_kmv(<vscale x 2 x i32>
   ret <vscale x 2 x i32> %res
 }
 
-define <vscale x 2 x i32> @splice_nxv2i32_offset_negative_kmv-1(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b) {
+define <vscale x 2 x i32> @splice_nxv2i32_offset_negative_kmv_minus1(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b) {
+; CHECK-LABEL: splice_nxv2i32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i32> @llvm.experimental.vector.splice.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 -3)
   ret <vscale x 2 x i32> %res
 }
@@ -1053,17 +1244,21 @@ declare <vscale x 2 x i32> @llvm.experimental.vector.splice.nxv2i32(<vscale x 2 
 define <vscale x 4 x i32> @splice_nxv4i32_offset_zero(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b) {
 ; CHECK-LABEL: splice_nxv4i32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i32> @llvm.experimental.vector.splice.nxv4i32(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b, i32 0)
   ret <vscale x 4 x i32> %res
 }
 
-define <vscale x 4 x i32> @splice_nxv4i32_offset_kmv-1(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b) {
+define <vscale x 4 x i32> @splice_nxv4i32_offset_kmv_minus1(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b) {
+; CHECK-LABEL: splice_nxv4i32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i32> @llvm.experimental.vector.splice.nxv4i32(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b, i32 3)
   ret <vscale x 4 x i32> %res
 }
@@ -1112,7 +1307,17 @@ define <vscale x 4 x i32> @splice_nxv4i32_offset_negative_kmv(<vscale x 4 x i32>
   ret <vscale x 4 x i32> %res
 }
 
-define <vscale x 4 x i32> @splice_nxv4i32_offset_negative_kmv-1(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b) {
+define <vscale x 4 x i32> @splice_nxv4i32_offset_negative_kmv_minus1(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b) {
+; CHECK-LABEL: splice_nxv4i32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i32> @llvm.experimental.vector.splice.nxv4i32(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b, i32 -5)
   ret <vscale x 4 x i32> %res
 }
@@ -1123,16 +1328,20 @@ declare <vscale x 4 x i32> @llvm.experimental.vector.splice.nxv4i32(<vscale x 4 
 define <vscale x 8 x i32> @splice_nxv8i32_offset_zero(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b) {
 ; CHECK-LABEL: splice_nxv8i32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i32> @llvm.experimental.vector.splice.nxv8i32(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b, i32 0)
   ret <vscale x 8 x i32> %res
 }
 
-define <vscale x 8 x i32> @splice_nxv8i32_offset_kmv-1(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b) {
+define <vscale x 8 x i32> @splice_nxv8i32_offset_kmv_minus1(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b) {
+; CHECK-LABEL: splice_nxv8i32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i32> @llvm.experimental.vector.splice.nxv8i32(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b, i32 7)
   ret <vscale x 8 x i32> %res
 }
@@ -1178,7 +1387,16 @@ define <vscale x 8 x i32> @splice_nxv8i32_offset_negative_kmv(<vscale x 8 x i32>
   ret <vscale x 8 x i32> %res
 }
 
-define <vscale x 8 x i32> @splice_nxv8i32_offset_negative_kmv-1(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b) {
+define <vscale x 8 x i32> @splice_nxv8i32_offset_negative_kmv_minus1(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b) {
+; CHECK-LABEL: splice_nxv8i32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i32> @llvm.experimental.vector.splice.nxv8i32(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b, i32 -9)
   ret <vscale x 8 x i32> %res
 }
@@ -1189,17 +1407,21 @@ declare <vscale x 8 x i32> @llvm.experimental.vector.splice.nxv8i32(<vscale x 8 
 define <vscale x 16 x i32> @splice_nxv16i32_offset_zero(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) {
 ; CHECK-LABEL: splice_nxv16i32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i32> @llvm.experimental.vector.splice.nxv16i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b, i32 0)
   ret <vscale x 16 x i32> %res
 }
 
-define <vscale x 16 x i32> @splice_nxv16i32_offset_kmv-1(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) {
+define <vscale x 16 x i32> @splice_nxv16i32_offset_kmv_minus1(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) {
+; CHECK-LABEL: splice_nxv16i32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 15
+; CHECK-NEXT:    addi a0, a0, -15
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i32> @llvm.experimental.vector.splice.nxv16i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b, i32 15)
   ret <vscale x 16 x i32> %res
 }
@@ -1248,7 +1470,17 @@ define <vscale x 16 x i32> @splice_nxv16i32_offset_negative_kmv(<vscale x 16 x i
   ret <vscale x 16 x i32> %res
 }
 
-define <vscale x 16 x i32> @splice_nxv16i32_offset_negative_kmv-1(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) {
+define <vscale x 16 x i32> @splice_nxv16i32_offset_negative_kmv_minus1(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) {
+; CHECK-LABEL: splice_nxv16i32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -17
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x i32> @llvm.experimental.vector.splice.nxv16i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b, i32 -17)
   ret <vscale x 16 x i32> %res
 }
@@ -1260,17 +1492,15 @@ declare <vscale x 16 x i32> @llvm.experimental.vector.splice.nxv16i32(<vscale x 
 define <vscale x 1 x i64> @splice_nxv1i64_offset_zero(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) {
 ; CHECK-LABEL: splice_nxv1i64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i64> @llvm.experimental.vector.splice.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 0)
   ret <vscale x 1 x i64> %res
 }
 
-define <vscale x 1 x i64> @splice_nxv1i64_offset_kmv-1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) {
+define <vscale x 1 x i64> @splice_nxv1i64_offset_kmv_minus1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) {
+; CHECK-LABEL: splice_nxv1i64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i64> @llvm.experimental.vector.splice.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 0)
   ret <vscale x 1 x i64> %res
 }
@@ -1319,7 +1549,17 @@ define <vscale x 1 x i64> @splice_nxv1i64_offset_negative_kmv(<vscale x 1 x i64>
   ret <vscale x 1 x i64> %res
 }
 
-define <vscale x 1 x i64> @splice_nxv1i64_offset_negative_kmv-1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) {
+define <vscale x 1 x i64> @splice_nxv1i64_offset_negative_kmv_minus1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) {
+; CHECK-LABEL: splice_nxv1i64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x i64> @llvm.experimental.vector.splice.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 -2)
   ret <vscale x 1 x i64> %res
 }
@@ -1330,17 +1570,21 @@ declare <vscale x 1 x i64> @llvm.experimental.vector.splice.nxv1i64(<vscale x 1 
 define <vscale x 2 x i64> @splice_nxv2i64_offset_zero(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) {
 ; CHECK-LABEL: splice_nxv2i64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i64> @llvm.experimental.vector.splice.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 0)
   ret <vscale x 2 x i64> %res
 }
 
-define <vscale x 2 x i64> @splice_nxv2i64_offset_kmv-1(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) {
+define <vscale x 2 x i64> @splice_nxv2i64_offset_kmv_minus1(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) {
+; CHECK-LABEL: splice_nxv2i64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i64> @llvm.experimental.vector.splice.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 1)
   ret <vscale x 2 x i64> %res
 }
@@ -1389,7 +1633,17 @@ define <vscale x 2 x i64> @splice_nxv2i64_offset_negative_kmv(<vscale x 2 x i64>
   ret <vscale x 2 x i64> %res
 }
 
-define <vscale x 2 x i64> @splice_nxv2i64_offset_negative_kmv-1(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) {
+define <vscale x 2 x i64> @splice_nxv2i64_offset_negative_kmv_minus1(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) {
+; CHECK-LABEL: splice_nxv2i64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x i64> @llvm.experimental.vector.splice.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 -3)
   ret <vscale x 2 x i64> %res
 }
@@ -1400,17 +1654,21 @@ declare <vscale x 2 x i64> @llvm.experimental.vector.splice.nxv2i64(<vscale x 2 
 define <vscale x 4 x i64> @splice_nxv4i64_offset_zero(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) {
 ; CHECK-LABEL: splice_nxv4i64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i64> @llvm.experimental.vector.splice.nxv4i64(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b, i32 0)
   ret <vscale x 4 x i64> %res
 }
 
-define <vscale x 4 x i64> @splice_nxv4i64_offset_kmv-1(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) {
+define <vscale x 4 x i64> @splice_nxv4i64_offset_kmv_minus1(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) {
+; CHECK-LABEL: splice_nxv4i64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i64> @llvm.experimental.vector.splice.nxv4i64(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b, i32 3)
   ret <vscale x 4 x i64> %res
 }
@@ -1459,7 +1717,17 @@ define <vscale x 4 x i64> @splice_nxv4i64_offset_negative_kmv(<vscale x 4 x i64>
   ret <vscale x 4 x i64> %res
 }
 
-define <vscale x 4 x i64> @splice_nxv4i64_offset_negative_kmv-1(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) {
+define <vscale x 4 x i64> @splice_nxv4i64_offset_negative_kmv_minus1(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) {
+; CHECK-LABEL: splice_nxv4i64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x i64> @llvm.experimental.vector.splice.nxv4i64(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b, i32 -5)
   ret <vscale x 4 x i64> %res
 }
@@ -1470,16 +1738,20 @@ declare <vscale x 4 x i64> @llvm.experimental.vector.splice.nxv4i64(<vscale x 4 
 define <vscale x 8 x i64> @splice_nxv8i64_offset_zero(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) {
 ; CHECK-LABEL: splice_nxv8i64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i64> @llvm.experimental.vector.splice.nxv8i64(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b, i32 0)
   ret <vscale x 8 x i64> %res
 }
 
-define <vscale x 8 x i64> @splice_nxv8i64_offset_kmv-1(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) {
+define <vscale x 8 x i64> @splice_nxv8i64_offset_kmv_minus1(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) {
+; CHECK-LABEL: splice_nxv8i64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i64> @llvm.experimental.vector.splice.nxv8i64(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b, i32 7)
   ret <vscale x 8 x i64> %res
 }
@@ -1525,7 +1797,16 @@ define <vscale x 8 x i64> @splice_nxv8i64_offset_negative_kmv(<vscale x 8 x i64>
   ret <vscale x 8 x i64> %res
 }
 
-define <vscale x 8 x i64> @splice_nxv8i64_offset_negative_kmv-1(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) {
+define <vscale x 8 x i64> @splice_nxv8i64_offset_negative_kmv_minus1(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) {
+; CHECK-LABEL: splice_nxv8i64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x i64> @llvm.experimental.vector.splice.nxv8i64(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b, i32 -9)
   ret <vscale x 8 x i64> %res
 }
@@ -1537,17 +1818,15 @@ declare <vscale x 8 x i64> @llvm.experimental.vector.splice.nxv8i64(<vscale x 8 
 define <vscale x 1 x float> @splice_nxv1f32_offset_zero(<vscale x 1 x float> %a, <vscale x 1 x float> %b) {
 ; CHECK-LABEL: splice_nxv1f32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x float> @llvm.experimental.vector.splice.nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x float> %b, i32 0)
   ret <vscale x 1 x float> %res
 }
 
-define <vscale x 1 x float> @splice_nxv1f32_offset_kmv-1(<vscale x 1 x float> %a, <vscale x 1 x float> %b) {
+define <vscale x 1 x float> @splice_nxv1f32_offset_kmv_minus1(<vscale x 1 x float> %a, <vscale x 1 x float> %b) {
+; CHECK-LABEL: splice_nxv1f32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x float> @llvm.experimental.vector.splice.nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x float> %b, i32 0)
   ret <vscale x 1 x float> %res
 }
@@ -1596,7 +1875,17 @@ define <vscale x 1 x float> @splice_nxv1f32_offset_negative_kmv(<vscale x 1 x fl
   ret <vscale x 1 x float> %res
 }
 
-define <vscale x 1 x float> @splice_nxv1f32_offset_negative_kmv-1(<vscale x 1 x float> %a, <vscale x 1 x float> %b) {
+define <vscale x 1 x float> @splice_nxv1f32_offset_negative_kmv_minus1(<vscale x 1 x float> %a, <vscale x 1 x float> %b) {
+; CHECK-LABEL: splice_nxv1f32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x float> @llvm.experimental.vector.splice.nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x float> %b, i32 -2)
   ret <vscale x 1 x float> %res
 }
@@ -1607,17 +1896,21 @@ declare <vscale x 1 x float> @llvm.experimental.vector.splice.nxv1f32(<vscale x 
 define <vscale x 2 x float> @splice_nxv2f32_offset_zero(<vscale x 2 x float> %a, <vscale x 2 x float> %b) {
 ; CHECK-LABEL: splice_nxv2f32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x float> @llvm.experimental.vector.splice.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 0)
   ret <vscale x 2 x float> %res
 }
 
-define <vscale x 2 x float> @splice_nxv2f32_offset_kmv-1(<vscale x 2 x float> %a, <vscale x 2 x float> %b) {
+define <vscale x 2 x float> @splice_nxv2f32_offset_kmv_minus1(<vscale x 2 x float> %a, <vscale x 2 x float> %b) {
+; CHECK-LABEL: splice_nxv2f32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x float> @llvm.experimental.vector.splice.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 1)
   ret <vscale x 2 x float> %res
 }
@@ -1666,7 +1959,17 @@ define <vscale x 2 x float> @splice_nxv2f32_offset_negative_kmv(<vscale x 2 x fl
   ret <vscale x 2 x float> %res
 }
 
-define <vscale x 2 x float> @splice_nxv2f32_offset_negative_kmv-1(<vscale x 2 x float> %a, <vscale x 2 x float> %b) {
+define <vscale x 2 x float> @splice_nxv2f32_offset_negative_kmv_minus1(<vscale x 2 x float> %a, <vscale x 2 x float> %b) {
+; CHECK-LABEL: splice_nxv2f32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x float> @llvm.experimental.vector.splice.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 -3)
   ret <vscale x 2 x float> %res
 }
@@ -1677,17 +1980,21 @@ declare <vscale x 2 x float> @llvm.experimental.vector.splice.nxv2f32(<vscale x 
 define <vscale x 4 x float> @splice_nxv4f32_offset_zero(<vscale x 4 x float> %a, <vscale x 4 x float> %b) {
 ; CHECK-LABEL: splice_nxv4f32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x float> @llvm.experimental.vector.splice.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b, i32 0)
   ret <vscale x 4 x float> %res
 }
 
-define <vscale x 4 x float> @splice_nxv4f32_offset_kmv-1(<vscale x 4 x float> %a, <vscale x 4 x float> %b) {
+define <vscale x 4 x float> @splice_nxv4f32_offset_kmv_minus1(<vscale x 4 x float> %a, <vscale x 4 x float> %b) {
+; CHECK-LABEL: splice_nxv4f32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x float> @llvm.experimental.vector.splice.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b, i32 3)
   ret <vscale x 4 x float> %res
 }
@@ -1736,7 +2043,17 @@ define <vscale x 4 x float> @splice_nxv4f32_offset_negative_kmv(<vscale x 4 x fl
   ret <vscale x 4 x float> %res
 }
 
-define <vscale x 4 x float> @splice_nxv4f32_offset_negative_kmv-1(<vscale x 4 x float> %a, <vscale x 4 x float> %b) {
+define <vscale x 4 x float> @splice_nxv4f32_offset_negative_kmv_minus1(<vscale x 4 x float> %a, <vscale x 4 x float> %b) {
+; CHECK-LABEL: splice_nxv4f32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x float> @llvm.experimental.vector.splice.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b, i32 -5)
   ret <vscale x 4 x float> %res
 }
@@ -1747,16 +2064,20 @@ declare <vscale x 4 x float> @llvm.experimental.vector.splice.nxv4f32(<vscale x 
 define <vscale x 8 x float> @splice_nxv8f32_offset_zero(<vscale x 8 x float> %a, <vscale x 8 x float> %b) {
 ; CHECK-LABEL: splice_nxv8f32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x float> @llvm.experimental.vector.splice.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b, i32 0)
   ret <vscale x 8 x float> %res
 }
 
-define <vscale x 8 x float> @splice_nxv8f32_offset_kmv-1(<vscale x 8 x float> %a, <vscale x 8 x float> %b) {
+define <vscale x 8 x float> @splice_nxv8f32_offset_kmv_minus1(<vscale x 8 x float> %a, <vscale x 8 x float> %b) {
+; CHECK-LABEL: splice_nxv8f32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x float> @llvm.experimental.vector.splice.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b, i32 7)
   ret <vscale x 8 x float> %res
 }
@@ -1802,7 +2123,16 @@ define <vscale x 8 x float> @splice_nxv8f32_offset_negative_kmv(<vscale x 8 x fl
   ret <vscale x 8 x float> %res
 }
 
-define <vscale x 8 x float> @splice_nxv8f32_offset_negative_kmv-1(<vscale x 8 x float> %a, <vscale x 8 x float> %b) {
+define <vscale x 8 x float> @splice_nxv8f32_offset_negative_kmv_minus1(<vscale x 8 x float> %a, <vscale x 8 x float> %b) {
+; CHECK-LABEL: splice_nxv8f32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x float> @llvm.experimental.vector.splice.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b, i32 -9)
   ret <vscale x 8 x float> %res
 }
@@ -1813,17 +2143,21 @@ declare <vscale x 8 x float> @llvm.experimental.vector.splice.nxv8f32(<vscale x 
 define <vscale x 16 x float> @splice_nxv16f32_offset_zero(<vscale x 16 x float> %a, <vscale x 16 x float> %b) {
 ; CHECK-LABEL: splice_nxv16f32_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x float> @llvm.experimental.vector.splice.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b, i32 0)
   ret <vscale x 16 x float> %res
 }
 
-define <vscale x 16 x float> @splice_nxv16f32_offset_kmv-1(<vscale x 16 x float> %a, <vscale x 16 x float> %b) {
+define <vscale x 16 x float> @splice_nxv16f32_offset_kmv_minus1(<vscale x 16 x float> %a, <vscale x 16 x float> %b) {
+; CHECK-LABEL: splice_nxv16f32_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 15
+; CHECK-NEXT:    addi a0, a0, -15
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x float> @llvm.experimental.vector.splice.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b, i32 15)
   ret <vscale x 16 x float> %res
 }
@@ -1872,7 +2206,17 @@ define <vscale x 16 x float> @splice_nxv16f32_offset_negative_kmv(<vscale x 16 x
   ret <vscale x 16 x float> %res
 }
 
-define <vscale x 16 x float> @splice_nxv16f32_offset_negative_kmv-1(<vscale x 16 x float> %a, <vscale x 16 x float> %b) {
+define <vscale x 16 x float> @splice_nxv16f32_offset_negative_kmv_minus1(<vscale x 16 x float> %a, <vscale x 16 x float> %b) {
+; CHECK-LABEL: splice_nxv16f32_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -17
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 16 x float> @llvm.experimental.vector.splice.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b, i32 -17)
   ret <vscale x 16 x float> %res
 }
@@ -1884,17 +2228,15 @@ declare <vscale x 16 x float> @llvm.experimental.vector.splice.nxv16f32(<vscale 
 define <vscale x 1 x double> @splice_nxv1f64_offset_zero(<vscale x 1 x double> %a, <vscale x 1 x double> %b) {
 ; CHECK-LABEL: splice_nxv1f64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x double> @llvm.experimental.vector.splice.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 0)
   ret <vscale x 1 x double> %res
 }
 
-define <vscale x 1 x double> @splice_nxv1f64_offset_kmv-1(<vscale x 1 x double> %a, <vscale x 1 x double> %b) {
+define <vscale x 1 x double> @splice_nxv1f64_offset_kmv_minus1(<vscale x 1 x double> %a, <vscale x 1 x double> %b) {
+; CHECK-LABEL: splice_nxv1f64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x double> @llvm.experimental.vector.splice.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 0)
   ret <vscale x 1 x double> %res
 }
@@ -1943,7 +2285,17 @@ define <vscale x 1 x double> @splice_nxv1f64_offset_negative_kmv(<vscale x 1 x d
   ret <vscale x 1 x double> %res
 }
 
-define <vscale x 1 x double> @splice_nxv1f64_offset_negative_kmv-1(<vscale x 1 x double> %a, <vscale x 1 x double> %b) {
+define <vscale x 1 x double> @splice_nxv1f64_offset_negative_kmv_minus1(<vscale x 1 x double> %a, <vscale x 1 x double> %b) {
+; CHECK-LABEL: splice_nxv1f64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
+; CHECK-NEXT:    addi a1, a0, -2
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v9, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 1 x double> @llvm.experimental.vector.splice.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 -2)
   ret <vscale x 1 x double> %res
 }
@@ -1954,17 +2306,21 @@ declare <vscale x 1 x double> @llvm.experimental.vector.splice.nxv1f64(<vscale x
 define <vscale x 2 x double> @splice_nxv2f64_offset_zero(<vscale x 2 x double> %a, <vscale x 2 x double> %b) {
 ; CHECK-LABEL: splice_nxv2f64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 2
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x double> @llvm.experimental.vector.splice.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 0)
   ret <vscale x 2 x double> %res
 }
 
-define <vscale x 2 x double> @splice_nxv2f64_offset_kmv-1(<vscale x 2 x double> %a, <vscale x 2 x double> %b) {
+define <vscale x 2 x double> @splice_nxv2f64_offset_kmv_minus1(<vscale x 2 x double> %a, <vscale x 2 x double> %b) {
+; CHECK-LABEL: splice_nxv2f64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x double> @llvm.experimental.vector.splice.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 1)
   ret <vscale x 2 x double> %res
 }
@@ -2013,7 +2369,17 @@ define <vscale x 2 x double> @splice_nxv2f64_offset_negative_kmv(<vscale x 2 x d
   ret <vscale x 2 x double> %res
 }
 
-define <vscale x 2 x double> @splice_nxv2f64_offset_negative_kmv-1(<vscale x 2 x double> %a, <vscale x 2 x double> %b) {
+define <vscale x 2 x double> @splice_nxv2f64_offset_negative_kmv_minus1(<vscale x 2 x double> %a, <vscale x 2 x double> %b) {
+; CHECK-LABEL: splice_nxv2f64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
+; CHECK-NEXT:    addi a1, a0, -3
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v10, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 2 x double> @llvm.experimental.vector.splice.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 -3)
   ret <vscale x 2 x double> %res
 }
@@ -2024,17 +2390,21 @@ declare <vscale x 2 x double> @llvm.experimental.vector.splice.nxv2f64(<vscale x
 define <vscale x 4 x double> @splice_nxv4f64_offset_zero(<vscale x 4 x double> %a, <vscale x 4 x double> %b) {
 ; CHECK-LABEL: splice_nxv4f64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    srli a0, a0, 1
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v12, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x double> @llvm.experimental.vector.splice.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b, i32 0)
   ret <vscale x 4 x double> %res
 }
 
-define <vscale x 4 x double> @splice_nxv4f64_offset_kmv-1(<vscale x 4 x double> %a, <vscale x 4 x double> %b) {
+define <vscale x 4 x double> @splice_nxv4f64_offset_kmv_minus1(<vscale x 4 x double> %a, <vscale x 4 x double> %b) {
+; CHECK-LABEL: splice_nxv4f64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 3
+; CHECK-NEXT:    addi a0, a0, -3
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x double> @llvm.experimental.vector.splice.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b, i32 3)
   ret <vscale x 4 x double> %res
 }
@@ -2083,7 +2453,17 @@ define <vscale x 4 x double> @splice_nxv4f64_offset_negative_kmv(<vscale x 4 x d
   ret <vscale x 4 x double> %res
 }
 
-define <vscale x 4 x double> @splice_nxv4f64_offset_negative_kmv-1(<vscale x 4 x double> %a, <vscale x 4 x double> %b) {
+define <vscale x 4 x double> @splice_nxv4f64_offset_negative_kmv_minus1(<vscale x 4 x double> %a, <vscale x 4 x double> %b) {
+; CHECK-LABEL: splice_nxv4f64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a1, a0, -5
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v12, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 4 x double> @llvm.experimental.vector.splice.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b, i32 -5)
   ret <vscale x 4 x double> %res
 }
@@ -2094,16 +2474,20 @@ declare <vscale x 4 x double> @llvm.experimental.vector.splice.nxv4f64(<vscale x
 define <vscale x 8 x double> @splice_nxv8f64_offset_zero(<vscale x 8 x double> %a, <vscale x 8 x double> %b) {
 ; CHECK-LABEL: splice_nxv8f64_offset_zero:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
-; CHECK-NEXT:    vslidedown.vi v8, v8, 0
-; CHECK-NEXT:    vslideup.vx v8, v16, a0
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x double> @llvm.experimental.vector.splice.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b, i32 0)
   ret <vscale x 8 x double> %res
 }
 
-define <vscale x 8 x double> @splice_nxv8f64_offset_kmv-1(<vscale x 8 x double> %a, <vscale x 8 x double> %b) {
+define <vscale x 8 x double> @splice_nxv8f64_offset_kmv_minus1(<vscale x 8 x double> %a, <vscale x 8 x double> %b) {
+; CHECK-LABEL: splice_nxv8f64_offset_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vi v8, v8, 7
+; CHECK-NEXT:    addi a0, a0, -7
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x double> @llvm.experimental.vector.splice.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b, i32 7)
   ret <vscale x 8 x double> %res
 }
@@ -2149,7 +2533,16 @@ define <vscale x 8 x double> @splice_nxv8f64_offset_negative_kmv(<vscale x 8 x d
   ret <vscale x 8 x double> %res
 }
 
-define <vscale x 8 x double> @splice_nxv8f64_offset_negative_kmv-1(<vscale x 8 x double> %a, <vscale x 8 x double> %b) {
+define <vscale x 8 x double> @splice_nxv8f64_offset_negative_kmv_minus1(<vscale x 8 x double> %a, <vscale x 8 x double> %b) {
+; CHECK-LABEL: splice_nxv8f64_offset_negative_kmv_minus1:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a1, a0, -9
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, tu, mu
+; CHECK-NEXT:    vslidedown.vx v8, v8, a1
+; CHECK-NEXT:    sub a0, a0, a1
+; CHECK-NEXT:    vslideup.vx v8, v16, a0
+; CHECK-NEXT:    ret
   %res = call <vscale x 8 x double> @llvm.experimental.vector.splice.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b, i32 -9)
   ret <vscale x 8 x double> %res
 }

@@ -12305,7 +12305,7 @@ SDValue DAGCombiner::visitTRUNCATE(SDNode *N) {
     SDValue Amt = N0.getOperand(1);
     KnownBits Known = DAG.computeKnownBits(Amt);
     unsigned Size = VT.getScalarSizeInBits();
-    if (Known.getBitWidth() - Known.countMinLeadingZeros() <= Log2_32(Size)) {
+    if (Known.countMaxActiveBits() <= Log2_32(Size)) {
       SDLoc SL(N);
       EVT AmtVT = TLI.getShiftAmountTy(VT, DAG.getDataLayout());
 
@@ -23054,9 +23054,10 @@ SDValue DAGCombiner::BuildDivEstimate(SDValue N, SDValue Op,
   if (LegalDAG)
     return SDValue();
 
-  // TODO: Handle half and/or extended types?
+  // TODO: Handle extended types?
   EVT VT = Op.getValueType();
-  if (VT.getScalarType() != MVT::f32 && VT.getScalarType() != MVT::f64)
+  if (VT.getScalarType() != MVT::f16 && VT.getScalarType() != MVT::f32 &&
+      VT.getScalarType() != MVT::f64)
     return SDValue();
 
   // If estimates are explicitly disabled for this function, we're done.
@@ -23193,9 +23194,10 @@ SDValue DAGCombiner::buildSqrtEstimateImpl(SDValue Op, SDNodeFlags Flags,
   if (LegalDAG)
     return SDValue();
 
-  // TODO: Handle half and/or extended types?
+  // TODO: Handle extended types?
   EVT VT = Op.getValueType();
-  if (VT.getScalarType() != MVT::f32 && VT.getScalarType() != MVT::f64)
+  if (VT.getScalarType() != MVT::f16 && VT.getScalarType() != MVT::f32 &&
+      VT.getScalarType() != MVT::f64)
     return SDValue();
 
   // If estimates are explicitly disabled for this function, we're done.

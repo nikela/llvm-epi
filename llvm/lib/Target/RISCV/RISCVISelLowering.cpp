@@ -450,10 +450,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN};
 
     static const unsigned FloatingPointVPOps[] = {
-        ISD::VP_FADD,        ISD::VP_FSUB,
-        ISD::VP_FMUL,        ISD::VP_FDIV,
-        ISD::VP_FREM,        ISD::VP_FNEG,
-        ISD::VP_REDUCE_FADD, ISD::VP_REDUCE_SEQ_FADD,
+        ISD::VP_FADD,        ISD::VP_FSUB,        ISD::VP_FMUL,
+        ISD::VP_FDIV,        ISD::VP_FREM,        ISD::VP_FNEG,
+        ISD::VP_FMA,         ISD::VP_REDUCE_FADD, ISD::VP_REDUCE_SEQ_FADD,
         ISD::VP_REDUCE_FMIN, ISD::VP_REDUCE_FMAX};
 
     if (!Subtarget.is64Bit()) {
@@ -1184,17 +1183,19 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
   case Intrinsic::riscv_masked_strided_load:
     Info.opc = ISD::INTRINSIC_W_CHAIN;
     Info.ptrVal = I.getArgOperand(1);
-    Info.memVT = MVT::getVT(I.getType()->getScalarType());
-    Info.align = Align(I.getType()->getScalarSizeInBits() / 8);
+    Info.memVT = getValueType(DL, I.getType()->getScalarType());
+    Info.align = Align(DL.getTypeSizeInBits(I.getType()->getScalarType()) / 8);
     Info.size = MemoryLocation::UnknownSize;
     Info.flags |= MachineMemOperand::MOLoad;
     return true;
   case Intrinsic::riscv_masked_strided_store:
     Info.opc = ISD::INTRINSIC_VOID;
     Info.ptrVal = I.getArgOperand(1);
-    Info.memVT = MVT::getVT(I.getArgOperand(0)->getType()->getScalarType());
-    Info.align =
-        Align(I.getArgOperand(0)->getType()->getScalarSizeInBits() / 8);
+    Info.memVT =
+        getValueType(DL, I.getArgOperand(0)->getType()->getScalarType());
+    Info.align = Align(
+        DL.getTypeSizeInBits(I.getArgOperand(0)->getType()->getScalarType()) /
+        8);
     Info.size = MemoryLocation::UnknownSize;
     Info.flags |= MachineMemOperand::MOStore;
     return true;
@@ -3325,6 +3326,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   }
   case ISD::VP_FNEG:
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
+  case ISD::VP_FMA:
+    return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
   case ISD::VP_SETCC:
     return lowerVPCmpOp(Op, DAG);
   case ISD::VECTOR_SPLICE:

@@ -215,20 +215,22 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
     unsigned OpMinSize = std::max(Op1MinSize, Op2MinSize);
 
     // If both are representable as i15 and at least one is constant,
-    // zero-extended, or sign-extended from vXi16 then we can treat this as
-    // PMADDWD which has the same costs as a vXi16 multiply.
+    // zero-extended, or sign-extended from vXi16 (or less pre-SSE41) then we
+    // can treat this as PMADDWD which has the same costs as a vXi16 multiply.
     if (OpMinSize <= 15 && !ST->isPMADDWDSlow()) {
       bool Op1Constant =
           isa<ConstantDataVector>(Args[0]) || isa<ConstantVector>(Args[0]);
       bool Op2Constant =
           isa<ConstantDataVector>(Args[1]) || isa<ConstantVector>(Args[1]);
-      bool Op1Sext16 = isa<SExtInst>(Args[0]) && Op1MinSize == 15;
-      bool Op2Sext16 = isa<SExtInst>(Args[1]) && Op2MinSize == 15;
+      bool Op1Sext = isa<SExtInst>(Args[0]) &&
+                     (Op1MinSize == 15 || (Op1MinSize < 15 && !ST->hasSSE41()));
+      bool Op2Sext = isa<SExtInst>(Args[1]) &&
+                     (Op2MinSize == 15 || (Op2MinSize < 15 && !ST->hasSSE41()));
 
       bool IsZeroExtended = !Op1Signed || !Op2Signed;
       bool IsConstant = Op1Constant || Op2Constant;
-      bool IsSext16 = Op1Sext16 || Op2Sext16;
-      if (IsConstant || IsZeroExtended || IsSext16)
+      bool IsSext = Op1Sext || Op2Sext;
+      if (IsConstant || IsZeroExtended || IsSext)
         LT.second =
             MVT::getVectorVT(MVT::i16, 2 * LT.second.getVectorNumElements());
     }
@@ -4697,6 +4699,7 @@ InstructionCost X86TTIImpl::getGSVectorCost(unsigned Opcode, Type *SrcVTy,
 InstructionCost X86TTIImpl::getGSScalarCost(unsigned Opcode, Type *SrcVTy,
                                             bool VariableMask, Align Alignment,
                                             unsigned AddressSpace) {
+  Type *ScalarTy = SrcVTy->getScalarType();
   unsigned VF = cast<FixedVectorType>(SrcVTy)->getNumElements();
   APInt DemandedElts = APInt::getAllOnes(VF);
   TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
@@ -4705,8 +4708,8 @@ InstructionCost X86TTIImpl::getGSScalarCost(unsigned Opcode, Type *SrcVTy,
   if (VariableMask) {
     auto *MaskTy =
         FixedVectorType::get(Type::getInt1Ty(SrcVTy->getContext()), VF);
-    MaskUnpackCost =
-        getScalarizationOverhead(MaskTy, DemandedElts, false, true);
+    MaskUnpackCost = getScalarizationOverhead(
+        MaskTy, DemandedElts, /*Insert=*/false, /*Extract=*/true);
     InstructionCost ScalarCompareCost = getCmpSelInstrCost(
         Instruction::ICmp, Type::getInt1Ty(SrcVTy->getContext()), nullptr,
         CmpInst::BAD_ICMP_PREDICATE, CostKind);
@@ -4714,24 +4717,23 @@ InstructionCost X86TTIImpl::getGSScalarCost(unsigned Opcode, Type *SrcVTy,
     MaskUnpackCost += VF * (BranchCost + ScalarCompareCost);
   }
 
+  InstructionCost AddressUnpackCost = getScalarizationOverhead(
+      FixedVectorType::get(ScalarTy->getPointerTo(), VF), DemandedElts,
+      /*Insert=*/false, /*Extract=*/true);
+
   // The cost of the scalar loads/stores.
   InstructionCost MemoryOpCost =
-      VF * getMemoryOpCost(Opcode, SrcVTy->getScalarType(),
-                           MaybeAlign(Alignment), AddressSpace, CostKind);
+      VF * getMemoryOpCost(Opcode, ScalarTy, MaybeAlign(Alignment),
+                           AddressSpace, CostKind);
 
-  InstructionCost InsertExtractCost = 0;
-  if (Opcode == Instruction::Load)
-    for (unsigned i = 0; i < VF; ++i)
-      // Add the cost of inserting each scalar load into the vector
-      InsertExtractCost +=
-        getVectorInstrCost(Instruction::InsertElement, SrcVTy, i);
-  else
-    for (unsigned i = 0; i < VF; ++i)
-      // Add the cost of extracting each element out of the data vector
-      InsertExtractCost +=
-        getVectorInstrCost(Instruction::ExtractElement, SrcVTy, i);
+  // The cost of forming the vector from loaded scalars/
+  // scalarizing the vector to perform scalar stores.
+  InstructionCost InsertExtractCost =
+      getScalarizationOverhead(cast<FixedVectorType>(SrcVTy), DemandedElts,
+                               /*Insert=*/Opcode == Instruction::Load,
+                               /*Extract=*/Opcode == Instruction::Store);
 
-  return MemoryOpCost + MaskUnpackCost + InsertExtractCost;
+  return AddressUnpackCost + MemoryOpCost + MaskUnpackCost + InsertExtractCost;
 }
 
 /// Calculate the cost of Gather / Scatter operation

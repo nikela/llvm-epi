@@ -173,6 +173,18 @@ then
  else
    info "Using GNU ld because we didn't find lld"
  fi
+
+ CLANG_BINDIR="$(dirname ${CC})"
+ if [ -x "${CLANG_BINDIR}/llvm-ar" ];
+ then
+   LLVM_AR="${CLANG_BINDIR}/llvm-ar"
+   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_AR=${LLVM_AR}")
+ fi
+ if [ -x "${CLANG_BINDIR}/llvm-ranlib" ];
+ then
+   LLVM_RANLIB="${CLANG_BINDIR}/llvm-ranlib"
+   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_RANLIB=${LLVM_RANLIB}")
+ fi
 else
   info "Using GNU ld because we are using gcc"
 fi

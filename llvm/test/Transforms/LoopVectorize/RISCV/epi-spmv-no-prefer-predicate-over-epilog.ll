@@ -41,7 +41,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ insertelement (<vscale x 1 x double> zeroinitializer, double 0.000000e+00, i32 0), [[VECTOR_PH]] ], [ [[TMP13:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ insertelement (<vscale x 1 x double> shufflevector (<vscale x 1 x double> insertelement (<vscale x 1 x double> poison, double 0.000000e+00, i32 0), <vscale x 1 x double> poison, <vscale x 1 x i32> zeroinitializer), double 0.000000e+00, i32 0), [[VECTOR_PH]] ], [ [[TMP13:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = add i64 [[CONV231]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, double* [[A:%.*]], i64 [[OFFSET_IDX]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = bitcast double* [[TMP7]] to <vscale x 1 x double>*

@@ -145,7 +145,7 @@ void EPIFoldBroadcast::determineFoldableUses(Instruction *Broadcast,
       // If the broadcast is used in other arguments than the extended operand,
       // this transformation is not beneficial.
       bool HasOtherBroadcastUses = false;
-      for (unsigned Arg = 0, E = CBUser->getNumArgOperands();
+      for (unsigned Arg = 0, E = CBUser->arg_size();
            Arg < E && !HasOtherBroadcastUses; Arg++) {
         // This is the extended operand. Skip it.
         if (Arg == ExtendedOp)

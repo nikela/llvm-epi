@@ -13,7 +13,7 @@ define <vscale x 2 x double> @test_llvm.epi.vfwredsum_nxv2f64(<vscale x 2 x floa
 ; CHECK-LABEL: test_llvm.epi.vfwredsum_nxv2f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v8, v10
+; CHECK-NEXT:    vfwredusum.vs v8, v8, v10
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 2 x double> @llvm.epi.vfwredsum.nxv2f64(<vscale x 2 x float> %a, <vscale x 2 x double> %b, i64 %evl)
     ret <vscale x 2 x double> %1
@@ -23,7 +23,7 @@ define <vscale x 4 x double> @test_llvm.epi.vfwredsum_nxv4f64(<vscale x 4 x floa
 ; CHECK-LABEL: test_llvm.epi.vfwredsum_nxv4f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v8, v12
+; CHECK-NEXT:    vfwredusum.vs v8, v8, v12
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 4 x double> @llvm.epi.vfwredsum.nxv4f64(<vscale x 4 x float> %a, <vscale x 4 x double> %b, i64 %evl)
     ret <vscale x 4 x double> %1
@@ -33,7 +33,7 @@ define <vscale x 8 x double> @test_llvm.epi.vfwredsum_nxv8f64(<vscale x 8 x floa
 ; CHECK-LABEL: test_llvm.epi.vfwredsum_nxv8f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v8, v16
+; CHECK-NEXT:    vfwredusum.vs v8, v8, v16
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 8 x double> @llvm.epi.vfwredsum.nxv8f64(<vscale x 8 x float> %a, <vscale x 8 x double> %b, i64 %evl)
     ret <vscale x 8 x double> %1
@@ -43,7 +43,7 @@ define <vscale x 2 x double> @test_llvm.epi.vfwredsum.mask_nxv2f64(<vscale x 2 x
 ; CHECK-LABEL: test_llvm.epi.vfwredsum.mask_nxv2f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v10, v12, v0.t
+; CHECK-NEXT:    vfwredusum.vs v8, v10, v12, v0.t
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 2 x double> @llvm.epi.vfwredsum.mask.nxv2f64(<vscale x 2 x double> %merge, <vscale x 2 x float> %a, <vscale x 2 x double> %b, <vscale x 2 x i1> %mask, i64 %evl)
     ret <vscale x 2 x double> %1
@@ -53,7 +53,7 @@ define <vscale x 4 x double> @test_llvm.epi.vfwredsum.mask_nxv4f64(<vscale x 4 x
 ; CHECK-LABEL: test_llvm.epi.vfwredsum.mask_nxv4f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v12, v16, v0.t
+; CHECK-NEXT:    vfwredusum.vs v8, v12, v16, v0.t
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 4 x double> @llvm.epi.vfwredsum.mask.nxv4f64(<vscale x 4 x double> %merge, <vscale x 4 x float> %a, <vscale x 4 x double> %b, <vscale x 4 x i1> %mask, i64 %evl)
     ret <vscale x 4 x double> %1
@@ -64,7 +64,7 @@ define <vscale x 8 x double> @test_llvm.epi.vfwredsum.mask_nxv8f64(<vscale x 8 x
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vl8re64.v v24, (a0)
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m4, ta, mu
-; CHECK-NEXT:    vfwredsum.vs v8, v16, v24, v0.t
+; CHECK-NEXT:    vfwredusum.vs v8, v16, v24, v0.t
 ; CHECK-NEXT:    ret
     %1 = call <vscale x 8 x double> @llvm.epi.vfwredsum.mask.nxv8f64(<vscale x 8 x double> %merge, <vscale x 8 x float> %a, <vscale x 8 x double> %b, <vscale x 8 x i1> %mask, i64 %evl)
     ret <vscale x 8 x double> %1

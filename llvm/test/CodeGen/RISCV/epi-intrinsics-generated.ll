@@ -109120,7 +109120,7 @@ define void @intrinsic_vfredsum_vs_nxv2f32_nxv2f32_nxv2f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv2f32_nxv2f32_nxv2f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 2 x float> @llvm.epi.vfredsum.nxv2f32.nxv2f32(
     <vscale x 2 x float> undef,
     <vscale x 2 x float> undef,
@@ -109143,7 +109143,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv2f32_nxv2f32_nxv2f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv2f32_nxv2f32_nxv2f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 2 x float> @llvm.epi.vfredsum.mask.nxv2f32.nxv2f32(
     <vscale x 2 x float> undef,
     <vscale x 2 x float> undef,
@@ -109167,7 +109167,7 @@ define void @intrinsic_vfredsum_vs_nxv4f32_nxv4f32_nxv4f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv4f32_nxv4f32_nxv4f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m2, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 4 x float> @llvm.epi.vfredsum.nxv4f32.nxv4f32(
     <vscale x 4 x float> undef,
     <vscale x 4 x float> undef,
@@ -109190,7 +109190,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv4f32_nxv4f32_nxv4f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv4f32_nxv4f32_nxv4f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m2, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 4 x float> @llvm.epi.vfredsum.mask.nxv4f32.nxv4f32(
     <vscale x 4 x float> undef,
     <vscale x 4 x float> undef,
@@ -109214,7 +109214,7 @@ define void @intrinsic_vfredsum_vs_nxv8f32_nxv8f32_nxv8f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv8f32_nxv8f32_nxv8f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m4, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 8 x float> @llvm.epi.vfredsum.nxv8f32.nxv8f32(
     <vscale x 8 x float> undef,
     <vscale x 8 x float> undef,
@@ -109237,7 +109237,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv8f32_nxv8f32_nxv8f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv8f32_nxv8f32_nxv8f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m4, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 8 x float> @llvm.epi.vfredsum.mask.nxv8f32.nxv8f32(
     <vscale x 8 x float> undef,
     <vscale x 8 x float> undef,
@@ -109261,7 +109261,7 @@ define void @intrinsic_vfredsum_vs_nxv16f32_nxv16f32_nxv16f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv16f32_nxv16f32_nxv16f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m8, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 16 x float> @llvm.epi.vfredsum.nxv16f32.nxv16f32(
     <vscale x 16 x float> undef,
     <vscale x 16 x float> undef,
@@ -109284,7 +109284,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv16f32_nxv16f32_nxv16f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv16f32_nxv16f32_nxv16f32
 ; CHECK:       vsetvli {{.*}}, a0, e32, m8, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 16 x float> @llvm.epi.vfredsum.mask.nxv16f32.nxv16f32(
     <vscale x 16 x float> undef,
     <vscale x 16 x float> undef,
@@ -109308,7 +109308,7 @@ define void @intrinsic_vfredsum_vs_nxv1f64_nxv1f64_nxv1f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv1f64_nxv1f64_nxv1f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 1 x double> @llvm.epi.vfredsum.nxv1f64.nxv1f64(
     <vscale x 1 x double> undef,
     <vscale x 1 x double> undef,
@@ -109331,7 +109331,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv1f64_nxv1f64_nxv1f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv1f64_nxv1f64_nxv1f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 1 x double> @llvm.epi.vfredsum.mask.nxv1f64.nxv1f64(
     <vscale x 1 x double> undef,
     <vscale x 1 x double> undef,
@@ -109355,7 +109355,7 @@ define void @intrinsic_vfredsum_vs_nxv2f64_nxv2f64_nxv2f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv2f64_nxv2f64_nxv2f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m2, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 2 x double> @llvm.epi.vfredsum.nxv2f64.nxv2f64(
     <vscale x 2 x double> undef,
     <vscale x 2 x double> undef,
@@ -109378,7 +109378,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv2f64_nxv2f64_nxv2f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv2f64_nxv2f64_nxv2f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m2, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 2 x double> @llvm.epi.vfredsum.mask.nxv2f64.nxv2f64(
     <vscale x 2 x double> undef,
     <vscale x 2 x double> undef,
@@ -109402,7 +109402,7 @@ define void @intrinsic_vfredsum_vs_nxv4f64_nxv4f64_nxv4f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv4f64_nxv4f64_nxv4f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m4, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 4 x double> @llvm.epi.vfredsum.nxv4f64.nxv4f64(
     <vscale x 4 x double> undef,
     <vscale x 4 x double> undef,
@@ -109425,7 +109425,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv4f64_nxv4f64_nxv4f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv4f64_nxv4f64_nxv4f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m4, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 4 x double> @llvm.epi.vfredsum.mask.nxv4f64.nxv4f64(
     <vscale x 4 x double> undef,
     <vscale x 4 x double> undef,
@@ -109449,7 +109449,7 @@ define void @intrinsic_vfredsum_vs_nxv8f64_nxv8f64_nxv8f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_vs_nxv8f64_nxv8f64_nxv8f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m8, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 8 x double> @llvm.epi.vfredsum.nxv8f64.nxv8f64(
     <vscale x 8 x double> undef,
     <vscale x 8 x double> undef,
@@ -109472,7 +109472,7 @@ define void @intrinsic_vfredsum_mask_vs_nxv8f64_nxv8f64_nxv8f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfredsum_mask_vs_nxv8f64_nxv8f64_nxv8f64
 ; CHECK:       vsetvli {{.*}}, a0, e64, m8, ta, mu
-; CHECK:       vfredsum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
+; CHECK:       vfredusum.vs {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}, v0.t
   %a = call <vscale x 8 x double> @llvm.epi.vfredsum.mask.nxv8f64.nxv8f64(
     <vscale x 8 x double> undef,
     <vscale x 8 x double> undef,

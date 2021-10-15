@@ -1411,12 +1411,6 @@ void ASTContext::InitBuiltinTypes(const TargetInfo &Target,
   if (LangOpts.MatrixTypes)
     InitBuiltinType(IncompleteMatrixIdxTy, BuiltinType::IncompleteMatrixIdx);
 
-  // C99 6.2.5p11.
-  FloatComplexTy      = getComplexType(FloatTy);
-  DoubleComplexTy     = getComplexType(DoubleTy);
-  LongDoubleComplexTy = getComplexType(LongDoubleTy);
-  Float128ComplexTy   = getComplexType(Float128Ty);
-
   // Builtin types for 'id', 'Class', and 'SEL'.
   InitBuiltinType(ObjCBuiltinIdTy, BuiltinType::ObjCId);
   InitBuiltinType(ObjCBuiltinClassTy, BuiltinType::ObjCClass);
@@ -5910,7 +5904,11 @@ QualType ASTContext::getUnqualifiedArrayType(QualType type,
 /// Attempt to unwrap two types that may both be array types with the same bound
 /// (or both be array types of unknown bound) for the purpose of comparing the
 /// cv-decomposition of two types per C++ [conv.qual].
-void ASTContext::UnwrapSimilarArrayTypes(QualType &T1, QualType &T2) {
+///
+/// \param AllowPiMismatch Allow the Pi1 and Pi2 to differ as described in
+///        C++20 [conv.qual], if permitted by the current language mode.
+void ASTContext::UnwrapSimilarArrayTypes(QualType &T1, QualType &T2,
+                                         bool AllowPiMismatch) {
   while (true) {
     auto *AT1 = getAsArrayType(T1);
     if (!AT1)
@@ -5922,12 +5920,21 @@ void ASTContext::UnwrapSimilarArrayTypes(QualType &T1, QualType &T2) {
 
     // If we don't have two array types with the same constant bound nor two
     // incomplete array types, we've unwrapped everything we can.
+    // C++20 also permits one type to be a constant array type and the other
+    // to be an incomplete array type.
+    // FIXME: Consider also unwrapping array of unknown bound and VLA.
     if (auto *CAT1 = dyn_cast<ConstantArrayType>(AT1)) {
       auto *CAT2 = dyn_cast<ConstantArrayType>(AT2);
-      if (!CAT2 || CAT1->getSize() != CAT2->getSize())
+      if (!((CAT2 && CAT1->getSize() == CAT2->getSize()) ||
+            (AllowPiMismatch && getLangOpts().CPlusPlus20 &&
+             isa<IncompleteArrayType>(AT2))))
         return;
-    } else if (!isa<IncompleteArrayType>(AT1) ||
-               !isa<IncompleteArrayType>(AT2)) {
+    } else if (isa<IncompleteArrayType>(AT1)) {
+      if (!(isa<IncompleteArrayType>(AT2) ||
+            (AllowPiMismatch && getLangOpts().CPlusPlus20 &&
+             isa<ConstantArrayType>(AT2))))
+        return;
+    } else {
       return;
     }
 
@@ -5946,10 +5953,14 @@ void ASTContext::UnwrapSimilarArrayTypes(QualType &T1, QualType &T2) {
 /// "unwraps" pointer and pointer-to-member types to compare them at each
 /// level.
 ///
+/// \param AllowPiMismatch Allow the Pi1 and Pi2 to differ as described in
+///        C++20 [conv.qual], if permitted by the current language mode.
+///
 /// \return \c true if a pointer type was unwrapped, \c false if we reached a
 /// pair of types that can't be unwrapped further.
-bool ASTContext::UnwrapSimilarTypes(QualType &T1, QualType &T2) {
-  UnwrapSimilarArrayTypes(T1, T2);
+bool ASTContext::UnwrapSimilarTypes(QualType &T1, QualType &T2,
+                                    bool AllowPiMismatch) {
+  UnwrapSimilarArrayTypes(T1, T2, AllowPiMismatch);
 
   const auto *T1PtrType = T1->getAs<PointerType>();
   const auto *T2PtrType = T2->getAs<PointerType>();
@@ -6010,7 +6021,7 @@ bool ASTContext::hasCvrSimilarType(QualType T1, QualType T2) {
     if (hasSameType(T1, T2))
       return true;
 
-    if (!UnwrapSimilarTypes(T1, T2))
+    if (!UnwrapSimilarTypes(T1, T2, /*AllowPiMismatch*/ false))
       return false;
   }
 }
@@ -6400,11 +6411,11 @@ QualType ASTContext::getFloatingTypeOfSizeWithinDomain(QualType Size,
     case BFloat16Rank: llvm_unreachable("Complex bfloat16 is not supported");
     case Float16Rank:
     case HalfRank: llvm_unreachable("Complex half is not supported");
-    case Ibm128Rank: llvm_unreachable("Complex __ibm128 is not supported");
-    case FloatRank:      return FloatComplexTy;
-    case DoubleRank:     return DoubleComplexTy;
-    case LongDoubleRank: return LongDoubleComplexTy;
-    case Float128Rank:   return Float128ComplexTy;
+    case Ibm128Rank:     return getComplexType(Ibm128Ty);
+    case FloatRank:      return getComplexType(FloatTy);
+    case DoubleRank:     return getComplexType(DoubleTy);
+    case LongDoubleRank: return getComplexType(LongDoubleTy);
+    case Float128Rank:   return getComplexType(Float128Ty);
     }
   }
 
@@ -11336,21 +11347,21 @@ QualType ASTContext::getIntTypeForBitwidth(unsigned DestWidth,
 /// sets floating point QualTy according to specified bitwidth.
 /// Returns empty type if there is no appropriate target types.
 QualType ASTContext::getRealTypeForBitwidth(unsigned DestWidth,
-                                            bool ExplicitIEEE) const {
-  TargetInfo::RealType Ty =
-      getTargetInfo().getRealTypeByWidth(DestWidth, ExplicitIEEE);
+                                            FloatModeKind ExplicitType) const {
+  FloatModeKind Ty =
+      getTargetInfo().getRealTypeByWidth(DestWidth, ExplicitType);
   switch (Ty) {
-  case TargetInfo::Float:
+  case FloatModeKind::Float:
     return FloatTy;
-  case TargetInfo::Double:
+  case FloatModeKind::Double:
     return DoubleTy;
-  case TargetInfo::LongDouble:
+  case FloatModeKind::LongDouble:
     return LongDoubleTy;
-  case TargetInfo::Float128:
+  case FloatModeKind::Float128:
     return Float128Ty;
-  case TargetInfo::Ibm128:
+  case FloatModeKind::Ibm128:
     return Ibm128Ty;
-  case TargetInfo::NoFloat:
+  case FloatModeKind::NoFloat:
     return {};
   }
 

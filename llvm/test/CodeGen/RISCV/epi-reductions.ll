@@ -194,7 +194,7 @@ define float @red_nxv2f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft2, v25
 ; CHECK-NEXT:    vfmv.v.f v25, ft1
-; CHECK-NEXT:    vfredsum.vs v25, v8, v25
+; CHECK-NEXT:    vfredusum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft1, v25
 ; CHECK-NEXT:    lui a0, %hi(.LCPI3_2)
 ; CHECK-NEXT:    flw ft3, %lo(.LCPI3_2)(a0)
@@ -239,7 +239,7 @@ define double @red_nxv1f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft2, v25
 ; CHECK-NEXT:    vfmv.v.f v25, ft1
-; CHECK-NEXT:    vfredsum.vs v25, v8, v25
+; CHECK-NEXT:    vfredusum.vs v25, v8, v25
 ; CHECK-NEXT:    vfmv.f.s ft1, v25
 ; CHECK-NEXT:    lui a0, %hi(.LCPI4_2)
 ; CHECK-NEXT:    fld ft3, %lo(.LCPI4_2)(a0)
@@ -287,7 +287,7 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v25, ft1
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
-; CHECK-NEXT:    vfredsum.vs v25, v8, v25
+; CHECK-NEXT:    vfredusum.vs v25, v8, v25
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_2)
 ; CHECK-NEXT:    fld ft1, %lo(.LCPI5_2)(a0)
 ; CHECK-NEXT:    vfmv.f.s ft3, v25
