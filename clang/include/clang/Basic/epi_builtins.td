@@ -1433,10 +1433,16 @@ def vredor : EPIBinBuiltin<"v", "vvv", "csil">;
 def vredxor : EPIBinBuiltin<"v", "vvv", "csil">;
 
 def vfredosum : EPIBinBuiltin<"v", "vvv", "fd">;
-def vfredsum : EPIBinBuiltin<"v", "vvv", "fd">;
 def vfredmax : EPIBinBuiltin<"v", "vvv", "fd">;
 def vfredmin : EPIBinBuiltin<"v", "vvv", "fd">;
 }
+
+let EPIRVVHeader = 1,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+        ${LMulExt}vfredusum_vs_${Type}${LMul}_${Type}m1(vundefined_${Type}m1(), (a), ${LMulTrunc}(b)${End}, (vl))${End} }],
+    CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
+        ${LMulExt}vfredusum_vs_${Type}${LMul}_${Type}m1_m((mask), ${LMulTrunc}(merge)${End}, (a), ${LMulTrunc}(b)${End}, (vl))${End} }] in
+def vfredsum : EPIBinBuiltin<"v", "vvv", "fd">;
 
 let EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
@@ -1455,8 +1461,13 @@ let EPIRVVHeader = 1,
 def vwredsum : EPIWidenBinBuiltin<"w", "wvw", "csi">;
 
 def vfwredosum : EPIWidenBinBuiltin<"w", "wvw", "f">;
-def vfwredsum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 }
+let EPIRVVHeader = 1,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+        vlmul_ext_v_${WidenedType}m1_${WidenedType}${WidenedLMul}(vfwredusum_vs_${Type}${LMul}_${WidenedType}m1(vundefined_${WidenedType}m1(), (a), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(b), (vl)))}],
+    CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(merge, a, b, mask, vl) \
+        vlmul_ext_v_${WidenedType}m1_${WidenedType}${WidenedLMul}(vfwredusum_vs_${Type}${LMul}_${WidenedType}m1_m((mask), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(merge), (a), vlmul_trunc_v_${WidenedType}${WidenedLMul}_${WidenedType}m1(b), (vl)))}] in
+def vfwredsum : EPIWidenBinBuiltin<"w", "wvw", "f">;
 
 // FIXME: add compatibility code for vwredsumu
 def vwredsumu : EPIWidenBinBuiltin<"w", "wvw", "csi">;

@@ -136,7 +136,7 @@ __epi_8xi8 test_vadd_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vadd_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vadd.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vadd.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vadd_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -156,7 +156,7 @@ __epi_4xi16 test_vadd_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vadd.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vadd.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vadd_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -176,7 +176,7 @@ __epi_2xi32 test_vadd_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vadd.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vadd.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vadd_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -196,7 +196,7 @@ __epi_1xi64 test_vadd_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vadd.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vadd.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vadd_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -216,7 +216,7 @@ __epi_16xi8 test_vadd_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vadd.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vadd.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vadd_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -236,7 +236,7 @@ __epi_8xi16 test_vadd_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vadd.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vadd.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vadd_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -256,7 +256,7 @@ __epi_4xi32 test_vadd_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vadd.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vadd.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vadd_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -276,7 +276,7 @@ __epi_2xi64 test_vadd_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vadd.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vadd.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vadd_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -296,7 +296,7 @@ __epi_32xi8 test_vadd_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vadd.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vadd.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vadd_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -316,7 +316,7 @@ __epi_16xi16 test_vadd_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vadd_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vadd.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vadd.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vadd_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -336,7 +336,7 @@ __epi_8xi32 test_vadd_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vadd.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vadd.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vadd_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -356,7 +356,7 @@ __epi_4xi64 test_vadd_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vadd_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vadd.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vadd.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vadd_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -376,7 +376,7 @@ __epi_8xi8 test_vand_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vand_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vand.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vand.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vand_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -396,7 +396,7 @@ __epi_4xi16 test_vand_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vand.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vand.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vand_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -416,7 +416,7 @@ __epi_2xi32 test_vand_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vand.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vand.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vand_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -436,7 +436,7 @@ __epi_1xi64 test_vand_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vand.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vand.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vand_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -456,7 +456,7 @@ __epi_16xi8 test_vand_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vand.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vand.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vand_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -476,7 +476,7 @@ __epi_8xi16 test_vand_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vand.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vand.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vand_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -496,7 +496,7 @@ __epi_4xi32 test_vand_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vand.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vand.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vand_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -516,7 +516,7 @@ __epi_2xi64 test_vand_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vand.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vand.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vand_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -536,7 +536,7 @@ __epi_32xi8 test_vand_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vand.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vand.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vand_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -556,7 +556,7 @@ __epi_16xi16 test_vand_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vand_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vand.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vand.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vand_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -576,7 +576,7 @@ __epi_8xi32 test_vand_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vand.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vand.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vand_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -596,7 +596,7 @@ __epi_4xi64 test_vand_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vand_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vand.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vand.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vand_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -796,7 +796,7 @@ __epi_8xi8 test_vdiv_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vdiv_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vdiv.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vdiv.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vdiv_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -816,7 +816,7 @@ __epi_4xi16 test_vdiv_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vdiv.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vdiv.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vdiv_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -836,7 +836,7 @@ __epi_2xi32 test_vdiv_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vdiv.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vdiv.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vdiv_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -856,7 +856,7 @@ __epi_1xi64 test_vdiv_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vdiv.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vdiv.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vdiv_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -876,7 +876,7 @@ __epi_16xi8 test_vdiv_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vdiv.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vdiv.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vdiv_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -896,7 +896,7 @@ __epi_8xi16 test_vdiv_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vdiv.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vdiv.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vdiv_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -916,7 +916,7 @@ __epi_4xi32 test_vdiv_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vdiv.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vdiv.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vdiv_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -936,7 +936,7 @@ __epi_2xi64 test_vdiv_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdiv.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdiv.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vdiv_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -956,7 +956,7 @@ __epi_32xi8 test_vdiv_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdiv.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdiv.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vdiv_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -976,7 +976,7 @@ __epi_16xi16 test_vdiv_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vdiv_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vdiv.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vdiv.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vdiv_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -996,7 +996,7 @@ __epi_8xi32 test_vdiv_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vdiv.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vdiv.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vdiv_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1016,7 +1016,7 @@ __epi_4xi64 test_vdiv_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vdiv_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vdiv.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vdiv.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vdiv_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1036,7 +1036,7 @@ __epi_8xi8 test_vdivu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int
 
 // CHECK-O2-LABEL: @test_vdivu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vdivu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vdivu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vdivu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1056,7 +1056,7 @@ __epi_4xi16 test_vdivu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vdivu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vdivu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vdivu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1076,7 +1076,7 @@ __epi_2xi32 test_vdivu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vdivu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vdivu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vdivu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1096,7 +1096,7 @@ __epi_1xi64 test_vdivu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vdivu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vdivu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vdivu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -1116,7 +1116,7 @@ __epi_16xi8 test_vdivu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vdivu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vdivu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vdivu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -1136,7 +1136,7 @@ __epi_8xi16 test_vdivu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vdivu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vdivu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vdivu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1156,7 +1156,7 @@ __epi_4xi32 test_vdivu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vdivu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vdivu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vdivu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1176,7 +1176,7 @@ __epi_2xi64 test_vdivu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdivu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vdivu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vdivu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1196,7 +1196,7 @@ __epi_32xi8 test_vdivu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdivu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vdivu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vdivu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -1216,7 +1216,7 @@ __epi_16xi16 test_vdivu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vdivu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vdivu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vdivu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vdivu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -1236,7 +1236,7 @@ __epi_8xi32 test_vdivu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vdivu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vdivu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vdivu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1256,7 +1256,7 @@ __epi_4xi64 test_vdivu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vdivu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vdivu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vdivu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vdivu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1276,7 +1276,7 @@ __epi_2xf32 test_vfadd_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfadd.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfadd.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfadd_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1296,7 +1296,7 @@ __epi_1xf64 test_vfadd_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfadd.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfadd.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfadd_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -1316,7 +1316,7 @@ __epi_4xf32 test_vfadd_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfadd.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfadd.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfadd_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1336,7 +1336,7 @@ __epi_2xf64 test_vfadd_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfadd.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfadd.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfadd_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1356,7 +1356,7 @@ __epi_8xf32 test_vfadd_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfadd.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfadd.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfadd_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1376,7 +1376,7 @@ __epi_4xf64 test_vfadd_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfadd_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfadd.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfadd.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfadd_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1396,7 +1396,7 @@ __epi_2xf32 test_vfcvt_f_x_2xf32_2xi32(__epi_2xi32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_2xf32_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfcvt_f_x_2xf32_2xi32_mask(__epi_2xf32 arg_0, __epi_2xi32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1416,7 +1416,7 @@ __epi_1xf64 test_vfcvt_f_x_1xf64_1xi64(__epi_1xi64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_1xf64_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfcvt_f_x_1xf64_1xi64_mask(__epi_1xf64 arg_0, __epi_1xi64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -1436,7 +1436,7 @@ __epi_4xf32 test_vfcvt_f_x_4xf32_4xi32(__epi_4xi32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_4xf32_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfcvt_f_x_4xf32_4xi32_mask(__epi_4xf32 arg_0, __epi_4xi32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1456,7 +1456,7 @@ __epi_2xf64 test_vfcvt_f_x_2xf64_2xi64(__epi_2xi64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_2xf64_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfcvt_f_x_2xf64_2xi64_mask(__epi_2xf64 arg_0, __epi_2xi64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1476,7 +1476,7 @@ __epi_8xf32 test_vfcvt_f_x_8xf32_8xi32(__epi_8xi32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_8xf32_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfcvt.f.x.v.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfcvt_f_x_8xf32_8xi32_mask(__epi_8xf32 arg_0, __epi_8xi32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -1496,7 +1496,7 @@ __epi_4xf64 test_vfcvt_f_x_4xf64_4xi64(__epi_4xi64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_f_x_4xf64_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfcvt.f.x.v.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfcvt_f_x_4xf64_4xi64_mask(__epi_4xf64 arg_0, __epi_4xi64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1516,7 +1516,7 @@ __epi_2xf32 test_vfcvt_f_xu_2xf32_2xi32(__epi_2xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_2xf32_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfcvt_f_xu_2xf32_2xi32_mask(__epi_2xf32 arg_0, __epi_2xi32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1536,7 +1536,7 @@ __epi_1xf64 test_vfcvt_f_xu_1xf64_1xi64(__epi_1xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_1xf64_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfcvt_f_xu_1xf64_1xi64_mask(__epi_1xf64 arg_0, __epi_1xi64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -1556,7 +1556,7 @@ __epi_4xf32 test_vfcvt_f_xu_4xf32_4xi32(__epi_4xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_4xf32_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfcvt_f_xu_4xf32_4xi32_mask(__epi_4xf32 arg_0, __epi_4xi32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1576,7 +1576,7 @@ __epi_2xf64 test_vfcvt_f_xu_2xf64_2xi64(__epi_2xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_2xf64_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfcvt_f_xu_2xf64_2xi64_mask(__epi_2xf64 arg_0, __epi_2xi64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1596,7 +1596,7 @@ __epi_8xf32 test_vfcvt_f_xu_8xf32_8xi32(__epi_8xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_8xf32_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfcvt.f.xu.v.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfcvt_f_xu_8xf32_8xi32_mask(__epi_8xf32 arg_0, __epi_8xi32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -1616,7 +1616,7 @@ __epi_4xf64 test_vfcvt_f_xu_4xf64_4xi64(__epi_4xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_f_xu_4xf64_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfcvt.f.xu.v.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfcvt_f_xu_4xf64_4xi64_mask(__epi_4xf64 arg_0, __epi_4xi64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1636,7 +1636,7 @@ __epi_2xi32 test_vfcvt_x_f_2xi32_2xf32(__epi_2xf32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_2xi32_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv2i32.nxv2f32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv2i32.nxv2f32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vfcvt_x_f_2xi32_2xf32_mask(__epi_2xi32 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1656,7 +1656,7 @@ __epi_1xi64 test_vfcvt_x_f_1xi64_1xf64(__epi_1xf64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_1xi64_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv1i64.nxv1f64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv1i64.nxv1f64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vfcvt_x_f_1xi64_1xf64_mask(__epi_1xi64 arg_0, __epi_1xf64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -1676,7 +1676,7 @@ __epi_4xi32 test_vfcvt_x_f_4xi32_4xf32(__epi_4xf32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_4xi32_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv4i32.nxv4f32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv4i32.nxv4f32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vfcvt_x_f_4xi32_4xf32_mask(__epi_4xi32 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1696,7 +1696,7 @@ __epi_2xi64 test_vfcvt_x_f_2xi64_2xf64(__epi_2xf64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_2xi64_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv2i64.nxv2f64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv2i64.nxv2f64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vfcvt_x_f_2xi64_2xf64_mask(__epi_2xi64 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1716,7 +1716,7 @@ __epi_8xi32 test_vfcvt_x_f_8xi32_8xf32(__epi_8xf32 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_8xi32_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv8i32.nxv8f32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfcvt.x.f.v.mask.nxv8i32.nxv8f32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vfcvt_x_f_8xi32_8xf32_mask(__epi_8xi32 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -1736,7 +1736,7 @@ __epi_4xi64 test_vfcvt_x_f_4xi64_4xf64(__epi_4xf64 arg_0, unsigned long int arg_
 
 // CHECK-O2-LABEL: @test_vfcvt_x_f_4xi64_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv4i64.nxv4f64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfcvt.x.f.v.mask.nxv4i64.nxv4f64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vfcvt_x_f_4xi64_4xf64_mask(__epi_4xi64 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1756,7 +1756,7 @@ __epi_2xi32 test_vfcvt_xu_f_2xi32_2xf32(__epi_2xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_2xi32_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv2i32.nxv2f32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv2i32.nxv2f32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vfcvt_xu_f_2xi32_2xf32_mask(__epi_2xi32 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1776,7 +1776,7 @@ __epi_1xi64 test_vfcvt_xu_f_1xi64_1xf64(__epi_1xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_1xi64_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv1i64.nxv1f64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv1i64.nxv1f64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vfcvt_xu_f_1xi64_1xf64_mask(__epi_1xi64 arg_0, __epi_1xf64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -1796,7 +1796,7 @@ __epi_4xi32 test_vfcvt_xu_f_4xi32_4xf32(__epi_4xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_4xi32_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv4i32.nxv4f32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv4i32.nxv4f32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vfcvt_xu_f_4xi32_4xf32_mask(__epi_4xi32 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1816,7 +1816,7 @@ __epi_2xi64 test_vfcvt_xu_f_2xi64_2xf64(__epi_2xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_2xi64_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv2i64.nxv2f64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv2i64.nxv2f64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vfcvt_xu_f_2xi64_2xf64_mask(__epi_2xi64 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -1836,7 +1836,7 @@ __epi_8xi32 test_vfcvt_xu_f_8xi32_8xf32(__epi_8xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_8xi32_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv8i32.nxv8f32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfcvt.xu.f.v.mask.nxv8i32.nxv8f32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vfcvt_xu_f_8xi32_8xf32_mask(__epi_8xi32 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -1856,7 +1856,7 @@ __epi_4xi64 test_vfcvt_xu_f_4xi64_4xf64(__epi_4xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfcvt_xu_f_4xi64_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv4i64.nxv4f64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfcvt.xu.f.v.mask.nxv4i64.nxv4f64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vfcvt_xu_f_4xi64_4xf64_mask(__epi_4xi64 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -1876,7 +1876,7 @@ __epi_2xf32 test_vfdiv_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfdiv.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfdiv.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfdiv_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1896,7 +1896,7 @@ __epi_1xf64 test_vfdiv_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfdiv.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfdiv.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfdiv_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -1916,7 +1916,7 @@ __epi_4xf32 test_vfdiv_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfdiv.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfdiv.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfdiv_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -1936,7 +1936,7 @@ __epi_2xf64 test_vfdiv_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfdiv.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfdiv.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfdiv_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -1956,7 +1956,7 @@ __epi_8xf32 test_vfdiv_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfdiv.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfdiv.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfdiv_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -1976,7 +1976,7 @@ __epi_4xf64 test_vfdiv_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfdiv_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfdiv.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfdiv.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfdiv_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2356,7 +2356,7 @@ __epi_2xf32 test_vfmax_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmax.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmax.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfmax_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2376,7 +2376,7 @@ __epi_1xf64 test_vfmax_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmax.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmax.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfmax_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -2396,7 +2396,7 @@ __epi_4xf32 test_vfmax_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmax.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmax.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfmax_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2416,7 +2416,7 @@ __epi_2xf64 test_vfmax_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmax.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmax.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfmax_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2436,7 +2436,7 @@ __epi_8xf32 test_vfmax_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmax.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmax.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfmax_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -2456,7 +2456,7 @@ __epi_4xf64 test_vfmax_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmax_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmax.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmax.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfmax_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2536,7 +2536,7 @@ __epi_2xf32 test_vfmin_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmin.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmin.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfmin_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2556,7 +2556,7 @@ __epi_1xf64 test_vfmin_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmin.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmin.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfmin_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -2576,7 +2576,7 @@ __epi_4xf32 test_vfmin_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmin.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmin.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfmin_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2596,7 +2596,7 @@ __epi_2xf64 test_vfmin_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmin.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmin.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfmin_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2616,7 +2616,7 @@ __epi_8xf32 test_vfmin_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmin.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmin.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfmin_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -2636,7 +2636,7 @@ __epi_4xf64 test_vfmin_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmin_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmin.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmin.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfmin_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2896,7 +2896,7 @@ __epi_2xf32 test_vfmul_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmul.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmul.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfmul_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2916,7 +2916,7 @@ __epi_1xf64 test_vfmul_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmul.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmul.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfmul_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -2936,7 +2936,7 @@ __epi_4xf32 test_vfmul_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmul.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmul.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfmul_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -2956,7 +2956,7 @@ __epi_2xf64 test_vfmul_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmul.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmul.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfmul_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -2976,7 +2976,7 @@ __epi_8xf32 test_vfmul_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmul.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmul.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfmul_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -2996,7 +2996,7 @@ __epi_4xf64 test_vfmul_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfmul_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmul.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmul.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfmul_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -3196,7 +3196,7 @@ __epi_2xf32 test_vfncvt_f_f_2xf32_2xf64(__epi_2xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_f_2xf32_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv2f32.nxv2f64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv2f32.nxv2f64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfncvt_f_f_2xf32_2xf64_mask(__epi_2xf32 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -3216,7 +3216,7 @@ __epi_4xf32 test_vfncvt_f_f_4xf32_4xf64(__epi_4xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_f_4xf32_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv4f32.nxv4f64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv4f32.nxv4f64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfncvt_f_f_4xf32_4xf64_mask(__epi_4xf32 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3236,7 +3236,7 @@ __epi_8xf32 test_vfncvt_f_f_8xf32_8xf64(__epi_8xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_f_8xf32_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv8f32.nxv8f64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.f.w.mask.nxv8f32.nxv8f64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfncvt_f_f_8xf32_8xf64_mask(__epi_8xf32 arg_0, __epi_8xf64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3256,7 +3256,7 @@ __epi_2xf32 test_vfncvt_f_x_2xf32_2xi64(__epi_2xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_x_2xf32_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv2f32.nxv2i64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv2f32.nxv2i64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfncvt_f_x_2xf32_2xi64_mask(__epi_2xf32 arg_0, __epi_2xi64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -3276,7 +3276,7 @@ __epi_4xf32 test_vfncvt_f_x_4xf32_4xi64(__epi_4xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_x_4xf32_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv4f32.nxv4i64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv4f32.nxv4i64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfncvt_f_x_4xf32_4xi64_mask(__epi_4xf32 arg_0, __epi_4xi64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3296,7 +3296,7 @@ __epi_8xf32 test_vfncvt_f_x_8xf32_8xi64(__epi_8xi64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_f_x_8xf32_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv8f32.nxv8i64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.x.w.mask.nxv8f32.nxv8i64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfncvt_f_x_8xf32_8xi64_mask(__epi_8xf32 arg_0, __epi_8xi64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3316,7 +3316,7 @@ __epi_2xf32 test_vfncvt_f_xu_2xf32_2xi64(__epi_2xi64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_f_xu_2xf32_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv2f32.nxv2i64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv2f32.nxv2i64.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfncvt_f_xu_2xf32_2xi64_mask(__epi_2xf32 arg_0, __epi_2xi64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -3336,7 +3336,7 @@ __epi_4xf32 test_vfncvt_f_xu_4xf32_4xi64(__epi_4xi64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_f_xu_4xf32_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv4f32.nxv4i64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv4f32.nxv4i64.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfncvt_f_xu_4xf32_4xi64_mask(__epi_4xf32 arg_0, __epi_4xi64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3356,7 +3356,7 @@ __epi_8xf32 test_vfncvt_f_xu_8xf32_8xi64(__epi_8xi64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_f_xu_8xf32_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv8f32.nxv8i64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfncvt.f.xu.w.mask.nxv8f32.nxv8i64.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfncvt_f_xu_8xf32_8xi64_mask(__epi_8xf32 arg_0, __epi_8xi64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3376,7 +3376,7 @@ __epi_4xi16 test_vfncvt_x_f_4xi16_4xf32(__epi_4xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_4xi16_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv4i16.nxv4f32.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv4i16.nxv4f32.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vfncvt_x_f_4xi16_4xf32_mask(__epi_4xi16 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3396,7 +3396,7 @@ __epi_2xi32 test_vfncvt_x_f_2xi32_2xf64(__epi_2xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_2xi32_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv2i32.nxv2f64.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv2i32.nxv2f64.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vfncvt_x_f_2xi32_2xf64_mask(__epi_2xi32 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -3416,7 +3416,7 @@ __epi_8xi16 test_vfncvt_x_f_8xi16_8xf32(__epi_8xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_8xi16_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv8i16.nxv8f32.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv8i16.nxv8f32.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vfncvt_x_f_8xi16_8xf32_mask(__epi_8xi16 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3436,7 +3436,7 @@ __epi_4xi32 test_vfncvt_x_f_4xi32_4xf64(__epi_4xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_4xi32_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv4i32.nxv4f64.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv4i32.nxv4f64.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vfncvt_x_f_4xi32_4xf64_mask(__epi_4xi32 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3456,7 +3456,7 @@ __epi_16xi16 test_vfncvt_x_f_16xi16_16xf32(__epi_16xf32 arg_0, unsigned long int
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_16xi16_16xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv16i16.nxv16f32.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x float> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vfncvt.x.f.w.mask.nxv16i16.nxv16f32.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x float> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vfncvt_x_f_16xi16_16xf32_mask(__epi_16xi16 arg_0, __epi_16xf32 arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -3476,7 +3476,7 @@ __epi_8xi32 test_vfncvt_x_f_8xi32_8xf64(__epi_8xf64 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfncvt_x_f_8xi32_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv8i32.nxv8f64.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfncvt.x.f.w.mask.nxv8i32.nxv8f64.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vfncvt_x_f_8xi32_8xf64_mask(__epi_8xi32 arg_0, __epi_8xf64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3496,7 +3496,7 @@ __epi_4xi16 test_vfncvt_xu_f_4xi16_4xf32(__epi_4xf32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_4xi16_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv4i16.nxv4f32.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv4i16.nxv4f32.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vfncvt_xu_f_4xi16_4xf32_mask(__epi_4xi16 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3516,7 +3516,7 @@ __epi_2xi32 test_vfncvt_xu_f_2xi32_2xf64(__epi_2xf64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_2xi32_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv2i32.nxv2f64.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv2i32.nxv2f64.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vfncvt_xu_f_2xi32_2xf64_mask(__epi_2xi32 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -3536,7 +3536,7 @@ __epi_8xi16 test_vfncvt_xu_f_8xi16_8xf32(__epi_8xf32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_8xi16_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv8i16.nxv8f32.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv8i16.nxv8f32.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vfncvt_xu_f_8xi16_8xf32_mask(__epi_8xi16 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -3556,7 +3556,7 @@ __epi_4xi32 test_vfncvt_xu_f_4xi32_4xf64(__epi_4xf64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_4xi32_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv4i32.nxv4f64.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv4i32.nxv4f64.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vfncvt_xu_f_4xi32_4xf64_mask(__epi_4xi32 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -3576,7 +3576,7 @@ __epi_16xi16 test_vfncvt_xu_f_16xi16_16xf32(__epi_16xf32 arg_0, unsigned long in
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_16xi16_16xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv16i16.nxv16f32.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x float> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vfncvt.xu.f.w.mask.nxv16i16.nxv16f32.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x float> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vfncvt_xu_f_16xi16_16xf32_mask(__epi_16xi16 arg_0, __epi_16xf32 arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -3596,7 +3596,7 @@ __epi_8xi32 test_vfncvt_xu_f_8xi32_8xf64(__epi_8xf64 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfncvt_xu_f_8xi32_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv8i32.nxv8f64.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vfncvt.xu.f.w.mask.nxv8i32.nxv8f64.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vfncvt_xu_f_8xi32_8xf64_mask(__epi_8xi32 arg_0, __epi_8xf64 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -4506,7 +4506,7 @@ __epi_4xf64 test_vfredosum_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __ep
 
 // CHECK-O2-LABEL: @test_vfredsum_2xf32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.nxv2f32.nxv2f32.i64(<vscale x 2 x float> undef, <vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.nxv2f32.nxv2f32.i64(<vscale x 2 x float> undef, <vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfredsum_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2)
@@ -4516,7 +4516,7 @@ __epi_2xf32 test_vfredsum_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfredsum_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfredsum_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4526,7 +4526,7 @@ __epi_2xf32 test_vfredsum_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi
 
 // CHECK-O2-LABEL: @test_vfredsum_1xf64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.nxv1f64.nxv1f64.i64(<vscale x 1 x double> undef, <vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.nxv1f64.nxv1f64.i64(<vscale x 1 x double> undef, <vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfredsum_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2)
@@ -4536,7 +4536,7 @@ __epi_1xf64 test_vfredsum_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfredsum_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfredsum_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -4547,7 +4547,7 @@ __epi_1xf64 test_vfredsum_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi
 // CHECK-O2-LABEL: @test_vfredsum_4xf32(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv4f32(<vscale x 4 x float> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.nxv2f32.nxv4f32.i64(<vscale x 2 x float> undef, <vscale x 4 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.nxv2f32.nxv4f32.i64(<vscale x 2 x float> undef, <vscale x 4 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 4 x float> @llvm.experimental.vector.insert.nxv4f32.nxv2f32(<vscale x 4 x float> undef, <vscale x 2 x float> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP2]]
 //
@@ -4560,7 +4560,7 @@ __epi_4xf32 test_vfredsum_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned l
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv4f32(<vscale x 4 x float> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv4f32(<vscale x 4 x float> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.mask.nxv2f32.nxv4f32.i64(<vscale x 2 x float> [[TMP0]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.mask.nxv2f32.nxv4f32.i64(<vscale x 2 x float> [[TMP0]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 4 x float> @llvm.experimental.vector.insert.nxv4f32.nxv2f32(<vscale x 4 x float> undef, <vscale x 2 x float> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP3]]
 //
@@ -4572,7 +4572,7 @@ __epi_4xf32 test_vfredsum_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi
 // CHECK-O2-LABEL: @test_vfredsum_2xf64(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.nxv1f64.nxv2f64.i64(<vscale x 1 x double> undef, <vscale x 2 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.nxv1f64.nxv2f64.i64(<vscale x 1 x double> undef, <vscale x 2 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x double> @llvm.experimental.vector.insert.nxv2f64.nxv1f64(<vscale x 2 x double> undef, <vscale x 1 x double> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP2]]
 //
@@ -4585,7 +4585,7 @@ __epi_2xf64 test_vfredsum_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned l
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.mask.nxv1f64.nxv2f64.i64(<vscale x 1 x double> [[TMP0]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.mask.nxv1f64.nxv2f64.i64(<vscale x 1 x double> [[TMP0]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 2 x double> @llvm.experimental.vector.insert.nxv2f64.nxv1f64(<vscale x 2 x double> undef, <vscale x 1 x double> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP3]]
 //
@@ -4597,7 +4597,7 @@ __epi_2xf64 test_vfredsum_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi
 // CHECK-O2-LABEL: @test_vfredsum_8xf32(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv8f32(<vscale x 8 x float> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.nxv2f32.nxv8f32.i64(<vscale x 2 x float> undef, <vscale x 8 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.nxv2f32.nxv8f32.i64(<vscale x 2 x float> undef, <vscale x 8 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 8 x float> @llvm.experimental.vector.insert.nxv8f32.nxv2f32(<vscale x 8 x float> undef, <vscale x 2 x float> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP2]]
 //
@@ -4610,7 +4610,7 @@ __epi_8xf32 test_vfredsum_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned l
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv8f32(<vscale x 8 x float> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.experimental.vector.extract.nxv2f32.nxv8f32(<vscale x 8 x float> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredsum.mask.nxv2f32.nxv8f32.i64(<vscale x 2 x float> [[TMP0]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[TMP1]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfredusum.mask.nxv2f32.nxv8f32.i64(<vscale x 2 x float> [[TMP0]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[TMP1]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 8 x float> @llvm.experimental.vector.insert.nxv8f32.nxv2f32(<vscale x 8 x float> undef, <vscale x 2 x float> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP3]]
 //
@@ -4622,7 +4622,7 @@ __epi_8xf32 test_vfredsum_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi
 // CHECK-O2-LABEL: @test_vfredsum_4xf64(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.nxv1f64.nxv4f64.i64(<vscale x 1 x double> undef, <vscale x 4 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.nxv1f64.nxv4f64.i64(<vscale x 1 x double> undef, <vscale x 4 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 4 x double> @llvm.experimental.vector.insert.nxv4f64.nxv1f64(<vscale x 4 x double> undef, <vscale x 1 x double> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP2]]
 //
@@ -4635,7 +4635,7 @@ __epi_4xf64 test_vfredsum_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned l
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredsum.mask.nxv1f64.nxv4f64.i64(<vscale x 1 x double> [[TMP0]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfredusum.mask.nxv1f64.nxv4f64.i64(<vscale x 1 x double> [[TMP0]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 4 x double> @llvm.experimental.vector.insert.nxv4f64.nxv1f64(<vscale x 4 x double> undef, <vscale x 1 x double> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP3]]
 //
@@ -4656,7 +4656,7 @@ __epi_2xf32 test_vfsgnj_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnj.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnj.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfsgnj_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4676,7 +4676,7 @@ __epi_1xf64 test_vfsgnj_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnj.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnj.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfsgnj_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -4696,7 +4696,7 @@ __epi_4xf32 test_vfsgnj_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnj.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnj.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfsgnj_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -4716,7 +4716,7 @@ __epi_2xf64 test_vfsgnj_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnj.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnj.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfsgnj_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4736,7 +4736,7 @@ __epi_8xf32 test_vfsgnj_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnj.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnj.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfsgnj_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -4756,7 +4756,7 @@ __epi_4xf64 test_vfsgnj_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfsgnj_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnj.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnj.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfsgnj_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -4776,7 +4776,7 @@ __epi_2xf32 test_vfsgnjn_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnjn.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnjn.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfsgnjn_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4796,7 +4796,7 @@ __epi_1xf64 test_vfsgnjn_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnjn.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnjn.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfsgnjn_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -4816,7 +4816,7 @@ __epi_4xf32 test_vfsgnjn_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnjn.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnjn.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfsgnjn_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -4836,7 +4836,7 @@ __epi_2xf64 test_vfsgnjn_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnjn.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnjn.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfsgnjn_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4856,7 +4856,7 @@ __epi_8xf32 test_vfsgnjn_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnjn.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnjn.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfsgnjn_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -4876,7 +4876,7 @@ __epi_4xf64 test_vfsgnjn_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjn_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnjn.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnjn.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfsgnjn_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -4896,7 +4896,7 @@ __epi_2xf32 test_vfsgnjx_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnjx.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsgnjx.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfsgnjx_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4916,7 +4916,7 @@ __epi_1xf64 test_vfsgnjx_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnjx.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsgnjx.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfsgnjx_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -4936,7 +4936,7 @@ __epi_4xf32 test_vfsgnjx_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnjx.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsgnjx.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfsgnjx_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -4956,7 +4956,7 @@ __epi_2xf64 test_vfsgnjx_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnjx.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsgnjx.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfsgnjx_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -4976,7 +4976,7 @@ __epi_8xf32 test_vfsgnjx_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnjx.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsgnjx.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfsgnjx_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -4996,7 +4996,7 @@ __epi_4xf64 test_vfsgnjx_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vfsgnjx_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnjx.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsgnjx.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfsgnjx_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5016,7 +5016,7 @@ __epi_2xf32 test_vfsqrt_2xf32(__epi_2xf32 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsqrt.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsqrt.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfsqrt_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5036,7 +5036,7 @@ __epi_1xf64 test_vfsqrt_1xf64(__epi_1xf64 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsqrt.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsqrt.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfsqrt_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -5056,7 +5056,7 @@ __epi_4xf32 test_vfsqrt_4xf32(__epi_4xf32 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsqrt.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsqrt.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfsqrt_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5076,7 +5076,7 @@ __epi_2xf64 test_vfsqrt_2xf64(__epi_2xf64 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsqrt.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsqrt.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfsqrt_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5096,7 +5096,7 @@ __epi_8xf32 test_vfsqrt_8xf32(__epi_8xf32 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsqrt.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsqrt.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfsqrt_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5116,7 +5116,7 @@ __epi_4xf64 test_vfsqrt_4xf64(__epi_4xf64 arg_0, unsigned long int arg_1)
 
 // CHECK-O2-LABEL: @test_vfsqrt_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsqrt.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsqrt.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfsqrt_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5136,7 +5136,7 @@ __epi_2xf32 test_vfsub_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsub.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfsub.mask.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfsub_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -5156,7 +5156,7 @@ __epi_1xf64 test_vfsub_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsub.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfsub.mask.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x double> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfsub_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xf64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -5176,7 +5176,7 @@ __epi_4xf32 test_vfsub_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsub.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfsub.mask.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfsub_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5196,7 +5196,7 @@ __epi_2xf64 test_vfsub_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsub.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfsub.mask.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x double> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfsub_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -5216,7 +5216,7 @@ __epi_8xf32 test_vfsub_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsub.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfsub.mask.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfsub_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -5236,7 +5236,7 @@ __epi_4xf64 test_vfsub_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vfsub_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsub.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfsub.mask.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x double> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfsub_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5256,7 +5256,7 @@ __epi_2xf64 test_vfwadd_2xf64(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwadd_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwadd.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwadd.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwadd_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -5276,7 +5276,7 @@ __epi_4xf64 test_vfwadd_4xf64(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwadd_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwadd.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwadd.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwadd_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5296,7 +5296,7 @@ __epi_8xf64 test_vfwadd_8xf64(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwadd_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwadd.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwadd.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwadd_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -5316,7 +5316,7 @@ __epi_2xf64 test_vfwadd_w_2xf64(__epi_2xf64 arg_0, __epi_2xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwadd_w_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwadd.w.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwadd.w.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwadd_w_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -5336,7 +5336,7 @@ __epi_4xf64 test_vfwadd_w_4xf64(__epi_4xf64 arg_0, __epi_4xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwadd_w_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwadd.w.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwadd.w.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwadd_w_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5356,7 +5356,7 @@ __epi_8xf64 test_vfwadd_w_8xf64(__epi_8xf64 arg_0, __epi_8xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwadd_w_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwadd.w.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwadd.w.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwadd_w_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf64 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -5376,7 +5376,7 @@ __epi_2xf64 test_vfwcvt_f_f_2xf64_2xf32(__epi_2xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_f_2xf64_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwcvt_f_f_2xf64_2xf32_mask(__epi_2xf64 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5396,7 +5396,7 @@ __epi_4xf64 test_vfwcvt_f_f_4xf64_4xf32(__epi_4xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_f_4xf64_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwcvt_f_f_4xf64_4xf32_mask(__epi_4xf64 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5416,7 +5416,7 @@ __epi_8xf64 test_vfwcvt_f_f_8xf64_8xf32(__epi_8xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_f_8xf64_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.f.v.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwcvt_f_f_8xf64_8xf32_mask(__epi_8xf64 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5436,7 +5436,7 @@ __epi_4xf32 test_vfwcvt_f_x_4xf32_4xi16(__epi_4xi16 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_4xf32_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv4f32.nxv4i16.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv4f32.nxv4i16.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfwcvt_f_x_4xf32_4xi16_mask(__epi_4xf32 arg_0, __epi_4xi16 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5456,7 +5456,7 @@ __epi_2xf64 test_vfwcvt_f_x_2xf64_2xi32(__epi_2xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_2xf64_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv2f64.nxv2i32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv2f64.nxv2i32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwcvt_f_x_2xf64_2xi32_mask(__epi_2xf64 arg_0, __epi_2xi32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5476,7 +5476,7 @@ __epi_8xf32 test_vfwcvt_f_x_8xf32_8xi16(__epi_8xi16 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_8xf32_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv8f32.nxv8i16.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv8f32.nxv8i16.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfwcvt_f_x_8xf32_8xi16_mask(__epi_8xf32 arg_0, __epi_8xi16 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5496,7 +5496,7 @@ __epi_4xf64 test_vfwcvt_f_x_4xf64_4xi32(__epi_4xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_4xf64_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv4f64.nxv4i32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv4f64.nxv4i32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwcvt_f_x_4xf64_4xi32_mask(__epi_4xf64 arg_0, __epi_4xi32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5516,7 +5516,7 @@ __epi_16xf32 test_vfwcvt_f_x_16xf32_16xi16(__epi_16xi16 arg_0, unsigned long int
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_16xf32_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv16f32.nxv16i16.i64(<vscale x 16 x float> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x float> @llvm.riscv.vfwcvt.f.x.v.mask.nxv16f32.nxv16i16.i64(<vscale x 16 x float> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x float> [[TMP0]]
 //
 __epi_16xf32 test_vfwcvt_f_x_16xf32_16xi16_mask(__epi_16xf32 arg_0, __epi_16xi16 arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -5536,7 +5536,7 @@ __epi_8xf64 test_vfwcvt_f_x_8xf64_8xi32(__epi_8xi32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_x_8xf64_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv8f64.nxv8i32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.x.v.mask.nxv8f64.nxv8i32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwcvt_f_x_8xf64_8xi32_mask(__epi_8xf64 arg_0, __epi_8xi32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5556,7 +5556,7 @@ __epi_4xf32 test_vfwcvt_f_xu_4xf32_4xi16(__epi_4xi16 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_4xf32_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv4f32.nxv4i16.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv4f32.nxv4i16.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfwcvt_f_xu_4xf32_4xi16_mask(__epi_4xf32 arg_0, __epi_4xi16 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5576,7 +5576,7 @@ __epi_2xf64 test_vfwcvt_f_xu_2xf64_2xi32(__epi_2xi32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_2xf64_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv2f64.nxv2i32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv2f64.nxv2i32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwcvt_f_xu_2xf64_2xi32_mask(__epi_2xf64 arg_0, __epi_2xi32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5596,7 +5596,7 @@ __epi_8xf32 test_vfwcvt_f_xu_8xf32_8xi16(__epi_8xi16 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_8xf32_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv8f32.nxv8i16.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv8f32.nxv8i16.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfwcvt_f_xu_8xf32_8xi16_mask(__epi_8xf32 arg_0, __epi_8xi16 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5616,7 +5616,7 @@ __epi_4xf64 test_vfwcvt_f_xu_4xf64_4xi32(__epi_4xi32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_4xf64_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv4f64.nxv4i32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv4f64.nxv4i32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwcvt_f_xu_4xf64_4xi32_mask(__epi_4xf64 arg_0, __epi_4xi32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5636,7 +5636,7 @@ __epi_16xf32 test_vfwcvt_f_xu_16xf32_16xi16(__epi_16xi16 arg_0, unsigned long in
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_16xf32_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv16f32.nxv16i16.i64(<vscale x 16 x float> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x float> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv16f32.nxv16i16.i64(<vscale x 16 x float> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x float> [[TMP0]]
 //
 __epi_16xf32 test_vfwcvt_f_xu_16xf32_16xi16_mask(__epi_16xf32 arg_0, __epi_16xi16 arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -5656,7 +5656,7 @@ __epi_8xf64 test_vfwcvt_f_xu_8xf64_8xi32(__epi_8xi32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_f_xu_8xf64_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv8f64.nxv8i32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwcvt.f.xu.v.mask.nxv8f64.nxv8i32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwcvt_f_xu_8xf64_8xi32_mask(__epi_8xf64 arg_0, __epi_8xi32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5676,7 +5676,7 @@ __epi_2xi64 test_vfwcvt_x_f_2xi64_2xf32(__epi_2xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_x_f_2xi64_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv2i64.nxv2f32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv2i64.nxv2f32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vfwcvt_x_f_2xi64_2xf32_mask(__epi_2xi64 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5696,7 +5696,7 @@ __epi_4xi64 test_vfwcvt_x_f_4xi64_4xf32(__epi_4xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_x_f_4xi64_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv4i64.nxv4f32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv4i64.nxv4f32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vfwcvt_x_f_4xi64_4xf32_mask(__epi_4xi64 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5716,7 +5716,7 @@ __epi_8xi64 test_vfwcvt_x_f_8xi64_8xf32(__epi_8xf32 arg_0, unsigned long int arg
 
 // CHECK-O2-LABEL: @test_vfwcvt_x_f_8xi64_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv8i64.nxv8f32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vfwcvt.x.f.v.mask.nxv8i64.nxv8f32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vfwcvt_x_f_8xi64_8xf32_mask(__epi_8xi64 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5736,7 +5736,7 @@ __epi_2xi64 test_vfwcvt_xu_f_2xi64_2xf32(__epi_2xf32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_xu_f_2xi64_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv2i64.nxv2f32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv2i64.nxv2f32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vfwcvt_xu_f_2xi64_2xf32_mask(__epi_2xi64 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -5756,7 +5756,7 @@ __epi_4xi64 test_vfwcvt_xu_f_4xi64_4xf32(__epi_4xf32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_xu_f_4xi64_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv4i64.nxv4f32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv4i64.nxv4f32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vfwcvt_xu_f_4xi64_4xf32_mask(__epi_4xi64 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -5776,7 +5776,7 @@ __epi_8xi64 test_vfwcvt_xu_f_8xi64_8xf32(__epi_8xf32 arg_0, unsigned long int ar
 
 // CHECK-O2-LABEL: @test_vfwcvt_xu_f_8xi64_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv8i64.nxv8f32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vfwcvt.xu.f.v.mask.nxv8i64.nxv8f32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vfwcvt_xu_f_8xi64_8xf32_mask(__epi_8xi64 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -5916,7 +5916,7 @@ __epi_2xf64 test_vfwmul_2xf64(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwmul_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwmul.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwmul.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwmul_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -5936,7 +5936,7 @@ __epi_4xf64 test_vfwmul_4xf64(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwmul_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwmul.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwmul.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwmul_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -5956,7 +5956,7 @@ __epi_8xf64 test_vfwmul_8xf64(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwmul_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwmul.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwmul.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwmul_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -6162,7 +6162,7 @@ __epi_8xf64 test_vfwredosum_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf32 arg_1, __e
 // CHECK-O2-LABEL: @test_vfwredsum_2xf64(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.nxv1f64.nxv2f32.i64(<vscale x 1 x double> undef, <vscale x 2 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.nxv1f64.nxv2f32.i64(<vscale x 1 x double> undef, <vscale x 2 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 2 x double> @llvm.experimental.vector.insert.nxv2f64.nxv1f64(<vscale x 2 x double> undef, <vscale x 1 x double> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP2]]
 //
@@ -6175,7 +6175,7 @@ __epi_2xf64 test_vfwredsum_2xf64(__epi_2xf32 arg_0, __epi_2xf64 arg_1, unsigned 
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv2f64(<vscale x 2 x double> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.mask.nxv1f64.nxv2f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.mask.nxv1f64.nxv2f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 2 x double> @llvm.experimental.vector.insert.nxv2f64.nxv1f64(<vscale x 2 x double> undef, <vscale x 1 x double> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP3]]
 //
@@ -6187,7 +6187,7 @@ __epi_2xf64 test_vfwredsum_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf32 arg_1, __ep
 // CHECK-O2-LABEL: @test_vfwredsum_4xf64(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.nxv1f64.nxv4f32.i64(<vscale x 1 x double> undef, <vscale x 4 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.nxv1f64.nxv4f32.i64(<vscale x 1 x double> undef, <vscale x 4 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 4 x double> @llvm.experimental.vector.insert.nxv4f64.nxv1f64(<vscale x 4 x double> undef, <vscale x 1 x double> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP2]]
 //
@@ -6200,7 +6200,7 @@ __epi_4xf64 test_vfwredsum_4xf64(__epi_4xf32 arg_0, __epi_4xf64 arg_1, unsigned 
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv4f64(<vscale x 4 x double> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.mask.nxv1f64.nxv4f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.mask.nxv1f64.nxv4f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 4 x double> @llvm.experimental.vector.insert.nxv4f64.nxv1f64(<vscale x 4 x double> undef, <vscale x 1 x double> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP3]]
 //
@@ -6212,7 +6212,7 @@ __epi_4xf64 test_vfwredsum_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf32 arg_1, __ep
 // CHECK-O2-LABEL: @test_vfwredsum_8xf64(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv8f64(<vscale x 8 x double> [[ARG_1:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.nxv1f64.nxv8f32.i64(<vscale x 1 x double> undef, <vscale x 8 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.nxv1f64.nxv8f32.i64(<vscale x 1 x double> undef, <vscale x 8 x float> [[ARG_0:%.*]], <vscale x 1 x double> [[TMP0]], i64 [[ARG_2:%.*]])
 // CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 8 x double> @llvm.experimental.vector.insert.nxv8f64.nxv1f64(<vscale x 8 x double> undef, <vscale x 1 x double> [[TMP1]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP2]]
 //
@@ -6225,7 +6225,7 @@ __epi_8xf64 test_vfwredsum_8xf64(__epi_8xf32 arg_0, __epi_8xf64 arg_1, unsigned 
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv8f64(<vscale x 8 x double> [[ARG_0:%.*]], i64 0)
 // CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.experimental.vector.extract.nxv1f64.nxv8f64(<vscale x 8 x double> [[ARG_2:%.*]], i64 0)
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredsum.mask.nxv1f64.nxv8f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfwredusum.mask.nxv1f64.nxv8f32.i64(<vscale x 1 x double> [[TMP0]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 1 x double> [[TMP1]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
 // CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 8 x double> @llvm.experimental.vector.insert.nxv8f64.nxv1f64(<vscale x 8 x double> undef, <vscale x 1 x double> [[TMP2]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP3]]
 //
@@ -6246,7 +6246,7 @@ __epi_2xf64 test_vfwsub_2xf64(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwsub_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwsub.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwsub.mask.nxv2f64.nxv2f32.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwsub_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf32 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -6266,7 +6266,7 @@ __epi_4xf64 test_vfwsub_4xf64(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwsub_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwsub.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwsub.mask.nxv4f64.nxv4f32.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwsub_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf32 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -6286,7 +6286,7 @@ __epi_8xf64 test_vfwsub_8xf64(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vfwsub_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwsub.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwsub.mask.nxv8f64.nxv8f32.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwsub_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf32 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -6306,7 +6306,7 @@ __epi_2xf64 test_vfwsub_w_2xf64(__epi_2xf64 arg_0, __epi_2xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwsub_w_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwsub.w.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfwsub.w.mask.nxv2f64.nxv2f32.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x float> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfwsub_w_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xf32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -6326,7 +6326,7 @@ __epi_4xf64 test_vfwsub_w_4xf64(__epi_4xf64 arg_0, __epi_4xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwsub_w_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwsub.w.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfwsub.w.mask.nxv4f64.nxv4f32.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x float> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfwsub_w_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xf32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -6346,7 +6346,7 @@ __epi_8xf64 test_vfwsub_w_8xf64(__epi_8xf64 arg_0, __epi_8xf32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vfwsub_w_8xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwsub.w.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x double> @llvm.riscv.vfwsub.w.mask.nxv8f64.nxv8f32.i64(<vscale x 8 x double> [[ARG_0:%.*]], <vscale x 8 x double> [[ARG_1:%.*]], <vscale x 8 x float> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x double> [[TMP0]]
 //
 __epi_8xf64 test_vfwsub_w_8xf64_mask(__epi_8xf64 arg_0, __epi_8xf64 arg_1, __epi_8xf32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -6848,7 +6848,7 @@ __epi_8xi8 test_vload_8xi8(const signed char*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vle.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vle.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_8xi8_mask(__epi_8xi8 arg_0, const signed char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -6870,7 +6870,7 @@ __epi_4xi16 test_vload_4xi16(const signed short int*  arg_0, unsigned long int a
 // CHECK-O2-LABEL: @test_vload_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vle.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vle.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_4xi16_mask(__epi_4xi16 arg_0, const signed short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -6892,7 +6892,7 @@ __epi_2xi32 test_vload_2xi32(const signed int*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vle.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vle.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_2xi32_mask(__epi_2xi32 arg_0, const signed int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -6914,7 +6914,7 @@ __epi_1xi64 test_vload_1xi64(const signed long int*  arg_0, unsigned long int ar
 // CHECK-O2-LABEL: @test_vload_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vle.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vle.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_1xi64_mask(__epi_1xi64 arg_0, const signed long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -6936,7 +6936,7 @@ __epi_2xf32 test_vload_2xf32(const float*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 2 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vle.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vle.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP1]]
 //
 __epi_2xf32 test_vload_2xf32_mask(__epi_2xf32 arg_0, const float*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -6958,7 +6958,7 @@ __epi_1xf64 test_vload_1xf64(const double*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vle.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vle.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP1]]
 //
 __epi_1xf64 test_vload_1xf64_mask(__epi_1xf64 arg_0, const double*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -6980,7 +6980,7 @@ __epi_16xi8 test_vload_16xi8(const signed char*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vle.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vle.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_16xi8_mask(__epi_16xi8 arg_0, const signed char*  arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -7002,7 +7002,7 @@ __epi_8xi16 test_vload_8xi16(const signed short int*  arg_0, unsigned long int a
 // CHECK-O2-LABEL: @test_vload_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vle.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vle.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_8xi16_mask(__epi_8xi16 arg_0, const signed short int*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -7024,7 +7024,7 @@ __epi_4xi32 test_vload_4xi32(const signed int*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vle.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vle.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_4xi32_mask(__epi_4xi32 arg_0, const signed int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -7046,7 +7046,7 @@ __epi_2xi64 test_vload_2xi64(const signed long int*  arg_0, unsigned long int ar
 // CHECK-O2-LABEL: @test_vload_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vle.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vle.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_2xi64_mask(__epi_2xi64 arg_0, const signed long int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -7068,7 +7068,7 @@ __epi_4xf32 test_vload_4xf32(const float*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 4 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vle.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vle.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP1]]
 //
 __epi_4xf32 test_vload_4xf32_mask(__epi_4xf32 arg_0, const float*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -7090,7 +7090,7 @@ __epi_2xf64 test_vload_2xf64(const double*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 2 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vle.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vle.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP1]]
 //
 __epi_2xf64 test_vload_2xf64_mask(__epi_2xf64 arg_0, const double*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -7112,7 +7112,7 @@ __epi_32xi8 test_vload_32xi8(const signed char*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vle.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vle.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_32xi8_mask(__epi_32xi8 arg_0, const signed char*  arg_1, __epi_32xi1 arg_2, unsigned long int arg_3)
@@ -7134,7 +7134,7 @@ __epi_16xi16 test_vload_16xi16(const signed short int*  arg_0, unsigned long int
 // CHECK-O2-LABEL: @test_vload_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vle.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vle.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_16xi16_mask(__epi_16xi16 arg_0, const signed short int*  arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -7156,7 +7156,7 @@ __epi_8xi32 test_vload_8xi32(const signed int*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vle.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vle.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_8xi32_mask(__epi_8xi32 arg_0, const signed int*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -7178,7 +7178,7 @@ __epi_4xi64 test_vload_4xi64(const signed long int*  arg_0, unsigned long int ar
 // CHECK-O2-LABEL: @test_vload_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vle.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vle.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_4xi64_mask(__epi_4xi64 arg_0, const signed long int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -7200,7 +7200,7 @@ __epi_8xf32 test_vload_8xf32(const float*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 8 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vle.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vle.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP1]]
 //
 __epi_8xf32 test_vload_8xf32_mask(__epi_8xf32 arg_0, const float*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -7222,7 +7222,7 @@ __epi_4xf64 test_vload_4xf64(const double*  arg_0, unsigned long int arg_1)
 // CHECK-O2-LABEL: @test_vload_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 4 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vle.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vle.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP1]]
 //
 __epi_4xf64 test_vload_4xf64_mask(__epi_4xf64 arg_0, const double*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -7244,7 +7244,7 @@ __epi_8xi8 test_vload_indexed_8xi8(const signed char*  arg_0, __epi_8xi8 arg_1, 
 // CHECK-O2-LABEL: @test_vload_indexed_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vluxei.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vluxei.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_indexed_8xi8_mask(__epi_8xi8 arg_0, const signed char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7266,7 +7266,7 @@ __epi_4xi16 test_vload_indexed_4xi16(const signed short int*  arg_0, __epi_4xi16
 // CHECK-O2-LABEL: @test_vload_indexed_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vluxei.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vluxei.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_indexed_4xi16_mask(__epi_4xi16 arg_0, const signed short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7288,7 +7288,7 @@ __epi_2xi32 test_vload_indexed_2xi32(const signed int*  arg_0, __epi_2xi32 arg_1
 // CHECK-O2-LABEL: @test_vload_indexed_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vluxei.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vluxei.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_indexed_2xi32_mask(__epi_2xi32 arg_0, const signed int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7310,7 +7310,7 @@ __epi_1xi64 test_vload_indexed_1xi64(const signed long int*  arg_0, __epi_1xi64 
 // CHECK-O2-LABEL: @test_vload_indexed_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vluxei.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vluxei.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_indexed_1xi64_mask(__epi_1xi64 arg_0, const signed long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -7332,7 +7332,7 @@ __epi_2xf32 test_vload_indexed_2xf32(const float*  arg_0, __epi_2xi32 arg_1, uns
 // CHECK-O2-LABEL: @test_vload_indexed_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 2 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vluxei.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vluxei.mask.nxv2f32.nxv2i32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP1]]
 //
 __epi_2xf32 test_vload_indexed_2xf32_mask(__epi_2xf32 arg_0, const float*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7354,7 +7354,7 @@ __epi_1xf64 test_vload_indexed_1xf64(const double*  arg_0, __epi_1xi64 arg_1, un
 // CHECK-O2-LABEL: @test_vload_indexed_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vluxei.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vluxei.mask.nxv1f64.nxv1i64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP1]]
 //
 __epi_1xf64 test_vload_indexed_1xf64_mask(__epi_1xf64 arg_0, const double*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -7376,7 +7376,7 @@ __epi_16xi8 test_vload_indexed_16xi8(const signed char*  arg_0, __epi_16xi8 arg_
 // CHECK-O2-LABEL: @test_vload_indexed_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vluxei.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vluxei.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_indexed_16xi8_mask(__epi_16xi8 arg_0, const signed char*  arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -7398,7 +7398,7 @@ __epi_8xi16 test_vload_indexed_8xi16(const signed short int*  arg_0, __epi_8xi16
 // CHECK-O2-LABEL: @test_vload_indexed_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vluxei.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vluxei.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_indexed_8xi16_mask(__epi_8xi16 arg_0, const signed short int*  arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7420,7 +7420,7 @@ __epi_4xi32 test_vload_indexed_4xi32(const signed int*  arg_0, __epi_4xi32 arg_1
 // CHECK-O2-LABEL: @test_vload_indexed_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vluxei.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vluxei.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_indexed_4xi32_mask(__epi_4xi32 arg_0, const signed int*  arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7442,7 +7442,7 @@ __epi_2xi64 test_vload_indexed_2xi64(const signed long int*  arg_0, __epi_2xi64 
 // CHECK-O2-LABEL: @test_vload_indexed_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vluxei.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vluxei.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_indexed_2xi64_mask(__epi_2xi64 arg_0, const signed long int*  arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7464,7 +7464,7 @@ __epi_4xf32 test_vload_indexed_4xf32(const float*  arg_0, __epi_4xi32 arg_1, uns
 // CHECK-O2-LABEL: @test_vload_indexed_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 4 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vluxei.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vluxei.mask.nxv4f32.nxv4i32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP1]]
 //
 __epi_4xf32 test_vload_indexed_4xf32_mask(__epi_4xf32 arg_0, const float*  arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7486,7 +7486,7 @@ __epi_2xf64 test_vload_indexed_2xf64(const double*  arg_0, __epi_2xi64 arg_1, un
 // CHECK-O2-LABEL: @test_vload_indexed_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 2 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vluxei.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vluxei.mask.nxv2f64.nxv2i64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP1]]
 //
 __epi_2xf64 test_vload_indexed_2xf64_mask(__epi_2xf64 arg_0, const double*  arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7508,7 +7508,7 @@ __epi_32xi8 test_vload_indexed_32xi8(const signed char*  arg_0, __epi_32xi8 arg_
 // CHECK-O2-LABEL: @test_vload_indexed_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vluxei.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vluxei.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_indexed_32xi8_mask(__epi_32xi8 arg_0, const signed char*  arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -7530,7 +7530,7 @@ __epi_16xi16 test_vload_indexed_16xi16(const signed short int*  arg_0, __epi_16x
 // CHECK-O2-LABEL: @test_vload_indexed_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vluxei.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vluxei.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_indexed_16xi16_mask(__epi_16xi16 arg_0, const signed short int*  arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -7552,7 +7552,7 @@ __epi_8xi32 test_vload_indexed_8xi32(const signed int*  arg_0, __epi_8xi32 arg_1
 // CHECK-O2-LABEL: @test_vload_indexed_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vluxei.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vluxei.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_indexed_8xi32_mask(__epi_8xi32 arg_0, const signed int*  arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7574,7 +7574,7 @@ __epi_4xi64 test_vload_indexed_4xi64(const signed long int*  arg_0, __epi_4xi64 
 // CHECK-O2-LABEL: @test_vload_indexed_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vluxei.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vluxei.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_indexed_4xi64_mask(__epi_4xi64 arg_0, const signed long int*  arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7596,7 +7596,7 @@ __epi_8xf32 test_vload_indexed_8xf32(const float*  arg_0, __epi_8xi32 arg_1, uns
 // CHECK-O2-LABEL: @test_vload_indexed_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 8 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vluxei.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vluxei.mask.nxv8f32.nxv8i32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP1]]
 //
 __epi_8xf32 test_vload_indexed_8xf32_mask(__epi_8xf32 arg_0, const float*  arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7618,7 +7618,7 @@ __epi_4xf64 test_vload_indexed_4xf64(const double*  arg_0, __epi_4xi64 arg_1, un
 // CHECK-O2-LABEL: @test_vload_indexed_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 4 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vluxei.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vluxei.mask.nxv4f64.nxv4i64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP1]]
 //
 __epi_4xf64 test_vload_indexed_4xf64_mask(__epi_4xf64 arg_0, const double*  arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7640,7 +7640,7 @@ __epi_8xi8 test_vload_indexed_unsigned_8xi8(const unsigned char*  arg_0, __epi_8
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vluxei.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vluxei.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_indexed_unsigned_8xi8_mask(__epi_8xi8 arg_0, const unsigned char*  arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7662,7 +7662,7 @@ __epi_4xi16 test_vload_indexed_unsigned_4xi16(const unsigned short int*  arg_0, 
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vluxei.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vluxei.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_indexed_unsigned_4xi16_mask(__epi_4xi16 arg_0, const unsigned short int*  arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7684,7 +7684,7 @@ __epi_2xi32 test_vload_indexed_unsigned_2xi32(const unsigned int*  arg_0, __epi_
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vluxei.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vluxei.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_indexed_unsigned_2xi32_mask(__epi_2xi32 arg_0, const unsigned int*  arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7706,7 +7706,7 @@ __epi_1xi64 test_vload_indexed_unsigned_1xi64(const unsigned long int*  arg_0, _
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vluxei.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vluxei.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_indexed_unsigned_1xi64_mask(__epi_1xi64 arg_0, const unsigned long int*  arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -7728,7 +7728,7 @@ __epi_16xi8 test_vload_indexed_unsigned_16xi8(const unsigned char*  arg_0, __epi
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vluxei.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vluxei.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_indexed_unsigned_16xi8_mask(__epi_16xi8 arg_0, const unsigned char*  arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -7750,7 +7750,7 @@ __epi_8xi16 test_vload_indexed_unsigned_8xi16(const unsigned short int*  arg_0, 
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vluxei.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vluxei.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_indexed_unsigned_8xi16_mask(__epi_8xi16 arg_0, const unsigned short int*  arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7772,7 +7772,7 @@ __epi_4xi32 test_vload_indexed_unsigned_4xi32(const unsigned int*  arg_0, __epi_
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vluxei.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vluxei.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_indexed_unsigned_4xi32_mask(__epi_4xi32 arg_0, const unsigned int*  arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7794,7 +7794,7 @@ __epi_2xi64 test_vload_indexed_unsigned_2xi64(const unsigned long int*  arg_0, _
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vluxei.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vluxei.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_indexed_unsigned_2xi64_mask(__epi_2xi64 arg_0, const unsigned long int*  arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7816,7 +7816,7 @@ __epi_32xi8 test_vload_indexed_unsigned_32xi8(const unsigned char*  arg_0, __epi
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vluxei.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vluxei.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_indexed_unsigned_32xi8_mask(__epi_32xi8 arg_0, const unsigned char*  arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -7838,7 +7838,7 @@ __epi_16xi16 test_vload_indexed_unsigned_16xi16(const unsigned short int*  arg_0
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vluxei.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vluxei.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_indexed_unsigned_16xi16_mask(__epi_16xi16 arg_0, const unsigned short int*  arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -7860,7 +7860,7 @@ __epi_8xi32 test_vload_indexed_unsigned_8xi32(const unsigned int*  arg_0, __epi_
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vluxei.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vluxei.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_indexed_unsigned_8xi32_mask(__epi_8xi32 arg_0, const unsigned int*  arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7882,7 +7882,7 @@ __epi_4xi64 test_vload_indexed_unsigned_4xi64(const unsigned long int*  arg_0, _
 // CHECK-O2-LABEL: @test_vload_indexed_unsigned_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vluxei.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vluxei.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_indexed_unsigned_4xi64_mask(__epi_4xi64 arg_0, const unsigned long int*  arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7904,7 +7904,7 @@ __epi_8xi8 test_vload_strided_8xi8(const signed char*  arg_0, signed long int ar
 // CHECK-O2-LABEL: @test_vload_strided_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vlse.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vlse.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_strided_8xi8_mask(__epi_8xi8 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -7926,7 +7926,7 @@ __epi_4xi16 test_vload_strided_4xi16(const signed short int*  arg_0, signed long
 // CHECK-O2-LABEL: @test_vload_strided_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vlse.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vlse.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_strided_4xi16_mask(__epi_4xi16 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -7948,7 +7948,7 @@ __epi_2xi32 test_vload_strided_2xi32(const signed int*  arg_0, signed long int a
 // CHECK-O2-LABEL: @test_vload_strided_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vlse.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vlse.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_strided_2xi32_mask(__epi_2xi32 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -7970,7 +7970,7 @@ __epi_1xi64 test_vload_strided_1xi64(const signed long int*  arg_0, signed long 
 // CHECK-O2-LABEL: @test_vload_strided_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vlse.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vlse.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_strided_1xi64_mask(__epi_1xi64 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -7992,7 +7992,7 @@ __epi_2xf32 test_vload_strided_2xf32(const float*  arg_0, signed long int arg_1,
 // CHECK-O2-LABEL: @test_vload_strided_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 2 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vlse.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vlse.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP1]]
 //
 __epi_2xf32 test_vload_strided_2xf32_mask(__epi_2xf32 arg_0, const float*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -8014,7 +8014,7 @@ __epi_1xf64 test_vload_strided_1xf64(const double*  arg_0, signed long int arg_1
 // CHECK-O2-LABEL: @test_vload_strided_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vlse.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vlse.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP1]]
 //
 __epi_1xf64 test_vload_strided_1xf64_mask(__epi_1xf64 arg_0, const double*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -8036,7 +8036,7 @@ __epi_16xi8 test_vload_strided_16xi8(const signed char*  arg_0, signed long int 
 // CHECK-O2-LABEL: @test_vload_strided_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vlse.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vlse.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_strided_16xi8_mask(__epi_16xi8 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -8058,7 +8058,7 @@ __epi_8xi16 test_vload_strided_8xi16(const signed short int*  arg_0, signed long
 // CHECK-O2-LABEL: @test_vload_strided_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vlse.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vlse.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_strided_8xi16_mask(__epi_8xi16 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8080,7 +8080,7 @@ __epi_4xi32 test_vload_strided_4xi32(const signed int*  arg_0, signed long int a
 // CHECK-O2-LABEL: @test_vload_strided_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vlse.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vlse.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_strided_4xi32_mask(__epi_4xi32 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8102,7 +8102,7 @@ __epi_2xi64 test_vload_strided_2xi64(const signed long int*  arg_0, signed long 
 // CHECK-O2-LABEL: @test_vload_strided_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vlse.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vlse.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_strided_2xi64_mask(__epi_2xi64 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -8124,7 +8124,7 @@ __epi_4xf32 test_vload_strided_4xf32(const float*  arg_0, signed long int arg_1,
 // CHECK-O2-LABEL: @test_vload_strided_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 4 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vlse.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vlse.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP1]]
 //
 __epi_4xf32 test_vload_strided_4xf32_mask(__epi_4xf32 arg_0, const float*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8146,7 +8146,7 @@ __epi_2xf64 test_vload_strided_2xf64(const double*  arg_0, signed long int arg_1
 // CHECK-O2-LABEL: @test_vload_strided_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 2 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vlse.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vlse.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP1]]
 //
 __epi_2xf64 test_vload_strided_2xf64_mask(__epi_2xf64 arg_0, const double*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -8168,7 +8168,7 @@ __epi_32xi8 test_vload_strided_32xi8(const signed char*  arg_0, signed long int 
 // CHECK-O2-LABEL: @test_vload_strided_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vlse.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vlse.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_strided_32xi8_mask(__epi_32xi8 arg_0, const signed char*  arg_1, signed long int arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -8190,7 +8190,7 @@ __epi_16xi16 test_vload_strided_16xi16(const signed short int*  arg_0, signed lo
 // CHECK-O2-LABEL: @test_vload_strided_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vlse.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vlse.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_strided_16xi16_mask(__epi_16xi16 arg_0, const signed short int*  arg_1, signed long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -8212,7 +8212,7 @@ __epi_8xi32 test_vload_strided_8xi32(const signed int*  arg_0, signed long int a
 // CHECK-O2-LABEL: @test_vload_strided_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vlse.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vlse.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_strided_8xi32_mask(__epi_8xi32 arg_0, const signed int*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8234,7 +8234,7 @@ __epi_4xi64 test_vload_strided_4xi64(const signed long int*  arg_0, signed long 
 // CHECK-O2-LABEL: @test_vload_strided_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vlse.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vlse.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_strided_4xi64_mask(__epi_4xi64 arg_0, const signed long int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8256,7 +8256,7 @@ __epi_8xf32 test_vload_strided_8xf32(const float*  arg_0, signed long int arg_1,
 // CHECK-O2-LABEL: @test_vload_strided_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast float* [[ARG_1:%.*]] to <vscale x 8 x float>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vlse.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vlse.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP1]]
 //
 __epi_8xf32 test_vload_strided_8xf32_mask(__epi_8xf32 arg_0, const float*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8278,7 +8278,7 @@ __epi_4xf64 test_vload_strided_4xf64(const double*  arg_0, signed long int arg_1
 // CHECK-O2-LABEL: @test_vload_strided_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[ARG_1:%.*]] to <vscale x 4 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vlse.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vlse.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP1]]
 //
 __epi_4xf64 test_vload_strided_4xf64_mask(__epi_4xf64 arg_0, const double*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8300,7 +8300,7 @@ __epi_8xi8 test_vload_strided_unsigned_8xi8(const unsigned char*  arg_0, signed 
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vlse.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vlse.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_strided_unsigned_8xi8_mask(__epi_8xi8 arg_0, const unsigned char*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8322,7 +8322,7 @@ __epi_4xi16 test_vload_strided_unsigned_4xi16(const unsigned short int*  arg_0, 
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vlse.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vlse.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_strided_unsigned_4xi16_mask(__epi_4xi16 arg_0, const unsigned short int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8344,7 +8344,7 @@ __epi_2xi32 test_vload_strided_unsigned_2xi32(const unsigned int*  arg_0, signed
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vlse.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vlse.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_strided_unsigned_2xi32_mask(__epi_2xi32 arg_0, const unsigned int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -8366,7 +8366,7 @@ __epi_1xi64 test_vload_strided_unsigned_1xi64(const unsigned long int*  arg_0, s
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vlse.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vlse.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_strided_unsigned_1xi64_mask(__epi_1xi64 arg_0, const unsigned long int*  arg_1, signed long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -8388,7 +8388,7 @@ __epi_16xi8 test_vload_strided_unsigned_16xi8(const unsigned char*  arg_0, signe
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vlse.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vlse.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_strided_unsigned_16xi8_mask(__epi_16xi8 arg_0, const unsigned char*  arg_1, signed long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -8410,7 +8410,7 @@ __epi_8xi16 test_vload_strided_unsigned_8xi16(const unsigned short int*  arg_0, 
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vlse.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vlse.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_strided_unsigned_8xi16_mask(__epi_8xi16 arg_0, const unsigned short int*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8432,7 +8432,7 @@ __epi_4xi32 test_vload_strided_unsigned_4xi32(const unsigned int*  arg_0, signed
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vlse.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vlse.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_strided_unsigned_4xi32_mask(__epi_4xi32 arg_0, const unsigned int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8454,7 +8454,7 @@ __epi_2xi64 test_vload_strided_unsigned_2xi64(const unsigned long int*  arg_0, s
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vlse.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vlse.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_strided_unsigned_2xi64_mask(__epi_2xi64 arg_0, const unsigned long int*  arg_1, signed long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -8476,7 +8476,7 @@ __epi_32xi8 test_vload_strided_unsigned_32xi8(const unsigned char*  arg_0, signe
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vlse.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vlse.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_strided_unsigned_32xi8_mask(__epi_32xi8 arg_0, const unsigned char*  arg_1, signed long int arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -8498,7 +8498,7 @@ __epi_16xi16 test_vload_strided_unsigned_16xi16(const unsigned short int*  arg_0
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vlse.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vlse.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_strided_unsigned_16xi16_mask(__epi_16xi16 arg_0, const unsigned short int*  arg_1, signed long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -8520,7 +8520,7 @@ __epi_8xi32 test_vload_strided_unsigned_8xi32(const unsigned int*  arg_0, signed
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vlse.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vlse.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_strided_unsigned_8xi32_mask(__epi_8xi32 arg_0, const unsigned int*  arg_1, signed long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -8542,7 +8542,7 @@ __epi_4xi64 test_vload_strided_unsigned_4xi64(const unsigned long int*  arg_0, s
 // CHECK-O2-LABEL: @test_vload_strided_unsigned_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vlse.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vlse.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_strided_unsigned_4xi64_mask(__epi_4xi64 arg_0, const unsigned long int*  arg_1, signed long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -8564,7 +8564,7 @@ __epi_8xi8 test_vload_unsigned_8xi8(const unsigned char*  arg_0, unsigned long i
 // CHECK-O2-LABEL: @test_vload_unsigned_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 8 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vle.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vle.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP1]]
 //
 __epi_8xi8 test_vload_unsigned_8xi8_mask(__epi_8xi8 arg_0, const unsigned char*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -8586,7 +8586,7 @@ __epi_4xi16 test_vload_unsigned_4xi16(const unsigned short int*  arg_0, unsigned
 // CHECK-O2-LABEL: @test_vload_unsigned_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 4 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vle.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vle.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP1]]
 //
 __epi_4xi16 test_vload_unsigned_4xi16_mask(__epi_4xi16 arg_0, const unsigned short int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -8608,7 +8608,7 @@ __epi_2xi32 test_vload_unsigned_2xi32(const unsigned int*  arg_0, unsigned long 
 // CHECK-O2-LABEL: @test_vload_unsigned_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vle.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vle.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
 //
 __epi_2xi32 test_vload_unsigned_2xi32_mask(__epi_2xi32 arg_0, const unsigned int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -8630,7 +8630,7 @@ __epi_1xi64 test_vload_unsigned_1xi64(const unsigned long int*  arg_0, unsigned 
 // CHECK-O2-LABEL: @test_vload_unsigned_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vle.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vle.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64>* [[TMP0]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP1]]
 //
 __epi_1xi64 test_vload_unsigned_1xi64_mask(__epi_1xi64 arg_0, const unsigned long int*  arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -8652,7 +8652,7 @@ __epi_16xi8 test_vload_unsigned_16xi8(const unsigned char*  arg_0, unsigned long
 // CHECK-O2-LABEL: @test_vload_unsigned_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 16 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vle.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vle.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP1]]
 //
 __epi_16xi8 test_vload_unsigned_16xi8_mask(__epi_16xi8 arg_0, const unsigned char*  arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -8674,7 +8674,7 @@ __epi_8xi16 test_vload_unsigned_8xi16(const unsigned short int*  arg_0, unsigned
 // CHECK-O2-LABEL: @test_vload_unsigned_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 8 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vle.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vle.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP1]]
 //
 __epi_8xi16 test_vload_unsigned_8xi16_mask(__epi_8xi16 arg_0, const unsigned short int*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -8696,7 +8696,7 @@ __epi_4xi32 test_vload_unsigned_4xi32(const unsigned int*  arg_0, unsigned long 
 // CHECK-O2-LABEL: @test_vload_unsigned_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 4 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vle.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vle.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP1]]
 //
 __epi_4xi32 test_vload_unsigned_4xi32_mask(__epi_4xi32 arg_0, const unsigned int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -8718,7 +8718,7 @@ __epi_2xi64 test_vload_unsigned_2xi64(const unsigned long int*  arg_0, unsigned 
 // CHECK-O2-LABEL: @test_vload_unsigned_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 2 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vle.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vle.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64>* [[TMP0]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP1]]
 //
 __epi_2xi64 test_vload_unsigned_2xi64_mask(__epi_2xi64 arg_0, const unsigned long int*  arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -8740,7 +8740,7 @@ __epi_32xi8 test_vload_unsigned_32xi8(const unsigned char*  arg_0, unsigned long
 // CHECK-O2-LABEL: @test_vload_unsigned_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i8* [[ARG_1:%.*]] to <vscale x 32 x i8>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vle.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vle.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8>* [[TMP0]], <vscale x 32 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP1]]
 //
 __epi_32xi8 test_vload_unsigned_32xi8_mask(__epi_32xi8 arg_0, const unsigned char*  arg_1, __epi_32xi1 arg_2, unsigned long int arg_3)
@@ -8762,7 +8762,7 @@ __epi_16xi16 test_vload_unsigned_16xi16(const unsigned short int*  arg_0, unsign
 // CHECK-O2-LABEL: @test_vload_unsigned_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i16* [[ARG_1:%.*]] to <vscale x 16 x i16>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vle.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vle.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16>* [[TMP0]], <vscale x 16 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP1]]
 //
 __epi_16xi16 test_vload_unsigned_16xi16_mask(__epi_16xi16 arg_0, const unsigned short int*  arg_1, __epi_16xi1 arg_2, unsigned long int arg_3)
@@ -8784,7 +8784,7 @@ __epi_8xi32 test_vload_unsigned_8xi32(const unsigned int*  arg_0, unsigned long 
 // CHECK-O2-LABEL: @test_vload_unsigned_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[ARG_1:%.*]] to <vscale x 8 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vle.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vle.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32>* [[TMP0]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP1]]
 //
 __epi_8xi32 test_vload_unsigned_8xi32_mask(__epi_8xi32 arg_0, const unsigned int*  arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -8806,7 +8806,7 @@ __epi_4xi64 test_vload_unsigned_4xi64(const unsigned long int*  arg_0, unsigned 
 // CHECK-O2-LABEL: @test_vload_unsigned_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[ARG_1:%.*]] to <vscale x 4 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vle.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vle.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64>* [[TMP0]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP1]]
 //
 __epi_4xi64 test_vload_unsigned_4xi64_mask(__epi_4xi64 arg_0, const unsigned long int*  arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -9186,7 +9186,7 @@ __epi_8xi8 test_vmax_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vmax_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmax.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmax.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmax_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9206,7 +9206,7 @@ __epi_4xi16 test_vmax_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmax.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmax.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmax_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -9226,7 +9226,7 @@ __epi_2xi32 test_vmax_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmax.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmax.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmax_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -9246,7 +9246,7 @@ __epi_1xi64 test_vmax_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmax.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmax.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmax_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -9266,7 +9266,7 @@ __epi_16xi8 test_vmax_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmax.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmax.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmax_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -9286,7 +9286,7 @@ __epi_8xi16 test_vmax_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmax.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmax.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmax_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9306,7 +9306,7 @@ __epi_4xi32 test_vmax_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmax.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmax.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmax_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -9326,7 +9326,7 @@ __epi_2xi64 test_vmax_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmax.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmax.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmax_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -9346,7 +9346,7 @@ __epi_32xi8 test_vmax_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmax.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmax.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmax_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -9366,7 +9366,7 @@ __epi_16xi16 test_vmax_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vmax_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmax.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmax.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmax_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -9386,7 +9386,7 @@ __epi_8xi32 test_vmax_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmax.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmax.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmax_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9406,7 +9406,7 @@ __epi_4xi64 test_vmax_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmax_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmax.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmax.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmax_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -9426,7 +9426,7 @@ __epi_8xi8 test_vmaxu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int
 
 // CHECK-O2-LABEL: @test_vmaxu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmaxu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmaxu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmaxu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9446,7 +9446,7 @@ __epi_4xi16 test_vmaxu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmaxu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmaxu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmaxu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -9466,7 +9466,7 @@ __epi_2xi32 test_vmaxu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmaxu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmaxu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmaxu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -9486,7 +9486,7 @@ __epi_1xi64 test_vmaxu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmaxu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmaxu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmaxu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -9506,7 +9506,7 @@ __epi_16xi8 test_vmaxu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmaxu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmaxu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmaxu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -9526,7 +9526,7 @@ __epi_8xi16 test_vmaxu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmaxu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmaxu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmaxu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9546,7 +9546,7 @@ __epi_4xi32 test_vmaxu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmaxu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmaxu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmaxu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -9566,7 +9566,7 @@ __epi_2xi64 test_vmaxu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmaxu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmaxu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmaxu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -9586,7 +9586,7 @@ __epi_32xi8 test_vmaxu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmaxu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmaxu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmaxu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -9606,7 +9606,7 @@ __epi_16xi16 test_vmaxu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vmaxu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmaxu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmaxu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmaxu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -9626,7 +9626,7 @@ __epi_8xi32 test_vmaxu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmaxu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmaxu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmaxu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -9646,7 +9646,7 @@ __epi_4xi64 test_vmaxu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmaxu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmaxu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmaxu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmaxu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10506,7 +10506,7 @@ __epi_8xi8 test_vmin_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vmin_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmin.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmin.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmin_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10526,7 +10526,7 @@ __epi_4xi16 test_vmin_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmin.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmin.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmin_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10546,7 +10546,7 @@ __epi_2xi32 test_vmin_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmin.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmin.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmin_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -10566,7 +10566,7 @@ __epi_1xi64 test_vmin_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmin.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmin.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmin_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -10586,7 +10586,7 @@ __epi_16xi8 test_vmin_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmin.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmin.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmin_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -10606,7 +10606,7 @@ __epi_8xi16 test_vmin_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmin.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmin.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmin_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10626,7 +10626,7 @@ __epi_4xi32 test_vmin_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmin.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmin.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmin_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10646,7 +10646,7 @@ __epi_2xi64 test_vmin_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmin.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmin.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmin_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -10666,7 +10666,7 @@ __epi_32xi8 test_vmin_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmin.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmin.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmin_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -10686,7 +10686,7 @@ __epi_16xi16 test_vmin_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vmin_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmin.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmin.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmin_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -10706,7 +10706,7 @@ __epi_8xi32 test_vmin_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmin.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmin.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmin_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10726,7 +10726,7 @@ __epi_4xi64 test_vmin_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmin_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmin.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmin.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmin_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10746,7 +10746,7 @@ __epi_8xi8 test_vminu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int
 
 // CHECK-O2-LABEL: @test_vminu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vminu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vminu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vminu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10766,7 +10766,7 @@ __epi_4xi16 test_vminu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vminu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vminu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vminu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10786,7 +10786,7 @@ __epi_2xi32 test_vminu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vminu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vminu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vminu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -10806,7 +10806,7 @@ __epi_1xi64 test_vminu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vminu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vminu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vminu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -10826,7 +10826,7 @@ __epi_16xi8 test_vminu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vminu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vminu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vminu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -10846,7 +10846,7 @@ __epi_8xi16 test_vminu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vminu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vminu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vminu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10866,7 +10866,7 @@ __epi_4xi32 test_vminu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vminu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vminu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vminu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -10886,7 +10886,7 @@ __epi_2xi64 test_vminu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vminu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vminu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vminu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -10906,7 +10906,7 @@ __epi_32xi8 test_vminu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vminu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vminu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vminu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -10926,7 +10926,7 @@ __epi_16xi16 test_vminu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vminu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vminu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vminu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vminu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -10946,7 +10946,7 @@ __epi_8xi32 test_vminu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vminu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vminu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vminu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -10966,7 +10966,7 @@ __epi_4xi64 test_vminu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vminu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vminu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vminu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vminu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -13764,7 +13764,7 @@ __epi_8xi8 test_vmul_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vmul_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmul.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmul.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmul_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -13784,7 +13784,7 @@ __epi_4xi16 test_vmul_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmul.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmul.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmul_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -13804,7 +13804,7 @@ __epi_2xi32 test_vmul_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmul.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmul.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmul_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -13824,7 +13824,7 @@ __epi_1xi64 test_vmul_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmul.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmul.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmul_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -13844,7 +13844,7 @@ __epi_16xi8 test_vmul_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmul.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmul.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmul_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -13864,7 +13864,7 @@ __epi_8xi16 test_vmul_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmul.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmul.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmul_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -13884,7 +13884,7 @@ __epi_4xi32 test_vmul_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmul.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmul.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmul_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -13904,7 +13904,7 @@ __epi_2xi64 test_vmul_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmul.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmul.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmul_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -13924,7 +13924,7 @@ __epi_32xi8 test_vmul_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmul.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmul.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmul_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -13944,7 +13944,7 @@ __epi_16xi16 test_vmul_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vmul_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmul.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmul.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmul_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -13964,7 +13964,7 @@ __epi_8xi32 test_vmul_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmul.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmul.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmul_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -13984,7 +13984,7 @@ __epi_4xi64 test_vmul_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vmul_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmul.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmul.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmul_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14004,7 +14004,7 @@ __epi_8xi8 test_vmulh_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int
 
 // CHECK-O2-LABEL: @test_vmulh_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulh.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulh.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmulh_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14024,7 +14024,7 @@ __epi_4xi16 test_vmulh_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulh.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulh.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmulh_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14044,7 +14044,7 @@ __epi_2xi32 test_vmulh_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulh.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulh.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmulh_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14064,7 +14064,7 @@ __epi_1xi64 test_vmulh_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulh.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulh.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmulh_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -14084,7 +14084,7 @@ __epi_16xi8 test_vmulh_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulh.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulh.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmulh_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14104,7 +14104,7 @@ __epi_8xi16 test_vmulh_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulh.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulh.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmulh_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14124,7 +14124,7 @@ __epi_4xi32 test_vmulh_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulh.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulh.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmulh_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14144,7 +14144,7 @@ __epi_2xi64 test_vmulh_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulh.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulh.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmulh_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14164,7 +14164,7 @@ __epi_32xi8 test_vmulh_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulh.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulh.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmulh_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -14184,7 +14184,7 @@ __epi_16xi16 test_vmulh_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vmulh_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulh.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulh.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmulh_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14204,7 +14204,7 @@ __epi_8xi32 test_vmulh_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulh.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulh.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmulh_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14224,7 +14224,7 @@ __epi_4xi64 test_vmulh_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vmulh_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulh.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulh.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmulh_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14244,7 +14244,7 @@ __epi_8xi8 test_vmulhsu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vmulhsu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulhsu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulhsu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmulhsu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14264,7 +14264,7 @@ __epi_4xi16 test_vmulhsu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulhsu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulhsu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmulhsu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14284,7 +14284,7 @@ __epi_2xi32 test_vmulhsu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulhsu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulhsu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmulhsu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14304,7 +14304,7 @@ __epi_1xi64 test_vmulhsu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulhsu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulhsu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmulhsu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -14324,7 +14324,7 @@ __epi_16xi8 test_vmulhsu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulhsu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulhsu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmulhsu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14344,7 +14344,7 @@ __epi_8xi16 test_vmulhsu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulhsu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulhsu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmulhsu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14364,7 +14364,7 @@ __epi_4xi32 test_vmulhsu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulhsu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulhsu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmulhsu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14384,7 +14384,7 @@ __epi_2xi64 test_vmulhsu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulhsu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulhsu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmulhsu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14404,7 +14404,7 @@ __epi_32xi8 test_vmulhsu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulhsu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulhsu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmulhsu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -14424,7 +14424,7 @@ __epi_16xi16 test_vmulhsu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vmulhsu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulhsu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulhsu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmulhsu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14444,7 +14444,7 @@ __epi_8xi32 test_vmulhsu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulhsu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulhsu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmulhsu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14464,7 +14464,7 @@ __epi_4xi64 test_vmulhsu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vmulhsu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulhsu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulhsu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmulhsu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14484,7 +14484,7 @@ __epi_8xi8 test_vmulhu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long in
 
 // CHECK-O2-LABEL: @test_vmulhu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulhu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vmulhu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vmulhu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14504,7 +14504,7 @@ __epi_4xi16 test_vmulhu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulhu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vmulhu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vmulhu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14524,7 +14524,7 @@ __epi_2xi32 test_vmulhu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulhu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vmulhu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vmulhu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14544,7 +14544,7 @@ __epi_1xi64 test_vmulhu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulhu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vmulhu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vmulhu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -14564,7 +14564,7 @@ __epi_16xi8 test_vmulhu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulhu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vmulhu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vmulhu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14584,7 +14584,7 @@ __epi_8xi16 test_vmulhu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulhu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vmulhu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vmulhu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14604,7 +14604,7 @@ __epi_4xi32 test_vmulhu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulhu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vmulhu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vmulhu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -14624,7 +14624,7 @@ __epi_2xi64 test_vmulhu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulhu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vmulhu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vmulhu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -14644,7 +14644,7 @@ __epi_32xi8 test_vmulhu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulhu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vmulhu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vmulhu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -14664,7 +14664,7 @@ __epi_16xi16 test_vmulhu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vmulhu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulhu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vmulhu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vmulhu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -14684,7 +14684,7 @@ __epi_8xi32 test_vmulhu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulhu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vmulhu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vmulhu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -14704,7 +14704,7 @@ __epi_4xi64 test_vmulhu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vmulhu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulhu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vmulhu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vmulhu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15204,7 +15204,7 @@ __epi_8xi8 test_vnsra_8xi8(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned long in
 
 // CHECK-O2-LABEL: @test_vnsra_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vnsra.mask.nxv8i8.nxv8i16.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vnsra.mask.nxv8i8.nxv8i16.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vnsra_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15224,7 +15224,7 @@ __epi_4xi16 test_vnsra_4xi16(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsra_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vnsra.mask.nxv4i16.nxv4i32.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vnsra.mask.nxv4i16.nxv4i32.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vnsra_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15244,7 +15244,7 @@ __epi_2xi32 test_vnsra_2xi32(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsra_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vnsra.mask.nxv2i32.nxv2i64.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vnsra.mask.nxv2i32.nxv2i64.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vnsra_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -15264,7 +15264,7 @@ __epi_16xi8 test_vnsra_16xi8(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vnsra_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vnsra.mask.nxv16i8.nxv16i16.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vnsra.mask.nxv16i8.nxv16i16.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vnsra_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15284,7 +15284,7 @@ __epi_8xi16 test_vnsra_8xi16(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsra_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vnsra.mask.nxv8i16.nxv8i32.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vnsra.mask.nxv8i16.nxv8i32.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vnsra_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15304,7 +15304,7 @@ __epi_4xi32 test_vnsra_4xi32(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsra_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vnsra.mask.nxv4i32.nxv4i64.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vnsra.mask.nxv4i32.nxv4i64.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vnsra_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15324,7 +15324,7 @@ __epi_32xi8 test_vnsra_32xi8(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vnsra_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vnsra.mask.nxv32i8.nxv32i16.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vnsra.mask.nxv32i8.nxv32i16.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vnsra_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -15344,7 +15344,7 @@ __epi_16xi16 test_vnsra_16xi16(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vnsra_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vnsra.mask.nxv16i16.nxv16i32.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vnsra.mask.nxv16i16.nxv16i32.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vnsra_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15364,7 +15364,7 @@ __epi_8xi32 test_vnsra_8xi32(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsra_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vnsra.mask.nxv8i32.nxv8i64.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vnsra.mask.nxv8i32.nxv8i64.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vnsra_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15384,7 +15384,7 @@ __epi_8xi8 test_vnsrl_8xi8(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned long in
 
 // CHECK-O2-LABEL: @test_vnsrl_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vnsrl.mask.nxv8i8.nxv8i16.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vnsrl.mask.nxv8i8.nxv8i16.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vnsrl_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15404,7 +15404,7 @@ __epi_4xi16 test_vnsrl_4xi16(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsrl_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vnsrl.mask.nxv4i16.nxv4i32.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vnsrl.mask.nxv4i16.nxv4i32.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vnsrl_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15424,7 +15424,7 @@ __epi_2xi32 test_vnsrl_2xi32(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsrl_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vnsrl.mask.nxv2i32.nxv2i64.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vnsrl.mask.nxv2i32.nxv2i64.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vnsrl_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -15444,7 +15444,7 @@ __epi_16xi8 test_vnsrl_16xi8(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vnsrl_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vnsrl.mask.nxv16i8.nxv16i16.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vnsrl.mask.nxv16i8.nxv16i16.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vnsrl_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15464,7 +15464,7 @@ __epi_8xi16 test_vnsrl_8xi16(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsrl_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vnsrl.mask.nxv8i16.nxv8i32.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vnsrl.mask.nxv8i16.nxv8i32.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vnsrl_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15484,7 +15484,7 @@ __epi_4xi32 test_vnsrl_4xi32(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsrl_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vnsrl.mask.nxv4i32.nxv4i64.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vnsrl.mask.nxv4i32.nxv4i64.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vnsrl_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15504,7 +15504,7 @@ __epi_32xi8 test_vnsrl_32xi8(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vnsrl_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vnsrl.mask.nxv32i8.nxv32i16.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vnsrl.mask.nxv32i8.nxv32i16.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vnsrl_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -15524,7 +15524,7 @@ __epi_16xi16 test_vnsrl_16xi16(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vnsrl_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vnsrl.mask.nxv16i16.nxv16i32.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vnsrl.mask.nxv16i16.nxv16i32.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vnsrl_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15544,7 +15544,7 @@ __epi_8xi32 test_vnsrl_8xi32(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vnsrl_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vnsrl.mask.nxv8i32.nxv8i64.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vnsrl.mask.nxv8i32.nxv8i64.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vnsrl_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15564,7 +15564,7 @@ __epi_8xi8 test_vor_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int a
 
 // CHECK-O2-LABEL: @test_vor_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vor.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vor.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vor_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15584,7 +15584,7 @@ __epi_4xi16 test_vor_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vor.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vor.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vor_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15604,7 +15604,7 @@ __epi_2xi32 test_vor_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vor.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vor.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vor_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -15624,7 +15624,7 @@ __epi_1xi64 test_vor_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vor.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vor.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vor_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -15644,7 +15644,7 @@ __epi_16xi8 test_vor_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vor.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vor.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vor_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15664,7 +15664,7 @@ __epi_8xi16 test_vor_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vor.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vor.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vor_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15684,7 +15684,7 @@ __epi_4xi32 test_vor_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vor.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vor.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vor_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -15704,7 +15704,7 @@ __epi_2xi64 test_vor_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vor.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vor.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vor_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -15724,7 +15724,7 @@ __epi_32xi8 test_vor_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vor.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vor.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vor_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -15744,7 +15744,7 @@ __epi_16xi16 test_vor_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vor_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vor.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vor.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vor_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -15764,7 +15764,7 @@ __epi_8xi32 test_vor_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vor.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vor.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vor_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -15784,7 +15784,7 @@ __epi_4xi64 test_vor_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vor_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vor.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vor.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vor_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18164,7 +18164,7 @@ __epi_8xi8 test_vrem_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vrem_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrem.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrem.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vrem_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18184,7 +18184,7 @@ __epi_4xi16 test_vrem_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrem.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrem.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vrem_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18204,7 +18204,7 @@ __epi_2xi32 test_vrem_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrem.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrem.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vrem_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18224,7 +18224,7 @@ __epi_1xi64 test_vrem_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrem.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrem.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vrem_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -18244,7 +18244,7 @@ __epi_16xi8 test_vrem_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrem.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrem.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vrem_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18264,7 +18264,7 @@ __epi_8xi16 test_vrem_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrem.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrem.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vrem_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18284,7 +18284,7 @@ __epi_4xi32 test_vrem_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrem.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrem.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vrem_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18304,7 +18304,7 @@ __epi_2xi64 test_vrem_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrem.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrem.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vrem_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18324,7 +18324,7 @@ __epi_32xi8 test_vrem_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrem.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrem.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vrem_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -18344,7 +18344,7 @@ __epi_16xi16 test_vrem_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrem_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrem.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrem.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vrem_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18364,7 +18364,7 @@ __epi_8xi32 test_vrem_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrem.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrem.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vrem_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18384,7 +18384,7 @@ __epi_4xi64 test_vrem_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrem_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrem.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrem.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vrem_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18404,7 +18404,7 @@ __epi_8xi8 test_vremu_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int
 
 // CHECK-O2-LABEL: @test_vremu_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vremu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vremu.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vremu_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18424,7 +18424,7 @@ __epi_4xi16 test_vremu_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vremu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vremu.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vremu_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18444,7 +18444,7 @@ __epi_2xi32 test_vremu_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vremu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vremu.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vremu_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18464,7 +18464,7 @@ __epi_1xi64 test_vremu_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vremu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vremu.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vremu_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -18484,7 +18484,7 @@ __epi_16xi8 test_vremu_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vremu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vremu.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vremu_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18504,7 +18504,7 @@ __epi_8xi16 test_vremu_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vremu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vremu.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vremu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18524,7 +18524,7 @@ __epi_4xi32 test_vremu_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vremu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vremu.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vremu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18544,7 +18544,7 @@ __epi_2xi64 test_vremu_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vremu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vremu.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vremu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18564,7 +18564,7 @@ __epi_32xi8 test_vremu_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vremu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vremu.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vremu_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -18584,7 +18584,7 @@ __epi_16xi16 test_vremu_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vremu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vremu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vremu.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vremu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18604,7 +18604,7 @@ __epi_8xi32 test_vremu_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vremu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vremu.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vremu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18624,7 +18624,7 @@ __epi_4xi64 test_vremu_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vremu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vremu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vremu.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vremu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18644,7 +18644,7 @@ __epi_8xi8 test_vrgather_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vrgather_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrgather.vv.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrgather.vv.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vrgather_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18664,7 +18664,7 @@ __epi_4xi16 test_vrgather_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrgather.vv.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrgather.vv.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vrgather_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18684,7 +18684,7 @@ __epi_2xi32 test_vrgather_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrgather.vv.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrgather.vv.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vrgather_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18704,7 +18704,7 @@ __epi_1xi64 test_vrgather_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrgather.vv.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrgather.vv.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vrgather_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -18724,7 +18724,7 @@ __epi_2xf32 test_vrgather_2xf32(__epi_2xf32 arg_0, __epi_2xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vrgather.vv.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vrgather.vv.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vrgather_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18744,7 +18744,7 @@ __epi_1xf64 test_vrgather_1xf64(__epi_1xf64 arg_0, __epi_1xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vrgather.vv.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vrgather.vv.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vrgather_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -18764,7 +18764,7 @@ __epi_16xi8 test_vrgather_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrgather.vv.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrgather.vv.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vrgather_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18784,7 +18784,7 @@ __epi_8xi16 test_vrgather_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrgather.vv.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrgather.vv.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vrgather_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18804,7 +18804,7 @@ __epi_4xi32 test_vrgather_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrgather.vv.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrgather.vv.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vrgather_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18824,7 +18824,7 @@ __epi_2xi64 test_vrgather_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrgather.vv.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrgather.vv.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vrgather_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18844,7 +18844,7 @@ __epi_4xf32 test_vrgather_4xf32(__epi_4xf32 arg_0, __epi_4xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vrgather.vv.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vrgather.vv.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vrgather_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18864,7 +18864,7 @@ __epi_2xf64 test_vrgather_2xf64(__epi_2xf64 arg_0, __epi_2xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vrgather.vv.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vrgather.vv.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vrgather_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -18884,7 +18884,7 @@ __epi_32xi8 test_vrgather_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrgather.vv.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrgather.vv.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vrgather_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -18904,7 +18904,7 @@ __epi_16xi16 test_vrgather_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vrgather_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrgather.vv.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrgather.vv.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vrgather_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -18924,7 +18924,7 @@ __epi_8xi32 test_vrgather_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrgather.vv.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrgather.vv.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vrgather_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18944,7 +18944,7 @@ __epi_4xi64 test_vrgather_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrgather.vv.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrgather.vv.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vrgather_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -18964,7 +18964,7 @@ __epi_8xf32 test_vrgather_8xf32(__epi_8xf32 arg_0, __epi_8xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vrgather.vv.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vrgather.vv.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vrgather_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -18984,7 +18984,7 @@ __epi_4xf64 test_vrgather_4xf64(__epi_4xf64 arg_0, __epi_4xi64 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vrgather_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vrgather.vv.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vrgather.vv.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vrgather_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19126,7 +19126,7 @@ __epi_8xi8 test_vslide1down_8xi8(__epi_8xi8 arg_0, unsigned long int arg_1, unsi
 // CHECK-O2-LABEL: @test_vslide1down_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vslide1down.mask.nxv8i8.i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vslide1down.mask.nxv8i8.i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vslide1down_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19148,7 +19148,7 @@ __epi_4xi16 test_vslide1down_4xi16(__epi_4xi16 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vslide1down.mask.nxv4i16.i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vslide1down.mask.nxv4i16.i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vslide1down_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19170,7 +19170,7 @@ __epi_2xi32 test_vslide1down_2xi32(__epi_2xi32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vslide1down.mask.nxv2i32.i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vslide1down.mask.nxv2i32.i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vslide1down_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19190,7 +19190,7 @@ __epi_1xi64 test_vslide1down_1xi64(__epi_1xi64 arg_0, unsigned long int arg_1, u
 
 // CHECK-O2-LABEL: @test_vslide1down_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vslide1down.mask.nxv1i64.i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vslide1down.mask.nxv1i64.i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vslide1down_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -19212,7 +19212,7 @@ __epi_2xf32 test_vslide1down_2xf32(__epi_2xf32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfslide1down.mask.nxv2f32.f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfslide1down.mask.nxv2f32.f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vslide1down_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19234,7 +19234,7 @@ __epi_1xf64 test_vslide1down_1xf64(__epi_1xf64 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfslide1down.mask.nxv1f64.f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfslide1down.mask.nxv1f64.f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vslide1down_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -19256,7 +19256,7 @@ __epi_16xi8 test_vslide1down_16xi8(__epi_16xi8 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vslide1down.mask.nxv16i8.i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vslide1down.mask.nxv16i8.i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vslide1down_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -19278,7 +19278,7 @@ __epi_8xi16 test_vslide1down_8xi16(__epi_8xi16 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vslide1down.mask.nxv8i16.i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vslide1down.mask.nxv8i16.i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vslide1down_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19300,7 +19300,7 @@ __epi_4xi32 test_vslide1down_4xi32(__epi_4xi32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vslide1down.mask.nxv4i32.i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vslide1down.mask.nxv4i32.i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vslide1down_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19320,7 +19320,7 @@ __epi_2xi64 test_vslide1down_2xi64(__epi_2xi64 arg_0, unsigned long int arg_1, u
 
 // CHECK-O2-LABEL: @test_vslide1down_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vslide1down.mask.nxv2i64.i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vslide1down.mask.nxv2i64.i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vslide1down_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19342,7 +19342,7 @@ __epi_4xf32 test_vslide1down_4xf32(__epi_4xf32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfslide1down.mask.nxv4f32.f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfslide1down.mask.nxv4f32.f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vslide1down_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19364,7 +19364,7 @@ __epi_2xf64 test_vslide1down_2xf64(__epi_2xf64 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfslide1down.mask.nxv2f64.f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfslide1down.mask.nxv2f64.f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vslide1down_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19386,7 +19386,7 @@ __epi_32xi8 test_vslide1down_32xi8(__epi_32xi8 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vslide1down.mask.nxv32i8.i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vslide1down.mask.nxv32i8.i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vslide1down_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long int arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -19408,7 +19408,7 @@ __epi_16xi16 test_vslide1down_16xi16(__epi_16xi16 arg_0, unsigned long int arg_1
 // CHECK-O2-LABEL: @test_vslide1down_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vslide1down.mask.nxv16i16.i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vslide1down.mask.nxv16i16.i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vslide1down_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -19430,7 +19430,7 @@ __epi_8xi32 test_vslide1down_8xi32(__epi_8xi32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vslide1down.mask.nxv8i32.i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vslide1down.mask.nxv8i32.i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vslide1down_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19450,7 +19450,7 @@ __epi_4xi64 test_vslide1down_4xi64(__epi_4xi64 arg_0, unsigned long int arg_1, u
 
 // CHECK-O2-LABEL: @test_vslide1down_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vslide1down.mask.nxv4i64.i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vslide1down.mask.nxv4i64.i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vslide1down_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19472,7 +19472,7 @@ __epi_8xf32 test_vslide1down_8xf32(__epi_8xf32 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfslide1down.mask.nxv8f32.f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfslide1down.mask.nxv8f32.f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vslide1down_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19494,7 +19494,7 @@ __epi_4xf64 test_vslide1down_4xf64(__epi_4xf64 arg_0, unsigned long int arg_1, u
 // CHECK-O2-LABEL: @test_vslide1down_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfslide1down.mask.nxv4f64.f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfslide1down.mask.nxv4f64.f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vslide1down_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19516,7 +19516,7 @@ __epi_8xi8 test_vslide1up_8xi8(__epi_8xi8 arg_0, unsigned long int arg_1, unsign
 // CHECK-O2-LABEL: @test_vslide1up_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vslide1up.mask.nxv8i8.i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vslide1up.mask.nxv8i8.i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vslide1up_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19538,7 +19538,7 @@ __epi_4xi16 test_vslide1up_4xi16(__epi_4xi16 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vslide1up.mask.nxv4i16.i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vslide1up.mask.nxv4i16.i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vslide1up_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19560,7 +19560,7 @@ __epi_2xi32 test_vslide1up_2xi32(__epi_2xi32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vslide1up.mask.nxv2i32.i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vslide1up.mask.nxv2i32.i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vslide1up_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19580,7 +19580,7 @@ __epi_1xi64 test_vslide1up_1xi64(__epi_1xi64 arg_0, unsigned long int arg_1, uns
 
 // CHECK-O2-LABEL: @test_vslide1up_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vslide1up.mask.nxv1i64.i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vslide1up.mask.nxv1i64.i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vslide1up_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -19602,7 +19602,7 @@ __epi_2xf32 test_vslide1up_2xf32(__epi_2xf32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfslide1up.mask.nxv2f32.f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfslide1up.mask.nxv2f32.f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vslide1up_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19624,7 +19624,7 @@ __epi_1xf64 test_vslide1up_1xf64(__epi_1xf64 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfslide1up.mask.nxv1f64.f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfslide1up.mask.nxv1f64.f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vslide1up_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -19646,7 +19646,7 @@ __epi_16xi8 test_vslide1up_16xi8(__epi_16xi8 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vslide1up.mask.nxv16i8.i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vslide1up.mask.nxv16i8.i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vslide1up_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -19668,7 +19668,7 @@ __epi_8xi16 test_vslide1up_8xi16(__epi_8xi16 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vslide1up.mask.nxv8i16.i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vslide1up.mask.nxv8i16.i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vslide1up_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19690,7 +19690,7 @@ __epi_4xi32 test_vslide1up_4xi32(__epi_4xi32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vslide1up.mask.nxv4i32.i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vslide1up.mask.nxv4i32.i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vslide1up_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19710,7 +19710,7 @@ __epi_2xi64 test_vslide1up_2xi64(__epi_2xi64 arg_0, unsigned long int arg_1, uns
 
 // CHECK-O2-LABEL: @test_vslide1up_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vslide1up.mask.nxv2i64.i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vslide1up.mask.nxv2i64.i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vslide1up_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19732,7 +19732,7 @@ __epi_4xf32 test_vslide1up_4xf32(__epi_4xf32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfslide1up.mask.nxv4f32.f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfslide1up.mask.nxv4f32.f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vslide1up_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19754,7 +19754,7 @@ __epi_2xf64 test_vslide1up_2xf64(__epi_2xf64 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfslide1up.mask.nxv2f64.f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfslide1up.mask.nxv2f64.f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vslide1up_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -19776,7 +19776,7 @@ __epi_32xi8 test_vslide1up_32xi8(__epi_32xi8 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i8
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vslide1up.mask.nxv32i8.i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vslide1up.mask.nxv32i8.i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i8 [[CONV]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vslide1up_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long int arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -19798,7 +19798,7 @@ __epi_16xi16 test_vslide1up_16xi16(__epi_16xi16 arg_0, unsigned long int arg_1, 
 // CHECK-O2-LABEL: @test_vslide1up_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i16
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vslide1up.mask.nxv16i16.i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vslide1up.mask.nxv16i16.i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i16 [[CONV]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vslide1up_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -19820,7 +19820,7 @@ __epi_8xi32 test_vslide1up_8xi32(__epi_8xi32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = trunc i64 [[ARG_2:%.*]] to i32
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vslide1up.mask.nxv8i32.i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vslide1up.mask.nxv8i32.i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i32 [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vslide1up_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19840,7 +19840,7 @@ __epi_4xi64 test_vslide1up_4xi64(__epi_4xi64 arg_0, unsigned long int arg_1, uns
 
 // CHECK-O2-LABEL: @test_vslide1up_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vslide1up.mask.nxv4i64.i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vslide1up.mask.nxv4i64.i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vslide1up_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -19862,7 +19862,7 @@ __epi_8xf32 test_vslide1up_8xf32(__epi_8xf32 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to float
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfslide1up.mask.nxv8f32.f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfslide1up.mask.nxv8f32.f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], float [[CONV]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vslide1up_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -19884,7 +19884,7 @@ __epi_4xf64 test_vslide1up_4xf64(__epi_4xf64 arg_0, unsigned long int arg_1, uns
 // CHECK-O2-LABEL: @test_vslide1up_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
 // CHECK-O2-NEXT:    [[CONV:%.*]] = uitofp i64 [[ARG_2:%.*]] to double
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfslide1up.mask.nxv4f64.f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfslide1up.mask.nxv4f64.f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], double [[CONV]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vslide1up_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -20624,7 +20624,7 @@ __epi_8xi8 test_vsll_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vsll_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsll.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsll.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vsll_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -20644,7 +20644,7 @@ __epi_4xi16 test_vsll_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsll.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsll.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vsll_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -20664,7 +20664,7 @@ __epi_2xi32 test_vsll_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsll.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsll.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vsll_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -20684,7 +20684,7 @@ __epi_1xi64 test_vsll_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsll.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsll.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vsll_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -20704,7 +20704,7 @@ __epi_16xi8 test_vsll_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsll.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsll.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vsll_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -20724,7 +20724,7 @@ __epi_8xi16 test_vsll_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsll.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsll.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vsll_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -20744,7 +20744,7 @@ __epi_4xi32 test_vsll_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsll.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsll.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vsll_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -20764,7 +20764,7 @@ __epi_2xi64 test_vsll_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsll.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsll.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vsll_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -20784,7 +20784,7 @@ __epi_32xi8 test_vsll_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsll.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsll.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vsll_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -20804,7 +20804,7 @@ __epi_16xi16 test_vsll_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vsll_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsll.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsll.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vsll_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -20824,7 +20824,7 @@ __epi_8xi32 test_vsll_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsll.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsll.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vsll_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -20844,7 +20844,7 @@ __epi_4xi64 test_vsll_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsll_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsll.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsll.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vsll_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -20864,7 +20864,7 @@ __epi_8xi8 test_vsplat_8xi8(__epi_8xi8 arg_0, unsigned long int arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vsplat_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrgather.vx.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vrgather.vx.mask.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vsplat_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -20884,7 +20884,7 @@ __epi_4xi16 test_vsplat_4xi16(__epi_4xi16 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrgather.vx.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vrgather.vx.mask.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vsplat_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -20904,7 +20904,7 @@ __epi_2xi32 test_vsplat_2xi32(__epi_2xi32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrgather.vx.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vrgather.vx.mask.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vsplat_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -20924,7 +20924,7 @@ __epi_1xi64 test_vsplat_1xi64(__epi_1xi64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrgather.vx.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vrgather.vx.mask.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vsplat_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -20944,7 +20944,7 @@ __epi_2xf32 test_vsplat_2xf32(__epi_2xf32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_2xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vrgather.vx.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vrgather.vx.mask.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vsplat_2xf32_mask(__epi_2xf32 arg_0, __epi_2xf32 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -20964,7 +20964,7 @@ __epi_1xf64 test_vsplat_1xf64(__epi_1xf64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_1xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vrgather.vx.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vrgather.vx.mask.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vsplat_1xf64_mask(__epi_1xf64 arg_0, __epi_1xf64 arg_1, unsigned long int arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -20984,7 +20984,7 @@ __epi_16xi8 test_vsplat_16xi8(__epi_16xi8 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrgather.vx.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vrgather.vx.mask.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vsplat_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21004,7 +21004,7 @@ __epi_8xi16 test_vsplat_8xi16(__epi_8xi16 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrgather.vx.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vrgather.vx.mask.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vsplat_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21024,7 +21024,7 @@ __epi_4xi32 test_vsplat_4xi32(__epi_4xi32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrgather.vx.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vrgather.vx.mask.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vsplat_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21044,7 +21044,7 @@ __epi_2xi64 test_vsplat_2xi64(__epi_2xi64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrgather.vx.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vrgather.vx.mask.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vsplat_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21064,7 +21064,7 @@ __epi_4xf32 test_vsplat_4xf32(__epi_4xf32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_4xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vrgather.vx.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vrgather.vx.mask.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vsplat_4xf32_mask(__epi_4xf32 arg_0, __epi_4xf32 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21084,7 +21084,7 @@ __epi_2xf64 test_vsplat_2xf64(__epi_2xf64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_2xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vrgather.vx.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vrgather.vx.mask.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vsplat_2xf64_mask(__epi_2xf64 arg_0, __epi_2xf64 arg_1, unsigned long int arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21104,7 +21104,7 @@ __epi_32xi8 test_vsplat_32xi8(__epi_32xi8 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrgather.vx.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vrgather.vx.mask.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vsplat_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long int arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -21124,7 +21124,7 @@ __epi_16xi16 test_vsplat_16xi16(__epi_16xi16 arg_0, unsigned long int arg_1, uns
 
 // CHECK-O2-LABEL: @test_vsplat_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrgather.vx.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vrgather.vx.mask.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vsplat_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned long int arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21144,7 +21144,7 @@ __epi_8xi32 test_vsplat_8xi32(__epi_8xi32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrgather.vx.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vrgather.vx.mask.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vsplat_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21164,7 +21164,7 @@ __epi_4xi64 test_vsplat_4xi64(__epi_4xi64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrgather.vx.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vrgather.vx.mask.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vsplat_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21184,7 +21184,7 @@ __epi_8xf32 test_vsplat_8xf32(__epi_8xf32 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_8xf32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vrgather.vx.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vrgather.vx.mask.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vsplat_8xf32_mask(__epi_8xf32 arg_0, __epi_8xf32 arg_1, unsigned long int arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21204,7 +21204,7 @@ __epi_4xf64 test_vsplat_4xf64(__epi_4xf64 arg_0, unsigned long int arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vsplat_4xf64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vrgather.vx.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vrgather.vx.mask.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], i64 [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vsplat_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, unsigned long int arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21224,7 +21224,7 @@ __epi_8xi8 test_vsra_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vsra_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsra.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsra.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vsra_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21244,7 +21244,7 @@ __epi_4xi16 test_vsra_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsra.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsra.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vsra_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21264,7 +21264,7 @@ __epi_2xi32 test_vsra_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsra.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsra.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vsra_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21284,7 +21284,7 @@ __epi_1xi64 test_vsra_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsra.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsra.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vsra_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -21304,7 +21304,7 @@ __epi_16xi8 test_vsra_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsra.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsra.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vsra_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21324,7 +21324,7 @@ __epi_8xi16 test_vsra_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsra.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsra.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vsra_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21344,7 +21344,7 @@ __epi_4xi32 test_vsra_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsra.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsra.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vsra_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21364,7 +21364,7 @@ __epi_2xi64 test_vsra_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsra.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsra.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vsra_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21384,7 +21384,7 @@ __epi_32xi8 test_vsra_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsra.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsra.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vsra_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -21404,7 +21404,7 @@ __epi_16xi16 test_vsra_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vsra_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsra.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsra.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vsra_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21424,7 +21424,7 @@ __epi_8xi32 test_vsra_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsra.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsra.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vsra_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21444,7 +21444,7 @@ __epi_4xi64 test_vsra_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsra_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsra.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsra.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vsra_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21464,7 +21464,7 @@ __epi_8xi8 test_vsrl_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vsrl_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsrl.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsrl.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vsrl_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21484,7 +21484,7 @@ __epi_4xi16 test_vsrl_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsrl.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsrl.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vsrl_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21504,7 +21504,7 @@ __epi_2xi32 test_vsrl_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsrl.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsrl.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vsrl_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21524,7 +21524,7 @@ __epi_1xi64 test_vsrl_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsrl.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsrl.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vsrl_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -21544,7 +21544,7 @@ __epi_16xi8 test_vsrl_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsrl.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsrl.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vsrl_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21564,7 +21564,7 @@ __epi_8xi16 test_vsrl_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsrl.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsrl.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vsrl_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21584,7 +21584,7 @@ __epi_4xi32 test_vsrl_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsrl.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsrl.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vsrl_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -21604,7 +21604,7 @@ __epi_2xi64 test_vsrl_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsrl.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsrl.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vsrl_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -21624,7 +21624,7 @@ __epi_32xi8 test_vsrl_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsrl.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsrl.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vsrl_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -21644,7 +21644,7 @@ __epi_16xi16 test_vsrl_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vsrl_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsrl.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsrl.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vsrl_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -21664,7 +21664,7 @@ __epi_8xi32 test_vsrl_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsrl.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsrl.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vsrl_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -21684,7 +21684,7 @@ __epi_4xi64 test_vsrl_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsrl_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsrl.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsrl.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vsrl_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -23684,7 +23684,7 @@ __epi_8xi8 test_vsub_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vsub_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsub.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vsub.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vsub_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -23704,7 +23704,7 @@ __epi_4xi16 test_vsub_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsub.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vsub.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vsub_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -23724,7 +23724,7 @@ __epi_2xi32 test_vsub_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsub.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vsub.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vsub_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -23744,7 +23744,7 @@ __epi_1xi64 test_vsub_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsub.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vsub.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vsub_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -23764,7 +23764,7 @@ __epi_16xi8 test_vsub_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsub.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vsub.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vsub_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -23784,7 +23784,7 @@ __epi_8xi16 test_vsub_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsub.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vsub.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vsub_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -23804,7 +23804,7 @@ __epi_4xi32 test_vsub_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsub.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vsub.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vsub_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -23824,7 +23824,7 @@ __epi_2xi64 test_vsub_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsub.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vsub.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vsub_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -23844,7 +23844,7 @@ __epi_32xi8 test_vsub_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsub.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vsub.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vsub_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -23864,7 +23864,7 @@ __epi_16xi16 test_vsub_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vsub_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsub.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vsub.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vsub_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -23884,7 +23884,7 @@ __epi_8xi32 test_vsub_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsub.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vsub.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vsub_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -23904,7 +23904,7 @@ __epi_4xi64 test_vsub_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vsub_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsub.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vsub.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vsub_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -23924,7 +23924,7 @@ __epi_8xi16 test_vwadd_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vwadd_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwadd.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwadd.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwadd_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -23944,7 +23944,7 @@ __epi_4xi32 test_vwadd_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwadd_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwadd.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwadd.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwadd_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -23964,7 +23964,7 @@ __epi_2xi64 test_vwadd_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwadd_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwadd.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwadd.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwadd_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -23984,7 +23984,7 @@ __epi_16xi16 test_vwadd_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwadd.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwadd.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwadd_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24004,7 +24004,7 @@ __epi_8xi32 test_vwadd_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwadd_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwadd.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwadd.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwadd_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24024,7 +24024,7 @@ __epi_4xi64 test_vwadd_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwadd_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwadd.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwadd.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwadd_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24044,7 +24044,7 @@ __epi_32xi16 test_vwadd_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwadd.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwadd.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwadd_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24064,7 +24064,7 @@ __epi_16xi32 test_vwadd_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vwadd_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwadd.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwadd.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwadd_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24084,7 +24084,7 @@ __epi_8xi64 test_vwadd_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwadd_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwadd.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwadd.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwadd_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24104,7 +24104,7 @@ __epi_8xi16 test_vwadd_w_8xi16(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwadd_w_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwadd.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwadd.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwadd_w_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24124,7 +24124,7 @@ __epi_4xi32 test_vwadd_w_4xi32(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_w_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwadd.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwadd.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwadd_w_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24144,7 +24144,7 @@ __epi_2xi64 test_vwadd_w_2xi64(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_w_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwadd.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwadd.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwadd_w_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -24164,7 +24164,7 @@ __epi_16xi16 test_vwadd_w_16xi16(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwadd_w_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwadd.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwadd.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwadd_w_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24184,7 +24184,7 @@ __epi_8xi32 test_vwadd_w_8xi32(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_w_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwadd.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwadd.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwadd_w_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24204,7 +24204,7 @@ __epi_4xi64 test_vwadd_w_4xi64(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_w_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwadd.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwadd.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwadd_w_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24224,7 +24224,7 @@ __epi_32xi16 test_vwadd_w_32xi16(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwadd_w_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwadd.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwadd.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwadd_w_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24244,7 +24244,7 @@ __epi_16xi32 test_vwadd_w_16xi32(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwadd_w_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwadd.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwadd.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwadd_w_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24264,7 +24264,7 @@ __epi_8xi64 test_vwadd_w_8xi64(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwadd_w_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwadd.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwadd.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwadd_w_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24284,7 +24284,7 @@ __epi_8xi16 test_vwaddu_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vwaddu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwaddu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwaddu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwaddu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24304,7 +24304,7 @@ __epi_4xi32 test_vwaddu_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwaddu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwaddu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwaddu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwaddu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24324,7 +24324,7 @@ __epi_2xi64 test_vwaddu_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwaddu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwaddu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwaddu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwaddu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -24344,7 +24344,7 @@ __epi_16xi16 test_vwaddu_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwaddu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwaddu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwaddu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24364,7 +24364,7 @@ __epi_8xi32 test_vwaddu_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwaddu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwaddu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwaddu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwaddu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24384,7 +24384,7 @@ __epi_4xi64 test_vwaddu_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwaddu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwaddu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwaddu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwaddu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24404,7 +24404,7 @@ __epi_32xi16 test_vwaddu_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwaddu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwaddu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwaddu_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24424,7 +24424,7 @@ __epi_16xi32 test_vwaddu_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwaddu_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwaddu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwaddu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwaddu_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24444,7 +24444,7 @@ __epi_8xi64 test_vwaddu_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwaddu_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwaddu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwaddu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwaddu_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24464,7 +24464,7 @@ __epi_8xi16 test_vwaddu_w_8xi16(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwaddu_w_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwaddu.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwaddu.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwaddu_w_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24484,7 +24484,7 @@ __epi_4xi32 test_vwaddu_w_4xi32(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_w_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwaddu.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwaddu.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwaddu_w_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24504,7 +24504,7 @@ __epi_2xi64 test_vwaddu_w_2xi64(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_w_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwaddu.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwaddu.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwaddu_w_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -24524,7 +24524,7 @@ __epi_16xi16 test_vwaddu_w_16xi16(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwaddu_w_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwaddu.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwaddu.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwaddu_w_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24544,7 +24544,7 @@ __epi_8xi32 test_vwaddu_w_8xi32(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_w_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwaddu.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwaddu.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwaddu_w_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24564,7 +24564,7 @@ __epi_4xi64 test_vwaddu_w_4xi64(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_w_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwaddu.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwaddu.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwaddu_w_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24584,7 +24584,7 @@ __epi_32xi16 test_vwaddu_w_32xi16(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwaddu_w_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwaddu.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwaddu.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwaddu_w_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24604,7 +24604,7 @@ __epi_16xi32 test_vwaddu_w_16xi32(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vwaddu_w_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwaddu.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwaddu.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwaddu_w_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24624,7 +24624,7 @@ __epi_8xi64 test_vwaddu_w_8xi64(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwaddu_w_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwaddu.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwaddu.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwaddu_w_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24644,7 +24644,7 @@ __epi_8xi16 test_vwmul_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vwmul_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmul.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmul.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwmul_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24664,7 +24664,7 @@ __epi_4xi32 test_vwmul_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmul_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmul.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmul.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwmul_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24684,7 +24684,7 @@ __epi_2xi64 test_vwmul_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmul_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmul.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmul.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwmul_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -24704,7 +24704,7 @@ __epi_16xi16 test_vwmul_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmul_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmul.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmul.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwmul_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24724,7 +24724,7 @@ __epi_8xi32 test_vwmul_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmul_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmul.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmul.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwmul_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24744,7 +24744,7 @@ __epi_4xi64 test_vwmul_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmul_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmul.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmul.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwmul_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24764,7 +24764,7 @@ __epi_32xi16 test_vwmul_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmul_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmul.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmul.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwmul_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24784,7 +24784,7 @@ __epi_16xi32 test_vwmul_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vwmul_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmul.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmul.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwmul_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24804,7 +24804,7 @@ __epi_8xi64 test_vwmul_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmul_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmul.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmul.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwmul_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24824,7 +24824,7 @@ __epi_8xi16 test_vwmulsu_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwmulsu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmulsu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmulsu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwmulsu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24844,7 +24844,7 @@ __epi_4xi32 test_vwmulsu_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmulsu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmulsu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmulsu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwmulsu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24864,7 +24864,7 @@ __epi_2xi64 test_vwmulsu_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmulsu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmulsu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmulsu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwmulsu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -24884,7 +24884,7 @@ __epi_16xi16 test_vwmulsu_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vwmulsu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmulsu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmulsu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwmulsu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24904,7 +24904,7 @@ __epi_8xi32 test_vwmulsu_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmulsu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmulsu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmulsu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwmulsu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -24924,7 +24924,7 @@ __epi_4xi64 test_vwmulsu_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmulsu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmulsu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmulsu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwmulsu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -24944,7 +24944,7 @@ __epi_32xi16 test_vwmulsu_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vwmulsu_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmulsu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmulsu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwmulsu_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -24964,7 +24964,7 @@ __epi_16xi32 test_vwmulsu_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwmulsu_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmulsu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmulsu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwmulsu_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -24984,7 +24984,7 @@ __epi_8xi64 test_vwmulsu_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwmulsu_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmulsu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmulsu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwmulsu_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25004,7 +25004,7 @@ __epi_8xi16 test_vwmulu_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vwmulu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmulu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwmulu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwmulu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25024,7 +25024,7 @@ __epi_4xi32 test_vwmulu_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwmulu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmulu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwmulu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwmulu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25044,7 +25044,7 @@ __epi_2xi64 test_vwmulu_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwmulu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmulu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwmulu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwmulu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -25064,7 +25064,7 @@ __epi_16xi16 test_vwmulu_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwmulu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmulu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwmulu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwmulu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25084,7 +25084,7 @@ __epi_8xi32 test_vwmulu_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwmulu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmulu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwmulu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwmulu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25104,7 +25104,7 @@ __epi_4xi64 test_vwmulu_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwmulu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmulu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwmulu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwmulu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25124,7 +25124,7 @@ __epi_32xi16 test_vwmulu_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwmulu_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmulu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwmulu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwmulu_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -25144,7 +25144,7 @@ __epi_16xi32 test_vwmulu_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwmulu_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmulu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwmulu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwmulu_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25164,7 +25164,7 @@ __epi_8xi64 test_vwmulu_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwmulu_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmulu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwmulu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwmulu_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25409,7 +25409,7 @@ __epi_8xi16 test_vwsub_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long i
 
 // CHECK-O2-LABEL: @test_vwsub_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsub.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsub.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwsub_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25429,7 +25429,7 @@ __epi_4xi32 test_vwsub_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwsub_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsub.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsub.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwsub_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25449,7 +25449,7 @@ __epi_2xi64 test_vwsub_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwsub_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsub.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsub.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwsub_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -25469,7 +25469,7 @@ __epi_16xi16 test_vwsub_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsub.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsub.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwsub_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25489,7 +25489,7 @@ __epi_8xi32 test_vwsub_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwsub_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsub.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsub.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwsub_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25509,7 +25509,7 @@ __epi_4xi64 test_vwsub_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwsub_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsub.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsub.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwsub_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25529,7 +25529,7 @@ __epi_32xi16 test_vwsub_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsub.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsub.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwsub_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -25549,7 +25549,7 @@ __epi_16xi32 test_vwsub_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned 
 
 // CHECK-O2-LABEL: @test_vwsub_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsub.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsub.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwsub_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25569,7 +25569,7 @@ __epi_8xi64 test_vwsub_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long
 
 // CHECK-O2-LABEL: @test_vwsub_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsub.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsub.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwsub_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25589,7 +25589,7 @@ __epi_8xi16 test_vwsub_w_8xi16(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsub_w_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsub.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsub.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwsub_w_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25609,7 +25609,7 @@ __epi_4xi32 test_vwsub_w_4xi32(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_w_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsub.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsub.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwsub_w_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25629,7 +25629,7 @@ __epi_2xi64 test_vwsub_w_2xi64(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_w_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsub.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsub.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwsub_w_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -25649,7 +25649,7 @@ __epi_16xi16 test_vwsub_w_16xi16(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwsub_w_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsub.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsub.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwsub_w_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25669,7 +25669,7 @@ __epi_8xi32 test_vwsub_w_8xi32(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_w_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsub.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsub.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwsub_w_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25689,7 +25689,7 @@ __epi_4xi64 test_vwsub_w_4xi64(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_w_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsub.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsub.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwsub_w_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25709,7 +25709,7 @@ __epi_32xi16 test_vwsub_w_32xi16(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwsub_w_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsub.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsub.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwsub_w_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -25729,7 +25729,7 @@ __epi_16xi32 test_vwsub_w_16xi32(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwsub_w_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsub.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsub.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwsub_w_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25749,7 +25749,7 @@ __epi_8xi64 test_vwsub_w_8xi64(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsub_w_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsub.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsub.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwsub_w_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25769,7 +25769,7 @@ __epi_8xi16 test_vwsubu_8xi16(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vwsubu_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsubu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsubu.mask.nxv8i16.nxv8i8.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwsubu_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25789,7 +25789,7 @@ __epi_4xi32 test_vwsubu_4xi32(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsubu_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsubu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsubu.mask.nxv4i32.nxv4i16.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwsubu_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25809,7 +25809,7 @@ __epi_2xi64 test_vwsubu_2xi64(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsubu_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsubu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsubu.mask.nxv2i64.nxv2i32.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwsubu_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -25829,7 +25829,7 @@ __epi_16xi16 test_vwsubu_16xi16(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsubu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsubu.mask.nxv16i16.nxv16i8.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwsubu_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25849,7 +25849,7 @@ __epi_8xi32 test_vwsubu_8xi32(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsubu_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsubu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsubu.mask.nxv8i32.nxv8i16.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwsubu_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25869,7 +25869,7 @@ __epi_4xi64 test_vwsubu_4xi64(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsubu_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsubu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsubu.mask.nxv4i64.nxv4i32.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwsubu_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25889,7 +25889,7 @@ __epi_32xi16 test_vwsubu_32xi16(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsubu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsubu.mask.nxv32i16.nxv32i8.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwsubu_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -25909,7 +25909,7 @@ __epi_16xi32 test_vwsubu_16xi32(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned
 
 // CHECK-O2-LABEL: @test_vwsubu_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsubu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsubu.mask.nxv16i32.nxv16i16.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwsubu_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -25929,7 +25929,7 @@ __epi_8xi64 test_vwsubu_8xi64(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned lon
 
 // CHECK-O2-LABEL: @test_vwsubu_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsubu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsubu.mask.nxv8i64.nxv8i32.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwsubu_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25949,7 +25949,7 @@ __epi_8xi16 test_vwsubu_w_8xi16(__epi_8xi16 arg_0, __epi_8xi8 arg_1, unsigned lo
 
 // CHECK-O2-LABEL: @test_vwsubu_w_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsubu.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vwsubu.w.mask.nxv8i16.nxv8i8.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vwsubu_w_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -25969,7 +25969,7 @@ __epi_4xi32 test_vwsubu_w_4xi32(__epi_4xi32 arg_0, __epi_4xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_w_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsubu.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vwsubu.w.mask.nxv4i32.nxv4i16.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vwsubu_w_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -25989,7 +25989,7 @@ __epi_2xi64 test_vwsubu_w_2xi64(__epi_2xi64 arg_0, __epi_2xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_w_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsubu.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vwsubu.w.mask.nxv2i64.nxv2i32.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vwsubu_w_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -26009,7 +26009,7 @@ __epi_16xi16 test_vwsubu_w_16xi16(__epi_16xi16 arg_0, __epi_16xi8 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwsubu_w_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsubu.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vwsubu.w.mask.nxv16i16.nxv16i8.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vwsubu_w_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -26029,7 +26029,7 @@ __epi_8xi32 test_vwsubu_w_8xi32(__epi_8xi32 arg_0, __epi_8xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_w_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsubu.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vwsubu.w.mask.nxv8i32.nxv8i16.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vwsubu_w_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -26049,7 +26049,7 @@ __epi_4xi64 test_vwsubu_w_4xi64(__epi_4xi64 arg_0, __epi_4xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_w_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsubu.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vwsubu.w.mask.nxv4i64.nxv4i32.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vwsubu_w_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -26069,7 +26069,7 @@ __epi_32xi16 test_vwsubu_w_32xi16(__epi_32xi16 arg_0, __epi_32xi8 arg_1, unsigne
 
 // CHECK-O2-LABEL: @test_vwsubu_w_32xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsubu.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i16> @llvm.riscv.vwsubu.w.mask.nxv32i16.nxv32i8.i64(<vscale x 32 x i16> [[ARG_0:%.*]], <vscale x 32 x i16> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i16> [[TMP0]]
 //
 __epi_32xi16 test_vwsubu_w_32xi16_mask(__epi_32xi16 arg_0, __epi_32xi16 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -26089,7 +26089,7 @@ __epi_16xi32 test_vwsubu_w_16xi32(__epi_16xi32 arg_0, __epi_16xi16 arg_1, unsign
 
 // CHECK-O2-LABEL: @test_vwsubu_w_16xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsubu.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i32> @llvm.riscv.vwsubu.w.mask.nxv16i32.nxv16i16.i64(<vscale x 16 x i32> [[ARG_0:%.*]], <vscale x 16 x i32> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i32> [[TMP0]]
 //
 __epi_16xi32 test_vwsubu_w_16xi32_mask(__epi_16xi32 arg_0, __epi_16xi32 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -26109,7 +26109,7 @@ __epi_8xi64 test_vwsubu_w_8xi64(__epi_8xi64 arg_0, __epi_8xi32 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vwsubu_w_8xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsubu.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i64> @llvm.riscv.vwsubu.w.mask.nxv8i64.nxv8i32.i64(<vscale x 8 x i64> [[ARG_0:%.*]], <vscale x 8 x i64> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i64> [[TMP0]]
 //
 __epi_8xi64 test_vwsubu_w_8xi64_mask(__epi_8xi64 arg_0, __epi_8xi64 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -26129,7 +26129,7 @@ __epi_8xi8 test_vxor_8xi8(__epi_8xi8 arg_0, __epi_8xi8 arg_1, unsigned long int 
 
 // CHECK-O2-LABEL: @test_vxor_8xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vxor.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i8> @llvm.riscv.vxor.mask.nxv8i8.nxv8i8.i64(<vscale x 8 x i8> [[ARG_0:%.*]], <vscale x 8 x i8> [[ARG_1:%.*]], <vscale x 8 x i8> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i8> [[TMP0]]
 //
 __epi_8xi8 test_vxor_8xi8_mask(__epi_8xi8 arg_0, __epi_8xi8 arg_1, __epi_8xi8 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -26149,7 +26149,7 @@ __epi_4xi16 test_vxor_4xi16(__epi_4xi16 arg_0, __epi_4xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_4xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vxor.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i16> @llvm.riscv.vxor.mask.nxv4i16.nxv4i16.i64(<vscale x 4 x i16> [[ARG_0:%.*]], <vscale x 4 x i16> [[ARG_1:%.*]], <vscale x 4 x i16> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i16> [[TMP0]]
 //
 __epi_4xi16 test_vxor_4xi16_mask(__epi_4xi16 arg_0, __epi_4xi16 arg_1, __epi_4xi16 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -26169,7 +26169,7 @@ __epi_2xi32 test_vxor_2xi32(__epi_2xi32 arg_0, __epi_2xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_2xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vxor.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.riscv.vxor.mask.nxv2i32.nxv2i32.i64(<vscale x 2 x i32> [[ARG_0:%.*]], <vscale x 2 x i32> [[ARG_1:%.*]], <vscale x 2 x i32> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i32> [[TMP0]]
 //
 __epi_2xi32 test_vxor_2xi32_mask(__epi_2xi32 arg_0, __epi_2xi32 arg_1, __epi_2xi32 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -26189,7 +26189,7 @@ __epi_1xi64 test_vxor_1xi64(__epi_1xi64 arg_0, __epi_1xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_1xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vxor.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.riscv.vxor.mask.nxv1i64.nxv1i64.i64(<vscale x 1 x i64> [[ARG_0:%.*]], <vscale x 1 x i64> [[ARG_1:%.*]], <vscale x 1 x i64> [[ARG_2:%.*]], <vscale x 1 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 1 x i64> [[TMP0]]
 //
 __epi_1xi64 test_vxor_1xi64_mask(__epi_1xi64 arg_0, __epi_1xi64 arg_1, __epi_1xi64 arg_2, __epi_1xi1 arg_3, unsigned long int arg_4)
@@ -26209,7 +26209,7 @@ __epi_16xi8 test_vxor_16xi8(__epi_16xi8 arg_0, __epi_16xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_16xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vxor.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i8> @llvm.riscv.vxor.mask.nxv16i8.nxv16i8.i64(<vscale x 16 x i8> [[ARG_0:%.*]], <vscale x 16 x i8> [[ARG_1:%.*]], <vscale x 16 x i8> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i8> [[TMP0]]
 //
 __epi_16xi8 test_vxor_16xi8_mask(__epi_16xi8 arg_0, __epi_16xi8 arg_1, __epi_16xi8 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -26229,7 +26229,7 @@ __epi_8xi16 test_vxor_8xi16(__epi_8xi16 arg_0, __epi_8xi16 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_8xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vxor.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i16> @llvm.riscv.vxor.mask.nxv8i16.nxv8i16.i64(<vscale x 8 x i16> [[ARG_0:%.*]], <vscale x 8 x i16> [[ARG_1:%.*]], <vscale x 8 x i16> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i16> [[TMP0]]
 //
 __epi_8xi16 test_vxor_8xi16_mask(__epi_8xi16 arg_0, __epi_8xi16 arg_1, __epi_8xi16 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -26249,7 +26249,7 @@ __epi_4xi32 test_vxor_4xi32(__epi_4xi32 arg_0, __epi_4xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_4xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vxor.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i32> @llvm.riscv.vxor.mask.nxv4i32.nxv4i32.i64(<vscale x 4 x i32> [[ARG_0:%.*]], <vscale x 4 x i32> [[ARG_1:%.*]], <vscale x 4 x i32> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i32> [[TMP0]]
 //
 __epi_4xi32 test_vxor_4xi32_mask(__epi_4xi32 arg_0, __epi_4xi32 arg_1, __epi_4xi32 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
@@ -26269,7 +26269,7 @@ __epi_2xi64 test_vxor_2xi64(__epi_2xi64 arg_0, __epi_2xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_2xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vxor.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i64> @llvm.riscv.vxor.mask.nxv2i64.nxv2i64.i64(<vscale x 2 x i64> [[ARG_0:%.*]], <vscale x 2 x i64> [[ARG_1:%.*]], <vscale x 2 x i64> [[ARG_2:%.*]], <vscale x 2 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 2 x i64> [[TMP0]]
 //
 __epi_2xi64 test_vxor_2xi64_mask(__epi_2xi64 arg_0, __epi_2xi64 arg_1, __epi_2xi64 arg_2, __epi_2xi1 arg_3, unsigned long int arg_4)
@@ -26289,7 +26289,7 @@ __epi_32xi8 test_vxor_32xi8(__epi_32xi8 arg_0, __epi_32xi8 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_32xi8_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vxor.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 32 x i8> @llvm.riscv.vxor.mask.nxv32i8.nxv32i8.i64(<vscale x 32 x i8> [[ARG_0:%.*]], <vscale x 32 x i8> [[ARG_1:%.*]], <vscale x 32 x i8> [[ARG_2:%.*]], <vscale x 32 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 32 x i8> [[TMP0]]
 //
 __epi_32xi8 test_vxor_32xi8_mask(__epi_32xi8 arg_0, __epi_32xi8 arg_1, __epi_32xi8 arg_2, __epi_32xi1 arg_3, unsigned long int arg_4)
@@ -26309,7 +26309,7 @@ __epi_16xi16 test_vxor_16xi16(__epi_16xi16 arg_0, __epi_16xi16 arg_1, unsigned l
 
 // CHECK-O2-LABEL: @test_vxor_16xi16_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vxor.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 16 x i16> @llvm.riscv.vxor.mask.nxv16i16.nxv16i16.i64(<vscale x 16 x i16> [[ARG_0:%.*]], <vscale x 16 x i16> [[ARG_1:%.*]], <vscale x 16 x i16> [[ARG_2:%.*]], <vscale x 16 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 16 x i16> [[TMP0]]
 //
 __epi_16xi16 test_vxor_16xi16_mask(__epi_16xi16 arg_0, __epi_16xi16 arg_1, __epi_16xi16 arg_2, __epi_16xi1 arg_3, unsigned long int arg_4)
@@ -26329,7 +26329,7 @@ __epi_8xi32 test_vxor_8xi32(__epi_8xi32 arg_0, __epi_8xi32 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_8xi32_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vxor.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x i32> @llvm.riscv.vxor.mask.nxv8i32.nxv8i32.i64(<vscale x 8 x i32> [[ARG_0:%.*]], <vscale x 8 x i32> [[ARG_1:%.*]], <vscale x 8 x i32> [[ARG_2:%.*]], <vscale x 8 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 8 x i32> [[TMP0]]
 //
 __epi_8xi32 test_vxor_8xi32_mask(__epi_8xi32 arg_0, __epi_8xi32 arg_1, __epi_8xi32 arg_2, __epi_8xi1 arg_3, unsigned long int arg_4)
@@ -26349,7 +26349,7 @@ __epi_4xi64 test_vxor_4xi64(__epi_4xi64 arg_0, __epi_4xi64 arg_1, unsigned long 
 
 // CHECK-O2-LABEL: @test_vxor_4xi64_mask(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vxor.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x i64> @llvm.riscv.vxor.mask.nxv4i64.nxv4i64.i64(<vscale x 4 x i64> [[ARG_0:%.*]], <vscale x 4 x i64> [[ARG_1:%.*]], <vscale x 4 x i64> [[ARG_2:%.*]], <vscale x 4 x i1> [[ARG_3:%.*]], i64 [[ARG_4:%.*]], i64 0)
 // CHECK-O2-NEXT:    ret <vscale x 4 x i64> [[TMP0]]
 //
 __epi_4xi64 test_vxor_4xi64_mask(__epi_4xi64 arg_0, __epi_4xi64 arg_1, __epi_4xi64 arg_2, __epi_4xi1 arg_3, unsigned long int arg_4)
