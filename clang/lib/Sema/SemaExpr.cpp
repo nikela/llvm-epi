@@ -6546,10 +6546,12 @@ ExprResult Sema::BuildCallExpr(Scope *Scope, Expr *Fn, SourceLocation LParenLoc,
         auto ArgAS = ArgPtTy.getAddressSpace();
 
         // Add address space cast if target address spaces are different
-        if ((ArgAS != LangAS::Default &&
-             getASTContext().getTargetAddressSpace(ArgAS) !=
-                 getASTContext().getTargetAddressSpace(ParamAS)) ||
-            ParamAS == LangAS::Default)
+        bool NeedImplicitASC = 
+          ParamAS != LangAS::Default &&       // Pointer params in generic AS don't need special handling.
+          ( ArgAS == LangAS::Default  ||      // We do allow implicit conversion from generic AS 
+                                              // or from specific AS which has target AS matching that of Param.
+          getASTContext().getTargetAddressSpace(ArgAS) == getASTContext().getTargetAddressSpace(ParamAS));
+        if (!NeedImplicitASC)
           continue;
 
         // First, ensure that the Arg is an RValue.
