@@ -5323,8 +5323,6 @@ InnerLoopVectorizer::getVPIntrInstr(unsigned Opcode) {
     return {Intrinsic::vp_inttoptr, false};
   case Instruction::PtrToInt:
     return {Intrinsic::vp_ptrtoint, false};
-  case Instruction::BitCast:
-    return {Intrinsic::vp_bitcast, false};
   }
   return {Intrinsic::not_intrinsic, false};
 }
@@ -5485,18 +5483,6 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     else
       assert(DestElemTy->isIntegerTy() && SrcElemTy->isPointerTy() &&
              "Invalid destination/source type for ptr to int cast.");
-    return CreateCast(CI);
-  }
-
-  //===------------------- bitcast cast instructions ----------------------===//
-  if (Opcode == Instruction::BitCast) {
-    auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
-    Type *DestElemTy = CI->getType();
-    Type *SrcElemTy = CI->getOperand(0)->getType();
-    assert(SrcElemTy->getPrimitiveSizeInBits() ==
-               DestElemTy->getPrimitiveSizeInBits() &&
-           "Invalid destination/source type for bitcast.");
     return CreateCast(CI);
   }
 

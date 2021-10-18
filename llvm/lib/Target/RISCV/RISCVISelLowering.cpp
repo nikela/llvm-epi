@@ -4347,7 +4347,6 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   VP_INTRINSIC(vp_icmp)                                                        \
   VP_INTRINSIC(vp_fcmp)                                                        \
   VP_INTRINSIC(vp_select)                                                      \
-  VP_INTRINSIC(vp_bitcast)                                                     \
   VP_INTRINSIC(vp_sitofp)                                                      \
   VP_INTRINSIC(vp_uitofp)                                                      \
   VP_INTRINSIC(vp_fptosi)                                                      \
@@ -4902,12 +4901,6 @@ static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG,
         {DAG.getTargetConstant(Intrinsic::epi_vmxor, DL, MVT::i64), OpB,
          XorAndMask, EVL});
   }
-  case Intrinsic::vp_bitcast: {
-    assert(Op.getValueType().getSizeInBits() ==
-               Op.getOperand(1).getValueType().getSizeInBits() &&
-           "Unable to bitcast values of unmatching sizes");
-    return DAG.getNode(ISD::BITCAST, DL, Op.getValueType(), Op.getOperand(1));
-  }
   }
 
   std::vector<SDValue> Operands;
@@ -5345,7 +5338,6 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_icmp:
   case Intrinsic__vp_fcmp:
   case Intrinsic__vp_select:
-  case Intrinsic__vp_bitcast:
     return LowerVPINTRINSIC_WO_CHAIN(Op, DAG, TargetLowering);
   case Intrinsic__vp_sitofp:
   case Intrinsic__vp_uitofp:

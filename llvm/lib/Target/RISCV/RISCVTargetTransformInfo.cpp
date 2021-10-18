@@ -507,7 +507,6 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(add)                                                            \
   VP_INTRINSIC(and)                                                            \
   VP_INTRINSIC(ashr)                                                           \
-  VP_INTRINSIC(bitcast)                                                        \
   VP_INTRINSIC(fadd)                                                           \
   VP_INTRINSIC(fcmp)                                                           \
   VP_INTRINSIC(fdiv)                                                           \
