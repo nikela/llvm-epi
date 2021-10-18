@@ -12,7 +12,7 @@ void basic_test_callee(__epi_1xf64 a, __epi_1xf64 b, __epi_1xi1 mask);
 // CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[A]], align 8
 // CHECK-NEXT:    [[TMP1:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[B]], align 8
 // CHECK-NEXT:    [[TMP2:%.*]] = load <vscale x 1 x i1>, <vscale x 1 x i1>* [[MASK]], align 8
-// CHECK-NEXT:    call void @basic_test_callee(<vscale x 1 x double> [[TMP0]], <vscale x 1 x double> [[TMP1]], <vscale x 1 x i1> [[TMP2]])
+// CHECK-NEXT:    call void @basic_test_callee(<vscale x 1 x double> noundef [[TMP0]], <vscale x 1 x double> noundef [[TMP1]], <vscale x 1 x i1> [[TMP2]])
 // CHECK-NEXT:    ret void
 //
 void basic_test_caller(void)
