@@ -10373,7 +10373,8 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
         *SI, make_range(Operands.begin(), Operands.end()), InvariantCond));
   }
 
-  if (preferPredicatedWiden())
+  // BitCast does not need to be predicated
+  if (preferPredicatedWiden() && Instr->getOpcode() != Instruction::BitCast)
     return toVPRecipeResult(tryToPredicatedWiden(Instr, Operands, Plan));
 
   return toVPRecipeResult(tryToWiden(Instr, Operands));
