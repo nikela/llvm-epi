@@ -6425,6 +6425,11 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly
                                 VectorRegisterWidthFactor,
                                 /* IsScalable */ true);
 
+  if (FeasibleMaxVFLowerBound.isZero() || FeasibleMaxVFUpperBound.isZero()) {
+    LLVM_DEBUG(dbgs() << "LV: No feasible VF exists\n");
+    return FixedScalableVFPair::getNone();
+  }
+
   // If the user vectorization factor is legally unsafe, clamp it to a safe
   // value. Otherwise, return as is.
   if (UserVF.isNonZero() && !IgnoreScalableUserVF) {

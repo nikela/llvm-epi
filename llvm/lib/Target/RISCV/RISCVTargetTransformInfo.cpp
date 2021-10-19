@@ -303,8 +303,9 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                                     unsigned RegWidthFactor,
                                     bool IsScalable) const {
   // check for SEW <= ELEN in the base ISA
-  assert(WidestType <= getMaxElementWidth() &&
-         "Vector element type larger than the maximum supported type.");
+  if (WidestType > getMaxElementWidth() || SmallestType > getMaxElementWidth())
+    return {ElementCount::getNull(), ElementCount::getNull()};
+
   // Smallest SEW supported = 8. For 1 bit wide Type, clip to 8 bit to get a
   // valid range of VFs.
   SmallestType = std::max<unsigned>(8, SmallestType);
