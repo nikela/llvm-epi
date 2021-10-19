@@ -572,7 +572,9 @@ public:
 
   // FIXME: This is not ideal.
   SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
-                          ArrayRef<RISCVVTToLibCall> TypeToCall) const;
+                          ArrayRef<RISCVVTToLibCall> TypeToCall,
+                          EVT VT) const;
+
 private:
   /// RISCVCCAssignFn - This target-specific function extends the default
   /// CCValAssign with additional information used to lower RISC-V calling
