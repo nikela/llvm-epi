@@ -30,8 +30,7 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK-NEXT:    [[BOUND0:%.*]] = icmp ult i8* [[DY1]], [[SCEVGEP45]]
 ; CHECK-NEXT:    [[BOUND1:%.*]] = icmp ult i8* [[DX3]], [[SCEVGEP2]]
 ; CHECK-NEXT:    [[FOUND_CONFLICT:%.*]] = and i1 [[BOUND0]], [[BOUND1]]
-; CHECK-NEXT:    [[MEMCHECK_CONFLICT:%.*]] = and i1 [[FOUND_CONFLICT]], true
-; CHECK-NEXT:    br i1 [[MEMCHECK_CONFLICT]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
+; CHECK-NEXT:    br i1 [[FOUND_CONFLICT]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
@@ -102,8 +101,7 @@ define dso_local void @axpy_ref(double %a, double* nocapture readonly %dx, doubl
 ; CHECK1-NEXT:    [[BOUND0:%.*]] = icmp ult i8* [[DY1]], [[SCEVGEP45]]
 ; CHECK1-NEXT:    [[BOUND1:%.*]] = icmp ult i8* [[DX3]], [[SCEVGEP2]]
 ; CHECK1-NEXT:    [[FOUND_CONFLICT:%.*]] = and i1 [[BOUND0]], [[BOUND1]]
-; CHECK1-NEXT:    [[MEMCHECK_CONFLICT:%.*]] = and i1 [[FOUND_CONFLICT]], true
-; CHECK1-NEXT:    br i1 [[MEMCHECK_CONFLICT]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
+; CHECK1-NEXT:    br i1 [[FOUND_CONFLICT]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; CHECK1:       vector.ph:
 ; CHECK1-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP1]]

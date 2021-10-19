@@ -8,13 +8,13 @@ define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %va, <vscale x 1 x i64> %v
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-NEXT:    vslidedown.vx v25, v8, a0
+; CHECK-NEXT:    vslidedown.vx v8, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
-; CHECK-NEXT:    vmsltu.vx v0, v26, a0
-; CHECK-NEXT:    vslideup.vx v26, v9, a0
-; CHECK-NEXT:    vmerge.vvm v8, v26, v25, v0
+; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vmsltu.vx v0, v10, a0
+; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %vc = call <vscale x 1 x i64> @llvm.experimental.vector.vp.slideleftfill.nxv1i64(
     <vscale x 1 x i64> %va,
@@ -33,13 +33,13 @@ define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %va, <vscale x 2 x i32> %v
 ; CHECK-LABEL: nxv2i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-NEXT:    vslidedown.vx v25, v8, a0
+; CHECK-NEXT:    vslidedown.vx v8, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
-; CHECK-NEXT:    vmsltu.vx v0, v26, a0
-; CHECK-NEXT:    vslideup.vx v26, v9, a0
-; CHECK-NEXT:    vmerge.vvm v8, v26, v25, v0
+; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vmsltu.vx v0, v10, a0
+; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %vc = call <vscale x 2 x i32> @llvm.experimental.vector.vp.slideleftfill.nxv2i32(
     <vscale x 2 x i32> %va,
@@ -58,13 +58,13 @@ define <vscale x 1 x double> @nxv1f64(<vscale x 1 x double> %va, <vscale x 1 x d
 ; CHECK-LABEL: nxv1f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-NEXT:    vslidedown.vx v25, v8, a0
+; CHECK-NEXT:    vslidedown.vx v8, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
-; CHECK-NEXT:    vmsltu.vx v0, v26, a0
-; CHECK-NEXT:    vslideup.vx v26, v9, a0
-; CHECK-NEXT:    vmerge.vvm v8, v26, v25, v0
+; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vmsltu.vx v0, v10, a0
+; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %vc = call <vscale x 1 x double> @llvm.experimental.vector.vp.slideleftfill.nxv1f64(
     <vscale x 1 x double> %va,
@@ -83,13 +83,13 @@ define <vscale x 2 x float> @nxv2f32(<vscale x 2 x float> %va, <vscale x 2 x flo
 ; CHECK-LABEL: nxv2f32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-NEXT:    vslidedown.vx v25, v8, a0
+; CHECK-NEXT:    vslidedown.vx v8, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
-; CHECK-NEXT:    vmsltu.vx v0, v26, a0
-; CHECK-NEXT:    vslideup.vx v26, v9, a0
-; CHECK-NEXT:    vmerge.vvm v8, v26, v25, v0
+; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vmsltu.vx v0, v10, a0
+; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %vc = call <vscale x 2 x float> @llvm.experimental.vector.vp.slideleftfill.nxv2f32(
     <vscale x 2 x float> %va,
@@ -108,13 +108,13 @@ define <vscale x 2 x i64> @nxv2i64(<vscale x 2 x i64> %va, <vscale x 2 x i64> %v
 ; CHECK-LABEL: nxv2i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-NEXT:    vslidedown.vx v26, v8, a0
+; CHECK-NEXT:    vslidedown.vx v8, v8, a0
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m2, ta, mu
-; CHECK-NEXT:    vid.v v28
-; CHECK-NEXT:    vmsltu.vx v0, v28, a0
-; CHECK-NEXT:    vslideup.vx v28, v10, a0
-; CHECK-NEXT:    vmerge.vvm v8, v28, v26, v0
+; CHECK-NEXT:    vid.v v12
+; CHECK-NEXT:    vmsltu.vx v0, v12, a0
+; CHECK-NEXT:    vslideup.vx v12, v10, a0
+; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %vc = call <vscale x 2 x i64> @llvm.experimental.vector.vp.slideleftfill.nxv2i64(
     <vscale x 2 x i64> %va,

@@ -6,11 +6,11 @@ define void @nxv1i64_1(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %
 ; CHECK-LABEL: nxv1i64_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vsll.vi v25, v9, 3
+; CHECK-NEXT:    vsll.vi v9, v9, 3
 ; CHECK-NEXT:    slli a1, a1, 32
 ; CHECK-NEXT:    srli a1, a1, 32
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-NEXT:    vsoxei64.v v8, (a0), v25, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v9, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, <vscale x 1 x i1> %mask, i32 %evl)
@@ -33,11 +33,11 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 ; CHECK-LABEL: nxv1i64_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vmv.v.x v25, a0
+; CHECK-NEXT:    vmv.v.x v9, a0
 ; CHECK-NEXT:    slli a0, a1, 32
 ; CHECK-NEXT:    srli a0, a0, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vsoxei64.v v8, (zero), v25, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
   %splat = shufflevector <vscale x 1 x i64*> %head, <vscale x 1 x i64*> undef, <vscale x 1 x i32> zeroinitializer
@@ -51,10 +51,10 @@ define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i3
 ; CHECK-NEXT:    slli a1, a1, 32
 ; CHECK-NEXT:    srli a1, a1, 32
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
-; CHECK-NEXT:    vsext.vf2 v26, v9
-; CHECK-NEXT:    vsll.vi v26, v26, 2
+; CHECK-NEXT:    vsext.vf2 v10, v9
+; CHECK-NEXT:    vsll.vi v10, v10, 2
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-NEXT:    vsoxei64.v v8, (a0), v26, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v10, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
   call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %1, <vscale x 2 x i1> %mask, i32 %evl)
@@ -77,11 +77,11 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 ; CHECK-LABEL: nxv2f32_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
-; CHECK-NEXT:    vmv.v.x v26, a0
+; CHECK-NEXT:    vmv.v.x v10, a0
 ; CHECK-NEXT:    slli a0, a1, 32
 ; CHECK-NEXT:    srli a0, a0, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vsoxei64.v v8, (zero), v26, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
   %splat = shufflevector <vscale x 2 x float*> %head, <vscale x 2 x float*> undef, <vscale x 2 x i32> zeroinitializer

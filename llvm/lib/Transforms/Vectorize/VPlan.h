@@ -1652,29 +1652,41 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
 protected:
   Instruction &Ingredient;
 
+  // Whether the loaded-from / stored-to addresses are consecutive.
+  bool Consecutive;
+
+  // Whether the consecutive loaded/stored addresses are in reverse order.
+  bool Reverse;
+
   VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
+                                 bool Consecutive, bool Reverse,
                                  const unsigned char RecipeSC,
                                  const unsigned char ValueSC)
-      : VPRecipeBase(RecipeSC, {Addr}), Ingredient(Load) {
+      : VPRecipeBase(RecipeSC, {Addr}), Ingredient(Load),
+        Consecutive(Consecutive), Reverse(Reverse) {
     new VPValue(ValueSC, &Load, this);
   }
 
   VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                 VPValue *StoredValue,
-                                 const unsigned char RecipeSC)
-      : VPRecipeBase(RecipeSC, {Addr, StoredValue}), Ingredient(Store) {}
+                                 VPValue *StoredValue, bool Consecutive,
+                                 bool Reverse, const unsigned char RecipeSC)
+      : VPRecipeBase(RecipeSC, {Addr, StoredValue}), Ingredient(Store),
+        Consecutive(Consecutive), Reverse(Reverse) {}
 
 public:
-  VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask)
-      : VPWidenMemoryInstructionRecipe(Load, Addr, VPWidenMemoryInstructionSC,
+  VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask,
+                                 bool Consecutive, bool Reverse)
+      : VPWidenMemoryInstructionRecipe(Load, Addr, Consecutive, Reverse,
+                                       VPWidenMemoryInstructionSC,
                                        VPValue::VPVMemoryInstructionSC) {
     setMask(Mask);
   }
 
   VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                 VPValue *StoredValue, VPValue *Mask)
-      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue,
-                                       VPWidenMemoryInstructionSC) {
+                                 VPValue *StoredValue, VPValue *Mask,
+                                 bool Consecutive, bool Reverse)
+      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Consecutive,
+                                       Reverse, VPWidenMemoryInstructionSC) {
     setMask(Mask);
   }
 
@@ -1704,6 +1716,13 @@ public:
     return getOperand(1); // Stored value is the 2nd, mandatory operand.
   }
 
+  // Return whether the loaded-from / stored-to addresses are consecutive.
+  bool isConsecutive() const { return Consecutive; }
+
+  // Return whether the consecutive loaded/stored addresses are in reverse
+  // order.
+  bool isReverse() const { return Reverse; }
+
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
 
@@ -1723,9 +1742,11 @@ class VPPredicatedWidenMemoryInstructionRecipe
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
-                                           VPValue *Mask, VPValue *EVL)
+                                           VPValue *Mask, bool Consecutive,
+                                           bool Reverse, VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(
-            Load, Addr, VPPredicatedWidenMemoryInstructionSC,
+            Load, Addr, Consecutive, Reverse,
+            VPPredicatedWidenMemoryInstructionSC,
             VPValue::VPVPredicatedMemoryInstructionSC) {
     addOperand(Mask);
     addOperand(EVL);
@@ -1733,8 +1754,10 @@ public:
 
   VPPredicatedWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
                                            VPValue *StoredValue, VPValue *Mask,
+                                           bool Consecutive, bool Reverse,
                                            VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue,
+      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Consecutive,
+                                       Reverse,
                                        VPPredicatedWidenMemoryInstructionSC) {
     addOperand(Mask);
     addOperand(EVL);

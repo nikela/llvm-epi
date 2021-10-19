@@ -16,10 +16,10 @@ define void @foo(i32* %p, i64 %gvl) nounwind optnone noinline
 ; CHECK-NEXT:    sub a2, sp, a2
 ; CHECK-NEXT:    mv sp, a2
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v25, (a0)
-; CHECK-NEXT:    vs1r.v v25, (a2)
-; CHECK-NEXT:    vl1re32.v v25, (a2)
-; CHECK-NEXT:    vse32.v v25, (a0)
+; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (a2)
+; CHECK-NEXT:    vl1re32.v v8, (a2)
+; CHECK-NEXT:    vse32.v v8, (a0)
 ; CHECK-NEXT:    addi sp, s0, -16
 ; CHECK-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload

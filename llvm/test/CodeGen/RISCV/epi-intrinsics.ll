@@ -39,29 +39,29 @@ define void @test_load_stores() nounwind
 ; CHECK-LABEL: test_load_stores:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vle8.v v25, (a0)
+; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vse8.v v25, (a0)
+; CHECK-NEXT:    vse8.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vle16.v v25, (a0)
+; CHECK-NEXT:    vle16.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vse16.v v25, (a0)
+; CHECK-NEXT:    vse16.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v25, (a0)
+; CHECK-NEXT:    vle32.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vse32.v v25, (a0)
+; CHECK-NEXT:    vse32.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v25, (a0)
+; CHECK-NEXT:    vle64.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vse64.v v25, (a0)
+; CHECK-NEXT:    vse64.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v25, (a0)
+; CHECK-NEXT:    vle32.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vse32.v v25, (a0)
+; CHECK-NEXT:    vse32.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v25, (a0)
+; CHECK-NEXT:    vle64.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vse64.v v25, (a0)
+; CHECK-NEXT:    vse64.v v8, (a0)
 ; CHECK-NEXT:    ret
 {
   %a1 = call <vscale x 8 x i8> @llvm.epi.vload.nxv8i8(<vscale x 8 x i8>* undef, i64 undef)
@@ -108,25 +108,25 @@ define void @test_greater_comparisons(<vscale x 1 x i64>* %pia,
 ; CHECK-LABEL: test_greater_comparisons:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v25, (a0)
-; CHECK-NEXT:    vle64.v v26, (a1)
-; CHECK-NEXT:    vmslt.vv v27, v26, v25
+; CHECK-NEXT:    vle64.v v8, (a0)
+; CHECK-NEXT:    vle64.v v9, (a1)
+; CHECK-NEXT:    vmslt.vv v10, v9, v8
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-NEXT:    vsm.v v27, (a2)
+; CHECK-NEXT:    vsm.v v10, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vmsltu.vv v25, v26, v25
+; CHECK-NEXT:    vmsltu.vv v8, v9, v8
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-NEXT:    vsm.v v25, (a2)
+; CHECK-NEXT:    vsm.v v8, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v25, (a3)
-; CHECK-NEXT:    vle64.v v26, (a4)
-; CHECK-NEXT:    vmflt.vv v27, v26, v25
+; CHECK-NEXT:    vle64.v v8, (a3)
+; CHECK-NEXT:    vle64.v v9, (a4)
+; CHECK-NEXT:    vmflt.vv v10, v9, v8
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-NEXT:    vsm.v v27, (a2)
+; CHECK-NEXT:    vsm.v v10, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vmfle.vv v25, v26, v25
+; CHECK-NEXT:    vmfle.vv v8, v9, v8
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-NEXT:    vsm.v v25, (a2)
+; CHECK-NEXT:    vsm.v v8, (a2)
 ; CHECK-NEXT:    ret
                                       <vscale x 1 x i64>* %pib,
                                       <vscale x 1 x i1>* %pm,

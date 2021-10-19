@@ -64,15 +64,15 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O0-NEXT:    ld a2, 48(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a5, 0(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a3, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    ori a4, a5, 88
 ; CHECK-O0-NEXT:    vsetvl a3, a3, a4
-; CHECK-O0-NEXT:    vle64.v v26, (a2)
-; CHECK-O0-NEXT:    # implicit-def: $v27
-; CHECK-O0-NEXT:    vle64.v v27, (a1)
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vfadd.vv v25, v26, v27
-; CHECK-O0-NEXT:    vse64.v v25, (a0)
+; CHECK-O0-NEXT:    vle64.v v9, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v10
+; CHECK-O0-NEXT:    vle64.v v10, (a1)
+; CHECK-O0-NEXT:    # implicit-def: $v8
+; CHECK-O0-NEXT:    vfadd.vv v8, v9, v10
+; CHECK-O0-NEXT:    vse64.v v8, (a0)
 ; CHECK-O0-NEXT:    addi sp, sp, 80
 ; CHECK-O0-NEXT:    ret
 ;
@@ -104,10 +104,10 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O2-NEXT:  .LBB0_6: # %if.end4
 ; CHECK-O2-NEXT:    ori a1, a2, 88
 ; CHECK-O2-NEXT:    vsetvl a0, a0, a1
-; CHECK-O2-NEXT:    vle64.v v25, (a3)
-; CHECK-O2-NEXT:    vle64.v v26, (a4)
-; CHECK-O2-NEXT:    vfadd.vv v25, v25, v26
-; CHECK-O2-NEXT:    vse64.v v25, (a5)
+; CHECK-O2-NEXT:    vle64.v v8, (a3)
+; CHECK-O2-NEXT:    vle64.v v9, (a4)
+; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
+; CHECK-O2-NEXT:    vse64.v v8, (a5)
 ; CHECK-O2-NEXT:    ret
 entry:
   %cmp = icmp sgt i64 %rvl, 44

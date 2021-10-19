@@ -7,8 +7,8 @@ define <vscale x 8 x i32> @test_zext_i8_i32_m1(<vscale x 8 x i8> %a) nounwind
 ; CHECK-LABEL: test_zext_i8_i32_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
-; CHECK-NEXT:    vzext.vf4 v28, v8
-; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    vzext.vf4 v12, v8
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 8 x i8> %a to <vscale x 8 x i32>
@@ -33,8 +33,8 @@ define <vscale x 4 x i64> @test_zext_i16_i64_m1(<vscale x 4 x i16> %a) nounwind
 ; CHECK-LABEL: test_zext_i16_i64_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, mu
-; CHECK-NEXT:    vzext.vf4 v28, v8
-; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    vzext.vf4 v12, v8
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 4 x i16> %a to <vscale x 4 x i64>

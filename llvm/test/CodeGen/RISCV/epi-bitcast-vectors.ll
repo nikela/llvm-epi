@@ -13,9 +13,9 @@ define void @foo_1(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 1 x double>* %d
 ; CHECK-LABEL: foo_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v25, (a1)
+; CHECK-NEXT:    vle32.v v8, (a1)
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vse64.v v25, (a2)
+; CHECK-NEXT:    vse64.v v8, (a2)
 ; CHECK-NEXT:    ret
   %a = call <vscale x 2 x i32> @llvm.epi.vload.v2i32(<vscale x 2 x i32> *%src, i64 %gvl)
   %b = bitcast <vscale x 2 x i32> %a to <vscale x 1 x double>
@@ -28,8 +28,8 @@ define void @foo_2(i64 %gvl, <vscale x 2 x i32>* %src, <vscale x 2 x float>* %ds
 ; CHECK-LABEL: foo_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v25, (a1)
-; CHECK-NEXT:    vse32.v v25, (a2)
+; CHECK-NEXT:    vle32.v v8, (a1)
+; CHECK-NEXT:    vse32.v v8, (a2)
 ; CHECK-NEXT:    ret
   %a = call <vscale x 2 x i32> @llvm.epi.vload.v2i32(<vscale x 2 x i32> *%src, i64 %gvl)
   %b = bitcast <vscale x 2 x i32> %a to <vscale x 2 x float>
@@ -41,8 +41,8 @@ define void @foo_3(i64 %gvl, <vscale x 4 x i32>* %src, <vscale x 4 x float>* %ds
 ; CHECK-LABEL: foo_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
-; CHECK-NEXT:    vle32.v v26, (a1)
-; CHECK-NEXT:    vse32.v v26, (a2)
+; CHECK-NEXT:    vle32.v v8, (a1)
+; CHECK-NEXT:    vse32.v v8, (a2)
 ; CHECK-NEXT:    ret
   %a = call <vscale x 4 x i32> @llvm.epi.vload.v4i32(<vscale x 4 x i32> *%src, i64 %gvl)
   %b = bitcast <vscale x 4 x i32> %a to <vscale x 4 x float>
@@ -56,8 +56,8 @@ define void @foo_3(i64 %gvl, <vscale x 4 x i32>* %src, <vscale x 4 x float>* %ds
 define void @foo_5(<vscale x 2 x i32>* %src, <vscale x 1 x double>* %dst) nounwind {
 ; CHECK-LABEL: foo_5:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vl1re32.v v25, (a0)
-; CHECK-NEXT:    vs1r.v v25, (a1)
+; CHECK-NEXT:    vl1re32.v v8, (a0)
+; CHECK-NEXT:    vs1r.v v8, (a1)
 ; CHECK-NEXT:    ret
   %a = load <vscale x 2 x i32>, <vscale x 2 x i32> *%src
   %b = bitcast <vscale x 2 x i32> %a to <vscale x 1 x double>

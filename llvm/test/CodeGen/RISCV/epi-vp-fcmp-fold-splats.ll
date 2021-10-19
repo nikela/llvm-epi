@@ -14,36 +14,37 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    addi a1, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    slli a1, a0, 32
 ; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfgt.vf v25, v8, fa0, v0.t
+; CHECK-O0-NEXT:    vmfgt.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vf v25, v8, fa0, v0.t
+; CHECK-O0-NEXT:    vmflt.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfge.vf v25, v8, fa0, v0.t
+; CHECK-O0-NEXT:    vmfge.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vf v25, v8, fa0, v0.t
+; CHECK-O0-NEXT:    vmfle.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -56,21 +57,21 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfgt.vf v25, v8, fa0, v0.t
+; CHECK-O2-NEXT:    vmfgt.vf v9, v8, fa0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vf v25, v8, fa0, v0.t
+; CHECK-O2-NEXT:    vmflt.vf v9, v8, fa0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfge.vf v25, v8, fa0, v0.t
+; CHECK-O2-NEXT:    vmfge.vf v9, v8, fa0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vf v25, v8, fa0, v0.t
+; CHECK-O2-NEXT:    vmfle.vf v8, v8, fa0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -104,38 +105,39 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    addi a1, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    slli a1, a0, 32
 ; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    lui a2, %hi(.LCPI1_0)
 ; CHECK-O0-NEXT:    fld ft0, %lo(.LCPI1_0)(a2)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vf v25, v8, ft0, v0.t
+; CHECK-O0-NEXT:    vmflt.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfgt.vf v25, v8, ft0, v0.t
+; CHECK-O0-NEXT:    vmfgt.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vf v25, v8, ft0, v0.t
+; CHECK-O0-NEXT:    vmfle.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfge.vf v25, v8, ft0, v0.t
+; CHECK-O0-NEXT:    vmfge.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
@@ -150,21 +152,21 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vf v25, v8, ft0, v0.t
+; CHECK-O2-NEXT:    vmflt.vf v9, v8, ft0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfgt.vf v25, v8, ft0, v0.t
+; CHECK-O2-NEXT:    vmfgt.vf v9, v8, ft0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vf v25, v8, ft0, v0.t
+; CHECK-O2-NEXT:    vmfle.vf v9, v8, ft0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfge.vf v25, v8, ft0, v0.t
+; CHECK-O2-NEXT:    vmfge.vf v8, v8, ft0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 

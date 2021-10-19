@@ -24,12 +24,12 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a0, a2, a4
-; CHECK-NEXT:    vl1re16.v v25, (a0)
+; CHECK-NEXT:    vl1re16.v v8, (a0)
 ; CHECK-NEXT:    add t3, a1, a4
-; CHECK-NEXT:    vl1re16.v v26, (t3)
+; CHECK-NEXT:    vl1re16.v v9, (t3)
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m1, ta, mu
-; CHECK-NEXT:    vmacc.vx v26, a3, v25
-; CHECK-NEXT:    vs1r.v v26, (t3)
+; CHECK-NEXT:    vmacc.vx v9, a3, v8
+; CHECK-NEXT:    vs1r.v v9, (t3)
 ; CHECK-NEXT:    add a5, a5, t2
 ; CHECK-NEXT:    add a4, a4, t0
 ; CHECK-NEXT:    bne a5, t1, .LBB0_4
@@ -137,12 +137,12 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a0, a2, a4
-; CHECK-NEXT:    vl1re32.v v25, (a0)
+; CHECK-NEXT:    vl1re32.v v8, (a0)
 ; CHECK-NEXT:    add t3, a1, a4
-; CHECK-NEXT:    vl1re32.v v26, (t3)
+; CHECK-NEXT:    vl1re32.v v9, (t3)
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
-; CHECK-NEXT:    vmacc.vx v26, a3, v25
-; CHECK-NEXT:    vs1r.v v26, (t3)
+; CHECK-NEXT:    vmacc.vx v9, a3, v8
+; CHECK-NEXT:    vs1r.v v9, (t3)
 ; CHECK-NEXT:    add a5, a5, t2
 ; CHECK-NEXT:    add a4, a4, t0
 ; CHECK-NEXT:    bne a5, t1, .LBB1_4
@@ -249,12 +249,12 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:  .LBB2_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vl1re64.v v25, (a4)
+; CHECK-NEXT:    vl1re64.v v8, (a4)
 ; CHECK-NEXT:    add t3, a1, a5
-; CHECK-NEXT:    vl1re64.v v26, (t3)
+; CHECK-NEXT:    vl1re64.v v9, (t3)
 ; CHECK-NEXT:    vsetvli a4, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vmacc.vx v26, a3, v25
-; CHECK-NEXT:    vs1r.v v26, (t3)
+; CHECK-NEXT:    vmacc.vx v9, a3, v8
+; CHECK-NEXT:    vs1r.v v9, (t3)
 ; CHECK-NEXT:    add t2, t2, t1
 ; CHECK-NEXT:    add a5, a5, a6
 ; CHECK-NEXT:    bne t2, t0, .LBB2_4

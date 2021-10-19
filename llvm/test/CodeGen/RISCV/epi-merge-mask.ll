@@ -31,24 +31,24 @@ define void @merge_mask(i64 %vl, double* %c, double* %a, double* %b) nounwind {
 ; CHECK-O0-LABEL: merge_mask:
 ; CHECK-O0:       # %bb.0: # %entry
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    # implicit-def: $v26
-; CHECK-O0-NEXT:    vle64.v v26, (a2)
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vle64.v v25, (a3)
+; CHECK-O0-NEXT:    # implicit-def: $v9
+; CHECK-O0-NEXT:    vle64.v v9, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v8
+; CHECK-O0-NEXT:    vle64.v v8, (a3)
 ; CHECK-O0-NEXT:    # implicit-def: $v0
-; CHECK-O0-NEXT:    vmflt.vv v0, v26, v25
-; CHECK-O0-NEXT:    vfsub.vv v25, v25, v26, v0.t
-; CHECK-O0-NEXT:    vse64.v v25, (a1)
+; CHECK-O0-NEXT:    vmflt.vv v0, v9, v8
+; CHECK-O0-NEXT:    vfsub.vv v8, v8, v9, v0.t
+; CHECK-O0-NEXT:    vse64.v v8, (a1)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: merge_mask:
 ; CHECK-O2:       # %bb.0: # %entry
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vle64.v v25, (a2)
-; CHECK-O2-NEXT:    vle64.v v26, (a3)
-; CHECK-O2-NEXT:    vmflt.vv v0, v25, v26
-; CHECK-O2-NEXT:    vfsub.vv v26, v26, v25, v0.t
-; CHECK-O2-NEXT:    vse64.v v26, (a1)
+; CHECK-O2-NEXT:    vle64.v v8, (a2)
+; CHECK-O2-NEXT:    vle64.v v9, (a3)
+; CHECK-O2-NEXT:    vmflt.vv v0, v8, v9
+; CHECK-O2-NEXT:    vfsub.vv v9, v9, v8, v0.t
+; CHECK-O2-NEXT:    vse64.v v9, (a1)
 ; CHECK-O2-NEXT:    ret
 entry:
 

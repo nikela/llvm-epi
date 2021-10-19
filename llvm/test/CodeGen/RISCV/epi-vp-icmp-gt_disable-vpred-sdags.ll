@@ -7,11 +7,12 @@
 define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %evl) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_gtu:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmsgtu.vx v25, v8, a0, v0.t
-; CHECK-O0-NEXT:    vmv1r.v v0, v25
+; CHECK-O0-NEXT:    vmsgtu.vx v8, v9, a0, v0.t
+; CHECK-O0-NEXT:    vmv1r.v v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_gtu:
@@ -28,11 +29,12 @@ define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscal
 define <vscale x 1 x i1> @test_vp_icmp_gt(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %evl) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_gt:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11
-; CHECK-O0-NEXT:    # implicit-def: $v25
+; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmsgt.vx v25, v8, a0, v0.t
-; CHECK-O0-NEXT:    vmv1r.v v0, v25
+; CHECK-O0-NEXT:    vmsgt.vx v8, v9, a0, v0.t
+; CHECK-O0-NEXT:    vmv1r.v v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_gt:

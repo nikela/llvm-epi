@@ -11,17 +11,17 @@ define <vscale x 1 x i1> @test_vp_logical_and(<vscale x 1 x i1> %a0, i32 %n) nou
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmset.m v8
 ; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmand.mm v0, v0, v25
+; CHECK-O0-NEXT:    vmand.mm v0, v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_and:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmset.m v25
+; CHECK-O2-NEXT:    vmset.m v8
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmand.mm v0, v0, v25
+; CHECK-O2-NEXT:    vmand.mm v0, v0, v8
 ; CHECK-O2-NEXT:    ret
   %head.1 = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head.1, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -36,17 +36,17 @@ define <vscale x 1 x i1> @test_vp_logical_or(<vscale x 1 x i1> %a0, i32 %n) noun
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmset.m v8
 ; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v0, v0, v25
+; CHECK-O0-NEXT:    vmor.mm v0, v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_or:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmset.m v25
+; CHECK-O2-NEXT:    vmset.m v8
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v0, v0, v25
+; CHECK-O2-NEXT:    vmor.mm v0, v0, v8
 ; CHECK-O2-NEXT:    ret
   %head.1 = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head.1, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -61,17 +61,17 @@ define <vscale x 1 x i1> @test_vp_logical_xor(<vscale x 1 x i1> %a0, i32 %n) nou
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    # kill: def $x11 killed $x10
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmset.m v25
+; CHECK-O0-NEXT:    vmset.m v8
 ; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v0, v0, v25
+; CHECK-O0-NEXT:    vmxor.mm v0, v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_xor:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmset.m v25
+; CHECK-O2-NEXT:    vmset.m v8
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v0, v0, v25
+; CHECK-O2-NEXT:    vmxor.mm v0, v0, v8
 ; CHECK-O2-NEXT:    ret
   %head.1 = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head.1, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer

@@ -70,14 +70,14 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    addi a0, a0, 256
 ; SPILL-O0-NEXT:    sd a0, 64(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    ld a0, 16(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    # implicit-def: $v25
+; SPILL-O0-NEXT:    # implicit-def: $v8
 ; SPILL-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; SPILL-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    vle64.v v25, (a0)
+; SPILL-O0-NEXT:    vle64.v v8, (a0)
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    sd s3, 8(sp)
 ; SPILL-O0-NEXT:    addi s3, sp, 72
-; SPILL-O0-NEXT:    vs1r.v v25, (s3) # Unknown-size Folded Spill
+; SPILL-O0-NEXT:    vs1r.v v8, (s3) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    ld s3, 8(sp)
 ; SPILL-O0-NEXT:    # implicit-def: $v7
 ; SPILL-O0-NEXT:    vle64.v v7, (a0)
@@ -99,68 +99,68 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    vle64.v v1, (s10)
 ; SPILL-O0-NEXT:    # implicit-def: $v0
 ; SPILL-O0-NEXT:    vle64.v v0, (s9)
-; SPILL-O0-NEXT:    # implicit-def: $v24
-; SPILL-O0-NEXT:    vle64.v v24, (s8)
-; SPILL-O0-NEXT:    # implicit-def: $v23
-; SPILL-O0-NEXT:    vle64.v v23, (s7)
-; SPILL-O0-NEXT:    # implicit-def: $v22
-; SPILL-O0-NEXT:    vle64.v v22, (s6)
-; SPILL-O0-NEXT:    # implicit-def: $v21
-; SPILL-O0-NEXT:    vle64.v v21, (s5)
-; SPILL-O0-NEXT:    # implicit-def: $v20
-; SPILL-O0-NEXT:    vle64.v v20, (s4)
-; SPILL-O0-NEXT:    # implicit-def: $v19
-; SPILL-O0-NEXT:    vle64.v v19, (s3)
-; SPILL-O0-NEXT:    # implicit-def: $v18
-; SPILL-O0-NEXT:    vle64.v v18, (s2)
-; SPILL-O0-NEXT:    # implicit-def: $v17
-; SPILL-O0-NEXT:    vle64.v v17, (s1)
-; SPILL-O0-NEXT:    # implicit-def: $v16
-; SPILL-O0-NEXT:    vle64.v v16, (s0)
-; SPILL-O0-NEXT:    # implicit-def: $v15
-; SPILL-O0-NEXT:    vle64.v v15, (t6)
-; SPILL-O0-NEXT:    # implicit-def: $v14
-; SPILL-O0-NEXT:    vle64.v v14, (t5)
-; SPILL-O0-NEXT:    # implicit-def: $v13
-; SPILL-O0-NEXT:    vle64.v v13, (t4)
-; SPILL-O0-NEXT:    # implicit-def: $v12
-; SPILL-O0-NEXT:    vle64.v v12, (t3)
-; SPILL-O0-NEXT:    # implicit-def: $v11
-; SPILL-O0-NEXT:    vle64.v v11, (t2)
-; SPILL-O0-NEXT:    # implicit-def: $v10
-; SPILL-O0-NEXT:    vle64.v v10, (t1)
-; SPILL-O0-NEXT:    # implicit-def: $v9
-; SPILL-O0-NEXT:    vle64.v v9, (t0)
-; SPILL-O0-NEXT:    # implicit-def: $v8
-; SPILL-O0-NEXT:    vle64.v v8, (a7)
 ; SPILL-O0-NEXT:    # implicit-def: $v31
-; SPILL-O0-NEXT:    vle64.v v31, (a6)
+; SPILL-O0-NEXT:    vle64.v v31, (s8)
 ; SPILL-O0-NEXT:    # implicit-def: $v30
-; SPILL-O0-NEXT:    vle64.v v30, (a5)
+; SPILL-O0-NEXT:    vle64.v v30, (s7)
 ; SPILL-O0-NEXT:    # implicit-def: $v29
-; SPILL-O0-NEXT:    vle64.v v29, (a4)
+; SPILL-O0-NEXT:    vle64.v v29, (s6)
 ; SPILL-O0-NEXT:    # implicit-def: $v28
-; SPILL-O0-NEXT:    vle64.v v28, (a3)
+; SPILL-O0-NEXT:    vle64.v v28, (s5)
 ; SPILL-O0-NEXT:    # implicit-def: $v27
-; SPILL-O0-NEXT:    vle64.v v27, (a2)
+; SPILL-O0-NEXT:    vle64.v v27, (s4)
 ; SPILL-O0-NEXT:    # implicit-def: $v26
-; SPILL-O0-NEXT:    vle64.v v26, (a1)
+; SPILL-O0-NEXT:    vle64.v v26, (s3)
 ; SPILL-O0-NEXT:    # implicit-def: $v25
-; SPILL-O0-NEXT:    vle64.v v25, (a0)
+; SPILL-O0-NEXT:    vle64.v v25, (s2)
+; SPILL-O0-NEXT:    # implicit-def: $v24
+; SPILL-O0-NEXT:    vle64.v v24, (s1)
+; SPILL-O0-NEXT:    # implicit-def: $v23
+; SPILL-O0-NEXT:    vle64.v v23, (s0)
+; SPILL-O0-NEXT:    # implicit-def: $v22
+; SPILL-O0-NEXT:    vle64.v v22, (t6)
+; SPILL-O0-NEXT:    # implicit-def: $v21
+; SPILL-O0-NEXT:    vle64.v v21, (t5)
+; SPILL-O0-NEXT:    # implicit-def: $v20
+; SPILL-O0-NEXT:    vle64.v v20, (t4)
+; SPILL-O0-NEXT:    # implicit-def: $v19
+; SPILL-O0-NEXT:    vle64.v v19, (t3)
+; SPILL-O0-NEXT:    # implicit-def: $v18
+; SPILL-O0-NEXT:    vle64.v v18, (t2)
+; SPILL-O0-NEXT:    # implicit-def: $v17
+; SPILL-O0-NEXT:    vle64.v v17, (t1)
+; SPILL-O0-NEXT:    # implicit-def: $v16
+; SPILL-O0-NEXT:    vle64.v v16, (t0)
+; SPILL-O0-NEXT:    # implicit-def: $v15
+; SPILL-O0-NEXT:    vle64.v v15, (a7)
+; SPILL-O0-NEXT:    # implicit-def: $v14
+; SPILL-O0-NEXT:    vle64.v v14, (a6)
+; SPILL-O0-NEXT:    # implicit-def: $v13
+; SPILL-O0-NEXT:    vle64.v v13, (a5)
+; SPILL-O0-NEXT:    # implicit-def: $v12
+; SPILL-O0-NEXT:    vle64.v v12, (a4)
+; SPILL-O0-NEXT:    # implicit-def: $v11
+; SPILL-O0-NEXT:    vle64.v v11, (a3)
+; SPILL-O0-NEXT:    # implicit-def: $v10
+; SPILL-O0-NEXT:    vle64.v v10, (a2)
+; SPILL-O0-NEXT:    # implicit-def: $v9
+; SPILL-O0-NEXT:    vle64.v v9, (a1)
+; SPILL-O0-NEXT:    # implicit-def: $v8
+; SPILL-O0-NEXT:    vle64.v v8, (a0)
 ; SPILL-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    sd t4, 8(sp)
 ; SPILL-O0-NEXT:    csrr t4, vlenb
 ; SPILL-O0-NEXT:    add t4, sp, t4
 ; SPILL-O0-NEXT:    addi t4, t4, 72
-; SPILL-O0-NEXT:    vs1r.v v25, (t4) # Unknown-size Folded Spill
+; SPILL-O0-NEXT:    vs1r.v v8, (t4) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    addi t4, sp, 72
-; SPILL-O0-NEXT:    vl1r.v v25, (t4) # Unknown-size Folded Reload
-; SPILL-O0-NEXT:    vse64.v v25, (a0)
+; SPILL-O0-NEXT:    vl1r.v v8, (t4) # Unknown-size Folded Reload
+; SPILL-O0-NEXT:    vse64.v v8, (a0)
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    csrr t4, vlenb
 ; SPILL-O0-NEXT:    add t4, sp, t4
 ; SPILL-O0-NEXT:    addi t4, t4, 72
-; SPILL-O0-NEXT:    vl1r.v v25, (t4) # Unknown-size Folded Reload
+; SPILL-O0-NEXT:    vl1r.v v8, (t4) # Unknown-size Folded Reload
 ; SPILL-O0-NEXT:    ld t4, 8(sp)
 ; SPILL-O0-NEXT:    vse64.v v7, (a0)
 ; SPILL-O0-NEXT:    ld a0, 40(sp) # 8-byte Folded Reload
@@ -174,30 +174,30 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    vse64.v v2, (s11)
 ; SPILL-O0-NEXT:    vse64.v v1, (s10)
 ; SPILL-O0-NEXT:    vse64.v v0, (s9)
-; SPILL-O0-NEXT:    vse64.v v24, (s8)
-; SPILL-O0-NEXT:    vse64.v v23, (s7)
-; SPILL-O0-NEXT:    vse64.v v22, (s6)
-; SPILL-O0-NEXT:    vse64.v v21, (s5)
-; SPILL-O0-NEXT:    vse64.v v20, (s4)
-; SPILL-O0-NEXT:    vse64.v v19, (s3)
-; SPILL-O0-NEXT:    vse64.v v18, (s2)
-; SPILL-O0-NEXT:    vse64.v v17, (s1)
-; SPILL-O0-NEXT:    vse64.v v16, (s0)
-; SPILL-O0-NEXT:    vse64.v v15, (t6)
-; SPILL-O0-NEXT:    vse64.v v14, (t5)
-; SPILL-O0-NEXT:    vse64.v v13, (t4)
-; SPILL-O0-NEXT:    vse64.v v12, (t3)
-; SPILL-O0-NEXT:    vse64.v v11, (t2)
-; SPILL-O0-NEXT:    vse64.v v10, (t1)
-; SPILL-O0-NEXT:    vse64.v v9, (t0)
-; SPILL-O0-NEXT:    vse64.v v8, (a7)
-; SPILL-O0-NEXT:    vse64.v v31, (a6)
-; SPILL-O0-NEXT:    vse64.v v30, (a5)
-; SPILL-O0-NEXT:    vse64.v v29, (a4)
-; SPILL-O0-NEXT:    vse64.v v28, (a3)
-; SPILL-O0-NEXT:    vse64.v v27, (a2)
-; SPILL-O0-NEXT:    vse64.v v26, (a1)
-; SPILL-O0-NEXT:    vse64.v v25, (a0)
+; SPILL-O0-NEXT:    vse64.v v31, (s8)
+; SPILL-O0-NEXT:    vse64.v v30, (s7)
+; SPILL-O0-NEXT:    vse64.v v29, (s6)
+; SPILL-O0-NEXT:    vse64.v v28, (s5)
+; SPILL-O0-NEXT:    vse64.v v27, (s4)
+; SPILL-O0-NEXT:    vse64.v v26, (s3)
+; SPILL-O0-NEXT:    vse64.v v25, (s2)
+; SPILL-O0-NEXT:    vse64.v v24, (s1)
+; SPILL-O0-NEXT:    vse64.v v23, (s0)
+; SPILL-O0-NEXT:    vse64.v v22, (t6)
+; SPILL-O0-NEXT:    vse64.v v21, (t5)
+; SPILL-O0-NEXT:    vse64.v v20, (t4)
+; SPILL-O0-NEXT:    vse64.v v19, (t3)
+; SPILL-O0-NEXT:    vse64.v v18, (t2)
+; SPILL-O0-NEXT:    vse64.v v17, (t1)
+; SPILL-O0-NEXT:    vse64.v v16, (t0)
+; SPILL-O0-NEXT:    vse64.v v15, (a7)
+; SPILL-O0-NEXT:    vse64.v v14, (a6)
+; SPILL-O0-NEXT:    vse64.v v13, (a5)
+; SPILL-O0-NEXT:    vse64.v v12, (a4)
+; SPILL-O0-NEXT:    vse64.v v11, (a3)
+; SPILL-O0-NEXT:    vse64.v v10, (a2)
+; SPILL-O0-NEXT:    vse64.v v9, (a1)
+; SPILL-O0-NEXT:    vse64.v v8, (a0)
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    slli a0, a0, 1
 ; SPILL-O0-NEXT:    add sp, sp, a0

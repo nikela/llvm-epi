@@ -7,8 +7,8 @@ define <vscale x 2 x i64> @test_sext_i32_i64_m1(<vscale x 2 x i32> %a) nounwind
 ; CHECK-LABEL: test_sext_i32_i64_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
-; CHECK-NEXT:    vsext.vf2 v26, v8
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vsext.vf2 v10, v8
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 2 x i32> %a to <vscale x 2 x i64>
@@ -19,8 +19,8 @@ define <vscale x 4 x i64> @test_sext_i32_i64_m2(<vscale x 4 x i32> %a) nounwind
 ; CHECK-LABEL: test_sext_i32_i64_m2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, mu
-; CHECK-NEXT:    vsext.vf2 v28, v8
-; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    vsext.vf2 v12, v8
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 4 x i32> %a to <vscale x 4 x i64>
@@ -44,8 +44,8 @@ define <vscale x 4 x i32> @test_sext_i16_i32_m1(<vscale x 4 x i16> %a) nounwind
 ; CHECK-LABEL: test_sext_i16_i32_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, mu
-; CHECK-NEXT:    vsext.vf2 v26, v8
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vsext.vf2 v10, v8
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 4 x i16> %a to <vscale x 4 x i32>
@@ -56,8 +56,8 @@ define <vscale x 8 x i32> @test_sext_i16_i32_m2(<vscale x 8 x i16> %a) nounwind
 ; CHECK-LABEL: test_sext_i16_i32_m2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
-; CHECK-NEXT:    vsext.vf2 v28, v8
-; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    vsext.vf2 v12, v8
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 8 x i16> %a to <vscale x 8 x i32>
@@ -81,8 +81,8 @@ define <vscale x 8 x i16> @test_sext_i8_i16_m1(<vscale x 8 x i8> %a) nounwind
 ; CHECK-LABEL: test_sext_i8_i16_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vsext.vf2 v26, v8
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vsext.vf2 v10, v8
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 8 x i8> %a to <vscale x 8 x i16>
@@ -93,8 +93,8 @@ define <vscale x 16 x i16> @test_sext_i8_i16_m2(<vscale x 16 x i8> %a) nounwind
 ; CHECK-LABEL: test_sext_i8_i16_m2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m4, ta, mu
-; CHECK-NEXT:    vsext.vf2 v28, v8
-; CHECK-NEXT:    vmv4r.v v8, v28
+; CHECK-NEXT:    vsext.vf2 v12, v8
+; CHECK-NEXT:    vmv4r.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = sext <vscale x 16 x i8> %a to <vscale x 16 x i16>

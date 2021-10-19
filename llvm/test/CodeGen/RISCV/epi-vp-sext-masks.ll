@@ -36,8 +36,8 @@ define <vscale x 8 x i32> @test_vp_sext_nxv8i32_nxv8i1(<vscale x 8 x i1> %op, i3
 ; CHECK-LABEL: test_vp_sext_nxv8i32_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
-; CHECK-NEXT:    vmv.v.i v28, 0
-; CHECK-NEXT:    vmerge.vim v8, v28, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 8 x i1> %head, <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -50,8 +50,8 @@ define <vscale x 8 x i32> @test_vp_sext_masked_nxv8i32_nxv8i1(<vscale x 8 x i1> 
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i32_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
-; CHECK-NEXT:    vmv.v.i v28, 0
-; CHECK-NEXT:    vmerge.vim v8, v28, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <vscale x 8 x i32> @llvm.vp.sext.nxv8i32.nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x i32> %x
@@ -61,8 +61,8 @@ define <vscale x 8 x i16> @test_vp_sext_nxv8i16_nxv8i1(<vscale x 8 x i1> %op, i3
 ; CHECK-LABEL: test_vp_sext_nxv8i16_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, mu
-; CHECK-NEXT:    vmv.v.i v26, 0
-; CHECK-NEXT:    vmerge.vim v8, v26, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 8 x i1> %head, <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -75,8 +75,8 @@ define <vscale x 8 x i16> @test_vp_sext_masked_nxv8i16_nxv8i1(<vscale x 8 x i1> 
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i16_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, mu
-; CHECK-NEXT:    vmv.v.i v26, 0
-; CHECK-NEXT:    vmerge.vim v8, v26, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <vscale x 8 x i16> @llvm.vp.sext.nxv8i16.nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x i16> %x
@@ -86,8 +86,8 @@ define <vscale x 8 x i8> @test_vp_sext_nxv8i8_nxv8i1(<vscale x 8 x i1> %op, i32 
 ; CHECK-LABEL: test_vp_sext_nxv8i8_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 8 x i1> %head, <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -100,8 +100,8 @@ define <vscale x 8 x i8> @test_vp_sext_masked_nxv8i8_nxv8i1(<vscale x 8 x i1> %o
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i8_nxv8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <vscale x 8 x i8> @llvm.vp.sext.nxv8i8.nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x i8> %x

@@ -5,11 +5,11 @@
 define <vscale x 8 x i1> @indirect_register_param(<vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %merge, <vscale x 8 x i1> %m, i64 %gvl) nounwind {
 ; CHECK-LABEL: indirect_register_param:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vmv1r.v v25, v0
+; CHECK-NEXT:    vmv1r.v v17, v0
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v16
-; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
-; CHECK-NEXT:    vmv1r.v v0, v25
+; CHECK-NEXT:    vmseq.vv v17, v8, v12, v0.t
+; CHECK-NEXT:    vmv1r.v v0, v17
 ; CHECK-NEXT:    ret
 entry:
     %0 = tail call <vscale x 8 x i1> @llvm.epi.vmseq.mask.nxv8i1.nxv8i32.nxv8i32(<vscale x 8 x i1> %merge, <vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %m, i64 %gvl)
@@ -34,11 +34,11 @@ define void @indirect_register_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1>
 define <vscale x 8 x i1> @indirect_stack_param(
 ; CHECK-LABEL: indirect_stack_param:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vmv1r.v v25, v0
+; CHECK-NEXT:    vmv1r.v v17, v0
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v16
-; CHECK-NEXT:    vmseq.vv v25, v8, v12, v0.t
-; CHECK-NEXT:    vmv1r.v v0, v25
+; CHECK-NEXT:    vmseq.vv v17, v8, v12, v0.t
+; CHECK-NEXT:    vmv1r.v v0, v17
 ; CHECK-NEXT:    ret
     i64 %gvl, i64 %_2, i64 %_3, i64 %_4, i64 %_5, i64 %_6, i64 %_7, i64 %_8,
     <vscale x 8 x i32> %a, <vscale x 8 x i32> %b, <vscale x 8 x i1> %merge, <vscale x 8 x i1> %m) nounwind {

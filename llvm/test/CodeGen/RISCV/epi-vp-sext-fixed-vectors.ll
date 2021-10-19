@@ -6,8 +6,8 @@ define <2 x i64> @sext.i64.i32(<2 x i32> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: sext.i64.i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vsext.vf2 v25, v8
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vsext.vf2 v9, v8
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
 {
   %b = call <2 x i64> @llvm.vp.sext.v2i64.v2i32(<2 x i32> %a,
@@ -20,8 +20,8 @@ define <2 x i64> @sext.i64.i32.mask(<2 x i32> %a, <2 x i1> %mask, i32 zeroext %g
 ; CHECK-LABEL: sext.i64.i32.mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vsext.vf2 v25, v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vsext.vf2 v9, v8, v0.t
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
 {
   %b = call <2 x i64> @llvm.vp.sext.v2i64.v2i32(
@@ -37,8 +37,8 @@ define <4 x i32> @test_vp_sext_v4i32_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v4i32_v4i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vsext.vf4 v25, v8
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vsext.vf4 v9, v8
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
     %m.first = insertelement <4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <4 x i1> %m.first, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -50,8 +50,8 @@ define <4 x i32> @test_vp_sext_masked_v4i32_v4i8(<4 x i8> %a, <4 x i1> %mask, i3
 ; CHECK-LABEL: test_vp_sext_masked_v4i32_v4i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vsext.vf4 v25, v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vsext.vf4 v9, v8, v0.t
+; CHECK-NEXT:    vmv1r.v v8, v9
 ; CHECK-NEXT:    ret
     %x = call <4 x i32> @llvm.vp.sext.v4i32.v4i8(<4 x i8> %a, <4 x i1> %mask, i32 %evl)
     ret <4 x i32> %x
@@ -61,8 +61,8 @@ define <4 x i64> @test_vp_sext_v4i64_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v4i64_v4i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-NEXT:    vsext.vf8 v26, v8
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vsext.vf8 v10, v8
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
     %m.first = insertelement <4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <4 x i1> %m.first, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -74,8 +74,8 @@ define <4 x i64> @test_vp_sext_masked_v4i64_v4i8(<4 x i8> %a, <4 x i1> %mask, i3
 ; CHECK-LABEL: test_vp_sext_masked_v4i64_v4i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-NEXT:    vsext.vf8 v26, v8, v0.t
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vsext.vf8 v10, v8, v0.t
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
     %x = call <4 x i64> @llvm.vp.sext.v4i64.v4i8(<4 x i8> %a, <4 x i1> %mask, i32 %evl)
     ret <4 x i64> %x
