@@ -1096,15 +1096,6 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       selectVSETVLMAX(Node, XLenVT, Node->getNumOperands() - 1);
       return;
     }
-    case Intrinsic::experimental_vector_vp_slideleftfill: {
-      SDValue Offset = Node->getOperand(3);
-      SDValue EVL1 = Node->getOperand(4);
-      SDValue EVL2 = Node->getOperand(5);
-      auto *Result =
-          SelectSlideLeftFill(Node, CurDAG, EVL1, EVL2, Offset, XLenVT);
-      ReplaceNode(Node, Result);
-      return;
-    }
     case Intrinsic::experimental_vector_slideleftfill: {
       SDValue Offset = Node->getOperand(3);
 

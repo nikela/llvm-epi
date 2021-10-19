@@ -545,13 +545,9 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(strided_load)                                                   \
   VP_INTRINSIC(strided_store)
 #define VP_INTRINSIC(name) case Intrinsic::vp_##name:
-    VP_INTRINSIC_LIST
-    // EPI-specific
-  case Intrinsic::experimental_vector_vp_slideleftfill:
-    // FIXME: Assume they can be affordably implemented.
-    // FIXME: This will swallow also fixed-vectors.
-    return 1;
+  VP_INTRINSIC_LIST
 #undef VP_INTRINSIC
+    return 1;
   default:
     break;
   }

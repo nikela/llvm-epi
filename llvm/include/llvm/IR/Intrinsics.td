@@ -1728,7 +1728,7 @@ def int_experimental_vp_splice:
              llvm_i32_ty,
              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
              llvm_i32_ty, llvm_i32_ty],
-            [IntrNoMem, ImmArg<ArgIndex<2>>]>;
+            [IntrNoMem]>;
 
 //===-------------------------- Masked Intrinsics -------------------------===//
 //
@@ -1976,42 +1976,15 @@ def int_experimental_vector_reverse : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
 def int_vscale : DefaultAttrsIntrinsic<[llvm_anyint_ty], [], [IntrNoMem]>;
 
 //===---------- Intrinsics to modify scalable vectors ---------------------===//
-// This intrinsic takes two vector arguments %v1 and %v2, an integer number
-// %num, and and integer Explicit Vector Length values %evl1 and %evl2 such that
-// 0 <= %num <= %evl1 <= W and 0 <= %evl2 <= W, where W is the runtime vector
-// register(group) width (vscale x k). If %evl1, %evl2 and %num do not follow
-// these constraints, the intrinsic has undefined behaviour.
+// This intrinsic takes two vector arguments %v1 and %v2, and an integer number
+// %num.
 //
 // Semantics:
-// Effectively, this intrinsic concatenates %v1[0..%evl1-1] and %v2[0..%evl2-1]
-// and selects the elements in a window of size %evl2, starting at index %num of
-// the concatenated vector. Elements in the result vector beyond %evl2 are undef.
-// The result vector of length %evl2 contains %evl1 - %num elements from indices
-// [%num..%evl1 - 1] of %v1 followed by the first %evl2 - (%evl1 - %num)
-// elements of %v2. If %evl1 - %num >= %evl2, only the first %evl2 elements are
-// considered and the remaining are undef.
-//
-// Examples:
-// %v1: [a b c d e]
-// %v2: [0 1 2 3]
-// %evl1: 5, %evl2: 4, %num: 2
-// transformations: %v1 -> [c d e _ _] -> [c d e _] -> [c d e 0]
-//
-// %v1: [0 1 2 3]
-// %v2: [a b c d e f]
-// %evl1: 4, %evl2: 6, %num: 3
-// transformations: %v1 -> [3 _ _ _] -> [3 _ _ _ _ _] -> [3 a b c d e]
-
-def int_experimental_vector_vp_slideleftfill : Intrinsic<[llvm_anyvector_ty],
-                                                    [LLVMMatchType<0>,
-                                                     LLVMMatchType<0>,
-                                                     llvm_i32_ty, llvm_i32_ty,
-                                                     llvm_i32_ty],
-                                                    [IntrNoMem]>;
-
-// This is the non-predicated version of the above slideleftfill intrinsic that
-// has the same semantics assuming %evl1 = %evl2 = W. This is needed for
-// non-predicated/whole register operation on scalable vectors.
+// Effectively, this intrinsic concatenates %v1 and %v2 and selects the elements
+// in a window of size W, where W is the runtime vector register(group) width (vscale x k),
+// starting at index %num of the concatenated vector.
+// The result vector contains W - %num elements from indices [%num..W - 1] of %v1 followed
+// by the first %num elements of %v2.
 def int_experimental_vector_slideleftfill : Intrinsic<[llvm_anyvector_ty],
                                                     [LLVMMatchType<0>,
                                                      LLVMMatchType<0>,

@@ -735,13 +735,15 @@ void VPInstruction::generateInstruction(VPTransformState &State,
       Value *Vlen = Builder.CreateVScale(
           ConstantInt::get(IdxTy, State.VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(IdxTy, 1));
+      Value *Mask =
+          Builder.CreateVectorSplat(State.VF, ConstantInt::get(Builder.getInt1Ty(), 1));
 
-      Value *SlideLeftFill = Builder.CreateIntrinsic(
-          Intrinsic::experimental_vector_vp_slideleftfill,
-          {PartMinus1->getType()}, {PartMinus1, V2, Shift, EVLPhi, EVL},
+      Value *Splice = Builder.CreateIntrinsic(
+          Intrinsic::experimental_vp_splice,
+          {PartMinus1->getType()}, {PartMinus1, V2, Shift, Mask, EVLPhi, EVL},
           nullptr);
 
-      State.set(this, SlideLeftFill, Part);
+      State.set(this, Splice, Part);
     }
     break;
   }
