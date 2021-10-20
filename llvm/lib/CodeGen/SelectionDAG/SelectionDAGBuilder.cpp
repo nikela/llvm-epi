@@ -6401,10 +6401,13 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #include "llvm/IR/VPIntrinsics.def"
     {
-    if (!DisableVPRedIntrinsics)
-      visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
-    else
-      visitTargetIntrinsic(I, Intrinsic);
+      // We have a full implementation of llvm.experimental.vp.splice
+      // that we can use already.
+      if (!DisableVPRedIntrinsics ||
+          Intrinsic == Intrinsic::experimental_vp_splice)
+        visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
+      else
+        visitTargetIntrinsic(I, Intrinsic);
     }
     return;
   case Intrinsic::fmuladd: {
