@@ -7707,9 +7707,9 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
       DAG.getNode(RISCVISD::SETCC_VL, DL, MaskVT, VID,
                   DAG.getSplatVector(
                       ContainerVT.changeVectorElementTypeToInteger(), DL, Diff),
-                  DAG.getCondCode(ISD::SETLT), Ops[3], Ops[5]);
+                  DAG.getCondCode(ISD::SETULT), Ops[3], Ops[5]);
   SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, MergeMask,
-                               SLIDEUP, SLIDEDOWN, Ops[5]);
+                               SLIDEDOWN, SLIDEUP, Ops[5]);
 
   if (!VT.isFixedLengthVector())
     return Result;
