@@ -6,8 +6,8 @@ define void @nxv1i64(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %in
 ; CHECK-LABEL: nxv1i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vsll.vi v25, v9, 3
-; CHECK-NEXT:    vsoxei64.v v8, (a0), v25, v0.t
+; CHECK-NEXT:    vsll.vi v9, v9, 3
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v9, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   call void @llvm.masked.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask)
@@ -50,9 +50,9 @@ define void @nxv2i32(<vscale x 2 x i32> %data, i32* %ptr, <vscale x 2 x i64> %in
 ; CHECK-LABEL: nxv2i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
-; CHECK-NEXT:    vsll.vi v26, v10, 2
+; CHECK-NEXT:    vsll.vi v10, v10, 2
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
-; CHECK-NEXT:    vsoxei64.v v8, (a0), v26, v0.t
+; CHECK-NEXT:    vsoxei64.v v8, (a0), v10, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices
   call void @llvm.masked.scatter.nxv2i32.nxv2p0i32(<vscale x 2 x i32> %data, <vscale x 2 x i32*> %1, i32 4, <vscale x 2 x i1> %mask)

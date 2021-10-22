@@ -5,11 +5,11 @@
 define dso_local <vscale x 1 x i1> @foo(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i1> %merge, <vscale x 1 x i1> %m, i64 %gvl) nounwind {
 ; CHECK-LABEL: foo:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vmv1r.v v25, v0
+; CHECK-NEXT:    vmv1r.v v11, v0
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v10
-; CHECK-NEXT:    vmseq.vv v25, v8, v9, v0.t
-; CHECK-NEXT:    vmv1r.v v0, v25
+; CHECK-NEXT:    vmseq.vv v11, v8, v9, v0.t
+; CHECK-NEXT:    vmv1r.v v0, v11
 ; CHECK-NEXT:    ret
 entry:
   %0 = tail call <vscale x 1 x i1> @llvm.epi.vmseq.mask.nxv1i1.nxv1i64.nxv1i64(<vscale x 1 x i1> %merge, <vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale x 1 x i1> %m, i64 %gvl)

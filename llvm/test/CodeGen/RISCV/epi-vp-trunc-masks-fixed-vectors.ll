@@ -11,8 +11,8 @@ define <2 x i1> @test_vp_trunc_v2i1_v2i64(<2 x i64> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v2i1_v2i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1
-; CHECK-NEXT:    vmsne.vi v0, v25, 0
+; CHECK-NEXT:    vand.vi v8, v8, 1
+; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
   %head = insertelement <2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <2 x i1> %head, <2 x i1> undef, <2 x i32> zeroinitializer
@@ -25,8 +25,8 @@ define <2 x i1> @test_vp_trunc_masked_v2i1_v2i64(<2 x i64> %op, <2 x i1> %mask, 
 ; CHECK-LABEL: test_vp_trunc_masked_v2i1_v2i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1, v0.t
-; CHECK-NEXT:    vmsne.vi v0, v25, 0, v0.t
+; CHECK-NEXT:    vand.vi v8, v8, 1, v0.t
+; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
   %x = call <2 x i1> @llvm.vp.trunc.v2i1.v2i64(<2 x i64> %op, <2 x i1> %mask, i32 %evl)
   ret <2 x i1> %x
@@ -36,8 +36,8 @@ define <4 x i1> @test_vp_trunc_v4i1_v4i32(<4 x i32> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v4i1_v4i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1
-; CHECK-NEXT:    vmsne.vi v0, v25, 0
+; CHECK-NEXT:    vand.vi v8, v8, 1
+; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
   %head = insertelement <4 x i1> undef, i1 1, i32 0
   %allones = shufflevector <4 x i1> %head, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -50,8 +50,8 @@ define <4 x i1> @test_vp_trunc_masked_v4i1_v4i32(<4 x i32> %op, <4 x i1> %mask, 
 ; CHECK-LABEL: test_vp_trunc_masked_v4i1_v4i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1, v0.t
-; CHECK-NEXT:    vmsne.vi v0, v25, 0, v0.t
+; CHECK-NEXT:    vand.vi v8, v8, 1, v0.t
+; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
   %x = call <4 x i1> @llvm.vp.trunc.v4i1.v4i32(<4 x i32> %op, <4 x i1> %mask, i32 %evl)
   ret <4 x i1> %x
@@ -61,8 +61,8 @@ define <8 x i1> @test_vp_trunc_v8i1_v8i16(<8 x i16> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v8i1_v8i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1
-; CHECK-NEXT:    vmsne.vi v0, v25, 0
+; CHECK-NEXT:    vand.vi v8, v8, 1
+; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
   %head = insertelement <8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <8 x i1> %head, <8 x i1> undef, <8 x i32> zeroinitializer
@@ -75,8 +75,8 @@ define <8 x i1> @test_vp_trunc_masked_v8i1_v8i16(<8 x i16> %op, <8 x i1> %mask, 
 ; CHECK-LABEL: test_vp_trunc_masked_v8i1_v8i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1, v0.t
-; CHECK-NEXT:    vmsne.vi v0, v25, 0, v0.t
+; CHECK-NEXT:    vand.vi v8, v8, 1, v0.t
+; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
   %x = call <8 x i1> @llvm.vp.trunc.v8i1.v8i16(<8 x i16> %op, <8 x i1> %mask, i32 %evl)
   ret <8 x i1> %x
@@ -86,8 +86,8 @@ define <16 x i1> @test_vp_trunc_v16i1_v16i8(<16 x i8> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v16i1_v16i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1
-; CHECK-NEXT:    vmsne.vi v0, v25, 0
+; CHECK-NEXT:    vand.vi v8, v8, 1
+; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
   %head = insertelement <16 x i1> undef, i1 1, i32 0
   %allones = shufflevector <16 x i1> %head, <16 x i1> undef, <16 x i32> zeroinitializer
@@ -100,8 +100,8 @@ define <16 x i1> @test_vp_trunc_masked_v16i1_v16i8(<16 x i8> %op, <16 x i1> %mas
 ; CHECK-LABEL: test_vp_trunc_masked_v16i1_v16i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v8, 1, v0.t
-; CHECK-NEXT:    vmsne.vi v0, v25, 0, v0.t
+; CHECK-NEXT:    vand.vi v8, v8, 1, v0.t
+; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
   %x = call <16 x i1> @llvm.vp.trunc.v16i1.v16i8(<16 x i8> %op, <16 x i1> %mask, i32 %evl)
   ret <16 x i1> %x

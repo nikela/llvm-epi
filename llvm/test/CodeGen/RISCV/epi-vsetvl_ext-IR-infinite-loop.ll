@@ -54,15 +54,15 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O0-NEXT:    ld a2, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a3, 16(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a4, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    ori a5, a4, 88
 ; CHECK-O0-NEXT:    vsetvl a4, a3, a5
-; CHECK-O0-NEXT:    vle64.v v26, (a2)
-; CHECK-O0-NEXT:    # implicit-def: $v27
-; CHECK-O0-NEXT:    vle64.v v27, (a1)
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vfadd.vv v25, v26, v27
-; CHECK-O0-NEXT:    vse64.v v25, (a0)
+; CHECK-O0-NEXT:    vle64.v v9, (a2)
+; CHECK-O0-NEXT:    # implicit-def: $v10
+; CHECK-O0-NEXT:    vle64.v v10, (a1)
+; CHECK-O0-NEXT:    # implicit-def: $v8
+; CHECK-O0-NEXT:    vfadd.vv v8, v9, v10
+; CHECK-O0-NEXT:    vse64.v v8, (a0)
 ; CHECK-O0-NEXT:    slli a3, a3, 3
 ; CHECK-O0-NEXT:    add a2, a2, a3
 ; CHECK-O0-NEXT:    add a1, a1, a3
@@ -93,12 +93,12 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O2-NEXT:    add t1, a1, a5
 ; CHECK-O2-NEXT:    ori a0, a6, 88
 ; CHECK-O2-NEXT:    vsetvl a4, a7, a0
-; CHECK-O2-NEXT:    vle64.v v25, (t1)
+; CHECK-O2-NEXT:    vle64.v v8, (t1)
 ; CHECK-O2-NEXT:    add a0, a2, a5
-; CHECK-O2-NEXT:    vle64.v v26, (a0)
-; CHECK-O2-NEXT:    vfadd.vv v25, v25, v26
+; CHECK-O2-NEXT:    vle64.v v9, (a0)
+; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-O2-NEXT:    add a0, a3, a5
-; CHECK-O2-NEXT:    vse64.v v25, (a0)
+; CHECK-O2-NEXT:    vse64.v v8, (a0)
 ; CHECK-O2-NEXT:    add a5, a5, t0
 ; CHECK-O2-NEXT:    j .LBB0_4
 ; CHECK-O2-NEXT:  .LBB0_5: # %for.cond.cleanup

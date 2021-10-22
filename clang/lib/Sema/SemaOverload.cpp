@@ -9586,7 +9586,8 @@ static bool haveSameParameterTypes(ASTContext &Context, const FunctionDecl *F1,
   for (unsigned I = 0; I != NumParams; ++I) {
     QualType T1 = NextParam(F1, I1, I == 0);
     QualType T2 = NextParam(F2, I2, I == 0);
-    if (!T1.isNull() && !T1.isNull() && !Context.hasSameUnqualifiedType(T1, T2))
+    assert(!T1.isNull() && !T2.isNull() && "Unexpected null param types");
+    if (!Context.hasSameUnqualifiedType(T1, T2))
       return false;
   }
   return true;
@@ -14161,7 +14162,8 @@ Sema::CreateOverloadedArraySubscriptExpr(SourceLocation LLoc,
                               Method->getType()->castAs<FunctionProtoType>()))
           return ExprError();
 
-        return MaybeBindToTemporary(TheCall);
+        return CheckForImmediateInvocation(MaybeBindToTemporary(TheCall),
+                                           FnDecl);
       } else {
         // We matched a built-in operator. Convert the arguments, then
         // break out so that we will build the appropriate built-in
@@ -14916,7 +14918,7 @@ Sema::BuildOverloadedArrowExpr(Scope *S, Expr *Base, SourceLocation OpLoc,
                         Method->getType()->castAs<FunctionProtoType>()))
     return ExprError();
 
-  return MaybeBindToTemporary(TheCall);
+  return CheckForImmediateInvocation(MaybeBindToTemporary(TheCall), Method);
 }
 
 /// BuildLiteralOperatorCall - Build a UserDefinedLiteral by creating a call to

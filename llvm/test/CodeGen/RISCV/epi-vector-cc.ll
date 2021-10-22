@@ -29,12 +29,12 @@ define <vscale x 1 x double> @max_registers(
 ; CHECK-LABEL: max_registers:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vfadd.vv v25, v8, v9
-; CHECK-NEXT:    vfadd.vv v25, v25, v11
-; CHECK-NEXT:    vfadd.vv v25, v25, v12
-; CHECK-NEXT:    vfadd.vv v25, v25, v13
-; CHECK-NEXT:    vfadd.vv v25, v25, v14
-; CHECK-NEXT:    vfadd.vv v8, v25, v15
+; CHECK-NEXT:    vfadd.vv v8, v8, v9
+; CHECK-NEXT:    vfadd.vv v8, v8, v11
+; CHECK-NEXT:    vfadd.vv v8, v8, v12
+; CHECK-NEXT:    vfadd.vv v8, v8, v13
+; CHECK-NEXT:    vfadd.vv v8, v8, v14
+; CHECK-NEXT:    vfadd.vv v8, v8, v15
 ; CHECK-NEXT:    ret
                                  <vscale x 1 x double> %v0,
                                  <vscale x 1 x double> %v1,

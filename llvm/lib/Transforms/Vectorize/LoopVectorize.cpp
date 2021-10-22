@@ -569,6 +569,7 @@ public:
   void vectorizeMemoryInstruction(Instruction *Instr, VPTransformState &State,
                                   VPValue *Def, VPValue *Addr,
                                   VPValue *StoredValue, VPValue *BlockInMask,
+                                  bool ConsecutiveStride, bool Reverse,
                                   VPValue *EVL);
 
   /// Set the debug location in the builder \p Ptr using the debug location in
@@ -2058,7 +2059,7 @@ class GeneratedRTChecks {
   /// The value representing the result of the generated memory runtime checks.
   /// If it is nullptr, either no memory runtime checks have been generated or
   /// they have been used.
-  Instruction *MemRuntimeCheckCond = nullptr;
+  Value *MemRuntimeCheckCond = nullptr;
 
   DominatorTree *DT;
   LoopInfo *LI;
@@ -2101,7 +2102,7 @@ public:
       MemCheckBlock = SplitBlock(Pred, Pred->getTerminator(), DT, LI, nullptr,
                                  "vector.memcheck");
 
-      std::tie(std::ignore, MemRuntimeCheckCond) =
+      MemRuntimeCheckCond =
           addRuntimeChecks(MemCheckBlock->getTerminator(), L,
                            RtPtrChecking.getChecks(), MemCheckExp);
       assert(MemRuntimeCheckCond &&
@@ -3124,7 +3125,8 @@ InnerLoopVectorizer::computeStrideAddressing(VPTransformState &State,
 
 void InnerLoopVectorizer::vectorizeMemoryInstruction(
     Instruction *Instr, VPTransformState &State, VPValue *Def, VPValue *Addr,
-    VPValue *StoredValue, VPValue *BlockInMask, VPValue *EVL) {
+    VPValue *StoredValue, VPValue *BlockInMask, bool ConsecutiveStride,
+    bool Reverse, VPValue *EVL) {
   // Attempt to issue a wide load.
   LoadInst *LI = dyn_cast<LoadInst>(Instr);
   StoreInst *SI = dyn_cast<StoreInst>(Instr);
@@ -3133,6 +3135,12 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
   assert((!SI || StoredValue) && "No stored value provided for widened store");
   assert((!LI || !StoredValue) && "Stored value provided for widened load");
 
+  Type *ScalarDataTy = getLoadStoreType(Instr);
+
+  auto *DataTy = VectorType::get(ScalarDataTy, VF);
+  const Align Alignment = getLoadStoreAlignment(Instr);
+  bool CreateGatherScatter = !ConsecutiveStride;
+
   LoopVectorizationCostModel::InstWidening Decision =
       Cost->getWideningDecision(Instr, VF);
   assert((Decision == LoopVectorizationCostModel::CM_Widen ||
@@ -3140,27 +3148,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           Decision == LoopVectorizationCostModel::CM_GatherScatter ||
           Decision == LoopVectorizationCostModel::CM_Strided) &&
          "CM decision is not to widen the memory instruction");
-
-  Type *ScalarDataTy = getLoadStoreType(Instr);
-
-  auto *DataTy = VectorType::get(ScalarDataTy, VF);
-  const Align Alignment = getLoadStoreAlignment(Instr);
-
-  // Determine if the pointer operand of the access is either consecutive or
-  // reverse consecutive.
-  bool Reverse = (Decision == LoopVectorizationCostModel::CM_Widen_Reverse);
-  bool ConsecutiveStride =
-      Reverse || (Decision == LoopVectorizationCostModel::CM_Widen);
-  bool NonConsecutiveStride = (Decision == LoopVectorizationCostModel::CM_Strided);
-  bool CreateGatherScatter =
-      (Decision == LoopVectorizationCostModel::CM_GatherScatter) ||
-      NonConsecutiveStride;
-
-  // Either Ptr feeds a vector load/store, or a vector GEP should feed a vector
-  // gather/scatter. Otherwise Decision should have been to Scalarize.
-  assert((ConsecutiveStride || CreateGatherScatter) &&
-         "The instruction should be scalarized");
-  (void)ConsecutiveStride;
+  bool NonUnitStride =
+      (Decision == LoopVectorizationCostModel::CM_Strided);
 
   VectorParts BlockInMaskParts(UF);
   bool isMaskRequired = BlockInMask;
@@ -3236,7 +3225,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
           Value *BlockInMaskPart = isMaskRequired
                                        ? MaskValue(Part, NumElts)
                                        : Builder.getTrueVector(NumElts);
-          if (NonConsecutiveStride) {
+          if (NonUnitStride) {
             LLVM_DEBUG(llvm::dbgs()
                        << "It should be possible to stride this store!\n");
             LLVM_DEBUG(llvm::dbgs() << "Addr = " << *Addr << "\n");
@@ -3329,7 +3318,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         Value *BlockInMaskPart = isMaskRequired
                                      ? MaskValue(Part, NumElts)
                                      : Builder.getTrueVector(NumElts);
-        if (NonConsecutiveStride) {
+        if (NonUnitStride) {
           LLVM_DEBUG(llvm::dbgs()
                      << "It should be possible to stride this load!\n");
           LLVM_DEBUG(llvm::dbgs() << "Addr = " << *Addr << "\n");
@@ -4700,8 +4689,7 @@ void InnerLoopVectorizer::fixFirstOrderRecurrence(VPWidenPHIRecipe *PhiR,
   // and thus no phis which needed updated.
   if (!Cost->requiresScalarEpilogue(VF))
     for (PHINode &LCSSAPhi : LoopExitBlock->phis())
-      if (any_of(LCSSAPhi.incoming_values(),
-                 [Phi](Value *V) { return V == Phi; }))
+      if (llvm::is_contained(LCSSAPhi.incoming_values(), Phi))
         LCSSAPhi.addIncoming(ExtractForPhiUsedOutsideLoop, LoopMiddleBlock);
 }
 
@@ -4860,8 +4848,7 @@ void InnerLoopVectorizer::fixReduction(VPReductionPHIRecipe *PhiR,
   // fixFirstOrderRecurrence for a more complete explaination of the logic.
   if (!Cost->requiresScalarEpilogue(VF))
     for (PHINode &LCSSAPhi : LoopExitBlock->phis())
-      if (any_of(LCSSAPhi.incoming_values(),
-                 [LoopExitInst](Value *V) { return V == LoopExitInst; }))
+      if (llvm::is_contained(LCSSAPhi.incoming_values(), LoopExitInst))
         LCSSAPhi.addIncoming(ReducedPartRdx, LoopMiddleBlock);
 
   // Fix the scalar loop reduction variable with the incoming reduction sum
@@ -5336,8 +5323,6 @@ InnerLoopVectorizer::getVPIntrInstr(unsigned Opcode) {
     return {Intrinsic::vp_inttoptr, false};
   case Instruction::PtrToInt:
     return {Intrinsic::vp_ptrtoint, false};
-  case Instruction::BitCast:
-    return {Intrinsic::vp_bitcast, false};
   }
   return {Intrinsic::not_intrinsic, false};
 }
@@ -5498,18 +5483,6 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     else
       assert(DestElemTy->isIntegerTy() && SrcElemTy->isPointerTy() &&
              "Invalid destination/source type for ptr to int cast.");
-    return CreateCast(CI);
-  }
-
-  //===------------------- bitcast cast instructions ----------------------===//
-  if (Opcode == Instruction::BitCast) {
-    auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
-    Type *DestElemTy = CI->getType();
-    Type *SrcElemTy = CI->getOperand(0)->getType();
-    assert(SrcElemTy->getPrimitiveSizeInBits() ==
-               DestElemTy->getPrimitiveSizeInBits() &&
-           "Invalid destination/source type for bitcast.");
     return CreateCast(CI);
   }
 
@@ -6437,6 +6410,11 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly
                                 MaxSafeVectorWidthInBits,
                                 VectorRegisterWidthFactor,
                                 /* IsScalable */ true);
+
+  if (FeasibleMaxVFLowerBound.isZero() || FeasibleMaxVFUpperBound.isZero()) {
+    LLVM_DEBUG(dbgs() << "LV: No feasible VF exists\n");
+    return FixedScalableVFPair::getNone();
+  }
 
   // If the user vectorization factor is legally unsafe, clamp it to a safe
   // value. Otherwise, return as is.
@@ -9938,12 +9916,21 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenMemory(Instruction *I,
   if (Legal->isMaskRequired(I))
     Mask = createBlockInMask(I->getParent(), Plan);
 
+  // Determine if the pointer operand of the access is either consecutive or
+  // reverse consecutive.
+  LoopVectorizationCostModel::InstWidening Decision =
+      CM.getWideningDecision(I, Range.Start);
+  bool Reverse = Decision == LoopVectorizationCostModel::CM_Widen_Reverse;
+  bool Consecutive =
+      Reverse || Decision == LoopVectorizationCostModel::CM_Widen;
+
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
-    return new VPWidenMemoryInstructionRecipe(*Load, Operands[0], Mask);
+    return new VPWidenMemoryInstructionRecipe(*Load, Operands[0], Mask,
+                                              Consecutive, Reverse);
 
   StoreInst *Store = cast<StoreInst>(I);
   return new VPWidenMemoryInstructionRecipe(*Store, Operands[1], Operands[0],
-                                            Mask);
+                                            Mask, Consecutive, Reverse);
 }
 
 VPRecipeBase *
@@ -9953,15 +9940,21 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
   if (!validateWidenMemory(I, Range))
     return nullptr;
 
+  LoopVectorizationCostModel::InstWidening Decision =
+      CM.getWideningDecision(I, Range.Start);
+  bool Reverse = Decision == LoopVectorizationCostModel::CM_Widen_Reverse;
+  bool Consecutive =
+      Reverse || Decision == LoopVectorizationCostModel::CM_Widen;
+
   VPValue *Mask = createBlockInMask(I->getParent(), Plan);
   VPValue *EVL = getOrCreateEVL(Plan);
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
-    return new VPPredicatedWidenMemoryInstructionRecipe(*Load, Operands[0],
-                                                        Mask, EVL);
+    return new VPPredicatedWidenMemoryInstructionRecipe(
+        *Load, Operands[0], Mask, Consecutive, Reverse, EVL);
 
   StoreInst *Store = cast<StoreInst>(I);
-  return new VPPredicatedWidenMemoryInstructionRecipe(*Store, Operands[1],
-                                                      Operands[0], Mask, EVL);
+  return new VPPredicatedWidenMemoryInstructionRecipe(
+      *Store, Operands[1], Operands[0], Mask, Consecutive, Reverse, EVL);
 }
 
 VPWidenIntOrFpInductionRecipe *
@@ -10380,7 +10373,8 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
         *SI, make_range(Operands.begin(), Operands.end()), InvariantCond));
   }
 
-  if (preferPredicatedWiden())
+  // BitCast does not need to be predicated
+  if (preferPredicatedWiden() && Instr->getOpcode() != Instruction::BitCast)
     return toVPRecipeResult(tryToPredicatedWiden(Instr, Operands, Plan));
 
   return toVPRecipeResult(tryToWiden(Instr, Operands));
@@ -11203,7 +11197,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
   VPValue *StoredValue = isStore() ? getStoredValue() : nullptr;
   State.ILV->vectorizeMemoryInstruction(
       &Ingredient, State, StoredValue ? nullptr : getVPSingleValue(), getAddr(),
-      StoredValue, getMask(), /* EVL */ nullptr);
+      StoredValue, getMask(), Consecutive, Reverse, /* EVL */ nullptr);
 }
 
 void VPPredicatedWidenMemoryInstructionRecipe::execute(
@@ -11211,7 +11205,7 @@ void VPPredicatedWidenMemoryInstructionRecipe::execute(
   VPValue *StoredValue = isStore() ? getStoredValue() : nullptr;
   State.ILV->vectorizeMemoryInstruction(
       &Ingredient, State, StoredValue ? nullptr : getVPSingleValue(), getAddr(),
-      StoredValue, getMask(), getEVL());
+      StoredValue, getMask(), Consecutive, Reverse, getEVL());
 }
 
 // Determine how to lower the scalar epilogue, which depends on 1) optimising

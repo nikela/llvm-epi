@@ -14,8 +14,8 @@ define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <v
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O0-NEXT:    vs1r.v v25, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O0-NEXT:    vs1r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int:
@@ -23,8 +23,8 @@ define void @test_vp_select_int(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <v
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O2-NEXT:    vs1r.v v25, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O2-NEXT:    vs1r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i64>*
 
@@ -42,8 +42,8 @@ define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, 
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O0-NEXT:    vs1r.v v25, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O0-NEXT:    vs1r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int_2:
@@ -51,8 +51,8 @@ define void @test_vp_select_int_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, 
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O2-NEXT:    vs1r.v v25, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O2-NEXT:    vs1r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i32>*
 
@@ -70,8 +70,8 @@ define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, 
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v26, v10, v8, v0
-; CHECK-O0-NEXT:    vs2r.v v26, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v10, v8, v0
+; CHECK-O0-NEXT:    vs2r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_int_3:
@@ -79,8 +79,8 @@ define void @test_vp_select_int_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, 
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v26, v10, v8, v0
-; CHECK-O2-NEXT:    vs2r.v v26, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v10, v8, v0
+; CHECK-O2-NEXT:    vs2r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i64>*
 
@@ -98,8 +98,8 @@ define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O0-NEXT:    vs1r.v v25, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O0-NEXT:    vs1r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp:
@@ -107,8 +107,8 @@ define void @test_vp_select_fp(<vscale x 1 x double> %a, <vscale x 1 x double> %
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O2-NEXT:    vs1r.v v25, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O2-NEXT:    vs1r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x double>*
 
@@ -126,8 +126,8 @@ define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O0-NEXT:    vs1r.v v25, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O0-NEXT:    vs1r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp_2:
@@ -135,8 +135,8 @@ define void @test_vp_select_fp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v25, v9, v8, v0
-; CHECK-O2-NEXT:    vs1r.v v25, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v9, v8, v0
+; CHECK-O2-NEXT:    vs1r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x float>*
 
@@ -154,8 +154,8 @@ define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double>
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmerge.vvm v26, v10, v8, v0
-; CHECK-O0-NEXT:    vs2r.v v26, (a0)
+; CHECK-O0-NEXT:    vmerge.vvm v8, v10, v8, v0
+; CHECK-O0-NEXT:    vs2r.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_fp_3:
@@ -163,8 +163,8 @@ define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double>
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmerge.vvm v26, v10, v8, v0
-; CHECK-O2-NEXT:    vs2r.v v26, (a1)
+; CHECK-O2-NEXT:    vmerge.vvm v8, v10, v8, v0
+; CHECK-O2-NEXT:    vs2r.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x double>*
 
@@ -178,15 +178,16 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O0-LABEL: test_vp_select_mask:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv1r.v v10, v9
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
+; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
+; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask:
@@ -194,11 +195,11 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
+; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
+; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
 
@@ -212,15 +213,16 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-LABEL: test_vp_select_mask_2:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv1r.v v10, v9
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
+; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
+; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_2:
@@ -228,11 +230,11 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
+; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
+; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 
@@ -246,15 +248,16 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O0-LABEL: test_vp_select_mask_3:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv1r.v v10, v9
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O0-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
+; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
+; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v25, (a0)
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
@@ -262,11 +265,11 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v25, v25, v9
-; CHECK-O2-NEXT:    vmxor.mm v25, v8, v25
+; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
+; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
+; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v25, (a1)
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
 

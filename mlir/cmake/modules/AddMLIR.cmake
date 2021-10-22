@@ -189,7 +189,7 @@ function(add_mlir_library name)
 
     # In order for out-of-tree projects to build aggregates of this library,
     # we need to install the OBJECT library.
-    if(NOT ARG_DISABLE_INSTALL)
+    if(MLIR_INSTALL_AGGREGATE_OBJECTS AND NOT ARG_DISABLE_INSTALL)
       add_mlir_library_install(obj.${name})
     endif()
   endif()
@@ -279,6 +279,10 @@ function(add_mlir_aggregate name)
       # It is an imported target, which can only have flat strings populated
       # (no generator expressions).
       # Rebuild the generator expressions from the imported flat string lists.
+      if(NOT MLIR_INSTALL_AGGREGATE_OBJECTS)
+        message(SEND_ERROR "Cannot build aggregate from imported targets which were not installed via MLIR_INSTALL_AGGREGATE_OBJECTS (for ${lib}).")
+      endif()
+
       get_property(_has_object_lib_prop TARGET ${lib} PROPERTY MLIR_AGGREGATE_OBJECT_LIB_IMPORTED SET)
       get_property(_has_dep_libs_prop TARGET ${lib} PROPERTY MLIR_AGGREGATE_DEP_LIBS_IMPORTED SET)
       if(NOT _has_object_lib_prop OR NOT _has_dep_libs_prop)
@@ -339,18 +343,21 @@ function(add_mlir_aggregate name)
   if(MSVC)
     set_property(TARGET ${name} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
   endif()
-  string(APPEND _debugmsg
-    ": MAIN LIBRARY:\n"
-    "    OBJECTS = ${_objects}\n"
-    "    SOURCES = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SOURCES>>\n"
-    "    DEPS = ${_deps}\n"
-    "    LINK_LIBRARIES = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},LINK_LIBRARIES>>\n"
-    "    MLIR_AGGREGATE_EXCLUDE_LIBS = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},MLIR_AGGREGATE_EXCLUDE_LIBS>>\n"
-  )
-  file(GENERATE OUTPUT
-    "${CMAKE_CURRENT_BINARY_DIR}/${name}.aggregate_debug.txt"
-    CONTENT "${_debugmsg}"
-  )
+
+  # Debugging generator expressions can be hard. Uncomment the below to emit
+  # files next to the library with a lot of debug information:
+  # string(APPEND _debugmsg
+  #   ": MAIN LIBRARY:\n"
+  #   "    OBJECTS = ${_objects}\n"
+  #   "    SOURCES = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},SOURCES>>\n"
+  #   "    DEPS = ${_deps}\n"
+  #   "    LINK_LIBRARIES = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},LINK_LIBRARIES>>\n"
+  #   "    MLIR_AGGREGATE_EXCLUDE_LIBS = $<TARGET_GENEX_EVAL:${name},$<TARGET_PROPERTY:${name},MLIR_AGGREGATE_EXCLUDE_LIBS>>\n"
+  # )
+  # file(GENERATE OUTPUT
+  #   "${CMAKE_CURRENT_BINARY_DIR}/${name}.aggregate_debug.txt"
+  #   CONTENT "${_debugmsg}"
+  # )
 endfunction(add_mlir_aggregate)
 
 # Adds an MLIR library target for installation.

@@ -6,8 +6,8 @@ define <4 x i32> @test_vp_trunc_v4i32_v4i64(<4 x i64> %a, i32 zeroext %gvl) {
 ; CHECK-LABEL: test_vp_trunc_v4i32_v4i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vnsrl.wi v25, v8, 0
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vnsrl.wi v10, v8, 0
+; CHECK-NEXT:    vmv1r.v v8, v10
 ; CHECK-NEXT:    ret
   %b = call <4 x i32> @llvm.vp.trunc.v4i32.v4i64(<4 x i64> %a,
             <4 x i1> shufflevector (<4 x i1> insertelement (<4 x i1> undef, i1 true, i32 0), <4 x i1> undef, <4 x i32> zeroinitializer),
@@ -19,8 +19,8 @@ define <4 x i32> @test_vp_trunc_v4i32_v4i64_mask(<4 x i64> %a, <4 x i1> %mask, i
 ; CHECK-LABEL: test_vp_trunc_v4i32_v4i64_mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vnsrl.wi v25, v8, 0, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v25
+; CHECK-NEXT:    vnsrl.wi v10, v8, 0, v0.t
+; CHECK-NEXT:    vmv1r.v v8, v10
 ; CHECK-NEXT:    ret
   %b = call <4 x i32> @llvm.vp.trunc.v4i32.v4i64(
                <4 x i64> %a,
@@ -33,9 +33,9 @@ define <16 x i8> @test_vp_trunc_v16i8_v16i32(<16 x i32> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v16i8_v16i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, mu
-; CHECK-NEXT:    vnsrl.wi v26, v8, 0
+; CHECK-NEXT:    vnsrl.wi v12, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
-; CHECK-NEXT:    vnsrl.wi v8, v26, 0
+; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <16 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <16 x i1> %m.first, <16 x i1> undef, <16 x i32> zeroinitializer
@@ -47,11 +47,11 @@ define <16 x i8> @test_vp_trunc_v16i8_v16i64(<16 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v16i8_v16i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
-; CHECK-NEXT:    vnsrl.wi v28, v8, 0
+; CHECK-NEXT:    vnsrl.wi v16, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vnsrl.wi v26, v28, 0
+; CHECK-NEXT:    vnsrl.wi v10, v16, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
-; CHECK-NEXT:    vnsrl.wi v8, v26, 0
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <16 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <16 x i1> %m.first, <16 x i1> undef, <16 x i32> zeroinitializer
@@ -63,9 +63,9 @@ define <8 x i16> @test_vp_trunc_v8i16_v8i64(<8 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_v8i16_v8i64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
-; CHECK-NEXT:    vnsrl.wi v26, v8, 0
+; CHECK-NEXT:    vnsrl.wi v12, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
-; CHECK-NEXT:    vnsrl.wi v8, v26, 0
+; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <8 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <8 x i1> %m.first, <8 x i1> undef, <8 x i32> zeroinitializer

@@ -22,260 +22,260 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    mv s1, a0
 ; CHECK-NEXT:    addi s4, zero, 8
 ; CHECK-NEXT:    vsetvli zero, s4, e64, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
+; CHECK-NEXT:    vid.v v10
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vs1r.v v26, (a0) # Unknown-size Folded Spill
-; CHECK-NEXT:    vsrl.vi v25, v26, 1
+; CHECK-NEXT:    vs1r.v v10, (a0) # Unknown-size Folded Spill
+; CHECK-NEXT:    vsrl.vi v8, v10, 1
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vs1r.v v25, (a0) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmul.vx v25, v25, a0
-; CHECK-NEXT:    vand.vi v8, v26, 1
+; CHECK-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmul.vx v9, v8, a0
+; CHECK-NEXT:    vand.vi v8, v10, 1
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmul.vv v26, v8, v25
+; CHECK-NEXT:    vmul.vv v10, v8, v8
 ; CHECK-NEXT:    addi a0, sp, 16
-; CHECK-NEXT:    vs1r.v v26, (a0) # Unknown-size Folded Spill
-; CHECK-NEXT:    vadd.vv v25, v25, v26
+; CHECK-NEXT:    vs1r.v v10, (a0) # Unknown-size Folded Spill
+; CHECK-NEXT:    vadd.vv v9, v9, v10
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vs1r.v v25, (a0) # Unknown-size Folded Spill
+; CHECK-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
 ; CHECK-NEXT:    call llvm.epi.mask.cast.nxv1i1.nxv1i64@plt
 ; CHECK-NEXT:    vsetvli zero, s4, e64, m1, ta, mu
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vl1r.v v25, (a0) # Unknown-size Folded Reload
-; CHECK-NEXT:    vxor.vi v26, v25, 1
+; CHECK-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
+; CHECK-NEXT:    vxor.vi v9, v8, 1
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vl1r.v v25, (a0) # Unknown-size Folded Reload
-; CHECK-NEXT:    vmul.vv v25, v25, v25
+; CHECK-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
+; CHECK-NEXT:    vmul.vv v8, v8, v8
 ; CHECK-NEXT:    addi a0, sp, 16
-; CHECK-NEXT:    vl1r.v v27, (a0) # Unknown-size Folded Reload
-; CHECK-NEXT:    vadd.vv v25, v25, v27
+; CHECK-NEXT:    vl1r.v v10, (a0) # Unknown-size Folded Reload
+; CHECK-NEXT:    vadd.vv v8, v8, v10
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add a0, sp, a0
 ; CHECK-NEXT:    addi a0, a0, 16
-; CHECK-NEXT:    vl1r.v v21, (a0) # Unknown-size Folded Reload
-; CHECK-NEXT:    vluxei64.v v12, (a0), v21
+; CHECK-NEXT:    vl1r.v v28, (a0) # Unknown-size Folded Reload
+; CHECK-NEXT:    vluxei64.v v19, (a0), v28
 ; CHECK-NEXT:    slli a0, s0, 7
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v27, (a0), v21
+; CHECK-NEXT:    vluxei64.v v10, (a0), v28
 ; CHECK-NEXT:    addi a0, zero, 192
 ; CHECK-NEXT:    mul a0, s0, a0
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v28, (a0), v21
+; CHECK-NEXT:    vluxei64.v v11, (a0), v28
 ; CHECK-NEXT:    slli a1, s0, 4
-; CHECK-NEXT:    vfsub.vv v29, v12, v27
-; CHECK-NEXT:    vfadd.vv v30, v12, v27
-; CHECK-NEXT:    vfsub.vv v27, v25, v28
+; CHECK-NEXT:    vfsub.vv v12, v19, v10
+; CHECK-NEXT:    vfadd.vv v13, v19, v10
+; CHECK-NEXT:    vfsub.vv v10, v8, v11
 ; CHECK-NEXT:    slli a0, s0, 5
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v31, (a0), v21
+; CHECK-NEXT:    vluxei64.v v14, (a0), v28
 ; CHECK-NEXT:    addi a0, zero, 160
 ; CHECK-NEXT:    mul a0, s0, a0
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v8, (a0), v21
+; CHECK-NEXT:    vluxei64.v v15, (a0), v28
 ; CHECK-NEXT:    addi a0, zero, 224
 ; CHECK-NEXT:    mul a0, s0, a0
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v9, (a0), v21
+; CHECK-NEXT:    vluxei64.v v16, (a0), v28
 ; CHECK-NEXT:    addi a0, zero, 96
 ; CHECK-NEXT:    mul a0, s0, a0
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v10, (a0), v21
-; CHECK-NEXT:    vfadd.vv v28, v25, v28
-; CHECK-NEXT:    vfsub.vv v11, v31, v8
-; CHECK-NEXT:    vfadd.vv v31, v31, v8
-; CHECK-NEXT:    vfsub.vv v8, v9, v10
-; CHECK-NEXT:    vfadd.vv v13, v9, v10
-; CHECK-NEXT:    vfadd.vv v9, v30, v28
-; CHECK-NEXT:    vfadd.vv v10, v31, v13
-; CHECK-NEXT:    vfsub.vv v30, v13, v31
-; CHECK-NEXT:    vfsub.vv v28, v8, v11
-; CHECK-NEXT:    vfmacc.vv v27, v25, v28
-; CHECK-NEXT:    vfmsac.vv v29, v25, v25
-; CHECK-NEXT:    vfneg.v v28, v29
-; CHECK-NEXT:    vfadd.vv v31, v25, v12
-; CHECK-NEXT:    vfadd.vv v8, v12, v12
-; CHECK-NEXT:    vfadd.vv v11, v25, v25
-; CHECK-NEXT:    vfmsac.vv v29, v25, v25
-; CHECK-NEXT:    vfneg.v v29, v29
-; CHECK-NEXT:    vfadd.vv v13, v8, v11
+; CHECK-NEXT:    vluxei64.v v17, (a0), v28
+; CHECK-NEXT:    vfadd.vv v11, v8, v11
+; CHECK-NEXT:    vfsub.vv v18, v14, v15
+; CHECK-NEXT:    vfadd.vv v14, v14, v15
+; CHECK-NEXT:    vfsub.vv v15, v16, v17
+; CHECK-NEXT:    vfadd.vv v20, v16, v17
+; CHECK-NEXT:    vfadd.vv v16, v13, v11
+; CHECK-NEXT:    vfadd.vv v17, v14, v20
+; CHECK-NEXT:    vfsub.vv v13, v20, v14
+; CHECK-NEXT:    vfsub.vv v11, v15, v18
+; CHECK-NEXT:    vfmacc.vv v10, v8, v11
+; CHECK-NEXT:    vfmsac.vv v12, v8, v8
+; CHECK-NEXT:    vfneg.v v11, v12
+; CHECK-NEXT:    vfadd.vv v14, v8, v19
+; CHECK-NEXT:    vfadd.vv v15, v19, v19
+; CHECK-NEXT:    vfadd.vv v18, v8, v8
+; CHECK-NEXT:    vfmsac.vv v12, v8, v8
+; CHECK-NEXT:    vfneg.v v12, v12
+; CHECK-NEXT:    vfadd.vv v20, v15, v18
 ; CHECK-NEXT:    lui a0, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a0)
-; CHECK-NEXT:    vfsub.vv v16, v25, v13
-; CHECK-NEXT:    vfsub.vv v31, v25, v31
-; CHECK-NEXT:    vfsub.vv v8, v11, v8
-; CHECK-NEXT:    vmv1r.v v11, v31
-; CHECK-NEXT:    vfmsac.vf v11, ft0, v8
-; CHECK-NEXT:    vfneg.v v11, v11
+; CHECK-NEXT:    vfsub.vv v23, v8, v20
+; CHECK-NEXT:    vfsub.vv v14, v8, v14
+; CHECK-NEXT:    vfsub.vv v15, v18, v15
+; CHECK-NEXT:    vmv1r.v v18, v14
+; CHECK-NEXT:    vfmsac.vf v18, ft0, v15
+; CHECK-NEXT:    vfneg.v v18, v18
 ; CHECK-NEXT:    addi a0, zero, 136
 ; CHECK-NEXT:    mul a0, s0, a0
 ; CHECK-NEXT:    add a0, s1, a0
-; CHECK-NEXT:    vluxei64.v v13, (a0), v21
-; CHECK-NEXT:    vluxei64.v v14, (s1), v21
+; CHECK-NEXT:    vluxei64.v v20, (a0), v28
+; CHECK-NEXT:    vluxei64.v v21, (s1), v28
 ; CHECK-NEXT:    addi a0, zero, 104
 ; CHECK-NEXT:    mul a2, s0, a0
 ; CHECK-NEXT:    add a2, s1, a2
-; CHECK-NEXT:    vluxei64.v v15, (a2), v21
-; CHECK-NEXT:    vfmacc.vf v8, ft0, v31
-; CHECK-NEXT:    vfsub.vv v31, v12, v13
-; CHECK-NEXT:    vfadd.vv v13, v12, v13
-; CHECK-NEXT:    vfsub.vv v17, v14, v15
-; CHECK-NEXT:    vfadd.vv v14, v14, v15
-; CHECK-NEXT:    vfadd.vv v15, v25, v17
-; CHECK-NEXT:    vfmsac.vv v31, v25, v15
-; CHECK-NEXT:    vfneg.v v31, v31
-; CHECK-NEXT:    vfsub.vv v15, v13, v25
-; CHECK-NEXT:    vfsub.vv v13, v25, v14
-; CHECK-NEXT:    vmv1r.v v14, v15
-; CHECK-NEXT:    vfmsac.vf v14, ft0, v13
+; CHECK-NEXT:    vluxei64.v v22, (a2), v28
+; CHECK-NEXT:    vfmacc.vf v15, ft0, v14
+; CHECK-NEXT:    vfsub.vv v14, v19, v20
+; CHECK-NEXT:    vfadd.vv v20, v19, v20
+; CHECK-NEXT:    vfsub.vv v24, v21, v22
+; CHECK-NEXT:    vfadd.vv v21, v21, v22
+; CHECK-NEXT:    vfadd.vv v22, v8, v24
+; CHECK-NEXT:    vfmsac.vv v14, v8, v22
 ; CHECK-NEXT:    vfneg.v v14, v14
+; CHECK-NEXT:    vfsub.vv v22, v20, v8
+; CHECK-NEXT:    vfsub.vv v20, v8, v21
+; CHECK-NEXT:    vmv1r.v v21, v22
+; CHECK-NEXT:    vfmsac.vf v21, ft0, v20
+; CHECK-NEXT:    vfneg.v v21, v21
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vluxei64.v v17, (a1), v21
+; CHECK-NEXT:    vluxei64.v v24, (a1), v28
 ; CHECK-NEXT:    addi a1, zero, 48
 ; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vluxei64.v v18, (a1), v21
-; CHECK-NEXT:    vfmacc.vf v13, ft0, v15
-; CHECK-NEXT:    vfsub.vv v15, v17, v12
-; CHECK-NEXT:    vfadd.vv v17, v17, v12
-; CHECK-NEXT:    vfsub.vv v19, v25, v18
+; CHECK-NEXT:    vluxei64.v v25, (a1), v28
+; CHECK-NEXT:    vfmacc.vf v20, ft0, v22
+; CHECK-NEXT:    vfsub.vv v22, v24, v19
+; CHECK-NEXT:    vfadd.vv v24, v24, v19
+; CHECK-NEXT:    vfsub.vv v26, v8, v25
 ; CHECK-NEXT:    addi a1, zero, 80
 ; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vluxei64.v v20, (a1), v21
+; CHECK-NEXT:    vluxei64.v v27, (a1), v28
 ; CHECK-NEXT:    addi a1, zero, 240
 ; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vluxei64.v v21, (a1), v21
-; CHECK-NEXT:    vfadd.vv v18, v18, v25
-; CHECK-NEXT:    vfsub.vv v22, v20, v25
-; CHECK-NEXT:    vfadd.vv v20, v20, v25
-; CHECK-NEXT:    vfsub.vv v23, v21, v12
-; CHECK-NEXT:    vfadd.vv v12, v21, v12
-; CHECK-NEXT:    vfadd.vv v18, v12, v18
-; CHECK-NEXT:    vfadd.vv v21, v17, v20
-; CHECK-NEXT:    vmv1r.v v12, v15
-; CHECK-NEXT:    vfmsac.vf v12, ft0, v22
-; CHECK-NEXT:    vfneg.v v12, v12
-; CHECK-NEXT:    vmv1r.v v24, v23
-; CHECK-NEXT:    vfmsac.vf v24, ft0, v19
-; CHECK-NEXT:    vfneg.v v24, v24
-; CHECK-NEXT:    vfsub.vv v12, v24, v12
-; CHECK-NEXT:    vfmacc.vf v22, ft0, v15
-; CHECK-NEXT:    vfmacc.vf v19, ft0, v23
-; CHECK-NEXT:    vfadd.vv v15, v22, v19
-; CHECK-NEXT:    vfsub.vv v17, v17, v20
-; CHECK-NEXT:    vfsub.vv v19, v9, v10
-; CHECK-NEXT:    vfsub.vv v17, v25, v17
-; CHECK-NEXT:    vmv1r.v v20, v19
-; CHECK-NEXT:    vfmsac.vv v20, v25, v25
-; CHECK-NEXT:    vfneg.v v20, v20
-; CHECK-NEXT:    vfmacc.vv v19, v25, v25
-; CHECK-NEXT:    vfsub.vv v22, v18, v21
-; CHECK-NEXT:    vfsub.vv v16, v16, v25
-; CHECK-NEXT:    vmv1r.v v23, v22
-; CHECK-NEXT:    vfmsac.vv v23, v25, v16
-; CHECK-NEXT:    vfneg.v v23, v23
-; CHECK-NEXT:    vfmacc.vv v22, v25, v16
-; CHECK-NEXT:    vfneg.v v23, v23, v0.t
-; CHECK-NEXT:    vrgather.vv v16, v23, v26
-; CHECK-NEXT:    vfsub.vv v23, v20, v16
+; CHECK-NEXT:    vluxei64.v v28, (a1), v28
+; CHECK-NEXT:    vfadd.vv v25, v25, v8
+; CHECK-NEXT:    vfsub.vv v29, v27, v8
+; CHECK-NEXT:    vfadd.vv v27, v27, v8
+; CHECK-NEXT:    vfsub.vv v30, v28, v19
+; CHECK-NEXT:    vfadd.vv v19, v28, v19
+; CHECK-NEXT:    vfadd.vv v25, v19, v25
+; CHECK-NEXT:    vfadd.vv v28, v24, v27
+; CHECK-NEXT:    vmv1r.v v19, v22
+; CHECK-NEXT:    vfmsac.vf v19, ft0, v29
+; CHECK-NEXT:    vfneg.v v19, v19
+; CHECK-NEXT:    vmv1r.v v31, v30
+; CHECK-NEXT:    vfmsac.vf v31, ft0, v26
+; CHECK-NEXT:    vfneg.v v31, v31
+; CHECK-NEXT:    vfsub.vv v19, v31, v19
+; CHECK-NEXT:    vfmacc.vf v29, ft0, v22
+; CHECK-NEXT:    vfmacc.vf v26, ft0, v30
+; CHECK-NEXT:    vfadd.vv v22, v29, v26
+; CHECK-NEXT:    vfsub.vv v24, v24, v27
+; CHECK-NEXT:    vfsub.vv v26, v16, v17
+; CHECK-NEXT:    vfsub.vv v24, v8, v24
+; CHECK-NEXT:    vmv1r.v v27, v26
+; CHECK-NEXT:    vfmsac.vv v27, v8, v8
+; CHECK-NEXT:    vfneg.v v27, v27
+; CHECK-NEXT:    vfmacc.vv v26, v8, v8
+; CHECK-NEXT:    vfsub.vv v29, v25, v28
+; CHECK-NEXT:    vfsub.vv v23, v23, v8
+; CHECK-NEXT:    vmv1r.v v30, v29
+; CHECK-NEXT:    vfmsac.vv v30, v8, v23
+; CHECK-NEXT:    vfneg.v v30, v30
+; CHECK-NEXT:    vfmacc.vv v29, v8, v23
+; CHECK-NEXT:    vfneg.v v30, v30, v0.t
+; CHECK-NEXT:    vrgather.vv v23, v30, v9
+; CHECK-NEXT:    vfsub.vv v30, v27, v23
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    slli a1, a1, 2
 ; CHECK-NEXT:    add a1, sp, a1
 ; CHECK-NEXT:    addi a1, a1, 16
 ; CHECK-NEXT:    vl1r.v v1, (a1) # Unknown-size Folded Reload
-; CHECK-NEXT:    vrgather.vv v24, v23, v1
-; CHECK-NEXT:    vsuxei64.v v24, (a0), v25
+; CHECK-NEXT:    vrgather.vv v31, v30, v1
+; CHECK-NEXT:    vsuxei64.v v31, (a0), v8
 ; CHECK-NEXT:    slli a1, s2, 5
 ; CHECK-NEXT:    add a1, s3, a1
-; CHECK-NEXT:    vfneg.v v22, v22, v0.t
-; CHECK-NEXT:    vrgather.vv v23, v22, v26
-; CHECK-NEXT:    vfadd.vv v22, v19, v23
-; CHECK-NEXT:    vrgather.vv v24, v22, v1
-; CHECK-NEXT:    vsuxei64.v v24, (a1), v25
-; CHECK-NEXT:    vfadd.vv v16, v20, v16
-; CHECK-NEXT:    vrgather.vv v20, v16, v1
-; CHECK-NEXT:    vsuxei64.v v20, (a0), v25
-; CHECK-NEXT:    vfsub.vv v16, v19, v23
-; CHECK-NEXT:    vrgather.vv v19, v16, v1
-; CHECK-NEXT:    vsuxei64.v v19, (a0), v25
-; CHECK-NEXT:    vfadd.vv v9, v9, v10
-; CHECK-NEXT:    vfadd.vv v10, v21, v18
-; CHECK-NEXT:    vfadd.vv v9, v9, v10
-; CHECK-NEXT:    vrgather.vv v10, v25, v1
-; CHECK-NEXT:    vsuxei64.v v25, (a0), v25
-; CHECK-NEXT:    vfadd.vv v9, v9, v25
-; CHECK-NEXT:    vrgather.vv v16, v9, v1
-; CHECK-NEXT:    vsuxei64.v v16, (a0), v25
-; CHECK-NEXT:    vsuxei64.v v10, (a0), v25
-; CHECK-NEXT:    vsuxei64.v v25, (a0), v25
+; CHECK-NEXT:    vfneg.v v29, v29, v0.t
+; CHECK-NEXT:    vrgather.vv v30, v29, v9
+; CHECK-NEXT:    vfadd.vv v29, v26, v30
+; CHECK-NEXT:    vrgather.vv v31, v29, v1
+; CHECK-NEXT:    vsuxei64.v v31, (a1), v8
+; CHECK-NEXT:    vfadd.vv v23, v27, v23
+; CHECK-NEXT:    vrgather.vv v27, v23, v1
+; CHECK-NEXT:    vsuxei64.v v27, (a0), v8
+; CHECK-NEXT:    vfsub.vv v23, v26, v30
+; CHECK-NEXT:    vrgather.vv v26, v23, v1
+; CHECK-NEXT:    vsuxei64.v v26, (a0), v8
+; CHECK-NEXT:    vfadd.vv v16, v16, v17
+; CHECK-NEXT:    vfadd.vv v17, v28, v25
+; CHECK-NEXT:    vfadd.vv v16, v16, v17
+; CHECK-NEXT:    vrgather.vv v17, v8, v1
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
+; CHECK-NEXT:    vfadd.vv v16, v16, v8
+; CHECK-NEXT:    vrgather.vv v23, v16, v1
+; CHECK-NEXT:    vsuxei64.v v23, (a0), v8
+; CHECK-NEXT:    vsuxei64.v v17, (a0), v8
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
 ; CHECK-NEXT:    addi a1, zero, 208
 ; CHECK-NEXT:    mul a1, s2, a1
 ; CHECK-NEXT:    lui a2, %hi(.LCPI0_1)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_1)(a2)
 ; CHECK-NEXT:    add a1, s3, a1
-; CHECK-NEXT:    vsuxei64.v v10, (a1), v25
-; CHECK-NEXT:    vfadd.vv v9, v14, v11
-; CHECK-NEXT:    vfmsac.vf v9, ft0, v9
-; CHECK-NEXT:    vfneg.v v9, v9
-; CHECK-NEXT:    vfmacc.vv v30, v25, v17
-; CHECK-NEXT:    vfsub.vv v8, v8, v13
-; CHECK-NEXT:    vfmacc.vf v30, ft0, v8
+; CHECK-NEXT:    vsuxei64.v v17, (a1), v8
+; CHECK-NEXT:    vfadd.vv v16, v21, v18
+; CHECK-NEXT:    vfmsac.vf v16, ft0, v16
+; CHECK-NEXT:    vfneg.v v16, v16
+; CHECK-NEXT:    vfmacc.vv v13, v8, v24
+; CHECK-NEXT:    vfsub.vv v15, v15, v20
+; CHECK-NEXT:    vfmacc.vf v13, ft0, v15
 ; CHECK-NEXT:    addi a1, zero, 112
 ; CHECK-NEXT:    mul a1, s2, a1
 ; CHECK-NEXT:    add a1, s3, a1
-; CHECK-NEXT:    vrgather.vv v8, v25, v26
-; CHECK-NEXT:    vfsub.vv v8, v9, v8
-; CHECK-NEXT:    vrgather.vv v9, v8, v1
-; CHECK-NEXT:    vsuxei64.v v9, (a1), v25
-; CHECK-NEXT:    vfneg.v v30, v30, v0.t
-; CHECK-NEXT:    vrgather.vv v8, v30, v26
-; CHECK-NEXT:    vfadd.vv v30, v25, v8
-; CHECK-NEXT:    vrgather.vv v8, v30, v1
-; CHECK-NEXT:    vfmacc.vf v28, ft0, v15
-; CHECK-NEXT:    vfmacc.vf v27, ft0, v12
+; CHECK-NEXT:    vrgather.vv v15, v8, v9
+; CHECK-NEXT:    vfsub.vv v15, v16, v15
+; CHECK-NEXT:    vrgather.vv v16, v15, v1
+; CHECK-NEXT:    vsuxei64.v v16, (a1), v8
+; CHECK-NEXT:    vfneg.v v13, v13, v0.t
+; CHECK-NEXT:    vrgather.vv v15, v13, v9
+; CHECK-NEXT:    vfadd.vv v13, v8, v15
+; CHECK-NEXT:    vrgather.vv v15, v13, v1
+; CHECK-NEXT:    vfmacc.vf v11, ft0, v22
+; CHECK-NEXT:    vfmacc.vf v10, ft0, v19
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_2)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_2)(a1)
-; CHECK-NEXT:    vsuxei64.v v8, (a0), v25
-; CHECK-NEXT:    vsuxei64.v v25, (a0), v25
-; CHECK-NEXT:    vfneg.v v30, v25
-; CHECK-NEXT:    vfmsac.vf v29, ft0, v25
-; CHECK-NEXT:    vfmacc.vf v31, ft0, v25
+; CHECK-NEXT:    vsuxei64.v v15, (a0), v8
+; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
+; CHECK-NEXT:    vfneg.v v13, v8
+; CHECK-NEXT:    vfmsac.vf v12, ft0, v8
+; CHECK-NEXT:    vfmacc.vf v14, ft0, v8
 ; CHECK-NEXT:    lui a1, %hi(.LCPI0_3)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_3)(a1)
-; CHECK-NEXT:    vfneg.v v29, v29
-; CHECK-NEXT:    vfsub.vv v29, v30, v29
-; CHECK-NEXT:    vfadd.vv v30, v31, v25
-; CHECK-NEXT:    vfmsac.vf v28, ft0, v30
-; CHECK-NEXT:    vfneg.v v28, v28
-; CHECK-NEXT:    vfmsac.vf v27, ft0, v29
-; CHECK-NEXT:    vfneg.v v27, v27
+; CHECK-NEXT:    vfneg.v v12, v12
+; CHECK-NEXT:    vfsub.vv v12, v13, v12
+; CHECK-NEXT:    vfadd.vv v13, v14, v8
+; CHECK-NEXT:    vfmsac.vf v11, ft0, v13
+; CHECK-NEXT:    vfneg.v v11, v11
+; CHECK-NEXT:    vfmsac.vf v10, ft0, v12
+; CHECK-NEXT:    vfneg.v v10, v10
 ; CHECK-NEXT:    mul a0, s2, a0
 ; CHECK-NEXT:    add a0, s3, a0
-; CHECK-NEXT:    vfneg.v v27, v27, v0.t
-; CHECK-NEXT:    vrgather.vv v29, v27, v26
-; CHECK-NEXT:    vfsub.vv v26, v28, v29
-; CHECK-NEXT:    vrgather.vv v27, v26, v1
-; CHECK-NEXT:    vsuxei64.v v27, (a0), v25
+; CHECK-NEXT:    vfneg.v v10, v10, v0.t
+; CHECK-NEXT:    vrgather.vv v12, v10, v9
+; CHECK-NEXT:    vfsub.vv v9, v11, v12
+; CHECK-NEXT:    vrgather.vv v10, v9, v1
+; CHECK-NEXT:    vsuxei64.v v10, (a0), v8
 entry:
   %0 = tail call <vscale x 1 x double> @llvm.epi.vfmv.v.f.nxv1f64.f64(double 0x3FEA9B66290EA1A3, i64 8)
   %1 = tail call <vscale x 1 x double> @llvm.epi.vfmv.v.f.nxv1f64.f64(double 0x3FE561B82AB7F990, i64 8)

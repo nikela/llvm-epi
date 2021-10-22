@@ -11,8 +11,8 @@ define <2 x i64> @test_vp_sext_v2i64_v2i1(<2 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v2i64_v2i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <2 x i1> %head, <2 x i1> undef, <2 x i32> zeroinitializer
@@ -25,8 +25,8 @@ define <2 x i64> @test_vp_sext_masked_v2i64_v2i1(<2 x i1> %op, <2 x i1> %mask, i
 ; CHECK-LABEL: test_vp_sext_masked_v2i64_v2i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <2 x i64> @llvm.vp.sext.v2i64.v2i1(<2 x i1> %op, <2 x i1> %mask, i32 %evl)
   ret <2 x i64> %x
@@ -36,8 +36,8 @@ define <4 x i32> @test_vp_sext_v4i32_v4i1(<4 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v4i32_v4i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <4 x i1> undef, i1 1, i32 0
   %allones = shufflevector <4 x i1> %head, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -50,8 +50,8 @@ define <4 x i32> @test_vp_sext_masked_v4i32_v4i1(<4 x i1> %op, <4 x i1> %mask, i
 ; CHECK-LABEL: test_vp_sext_masked_v4i32_v4i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <4 x i32> @llvm.vp.sext.v4i32.v4i1(<4 x i1> %op, <4 x i1> %mask, i32 %evl)
   ret <4 x i32> %x
@@ -61,8 +61,8 @@ define <8 x i16> @test_vp_sext_v8i16_v8i1(<8 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v8i16_v8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <8 x i1> %head, <8 x i1> undef, <8 x i32> zeroinitializer
@@ -75,8 +75,8 @@ define <8 x i16> @test_vp_sext_masked_v8i16_v8i1(<8 x i1> %op, <8 x i1> %mask, i
 ; CHECK-LABEL: test_vp_sext_masked_v8i16_v8i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <8 x i16> @llvm.vp.sext.v8i16.v8i1(<8 x i1> %op, <8 x i1> %mask, i32 %evl)
   ret <8 x i16> %x
@@ -86,8 +86,8 @@ define <16 x i8> @test_vp_sext_v16i8_v16i1(<16 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_v16i8_v16i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <16 x i1> undef, i1 1, i32 0
   %allones = shufflevector <16 x i1> %head, <16 x i1> undef, <16 x i32> zeroinitializer
@@ -100,8 +100,8 @@ define <16 x i8> @test_vp_sext_masked_v16i8_v16i1(<16 x i1> %op, <16 x i1> %mask
 ; CHECK-LABEL: test_vp_sext_masked_v16i8_v16i1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vmv.v.i v25, 0
-; CHECK-NEXT:    vmerge.vim v8, v25, -1, v0
+; CHECK-NEXT:    vmv.v.i v8, 0
+; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
   %x = call <16 x i8> @llvm.vp.sext.v16i8.v16i1(<16 x i1> %op, <16 x i1> %mask, i32 %evl)
   ret <16 x i8> %x

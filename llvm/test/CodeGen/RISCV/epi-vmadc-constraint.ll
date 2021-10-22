@@ -56,94 +56,94 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    lwu a6, 0(a0)
 ; CHECK-NEXT:    lwu a7, 4(a0)
-; CHECK-NEXT:    vmv.v.x v25, a6
+; CHECK-NEXT:    vmv.v.x v8, a6
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 10
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, a7
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, a7
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a4, a3, 3
 ; CHECK-NEXT:    add a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu t0, 8(a0)
 ; CHECK-NEXT:    lwu t1, 12(a0)
 ; CHECK-NEXT:    lwu t2, 16(a0)
 ; CHECK-NEXT:    lwu t3, 20(a0)
-; CHECK-NEXT:    vmv.v.x v25, t0
+; CHECK-NEXT:    vmv.v.x v8, t0
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 3
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, t1
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, t1
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a4, a3, 3
 ; CHECK-NEXT:    sub a3, a4, a3
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, t2
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, t2
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi a4, zero, 6
 ; CHECK-NEXT:    mul a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, t3
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, t3
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a4, a3, 2
 ; CHECK-NEXT:    add a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu t4, 24(a0)
 ; CHECK-NEXT:    lwu t5, 28(a0)
 ; CHECK-NEXT:    lwu t6, 32(a0)
 ; CHECK-NEXT:    lwu s2, 36(a0)
-; CHECK-NEXT:    vmv.v.x v25, t4
+; CHECK-NEXT:    vmv.v.x v8, t4
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 2
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, t5
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, t5
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a4, a3, 1
 ; CHECK-NEXT:    add a3, a3, a4
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, t6
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, t6
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 1
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v25, s2
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v8, s2
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
 ; CHECK-NEXT:    lwu s3, 40(a0)
 ; CHECK-NEXT:    lwu s6, 44(a0)
 ; CHECK-NEXT:    lwu s7, 56(a0)
 ; CHECK-NEXT:    lwu s8, 60(a0)
-; CHECK-NEXT:    vmv.v.x v25, s3
+; CHECK-NEXT:    vmv.v.x v8, s3
 ; CHECK-NEXT:    addi a3, sp, 168
-; CHECK-NEXT:    vs1r.v v25, (a3) # Unknown-size Folded Spill
-; CHECK-NEXT:    vmv.v.x v15, s6
-; CHECK-NEXT:    vmv.v.x v16, s7
-; CHECK-NEXT:    vmv.v.x v17, s8
+; CHECK-NEXT:    vs1r.v v8, (a3) # Unknown-size Folded Spill
+; CHECK-NEXT:    vmv.v.x v22, s6
+; CHECK-NEXT:    vmv.v.x v23, s7
+; CHECK-NEXT:    vmv.v.x v24, s8
 ; CHECK-NEXT:    addi a4, zero, 18
 ; CHECK-NEXT:    addi a3, zero, -1
 ; CHECK-NEXT:    srli s4, a3, 1
 ; CHECK-NEXT:    addi s5, zero, 255
-; CHECK-NEXT:    # implicit-def: $v25
+; CHECK-NEXT:    # implicit-def: $v8
 ; CHECK-NEXT:  .LBB0_3: # %while.body
 ; CHECK-NEXT:    # =>This Loop Header: Depth=1
 ; CHECK-NEXT:    # Child Loop BB0_4 Depth 2
@@ -157,14 +157,14 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    slli s1, a3, 32
 ; CHECK-NEXT:    or s1, s1, s0
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vmv.v.x v26, s0
-; CHECK-NEXT:    vmxor.mm v0, v25, v25
-; CHECK-NEXT:    vid.v v27
-; CHECK-NEXT:    vadc.vvm v18, v26, v27, v0
-; CHECK-NEXT:    vmadc.vvm v25, v26, v27, v0
-; CHECK-NEXT:    vmv.v.x v26, a3
-; CHECK-NEXT:    vmv1r.v v0, v25
-; CHECK-NEXT:    vadc.vim v19, v26, 0, v0
+; CHECK-NEXT:    vmv.v.x v9, s0
+; CHECK-NEXT:    vmxor.mm v0, v8, v8
+; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vadc.vvm v25, v9, v10, v0
+; CHECK-NEXT:    vmadc.vvm v8, v9, v10, v0
+; CHECK-NEXT:    vmv.v.x v9, a3
+; CHECK-NEXT:    vmv1r.v v0, v8
+; CHECK-NEXT:    vadc.vim v26, v9, 0, v0
 ; CHECK-NEXT:    add a3, s1, s10
 ; CHECK-NEXT:    sw a3, 48(a0)
 ; CHECK-NEXT:    srli a3, a3, 32
@@ -174,30 +174,30 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    mul a3, a3, s0
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vl1r.v v28, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vl1r.v v11, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli s0, a3, 3
 ; CHECK-NEXT:    add a3, a3, s0
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vl1r.v v31, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vl1r.v v14, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli a3, a3, 3
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vl1r.v v30, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vl1r.v v13, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli s0, a3, 3
 ; CHECK-NEXT:    sub a3, s0, a3
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vl1r.v v29, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vl1r.v v12, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    addi s0, zero, 6
 ; CHECK-NEXT:    mul a3, a3, s0
 ; CHECK-NEXT:    add a3, a3, sp
 ; CHECK-NEXT:    addi a3, a3, 168
-; CHECK-NEXT:    vl1r.v v8, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vl1r.v v15, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    csrr a3, vlenb
 ; CHECK-NEXT:    slli s0, a3, 2
 ; CHECK-NEXT:    add a3, a3, s0
@@ -225,37 +225,37 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a3, a3, 168
 ; CHECK-NEXT:    vl1r.v v7, (a3) # Unknown-size Folded Reload
 ; CHECK-NEXT:    addi a3, sp, 168
-; CHECK-NEXT:    vl1r.v v22, (a3) # Unknown-size Folded Reload
-; CHECK-NEXT:    vmv1r.v v21, v15
-; CHECK-NEXT:    vmv1r.v v23, v18
-; CHECK-NEXT:    vmv1r.v v1, v19
-; CHECK-NEXT:    vmv1r.v v24, v16
-; CHECK-NEXT:    vmv1r.v v20, v17
+; CHECK-NEXT:    vl1r.v v29, (a3) # Unknown-size Folded Reload
+; CHECK-NEXT:    vmv1r.v v28, v22
+; CHECK-NEXT:    vmv1r.v v30, v25
+; CHECK-NEXT:    vmv1r.v v1, v26
+; CHECK-NEXT:    vmv1r.v v31, v23
+; CHECK-NEXT:    vmv1r.v v27, v24
 ; CHECK-NEXT:  .LBB0_4: # %for.body
 ; CHECK-NEXT:    # Parent Loop BB0_3 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
-; CHECK-NEXT:    vadd.vv v26, v28, v8
-; CHECK-NEXT:    vxor.vv v28, v23, v26
-; CHECK-NEXT:    vsll.vi v23, v28, 16
-; CHECK-NEXT:    vsrl.vi v28, v28, 16
-; CHECK-NEXT:    vxor.vv v23, v23, v28
-; CHECK-NEXT:    vadd.vv v0, v3, v23
-; CHECK-NEXT:    vxor.vv v28, v8, v0
-; CHECK-NEXT:    vsll.vi v8, v28, 12
-; CHECK-NEXT:    vsrl.vi v28, v28, 20
-; CHECK-NEXT:    vxor.vv v2, v8, v28
-; CHECK-NEXT:    vadd.vv v28, v26, v2
-; CHECK-NEXT:    vxor.vv v26, v23, v28
-; CHECK-NEXT:    vsll.vi v8, v26, 8
-; CHECK-NEXT:    vsrl.vi v26, v26, 24
-; CHECK-NEXT:    vxor.vv v23, v8, v26
-; CHECK-NEXT:    vadd.vv v8, v0, v23
-; CHECK-NEXT:    vxor.vv v26, v2, v8
-; CHECK-NEXT:    vsll.vi v0, v26, 7
-; CHECK-NEXT:    vsrl.vi v26, v26, 25
-; CHECK-NEXT:    vxor.vv v26, v0, v26
-; CHECK-NEXT:    vadd.vv v31, v31, v6
-; CHECK-NEXT:    vxor.vv v0, v1, v31
+; CHECK-NEXT:    vadd.vv v9, v11, v15
+; CHECK-NEXT:    vxor.vv v11, v30, v9
+; CHECK-NEXT:    vsll.vi v30, v11, 16
+; CHECK-NEXT:    vsrl.vi v11, v11, 16
+; CHECK-NEXT:    vxor.vv v30, v30, v11
+; CHECK-NEXT:    vadd.vv v0, v3, v30
+; CHECK-NEXT:    vxor.vv v11, v15, v0
+; CHECK-NEXT:    vsll.vi v15, v11, 12
+; CHECK-NEXT:    vsrl.vi v11, v11, 20
+; CHECK-NEXT:    vxor.vv v2, v15, v11
+; CHECK-NEXT:    vadd.vv v11, v9, v2
+; CHECK-NEXT:    vxor.vv v9, v30, v11
+; CHECK-NEXT:    vsll.vi v15, v9, 8
+; CHECK-NEXT:    vsrl.vi v9, v9, 24
+; CHECK-NEXT:    vxor.vv v30, v15, v9
+; CHECK-NEXT:    vadd.vv v15, v0, v30
+; CHECK-NEXT:    vxor.vv v9, v2, v15
+; CHECK-NEXT:    vsll.vi v0, v9, 7
+; CHECK-NEXT:    vsrl.vi v9, v9, 25
+; CHECK-NEXT:    vxor.vv v9, v0, v9
+; CHECK-NEXT:    vadd.vv v14, v14, v6
+; CHECK-NEXT:    vxor.vv v0, v1, v14
 ; CHECK-NEXT:    vsll.vi v1, v0, 16
 ; CHECK-NEXT:    vsrl.vi v0, v0, 16
 ; CHECK-NEXT:    vxor.vv v0, v1, v0
@@ -264,8 +264,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsll.vi v3, v1, 12
 ; CHECK-NEXT:    vsrl.vi v1, v1, 20
 ; CHECK-NEXT:    vxor.vv v3, v3, v1
-; CHECK-NEXT:    vadd.vv v31, v31, v3
-; CHECK-NEXT:    vxor.vv v0, v0, v31
+; CHECK-NEXT:    vadd.vv v14, v14, v3
+; CHECK-NEXT:    vxor.vv v0, v0, v14
 ; CHECK-NEXT:    vsll.vi v1, v0, 8
 ; CHECK-NEXT:    vsrl.vi v0, v0, 24
 ; CHECK-NEXT:    vxor.vv v1, v1, v0
@@ -274,361 +274,361 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vsll.vi v3, v2, 7
 ; CHECK-NEXT:    vsrl.vi v2, v2, 25
 ; CHECK-NEXT:    vxor.vv v2, v3, v2
-; CHECK-NEXT:    vadd.vv v30, v30, v5
-; CHECK-NEXT:    vxor.vv v24, v24, v30
-; CHECK-NEXT:    vsll.vi v3, v24, 16
-; CHECK-NEXT:    vsrl.vi v24, v24, 16
-; CHECK-NEXT:    vxor.vv v24, v3, v24
-; CHECK-NEXT:    vadd.vv v22, v22, v24
-; CHECK-NEXT:    vxor.vv v3, v5, v22
+; CHECK-NEXT:    vadd.vv v13, v13, v5
+; CHECK-NEXT:    vxor.vv v31, v31, v13
+; CHECK-NEXT:    vsll.vi v3, v31, 16
+; CHECK-NEXT:    vsrl.vi v31, v31, 16
+; CHECK-NEXT:    vxor.vv v31, v3, v31
+; CHECK-NEXT:    vadd.vv v29, v29, v31
+; CHECK-NEXT:    vxor.vv v3, v5, v29
 ; CHECK-NEXT:    vsll.vi v5, v3, 12
 ; CHECK-NEXT:    vsrl.vi v3, v3, 20
 ; CHECK-NEXT:    vxor.vv v3, v5, v3
-; CHECK-NEXT:    vadd.vv v30, v30, v3
-; CHECK-NEXT:    vxor.vv v24, v24, v30
-; CHECK-NEXT:    vsll.vi v5, v24, 8
-; CHECK-NEXT:    vsrl.vi v24, v24, 24
-; CHECK-NEXT:    vxor.vv v24, v5, v24
-; CHECK-NEXT:    vadd.vv v22, v22, v24
-; CHECK-NEXT:    vxor.vv v3, v3, v22
+; CHECK-NEXT:    vadd.vv v13, v13, v3
+; CHECK-NEXT:    vxor.vv v31, v31, v13
+; CHECK-NEXT:    vsll.vi v5, v31, 8
+; CHECK-NEXT:    vsrl.vi v31, v31, 24
+; CHECK-NEXT:    vxor.vv v31, v5, v31
+; CHECK-NEXT:    vadd.vv v29, v29, v31
+; CHECK-NEXT:    vxor.vv v3, v3, v29
 ; CHECK-NEXT:    vsll.vi v5, v3, 7
 ; CHECK-NEXT:    vsrl.vi v3, v3, 25
 ; CHECK-NEXT:    vxor.vv v3, v5, v3
-; CHECK-NEXT:    vadd.vv v29, v29, v4
-; CHECK-NEXT:    vxor.vv v20, v20, v29
-; CHECK-NEXT:    vsll.vi v5, v20, 16
-; CHECK-NEXT:    vsrl.vi v20, v20, 16
-; CHECK-NEXT:    vxor.vv v20, v5, v20
-; CHECK-NEXT:    vadd.vv v21, v21, v20
-; CHECK-NEXT:    vxor.vv v4, v4, v21
+; CHECK-NEXT:    vadd.vv v12, v12, v4
+; CHECK-NEXT:    vxor.vv v27, v27, v12
+; CHECK-NEXT:    vsll.vi v5, v27, 16
+; CHECK-NEXT:    vsrl.vi v27, v27, 16
+; CHECK-NEXT:    vxor.vv v27, v5, v27
+; CHECK-NEXT:    vadd.vv v28, v28, v27
+; CHECK-NEXT:    vxor.vv v4, v4, v28
 ; CHECK-NEXT:    vsll.vi v5, v4, 12
 ; CHECK-NEXT:    vsrl.vi v4, v4, 20
 ; CHECK-NEXT:    vxor.vv v4, v5, v4
-; CHECK-NEXT:    vadd.vv v29, v29, v4
-; CHECK-NEXT:    vxor.vv v20, v20, v29
-; CHECK-NEXT:    vsll.vi v5, v20, 8
-; CHECK-NEXT:    vsrl.vi v20, v20, 24
-; CHECK-NEXT:    vxor.vv v20, v5, v20
-; CHECK-NEXT:    vadd.vv v21, v21, v20
-; CHECK-NEXT:    vxor.vv v4, v4, v21
+; CHECK-NEXT:    vadd.vv v12, v12, v4
+; CHECK-NEXT:    vxor.vv v27, v27, v12
+; CHECK-NEXT:    vsll.vi v5, v27, 8
+; CHECK-NEXT:    vsrl.vi v27, v27, 24
+; CHECK-NEXT:    vxor.vv v27, v5, v27
+; CHECK-NEXT:    vadd.vv v28, v28, v27
+; CHECK-NEXT:    vxor.vv v4, v4, v28
 ; CHECK-NEXT:    vsll.vi v5, v4, 7
 ; CHECK-NEXT:    vsrl.vi v4, v4, 25
 ; CHECK-NEXT:    vxor.vv v4, v5, v4
-; CHECK-NEXT:    vadd.vv v28, v28, v2
-; CHECK-NEXT:    vxor.vv v20, v20, v28
-; CHECK-NEXT:    vsll.vi v5, v20, 16
-; CHECK-NEXT:    vsrl.vi v20, v20, 16
-; CHECK-NEXT:    vxor.vv v20, v5, v20
-; CHECK-NEXT:    vadd.vv v22, v22, v20
-; CHECK-NEXT:    vxor.vv v2, v2, v22
+; CHECK-NEXT:    vadd.vv v11, v11, v2
+; CHECK-NEXT:    vxor.vv v27, v27, v11
+; CHECK-NEXT:    vsll.vi v5, v27, 16
+; CHECK-NEXT:    vsrl.vi v27, v27, 16
+; CHECK-NEXT:    vxor.vv v27, v5, v27
+; CHECK-NEXT:    vadd.vv v29, v29, v27
+; CHECK-NEXT:    vxor.vv v2, v2, v29
 ; CHECK-NEXT:    vsll.vi v5, v2, 12
 ; CHECK-NEXT:    vsrl.vi v2, v2, 20
 ; CHECK-NEXT:    vxor.vv v2, v5, v2
-; CHECK-NEXT:    vadd.vv v28, v28, v2
-; CHECK-NEXT:    vxor.vv v20, v20, v28
-; CHECK-NEXT:    vsll.vi v5, v20, 8
-; CHECK-NEXT:    vsrl.vi v20, v20, 24
-; CHECK-NEXT:    vxor.vv v20, v5, v20
-; CHECK-NEXT:    vadd.vv v22, v22, v20
-; CHECK-NEXT:    vxor.vv v2, v2, v22
+; CHECK-NEXT:    vadd.vv v11, v11, v2
+; CHECK-NEXT:    vxor.vv v27, v27, v11
+; CHECK-NEXT:    vsll.vi v5, v27, 8
+; CHECK-NEXT:    vsrl.vi v27, v27, 24
+; CHECK-NEXT:    vxor.vv v27, v5, v27
+; CHECK-NEXT:    vadd.vv v29, v29, v27
+; CHECK-NEXT:    vxor.vv v2, v2, v29
 ; CHECK-NEXT:    vsll.vi v5, v2, 7
 ; CHECK-NEXT:    vsrl.vi v2, v2, 25
 ; CHECK-NEXT:    vxor.vv v6, v5, v2
-; CHECK-NEXT:    vadd.vv v31, v31, v3
-; CHECK-NEXT:    vxor.vv v23, v23, v31
-; CHECK-NEXT:    vsll.vi v2, v23, 16
-; CHECK-NEXT:    vsrl.vi v23, v23, 16
-; CHECK-NEXT:    vxor.vv v23, v2, v23
-; CHECK-NEXT:    vadd.vv v21, v21, v23
-; CHECK-NEXT:    vxor.vv v2, v3, v21
+; CHECK-NEXT:    vadd.vv v14, v14, v3
+; CHECK-NEXT:    vxor.vv v30, v30, v14
+; CHECK-NEXT:    vsll.vi v2, v30, 16
+; CHECK-NEXT:    vsrl.vi v30, v30, 16
+; CHECK-NEXT:    vxor.vv v30, v2, v30
+; CHECK-NEXT:    vadd.vv v28, v28, v30
+; CHECK-NEXT:    vxor.vv v2, v3, v28
 ; CHECK-NEXT:    vsll.vi v3, v2, 12
 ; CHECK-NEXT:    vsrl.vi v2, v2, 20
 ; CHECK-NEXT:    vxor.vv v2, v3, v2
-; CHECK-NEXT:    vadd.vv v31, v31, v2
-; CHECK-NEXT:    vxor.vv v23, v23, v31
-; CHECK-NEXT:    vsll.vi v3, v23, 8
-; CHECK-NEXT:    vsrl.vi v23, v23, 24
-; CHECK-NEXT:    vxor.vv v23, v3, v23
-; CHECK-NEXT:    vadd.vv v21, v21, v23
-; CHECK-NEXT:    vxor.vv v2, v2, v21
+; CHECK-NEXT:    vadd.vv v14, v14, v2
+; CHECK-NEXT:    vxor.vv v30, v30, v14
+; CHECK-NEXT:    vsll.vi v3, v30, 8
+; CHECK-NEXT:    vsrl.vi v30, v30, 24
+; CHECK-NEXT:    vxor.vv v30, v3, v30
+; CHECK-NEXT:    vadd.vv v28, v28, v30
+; CHECK-NEXT:    vxor.vv v2, v2, v28
 ; CHECK-NEXT:    vsll.vi v3, v2, 7
 ; CHECK-NEXT:    vsrl.vi v2, v2, 25
 ; CHECK-NEXT:    vxor.vv v5, v3, v2
-; CHECK-NEXT:    vadd.vv v30, v30, v4
-; CHECK-NEXT:    vxor.vv v1, v1, v30
+; CHECK-NEXT:    vadd.vv v13, v13, v4
+; CHECK-NEXT:    vxor.vv v1, v1, v13
 ; CHECK-NEXT:    vsll.vi v2, v1, 16
 ; CHECK-NEXT:    vsrl.vi v1, v1, 16
 ; CHECK-NEXT:    vxor.vv v1, v2, v1
-; CHECK-NEXT:    vadd.vv v8, v8, v1
-; CHECK-NEXT:    vxor.vv v2, v4, v8
+; CHECK-NEXT:    vadd.vv v15, v15, v1
+; CHECK-NEXT:    vxor.vv v2, v4, v15
 ; CHECK-NEXT:    vsll.vi v3, v2, 12
 ; CHECK-NEXT:    vsrl.vi v2, v2, 20
 ; CHECK-NEXT:    vxor.vv v2, v3, v2
-; CHECK-NEXT:    vadd.vv v30, v30, v2
-; CHECK-NEXT:    vxor.vv v1, v1, v30
+; CHECK-NEXT:    vadd.vv v13, v13, v2
+; CHECK-NEXT:    vxor.vv v1, v1, v13
 ; CHECK-NEXT:    vsll.vi v3, v1, 8
 ; CHECK-NEXT:    vsrl.vi v1, v1, 24
 ; CHECK-NEXT:    vxor.vv v1, v3, v1
-; CHECK-NEXT:    vadd.vv v3, v8, v1
-; CHECK-NEXT:    vxor.vv v8, v2, v3
-; CHECK-NEXT:    vsll.vi v2, v8, 7
-; CHECK-NEXT:    vsrl.vi v8, v8, 25
-; CHECK-NEXT:    vxor.vv v4, v2, v8
-; CHECK-NEXT:    vadd.vv v29, v29, v26
-; CHECK-NEXT:    vxor.vv v8, v24, v29
-; CHECK-NEXT:    vsll.vi v24, v8, 16
-; CHECK-NEXT:    vsrl.vi v8, v8, 16
-; CHECK-NEXT:    vxor.vv v8, v24, v8
-; CHECK-NEXT:    vadd.vv v0, v0, v8
-; CHECK-NEXT:    vxor.vv v26, v26, v0
-; CHECK-NEXT:    vsll.vi v24, v26, 12
-; CHECK-NEXT:    vsrl.vi v26, v26, 20
-; CHECK-NEXT:    vxor.vv v26, v24, v26
-; CHECK-NEXT:    vadd.vv v29, v29, v26
-; CHECK-NEXT:    vxor.vv v8, v8, v29
-; CHECK-NEXT:    vsll.vi v24, v8, 8
-; CHECK-NEXT:    vsrl.vi v8, v8, 24
-; CHECK-NEXT:    vxor.vv v24, v24, v8
-; CHECK-NEXT:    vadd.vv v7, v0, v24
-; CHECK-NEXT:    vxor.vv v26, v26, v7
-; CHECK-NEXT:    vsll.vi v8, v26, 7
-; CHECK-NEXT:    vsrl.vi v26, v26, 25
+; CHECK-NEXT:    vadd.vv v3, v15, v1
+; CHECK-NEXT:    vxor.vv v15, v2, v3
+; CHECK-NEXT:    vsll.vi v2, v15, 7
+; CHECK-NEXT:    vsrl.vi v15, v15, 25
+; CHECK-NEXT:    vxor.vv v4, v2, v15
+; CHECK-NEXT:    vadd.vv v12, v12, v9
+; CHECK-NEXT:    vxor.vv v15, v31, v12
+; CHECK-NEXT:    vsll.vi v31, v15, 16
+; CHECK-NEXT:    vsrl.vi v15, v15, 16
+; CHECK-NEXT:    vxor.vv v15, v31, v15
+; CHECK-NEXT:    vadd.vv v0, v0, v15
+; CHECK-NEXT:    vxor.vv v9, v9, v0
+; CHECK-NEXT:    vsll.vi v31, v9, 12
+; CHECK-NEXT:    vsrl.vi v9, v9, 20
+; CHECK-NEXT:    vxor.vv v9, v31, v9
+; CHECK-NEXT:    vadd.vv v12, v12, v9
+; CHECK-NEXT:    vxor.vv v15, v15, v12
+; CHECK-NEXT:    vsll.vi v31, v15, 8
+; CHECK-NEXT:    vsrl.vi v15, v15, 24
+; CHECK-NEXT:    vxor.vv v31, v31, v15
+; CHECK-NEXT:    vadd.vv v7, v0, v31
+; CHECK-NEXT:    vxor.vv v9, v9, v7
+; CHECK-NEXT:    vsll.vi v15, v9, 7
+; CHECK-NEXT:    vsrl.vi v9, v9, 25
 ; CHECK-NEXT:    sext.w a3, a5
 ; CHECK-NEXT:    addiw a5, a5, 2
-; CHECK-NEXT:    vxor.vv v8, v8, v26
+; CHECK-NEXT:    vxor.vv v15, v15, v9
 ; CHECK-NEXT:    bltu a3, a4, .LBB0_4
 ; CHECK-NEXT:  # %bb.5: # %for.end
 ; CHECK-NEXT:    # in Loop: Header=BB0_3 Depth=1
 ; CHECK-NEXT:    and a5, s9, s4
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vid.v v26
-; CHECK-NEXT:    vsll.vi v0, v26, 8
-; CHECK-NEXT:    vsrl.vi v9, v26, 1
-; CHECK-NEXT:    vrgather.vv v2, v0, v9
-; CHECK-NEXT:    vadd.vi v10, v2, 8
-; CHECK-NEXT:    vand.vi v26, v26, 1
+; CHECK-NEXT:    vid.v v9
+; CHECK-NEXT:    vsll.vi v0, v9, 8
+; CHECK-NEXT:    vsrl.vi v16, v9, 1
+; CHECK-NEXT:    vrgather.vv v2, v0, v16
+; CHECK-NEXT:    vadd.vi v17, v2, 8
+; CHECK-NEXT:    vand.vi v9, v9, 1
 ; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vand.vi v26, v26, 1
-; CHECK-NEXT:    vmsne.vi v26, v26, 0
+; CHECK-NEXT:    vand.vi v9, v9, 1
+; CHECK-NEXT:    vmsne.vi v9, v9, 0
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vmv1r.v v0, v26
-; CHECK-NEXT:    vmerge.vvm v2, v2, v10, v0
+; CHECK-NEXT:    vmv1r.v v0, v9
+; CHECK-NEXT:    vmerge.vvm v2, v2, v17, v0
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vadd.vx v28, v28, a6
-; CHECK-NEXT:    vadd.vx v31, v31, a7
-; CHECK-NEXT:    vadd.vx v10, v30, t0
-; CHECK-NEXT:    vadd.vx v11, v29, t1
-; CHECK-NEXT:    vsrl.vi v29, v27, 1
-; CHECK-NEXT:    vsll.vi v29, v29, 1
-; CHECK-NEXT:    vrgather.vv v30, v28, v29
-; CHECK-NEXT:    vrgather.vv v12, v31, v29
-; CHECK-NEXT:    vand.vi v27, v27, 1
+; CHECK-NEXT:    vadd.vx v11, v11, a6
+; CHECK-NEXT:    vadd.vx v14, v14, a7
+; CHECK-NEXT:    vadd.vx v17, v13, t0
+; CHECK-NEXT:    vadd.vx v18, v12, t1
+; CHECK-NEXT:    vsrl.vi v12, v10, 1
+; CHECK-NEXT:    vsll.vi v12, v12, 1
+; CHECK-NEXT:    vrgather.vv v13, v11, v12
+; CHECK-NEXT:    vrgather.vv v19, v14, v12
+; CHECK-NEXT:    vand.vi v10, v10, 1
 ; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
-; CHECK-NEXT:    vand.vi v27, v27, 1
-; CHECK-NEXT:    vmsne.vi v27, v27, 0
+; CHECK-NEXT:    vand.vi v10, v10, 1
+; CHECK-NEXT:    vmsne.vi v10, v10, 0
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vmv1r.v v0, v27
-; CHECK-NEXT:    vmerge.vvm v12, v30, v12, v0
-; CHECK-NEXT:    vadd.vi v30, v29, 1
-; CHECK-NEXT:    vrgather.vv v13, v28, v30
-; CHECK-NEXT:    vrgather.vv v28, v31, v30
-; CHECK-NEXT:    vmerge.vvm v13, v13, v28, v0
-; CHECK-NEXT:    vrgather.vv v28, v10, v29
-; CHECK-NEXT:    vrgather.vv v31, v11, v29
-; CHECK-NEXT:    vmerge.vvm v14, v28, v31, v0
-; CHECK-NEXT:    vrgather.vv v28, v10, v30
-; CHECK-NEXT:    vrgather.vv v31, v11, v30
-; CHECK-NEXT:    vmerge.vvm v10, v28, v31, v0
+; CHECK-NEXT:    vmv1r.v v0, v10
+; CHECK-NEXT:    vmerge.vvm v19, v13, v19, v0
+; CHECK-NEXT:    vadd.vi v13, v12, 1
+; CHECK-NEXT:    vrgather.vv v20, v11, v13
+; CHECK-NEXT:    vrgather.vv v11, v14, v13
+; CHECK-NEXT:    vmerge.vvm v20, v20, v11, v0
+; CHECK-NEXT:    vrgather.vv v11, v17, v12
+; CHECK-NEXT:    vrgather.vv v14, v18, v12
+; CHECK-NEXT:    vmerge.vvm v21, v11, v14, v0
+; CHECK-NEXT:    vrgather.vv v11, v17, v13
+; CHECK-NEXT:    vrgather.vv v14, v18, v13
+; CHECK-NEXT:    vmerge.vvm v17, v11, v14, v0
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vsll.vi v28, v9, 1
-; CHECK-NEXT:    vrgather.vv v31, v12, v28
-; CHECK-NEXT:    vluxei64.v v9, (a1), v2
-; CHECK-NEXT:    vrgather.vv v11, v14, v28
-; CHECK-NEXT:    vmv1r.v v0, v26
-; CHECK-NEXT:    vmerge.vvm v31, v31, v11, v0
-; CHECK-NEXT:    vrgather.vv v11, v13, v28
-; CHECK-NEXT:    vxor.vv v31, v31, v9
-; CHECK-NEXT:    vsuxei64.v v31, (a2), v2
+; CHECK-NEXT:    vsll.vi v11, v16, 1
+; CHECK-NEXT:    vrgather.vv v14, v19, v11
+; CHECK-NEXT:    vluxei64.v v16, (a1), v2
+; CHECK-NEXT:    vrgather.vv v18, v21, v11
+; CHECK-NEXT:    vmv1r.v v0, v9
+; CHECK-NEXT:    vmerge.vvm v14, v14, v18, v0
+; CHECK-NEXT:    vrgather.vv v18, v20, v11
+; CHECK-NEXT:    vxor.vv v14, v14, v16
+; CHECK-NEXT:    vsuxei64.v v14, (a2), v2
 ; CHECK-NEXT:    addi a3, a1, 64
-; CHECK-NEXT:    vluxei64.v v9, (a3), v2
-; CHECK-NEXT:    vrgather.vv v31, v10, v28
-; CHECK-NEXT:    vmerge.vvm v11, v11, v31, v0
-; CHECK-NEXT:    vadd.vi v31, v28, 1
-; CHECK-NEXT:    vxor.vv v9, v11, v9
+; CHECK-NEXT:    vluxei64.v v16, (a3), v2
+; CHECK-NEXT:    vrgather.vv v14, v17, v11
+; CHECK-NEXT:    vmerge.vvm v18, v18, v14, v0
+; CHECK-NEXT:    vadd.vi v14, v11, 1
+; CHECK-NEXT:    vxor.vv v16, v18, v16
 ; CHECK-NEXT:    addi a3, a2, 64
-; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v16, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 128
-; CHECK-NEXT:    vluxei64.v v9, (a3), v2
-; CHECK-NEXT:    vrgather.vv v11, v12, v31
-; CHECK-NEXT:    vrgather.vv v12, v14, v31
-; CHECK-NEXT:    vmerge.vvm v11, v11, v12, v0
-; CHECK-NEXT:    vxor.vv v9, v11, v9
+; CHECK-NEXT:    vluxei64.v v16, (a3), v2
+; CHECK-NEXT:    vrgather.vv v18, v19, v14
+; CHECK-NEXT:    vrgather.vv v19, v21, v14
+; CHECK-NEXT:    vmerge.vvm v18, v18, v19, v0
+; CHECK-NEXT:    vxor.vv v16, v18, v16
 ; CHECK-NEXT:    addi a3, a2, 128
-; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v16, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 192
-; CHECK-NEXT:    vluxei64.v v9, (a3), v2
-; CHECK-NEXT:    vrgather.vv v11, v13, v31
-; CHECK-NEXT:    vrgather.vv v12, v10, v31
-; CHECK-NEXT:    vmerge.vvm v10, v11, v12, v0
-; CHECK-NEXT:    vxor.vv v9, v10, v9
+; CHECK-NEXT:    vluxei64.v v16, (a3), v2
+; CHECK-NEXT:    vrgather.vv v18, v20, v14
+; CHECK-NEXT:    vrgather.vv v19, v17, v14
+; CHECK-NEXT:    vmerge.vvm v17, v18, v19, v0
+; CHECK-NEXT:    vxor.vv v16, v17, v16
 ; CHECK-NEXT:    addi a3, a2, 192
-; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v16, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 16
 ; CHECK-NEXT:    addi s0, a2, 16
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vadd.vx v8, v8, t2
-; CHECK-NEXT:    vadd.vx v9, v6, t3
-; CHECK-NEXT:    vadd.vx v10, v5, t4
-; CHECK-NEXT:    vadd.vx v11, v4, t5
-; CHECK-NEXT:    vrgather.vv v12, v8, v29
-; CHECK-NEXT:    vrgather.vv v13, v9, v29
-; CHECK-NEXT:    vmv1r.v v0, v27
-; CHECK-NEXT:    vmerge.vvm v12, v12, v13, v0
-; CHECK-NEXT:    vrgather.vv v13, v8, v30
-; CHECK-NEXT:    vrgather.vv v8, v9, v30
-; CHECK-NEXT:    vmerge.vvm v8, v13, v8, v0
-; CHECK-NEXT:    vrgather.vv v9, v10, v29
-; CHECK-NEXT:    vrgather.vv v13, v11, v29
-; CHECK-NEXT:    vmerge.vvm v9, v9, v13, v0
-; CHECK-NEXT:    vrgather.vv v13, v10, v30
-; CHECK-NEXT:    vrgather.vv v10, v11, v30
-; CHECK-NEXT:    vmerge.vvm v10, v13, v10, v0
+; CHECK-NEXT:    vadd.vx v15, v15, t2
+; CHECK-NEXT:    vadd.vx v16, v6, t3
+; CHECK-NEXT:    vadd.vx v17, v5, t4
+; CHECK-NEXT:    vadd.vx v18, v4, t5
+; CHECK-NEXT:    vrgather.vv v19, v15, v12
+; CHECK-NEXT:    vrgather.vv v20, v16, v12
+; CHECK-NEXT:    vmv1r.v v0, v10
+; CHECK-NEXT:    vmerge.vvm v19, v19, v20, v0
+; CHECK-NEXT:    vrgather.vv v20, v15, v13
+; CHECK-NEXT:    vrgather.vv v15, v16, v13
+; CHECK-NEXT:    vmerge.vvm v15, v20, v15, v0
+; CHECK-NEXT:    vrgather.vv v16, v17, v12
+; CHECK-NEXT:    vrgather.vv v20, v18, v12
+; CHECK-NEXT:    vmerge.vvm v16, v16, v20, v0
+; CHECK-NEXT:    vrgather.vv v20, v17, v13
+; CHECK-NEXT:    vrgather.vv v17, v18, v13
+; CHECK-NEXT:    vmerge.vvm v17, v20, v17, v0
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v12, v28
-; CHECK-NEXT:    vrgather.vv v14, v9, v28
-; CHECK-NEXT:    vmv1r.v v0, v26
-; CHECK-NEXT:    vmerge.vvm v13, v13, v14, v0
-; CHECK-NEXT:    vxor.vv v11, v13, v11
-; CHECK-NEXT:    vsuxei64.v v11, (s0), v2
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v19, v11
+; CHECK-NEXT:    vrgather.vv v21, v16, v11
+; CHECK-NEXT:    vmv1r.v v0, v9
+; CHECK-NEXT:    vmerge.vvm v20, v20, v21, v0
+; CHECK-NEXT:    vxor.vv v18, v20, v18
+; CHECK-NEXT:    vsuxei64.v v18, (s0), v2
 ; CHECK-NEXT:    addi a3, a1, 80
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v8, v28
-; CHECK-NEXT:    vrgather.vv v14, v10, v28
-; CHECK-NEXT:    vmerge.vvm v13, v13, v14, v0
-; CHECK-NEXT:    vxor.vv v11, v13, v11
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v15, v11
+; CHECK-NEXT:    vrgather.vv v21, v17, v11
+; CHECK-NEXT:    vmerge.vvm v20, v20, v21, v0
+; CHECK-NEXT:    vxor.vv v18, v20, v18
 ; CHECK-NEXT:    addi a3, a2, 80
-; CHECK-NEXT:    vsuxei64.v v11, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v18, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 144
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v12, v31
-; CHECK-NEXT:    vrgather.vv v12, v9, v31
-; CHECK-NEXT:    vmerge.vvm v9, v13, v12, v0
-; CHECK-NEXT:    vxor.vv v9, v9, v11
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v19, v14
+; CHECK-NEXT:    vrgather.vv v19, v16, v14
+; CHECK-NEXT:    vmerge.vvm v16, v20, v19, v0
+; CHECK-NEXT:    vxor.vv v16, v16, v18
 ; CHECK-NEXT:    addi a3, a2, 144
-; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v16, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 208
-; CHECK-NEXT:    vluxei64.v v9, (a3), v2
-; CHECK-NEXT:    vrgather.vv v11, v8, v31
-; CHECK-NEXT:    vrgather.vv v8, v10, v31
-; CHECK-NEXT:    vmerge.vvm v8, v11, v8, v0
-; CHECK-NEXT:    vxor.vv v8, v8, v9
+; CHECK-NEXT:    vluxei64.v v16, (a3), v2
+; CHECK-NEXT:    vrgather.vv v18, v15, v14
+; CHECK-NEXT:    vrgather.vv v15, v17, v14
+; CHECK-NEXT:    vmerge.vvm v15, v18, v15, v0
+; CHECK-NEXT:    vxor.vv v15, v15, v16
 ; CHECK-NEXT:    addi a3, a2, 208
-; CHECK-NEXT:    vsuxei64.v v8, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v15, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 32
 ; CHECK-NEXT:    addi s0, a2, 32
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vadd.vx v8, v3, t6
-; CHECK-NEXT:    vadd.vx v9, v7, s2
-; CHECK-NEXT:    vadd.vx v10, v22, s3
-; CHECK-NEXT:    vadd.vx v11, v21, s6
-; CHECK-NEXT:    vrgather.vv v12, v8, v29
-; CHECK-NEXT:    vrgather.vv v13, v9, v29
-; CHECK-NEXT:    vmv1r.v v0, v27
-; CHECK-NEXT:    vmerge.vvm v12, v12, v13, v0
-; CHECK-NEXT:    vrgather.vv v13, v8, v30
-; CHECK-NEXT:    vrgather.vv v8, v9, v30
-; CHECK-NEXT:    vmerge.vvm v8, v13, v8, v0
-; CHECK-NEXT:    vrgather.vv v9, v10, v29
-; CHECK-NEXT:    vrgather.vv v13, v11, v29
-; CHECK-NEXT:    vmerge.vvm v9, v9, v13, v0
-; CHECK-NEXT:    vrgather.vv v13, v10, v30
-; CHECK-NEXT:    vrgather.vv v10, v11, v30
-; CHECK-NEXT:    vmerge.vvm v10, v13, v10, v0
+; CHECK-NEXT:    vadd.vx v15, v3, t6
+; CHECK-NEXT:    vadd.vx v16, v7, s2
+; CHECK-NEXT:    vadd.vx v17, v29, s3
+; CHECK-NEXT:    vadd.vx v18, v28, s6
+; CHECK-NEXT:    vrgather.vv v19, v15, v12
+; CHECK-NEXT:    vrgather.vv v20, v16, v12
+; CHECK-NEXT:    vmv1r.v v0, v10
+; CHECK-NEXT:    vmerge.vvm v19, v19, v20, v0
+; CHECK-NEXT:    vrgather.vv v20, v15, v13
+; CHECK-NEXT:    vrgather.vv v15, v16, v13
+; CHECK-NEXT:    vmerge.vvm v15, v20, v15, v0
+; CHECK-NEXT:    vrgather.vv v16, v17, v12
+; CHECK-NEXT:    vrgather.vv v20, v18, v12
+; CHECK-NEXT:    vmerge.vvm v16, v16, v20, v0
+; CHECK-NEXT:    vrgather.vv v20, v17, v13
+; CHECK-NEXT:    vrgather.vv v17, v18, v13
+; CHECK-NEXT:    vmerge.vvm v17, v20, v17, v0
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v12, v28
-; CHECK-NEXT:    vrgather.vv v14, v9, v28
-; CHECK-NEXT:    vmv1r.v v0, v26
-; CHECK-NEXT:    vmerge.vvm v13, v13, v14, v0
-; CHECK-NEXT:    vxor.vv v11, v13, v11
-; CHECK-NEXT:    vsuxei64.v v11, (s0), v2
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v19, v11
+; CHECK-NEXT:    vrgather.vv v21, v16, v11
+; CHECK-NEXT:    vmv1r.v v0, v9
+; CHECK-NEXT:    vmerge.vvm v20, v20, v21, v0
+; CHECK-NEXT:    vxor.vv v18, v20, v18
+; CHECK-NEXT:    vsuxei64.v v18, (s0), v2
 ; CHECK-NEXT:    addi a3, a1, 96
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v8, v28
-; CHECK-NEXT:    vrgather.vv v14, v10, v28
-; CHECK-NEXT:    vmerge.vvm v13, v13, v14, v0
-; CHECK-NEXT:    vxor.vv v11, v13, v11
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v15, v11
+; CHECK-NEXT:    vrgather.vv v21, v17, v11
+; CHECK-NEXT:    vmerge.vvm v20, v20, v21, v0
+; CHECK-NEXT:    vxor.vv v18, v20, v18
 ; CHECK-NEXT:    addi a3, a2, 96
-; CHECK-NEXT:    vsuxei64.v v11, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v18, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 160
-; CHECK-NEXT:    vluxei64.v v11, (a3), v2
-; CHECK-NEXT:    vrgather.vv v13, v12, v31
-; CHECK-NEXT:    vrgather.vv v12, v9, v31
-; CHECK-NEXT:    vmerge.vvm v9, v13, v12, v0
-; CHECK-NEXT:    vxor.vv v9, v9, v11
+; CHECK-NEXT:    vluxei64.v v18, (a3), v2
+; CHECK-NEXT:    vrgather.vv v20, v19, v14
+; CHECK-NEXT:    vrgather.vv v19, v16, v14
+; CHECK-NEXT:    vmerge.vvm v16, v20, v19, v0
+; CHECK-NEXT:    vxor.vv v16, v16, v18
 ; CHECK-NEXT:    addi a3, a2, 160
-; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v16, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 224
-; CHECK-NEXT:    vluxei64.v v9, (a3), v2
-; CHECK-NEXT:    vrgather.vv v11, v8, v31
-; CHECK-NEXT:    vrgather.vv v8, v10, v31
-; CHECK-NEXT:    vmerge.vvm v8, v11, v8, v0
-; CHECK-NEXT:    vxor.vv v8, v8, v9
+; CHECK-NEXT:    vluxei64.v v16, (a3), v2
+; CHECK-NEXT:    vrgather.vv v18, v15, v14
+; CHECK-NEXT:    vrgather.vv v15, v17, v14
+; CHECK-NEXT:    vmerge.vvm v15, v18, v15, v0
+; CHECK-NEXT:    vxor.vv v15, v15, v16
 ; CHECK-NEXT:    addi a3, a2, 224
-; CHECK-NEXT:    vsuxei64.v v8, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v15, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 48
 ; CHECK-NEXT:    addi s0, a2, 48
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu
-; CHECK-NEXT:    vadd.vv v8, v23, v18
-; CHECK-NEXT:    vadd.vv v9, v1, v19
-; CHECK-NEXT:    vadd.vx v10, v24, s7
-; CHECK-NEXT:    vadd.vx v11, v20, s8
-; CHECK-NEXT:    vrgather.vv v12, v8, v29
-; CHECK-NEXT:    vrgather.vv v13, v9, v29
-; CHECK-NEXT:    vmv1r.v v0, v27
-; CHECK-NEXT:    vmerge.vvm v12, v12, v13, v0
-; CHECK-NEXT:    vrgather.vv v13, v8, v30
-; CHECK-NEXT:    vrgather.vv v8, v9, v30
-; CHECK-NEXT:    vmerge.vvm v8, v13, v8, v0
-; CHECK-NEXT:    vrgather.vv v9, v10, v29
-; CHECK-NEXT:    vrgather.vv v13, v11, v29
-; CHECK-NEXT:    vmerge.vvm v29, v9, v13, v0
-; CHECK-NEXT:    vrgather.vv v9, v10, v30
-; CHECK-NEXT:    vrgather.vv v10, v11, v30
-; CHECK-NEXT:    vmerge.vvm v27, v9, v10, v0
+; CHECK-NEXT:    vadd.vv v15, v30, v25
+; CHECK-NEXT:    vadd.vv v16, v1, v26
+; CHECK-NEXT:    vadd.vx v17, v31, s7
+; CHECK-NEXT:    vadd.vx v18, v27, s8
+; CHECK-NEXT:    vrgather.vv v19, v15, v12
+; CHECK-NEXT:    vrgather.vv v20, v16, v12
+; CHECK-NEXT:    vmv1r.v v0, v10
+; CHECK-NEXT:    vmerge.vvm v19, v19, v20, v0
+; CHECK-NEXT:    vrgather.vv v20, v15, v13
+; CHECK-NEXT:    vrgather.vv v15, v16, v13
+; CHECK-NEXT:    vmerge.vvm v15, v20, v15, v0
+; CHECK-NEXT:    vrgather.vv v16, v17, v12
+; CHECK-NEXT:    vrgather.vv v20, v18, v12
+; CHECK-NEXT:    vmerge.vvm v12, v16, v20, v0
+; CHECK-NEXT:    vrgather.vv v16, v17, v13
+; CHECK-NEXT:    vrgather.vv v17, v18, v13
+; CHECK-NEXT:    vmerge.vvm v10, v16, v17, v0
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
-; CHECK-NEXT:    vluxei64.v v30, (a3), v2
-; CHECK-NEXT:    vrgather.vv v9, v12, v28
-; CHECK-NEXT:    vrgather.vv v10, v29, v28
-; CHECK-NEXT:    vmv1r.v v0, v26
-; CHECK-NEXT:    vmerge.vvm v9, v9, v10, v0
-; CHECK-NEXT:    vxor.vv v30, v9, v30
-; CHECK-NEXT:    vsuxei64.v v30, (s0), v2
+; CHECK-NEXT:    vluxei64.v v13, (a3), v2
+; CHECK-NEXT:    vrgather.vv v16, v19, v11
+; CHECK-NEXT:    vrgather.vv v17, v12, v11
+; CHECK-NEXT:    vmv1r.v v0, v9
+; CHECK-NEXT:    vmerge.vvm v16, v16, v17, v0
+; CHECK-NEXT:    vxor.vv v13, v16, v13
+; CHECK-NEXT:    vsuxei64.v v13, (s0), v2
 ; CHECK-NEXT:    addi a3, a1, 112
-; CHECK-NEXT:    vluxei64.v v30, (a3), v2
-; CHECK-NEXT:    vrgather.vv v9, v8, v28
-; CHECK-NEXT:    vrgather.vv v10, v27, v28
-; CHECK-NEXT:    vmerge.vvm v28, v9, v10, v0
-; CHECK-NEXT:    vxor.vv v28, v28, v30
+; CHECK-NEXT:    vluxei64.v v13, (a3), v2
+; CHECK-NEXT:    vrgather.vv v16, v15, v11
+; CHECK-NEXT:    vrgather.vv v17, v10, v11
+; CHECK-NEXT:    vmerge.vvm v11, v16, v17, v0
+; CHECK-NEXT:    vxor.vv v11, v11, v13
 ; CHECK-NEXT:    addi a3, a2, 112
-; CHECK-NEXT:    vsuxei64.v v28, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v11, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 176
-; CHECK-NEXT:    vluxei64.v v28, (a3), v2
-; CHECK-NEXT:    vrgather.vv v30, v12, v31
-; CHECK-NEXT:    vrgather.vv v9, v29, v31
-; CHECK-NEXT:    vmerge.vvm v29, v30, v9, v0
-; CHECK-NEXT:    vxor.vv v28, v29, v28
+; CHECK-NEXT:    vluxei64.v v11, (a3), v2
+; CHECK-NEXT:    vrgather.vv v13, v19, v14
+; CHECK-NEXT:    vrgather.vv v16, v12, v14
+; CHECK-NEXT:    vmerge.vvm v12, v13, v16, v0
+; CHECK-NEXT:    vxor.vv v11, v12, v11
 ; CHECK-NEXT:    addi a3, a2, 176
-; CHECK-NEXT:    vsuxei64.v v28, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v11, (a3), v2
 ; CHECK-NEXT:    addi a3, a1, 240
-; CHECK-NEXT:    vluxei64.v v28, (a3), v2
-; CHECK-NEXT:    vrgather.vv v29, v8, v31
-; CHECK-NEXT:    vrgather.vv v30, v27, v31
-; CHECK-NEXT:    vmerge.vvm v26, v29, v30, v0
-; CHECK-NEXT:    vxor.vv v26, v26, v28
+; CHECK-NEXT:    vluxei64.v v11, (a3), v2
+; CHECK-NEXT:    vrgather.vv v12, v15, v14
+; CHECK-NEXT:    vrgather.vv v13, v10, v14
+; CHECK-NEXT:    vmerge.vvm v9, v12, v13, v0
+; CHECK-NEXT:    vxor.vv v9, v9, v11
 ; CHECK-NEXT:    addi a3, a2, 240
-; CHECK-NEXT:    vsuxei64.v v26, (a3), v2
+; CHECK-NEXT:    vsuxei64.v v9, (a3), v2
 ; CHECK-NEXT:    slli a3, s9, 7
 ; CHECK-NEXT:    subw s11, s11, a3
 ; CHECK-NEXT:    add a2, a2, a3

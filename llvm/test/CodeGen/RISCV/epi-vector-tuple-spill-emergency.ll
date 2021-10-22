@@ -23,7 +23,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    sd s10, 80(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    sd s11, 72(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
-; CHECK-NEXT:    slli a7, a1, 2
+; CHECK-NEXT:    slli a7, a1, 1
 ; CHECK-NEXT:    add a1, a1, a7
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    bge a4, a5, .LBB0_3
@@ -32,11 +32,11 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    addi a2, zero, 2
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
-; CHECK-NEXT:    vid.v v25
-; CHECK-NEXT:    vand.vi v25, v25, 1
+; CHECK-NEXT:    vid.v v8
+; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vand.vi v25, v25, 1
-; CHECK-NEXT:    vmsne.vi v0, v25, 0
+; CHECK-NEXT:    vand.vi v8, v8, 1
+; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    sub s10, a5, a4
 ; CHECK-NEXT:    addi a2, zero, 24
 ; CHECK-NEXT:    mul a2, a3, a2
@@ -82,338 +82,313 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    addi a2, zero, 2
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
-; CHECK-NEXT:    vle64.v v25, (a1)
+; CHECK-NEXT:    vle64.v v8, (a1)
 ; CHECK-NEXT:    addi a2, a1, 16
-; CHECK-NEXT:    vle64.v v26, (a2)
-; CHECK-NEXT:    vtrn.vv v3, v25, v25
-; CHECK-NEXT:    vfmul.vv v25, v26, v3
-; CHECK-NEXT:    vtrn.vv v1, v26, v26
-; CHECK-NEXT:    vfneg.v v26, v26, v0.t
-; CHECK-NEXT:    vtrn.vv v5, v26, v26
+; CHECK-NEXT:    vle64.v v9, (a2)
+; CHECK-NEXT:    vtrn.vv v3, v8, v8
+; CHECK-NEXT:    vfmul.vv v8, v9, v3
+; CHECK-NEXT:    vtrn.vv v1, v9, v9
+; CHECK-NEXT:    vfneg.v v9, v9, v0.t
+; CHECK-NEXT:    vtrn.vv v5, v9, v9
 ; CHECK-NEXT:    addi a2, a1, 48
-; CHECK-NEXT:    vle64.v v28, (a2)
-; CHECK-NEXT:    vtrn.vv v5, v6, v26
-; CHECK-NEXT:    vmv1r.v v27, v25
-; CHECK-NEXT:    vfmacc.vv v27, v4, v5
-; CHECK-NEXT:    vfnmsac.vv v25, v4, v5
-; CHECK-NEXT:    vfmul.vv v26, v28, v3
-; CHECK-NEXT:    vtrn.vv v5, v28, v28
-; CHECK-NEXT:    vfneg.v v28, v28, v0.t
-; CHECK-NEXT:    addi a2, a1, 32
-; CHECK-NEXT:    vle64.v v29, (a2)
-; CHECK-NEXT:    vtrn.vv v7, v28, v28
-; CHECK-NEXT:    vtrn.vv v7, v8, v28
-; CHECK-NEXT:    vfnmsac.vv v26, v4, v7
-; CHECK-NEXT:    vfmul.vv v31, v29, v3
-; CHECK-NEXT:    vfmul.vv v8, v29, v1
-; CHECK-NEXT:    vtrn.vv v9, v27, v27
-; CHECK-NEXT:    vfmul.vv v11, v29, v9
-; CHECK-NEXT:    vtrn.vv v19, v25, v25
-; CHECK-NEXT:    vfmul.vv v18, v29, v19
-; CHECK-NEXT:    vtrn.vv v21, v29, v29
-; CHECK-NEXT:    vfneg.v v29, v29, v0.t
-; CHECK-NEXT:    vtrn.vv v12, v29, v29
-; CHECK-NEXT:    vtrn.vv v12, v13, v29
-; CHECK-NEXT:    vmv1r.v v25, v31
-; CHECK-NEXT:    vfnmsac.vv v25, v4, v12
-; CHECK-NEXT:    vmv1r.v v14, v8
-; CHECK-NEXT:    addi a2, sp, 72
-; CHECK-NEXT:    csrr a3, vlenb
-; CHECK-NEXT:    vs1r.v v1, (a2) # Unknown-size Folded Spill
-; CHECK-NEXT:    add a2, a2, a3
-; CHECK-NEXT:    vs1r.v v2, (a2) # Unknown-size Folded Spill
-; CHECK-NEXT:    vfnmsac.vv v14, v2, v12
-; CHECK-NEXT:    vfmacc.vv v31, v4, v12
-; CHECK-NEXT:    vfmacc.vv v8, v2, v12
-; CHECK-NEXT:    vmv1r.v v23, v11
-; CHECK-NEXT:    vfnmsac.vv v23, v10, v12
-; CHECK-NEXT:    vmv1r.v v16, v18
-; CHECK-NEXT:    vfnmsac.vv v16, v20, v12
-; CHECK-NEXT:    vfmacc.vv v18, v20, v12
-; CHECK-NEXT:    add t5, a0, s9
-; CHECK-NEXT:    vle64.v v27, (t5)
-; CHECK-NEXT:    vfmacc.vv v11, v10, v12
-; CHECK-NEXT:    vle64.v v28, (a0)
-; CHECK-NEXT:    csrr a2, vlenb
-; CHECK-NEXT:    slli a2, a2, 2
-; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 72
-; CHECK-NEXT:    vs1r.v v28, (a2) # Unknown-size Folded Spill
-; CHECK-NEXT:    vtrn.vv v12, v25, v25
-; CHECK-NEXT:    vfmul.vv v29, v27, v12
-; CHECK-NEXT:    vfneg.v v27, v27, v0.t
-; CHECK-NEXT:    vtrn.vv v24, v27, v27
-; CHECK-NEXT:    add ra, a0, s8
-; CHECK-NEXT:    vle64.v v15, (ra)
-; CHECK-NEXT:    vtrn.vv v24, v25, v27
-; CHECK-NEXT:    vfnmsac.vv v29, v13, v24
-; CHECK-NEXT:    vfadd.vv v28, v28, v29
-; CHECK-NEXT:    vfmul.vv v30, v15, v9
-; CHECK-NEXT:    vfneg.v v15, v15, v0.t
-; CHECK-NEXT:    vtrn.vv v12, v15, v15
-; CHECK-NEXT:    add s0, a0, s7
-; CHECK-NEXT:    vle64.v v27, (s0)
-; CHECK-NEXT:    vtrn.vv v12, v13, v15
-; CHECK-NEXT:    vfnmsac.vv v30, v10, v12
-; CHECK-NEXT:    vtrn.vv v9, v8, v8
-; CHECK-NEXT:    vfmul.vv v8, v27, v9
-; CHECK-NEXT:    vfneg.v v27, v27, v0.t
-; CHECK-NEXT:    vtrn.vv v12, v27, v27
-; CHECK-NEXT:    vtrn.vv v12, v13, v27
-; CHECK-NEXT:    add a7, a0, s6
-; CHECK-NEXT:    vle64.v v15, (a7)
-; CHECK-NEXT:    vfnmsac.vv v8, v10, v12
-; CHECK-NEXT:    vfadd.vv v27, v30, v8
-; CHECK-NEXT:    vtrn.vv v12, v26, v26
-; CHECK-NEXT:    vfmul.vv v9, v15, v12
-; CHECK-NEXT:    vfneg.v v15, v15, v0.t
-; CHECK-NEXT:    vtrn.vv v24, v15, v15
-; CHECK-NEXT:    add t0, a0, s5
-; CHECK-NEXT:    vle64.v v26, (t0)
-; CHECK-NEXT:    vtrn.vv v24, v25, v15
-; CHECK-NEXT:    vfnmsac.vv v9, v13, v24
-; CHECK-NEXT:    vtrn.vv v12, v31, v31
-; CHECK-NEXT:    vfmul.vv v10, v26, v12
-; CHECK-NEXT:    vfneg.v v26, v26, v0.t
-; CHECK-NEXT:    vtrn.vv v24, v26, v26
-; CHECK-NEXT:    add t2, a0, s4
-; CHECK-NEXT:    vle64.v v31, (t2)
-; CHECK-NEXT:    vtrn.vv v24, v25, v26
-; CHECK-NEXT:    vfnmsac.vv v10, v13, v24
-; CHECK-NEXT:    vtrn.vv v14, v14, v14
-; CHECK-NEXT:    vfmul.vv v13, v31, v14
-; CHECK-NEXT:    vfneg.v v31, v31, v0.t
-; CHECK-NEXT:    add t1, a0, s3
-; CHECK-NEXT:    vle64.v v25, (t1)
-; CHECK-NEXT:    vtrn.vv v1, v31, v31
-; CHECK-NEXT:    vtrn.vv v1, v2, v31
-; CHECK-NEXT:    vfnmsac.vv v13, v15, v1
-; CHECK-NEXT:    vfmul.vv v14, v25, v19
-; CHECK-NEXT:    vfneg.v v25, v25, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v25, v25
-; CHECK-NEXT:    vtrn.vv v1, v2, v25
-; CHECK-NEXT:    add s11, a0, s2
-; CHECK-NEXT:    vle64.v v25, (s11)
-; CHECK-NEXT:    vfnmsac.vv v14, v20, v1
-; CHECK-NEXT:    vfadd.vv v26, v9, v13
-; CHECK-NEXT:    vfadd.vv v7, v14, v10
-; CHECK-NEXT:    vfmul.vv v15, v25, v3
-; CHECK-NEXT:    vfneg.v v25, v25, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v25, v25
-; CHECK-NEXT:    add a5, a0, t6
-; CHECK-NEXT:    vle64.v v12, (a5)
-; CHECK-NEXT:    vtrn.vv v1, v2, v25
-; CHECK-NEXT:    vfnmsac.vv v15, v4, v1
-; CHECK-NEXT:    vtrn.vv v1, v11, v11
-; CHECK-NEXT:    vfmul.vv v17, v12, v1
-; CHECK-NEXT:    vfneg.v v12, v12, v0.t
-; CHECK-NEXT:    ld a2, 16(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    add a3, a0, a2
-; CHECK-NEXT:    vle64.v v25, (a3)
-; CHECK-NEXT:    vtrn.vv v3, v12, v12
-; CHECK-NEXT:    vtrn.vv v3, v4, v12
-; CHECK-NEXT:    vfnmsac.vv v17, v2, v3
-; CHECK-NEXT:    vfmul.vv v19, v25, v21
-; CHECK-NEXT:    vfneg.v v25, v25, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v25, v25
-; CHECK-NEXT:    ld a2, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    add a6, a0, a2
-; CHECK-NEXT:    vle64.v v11, (a6)
-; CHECK-NEXT:    vtrn.vv v1, v2, v25
-; CHECK-NEXT:    vfnmsac.vv v19, v22, v1
-; CHECK-NEXT:    vtrn.vv v1, v23, v23
-; CHECK-NEXT:    vfmul.vv v25, v11, v1
+; CHECK-NEXT:    vle64.v v11, (a2)
+; CHECK-NEXT:    vtrn.vv v5, v6, v9
+; CHECK-NEXT:    vmv1r.v v10, v8
+; CHECK-NEXT:    vfmacc.vv v10, v4, v5
+; CHECK-NEXT:    vfnmsac.vv v8, v4, v5
+; CHECK-NEXT:    vfmul.vv v9, v11, v3
+; CHECK-NEXT:    vtrn.vv v5, v11, v11
 ; CHECK-NEXT:    vfneg.v v11, v11, v0.t
-; CHECK-NEXT:    vtrn.vv v3, v11, v11
-; CHECK-NEXT:    vtrn.vv v3, v4, v11
-; CHECK-NEXT:    vfnmsac.vv v25, v2, v3
-; CHECK-NEXT:    ld a2, 32(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    add a4, a0, a2
-; CHECK-NEXT:    vle64.v v20, (a4)
-; CHECK-NEXT:    vfadd.vv v11, v15, v19
+; CHECK-NEXT:    addi a2, a1, 32
+; CHECK-NEXT:    vle64.v v12, (a2)
+; CHECK-NEXT:    vtrn.vv v13, v11, v11
+; CHECK-NEXT:    vtrn.vv v13, v14, v11
+; CHECK-NEXT:    vfnmsac.vv v9, v4, v13
+; CHECK-NEXT:    vfmul.vv v14, v12, v3
+; CHECK-NEXT:    vfmul.vv v15, v12, v1
+; CHECK-NEXT:    vtrn.vv v16, v10, v10
+; CHECK-NEXT:    vfmul.vv v18, v12, v16
+; CHECK-NEXT:    vtrn.vv v26, v8, v8
+; CHECK-NEXT:    vfmul.vv v25, v12, v26
+; CHECK-NEXT:    vtrn.vv v28, v12, v12
+; CHECK-NEXT:    vfneg.v v12, v12, v0.t
+; CHECK-NEXT:    vtrn.vv v7, v12, v12
+; CHECK-NEXT:    vtrn.vv v7, v8, v12
+; CHECK-NEXT:    vmv1r.v v10, v14
+; CHECK-NEXT:    vfnmsac.vv v10, v4, v7
+; CHECK-NEXT:    vmv1r.v v19, v15
+; CHECK-NEXT:    vfnmsac.vv v19, v2, v7
+; CHECK-NEXT:    vfmacc.vv v14, v4, v7
+; CHECK-NEXT:    vfmacc.vv v15, v2, v7
+; CHECK-NEXT:    vmv1r.v v30, v18
+; CHECK-NEXT:    vfnmsac.vv v30, v17, v7
+; CHECK-NEXT:    vmv1r.v v23, v25
+; CHECK-NEXT:    vfnmsac.vv v23, v27, v7
+; CHECK-NEXT:    vfmacc.vv v25, v27, v7
+; CHECK-NEXT:    add t5, a0, s9
+; CHECK-NEXT:    vle64.v v13, (t5)
+; CHECK-NEXT:    vfmacc.vv v18, v17, v7
+; CHECK-NEXT:    vle64.v v11, (a0)
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    slli a2, a2, 1
 ; CHECK-NEXT:    add a2, a2, sp
 ; CHECK-NEXT:    addi a2, a2, 72
 ; CHECK-NEXT:    vs1r.v v11, (a2) # Unknown-size Folded Spill
-; CHECK-NEXT:    vfadd.vv v31, v25, v17
+; CHECK-NEXT:    vtrn.vv v7, v10, v10
+; CHECK-NEXT:    vfmul.vv v12, v13, v7
+; CHECK-NEXT:    vfneg.v v13, v13, v0.t
+; CHECK-NEXT:    vtrn.vv v20, v13, v13
+; CHECK-NEXT:    add ra, a0, s8
+; CHECK-NEXT:    vle64.v v10, (ra)
+; CHECK-NEXT:    vtrn.vv v20, v21, v13
+; CHECK-NEXT:    vfnmsac.vv v12, v8, v20
+; CHECK-NEXT:    vfadd.vv v31, v11, v12
+; CHECK-NEXT:    vfmul.vv v13, v10, v16
+; CHECK-NEXT:    vfneg.v v10, v10, v0.t
+; CHECK-NEXT:    vtrn.vv v20, v10, v10
+; CHECK-NEXT:    add s0, a0, s7
+; CHECK-NEXT:    vle64.v v22, (s0)
+; CHECK-NEXT:    vtrn.vv v20, v21, v10
+; CHECK-NEXT:    vfnmsac.vv v13, v17, v20
+; CHECK-NEXT:    vtrn.vv v16, v15, v15
+; CHECK-NEXT:    vfmul.vv v15, v22, v16
+; CHECK-NEXT:    vfneg.v v22, v22, v0.t
+; CHECK-NEXT:    vtrn.vv v20, v22, v22
+; CHECK-NEXT:    vtrn.vv v20, v21, v22
+; CHECK-NEXT:    add a7, a0, s6
+; CHECK-NEXT:    vle64.v v22, (a7)
+; CHECK-NEXT:    vfnmsac.vv v15, v17, v20
+; CHECK-NEXT:    vfadd.vv v10, v13, v15
+; CHECK-NEXT:    vtrn.vv v20, v9, v9
+; CHECK-NEXT:    vfmul.vv v16, v22, v20
+; CHECK-NEXT:    vfneg.v v22, v22, v0.t
+; CHECK-NEXT:    vtrn.vv v7, v22, v22
+; CHECK-NEXT:    add t0, a0, s5
+; CHECK-NEXT:    vle64.v v9, (t0)
+; CHECK-NEXT:    vtrn.vv v7, v8, v22
+; CHECK-NEXT:    vfnmsac.vv v16, v21, v7
+; CHECK-NEXT:    vtrn.vv v7, v14, v14
+; CHECK-NEXT:    vfmul.vv v17, v9, v7
+; CHECK-NEXT:    vfneg.v v9, v9, v0.t
+; CHECK-NEXT:    vtrn.vv v20, v9, v9
+; CHECK-NEXT:    add t2, a0, s4
+; CHECK-NEXT:    vle64.v v14, (t2)
+; CHECK-NEXT:    vtrn.vv v20, v21, v9
+; CHECK-NEXT:    vfnmsac.vv v17, v8, v20
+; CHECK-NEXT:    vtrn.vv v7, v19, v19
+; CHECK-NEXT:    vfmul.vv v20, v14, v7
+; CHECK-NEXT:    vfneg.v v14, v14, v0.t
+; CHECK-NEXT:    add t1, a0, s3
+; CHECK-NEXT:    vle64.v v9, (t1)
+; CHECK-NEXT:    vtrn.vv v21, v14, v14
+; CHECK-NEXT:    vtrn.vv v21, v22, v14
+; CHECK-NEXT:    vfnmsac.vv v20, v8, v21
+; CHECK-NEXT:    vfmul.vv v21, v9, v26
+; CHECK-NEXT:    vfneg.v v9, v9, v0.t
+; CHECK-NEXT:    vtrn.vv v7, v9, v9
+; CHECK-NEXT:    vtrn.vv v7, v8, v9
+; CHECK-NEXT:    add s11, a0, s2
+; CHECK-NEXT:    vle64.v v19, (s11)
+; CHECK-NEXT:    vfnmsac.vv v21, v27, v7
+; CHECK-NEXT:    vfadd.vv v14, v16, v20
+; CHECK-NEXT:    vfadd.vv v9, v21, v17
+; CHECK-NEXT:    vfmul.vv v22, v19, v3
+; CHECK-NEXT:    vfneg.v v19, v19, v0.t
+; CHECK-NEXT:    vtrn.vv v7, v19, v19
+; CHECK-NEXT:    add a5, a0, t6
+; CHECK-NEXT:    vle64.v v26, (a5)
+; CHECK-NEXT:    vtrn.vv v7, v8, v19
+; CHECK-NEXT:    vfnmsac.vv v22, v4, v7
+; CHECK-NEXT:    vtrn.vv v3, v18, v18
+; CHECK-NEXT:    vfmul.vv v24, v26, v3
+; CHECK-NEXT:    vfneg.v v26, v26, v0.t
+; CHECK-NEXT:    ld a2, 16(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    add a3, a0, a2
+; CHECK-NEXT:    vle64.v v8, (a3)
+; CHECK-NEXT:    vtrn.vv v18, v26, v26
+; CHECK-NEXT:    vtrn.vv v18, v19, v26
+; CHECK-NEXT:    vfnmsac.vv v24, v4, v18
+; CHECK-NEXT:    vfmul.vv v26, v8, v28
+; CHECK-NEXT:    vfneg.v v8, v8, v0.t
+; CHECK-NEXT:    vtrn.vv v3, v8, v8
+; CHECK-NEXT:    ld a2, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    add a6, a0, a2
+; CHECK-NEXT:    vle64.v v18, (a6)
+; CHECK-NEXT:    vtrn.vv v3, v4, v8
+; CHECK-NEXT:    vfnmsac.vv v26, v29, v3
+; CHECK-NEXT:    vtrn.vv v3, v30, v30
+; CHECK-NEXT:    vfmul.vv v8, v18, v3
+; CHECK-NEXT:    vfneg.v v18, v18, v0.t
+; CHECK-NEXT:    vtrn.vv v27, v18, v18
+; CHECK-NEXT:    vtrn.vv v18, v28, v18
+; CHECK-NEXT:    vfnmsac.vv v8, v4, v18
+; CHECK-NEXT:    ld a2, 32(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    add a4, a0, a2
+; CHECK-NEXT:    vle64.v v27, (a4)
+; CHECK-NEXT:    vfadd.vv v19, v22, v26
 ; CHECK-NEXT:    csrr a2, vlenb
-; CHECK-NEXT:    slli t3, a2, 1
-; CHECK-NEXT:    add a2, a2, t3
 ; CHECK-NEXT:    add a2, a2, sp
 ; CHECK-NEXT:    addi a2, a2, 72
-; CHECK-NEXT:    vs1r.v v31, (a2) # Unknown-size Folded Spill
-; CHECK-NEXT:    vfsub.vv v21, v11, v31
-; CHECK-NEXT:    vfmul.vv v22, v20, v5
-; CHECK-NEXT:    vfneg.v v20, v20, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v20, v20
+; CHECK-NEXT:    vs1r.v v19, (a2) # Unknown-size Folded Spill
+; CHECK-NEXT:    vfadd.vv v18, v8, v24
+; CHECK-NEXT:    addi a2, sp, 72
+; CHECK-NEXT:    vs1r.v v18, (a2) # Unknown-size Folded Spill
+; CHECK-NEXT:    vfsub.vv v28, v19, v18
+; CHECK-NEXT:    vfmul.vv v29, v27, v5
+; CHECK-NEXT:    vfneg.v v27, v27, v0.t
+; CHECK-NEXT:    vtrn.vv v3, v27, v27
 ; CHECK-NEXT:    ld a2, 40(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    add t3, a0, a2
-; CHECK-NEXT:    vle64.v v23, (t3)
-; CHECK-NEXT:    vtrn.vv v1, v2, v20
-; CHECK-NEXT:    vfnmsac.vv v22, v6, v1
-; CHECK-NEXT:    vtrn.vv v1, v18, v18
-; CHECK-NEXT:    vfmul.vv v18, v23, v1
-; CHECK-NEXT:    vfneg.v v23, v23, v0.t
-; CHECK-NEXT:    vtrn.vv v3, v23, v23
+; CHECK-NEXT:    vle64.v v30, (t3)
+; CHECK-NEXT:    vtrn.vv v3, v4, v27
+; CHECK-NEXT:    vfnmsac.vv v29, v6, v3
+; CHECK-NEXT:    vtrn.vv v3, v25, v25
+; CHECK-NEXT:    vfmul.vv v25, v30, v3
+; CHECK-NEXT:    vfneg.v v30, v30, v0.t
+; CHECK-NEXT:    vtrn.vv v5, v30, v30
 ; CHECK-NEXT:    ld a2, 48(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    add s1, a0, a2
-; CHECK-NEXT:    vle64.v v20, (s1)
-; CHECK-NEXT:    vtrn.vv v3, v4, v23
-; CHECK-NEXT:    vfnmsac.vv v18, v2, v3
-; CHECK-NEXT:    vtrn.vv v1, v16, v16
-; CHECK-NEXT:    vfmul.vv v16, v20, v1
-; CHECK-NEXT:    vfneg.v v20, v20, v0.t
+; CHECK-NEXT:    vle64.v v27, (s1)
+; CHECK-NEXT:    vtrn.vv v5, v6, v30
+; CHECK-NEXT:    vfnmsac.vv v25, v4, v5
+; CHECK-NEXT:    vtrn.vv v3, v23, v23
+; CHECK-NEXT:    vfmul.vv v23, v27, v3
+; CHECK-NEXT:    vfneg.v v27, v27, v0.t
 ; CHECK-NEXT:    ld a2, 64(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    add t4, a0, a2
-; CHECK-NEXT:    vle64.v v23, (t4)
-; CHECK-NEXT:    vtrn.vv v3, v20, v20
-; CHECK-NEXT:    vtrn.vv v3, v4, v20
-; CHECK-NEXT:    vfnmsac.vv v16, v2, v3
-; CHECK-NEXT:    addi a2, sp, 72
-; CHECK-NEXT:    sd a1, 8(sp)
-; CHECK-NEXT:    csrr a1, vlenb
-; CHECK-NEXT:    vl1r.v v3, (a2) # Unknown-size Folded Reload
-; CHECK-NEXT:    add a2, a2, a1
-; CHECK-NEXT:    vl1r.v v4, (a2) # Unknown-size Folded Reload
-; CHECK-NEXT:    ld a1, 8(sp)
-; CHECK-NEXT:    vfmul.vv v20, v23, v3
-; CHECK-NEXT:    vfneg.v v23, v23, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v23, v23
-; CHECK-NEXT:    vtrn.vv v1, v2, v23
-; CHECK-NEXT:    vfnmsac.vv v20, v4, v1
-; CHECK-NEXT:    vfadd.vv v23, v22, v16
-; CHECK-NEXT:    vfadd.vv v24, v20, v18
-; CHECK-NEXT:    vfsub.vv v1, v23, v24
-; CHECK-NEXT:    vfsub.vv v2, v28, v27
-; CHECK-NEXT:    vmv1r.v v12, v27
-; CHECK-NEXT:    vmv1r.v v11, v28
-; CHECK-NEXT:    vfadd.vv v3, v21, v1
-; CHECK-NEXT:    vmv1r.v v4, v2
-; CHECK-NEXT:    vfnmsac.vf v4, ft1, v3
-; CHECK-NEXT:    vfsub.vv v5, v26, v7
-; CHECK-NEXT:    vmv1r.v v31, v26
-; CHECK-NEXT:    vmv1r.v v26, v7
-; CHECK-NEXT:    vfsub.vv v21, v1, v21
-; CHECK-NEXT:    vmv1r.v v1, v5
-; CHECK-NEXT:    vfnmsac.vf v1, ft1, v21
-; CHECK-NEXT:    vfneg.v v1, v1, v0.t
-; CHECK-NEXT:    vtrn.vv v6, v1, v1
-; CHECK-NEXT:    vtrn.vv v6, v7, v1
-; CHECK-NEXT:    vfsub.vv v1, v4, v6
-; CHECK-NEXT:    vse64.v v1, (t2)
-; CHECK-NEXT:    vfmacc.vf v2, ft1, v3
-; CHECK-NEXT:    vfmacc.vf v5, ft1, v21
-; CHECK-NEXT:    vfneg.v v5, v5, v0.t
-; CHECK-NEXT:    vtrn.vv v27, v5, v5
-; CHECK-NEXT:    vtrn.vv v27, v28, v5
-; CHECK-NEXT:    vfadd.vv v21, v2, v27
-; CHECK-NEXT:    vse64.v v21, (t1)
-; CHECK-NEXT:    vfadd.vv v21, v4, v6
-; CHECK-NEXT:    vse64.v v21, (t0)
-; CHECK-NEXT:    vfsub.vv v27, v2, v27
-; CHECK-NEXT:    vse64.v v27, (a7)
-; CHECK-NEXT:    csrr a2, vlenb
-; CHECK-NEXT:    slli a2, a2, 2
-; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 72
-; CHECK-NEXT:    vl1r.v v27, (a2) # Unknown-size Folded Reload
-; CHECK-NEXT:    vfsub.vv v28, v27, v29
-; CHECK-NEXT:    vfsub.vv v27, v30, v8
-; CHECK-NEXT:    vfsub.vv v29, v14, v10
-; CHECK-NEXT:    vfsub.vv v30, v9, v13
-; CHECK-NEXT:    vfadd.vv v8, v29, v30
-; CHECK-NEXT:    vfsub.vv v29, v30, v29
-; CHECK-NEXT:    vfsub.vv v30, v15, v19
-; CHECK-NEXT:    vfsub.vv v25, v25, v17
-; CHECK-NEXT:    vmv1r.v v9, v30
-; CHECK-NEXT:    vfnmsac.vf v9, ft0, v25
-; CHECK-NEXT:    vfmacc.vf v25, ft0, v30
-; CHECK-NEXT:    vfsub.vv v30, v22, v16
-; CHECK-NEXT:    vfsub.vv v10, v18, v20
-; CHECK-NEXT:    vmv1r.v v13, v30
-; CHECK-NEXT:    vfnmsac.vf v13, ft0, v10
-; CHECK-NEXT:    vfmacc.vf v10, ft0, v30
-; CHECK-NEXT:    vmv1r.v v30, v28
-; CHECK-NEXT:    vfnmsac.vf v30, ft1, v8
-; CHECK-NEXT:    vfadd.vv v14, v25, v10
-; CHECK-NEXT:    vmv1r.v v15, v30
-; CHECK-NEXT:    vfnmsac.vf v15, ft2, v14
-; CHECK-NEXT:    vmv1r.v v16, v27
-; CHECK-NEXT:    vfmacc.vf v16, ft1, v29
-; CHECK-NEXT:    vfsub.vv v17, v13, v9
-; CHECK-NEXT:    vmv1r.v v18, v16
-; CHECK-NEXT:    vfnmsac.vf v18, ft2, v17
-; CHECK-NEXT:    vfneg.v v18, v18, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v18, v18
-; CHECK-NEXT:    vtrn.vv v1, v2, v18
-; CHECK-NEXT:    vfsub.vv v18, v15, v1
-; CHECK-NEXT:    vse64.v v18, (a6)
-; CHECK-NEXT:    vfmacc.vf v30, ft2, v14
-; CHECK-NEXT:    vfmacc.vf v16, ft2, v17
-; CHECK-NEXT:    vfneg.v v16, v16, v0.t
-; CHECK-NEXT:    vtrn.vv v3, v16, v16
-; CHECK-NEXT:    vtrn.vv v3, v4, v16
-; CHECK-NEXT:    vfsub.vv v14, v30, v3
-; CHECK-NEXT:    vse64.v v14, (a5)
-; CHECK-NEXT:    vfadd.vv v14, v15, v1
-; CHECK-NEXT:    vse64.v v14, (t3)
-; CHECK-NEXT:    vfadd.vv v30, v30, v3
-; CHECK-NEXT:    vse64.v v30, (t4)
-; CHECK-NEXT:    vfadd.vv v30, v11, v12
-; CHECK-NEXT:    vfadd.vv v26, v26, v31
-; CHECK-NEXT:    vfadd.vv v31, v30, v26
-; CHECK-NEXT:    csrr a2, vlenb
-; CHECK-NEXT:    slli a5, a2, 1
-; CHECK-NEXT:    add a2, a2, a5
-; CHECK-NEXT:    add a2, a2, sp
-; CHECK-NEXT:    addi a2, a2, 72
-; CHECK-NEXT:    vl1r.v v11, (a2) # Unknown-size Folded Reload
+; CHECK-NEXT:    vle64.v v30, (t4)
+; CHECK-NEXT:    vtrn.vv v5, v27, v27
+; CHECK-NEXT:    vtrn.vv v5, v6, v27
+; CHECK-NEXT:    vfnmsac.vv v23, v4, v5
+; CHECK-NEXT:    vfmul.vv v27, v30, v1
+; CHECK-NEXT:    vfneg.v v30, v30, v0.t
+; CHECK-NEXT:    vtrn.vv v3, v30, v30
+; CHECK-NEXT:    vtrn.vv v3, v4, v30
+; CHECK-NEXT:    vfnmsac.vv v27, v2, v3
+; CHECK-NEXT:    vfadd.vv v30, v29, v23
+; CHECK-NEXT:    vfadd.vv v1, v27, v25
+; CHECK-NEXT:    vfsub.vv v2, v30, v1
+; CHECK-NEXT:    vfsub.vv v3, v31, v10
+; CHECK-NEXT:    vmv1r.v v7, v10
+; CHECK-NEXT:    vfadd.vv v4, v28, v2
+; CHECK-NEXT:    vmv1r.v v5, v3
+; CHECK-NEXT:    vfnmsac.vf v5, ft1, v4
+; CHECK-NEXT:    vfsub.vv v6, v14, v9
+; CHECK-NEXT:    vfsub.vv v28, v2, v28
+; CHECK-NEXT:    vmv1r.v v2, v6
+; CHECK-NEXT:    vfnmsac.vf v2, ft1, v28
+; CHECK-NEXT:    vfneg.v v2, v2, v0.t
+; CHECK-NEXT:    vtrn.vv v10, v2, v2
+; CHECK-NEXT:    vtrn.vv v10, v11, v2
+; CHECK-NEXT:    vfsub.vv v2, v5, v10
+; CHECK-NEXT:    vse64.v v2, (t2)
+; CHECK-NEXT:    vfmacc.vf v3, ft1, v4
+; CHECK-NEXT:    vfmacc.vf v6, ft1, v28
+; CHECK-NEXT:    vfneg.v v6, v6, v0.t
+; CHECK-NEXT:    vtrn.vv v18, v6, v6
+; CHECK-NEXT:    vtrn.vv v18, v19, v6
+; CHECK-NEXT:    vfadd.vv v28, v3, v18
+; CHECK-NEXT:    vse64.v v28, (t1)
+; CHECK-NEXT:    vfadd.vv v10, v5, v10
+; CHECK-NEXT:    vse64.v v10, (t0)
+; CHECK-NEXT:    vfsub.vv v10, v3, v18
+; CHECK-NEXT:    vse64.v v10, (a7)
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    slli a2, a2, 1
 ; CHECK-NEXT:    add a2, a2, sp
 ; CHECK-NEXT:    addi a2, a2, 72
-; CHECK-NEXT:    vl1r.v v12, (a2) # Unknown-size Folded Reload
-; CHECK-NEXT:    vfadd.vv v11, v12, v11
-; CHECK-NEXT:    vfadd.vv v12, v23, v24
-; CHECK-NEXT:    vfadd.vv v14, v11, v12
-; CHECK-NEXT:    vfsub.vv v15, v31, v14
-; CHECK-NEXT:    vse64.v v15, (t5)
-; CHECK-NEXT:    vfsub.vv v26, v30, v26
-; CHECK-NEXT:    vfsub.vv v30, v12, v11
-; CHECK-NEXT:    vfneg.v v30, v30, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v30, v30
-; CHECK-NEXT:    vtrn.vv v1, v2, v30
-; CHECK-NEXT:    vfadd.vv v30, v26, v1
-; CHECK-NEXT:    vse64.v v30, (ra)
-; CHECK-NEXT:    vfadd.vv v30, v31, v14
-; CHECK-NEXT:    vse64.v v30, (a0)
-; CHECK-NEXT:    vfsub.vv v26, v26, v1
-; CHECK-NEXT:    vse64.v v26, (s0)
-; CHECK-NEXT:    vfmacc.vf v28, ft1, v8
-; CHECK-NEXT:    vfadd.vv v26, v9, v13
-; CHECK-NEXT:    vmv1r.v v30, v28
-; CHECK-NEXT:    vfnmsac.vf v30, ft2, v26
-; CHECK-NEXT:    vfnmsac.vf v27, ft1, v29
-; CHECK-NEXT:    vfsub.vv v25, v25, v10
-; CHECK-NEXT:    vmv1r.v v29, v27
-; CHECK-NEXT:    vfnmsac.vf v29, ft2, v25
-; CHECK-NEXT:    vfneg.v v29, v29, v0.t
-; CHECK-NEXT:    vtrn.vv v1, v29, v29
-; CHECK-NEXT:    vtrn.vv v1, v2, v29
-; CHECK-NEXT:    vfsub.vv v29, v30, v1
-; CHECK-NEXT:    vse64.v v29, (a3)
-; CHECK-NEXT:    vfmacc.vf v28, ft2, v26
-; CHECK-NEXT:    vfmacc.vf v27, ft2, v25
-; CHECK-NEXT:    vfneg.v v27, v27, v0.t
-; CHECK-NEXT:    vtrn.vv v3, v27, v27
-; CHECK-NEXT:    vtrn.vv v3, v4, v27
-; CHECK-NEXT:    vfadd.vv v25, v28, v3
-; CHECK-NEXT:    vse64.v v25, (a4)
-; CHECK-NEXT:    vfadd.vv v25, v30, v1
-; CHECK-NEXT:    vse64.v v25, (s1)
-; CHECK-NEXT:    vfsub.vv v25, v28, v3
-; CHECK-NEXT:    vse64.v v25, (s11)
+; CHECK-NEXT:    vl1r.v v10, (a2) # Unknown-size Folded Reload
+; CHECK-NEXT:    vfsub.vv v11, v10, v12
+; CHECK-NEXT:    vfsub.vv v10, v13, v15
+; CHECK-NEXT:    vfsub.vv v12, v21, v17
+; CHECK-NEXT:    vfsub.vv v13, v16, v20
+; CHECK-NEXT:    vfadd.vv v15, v12, v13
+; CHECK-NEXT:    vfsub.vv v12, v13, v12
+; CHECK-NEXT:    vfsub.vv v13, v22, v26
+; CHECK-NEXT:    vfsub.vv v8, v8, v24
+; CHECK-NEXT:    vmv1r.v v16, v13
+; CHECK-NEXT:    vfnmsac.vf v16, ft0, v8
+; CHECK-NEXT:    vfmacc.vf v8, ft0, v13
+; CHECK-NEXT:    vfsub.vv v13, v29, v23
+; CHECK-NEXT:    vfsub.vv v17, v25, v27
+; CHECK-NEXT:    vmv1r.v v18, v13
+; CHECK-NEXT:    vfnmsac.vf v18, ft0, v17
+; CHECK-NEXT:    vfmacc.vf v17, ft0, v13
+; CHECK-NEXT:    vmv1r.v v13, v11
+; CHECK-NEXT:    vfnmsac.vf v13, ft1, v15
+; CHECK-NEXT:    vfadd.vv v19, v8, v17
+; CHECK-NEXT:    vmv1r.v v20, v13
+; CHECK-NEXT:    vfnmsac.vf v20, ft2, v19
+; CHECK-NEXT:    vmv1r.v v21, v10
+; CHECK-NEXT:    vfmacc.vf v21, ft1, v12
+; CHECK-NEXT:    vfsub.vv v22, v18, v16
+; CHECK-NEXT:    vmv1r.v v23, v21
+; CHECK-NEXT:    vfnmsac.vf v23, ft2, v22
+; CHECK-NEXT:    vfneg.v v23, v23, v0.t
+; CHECK-NEXT:    vtrn.vv v2, v23, v23
+; CHECK-NEXT:    vtrn.vv v2, v3, v23
+; CHECK-NEXT:    vfsub.vv v23, v20, v2
+; CHECK-NEXT:    vse64.v v23, (a6)
+; CHECK-NEXT:    vfmacc.vf v13, ft2, v19
+; CHECK-NEXT:    vfmacc.vf v21, ft2, v22
+; CHECK-NEXT:    vfneg.v v21, v21, v0.t
+; CHECK-NEXT:    vtrn.vv v4, v21, v21
+; CHECK-NEXT:    vtrn.vv v4, v5, v21
+; CHECK-NEXT:    vfsub.vv v19, v13, v4
+; CHECK-NEXT:    vse64.v v19, (a5)
+; CHECK-NEXT:    vfadd.vv v19, v20, v2
+; CHECK-NEXT:    vse64.v v19, (t3)
+; CHECK-NEXT:    vfadd.vv v13, v13, v4
+; CHECK-NEXT:    vse64.v v13, (t4)
+; CHECK-NEXT:    vfadd.vv v13, v31, v7
+; CHECK-NEXT:    vfadd.vv v14, v9, v14
+; CHECK-NEXT:    vfadd.vv v19, v13, v14
+; CHECK-NEXT:    csrr a2, vlenb
+; CHECK-NEXT:    add a2, a2, sp
+; CHECK-NEXT:    addi a2, a2, 72
+; CHECK-NEXT:    vl1r.v v9, (a2) # Unknown-size Folded Reload
+; CHECK-NEXT:    addi a2, sp, 72
+; CHECK-NEXT:    vl1r.v v20, (a2) # Unknown-size Folded Reload
+; CHECK-NEXT:    vfadd.vv v9, v9, v20
+; CHECK-NEXT:    vfadd.vv v20, v30, v1
+; CHECK-NEXT:    vfadd.vv v21, v9, v20
+; CHECK-NEXT:    vfsub.vv v22, v19, v21
+; CHECK-NEXT:    vse64.v v22, (t5)
+; CHECK-NEXT:    vfsub.vv v13, v13, v14
+; CHECK-NEXT:    vfsub.vv v9, v20, v9
+; CHECK-NEXT:    vfneg.v v9, v9, v0.t
+; CHECK-NEXT:    vtrn.vv v1, v9, v9
+; CHECK-NEXT:    vtrn.vv v1, v2, v9
+; CHECK-NEXT:    vfadd.vv v9, v13, v1
+; CHECK-NEXT:    vse64.v v9, (ra)
+; CHECK-NEXT:    vfadd.vv v9, v19, v21
+; CHECK-NEXT:    vse64.v v9, (a0)
+; CHECK-NEXT:    vfsub.vv v9, v13, v1
+; CHECK-NEXT:    vse64.v v9, (s0)
+; CHECK-NEXT:    vfmacc.vf v11, ft1, v15
+; CHECK-NEXT:    vfadd.vv v9, v16, v18
+; CHECK-NEXT:    vmv1r.v v13, v11
+; CHECK-NEXT:    vfnmsac.vf v13, ft2, v9
+; CHECK-NEXT:    vfnmsac.vf v10, ft1, v12
+; CHECK-NEXT:    vfsub.vv v8, v8, v17
+; CHECK-NEXT:    vmv1r.v v12, v10
+; CHECK-NEXT:    vfnmsac.vf v12, ft2, v8
+; CHECK-NEXT:    vfneg.v v12, v12, v0.t
+; CHECK-NEXT:    vtrn.vv v1, v12, v12
+; CHECK-NEXT:    vtrn.vv v1, v2, v12
+; CHECK-NEXT:    vfsub.vv v12, v13, v1
+; CHECK-NEXT:    vse64.v v12, (a3)
+; CHECK-NEXT:    vfmacc.vf v11, ft2, v9
+; CHECK-NEXT:    vfmacc.vf v10, ft2, v8
+; CHECK-NEXT:    vfneg.v v10, v10, v0.t
+; CHECK-NEXT:    vtrn.vv v3, v10, v10
+; CHECK-NEXT:    vtrn.vv v3, v4, v10
+; CHECK-NEXT:    vfadd.vv v8, v11, v3
+; CHECK-NEXT:    vse64.v v8, (a4)
+; CHECK-NEXT:    vfadd.vv v8, v13, v1
+; CHECK-NEXT:    vse64.v v8, (s1)
+; CHECK-NEXT:    vfsub.vv v8, v11, v3
+; CHECK-NEXT:    vse64.v v8, (s11)
 ; CHECK-NEXT:    addi s10, s10, -1
 ; CHECK-NEXT:    ld a2, 56(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    add a0, a0, a2
@@ -421,7 +396,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    bnez s10, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.end
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
+; CHECK-NEXT:    slli a1, a0, 1
 ; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ld s11, 72(sp) # 8-byte Folded Reload

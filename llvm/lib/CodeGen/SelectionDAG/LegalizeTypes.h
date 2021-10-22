@@ -405,6 +405,7 @@ private:
   SDValue PromoteIntOp_VP_REDUCE(SDNode *N, unsigned OpNo);
   SDValue PromoteIntOp_SET_ROUNDING(SDNode *N);
   SDValue PromoteIntOp_VP_SETCC(SDNode *N, unsigned OpNo);
+  SDValue PromoteIntOp_VP_SPLICE(SDNode *N, unsigned OpNo);
 
   void PromoteSetCCOperands(SDValue &LHS,SDValue &RHS, ISD::CondCode Code);
 

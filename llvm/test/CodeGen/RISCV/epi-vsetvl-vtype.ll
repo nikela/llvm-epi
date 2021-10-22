@@ -32,30 +32,30 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    rdvtype t0
 ; CHECK-O0-NEXT:    vsetvl zero, a2, t0
 ; CHECK-O0-NEXT:    #NO_APP
-; CHECK-O0-NEXT:    # implicit-def: $v26
+; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vle64.v v26, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v25
-; CHECK-O0-NEXT:    vfadd.vv v25, v26, v26
+; CHECK-O0-NEXT:    vle64.v v9, (a0)
+; CHECK-O0-NEXT:    # implicit-def: $v8
+; CHECK-O0-NEXT:    vfadd.vv v8, v9, v9
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vse64.v v25, (a0)
+; CHECK-O0-NEXT:    vse64.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vsetvl_vtype:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vle64.v v25, (a0)
+; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    srli a0, a1, 1
 ; CHECK-O2-NEXT:    #APP
 ; CHECK-O2-NEXT:    rdvtype t0
 ; CHECK-O2-NEXT:    vsetvl zero, a0, t0
 ; CHECK-O2-NEXT:    #NO_APP
-; CHECK-O2-NEXT:    vfadd.vv v25, v25, v25
+; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O2-NEXT:    vse64.v v25, (a0)
+; CHECK-O2-NEXT:    vse64.v v8, (a0)
 ; CHECK-O2-NEXT:    ret
 {
   %gvl = call i64 @llvm.epi.vsetvl(

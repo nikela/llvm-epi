@@ -6,11 +6,11 @@ define <vscale x 8 x i8*> @test_llvm_vp_inttoptr_v8p0i8_v8i8(<vscale x 8 x i8> %
 ; CHECK-LABEL: test_llvm_vp_inttoptr_v8p0i8_v8i8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8, v0.t
+; CHECK-NEXT:    vwcvtu.x.x.v v10, v8, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v28, v26, v0.t
+; CHECK-NEXT:    vwcvtu.x.x.v v16, v10, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m4, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v8, v28, v0.t
+; CHECK-NEXT:    vwcvtu.x.x.v v8, v16, v0.t
 ; CHECK-NEXT:    ret
   %ptrs = call <vscale x 8 x i8*> @llvm.vp.inttoptr.v8p0i8.v8i8(<vscale x 8 x i8> %a, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x i8*> %ptrs
@@ -20,9 +20,9 @@ define <vscale x 4 x i16*> @test_llvm_vp_inttoptr_v4p0i16_v4i16(<vscale x 4 x i1
 ; CHECK-LABEL: test_llvm_vp_inttoptr_v4p0i16_v4i16:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8, v0.t
+; CHECK-NEXT:    vwcvtu.x.x.v v12, v8, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m2, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v8, v26, v0.t
+; CHECK-NEXT:    vwcvtu.x.x.v v8, v12, v0.t
 ; CHECK-NEXT:    ret
   %ptrs = call <vscale x 4 x i16*> @llvm.vp.inttoptr.v4p0i16.v4i16(<vscale x 4 x i16> %a, <vscale x 4 x i1> %mask, i32 %evl)
   ret <vscale x 4 x i16*> %ptrs
@@ -32,8 +32,8 @@ define <vscale x 2 x i32*> @test_llvm_vp_inttoptr_v2p0i32_v2i32(<vscale x 2 x i3
 ; CHECK-LABEL: test_llvm_vp_inttoptr_v2p0i32_v2i32:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-NEXT:    vwcvtu.x.x.v v26, v8, v0.t
-; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vwcvtu.x.x.v v10, v8, v0.t
+; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
   %ptrs = call <vscale x 2 x i32*> @llvm.vp.inttoptr.v2p0i32.v2i32(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 %evl)
   ret <vscale x 2 x i32*> %ptrs
