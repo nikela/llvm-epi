@@ -41,14 +41,6 @@ public:
   std::unique_ptr<fir::FirOpBuilder> firBuilder;
 };
 
-static void checkIntegerConstant(mlir::Value value, mlir::Type ty, int64_t v) {
-  EXPECT_TRUE(mlir::isa<ConstantOp>(value.getDefiningOp()));
-  auto cstOp = dyn_cast<ConstantOp>(value.getDefiningOp());
-  EXPECT_EQ(ty, cstOp.getType());
-  auto valueAttr = cstOp.getValue().dyn_cast_or_null<IntegerAttr>();
-  EXPECT_EQ(v, valueAttr.getInt());
-}
-
 TEST_F(CharacterTest, smallUtilityFunctions) {
   auto builder = getBuilder();
   auto loc = builder.getUnknownLoc();
@@ -60,26 +52,6 @@ TEST_F(CharacterTest, smallUtilityFunctions) {
   EXPECT_TRUE(fir::factory::CharacterExprHelper::isCharacterScalar(ty));
   EXPECT_EQ(fir::factory::CharacterExprHelper::getCharacterOrSequenceKind(ty),
       fir::factory::CharacterExprHelper::getCharacterKind(ty));
-}
-
-TEST_F(CharacterTest, createConcatenate) {
-  auto builder = getBuilder();
-  auto loc = builder.getUnknownLoc();
-  auto charHelper = fir::factory::CharacterExprHelper(builder, loc);
-  llvm::StringRef lhs("rightsideofconcat");
-  llvm::StringRef rhs("leftsideofconcat");
-  auto strLitLhs = fir::factory::createStringLiteral(builder, loc, lhs);
-  auto strLitRhs = fir::factory::createStringLiteral(builder, loc, rhs);
-  auto concat = charHelper.createConcatenate(
-      *strLitRhs.getCharBox(), *strLitLhs.getCharBox());
-  EXPECT_TRUE(mlir::isa<arith::AddIOp>(concat.getLen().getDefiningOp()));
-  auto addOp = dyn_cast<arith::AddIOp>(concat.getLen().getDefiningOp());
-  EXPECT_TRUE(mlir::isa<ConstantOp>(addOp.lhs().getDefiningOp()));
-  auto lhsCstOp = dyn_cast<ConstantOp>(addOp.lhs().getDefiningOp());
-  EXPECT_TRUE(mlir::isa<ConstantOp>(addOp.rhs().getDefiningOp()));
-  auto rhsCstOp = dyn_cast<ConstantOp>(addOp.rhs().getDefiningOp());
-  checkIntegerConstant(lhsCstOp, builder.getCharacterLengthType(), 16);
-  checkIntegerConstant(rhsCstOp, builder.getCharacterLengthType(), 17);
 }
 
 TEST_F(CharacterTest, createSubstring) {
