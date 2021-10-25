@@ -560,6 +560,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::ROTR, VT, Expand);
 
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
+
+      setOperationAction(ISD::CTTZ, VT, Expand);
+      setOperationAction(ISD::CTLZ, VT, Expand);
+      setOperationAction(ISD::CTPOP, VT, Expand);
+
       // Custom-lower extensions and truncations from/to mask types.
       setOperationAction(ISD::ANY_EXTEND, VT, Custom);
       setOperationAction(ISD::SIGN_EXTEND, VT, Custom);
