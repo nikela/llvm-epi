@@ -2466,7 +2466,7 @@ __epi_4xf64 test_vfmax_4xf64_mask(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4x
 
 // CHECK-O2-LABEL: @test_vfmerge_2xf32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vfmerge.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x float> @llvm.riscv.vmerge.nxv2f32.nxv2f32.i64(<vscale x 2 x float> [[ARG_0:%.*]], <vscale x 2 x float> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 2 x float> [[TMP0]]
 //
 __epi_2xf32 test_vfmerge_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -2476,7 +2476,7 @@ __epi_2xf32 test_vfmerge_2xf32(__epi_2xf32 arg_0, __epi_2xf32 arg_1, __epi_2xi1 
 
 // CHECK-O2-LABEL: @test_vfmerge_1xf64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vfmerge.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.riscv.vmerge.nxv1f64.nxv1f64.i64(<vscale x 1 x double> [[ARG_0:%.*]], <vscale x 1 x double> [[ARG_1:%.*]], <vscale x 1 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 1 x double> [[TMP0]]
 //
 __epi_1xf64 test_vfmerge_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xi1 arg_2, unsigned long int arg_3)
@@ -2486,7 +2486,7 @@ __epi_1xf64 test_vfmerge_1xf64(__epi_1xf64 arg_0, __epi_1xf64 arg_1, __epi_1xi1 
 
 // CHECK-O2-LABEL: @test_vfmerge_4xf32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vfmerge.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x float> @llvm.riscv.vmerge.nxv4f32.nxv4f32.i64(<vscale x 4 x float> [[ARG_0:%.*]], <vscale x 4 x float> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 4 x float> [[TMP0]]
 //
 __epi_4xf32 test_vfmerge_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
@@ -2496,7 +2496,7 @@ __epi_4xf32 test_vfmerge_4xf32(__epi_4xf32 arg_0, __epi_4xf32 arg_1, __epi_4xi1 
 
 // CHECK-O2-LABEL: @test_vfmerge_2xf64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vfmerge.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x double> @llvm.riscv.vmerge.nxv2f64.nxv2f64.i64(<vscale x 2 x double> [[ARG_0:%.*]], <vscale x 2 x double> [[ARG_1:%.*]], <vscale x 2 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 2 x double> [[TMP0]]
 //
 __epi_2xf64 test_vfmerge_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xi1 arg_2, unsigned long int arg_3)
@@ -2506,7 +2506,7 @@ __epi_2xf64 test_vfmerge_2xf64(__epi_2xf64 arg_0, __epi_2xf64 arg_1, __epi_2xi1 
 
 // CHECK-O2-LABEL: @test_vfmerge_8xf32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vfmerge.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 8 x float> @llvm.riscv.vmerge.nxv8f32.nxv8f32.i64(<vscale x 8 x float> [[ARG_0:%.*]], <vscale x 8 x float> [[ARG_1:%.*]], <vscale x 8 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 8 x float> [[TMP0]]
 //
 __epi_8xf32 test_vfmerge_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xi1 arg_2, unsigned long int arg_3)
@@ -2516,7 +2516,7 @@ __epi_8xf32 test_vfmerge_8xf32(__epi_8xf32 arg_0, __epi_8xf32 arg_1, __epi_8xi1 
 
 // CHECK-O2-LABEL: @test_vfmerge_4xf64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vfmerge.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 4 x double> @llvm.riscv.vmerge.nxv4f64.nxv4f64.i64(<vscale x 4 x double> [[ARG_0:%.*]], <vscale x 4 x double> [[ARG_1:%.*]], <vscale x 4 x i1> [[ARG_2:%.*]], i64 [[ARG_3:%.*]])
 // CHECK-O2-NEXT:    ret <vscale x 4 x double> [[TMP0]]
 //
 __epi_4xf64 test_vfmerge_4xf64(__epi_4xf64 arg_0, __epi_4xf64 arg_1, __epi_4xi1 arg_2, unsigned long int arg_3)
