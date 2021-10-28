@@ -20,6 +20,26 @@ class TerminalState;
 
 class Terminal {
 public:
+  enum class Parity {
+    No,
+    Even,
+    Odd,
+    Space,
+    Mark,
+  };
+
+  enum class ParityCheck {
+    // No parity checking
+    No,
+    // Replace erraneous bytes with NUL
+    ReplaceWithNUL,
+    // Ignore erraneous bytes
+    Ignore,
+    // Mark erraneous bytes by prepending them with \xFF\x00; real \xFF
+    // is escaped to \xFF\xFF
+    Mark,
+  };
+
   Terminal(int fd = -1) : m_fd(fd) {}
 
   ~Terminal() = default;
@@ -37,6 +57,18 @@ public:
   llvm::Error SetEcho(bool enabled);
 
   llvm::Error SetCanonical(bool enabled);
+
+  llvm::Error SetRaw();
+
+  llvm::Error SetBaudRate(unsigned int baud_rate);
+
+  llvm::Error SetStopBits(unsigned int stop_bits);
+
+  llvm::Error SetParity(Parity parity);
+
+  llvm::Error SetParityCheck(ParityCheck parity_check);
+
+  llvm::Error SetHardwareFlowControl(bool enabled);
 
 protected:
   struct Data;

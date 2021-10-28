@@ -781,7 +781,7 @@ public:
   /// operands. Plus, even the leaf nodes have different orders, it allows to
   /// sink reordering in the graph closer to the root node and merge it later
   /// during analysis.
-  void reorderBottomToTop();
+  void reorderBottomToTop(bool IgnoreReorder = false);
 
   /// \return The vector element size in bits to use when vectorizing the
   /// expression tree ending at \p V. If V is a store, the size is the width of
@@ -824,7 +824,7 @@ public:
 
   /// \returns True if the VectorizableTree is both tiny and not fully
   /// vectorizable. We do not vectorize such trees.
-  bool isTreeTinyAndNotFullyVectorizable() const;
+  bool isTreeTinyAndNotFullyVectorizable(bool ForReduction = false) const;
 
   /// Assume that a legal-sized 'or'-reduction of shifted/zexted loaded values
   /// can be load combined in the backend. Load combining may not be allowed in
@@ -1620,7 +1620,7 @@ private:
 
   /// \returns whether the VectorizableTree is fully vectorizable and will
   /// be beneficial even the tree height is tiny.
-  bool isFullyVectorizableTinyTree() const;
+  bool isFullyVectorizableTinyTree(bool ForReduction) const;
 
   /// Reorder commutative or alt operands to get better probability of
   /// generating vectorized code.
@@ -2820,7 +2820,7 @@ void BoUpSLP::reorderTopToBottom() {
   }
 }
 
-void BoUpSLP::reorderBottomToTop() {
+void BoUpSLP::reorderBottomToTop(bool IgnoreReorder) {
   SetVector<TreeEntry *> OrderedEntries;
   DenseMap<const TreeEntry *, OrdersType> GathersToOrders;
   // Find all reorderable leaf nodes with the given VF.
@@ -2950,7 +2950,8 @@ void BoUpSLP::reorderBottomToTop() {
       SmallPtrSet<const TreeEntry *, 4> VisitedOps;
       for (const auto &Op : Data.second) {
         TreeEntry *OpTE = Op.second;
-        if (!OpTE->ReuseShuffleIndices.empty())
+        if (!OpTE->ReuseShuffleIndices.empty() ||
+            (IgnoreReorder && OpTE == VectorizableTree.front().get()))
           continue;
         const auto &Order = [OpTE, &GathersToOrders]() -> const OrdersType & {
           if (OpTE->State == TreeEntry::NeedToGather)
@@ -3061,6 +3062,10 @@ void BoUpSLP::reorderBottomToTop() {
       }
     }
   }
+  // If the reordering is unnecessary, just remove the reorder.
+  if (IgnoreReorder && !VectorizableTree.front()->ReorderIndices.empty() &&
+      VectorizableTree.front()->ReuseShuffleIndices.empty())
+    VectorizableTree.front()->ReorderIndices.clear();
 }
 
 void BoUpSLP::buildExternalUses(
@@ -4896,13 +4901,29 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
   }
 }
 
-bool BoUpSLP::isFullyVectorizableTinyTree() const {
+bool BoUpSLP::isFullyVectorizableTinyTree(bool ForReduction) const {
   LLVM_DEBUG(dbgs() << "SLP: Check whether the tree with height "
                     << VectorizableTree.size() << " is fully vectorizable .\n");
 
+  auto &&AreVectorizableGathers = [this](const TreeEntry *TE, unsigned Limit) {
+    SmallVector<int> Mask;
+    return TE->State == TreeEntry::NeedToGather &&
+           !any_of(TE->Scalars,
+                   [this](Value *V) { return EphValues.contains(V); }) &&
+           (allConstant(TE->Scalars) || isSplat(TE->Scalars) ||
+            TE->Scalars.size() < Limit ||
+            (TE->getOpcode() == Instruction::ExtractElement &&
+             isFixedVectorShuffle(TE->Scalars, Mask)));
+  };
+
   // We only handle trees of heights 1 and 2.
   if (VectorizableTree.size() == 1 &&
-      VectorizableTree[0]->State == TreeEntry::Vectorize)
+      (VectorizableTree[0]->State == TreeEntry::Vectorize ||
+       (ForReduction &&
+        AreVectorizableGathers(VectorizableTree[0].get(),
+                               VectorizableTree[0]->Scalars.size()) &&
+        (VectorizableTree[0]->Scalars.size() > 2 ||
+         VectorizableTree[0]->ReuseShuffleIndices.size() > 2))))
     return true;
 
   if (VectorizableTree.size() != 2)
@@ -4914,19 +4935,14 @@ bool BoUpSLP::isFullyVectorizableTinyTree() const {
   // or they are extractelements, which form shuffle.
   SmallVector<int> Mask;
   if (VectorizableTree[0]->State == TreeEntry::Vectorize &&
-      (allConstant(VectorizableTree[1]->Scalars) ||
-       isSplat(VectorizableTree[1]->Scalars) ||
-       (VectorizableTree[1]->State == TreeEntry::NeedToGather &&
-        VectorizableTree[1]->Scalars.size() <
-            VectorizableTree[0]->Scalars.size()) ||
-       (VectorizableTree[1]->State == TreeEntry::NeedToGather &&
-        VectorizableTree[1]->getOpcode() == Instruction::ExtractElement &&
-        isFixedVectorShuffle(VectorizableTree[1]->Scalars, Mask))))
+      AreVectorizableGathers(VectorizableTree[1].get(),
+                             VectorizableTree[0]->Scalars.size()))
     return true;
 
   // Gathering cost would be too much for tiny trees.
   if (VectorizableTree[0]->State == TreeEntry::NeedToGather ||
-      VectorizableTree[1]->State == TreeEntry::NeedToGather)
+      (VectorizableTree[1]->State == TreeEntry::NeedToGather &&
+       VectorizableTree[0]->State != TreeEntry::ScatterVectorize))
     return false;
 
   return true;
@@ -4995,7 +5011,7 @@ bool BoUpSLP::isLoadCombineCandidate() const {
   return true;
 }
 
-bool BoUpSLP::isTreeTinyAndNotFullyVectorizable() const {
+bool BoUpSLP::isTreeTinyAndNotFullyVectorizable(bool ForReduction) const {
   // No need to vectorize inserts of gathered values.
   if (VectorizableTree.size() == 2 &&
       isa<InsertElementInst>(VectorizableTree[0]->Scalars[0]) &&
@@ -5009,7 +5025,7 @@ bool BoUpSLP::isTreeTinyAndNotFullyVectorizable() const {
 
   // If we have a tiny tree (a tree whose size is less than MinTreeSize), we
   // can vectorize it if we can prove it fully vectorizable.
-  if (isFullyVectorizableTinyTree())
+  if (isFullyVectorizableTinyTree(ForReduction))
     return false;
 
   assert(VectorizableTree.empty()
@@ -5771,7 +5787,8 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
     VF = E->ReuseShuffleIndices.size();
   ShuffleInstructionBuilder ShuffleBuilder(Builder, VF);
   if (E->State == TreeEntry::NeedToGather) {
-    setInsertPointAfterBundle(E);
+    if (E->getMainOp())
+      setInsertPointAfterBundle(E);
     Value *Vec;
     SmallVector<int> Mask;
     SmallVector<const TreeEntry *> Entries;
@@ -8372,13 +8389,13 @@ public:
   }
 
   /// Attempt to vectorize the tree found by matchAssociativeReduction.
-  bool tryToReduce(BoUpSLP &V, TargetTransformInfo *TTI) {
+  Value *tryToReduce(BoUpSLP &V, TargetTransformInfo *TTI) {
     // If there are a sufficient number of reduction values, reduce
     // to a nearby power-of-2. We can safely generate oversized
     // vectors and rely on the backend to split them to legal sizes.
     unsigned NumReducedVals = ReducedVals.size();
     if (NumReducedVals < 4)
-      return false;
+      return nullptr;
 
     // Intersect the fast-math-flags from all reduction operations.
     FastMathFlags RdxFMF;
@@ -8453,12 +8470,12 @@ public:
     while (i < NumReducedVals - ReduxWidth + 1 && ReduxWidth > 2) {
       ArrayRef<Value *> VL(&ReducedVals[i], ReduxWidth);
       V.buildTree(VL, IgnoreList);
-      if (V.isTreeTinyAndNotFullyVectorizable())
+      if (V.isTreeTinyAndNotFullyVectorizable(/*ForReduction=*/true))
         break;
       if (V.isLoadCombineReductionCandidate(RdxKind))
         break;
       V.reorderTopToBottom();
-      V.reorderBottomToTop();
+      V.reorderBottomToTop(/*IgnoreReorder=*/true);
       V.buildExternalUses(ExternallyUsedValues);
 
       // For a poison-safe boolean logic reduction, do not replace select
@@ -8479,7 +8496,7 @@ public:
       InstructionCost Cost = TreeCost + ReductionCost;
       if (!Cost.isValid()) {
         LLVM_DEBUG(dbgs() << "Encountered invalid baseline cost.\n");
-        return false;
+        return nullptr;
       }
       if (Cost >= -SLPCostThreshold) {
         V.getORE()->emit([&]() {
@@ -8559,7 +8576,7 @@ public:
       // vector reductions.
       V.eraseInstructions(IgnoreList);
     }
-    return VectorizedTree != nullptr;
+    return VectorizedTree;
   }
 
   unsigned numReductionValues() const { return ReducedVals.size(); }
@@ -8636,6 +8653,7 @@ private:
     assert(isPowerOf2_32(ReduxWidth) &&
            "We only handle power-of-two reductions for now");
 
+    ++NumVectorInstructions;
     return createSimpleTargetReduction(Builder, TTI, VectorizedValue, RdxKind,
                                        ReductionOps.back());
   }
@@ -8848,32 +8866,45 @@ static bool tryToVectorizeHorReductionOrInstOperands(
   // Skip the analysis of CmpInsts.Compiler implements postanalysis of the
   // CmpInsts so we can skip extra attempts in
   // tryToVectorizeHorReductionOrInstOperands and save compile time.
-  SmallVector<std::pair<Instruction *, unsigned>, 8> Stack(1, {Root, 0});
+  std::queue<std::pair<Instruction *, unsigned>> Stack;
+  Stack.emplace(Root, 0);
   SmallPtrSet<Value *, 8> VisitedInstrs;
+  SmallVector<WeakTrackingVH> PostponedInsts;
   bool Res = false;
+  auto &&TryToReduce = [TTI, &P, &R](Instruction *Inst, Value *&B0,
+                                     Value *&B1) -> Value * {
+    bool IsBinop = matchRdxBop(Inst, B0, B1);
+    bool IsSelect = match(Inst, m_Select(m_Value(), m_Value(), m_Value()));
+    if (IsBinop || IsSelect) {
+      HorizontalReduction HorRdx;
+      if (HorRdx.matchAssociativeReduction(P, Inst))
+        return HorRdx.tryToReduce(R, TTI);
+    }
+    return nullptr;
+  };
   while (!Stack.empty()) {
     Instruction *Inst;
     unsigned Level;
-    std::tie(Inst, Level) = Stack.pop_back_val();
+    std::tie(Inst, Level) = Stack.front();
+    Stack.pop();
     // Do not try to analyze instruction that has already been vectorized.
     // This may happen when we vectorize instruction operands on a previous
     // iteration while stack was populated before that happened.
     if (R.isDeleted(Inst))
       continue;
-    Value *B0, *B1;
-    bool IsBinop = matchRdxBop(Inst, B0, B1);
-    bool IsSelect = match(Inst, m_Select(m_Value(), m_Value(), m_Value()));
-    if (IsBinop || IsSelect) {
-      HorizontalReduction HorRdx;
-      if (HorRdx.matchAssociativeReduction(P, Inst)) {
-        if (HorRdx.tryToReduce(R, TTI)) {
-          Res = true;
-          // Set P to nullptr to avoid re-analysis of phi node in
-          // matchAssociativeReduction function unless this is the root node.
-          P = nullptr;
-          continue;
-        }
+    Value *B0 = nullptr, *B1 = nullptr;
+    if (Value *V = TryToReduce(Inst, B0, B1)) {
+      Res = true;
+      // Set P to nullptr to avoid re-analysis of phi node in
+      // matchAssociativeReduction function unless this is the root node.
+      P = nullptr;
+      if (auto *I = dyn_cast<Instruction>(V)) {
+        // Try to find another reduction.
+        Stack.emplace(I, Level);
+        continue;
       }
+    } else {
+      bool IsBinop = B0 && B1;
       if (P && IsBinop) {
         Inst = dyn_cast<Instruction>(B0);
         if (Inst == P)
@@ -8885,14 +8916,14 @@ static bool tryToVectorizeHorReductionOrInstOperands(
           continue;
         }
       }
-    }
-    // Set P to nullptr to avoid re-analysis of phi node in
-    // matchAssociativeReduction function unless this is the root node.
-    P = nullptr;
-    // Do not try to vectorize CmpInst operands, this is done separately.
-    if (!isa<CmpInst>(Inst) && Vectorize(Inst, R)) {
-      Res = true;
-      continue;
+      // Set P to nullptr to avoid re-analysis of phi node in
+      // matchAssociativeReduction function unless this is the root node.
+      P = nullptr;
+      // Do not try to vectorize CmpInst operands, this is done separately.
+      // Final attempt for binop args vectorization should happen after the loop
+      // to try to find reductions.
+      if (!isa<CmpInst>(Inst))
+        PostponedInsts.push_back(Inst);
     }
 
     // Try to vectorize operands.
@@ -8906,8 +8937,13 @@ static bool tryToVectorizeHorReductionOrInstOperands(
             // separately.
             if (!isa<PHINode>(I) && !isa<CmpInst>(I) && !R.isDeleted(I) &&
                 I->getParent() == BB)
-              Stack.emplace_back(I, Level);
+              Stack.emplace(I, Level);
   }
+  // Try to vectorized binops where reductions were not found.
+  for (Value *V : PostponedInsts)
+    if (auto *Inst = dyn_cast<Instruction>(V))
+      if (!R.isDeleted(Inst))
+        Res |= Vectorize(Inst, R);
   return Res;
 }
 
@@ -8998,6 +9034,78 @@ bool SLPVectorizerPass::vectorizeSimpleInstructions(
   return OpsChanged;
 }
 
+template <typename T>
+static bool
+tryToVectorizeSequence(SmallVectorImpl<T *> &Incoming,
+                       function_ref<unsigned(T *)> Limit,
+                       function_ref<bool(T *, T *)> Comparator,
+                       function_ref<bool(T *, T *)> AreCompatible,
+                       function_ref<bool(ArrayRef<T *>, bool)> TryToVectorize,
+                       bool LimitForRegisterSize) {
+  bool Changed = false;
+  // Sort by type, parent, operands.
+  stable_sort(Incoming, Comparator);
+
+  // Try to vectorize elements base on their type.
+  SmallVector<T *> Candidates;
+  for (auto *IncIt = Incoming.begin(), *E = Incoming.end(); IncIt != E;) {
+    // Look for the next elements with the same type, parent and operand
+    // kinds.
+    auto *SameTypeIt = IncIt;
+    while (SameTypeIt != E && AreCompatible(*SameTypeIt, *IncIt))
+      ++SameTypeIt;
+
+    // Try to vectorize them.
+    unsigned NumElts = (SameTypeIt - IncIt);
+    LLVM_DEBUG(dbgs() << "SLP: Trying to vectorize starting at nodes ("
+                      << NumElts << ")\n");
+    // The vectorization is a 3-state attempt:
+    // 1. Try to vectorize instructions with the same/alternate opcodes with the
+    // size of maximal register at first.
+    // 2. Try to vectorize remaining instructions with the same type, if
+    // possible. This may result in the better vectorization results rather than
+    // if we try just to vectorize instructions with the same/alternate opcodes.
+    // 3. Final attempt to try to vectorize all instructions with the
+    // same/alternate ops only, this may result in some extra final
+    // vectorization.
+    if (NumElts > 1 &&
+        TryToVectorize(makeArrayRef(IncIt, NumElts), LimitForRegisterSize)) {
+      // Success start over because instructions might have been changed.
+      Changed = true;
+    } else if (NumElts < Limit(*IncIt) &&
+               (Candidates.empty() ||
+                Candidates.front()->getType() == (*IncIt)->getType())) {
+      Candidates.append(IncIt, std::next(IncIt, NumElts));
+    }
+    // Final attempt to vectorize instructions with the same types.
+    if (Candidates.size() > 1 &&
+        (SameTypeIt == E || (*SameTypeIt)->getType() != (*IncIt)->getType())) {
+      if (TryToVectorize(Candidates, /*LimitForRegisterSize=*/false)) {
+        // Success start over because instructions might have been changed.
+        Changed = true;
+      } else if (LimitForRegisterSize) {
+        // Try to vectorize using small vectors.
+        for (auto *It = Candidates.begin(), *End = Candidates.end();
+             It != End;) {
+          auto *SameTypeIt = It;
+          while (SameTypeIt != End && AreCompatible(*SameTypeIt, *It))
+            ++SameTypeIt;
+          unsigned NumElts = (SameTypeIt - It);
+          if (NumElts > 1 && TryToVectorize(makeArrayRef(It, NumElts),
+                                            /*LimitForRegisterSize=*/false))
+            Changed = true;
+          It = SameTypeIt;
+        }
+      }
+      Candidates.clear();
+    }
+
+    // Start over at the next instruction of a different type (or the end).
+    IncIt = SameTypeIt;
+  }
+  return Changed;
+}
+
 bool SLPVectorizerPass::vectorizeChainsInBlock(BasicBlock *BB, BoUpSLP &R) {
   bool Changed = false;
   SmallVector<Value *, 4> Incoming;
@@ -9006,11 +9114,89 @@ bool SLPVectorizerPass::vectorizeChainsInBlock(BasicBlock *BB, BoUpSLP &R) {
   // node. Allows better to identify the chains that can be vectorized in the
   // better way.
   DenseMap<Value *, SmallVector<Value *, 4>> PHIToOpcodes;
+  auto PHICompare = [this, &PHIToOpcodes](Value *V1, Value *V2) {
+    assert(isValidElementType(V1->getType()) &&
+           isValidElementType(V2->getType()) &&
+           "Expected vectorizable types only.");
+    // It is fine to compare type IDs here, since we expect only vectorizable
+    // types, like ints, floats and pointers, we don't care about other type.
+    if (V1->getType()->getTypeID() < V2->getType()->getTypeID())
+      return true;
+    if (V1->getType()->getTypeID() > V2->getType()->getTypeID())
+      return false;
+    ArrayRef<Value *> Opcodes1 = PHIToOpcodes[V1];
+    ArrayRef<Value *> Opcodes2 = PHIToOpcodes[V2];
+    if (Opcodes1.size() < Opcodes2.size())
+      return true;
+    if (Opcodes1.size() > Opcodes2.size())
+      return false;
+    for (int I = 0, E = Opcodes1.size(); I < E; ++I) {
+      // Undefs are compatible with any other value.
+      if (isa<UndefValue>(Opcodes1[I]) || isa<UndefValue>(Opcodes2[I]))
+        continue;
+      if (auto *I1 = dyn_cast<Instruction>(Opcodes1[I]))
+        if (auto *I2 = dyn_cast<Instruction>(Opcodes2[I])) {
+          DomTreeNodeBase<BasicBlock> *NodeI1 = DT->getNode(I1->getParent());
+          DomTreeNodeBase<BasicBlock> *NodeI2 = DT->getNode(I2->getParent());
+          if (!NodeI1)
+            return NodeI2 != nullptr;
+          if (!NodeI2)
+            return false;
+          assert((NodeI1 == NodeI2) ==
+                     (NodeI1->getDFSNumIn() == NodeI2->getDFSNumIn()) &&
+                 "Different nodes should have different DFS numbers");
+          if (NodeI1 != NodeI2)
+            return NodeI1->getDFSNumIn() < NodeI2->getDFSNumIn();
+          InstructionsState S = getSameOpcode({I1, I2});
+          if (S.getOpcode())
+            continue;
+          return I1->getOpcode() < I2->getOpcode();
+        }
+      if (isa<Constant>(Opcodes1[I]) && isa<Constant>(Opcodes2[I]))
+        continue;
+      if (Opcodes1[I]->getValueID() < Opcodes2[I]->getValueID())
+        return true;
+      if (Opcodes1[I]->getValueID() > Opcodes2[I]->getValueID())
+        return false;
+    }
+    return false;
+  };
+  auto AreCompatiblePHIs = [&PHIToOpcodes](Value *V1, Value *V2) {
+    if (V1 == V2)
+      return true;
+    if (V1->getType() != V2->getType())
+      return false;
+    ArrayRef<Value *> Opcodes1 = PHIToOpcodes[V1];
+    ArrayRef<Value *> Opcodes2 = PHIToOpcodes[V2];
+    if (Opcodes1.size() != Opcodes2.size())
+      return false;
+    for (int I = 0, E = Opcodes1.size(); I < E; ++I) {
+      // Undefs are compatible with any other value.
+      if (isa<UndefValue>(Opcodes1[I]) || isa<UndefValue>(Opcodes2[I]))
+        continue;
+      if (auto *I1 = dyn_cast<Instruction>(Opcodes1[I]))
+        if (auto *I2 = dyn_cast<Instruction>(Opcodes2[I])) {
+          if (I1->getParent() != I2->getParent())
+            return false;
+          InstructionsState S = getSameOpcode({I1, I2});
+          if (S.getOpcode())
+            continue;
+          return false;
+        }
+      if (isa<Constant>(Opcodes1[I]) && isa<Constant>(Opcodes2[I]))
+        continue;
+      if (Opcodes1[I]->getValueID() != Opcodes2[I]->getValueID())
+        return false;
+    }
+    return true;
+  };
+  auto Limit = [&R](Value *V) {
+    unsigned EltSize = R.getVectorElementSize(V);
+    return std::max(2U, R.getMaxVecRegSize() / EltSize);
+  };
 
-  bool HaveVectorizedPhiNodes = true;
-  while (HaveVectorizedPhiNodes) {
-    HaveVectorizedPhiNodes = false;
-
+  bool HaveVectorizedPhiNodes = false;
+  do {
     // Collect the incoming values from the PHIs.
     Incoming.clear();
     for (Instruction &I : *BB) {
@@ -9048,158 +9234,15 @@ bool SLPVectorizerPass::vectorizeChainsInBlock(BasicBlock *BB, BoUpSLP &R) {
       }
     }
 
-    // Sort by type, parent, operands.
-    stable_sort(Incoming, [this, &PHIToOpcodes](Value *V1, Value *V2) {
-      assert(isValidElementType(V1->getType()) &&
-             isValidElementType(V2->getType()) &&
-             "Expected vectorizable types only.");
-      // It is fine to compare type IDs here, since we expect only vectorizable
-      // types, like ints, floats and pointers, we don't care about other type.
-      if (V1->getType()->getTypeID() < V2->getType()->getTypeID())
-        return true;
-      if (V1->getType()->getTypeID() > V2->getType()->getTypeID())
-        return false;
-      ArrayRef<Value *> Opcodes1 = PHIToOpcodes[V1];
-      ArrayRef<Value *> Opcodes2 = PHIToOpcodes[V2];
-      if (Opcodes1.size() < Opcodes2.size())
-        return true;
-      if (Opcodes1.size() > Opcodes2.size())
-        return false;
-      for (int I = 0, E = Opcodes1.size(); I < E; ++I) {
-        // Undefs are compatible with any other value.
-        if (isa<UndefValue>(Opcodes1[I]) || isa<UndefValue>(Opcodes2[I]))
-          continue;
-        if (auto *I1 = dyn_cast<Instruction>(Opcodes1[I]))
-          if (auto *I2 = dyn_cast<Instruction>(Opcodes2[I])) {
-            DomTreeNodeBase<BasicBlock> *NodeI1 = DT->getNode(I1->getParent());
-            DomTreeNodeBase<BasicBlock> *NodeI2 = DT->getNode(I2->getParent());
-            if (!NodeI1)
-              return NodeI2 != nullptr;
-            if (!NodeI2)
-              return false;
-            assert((NodeI1 == NodeI2) ==
-                       (NodeI1->getDFSNumIn() == NodeI2->getDFSNumIn()) &&
-                   "Different nodes should have different DFS numbers");
-            if (NodeI1 != NodeI2)
-              return NodeI1->getDFSNumIn() < NodeI2->getDFSNumIn();
-            InstructionsState S = getSameOpcode({I1, I2});
-            if (S.getOpcode())
-              continue;
-            return I1->getOpcode() < I2->getOpcode();
-          }
-        if (isa<Constant>(Opcodes1[I]) && isa<Constant>(Opcodes2[I]))
-          continue;
-        if (Opcodes1[I]->getValueID() < Opcodes2[I]->getValueID())
-          return true;
-        if (Opcodes1[I]->getValueID() > Opcodes2[I]->getValueID())
-          return false;
-      }
-      return false;
-    });
-
-    auto &&AreCompatiblePHIs = [&PHIToOpcodes](Value *V1, Value *V2) {
-      if (V1 == V2)
-        return true;
-      if (V1->getType() != V2->getType())
-        return false;
-      ArrayRef<Value *> Opcodes1 = PHIToOpcodes[V1];
-      ArrayRef<Value *> Opcodes2 = PHIToOpcodes[V2];
-      if (Opcodes1.size() != Opcodes2.size())
-        return false;
-      for (int I = 0, E = Opcodes1.size(); I < E; ++I) {
-        // Undefs are compatible with any other value.
-        if (isa<UndefValue>(Opcodes1[I]) || isa<UndefValue>(Opcodes2[I]))
-          continue;
-        if (auto *I1 = dyn_cast<Instruction>(Opcodes1[I]))
-          if (auto *I2 = dyn_cast<Instruction>(Opcodes2[I])) {
-            if (I1->getParent() != I2->getParent())
-              return false;
-            InstructionsState S = getSameOpcode({I1, I2});
-            if (S.getOpcode())
-              continue;
-            return false;
-          }
-        if (isa<Constant>(Opcodes1[I]) && isa<Constant>(Opcodes2[I]))
-          continue;
-        if (Opcodes1[I]->getValueID() != Opcodes2[I]->getValueID())
-          return false;
-      }
-      return true;
-    };
-
-    // Try to vectorize elements base on their type.
-    SmallVector<Value *, 4> Candidates;
-    for (SmallVector<Value *, 4>::iterator IncIt = Incoming.begin(),
-                                           E = Incoming.end();
-         IncIt != E;) {
-
-      // Look for the next elements with the same type, parent and operand
-      // kinds.
-      SmallVector<Value *, 4>::iterator SameTypeIt = IncIt;
-      while (SameTypeIt != E && AreCompatiblePHIs(*SameTypeIt, *IncIt)) {
-        VisitedInstrs.insert(*SameTypeIt);
-        ++SameTypeIt;
-      }
-
-      // Try to vectorize them.
-      unsigned NumElts = (SameTypeIt - IncIt);
-      LLVM_DEBUG(dbgs() << "SLP: Trying to vectorize starting at PHIs ("
-                        << NumElts << ")\n");
-      // The order in which the phi nodes appear in the program does not matter.
-      // So allow tryToVectorizeList to reorder them if it is beneficial. This
-      // is done when there are exactly two elements since tryToVectorizeList
-      // asserts that there are only two values when AllowReorder is true.
-      // The vectorization is a 3-state attempt:
-      // 1. Try to vectorize PHIs with the same/alternate opcodes with the size
-      // of maximal register at first.
-      // 2. Try to vectorize remaining PHIs with the same type, if possible.
-      // This may result in the better vectorization results rather than if we
-      // try just to vectorize PHIs with the same/alternate opcodes.
-      // 3. Final attempt to try to vectorize all PHIs with the same/alternate
-      // ops only, this may result in some extra final vectorization.
-      if (NumElts > 1 && tryToVectorizeList(makeArrayRef(IncIt, NumElts), R,
-                                            /*LimitForRegisterSize=*/true)) {
-        // Success start over because instructions might have been changed.
-        HaveVectorizedPhiNodes = true;
-        Changed = true;
-      } else if (NumElts * R.getVectorElementSize(*IncIt) <
-                     R.getMaxVecRegSize() &&
-                 (Candidates.empty() ||
-                  Candidates.front()->getType() == (*IncIt)->getType())) {
-        Candidates.append(IncIt, std::next(IncIt, NumElts));
-      }
-      // Final attempt to vectorize phis with the same types.
-      if (Candidates.size() > 1 &&
-          (SameTypeIt == E ||
-           (*SameTypeIt)->getType() != (*IncIt)->getType())) {
-        if (tryToVectorizeList(Candidates, R)) {
-          // Success start over because instructions might have been changed.
-          HaveVectorizedPhiNodes = true;
-          Changed = true;
-        } else {
-          // Try to vectorize using small vectors.
-          for (SmallVector<Value *, 4>::iterator It = Candidates.begin(),
-                                                 End = Candidates.end();
-               It != End;) {
-            SmallVector<Value *, 4>::iterator SameTypeIt = It;
-            while (SameTypeIt != End && AreCompatiblePHIs(*SameTypeIt, *It))
-              ++SameTypeIt;
-            unsigned NumElts = (SameTypeIt - It);
-            if (NumElts > 1 &&
-                tryToVectorizeList(makeArrayRef(It, NumElts), R)) {
-              HaveVectorizedPhiNodes = true;
-              Changed = true;
-            }
-            It = SameTypeIt;
-          }
-        }
-        Candidates.clear();
-      }
-
-      // Start over at the next instruction of a different type (or the end).
-      IncIt = SameTypeIt;
-    }
-  }
+    HaveVectorizedPhiNodes = tryToVectorizeSequence<Value>(
+        Incoming, Limit, PHICompare, AreCompatiblePHIs,
+        [this, &R](ArrayRef<Value *> Candidates, bool LimitForRegisterSize) {
+          return tryToVectorizeList(Candidates, R, LimitForRegisterSize);
+        },
+        /*LimitForRegisterSize=*/true);
+    Changed |= HaveVectorizedPhiNodes;
+    VisitedInstrs.insert(Incoming.begin(), Incoming.end());
+  } while (HaveVectorizedPhiNodes);
 
   VisitedInstrs.clear();
 
@@ -9452,6 +9495,10 @@ bool SLPVectorizerPass::vectorizeStoreChains(BoUpSLP &R) {
     return V1->getValueOperand()->getValueID() ==
            V2->getValueOperand()->getValueID();
   };
+  auto Limit = [&R, this](StoreInst *SI) {
+    unsigned EltSize = DL->getTypeSizeInBits(SI->getValueOperand()->getType());
+    return R.getMinVF(EltSize);
+  };
 
   // Attempt to sort and vectorize each of the store-groups.
   for (auto &Pair : Stores) {
@@ -9461,33 +9508,15 @@ bool SLPVectorizerPass::vectorizeStoreChains(BoUpSLP &R) {
     LLVM_DEBUG(dbgs() << "SLP: Analyzing a store chain of length "
                       << Pair.second.size() << ".\n");
 
-    stable_sort(Pair.second, StoreSorter);
+    if (!isValidElementType(Pair.second.front()->getValueOperand()->getType()))
+      continue;
 
-    // Try to vectorize elements based on their compatibility.
-    for (ArrayRef<StoreInst *>::iterator IncIt = Pair.second.begin(),
-                                         E = Pair.second.end();
-         IncIt != E;) {
-
-      // Look for the next elements with the same type.
-      ArrayRef<StoreInst *>::iterator SameTypeIt = IncIt;
-      Type *EltTy = (*IncIt)->getPointerOperand()->getType();
-
-      while (SameTypeIt != E && AreCompatibleStores(*SameTypeIt, *IncIt))
-        ++SameTypeIt;
-
-      // Try to vectorize them.
-      unsigned NumElts = (SameTypeIt - IncIt);
-      LLVM_DEBUG(dbgs() << "SLP: Trying to vectorize starting at stores ("
-                        << NumElts << ")\n");
-      if (NumElts > 1 && !EltTy->getPointerElementType()->isVectorTy() &&
-          vectorizeStores(makeArrayRef(IncIt, NumElts), R)) {
-        // Success start over because instructions might have been changed.
-        Changed = true;
-      }
-
-      // Start over at the next instruction of a different type (or the end).
-      IncIt = SameTypeIt;
-    }
+    Changed |= tryToVectorizeSequence<StoreInst>(
+        Pair.second, Limit, StoreSorter, AreCompatibleStores,
+        [this, &R](ArrayRef<StoreInst *> Candidates, bool) {
+          return vectorizeStores(Candidates, R);
+        },
+        /*LimitForRegisterSize=*/false);
   }
   return Changed;
 }

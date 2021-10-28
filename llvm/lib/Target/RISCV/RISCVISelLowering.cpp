@@ -531,10 +531,13 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         setLoadExtAction(ISD::ZEXTLOAD, OtherVT, VT, Expand);
       }
 
-      // VP bitwise operations nodes
+      // VP nodes
       setOperationAction(ISD::VP_AND, VT, Custom);
       setOperationAction(ISD::VP_OR, VT, Custom);
       setOperationAction(ISD::VP_XOR, VT, Custom);
+
+      setOperationAction(ISD::VP_FPTOSI, VT, Custom);
+      setOperationAction(ISD::VP_FPTOUI, VT, Custom);
 
       // Comparisons
       setOperationAction(ISD::VP_SETCC, VT, Custom);
@@ -557,6 +560,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::ROTR, VT, Expand);
 
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
+
+      setOperationAction(ISD::CTTZ, VT, Expand);
+      setOperationAction(ISD::CTLZ, VT, Expand);
+      setOperationAction(ISD::CTPOP, VT, Expand);
+
       // Custom-lower extensions and truncations from/to mask types.
       setOperationAction(ISD::ANY_EXTEND, VT, Custom);
       setOperationAction(ISD::SIGN_EXTEND, VT, Custom);
@@ -809,6 +817,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::AND, VT, Custom);
           setOperationAction(ISD::OR, VT, Custom);
           setOperationAction(ISD::XOR, VT, Custom);
+
+          setOperationAction(ISD::VP_FPTOSI, VT, Custom);
+          setOperationAction(ISD::VP_FPTOUI, VT, Custom);
 
           setOperationAction(ISD::VP_SELECT, VT, Custom);
 
@@ -1388,6 +1399,8 @@ bool RISCVTargetLowering::shouldSinkOperands(
     case Instruction::FSub:
     case Instruction::FMul:
     case Instruction::FDiv:
+    case Instruction::ICmp:
+    case Instruction::FCmp:
       return true;
     case Instruction::Shl:
     case Instruction::LShr:
@@ -4016,8 +4029,13 @@ static bool IsSplatOfOne(const SDValue &MaskOp) {
 }
 
 static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
-  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   SDLoc DL(Op);
+  unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+  unsigned MaskOpNo = 2;
+  bool IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+  unsigned EVLOpNo = 3;
+  assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
+         "Unexpected operand");
 
   EVT DstType = Op.getValueType();
   uint64_t DstTypeSize = DstType.getScalarSizeInBits();
@@ -4026,20 +4044,126 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   uint64_t SrcTypeSize = SrcType.getScalarSizeInBits();
   assert(isPowerOf2_64(DstTypeSize) && isPowerOf2_64(SrcTypeSize) &&
          "Types must be powers of two");
+  int Ratio =
+      std::max(DstTypeSize, SrcTypeSize) / std::min(DstTypeSize, SrcTypeSize);
+
   if (IntNo == Intrinsic::vp_ptrtoint || IntNo == Intrinsic::vp_inttoptr) {
     IntNo =
         DstTypeSize > SrcTypeSize ? Intrinsic::vp_zext : Intrinsic::vp_trunc;
   }
+  // Handle VP conversions on masks
+  if (Ratio > 1) {
+    if (SrcType.getVectorElementType() == MVT::i1) {
+      EVT ToType = DstType;
+      uint64_t ExtValue = 0;
+      unsigned CvtIntNo = Intrinsic::not_intrinsic;
+      // Use same lowering as the llvm IR opcode
+      switch (IntNo) {
+      default:
+        llvm_unreachable("SrcType == i1 not valid for this intrinsic");
+      case Intrinsic::vp_sitofp:
+        ToType = DstType.changeVectorElementTypeToInteger();
+        CvtIntNo = Intrinsic::epi_vfcvt_f_x;
+        LLVM_FALLTHROUGH;
+      case Intrinsic::vp_sext:
+        ExtValue = -1;
+        break;
+      case Intrinsic::vp_uitofp:
+        ToType = DstType.changeVectorElementTypeToInteger();
+        CvtIntNo = Intrinsic::epi_vfcvt_f_xu;
+        LLVM_FALLTHROUGH;
+      case Intrinsic::vp_zext:
+        ExtValue = 1;
+        break;
+      }
 
-  int Ratio =
-      std::max(DstTypeSize, SrcTypeSize) / std::min(DstTypeSize, SrcTypeSize);
-  unsigned MaskOpNo = 2;
-  unsigned EVLOpNo = 3;
-  assert(Op.getOperand(EVLOpNo).getValueType() == MVT::i32 &&
-         "Unexpected operand");
-  bool IsMasked = !IsSplatOfOne(Op.getOperand(MaskOpNo));
+      // NOTE: we do not handle the masked cases because they are not trivial
+      // (and the unmasked cases generate a correct result anyway)
+      SmallVector<SDValue, 3> VMVOps;
+      VMVOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmv_v_x, DL, MVT::i64));
+      VMVOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+      VMVOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                   Op.getOperand(EVLOpNo)));
+      SDValue VMV = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, ToType, VMVOps);
+
+      SmallVector<SDValue, 5> VMERGEOps;
+      VMERGEOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmerge, DL, MVT::i64));
+      VMERGEOps.push_back(VMV);
+      VMERGEOps.push_back(DAG.getConstant(ExtValue, DL, MVT::i64));
+      VMERGEOps.push_back(SrcOp);
+      VMERGEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                   Op.getOperand(EVLOpNo)));
+      SDValue VMERGE = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, ToType, VMERGEOps);
+
+      if (CvtIntNo == Intrinsic::not_intrinsic)
+        return VMERGE;
+
+      SmallVector<SDValue, 3> VFCVTOps;
+      VFCVTOps.push_back(DAG.getTargetConstant(CvtIntNo, DL, MVT::i64));
+      VFCVTOps.push_back(VMERGE);
+      VFCVTOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                   Op.getOperand(EVLOpNo)));
+
+      return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VFCVTOps);
+    }
+
+    if (DstType.getVectorElementType() == MVT::i1) {
+      switch (IntNo) {
+      default:
+        llvm_unreachable("DstType == i1 not valid for this intrinsic");
+      case Intrinsic::vp_fptosi:
+      case Intrinsic::vp_fptoui: {
+        unsigned VMFNEIntNo = IsMasked ? Intrinsic::epi_vmfne_mask : Intrinsic::epi_vmfne;
+
+        SmallVector<SDValue, 6> VMFNEOps;
+        VMFNEOps.push_back(DAG.getTargetConstant(VMFNEIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VMFNEOps.push_back(DAG.getNode(ISD::UNDEF, DL, DstType)); // Merge
+        VMFNEOps.push_back(SrcOp);
+        VMFNEOps.push_back(DAG.getConstantFP(0, DL, SrcType.getVectorElementType()));
+        if (IsMasked)
+          VMFNEOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VMFNEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMFNEOps);
+      }
+      // Use the same lowering as the llvm IR opcode
+      case Intrinsic::vp_trunc: {
+        unsigned VANDIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
+        unsigned VMSNEIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
+
+        SmallVector<SDValue, 6> VANDOps;
+        VANDOps.push_back(DAG.getTargetConstant(VANDIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(DAG.getNode(ISD::UNDEF, DL, SrcType)); // Merge
+        VANDOps.push_back(SrcOp);
+        VANDOps.push_back(DAG.getConstant(1, DL, MVT::i64));
+        if (IsMasked)
+          VANDOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VANDOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+        SDValue VAND = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, SrcType, VANDOps);
+
+        SmallVector<SDValue, 6> VMSNEOps;
+        VMSNEOps.push_back(DAG.getTargetConstant(VMSNEIntNo, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(DAG.getNode(ISD::UNDEF, DL, DstType)); // Merge
+        VMSNEOps.push_back(VAND);
+        VMSNEOps.push_back(DAG.getConstant(0, DL, MVT::i64));
+        if (IsMasked)
+          VMSNEOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
+        VMSNEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
+                                     Op.getOperand(EVLOpNo)));
+
+        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMSNEOps);
+      }
+      }
+    }
+  }
+
+  // Second intrinsic is used to correctly widen/narrow the source operand
   unsigned EPIIntNo;
-  // Further instrinsic to use to correctly widen/narrow the source operand
   unsigned FurtherEPIIntNo = Intrinsic::not_intrinsic;
   switch (IntNo) {
   default:
@@ -4159,38 +4283,6 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
   // then we need to use another (custom) method
   // (like we already do for narrowing, see below)
   if (Ratio > 2 && DstTypeSize > SrcTypeSize) {
-    // If SrcType is MVT::i1, then use the same lowering as the llvm IR opcode
-    if (SrcType.getVectorElementType() == MVT::i1) {
-      switch (IntNo) {
-      default:
-        llvm_unreachable("SrcType == i1 not handled for intrinsics other than "
-                         "vp_zext/vp_sext");
-      // NOTE: for both vp_sext and vp_zext we do not handle the masked cases
-      // because they are not trivial (and the unmasked cases generate a correct
-      // result anyway)
-      case Intrinsic::vp_sext:
-      case Intrinsic::vp_zext: {
-        uint64_t ExtValue = IntNo == Intrinsic::vp_zext ? 1 : -1;
-
-        SmallVector<SDValue, 3> VMVOps;
-        VMVOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmv_v_x, DL, MVT::i64));
-        VMVOps.push_back(DAG.getConstant(0, DL, MVT::i64));
-        VMVOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                                     Op.getOperand(EVLOpNo)));
-        SDValue VMV = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMVOps);
-
-        SmallVector<SDValue, 5> VMERGEOps;
-        VMERGEOps.push_back(DAG.getTargetConstant(Intrinsic::epi_vmerge, DL, MVT::i64));
-        VMERGEOps.push_back(VMV);
-        VMERGEOps.push_back(DAG.getConstant(ExtValue, DL, MVT::i64));
-        VMERGEOps.push_back(SrcOp);
-        VMERGEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                                     Op.getOperand(EVLOpNo)));
-
-        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMERGEOps);
-      }
-      }
-    }
     // Invoke the FurtherEPIIntNo intrinsic to widen the source operand
     // as many times as needed, without changing the type
     EVT FromType = SrcType;
@@ -4233,47 +4325,8 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
 
   // Invoke EPIIntNo intrinsic
   EVT ToType = DstType;
-  if (Ratio > 2 && DstTypeSize < SrcTypeSize) {
-    // If DstType is MVT::i1, then use the same lowering as the llvm IR opcode
-    if (DstType.getVectorElementType() == MVT::i1) {
-      switch (IntNo) {
-      default:
-        llvm_unreachable("DstType == i1 not handled for intrinsics other than "
-                         "vp_trunc");
-      case Intrinsic::vp_trunc: {
-        unsigned VANDIntNo = IsMasked ? Intrinsic::epi_vand_mask : Intrinsic::epi_vand;
-        unsigned VMSNEIntNo = IsMasked ? Intrinsic::epi_vmsne_mask : Intrinsic::epi_vmsne;
-
-        SmallVector<SDValue, 6> VANDOps;
-        VANDOps.push_back(DAG.getTargetConstant(VANDIntNo, DL, MVT::i64));
-        if (IsMasked)
-          VANDOps.push_back(DAG.getNode(ISD::UNDEF, DL, SrcType)); // Merge
-        VANDOps.push_back(SrcOp);
-        VANDOps.push_back(DAG.getConstant(1, DL, MVT::i64));
-        if (IsMasked)
-          VANDOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
-        VANDOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                                     Op.getOperand(EVLOpNo)));
-        SDValue VAND = DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, SrcType, VANDOps);
-
-        SmallVector<SDValue, 6> VMSNEOps;
-        VMSNEOps.push_back(DAG.getTargetConstant(VMSNEIntNo, DL, MVT::i64));
-        if (IsMasked)
-          VMSNEOps.push_back(DAG.getNode(ISD::UNDEF, DL, DstType)); // Merge
-        VMSNEOps.push_back(VAND);
-        VMSNEOps.push_back(DAG.getConstant(0, DL, MVT::i64));
-        if (IsMasked)
-          VMSNEOps.push_back(Op.getOperand(MaskOpNo)); // Mask.
-        VMSNEOps.push_back(DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64,
-                                     Op.getOperand(EVLOpNo)));
-
-        return DAG.getNode(ISD::INTRINSIC_WO_CHAIN, DL, DstType, VMSNEOps);
-      }
-      }
-    }
-
+  if (Ratio > 2 && DstTypeSize < SrcTypeSize)
     ToType = NarrowVectorElementType(SrcType);
-  }
   std::vector<SDValue> Operands;
   Operands.reserve(4 + IsMasked * 2);
   Operands.push_back(DAG.getTargetConstant(EPIIntNo, DL, MVT::i64));
@@ -7661,9 +7714,9 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
       DAG.getNode(RISCVISD::SETCC_VL, DL, MaskVT, VID,
                   DAG.getSplatVector(
                       ContainerVT.changeVectorElementTypeToInteger(), DL, Diff),
-                  DAG.getCondCode(ISD::SETLT), Ops[3], Ops[5]);
+                  DAG.getCondCode(ISD::SETULT), Ops[3], Ops[5]);
   SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, MergeMask,
-                               SLIDEUP, SLIDEDOWN, Ops[5]);
+                               SLIDEDOWN, SLIDEUP, Ops[5]);
 
   if (!VT.isFixedLengthVector())
     return Result;
@@ -7855,19 +7908,36 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
   SDValue Result;
   if (DstTypeSize > SrcTypeSize) { // Widening + Conversion
     if (SrcType.isInteger()) { // First widen, then convert
-      EVT ExtToType;
-      EVT ToType = SrcType.widenIntegerVectorElementType(*DAG.getContext());
-      while (ToType.getScalarSizeInBits() != DstTypeSize) {
-        ExtToType = ToType;
-        ToType = ToType.widenIntegerVectorElementType(*DAG.getContext());
-      }
-      if (ExtToType != MVT::INVALID_SIMPLE_VALUE_TYPE) {
-        Result = DAG.getNode(RISCVISDExtOpc, DL, ExtToType, Ops);
+      assert(DstType.isFloatingPoint() && "Wrong input/output vector types");
+
+      if (SrcType.getVectorElementType() == MVT::i1) { //Handle mask vectors
+        SDValue Zero = DAG.getConstant(0, DL, Subtarget.getXLenVT());
+        SDValue ZeroSplat = DAG.getNode(
+            RISCVISD::VMV_V_X_VL, DL,
+            ContainerVT.changeVectorElementTypeToInteger(), Zero, Ops[2]);
+        SDValue One =
+            DAG.getConstant(RISCVISDExtOpc == RISCVISD::VZEXT_VL ? 1 : -1, DL,
+                            ContainerVT.changeVectorElementTypeToInteger());
+        Result = DAG.getNode(RISCVISD::VSELECT_VL, DL,
+                             ContainerVT.changeVectorElementTypeToInteger(),
+                             Ops[0], One, ZeroSplat, Ops[2]);
         Ops[0] = Result;
+      } else {
+        EVT ExtToType;
+        EVT ToType = SrcType.widenIntegerVectorElementType(*DAG.getContext());
+        while (ToType.getScalarSizeInBits() != DstTypeSize) {
+          ExtToType = ToType;
+          ToType = ToType.widenIntegerVectorElementType(*DAG.getContext());
+        }
+        if (ExtToType != MVT::INVALID_SIMPLE_VALUE_TYPE) {
+          Result = DAG.getNode(RISCVISDExtOpc, DL, ExtToType, Ops);
+          Ops[0] = Result;
+        }
       }
 
       Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
     } else if (SrcType.isFloatingPoint()) { // First convert, then widen
+      assert(DstType.isInteger() && "Wrong input/output vector types");
       EVT SrcEltType = SrcType.getVectorElementType();
       const ElementCount EltCount = SrcType.getVectorElementCount();
       MVT ToEltType = MVT::getIntegerVT(SrcEltType.getSizeInBits() * 2);
@@ -7882,7 +7952,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
         Result = DAG.getNode(RISCVISDExtOpc, DL, ContainerVT, Ops);
       }
     } else {
-      llvm_unreachable("Vector Element type must be Integer of Floating Point");
+      llvm_unreachable("Vector Element type must be Integer or Floating Point");
     }
   } else if (DstTypeSize < SrcTypeSize) { // Narrowing + Conversion
     auto NarrowIntegerVectorElementType = [&](EVT SrcType) -> MVT {
@@ -7893,6 +7963,7 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
     };
 
     if (SrcType.isInteger()) { // First narrow, then convert
+      assert(DstType.isFloatingPoint() && "Wrong input/output vector types");
       MVT ToType = NarrowIntegerVectorElementType(SrcType);
       if (ToType.isFixedLengthVector())
         ToType = getContainerForFixedLengthVector(ToType);
@@ -7905,21 +7976,33 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
 
       Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
     } else if (SrcType.isFloatingPoint()) { // First convert, then narrow
-      MVT ToType = NarrowIntegerVectorElementType(SrcType);
-      if (ToType.isFixedLengthVector())
-        ToType = getContainerForFixedLengthVector(ToType);
+      assert(DstType.isInteger() && "Wrong input/output vector types");
 
-      Result = DAG.getNode(RISCVISDOpc, DL, ToType, Ops);
+      if (DstType.getVectorElementType() == MVT::i1) { // TODO: Handle mask vectors
+        SDValue FPZero = DAG.getConstantFP(0, DL, SrcType);
+        Result =
+            DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, Ops[0], FPZero,
+                        DAG.getCondCode(ISD::SETUNE), Ops[1], Ops[2]);
+      } else {
+        MVT ToType = NarrowIntegerVectorElementType(SrcType);
+        if (ToType.isFixedLengthVector())
+          ToType = getContainerForFixedLengthVector(ToType);
 
-      while (ToType.getScalarSizeInBits() != DstTypeSize) {
-        Ops[0] = Result;
-        ToType = NarrowIntegerVectorElementType(ToType);
-        Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ToType, Ops);
+        Result = DAG.getNode(RISCVISDOpc, DL, ToType, Ops);
+
+        while (ToType.getScalarSizeInBits() != DstTypeSize) {
+          Ops[0] = Result;
+          ToType = NarrowIntegerVectorElementType(ToType);
+          Result = DAG.getNode(RISCVISD::TRUNCATE_VECTOR_VL, DL, ToType, Ops);
+        }
       }
     } else {
-      llvm_unreachable("Vector Element type must be Integer of Floating Point");
+      llvm_unreachable("Vector Element type must be Integer or Floating Point");
     }
   } else { // Conversion only
+    assert(((SrcType.isInteger() && DstType.isFloatingPoint()) ||
+            (SrcType.isFloatingPoint() && DstType.isInteger())) &&
+           "Wrong input/output vector types");
     Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
   }
 

@@ -5050,7 +5050,7 @@ static bool MayFoldLoadIntoBroadcastFromMem(SDValue Op, MVT EltVT,
 
   // We can not replace a wide volatile load with a broadcast-from-memory,
   // because that would narrow the load, which isn't legal for volatiles.
-  const LoadSDNode *Ld = dyn_cast<LoadSDNode>(Op.getNode());
+  auto *Ld = cast<LoadSDNode>(Op.getNode());
   return !Ld->isVolatile() ||
          Ld->getValueSizeInBits(0) == EltVT.getScalarSizeInBits();
 }
@@ -5242,8 +5242,8 @@ static X86::CondCode TranslateIntegerX86CC(ISD::CondCode SetCCOpcode) {
 /// condition code, returning the condition code and the LHS/RHS of the
 /// comparison to make.
 static X86::CondCode TranslateX86CC(ISD::CondCode SetCCOpcode, const SDLoc &DL,
-                               bool isFP, SDValue &LHS, SDValue &RHS,
-                               SelectionDAG &DAG) {
+                                    bool isFP, SDValue &LHS, SDValue &RHS,
+                                    SelectionDAG &DAG) {
   if (!isFP) {
     if (ConstantSDNode *RHSC = dyn_cast<ConstantSDNode>(RHS)) {
       if (SetCCOpcode == ISD::SETGT && RHSC->isAllOnes()) {
@@ -8703,10 +8703,10 @@ static bool findEltLoadSrc(SDValue Elt, LoadSDNode *&Ld, int64_t &ByteOffset) {
   case ISD::SCALAR_TO_VECTOR:
     return findEltLoadSrc(Elt.getOperand(0), Ld, ByteOffset);
   case ISD::SRL:
-    if (auto *IdxC = dyn_cast<ConstantSDNode>(Elt.getOperand(1))) {
-      uint64_t Idx = IdxC->getZExtValue();
-      if ((Idx % 8) == 0 && findEltLoadSrc(Elt.getOperand(0), Ld, ByteOffset)) {
-        ByteOffset += Idx / 8;
+    if (auto *AmtC = dyn_cast<ConstantSDNode>(Elt.getOperand(1))) {
+      uint64_t Amt = AmtC->getZExtValue();
+      if ((Amt % 8) == 0 && findEltLoadSrc(Elt.getOperand(0), Ld, ByteOffset)) {
+        ByteOffset += Amt / 8;
         return true;
       }
     }
@@ -28139,26 +28139,32 @@ static SDValue LowerADDSAT_SUBSAT(SDValue Op, SelectionDAG &DAG,
       TLI.getSetCCResultType(DAG.getDataLayout(), *DAG.getContext(), VT);
 
   unsigned BitWidth = VT.getScalarSizeInBits();
-  if (Opcode == ISD::USUBSAT && !TLI.isOperationLegal(ISD::UMAX, VT)) {
-    // Handle a special-case with a bit-hack instead of cmp+select:
-    // usubsat X, SMIN --> (X ^ SMIN) & (X s>> BW-1)
-    ConstantSDNode *C = isConstOrConstSplat(Y, true);
-    if (C && C->getAPIntValue().isSignMask()) {
-      SDValue SignMask = DAG.getConstant(C->getAPIntValue(), DL, VT);
-      SDValue ShiftAmt = DAG.getConstant(BitWidth - 1, DL, VT);
-      SDValue Xor = DAG.getNode(ISD::XOR, DL, VT, X, SignMask);
-      SDValue Sra = DAG.getNode(ISD::SRA, DL, VT, X, ShiftAmt);
-      return DAG.getNode(ISD::AND, DL, VT, Xor, Sra);
+  if (Opcode == ISD::USUBSAT) {
+    if (!TLI.isOperationLegal(ISD::UMAX, VT) || useVPTERNLOG(Subtarget, VT)) {
+      // Handle a special-case with a bit-hack instead of cmp+select:
+      // usubsat X, SMIN --> (X ^ SMIN) & (X s>> BW-1)
+      // If the target can use VPTERNLOG, DAGToDAG will match this as
+      // "vpsra + vpternlog" which is better than "vpmax + vpsub" with a
+      // "broadcast" constant load.
+      ConstantSDNode *C = isConstOrConstSplat(Y, true);
+      if (C && C->getAPIntValue().isSignMask()) {
+        SDValue SignMask = DAG.getConstant(C->getAPIntValue(), DL, VT);
+        SDValue ShiftAmt = DAG.getConstant(BitWidth - 1, DL, VT);
+        SDValue Xor = DAG.getNode(ISD::XOR, DL, VT, X, SignMask);
+        SDValue Sra = DAG.getNode(ISD::SRA, DL, VT, X, ShiftAmt);
+        return DAG.getNode(ISD::AND, DL, VT, Xor, Sra);
+      }
     }
-
-    // usubsat X, Y --> (X >u Y) ? X - Y : 0
-    SDValue Sub = DAG.getNode(ISD::SUB, DL, VT, X, Y);
-    SDValue Cmp = DAG.getSetCC(DL, SetCCResultType, X, Y, ISD::SETUGT);
-    // TODO: Move this to DAGCombiner?
-    if (SetCCResultType == VT &&
-        DAG.ComputeNumSignBits(Cmp) == VT.getScalarSizeInBits())
-      return DAG.getNode(ISD::AND, DL, VT, Cmp, Sub);
-    return DAG.getSelect(DL, VT, Cmp, Sub, DAG.getConstant(0, DL, VT));
+    if (!TLI.isOperationLegal(ISD::UMAX, VT)) {
+      // usubsat X, Y --> (X >u Y) ? X - Y : 0
+      SDValue Sub = DAG.getNode(ISD::SUB, DL, VT, X, Y);
+      SDValue Cmp = DAG.getSetCC(DL, SetCCResultType, X, Y, ISD::SETUGT);
+      // TODO: Move this to DAGCombiner?
+      if (SetCCResultType == VT &&
+          DAG.ComputeNumSignBits(Cmp) == VT.getScalarSizeInBits())
+        return DAG.getNode(ISD::AND, DL, VT, Cmp, Sub);
+      return DAG.getSelect(DL, VT, Cmp, Sub, DAG.getConstant(0, DL, VT));
+    }
   }
 
   if ((Opcode == ISD::SADDSAT || Opcode == ISD::SSUBSAT) &&
@@ -50274,6 +50280,48 @@ static SDValue combineGatherScatter(SDNode *N, SelectionDAG &DAG,
       EVT NewVT = Index.getValueType().changeVectorElementType(MVT::i32);
       Index = DAG.getNode(ISD::TRUNCATE, DL, NewVT, Index);
       return rebuildGatherScatter(GorS, Index, Base, Scale, DAG);
+    }
+  }
+
+  const TargetLowering &TLI = DAG.getTargetLoweringInfo();
+  EVT PtrVT = TLI.getPointerTy(DAG.getDataLayout());
+  // Try to move splat constant adders from the index operand to the base
+  // pointer operand. Taking care to multiply by the scale. We can only do
+  // this when index element type is the same as the pointer type.
+  // Otherwise we need to be sure the math doesn't wrap before the scale.
+  if (Index.getOpcode() == ISD::ADD &&
+      Index.getValueType().getVectorElementType() == PtrVT &&
+      isa<ConstantSDNode>(Scale)) {
+    uint64_t ScaleAmt = cast<ConstantSDNode>(Scale)->getZExtValue();
+    if (auto *BV = dyn_cast<BuildVectorSDNode>(Index.getOperand(1))) {
+      BitVector UndefElts;
+      if (ConstantSDNode *C = BV->getConstantSplatNode(&UndefElts)) {
+        // FIXME: Allow non-constant?
+        if (UndefElts.none()) {
+          // Apply the scale.
+          APInt Adder = C->getAPIntValue() * ScaleAmt;
+          // Add it to the existing base.
+          Base = DAG.getNode(ISD::ADD, DL, PtrVT, Base,
+                             DAG.getConstant(Adder, DL, PtrVT));
+          Index = Index.getOperand(0);
+          return rebuildGatherScatter(GorS, Index, Base, Scale, DAG);
+        }
+      }
+
+      // It's also possible base is just a constant. In that case, just
+      // replace it with 0 and move the displacement into the index.
+      if (BV->isConstant() && isa<ConstantSDNode>(Base) &&
+          isOneConstant(Scale)) {
+        SDValue Splat = DAG.getSplatBuildVector(Index.getValueType(), DL, Base);
+        // Combine the constant build_vector and the constant base.
+        Splat = DAG.getNode(ISD::ADD, DL, Index.getValueType(),
+                            Index.getOperand(1), Splat);
+        // Add to the LHS of the original Index add.
+        Index = DAG.getNode(ISD::ADD, DL, Index.getValueType(),
+                            Index.getOperand(0), Splat);
+        Base = DAG.getConstant(0, DL, Base.getValueType());
+        return rebuildGatherScatter(GorS, Index, Base, Scale, DAG);
+      }
     }
   }
 

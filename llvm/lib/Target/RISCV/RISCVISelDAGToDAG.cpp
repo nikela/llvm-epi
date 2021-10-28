@@ -342,12 +342,40 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
   EVT VT = Node->getValueType(0);
   SDLoc DL(Node);
   uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+  bool IsMaskVector = false;
+  if (SEW == 1) {
+    IsMaskVector = true;
+    switch(VT.getVectorElementCount().getKnownMinValue()) {
+    default:
+      llvm_unreachable("Wrong factor size");
+    case 1:
+      SEW = 64;
+      VT = VT.changeVectorElementType(MVT::i64);
+      break;
+    case 2:
+      SEW = 32;
+      VT = VT.changeVectorElementType(MVT::i32);
+      break;
+    case 4:
+      SEW = 16;
+      VT = VT.changeVectorElementType(MVT::i16);
+      break;
+    case 8:
+    case 16:
+    case 32:
+    case 64:
+      SEW = 8;
+      VT = VT.changeVectorElementType(MVT::i8);
+      break;
+    }
+  }
 
   ElementCount EC = VT.getVectorElementCount();
   assert(EC.isScalable() && "Unexpected VT");
   uint64_t LMul = EC.getKnownMinValue() * SEW / 64; // FIXME: ELEN=64 hardcoded.
 
   unsigned VIDInst, VRSUBInst, VRGATHERInst;
+  unsigned VMVInst, VMERGEInst, VMSNEInst;
   switch (LMul) {
   default:
     llvm_unreachable("Unexpected LMUL");
@@ -355,21 +383,33 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
     VIDInst = RISCV::PseudoEPIVID_V_M1;
     VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M1;
     VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M1;
+    VMVInst = RISCV::PseudoEPIVMV_V_I_M1;
+    VMERGEInst = RISCV::PseudoEPIVMERGE_VIM_M1;
+    VMSNEInst = RISCV::PseudoEPIVMSNE_VI_M1;
     break;
   case 2:
     VIDInst = RISCV::PseudoEPIVID_V_M2;
     VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M2;
     VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M2;
+    VMVInst = RISCV::PseudoEPIVMV_V_I_M2;
+    VMERGEInst = RISCV::PseudoEPIVMERGE_VIM_M2;
+    VMSNEInst = RISCV::PseudoEPIVMSNE_VI_M2;
     break;
   case 4:
     VIDInst = RISCV::PseudoEPIVID_V_M4;
     VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M4;
     VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M4;
+    VMVInst = RISCV::PseudoEPIVMV_V_I_M4;
+    VMERGEInst = RISCV::PseudoEPIVMERGE_VIM_M4;
+    VMSNEInst = RISCV::PseudoEPIVMSNE_VI_M4;
     break;
   case 8:
     VIDInst = RISCV::PseudoEPIVID_V_M8;
     VRSUBInst = RISCV::PseudoEPIVRSUB_VX_M8;
     VRGATHERInst = RISCV::PseudoEPIVRGATHER_VV_M8;
+    VMVInst = RISCV::PseudoEPIVMV_V_I_M8;
+    VMERGEInst = RISCV::PseudoEPIVMERGE_VIM_M8;
+    VMSNEInst = RISCV::PseudoEPIVMSNE_VI_M8;
     break;
   }
 
@@ -393,6 +433,7 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
                                           VT.changeVectorElementType(MVT::i1));
   SDValue SEWOperand = CurDAG->getTargetConstant(SEW, DL, MVT::i64);
 
+  VLMax = CurDAG->getTargetConstant(RISCV::VLMaxSentinel, DL, MVT::i64);
   auto *VID = CurDAG->getMachineNode(VIDInst, DL, VT,
                                      {Undef, NoRegMask, VLMax, SEWOperand});
 
@@ -401,9 +442,29 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
                              {Undef, SDValue(VID, 0), SDValue(ADDI, 0),
                               NoRegMask, VLMax, SEWOperand});
 
+  if (IsMaskVector) {
+    auto *VMV =
+        CurDAG->getMachineNode(VMVInst, DL, VT,
+                               {CurDAG->getTargetConstant(0, DL, MVT::i64),
+                                VLMax, SEWOperand});
+    auto *VMERGE = CurDAG->getMachineNode(
+        VMERGEInst, DL, VT,
+        {SDValue(VMV, 0), CurDAG->getTargetConstant(1, DL, MVT::i64), Op,
+         VLMax, SEWOperand});
+
+    Op = SDValue(VMERGE, 0);
+  }
+
   auto *VRGATHER = CurDAG->getMachineNode(
       VRGATHERInst, DL, VT,
       {Undef, Op, SDValue(VRSUB, 0), NoRegMask, VLMax, SEWOperand});
+
+  if (IsMaskVector) {
+    return CurDAG->getMachineNode(VMSNEInst, DL, Node->getValueType(0),
+                                  {Undef, SDValue(VRGATHER, 0),
+                                   CurDAG->getTargetConstant(0, DL, MVT::i64),
+                                   NoRegMask, VLMax, SEWOperand});
+  }
 
   return VRGATHER;
 }
