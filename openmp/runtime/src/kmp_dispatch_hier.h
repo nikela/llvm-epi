@@ -986,7 +986,7 @@ void __kmp_dispatch_init_hierarchy(ident_t *loc, int n,
     sh->hier->allocate_hier(n, new_layers, new_scheds, new_chunks);
     sh->u.s.iteration = 0;
   }
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
   // Check to make sure the hierarchy is valid
   kmp_hier_t<T> *hier = sh->hier;
   if (!sh->hier->is_valid()) {
@@ -1060,7 +1060,7 @@ void __kmp_dispatch_init_hierarchy(ident_t *loc, int n,
            gtid, pr->hier_id));
 
   pr->flags.contains_last = FALSE;
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 
   // Now that the number of active threads at each level is determined,
   // the barrier data for each unit can be initialized and the last layer's
@@ -1095,7 +1095,7 @@ void __kmp_dispatch_init_hierarchy(ident_t *loc, int n,
     kmp_hier_private_bdata_t *tdata = &(th->th.th_hier_bar_data[i]);
     unit->reset_private_barrier(tdata);
   }
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 
 #ifdef KMP_DEBUG
   if (__kmp_tid_from_gtid(gtid) == 0) {
@@ -1106,7 +1106,7 @@ void __kmp_dispatch_init_hierarchy(ident_t *loc, int n,
     }
     hier->print();
   }
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 #endif // KMP_DEBUG
 }
 #endif
