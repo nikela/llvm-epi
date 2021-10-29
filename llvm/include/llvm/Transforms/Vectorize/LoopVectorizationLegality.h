@@ -31,8 +31,6 @@
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Support/TypeSize.h"
 #include "llvm/Transforms/Utils/LoopUtils.h"
-#include <bits/stdint-uintn.h>
-#include <limits>
 
 namespace llvm {
 
