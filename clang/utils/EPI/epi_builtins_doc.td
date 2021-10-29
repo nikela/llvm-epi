@@ -2458,7 +2458,7 @@ enable or disable that element at the same time.}];
 def : DocEPIBuiltin<vmor>
 {
   let Category = DocEPIMaskOperations;
-  let Title = "Compute elementwise logical xor between two masks";
+  let Title = "Compute elementwise logical or between two masks";
   let Description = [{Use these builtins to compute a new mask that enables
 an element if either the first or the second (or both) mask operands
 enable that element.}];
@@ -2474,7 +2474,7 @@ enable that element.}];
 def : DocEPIBuiltin<vmornot>
 {
   let Category = DocEPIMaskOperations;
-  let Title = "Compute elementwise logical xor between two masks";
+  let Title = "Compute elementwise logical ornot between two masks";
   let Description = [{Use these builtins to compute a new mask that enables
 an element if either the first mask operand enables the element or the second
 mask operand does not enable that element.}];
