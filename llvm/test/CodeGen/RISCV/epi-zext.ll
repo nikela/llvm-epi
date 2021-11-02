@@ -8,7 +8,7 @@ define <vscale x 2 x i64> @test_zext_i32_i64_m1(<vscale x 2 x i32> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v10, v8
-; CHECK-NEXT:    vmv2r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 2 x i32> %a to <vscale x 2 x i64>
@@ -20,7 +20,7 @@ define <vscale x 4 x i64> @test_zext_i32_i64_m2(<vscale x 4 x i32> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v12, v8
-; CHECK-NEXT:    vmv4r.v v8, v12
+; CHECK-NEXT:    vmv.v.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 4 x i32> %a to <vscale x 4 x i64>
@@ -32,7 +32,7 @@ define <vscale x 8 x i64> @test_zext_i32_i64_m4(<vscale x 8 x i32> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v16, v8
-; CHECK-NEXT:    vmv8r.v v8, v16
+; CHECK-NEXT:    vmv.v.v v8, v16
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 8 x i32> %a to <vscale x 8 x i64>
@@ -45,7 +45,7 @@ define <vscale x 4 x i32> @test_zext_i16_i32_m1(<vscale x 4 x i16> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v10, v8
-; CHECK-NEXT:    vmv2r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 4 x i16> %a to <vscale x 4 x i32>
@@ -57,7 +57,7 @@ define <vscale x 8 x i32> @test_zext_i16_i32_m2(<vscale x 8 x i16> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v12, v8
-; CHECK-NEXT:    vmv4r.v v8, v12
+; CHECK-NEXT:    vmv.v.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 8 x i16> %a to <vscale x 8 x i32>
@@ -69,7 +69,7 @@ define <vscale x 16 x i32> @test_zext_i16_i32_m4(<vscale x 16 x i16> %a) nounwin
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v16, v8
-; CHECK-NEXT:    vmv8r.v v8, v16
+; CHECK-NEXT:    vmv.v.v v8, v16
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 16 x i16> %a to <vscale x 16 x i32>
@@ -82,7 +82,7 @@ define <vscale x 8 x i16> @test_zext_i8_i16_m1(<vscale x 8 x i8> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m2, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v10, v8
-; CHECK-NEXT:    vmv2r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 8 x i8> %a to <vscale x 8 x i16>
@@ -94,7 +94,7 @@ define <vscale x 16 x i16> @test_zext_i8_i16_m2(<vscale x 16 x i8> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m4, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v12, v8
-; CHECK-NEXT:    vmv4r.v v8, v12
+; CHECK-NEXT:    vmv.v.v v8, v12
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 16 x i8> %a to <vscale x 16 x i16>
@@ -106,7 +106,7 @@ define <vscale x 32 x i16> @test_zext_i8_i16_m4(<vscale x 32 x i8> %a) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vzext.vf2 v16, v8
-; CHECK-NEXT:    vmv8r.v v8, v16
+; CHECK-NEXT:    vmv.v.v v8, v16
 ; CHECK-NEXT:    ret
 {
   %b = zext <vscale x 32 x i8> %a to <vscale x 32 x i16>

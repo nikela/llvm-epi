@@ -87,9 +87,8 @@ TEST(ToolChainTest, VFSGCCInstallation) {
       llvm::raw_string_ostream OS(S);
       C->getDefaultToolChain().printVerboseInfo(OS);
     }
-#if _WIN32
-    std::replace(S.begin(), S.end(), '\\', '/');
-#endif
+    if (is_style_windows(llvm::sys::path::Style::native))
+      std::replace(S.begin(), S.end(), '\\', '/');
     EXPECT_EQ(
         "Found candidate GCC installation: "
         "/usr/lib/gcc/arm-linux-gnueabihf/4.6.3\n"
@@ -112,9 +111,8 @@ TEST(ToolChainTest, VFSGCCInstallation) {
       llvm::raw_string_ostream OS(S);
       C->getDefaultToolChain().printVerboseInfo(OS);
     }
-#if _WIN32
-    std::replace(S.begin(), S.end(), '\\', '/');
-#endif
+    if (is_style_windows(llvm::sys::path::Style::native))
+      std::replace(S.begin(), S.end(), '\\', '/');
     // Test that 4.5.3 from --sysroot is not overridden by 4.6.3 (larger
     // version) from /usr.
     EXPECT_EQ("Found candidate GCC installation: "
@@ -156,9 +154,8 @@ TEST(ToolChainTest, VFSGCCInstallationRelativeDir) {
     llvm::raw_string_ostream OS(S);
     C->getDefaultToolChain().printVerboseInfo(OS);
   }
-#if _WIN32
-  std::replace(S.begin(), S.end(), '\\', '/');
-#endif
+  if (is_style_windows(llvm::sys::path::Style::windows))
+    std::replace(S.begin(), S.end(), '\\', '/');
   EXPECT_EQ("Found candidate GCC installation: "
             "/home/test/bin/../lib/gcc/arm-linux-gnueabi/4.6.1\n"
             "Selected GCC installation: "

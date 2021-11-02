@@ -33,7 +33,7 @@ define <vscale x 2 x i32> @test_llvm_vp_ptrtoint_v2i32_v2p0i32(<vscale x 2 x i32
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %x = call <vscale x 2 x i32> @llvm.vp.ptrtoint.v2i32.v2p0i32(<vscale x 2 x i32*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl)
   ret <vscale x 2 x i32> %x

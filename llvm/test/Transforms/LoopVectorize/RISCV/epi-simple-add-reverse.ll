@@ -33,11 +33,11 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP5:%.*]] = bitcast i8* [[TMP4]] to <vscale x 64 x i8>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 64 x i8>, <vscale x 64 x i8>* [[TMP5]], align 1
-; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[INDEX]] to i32
-; CHECK-NEXT:    [[TMP7:%.*]] = sub nsw i32 [[N]], [[TMP6]]
+; CHECK-NEXT:    [[TMP4:%.*]] = trunc i64 [[INDEX]] to i32
+; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i8* [[TMP5]] to <vscale x 64 x i8>*
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 64 x i8>, <vscale x 64 x i8>* [[TMP6]], align 1
+; CHECK-NEXT:    [[TMP7:%.*]] = sub nsw i32 [[N]], [[TMP4]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = sext i32 [[TMP7]] to i64
 ; CHECK-NEXT:    [[TMP9:%.*]] = getelementptr inbounds i8, i8* [[B:%.*]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = call i32 @llvm.vscale.i32()
@@ -101,11 +101,11 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK1-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
-; CHECK1-NEXT:    [[TMP5:%.*]] = bitcast i8* [[TMP4]] to <vscale x 8 x i8>*
-; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP5]], align 1
-; CHECK1-NEXT:    [[TMP6:%.*]] = trunc i64 [[INDEX]] to i32
-; CHECK1-NEXT:    [[TMP7:%.*]] = sub nsw i32 [[N]], [[TMP6]]
+; CHECK1-NEXT:    [[TMP4:%.*]] = trunc i64 [[INDEX]] to i32
+; CHECK1-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
+; CHECK1-NEXT:    [[TMP6:%.*]] = bitcast i8* [[TMP5]] to <vscale x 8 x i8>*
+; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i8>, <vscale x 8 x i8>* [[TMP6]], align 1
+; CHECK1-NEXT:    [[TMP7:%.*]] = sub nsw i32 [[N]], [[TMP4]]
 ; CHECK1-NEXT:    [[TMP8:%.*]] = sext i32 [[TMP7]] to i64
 ; CHECK1-NEXT:    [[TMP9:%.*]] = getelementptr inbounds i8, i8* [[B:%.*]], i64 [[TMP8]]
 ; CHECK1-NEXT:    [[TMP10:%.*]] = call i32 @llvm.vscale.i32()

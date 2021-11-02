@@ -7,7 +7,7 @@ define <4 x i32> @test_vp_trunc_v4i32_v4i64(<4 x i64> %a, i32 zeroext %gvl) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %b = call <4 x i32> @llvm.vp.trunc.v4i32.v4i64(<4 x i64> %a,
             <4 x i1> shufflevector (<4 x i1> insertelement (<4 x i1> undef, i1 true, i32 0), <4 x i1> undef, <4 x i32> zeroinitializer),
@@ -20,7 +20,7 @@ define <4 x i32> @test_vp_trunc_v4i32_v4i64_mask(<4 x i64> %a, <4 x i1> %mask, i
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %b = call <4 x i32> @llvm.vp.trunc.v4i32.v4i64(
                <4 x i64> %a,

@@ -68,7 +68,7 @@ define <vscale x 2 x float> @nxv2f32_2(<vscale x 2 x float*> %ptrs, <vscale x 2 
 ; CHECK-NEXT:    srli a0, a0, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v10, (zero), v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %data = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl)
   ret <vscale x 2 x float> %data
