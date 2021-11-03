@@ -8113,7 +8113,7 @@ SDValue RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op, SelectionDAG
       // vd[i] = undef, when 0 <= i < VLEN - EVL
       // vd[i] = v1[i - (VLEN - EVL)], when VLEN - EVL <= i < VLEN
     // Then, we split the splice and reverse each half
-    // Finally, we concatenates the two halves in reverse order
+    // Finally, we concatenate the two halves in reverse order
     // NOTE: It's also possible that, after splitting, VLMAX
     // no longer requires vrgatherei16.vv.
     if (MinSize == (8 * RISCV::RVVBitsPerBlock)) {

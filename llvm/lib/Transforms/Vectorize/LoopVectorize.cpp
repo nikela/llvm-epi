@@ -3207,7 +3207,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, PartPtr, LastLane));
       PartPtr->setIsInBounds(InBounds);
-      if (isMaskRequired) { // Reverse of a null all-one mask is a null mask.
+      if (isMaskRequired) { // We reverse the mask only if it is not an all-ones mask.
         if (EVL) {
           Value *Mask = BlockInMaskParts[Part];
           VectorType *MaskTy = cast<VectorType>(Mask->getType());
