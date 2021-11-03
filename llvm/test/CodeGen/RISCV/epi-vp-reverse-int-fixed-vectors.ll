@@ -10,7 +10,7 @@ define <2 x i64> @test_vp_reverse_v2i64_masked(<2 x i64> %src, <2 x i1> %mask, i
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vrsub.vx v10, v9, a0, v0.t
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %dst = call <2 x i64> @llvm.experimental.vp.reverse.v2i64(<2 x i64> %src, <2 x i1> %mask, i32 %evl)
   ret <2 x i64> %dst
@@ -24,7 +24,7 @@ define <2 x i64> @test_vp_reverse_v2i64(<2 x i64> %src, i32 zeroext %evl) {
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a1
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <2 x i1> undef, i1 1, i32 0
   %allones = shufflevector <2 x i1> %head, <2 x i1> undef, <2 x i32> zeroinitializer
@@ -41,7 +41,7 @@ define <4 x i32> @test_vp_reverse_v4i32_masked(<4 x i32> %src, <4 x i1> %mask, i
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vrsub.vx v10, v9, a0, v0.t
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %dst = call <4 x i32> @llvm.experimental.vp.reverse.v4i32(<4 x i32> %src, <4 x i1> %mask, i32 %evl)
   ret <4 x i32> %dst
@@ -55,7 +55,7 @@ define <4 x i32> @test_vp_reverse_v4i32(<4 x i32> %src, i32 zeroext %evl) {
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a1
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <4 x i1> undef, i1 1, i32 0
   %allones = shufflevector <4 x i1> %head, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -72,7 +72,7 @@ define <8 x i16> @test_vp_reverse_v8i16_masked(<8 x i16> %src, <8 x i1> %mask, i
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    vrsub.vx v10, v9, a0, v0.t
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %dst = call <8 x i16> @llvm.experimental.vp.reverse.v8i16(<8 x i16> %src, <8 x i1> %mask, i32 %evl)
   ret <8 x i16> %dst
@@ -86,7 +86,7 @@ define <8 x i16> @test_vp_reverse_v8i16(<8 x i16> %src, i32 zeroext %evl) {
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a1
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <8 x i1> %head, <8 x i1> undef, <8 x i32> zeroinitializer
@@ -104,7 +104,7 @@ define <16 x i8> @test_vp_reverse_v16i8_masked(<16 x i8> %src, <16 x i1> %mask, 
 ; CHECK-NEXT:    vrsub.vx v10, v10, a0, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vrgatherei16.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %dst = call <16 x i8> @llvm.experimental.vp.reverse.v16i8(<16 x i8> %src, <16 x i1> %mask, i32 %evl)
   ret <16 x i8> %dst
@@ -119,7 +119,7 @@ define <16 x i8> @test_vp_reverse_v16i8(<16 x i8> %src, i32 zeroext %evl) {
 ; CHECK-NEXT:    vrsub.vx v10, v10, a1
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vrgatherei16.vv v9, v8, v10
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <16 x i1> undef, i1 1, i32 0
   %allones = shufflevector <16 x i1> %head, <16 x i1> undef, <16 x i32> zeroinitializer
