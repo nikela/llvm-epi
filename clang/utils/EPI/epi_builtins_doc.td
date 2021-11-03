@@ -302,8 +302,6 @@ selected by a mask vector are contiguosly packed.}];
        if mask[element] then
           result[next_index] = a[element]
           next_index = next_index + 1
-
-    result[next_index : VLMAX] = 0
   }];
 }
 
@@ -913,7 +911,6 @@ the vector `b`}];
          current_max = max(current_max, a[element])
 
       result[0] = current_max
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -926,7 +923,6 @@ the vector `b`}];
            result[element] = merge[element]
 
       result[0] = current_max
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -946,7 +942,6 @@ the vector `b`}];
          current_min = max(current_min, a[element])
 
       result[0] = current_min
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -959,7 +954,6 @@ the vector `b`}];
            result[element] = merge[element]
 
       result[0] = current_min
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -982,7 +976,6 @@ This operation preserves the order of the floating-point addition as described.
          current_sum = current_sum + a[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -995,7 +988,6 @@ This operation preserves the order of the floating-point addition as described.
            result[element] = merge[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -1019,7 +1011,6 @@ operations can be reassociated for efficiency reasons.
          current_sum = current_sum + a[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -1032,7 +1023,6 @@ operations can be reassociated for efficiency reasons.
            result[element] = merge[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -1477,7 +1467,6 @@ with twice the number of bits as the original elements.
          current_sum = current_sum + fp_widen(a[element])
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -1490,7 +1479,6 @@ with twice the number of bits as the original elements.
            result[element] = merge[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -1513,7 +1501,6 @@ This builtin will compute the sum in any valid sequential order.
          current_sum = current_sum + fp_widen(a[element])
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -1526,7 +1513,6 @@ This builtin will compute the sum in any valid sequential order.
            result[element] = merge[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -2530,8 +2516,6 @@ Every other element in the resulting mask is disabled.
         result[element] = 1
       else
         break
-
-    result[element : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -2541,8 +2525,6 @@ Every other element in the resulting mask is disabled.
           result[element] = 1
         else
           break
-
-    result[element : VLMAX] = 0
   }];
 }
 
@@ -2564,8 +2546,6 @@ Every other element in the resulting mask is disabled.
       result[element] = 1
       if a[element] then
         break
-
-    result[element : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -2574,8 +2554,6 @@ Every other element in the resulting mask is disabled.
         result[element] = 1
         if a[element] then
           break
-
-    result[element : VLMAX] = 0
   }];
 }
 
@@ -2674,8 +2652,6 @@ except for the lowermost corresponding element enabled in the given mask.
         break
       else
         result[element] = 0
-
-    result[element : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -2686,8 +2662,6 @@ except for the lowermost corresponding element enabled in the given mask.
           break
         else
           result[element] = 0
-
-    result[element : VLMAX] = 0
   }];
 }
 
@@ -2993,7 +2967,6 @@ first element of the vector `b`.
          current_red = bitwise_and(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3006,7 +2979,6 @@ first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3027,7 +2999,6 @@ taken from the first element of the vector `b`.
          current_red = max(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3040,7 +3011,6 @@ taken from the first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3061,7 +3031,6 @@ taken from the first element of the vector `b`.
          current_red = maxu(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3074,7 +3043,6 @@ taken from the first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3095,7 +3063,6 @@ taken from the first element of the vector `b`.
          current_red = min(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3108,7 +3075,6 @@ taken from the first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3129,7 +3095,6 @@ taken from the first element of the vector `b`.
          current_red = minu(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3142,7 +3107,6 @@ taken from the first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3163,7 +3127,6 @@ first element of the vector `b`.
          current_red = bitwise_or(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3176,7 +3139,6 @@ first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3197,7 +3159,6 @@ first element of the vector `b`.
          current_sum = current_sum + a[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3210,7 +3171,6 @@ first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_sum
-      result[1 : VLMAX] = 0
   }];
 }
 
@@ -3231,7 +3191,6 @@ first element of the vector `b`.
          current_red = bitwise_xor(current_red, a[element])
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 
   let OperationMask = [{
@@ -3244,7 +3203,6 @@ first element of the vector `b`.
            result[element] = merge[element]
 
       result[0] = current_red
-      result[1 : VLMAX] = 0
   }];
 }
 
