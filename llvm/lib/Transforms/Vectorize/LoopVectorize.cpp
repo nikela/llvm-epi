@@ -3187,21 +3187,42 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
     if (Reverse) {
       // If the address is consecutive but reversed, then the
       // wide store needs to start at the last vector element.
-      // RunTimeVF =  VScale * VF.getKnownMinValue()
-      // For fixed-width VScale is 1, then RunTimeVF = VF.getKnownMinValue()
-      Value *RunTimeVF = getRuntimeVF(Builder, Builder.getInt32Ty(), VF);
-      // NumElt = -Part * RunTimeVF
-      Value *NumElt = Builder.CreateMul(Builder.getInt32(-Part), RunTimeVF);
-      // LastLane = 1 - RunTimeVF
-      Value *LastLane = Builder.CreateSub(Builder.getInt32(1), RunTimeVF);
+      Value *VecLen;
+      if (EVL) {
+        // If EVL is not nullptr, then EVL must be a valid value set during plan
+        // creation and must be used to correctly reverse the address
+        VecLen = State.get(EVL, Part);
+      } else {
+        // RunTimeVF =  VScale * VF.getKnownMinValue()
+        // For fixed-width VScale is 1, then RunTimeVF = VF.getKnownMinValue()
+        VecLen = getRuntimeVF(Builder, Builder.getInt32Ty(), VF);
+      }
+      // NumElt = -Part * VecLen
+      Value *NumElt = Builder.CreateMul(Builder.getInt32(-Part), VecLen);
+      // LastLane = 1 - VecLen
+      Value *LastLane = Builder.CreateSub(Builder.getInt32(1), VecLen);
       PartPtr =
           cast<GetElementPtrInst>(Builder.CreateGEP(ScalarDataTy, Ptr, NumElt));
       PartPtr->setIsInBounds(InBounds);
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, PartPtr, LastLane));
       PartPtr->setIsInBounds(InBounds);
-      if (isMaskRequired) // Reverse of a null all-one mask is a null mask.
-        BlockInMaskParts[Part] = reverseVector(BlockInMaskParts[Part]);
+      if (isMaskRequired) { // We reverse the mask only if it is not an all-ones mask.
+        if (EVL) {
+          Value *Mask = BlockInMaskParts[Part];
+          VectorType *MaskTy = cast<VectorType>(Mask->getType());
+          Function *VPIntr = Intrinsic::getDeclaration(
+              LoopVectorPreHeader->getModule(),
+              Intrinsic::experimental_vp_reverse, {MaskTy});
+          Value *BlockInMaskPart =
+              Builder.getTrueVector(MaskTy->getElementCount());
+
+          BlockInMaskParts[Part] = Builder.CreateCall(
+              VPIntr, {Mask, BlockInMaskPart, State.get(EVL, Part)});
+        } else {
+          BlockInMaskParts[Part] = reverseVector(BlockInMaskParts[Part]);
+        }
+      }
     } else {
       Value *Increment = createStepForVF(Builder, Builder.getInt32(Part), VF);
       PartPtr = cast<GetElementPtrInst>(
@@ -3291,7 +3312,21 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         if (Reverse) {
           // If we store to reverse consecutive memory locations, then we need
           // to reverse the order of elements in the stored value.
-          StoredVal = reverseVector(StoredVal);
+          if (EVLPart) {
+            VectorType *StoredValTy = cast<VectorType>(StoredVal->getType());
+            Function *VPIntr = Intrinsic::getDeclaration(
+                LoopVectorPreHeader->getModule(),
+                Intrinsic::experimental_vp_reverse, {StoredValTy});
+            Value *BlockInMaskPart =
+                isMaskRequired
+                    ? MaskValue(Part, StoredValTy->getElementCount())
+                    : Builder.getTrueVector(StoredValTy->getElementCount());
+
+            StoredVal = Builder.CreateCall(
+                VPIntr, {StoredVal, BlockInMaskPart, EVLPart});
+          } else {
+            StoredVal = reverseVector(StoredVal);
+          }
           // We don't want to update the value in the map as it might be used in
           // another expression. So don't call resetVectorValue(StoredVal).
         }
@@ -3406,8 +3441,23 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
 
       // Add metadata to the load, but setVectorValue to the reverse shuffle.
       addMetadata(NewLI, LI);
-      if (Reverse)
-        NewLI = reverseVector(NewLI);
+      if (Reverse) {
+        if (EVLPart) {
+            VectorType *LoadedValTy = cast<VectorType>(NewLI->getType());
+            Function *VPIntr = Intrinsic::getDeclaration(
+                LoopVectorPreHeader->getModule(),
+                Intrinsic::experimental_vp_reverse, {LoadedValTy});
+            Value *BlockInMaskPart =
+                isMaskRequired
+                    ? MaskValue(Part, LoadedValTy->getElementCount())
+                    : Builder.getTrueVector(LoadedValTy->getElementCount());
+
+            NewLI = Builder.CreateCall(
+                VPIntr, {NewLI, BlockInMaskPart, EVLPart});
+        } else {
+          NewLI = reverseVector(NewLI);
+        }
+      }
     }
 
     State.set(Def, NewLI, Part);

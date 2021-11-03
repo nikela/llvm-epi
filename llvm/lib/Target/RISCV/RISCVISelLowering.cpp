@@ -444,15 +444,29 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::Other, Custom);
     setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
-    static const unsigned IntegerVPOps[] = {
-        ISD::VP_ADD,         ISD::VP_SUB,         ISD::VP_MUL,
-        ISD::VP_SDIV,        ISD::VP_UDIV,        ISD::VP_SREM,
-        ISD::VP_UREM,        ISD::VP_AND,         ISD::VP_OR,
-        ISD::VP_XOR,         ISD::VP_ASHR,        ISD::VP_LSHR,
-        ISD::VP_SHL,         ISD::VP_REDUCE_ADD,  ISD::VP_REDUCE_MUL,
-        ISD::VP_REDUCE_AND,  ISD::VP_REDUCE_OR,   ISD::VP_REDUCE_XOR,
-        ISD::VP_REDUCE_SMAX, ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX,
-        ISD::VP_REDUCE_UMIN};
+    static const unsigned IntegerVPOps[] = {ISD::VP_ADD,
+                                            ISD::VP_SUB,
+                                            ISD::VP_MUL,
+                                            ISD::VP_SDIV,
+                                            ISD::VP_UDIV,
+                                            ISD::VP_SREM,
+                                            ISD::VP_UREM,
+                                            ISD::VP_AND,
+                                            ISD::VP_OR,
+                                            ISD::VP_XOR,
+                                            ISD::VP_ASHR,
+                                            ISD::VP_LSHR,
+                                            ISD::VP_SHL,
+                                            ISD::VP_REDUCE_ADD,
+                                            ISD::VP_REDUCE_MUL,
+                                            ISD::VP_REDUCE_AND,
+                                            ISD::VP_REDUCE_OR,
+                                            ISD::VP_REDUCE_XOR,
+                                            ISD::VP_REDUCE_SMAX,
+                                            ISD::VP_REDUCE_SMIN,
+                                            ISD::VP_REDUCE_UMAX,
+                                            ISD::VP_REDUCE_UMIN,
+                                            ISD::EXPERIMENTAL_VP_REVERSE};
 
     static const unsigned FloatingPointVPOps[] = {ISD::VP_FADD,
                                                   ISD::VP_FSUB,
@@ -466,7 +480,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_REDUCE_FMUL,
                                                   ISD::VP_REDUCE_SEQ_FMUL,
                                                   ISD::VP_REDUCE_FMIN,
-                                                  ISD::VP_REDUCE_FMAX};
+                                                  ISD::VP_REDUCE_FMAX,
+                                                  ISD::EXPERIMENTAL_VP_REVERSE};
 
     if (!Subtarget.is64Bit()) {
       // We must custom-lower certain vXi64 operations on RV32 due to the vector
@@ -547,6 +562,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::VP_SETCC, VT, Custom);
 
       setOperationAction(ISD::VP_SELECT, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
       setOperationAction(ISD::VP_TRUNC, VT, Custom);
     }
@@ -832,6 +848,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::VP_FPTOUI, VT, Custom);
 
           setOperationAction(ISD::VP_SELECT, VT, Custom);
+          setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
           setOperationAction(ISD::VP_TRUNC, VT, Custom);
 
@@ -3476,6 +3493,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::VSELECT_VL);
   case ISD::EXPERIMENTAL_VP_SPLICE:
     return lowerVPSpliceExperimental(Op, DAG);
+  case ISD::EXPERIMENTAL_VP_REVERSE:
+    return lowerVPReverseExperimental(Op, DAG);
   case ISD::VP_SEXT: {
     uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
@@ -8014,6 +8033,152 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
             (SrcType.isFloatingPoint() && DstType.isInteger())) &&
            "Wrong input/output vector types");
     Result = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+  }
+
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+SDValue RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  MVT XLenVT = Subtarget.getXLenVT();
+
+  // Ops indexes: 0->Op1, 1->Mask, 2->EVL
+  SmallVector<SDValue, 3> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    // Pass through operands which aren't fixed-length vectors.
+    if (!V.getValueType().isFixedLengthVector()) {
+      Ops.push_back(V);
+      continue;
+    }
+    // "cast" fixed length vector to a scalable vector.
+    MVT OpVT = V.getSimpleValueType();
+    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
+    assert(useRVVForFixedLengthVectorVT(OpVT) &&
+           "Only fixed length vectors are supported!");
+    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
+  }
+
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  MVT GatherVT = ContainerVT;
+  MVT IndicesVT = ContainerVT.changeVectorElementTypeToInteger();
+  // Check if we are working with mask vectors
+  bool IsMaskVector = ContainerVT.getVectorElementType() == MVT::i1;
+  if (IsMaskVector) {
+    switch(ContainerVT.getVectorElementCount().getKnownMinValue()) {
+    default: llvm_unreachable("Invalid factor size");
+    case 1: IndicesVT = MVT::i64; break;
+    case 2: IndicesVT = MVT::i32; break;
+    case 4: IndicesVT = MVT::i16; break;
+    case 8:
+    case 16:
+    case 32:
+    case 64: IndicesVT = MVT::i8; break;
+    }
+    GatherVT = IndicesVT = ContainerVT.changeVectorElementType(IndicesVT);
+
+    // Expand input operand
+    SDValue SplatOne = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, IndicesVT,
+                                    DAG.getConstant(1, DL, XLenVT), Ops[2]);
+    SDValue VMV0 = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, IndicesVT,
+                                    DAG.getConstant(0, DL, XLenVT), Ops[2]);
+    SDValue VMERGE = DAG.getNode(RISCVISD::VSELECT_VL, DL, IndicesVT, Ops[0],
+                                 SplatOne, VMV0, Ops[2]);
+    Ops[0] = VMERGE;
+  }
+
+  unsigned EltSize = GatherVT.getScalarSizeInBits();
+  unsigned MinSize = GatherVT.getSizeInBits().getKnownMinValue();
+  unsigned MaxVLMAX = 0;
+  unsigned VectorBitsMax = Subtarget.getMaxRVVVectorSizeInBits();
+  if (VectorBitsMax != 0)
+    MaxVLMAX = ((VectorBitsMax / EltSize) * MinSize) / RISCV::RVVBitsPerBlock;
+
+  unsigned GatherOpc = RISCVISD::VRGATHER_VV_VL;
+  // If this is SEW=8 and VLMAX is unknown or more than 256, we need
+  // to use vrgatherei16.vv.
+  // TODO: It's also possible to use vrgatherei16.vv for other types to
+  // decrease register width for the index calculation.
+  // NOTE: This code assumes VLMAX <= 65536 for LMUL=8 SEW=16.
+  if ((MaxVLMAX == 0 || MaxVLMAX > 256) && EltSize == 8) {
+    // If this is LMUL=8, we have to split before using vrgatherei16.vv.
+    // First, we splice the input operand in order to obtain:
+      // vd[i] = undef, when 0 <= i < VLEN - EVL
+      // vd[i] = v1[i - (VLEN - EVL)], when VLEN - EVL <= i < VLEN
+    // Then, we split the splice and reverse each half
+    // Finally, we concatenate the two halves in reverse order
+    // NOTE: It's also possible that, after splitting, VLMAX
+    // no longer requires vrgatherei16.vv.
+    if (MinSize == (8 * RISCV::RVVBitsPerBlock)) {
+      unsigned MinElts = GatherVT.getVectorMinNumElements();
+      SDValue VLMax = DAG.getNode(ISD::VSCALE, DL, XLenVT,
+                                  DAG.getConstant(MinElts, DL, XLenVT));
+      SDValue TrueMask =
+          DAG.getConstant(1, DL, GatherVT.changeVectorElementType(MVT::i1));
+
+      SDValue SPLICE = DAG.getNode(
+          ISD::EXPERIMENTAL_VP_SPLICE, DL, GatherVT,
+          {DAG.getUNDEF(GatherVT), Ops[0], Ops[2], TrueMask, VLMax, VLMax});
+
+      EVT LoVT, HiVT;
+      std::tie(LoVT, HiVT) = DAG.GetSplitDestVTs(GatherVT);
+      SDValue Lo, Hi;
+      std::tie(Lo, Hi) = DAG.SplitVector(SPLICE, DL);
+      SDValue LoMask, HiMask;
+      LoMask = HiMask =
+          DAG.getConstant(1, DL, LoVT.changeVectorElementType(MVT::i1));
+
+      SDValue LoRev = DAG.getNode(ISD::EXPERIMENTAL_VP_REVERSE, DL, LoVT, Lo,
+                                  LoMask, VLMax);
+      SDValue HiRev = DAG.getNode(ISD::EXPERIMENTAL_VP_REVERSE, DL, HiVT, Hi,
+                                  HiMask, VLMax);
+
+      // Reassemble the low and high pieces reversed.
+      // NOTE: this Result is unmasked (because we do not need masks for
+      // shuffles). If in the future this has to change, we can use a SELECT_VL
+      // between Result and UNDEF using the mask originally passed to VP_REVERSE
+      SDValue Result =
+          DAG.getNode(ISD::CONCAT_VECTORS, DL, GatherVT, HiRev, LoRev);
+
+      if (IsMaskVector) {
+        // Truncate Result back to a mask vector
+        Result = DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, Result,
+                             DAG.getConstant(0, DL, GatherVT),
+                             DAG.getCondCode(ISD::SETNE), Ops[1], Ops[2]);
+      }
+
+      if (!VT.isFixedLengthVector())
+        return Result;
+      return convertFromScalableVector(VT, Result, DAG, Subtarget);
+    }
+
+    // Just promote the int type to i16 which will double the LMUL.
+    IndicesVT = MVT::getVectorVT(MVT::i16, IndicesVT.getVectorElementCount());
+    GatherOpc = RISCVISD::VRGATHEREI16_VV_VL;
+  }
+
+  SDValue VID = DAG.getNode(RISCVISD::VID_VL, DL, IndicesVT, Ops[1], Ops[2]);
+  SDValue VecLen =
+      DAG.getNode(ISD::SUB, DL, XLenVT, Ops[2], DAG.getConstant(1, DL, XLenVT));
+  SDValue VecLenSplat =
+      DAG.getNode(RISCVISD::VMV_V_X_VL, DL, IndicesVT, VecLen, Ops[1], Ops[2]);
+  SDValue VRSUB = DAG.getNode(RISCVISD::SUB_VL, DL, IndicesVT, VecLenSplat, VID,
+                              Ops[1], Ops[2]);
+  SDValue Result =
+      DAG.getNode(GatherOpc, DL, GatherVT, Ops[0], VRSUB, Ops[1], Ops[2]);
+
+  if (IsMaskVector) {
+    // Truncate Result back to a mask vector
+    Result = DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, Result,
+                         DAG.getConstant(0, DL, GatherVT),
+                         DAG.getCondCode(ISD::SETNE), Ops[1], Ops[2]);
   }
 
   if (!VT.isFixedLengthVector())
