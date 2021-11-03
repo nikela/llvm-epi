@@ -2660,6 +2660,23 @@ void Record::checkRecordAssertions() {
   }
 }
 
+// Report a warning if the record has unused template arguments.
+void Record::checkUnusedTemplateArgs() {
+  for (const Init *TA : getTemplateArgs()) {
+    const RecordVal *Arg = getValue(TA);
+    // We allow silencing this warning using a double underscore in the name
+    // of the template argument.
+    StringRef Name = Arg->getName();
+    size_t LastColon = Name.find_last_of(':');
+    if (LastColon != StringRef::npos &&
+        Name.substr(LastColon + 1).startswith("__"))
+      continue;
+    if (!Arg->isUsed())
+      PrintWarning(Arg->getLoc(),
+                   "unused template argument: " + Twine(Name));
+  }
+}
+
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void RecordKeeper::dump() const { errs() << *this; }
 #endif

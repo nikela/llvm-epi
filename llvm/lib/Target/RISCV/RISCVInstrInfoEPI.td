@@ -1046,7 +1046,7 @@ class LMULHandler<int vlmul_>
   string VLMul_str = !if(Fractional, "1/" # VLMul, !cast<string>(VLMul));
 }
 
-class DoubleVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class DoubleVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r = !if(!not(Fractional),
     !cond(!eq(!cast<string>(evr), "VR") : VRM2,
@@ -1056,7 +1056,7 @@ class DoubleVR<RegisterClass evr, int vlmul_, int eew, int sew>
     VR);
 }
 
-class FourTimesVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class FourTimesVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r = !if(!not(Fractional),
      !cond(!eq(!cast<string>(evr), "VR") : VRM4,
@@ -1066,7 +1066,7 @@ class FourTimesVR<RegisterClass evr, int vlmul_, int eew, int sew>
   );
 }
 
-class EightTimesVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class EightTimesVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r = !if(!not(Fractional),
      !cond(!eq(!cast<string>(evr), "VR") : VRM8),
@@ -1077,7 +1077,7 @@ class EightTimesVR<RegisterClass evr, int vlmul_, int eew, int sew>
   );
 }
 
-class HalfVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class HalfVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r = 
     !cond(!eq(!cast<string>(evr), "VR") : VR,
@@ -1086,7 +1086,7 @@ class HalfVR<RegisterClass evr, int vlmul_, int eew, int sew>
           !eq(!cast<string>(evr), "VRM8") : VRM4);
 }
 
-class FourthVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class FourthVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r = 
      !cond(!eq(!cast<string>(evr), "VR") : VR,
@@ -1095,7 +1095,7 @@ class FourthVR<RegisterClass evr, int vlmul_, int eew, int sew>
            !eq(!cast<string>(evr), "VRM8") : VRM2);
 }
 
-class EighthVR<RegisterClass evr, int vlmul_, int eew, int sew>
+class EighthVR<RegisterClass evr, int vlmul_>
       : LMULHandler<vlmul_> {
   RegisterClass r =
      !cond(!eq(!cast<string>(evr), "VR") : VR,
@@ -1127,21 +1127,21 @@ class RegisterClassForIndex<int vlmul_, int sew, int eew, RegisterClass vr>
   RegisterClass r = !if(!not(Fractional),
                       // LMUL>=1
                       !if(!eq(sew, eew), vr,
-                      !if(!eq(eew, !mul(2, sew)), DoubleVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(eew, !mul(4, sew)), FourTimesVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(eew, !mul(8, sew)), EightTimesVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(2, eew), sew), HalfVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(4, eew), sew), FourthVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(8, eew), sew), EighthVR<vr, vlmul_, eew, sew>.r,
+                      !if(!eq(eew, !mul(2, sew)), DoubleVR<vr, vlmul_>.r,
+                      !if(!eq(eew, !mul(4, sew)), FourTimesVR<vr, vlmul_>.r,
+                      !if(!eq(eew, !mul(8, sew)), EightTimesVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(2, eew), sew), HalfVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(4, eew), sew), FourthVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(8, eew), sew), EighthVR<vr, vlmul_>.r,
                       !cast<RegisterClass>("RegisterClassForIndex invalid|vr="#vr#"|sew="#sew#"|eew="#eew#"|VLMul="#VLMul_str)))))))),
                       // LMUL<1
                       !if(!eq(sew, eew), vr,
-                      !if(!eq(eew, !mul(2, sew)), DoubleVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(eew, !mul(4, sew)), FourTimesVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(eew, !mul(8, sew)), EightTimesVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(2, eew), sew), HalfVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(4, eew), sew), FourthVR<vr, vlmul_, eew, sew>.r,
-                      !if(!eq(!mul(8, eew), sew), EighthVR<vr, vlmul_, eew, sew>.r,
+                      !if(!eq(eew, !mul(2, sew)), DoubleVR<vr, vlmul_>.r,
+                      !if(!eq(eew, !mul(4, sew)), FourTimesVR<vr, vlmul_>.r,
+                      !if(!eq(eew, !mul(8, sew)), EightTimesVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(2, eew), sew), HalfVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(4, eew), sew), FourthVR<vr, vlmul_>.r,
+                      !if(!eq(!mul(8, eew), sew), EighthVR<vr, vlmul_>.r,
                       !cast<RegisterClass>("RegisterClassForIndex invalid|vr="#vr#"|sew="#sew#"|eew="#eew#"|VLMul="#VLMul_str))))))))
                     );
 }
@@ -1799,7 +1799,7 @@ multiclass pat_intrinsic_binary_nomask<string intrinsic_name,
                                        ValueType result_type,
                                        ValueType op1_type,
                                        ValueType op2_type,
-                                       ValueType mask_type,
+                                       ValueType __mask_type,
                                        int sew,
                                        LMULInfo MInfo,
                                        VReg op1_reg_class,
@@ -1832,7 +1832,7 @@ multiclass pat_intrinsic_binary_mask_in<string intrinsic_name,
                                         ValueType mask_type,
                                         int sew,
                                         LMULInfo MInfo,
-                                        VReg result_reg_class,
+                                        VReg __result_reg_class,
                                         VReg op1_reg_class,
                                         DAGOperand op2_kind,
                                         bit swap = 0>

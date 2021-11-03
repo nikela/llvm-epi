@@ -9822,7 +9822,7 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
   else {
     auto *IVRecipe = new VPWidenCanonicalIVRecipe();
     Builder.getInsertBlock()->insert(IVRecipe, Builder.getInsertPoint());
-    IV = IVRecipe->getVPSingleValue();
+    IV = IVRecipe;
   }
   return IVCache[VPBB] = IV;
 }
