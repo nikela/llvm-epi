@@ -13,7 +13,7 @@ define void @intrinsic_vpopc_m_i64_nxv1i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_m_i64_nxv1i1
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}
+; CHECK:       vcpop.m a0, {{v[0-9]+}}
   %a = call i64 @llvm.epi.vpopc.i64.nxv1i1(
     <vscale x 1 x i1> undef,
     i64 undef)
@@ -33,7 +33,7 @@ define void @intrinsic_vpopc_mask_m_i64_nxv1i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_mask_m_i64_nxv1i1
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}, v0.t
+; CHECK:       vcpop.m a0, {{v[0-9]+}}, v0.t
   %a = call i64 @llvm.epi.vpopc.mask.i64.nxv1i1(
     <vscale x 1 x i1> undef,
     <vscale x 1 x i1> undef,
@@ -54,7 +54,7 @@ define void @intrinsic_vpopc_m_i64_nxv2i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_m_i64_nxv2i1
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}
+; CHECK:       vcpop.m a0, {{v[0-9]+}}
   %a = call i64 @llvm.epi.vpopc.i64.nxv2i1(
     <vscale x 2 x i1> undef,
     i64 undef)
@@ -74,7 +74,7 @@ define void @intrinsic_vpopc_mask_m_i64_nxv2i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_mask_m_i64_nxv2i1
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}, v0.t
+; CHECK:       vcpop.m a0, {{v[0-9]+}}, v0.t
   %a = call i64 @llvm.epi.vpopc.mask.i64.nxv2i1(
     <vscale x 2 x i1> undef,
     <vscale x 2 x i1> undef,
@@ -95,7 +95,7 @@ define void @intrinsic_vpopc_m_i64_nxv4i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_m_i64_nxv4i1
 ; CHECK:       vsetvli {{.*}}, a0, e16, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}
+; CHECK:       vcpop.m a0, {{v[0-9]+}}
   %a = call i64 @llvm.epi.vpopc.i64.nxv4i1(
     <vscale x 4 x i1> undef,
     i64 undef)
@@ -115,7 +115,7 @@ define void @intrinsic_vpopc_mask_m_i64_nxv4i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_mask_m_i64_nxv4i1
 ; CHECK:       vsetvli {{.*}}, a0, e16, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}, v0.t
+; CHECK:       vcpop.m a0, {{v[0-9]+}}, v0.t
   %a = call i64 @llvm.epi.vpopc.mask.i64.nxv4i1(
     <vscale x 4 x i1> undef,
     <vscale x 4 x i1> undef,
@@ -136,7 +136,7 @@ define void @intrinsic_vpopc_m_i64_nxv8i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_m_i64_nxv8i1
 ; CHECK:       vsetvli {{.*}}, a0, e8, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}
+; CHECK:       vcpop.m a0, {{v[0-9]+}}
   %a = call i64 @llvm.epi.vpopc.i64.nxv8i1(
     <vscale x 8 x i1> undef,
     i64 undef)
@@ -156,7 +156,7 @@ define void @intrinsic_vpopc_mask_m_i64_nxv8i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vpopc_mask_m_i64_nxv8i1
 ; CHECK:       vsetvli {{.*}}, a0, e8, m1, ta, mu
-; CHECK:       vpopc.m a0, {{v[0-9]+}}, v0.t
+; CHECK:       vcpop.m a0, {{v[0-9]+}}, v0.t
   %a = call i64 @llvm.epi.vpopc.mask.i64.nxv8i1(
     <vscale x 8 x i1> undef,
     <vscale x 8 x i1> undef,
@@ -110624,7 +110624,7 @@ define void @intrinsic_vmandnot_mm_nxv1i1_nxv1i1_nxv1i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmandnot_mm_nxv1i1_nxv1i1_nxv1i1
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vmandnot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmandn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 1 x i1> @llvm.epi.vmandnot.nxv1i1.nxv1i1(
     <vscale x 1 x i1> undef,
     <vscale x 1 x i1> undef,
@@ -110646,7 +110646,7 @@ define void @intrinsic_vmandnot_mm_nxv2i1_nxv2i1_nxv2i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmandnot_mm_nxv2i1_nxv2i1_nxv2i1
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vmandnot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmandn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 2 x i1> @llvm.epi.vmandnot.nxv2i1.nxv2i1(
     <vscale x 2 x i1> undef,
     <vscale x 2 x i1> undef,
@@ -110668,7 +110668,7 @@ define void @intrinsic_vmandnot_mm_nxv4i1_nxv4i1_nxv4i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmandnot_mm_nxv4i1_nxv4i1_nxv4i1
 ; CHECK:       vsetvli {{.*}}, a0, e16, m1, ta, mu
-; CHECK:       vmandnot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmandn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 4 x i1> @llvm.epi.vmandnot.nxv4i1.nxv4i1(
     <vscale x 4 x i1> undef,
     <vscale x 4 x i1> undef,
@@ -110690,7 +110690,7 @@ define void @intrinsic_vmandnot_mm_nxv8i1_nxv8i1_nxv8i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmandnot_mm_nxv8i1_nxv8i1_nxv8i1
 ; CHECK:       vsetvli {{.*}}, a0, e8, m1, ta, mu
-; CHECK:       vmandnot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmandn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 8 x i1> @llvm.epi.vmandnot.nxv8i1.nxv8i1(
     <vscale x 8 x i1> undef,
     <vscale x 8 x i1> undef,
@@ -110976,7 +110976,7 @@ define void @intrinsic_vmornot_mm_nxv1i1_nxv1i1_nxv1i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmornot_mm_nxv1i1_nxv1i1_nxv1i1
 ; CHECK:       vsetvli {{.*}}, a0, e64, m1, ta, mu
-; CHECK:       vmornot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmorn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 1 x i1> @llvm.epi.vmornot.nxv1i1.nxv1i1(
     <vscale x 1 x i1> undef,
     <vscale x 1 x i1> undef,
@@ -110998,7 +110998,7 @@ define void @intrinsic_vmornot_mm_nxv2i1_nxv2i1_nxv2i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmornot_mm_nxv2i1_nxv2i1_nxv2i1
 ; CHECK:       vsetvli {{.*}}, a0, e32, m1, ta, mu
-; CHECK:       vmornot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmorn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 2 x i1> @llvm.epi.vmornot.nxv2i1.nxv2i1(
     <vscale x 2 x i1> undef,
     <vscale x 2 x i1> undef,
@@ -111020,7 +111020,7 @@ define void @intrinsic_vmornot_mm_nxv4i1_nxv4i1_nxv4i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmornot_mm_nxv4i1_nxv4i1_nxv4i1
 ; CHECK:       vsetvli {{.*}}, a0, e16, m1, ta, mu
-; CHECK:       vmornot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmorn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 4 x i1> @llvm.epi.vmornot.nxv4i1.nxv4i1(
     <vscale x 4 x i1> undef,
     <vscale x 4 x i1> undef,
@@ -111042,7 +111042,7 @@ define void @intrinsic_vmornot_mm_nxv8i1_nxv8i1_nxv8i1() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vmornot_mm_nxv8i1_nxv8i1_nxv8i1
 ; CHECK:       vsetvli {{.*}}, a0, e8, m1, ta, mu
-; CHECK:       vmornot.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
+; CHECK:       vmorn.mm {{v[0-9]+}}, {{v[0-9]+}}, {{v[0-9]+}}
   %a = call <vscale x 8 x i1> @llvm.epi.vmornot.nxv8i1.nxv8i1(
     <vscale x 8 x i1> undef,
     <vscale x 8 x i1> undef,

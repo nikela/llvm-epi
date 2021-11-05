@@ -1365,14 +1365,14 @@ defm PseudoEPIVFNCVT_F_F  : pseudo_unary_v_w;
 
 defm PseudoEPIVID         : pseudo_nullary_v;
 
-defm PseudoEPIVPOPC       : pseudo_unary_x_m;
+defm PseudoEPIVCPOP       : pseudo_unary_x_m;
 defm PseudoEPIVFIRST      : pseudo_unary_x_m;
 
-defm PseudoEPIVMANDNOT    : pseudo_binary_m_mm;
+defm PseudoEPIVMANDN      : pseudo_binary_m_mm;
 defm PseudoEPIVMAND       : pseudo_binary_m_mm;
 defm PseudoEPIVMOR        : pseudo_binary_m_mm;
 defm PseudoEPIVMXOR       : pseudo_binary_m_mm;
-defm PseudoEPIVMORNOT     : pseudo_binary_m_mm;
+defm PseudoEPIVMORN       : pseudo_binary_m_mm;
 defm PseudoEPIVMNAND      : pseudo_binary_m_mm;
 defm PseudoEPIVMNOR       : pseudo_binary_m_mm;
 defm PseudoEPIVMXNOR      : pseudo_binary_m_mm;
@@ -2880,10 +2880,10 @@ defm "" : pat_intrinsic_binary_any_and_int_v_vx<"int_epi_vslide1down", "PseudoEP
 
 foreach mti = EPIAllMasks in {
   def : Pat<(int_epi_vpopc (mti.Mask VR:$rs2), AVL:$vl),
-            (!cast<Instruction>("PseudoEPIVPOPC_M_" # mti.MInfo.MX) $rs2,
+            (!cast<Instruction>("PseudoEPIVCPOP_M_" # mti.MInfo.MX) $rs2,
               (mti.Mask zero_reg), AVL:$vl, mti.SEW)>;
   def : Pat<(int_epi_vpopc_mask (mti.Mask VR:$rs2), (mti.Mask V0), AVL:$vl),
-            (!cast<Instruction>("PseudoEPIVPOPC_M_" # mti.MInfo.MX) $rs2,
+            (!cast<Instruction>("PseudoEPIVCPOP_M_" # mti.MInfo.MX) $rs2,
               (mti.Mask V0), AVL:$vl, mti.SEW)>;
 
   def : Pat<(int_epi_vfirst (mti.Mask VR:$rs2), AVL:$vl),
@@ -2917,11 +2917,11 @@ def : Pat<(vtp.Vector (int_epi_vcompress (vtp.Vector vtp.MInfo.vrclass:$rs2),
                    $rs2, $rs1, AVL:$vl, vtp.SEW)>;
 }
 
-defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmandnot", "PseudoEPIVMANDNOT">;
+defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmandnot", "PseudoEPIVMANDN">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmand", "PseudoEPIVMAND">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmor", "PseudoEPIVMOR">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmxor", "PseudoEPIVMXOR">;
-defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmornot", "PseudoEPIVMORNOT">;
+defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmornot", "PseudoEPIVMORN">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmnand", "PseudoEPIVMNAND">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmnor", "PseudoEPIVMNOR">;
 defm "" : pat_intrinsic_binary_m_mm<"int_epi_vmxnor", "PseudoEPIVMXNOR">;
