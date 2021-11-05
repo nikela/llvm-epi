@@ -378,7 +378,7 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
   // know whether the LoopVectorizer is safe to do or not.
   // We only consider to use single vector register (LMUL = 1) to vectorize.
   unsigned MaxVectorSizeInBits = ST->getMaxRVVVectorSizeInBits();
-  if (ST->hasStdExtV() && MaxVectorSizeInBits != 0)
+  if (ST->hasVInstructions() && MaxVectorSizeInBits != 0)
     return MaxVectorSizeInBits / RISCV::RVVBitsPerBlock;
   return BaseT::getMaxVScale();
 }
@@ -550,7 +550,8 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(vp_zext)                                                        \
   VP_INTRINSIC(vp_strided_load)                                                \
   VP_INTRINSIC(vp_strided_store)                                               \
-  VP_INTRINSIC(experimental_vp_splice)
+  VP_INTRINSIC(experimental_vp_splice)                                         \
+  VP_INTRINSIC(experimental_vp_reverse)
 #define VP_INTRINSIC(name) case Intrinsic::name:
   VP_INTRINSIC_LIST
 #undef VP_INTRINSIC

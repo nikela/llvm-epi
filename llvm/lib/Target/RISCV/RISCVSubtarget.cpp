@@ -116,7 +116,8 @@ const RegisterBankInfo *RISCVSubtarget::getRegBankInfo() const {
 #define MINIMUM_VLEN 64
 
 unsigned RISCVSubtarget::getMaxRVVVectorSizeInBits() const {
-  assert(hasStdExtV() && "Tried to get vector length without V support!");
+  assert(hasVInstructions() &&
+         "Tried to get vector length without Zve or V extension support!");
   if (RVVVectorBitsMax == 0)
     return 0;
   assert(RVVVectorBitsMax >= MINIMUM_VLEN && RVVVectorBitsMax <= 65536 &&
@@ -131,8 +132,8 @@ unsigned RISCVSubtarget::getMaxRVVVectorSizeInBits() const {
 }
 
 unsigned RISCVSubtarget::getMinRVVVectorSizeInBits() const {
-  assert(hasStdExtV() &&
-         "Tried to get vector length without V extension support!");
+  assert(hasVInstructions() &&
+         "Tried to get vector length without Zve or V extension support!");
   assert((RVVVectorBitsMin == 0 ||
           (RVVVectorBitsMin >= MINIMUM_VLEN && RVVVectorBitsMax <= 65536 &&
            isPowerOf2_32(RVVVectorBitsMin))) &&
@@ -148,8 +149,8 @@ unsigned RISCVSubtarget::getMinRVVVectorSizeInBits() const {
 }
 
 unsigned RISCVSubtarget::getMaxLMULForFixedLengthVectors() const {
-  assert(hasStdExtV() &&
-         "Tried to get maximum LMUL without V extension support!");
+  assert(hasVInstructions() &&
+         "Tried to get vector length without Zve or V extension support!");
   assert(RVVVectorLMULMax <= 8 && isPowerOf2_32(RVVVectorLMULMax) &&
          "V extension requires a LMUL to be at most 8 and a power of 2!");
   return PowerOf2Floor(
@@ -157,8 +158,8 @@ unsigned RISCVSubtarget::getMaxLMULForFixedLengthVectors() const {
 }
 
 unsigned RISCVSubtarget::getMaxELENForFixedLengthVectors() const {
-  assert(hasStdExtV() &&
-         "Tried to get maximum ELEN without V extension support!");
+  assert(hasVInstructions() &&
+         "Tried to get maximum ELEN without Zve or V extension support!");
   assert(RVVVectorELENMax <= 64 && RVVVectorELENMax >= 8 &&
          isPowerOf2_32(RVVVectorELENMax) &&
          "V extension requires a ELEN to be a power of 2 between 8 and 64!");
@@ -167,5 +168,5 @@ unsigned RISCVSubtarget::getMaxELENForFixedLengthVectors() const {
 }
 
 bool RISCVSubtarget::useRVVForFixedLengthVectors() const {
-  return hasStdExtV() && getMinRVVVectorSizeInBits() != 0;
+  return hasVInstructions() && getMinRVVVectorSizeInBits() != 0;
 }

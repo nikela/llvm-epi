@@ -8,7 +8,7 @@ define <vscale x 1 x i64> @nxv1i64(i64* %ptr, <vscale x 1 x i64> %indices, <vsca
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vsll.vi v8, v8, 3
 ; CHECK-NEXT:    vluxei64.v v9, (a0), v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v9
+; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
   %2 = call <vscale x 1 x i64> @llvm.masked.gather.nxv1i64.nxv1p0i64(<vscale x 1 x i64*> %1, i32 8, <vscale x 1 x i1> %mask, <vscale x 1 x i64> %passthru)
@@ -41,7 +41,7 @@ define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices,
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; CHECK-NEXT:    vsll.vi v8, v8, 3
 ; CHECK-NEXT:    vluxei64.v v16, (a0), v8, v0.t
-; CHECK-NEXT:    vmv8r.v v8, v16
+; CHECK-NEXT:    vmv.v.v v8, v16
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
   %2 = call <vscale x 8 x double> @llvm.masked.gather.nxv8f64.nxv8p0f64(<vscale x 8 x double*> %1, i32 8, <vscale x 8 x i1> %mask, <vscale x 8 x double> %passthru)
@@ -55,7 +55,7 @@ define <vscale x 2 x i32> @nxv2xi32(i32* %ptr, <vscale x 2 x i64> %indices, <vsc
 ; CHECK-NEXT:    vsll.vi v8, v8, 2
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v10, (a0), v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %1 = getelementptr i32, i32* %ptr, <vscale x 2 x i64> %indices
   %2 = call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0i32(<vscale x 2 x i32*> %1, i32 4, <vscale x 2 x i1> %mask, <vscale x 2 x i32> %passthru)
@@ -67,7 +67,7 @@ define <vscale x 2 x i32> @nxv2xi32_full(<vscale x 2 x i32*> %ptr, <vscale x 2 x
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v10, (zero), v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 entry:
   %x = call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0i32(<vscale x 2 x i32*> %ptr, i32 4,

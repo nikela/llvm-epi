@@ -14,19 +14,19 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    sub sp, sp, a3
 ; SPILL-O0-NEXT:    sd a2, 24(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
-; SPILL-O0-NEXT:    # implicit-def: $v8
+; SPILL-O0-NEXT:    # implicit-def: $v10
 ; SPILL-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
-; SPILL-O0-NEXT:    vle64.v v8, (a0)
-; SPILL-O0-NEXT:    # implicit-def: $v9
-; SPILL-O0-NEXT:    vle64.v v9, (a1)
-; SPILL-O0-NEXT:    # implicit-def: $v0_v1
-; SPILL-O0-NEXT:    vzip2.vv v0, v8, v9
-; SPILL-O0-NEXT:    vmv1r.v v8, v1
+; SPILL-O0-NEXT:    vle64.v v10, (a0)
+; SPILL-O0-NEXT:    # implicit-def: $v11
+; SPILL-O0-NEXT:    vle64.v v11, (a1)
+; SPILL-O0-NEXT:    # implicit-def: $v8_v9
+; SPILL-O0-NEXT:    vzip2.vv v8, v10, v11
+; SPILL-O0-NEXT:    vmv1r.v v10, v9
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    add a0, sp, a0
 ; SPILL-O0-NEXT:    addi a0, a0, 40
-; SPILL-O0-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
-; SPILL-O0-NEXT:    vmv1r.v v8, v0
+; SPILL-O0-NEXT:    vs1r.v v10, (a0) # Unknown-size Folded Spill
+; SPILL-O0-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9
 ; SPILL-O0-NEXT:    addi a0, sp, 40
 ; SPILL-O0-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    call foo
@@ -62,21 +62,21 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; SPILL-O2-NEXT:    vle64.v v8, (a0)
 ; SPILL-O2-NEXT:    vle64.v v9, (a1)
-; SPILL-O2-NEXT:    vzip2.vv v0, v8, v9
+; SPILL-O2-NEXT:    vzip2.vv v8, v8, v9
 ; SPILL-O2-NEXT:    addi a0, sp, 24
 ; SPILL-O2-NEXT:    csrr a1, vlenb
-; SPILL-O2-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
+; SPILL-O2-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vs1r.v v1, (a0) # Unknown-size Folded Spill
+; SPILL-O2-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    call foo
 ; SPILL-O2-NEXT:    vsetvli zero, s0, e64, m1, ta, mu
 ; SPILL-O2-NEXT:    addi a0, sp, 24
 ; SPILL-O2-NEXT:    csrr a1, vlenb
-; SPILL-O2-NEXT:    vl1r.v v0, (a0) # Unknown-size Folded Reload
+; SPILL-O2-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; SPILL-O2-NEXT:    add a0, a0, a1
-; SPILL-O2-NEXT:    vl1r.v v1, (a0) # Unknown-size Folded Reload
-; SPILL-O2-NEXT:    vse64.v v0, (s1)
-; SPILL-O2-NEXT:    vse64.v v1, (s1)
+; SPILL-O2-NEXT:    vl1r.v v9, (a0) # Unknown-size Folded Reload
+; SPILL-O2-NEXT:    vse64.v v8, (s1)
+; SPILL-O2-NEXT:    vse64.v v9, (s1)
 ; SPILL-O2-NEXT:    csrr a0, vlenb
 ; SPILL-O2-NEXT:    slli a0, a0, 1
 ; SPILL-O2-NEXT:    add sp, sp, a0

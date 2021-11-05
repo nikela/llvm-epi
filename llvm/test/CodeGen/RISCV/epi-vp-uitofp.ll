@@ -36,7 +36,7 @@ define <vscale x 2 x float> @uitofp.f32.i64(<vscale x 2 x i64> %a, i32 zeroext %
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.f.xu.w v10, v8
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.uitofp.nxv2f32.nxv2i64(<vscale x 2 x i64> %a,
@@ -50,7 +50,7 @@ define <vscale x 2 x float> @uitofp.f32.i64.mask(<vscale x 2 x i64> %a, <vscale 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.f.xu.w v10, v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.uitofp.nxv2f32.nxv2i64(

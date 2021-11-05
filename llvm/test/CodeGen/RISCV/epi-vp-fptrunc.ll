@@ -7,7 +7,7 @@ define <vscale x 2 x float> @fptrunc.f32.f64(<vscale x 2 x double> %a, i32 zeroe
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.f.f.w v10, v8
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(<vscale x 2 x double> %a,
@@ -21,7 +21,7 @@ define <vscale x 2 x float> @fptrunc.f32.f64.mask(<vscale x 2 x double> %a, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.f.f.w v10, v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x float> @llvm.vp.fptrunc.nxv2f32.nxv2f64(

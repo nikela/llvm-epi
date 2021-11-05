@@ -68,7 +68,7 @@ define <vscale x 2 x i32> @fptoui.i32.f64(<vscale x 2 x double> %a, i32 zeroext 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double> %a,
@@ -82,7 +82,7 @@ define <vscale x 2 x i32> @fptoui.i32.f64.mask(<vscale x 2 x double> %a, <vscale
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8, v0.t
-; CHECK-NEXT:    vmv1r.v v8, v10
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
 {
   %b = call <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(

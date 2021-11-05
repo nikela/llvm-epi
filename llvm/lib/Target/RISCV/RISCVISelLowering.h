@@ -313,8 +313,8 @@ enum NodeType : unsigned {
   VSEXT_VL,
   VZEXT_VL,
 
-  //  vpopc.m with additional mask and VL operands.
-  VPOPC_VL,
+  //  vcpop.m with additional mask and VL operands.
+  VCPOP_VL,
 
   // Reads value of CSR.
   // The first operand is a chain pointer. The second specifies address of the
@@ -672,6 +672,7 @@ private:
   SDValue lowerVPTruncToMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
                              unsigned RISCVISDOpc) const;
+  SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
                                             unsigned ExtendOpc) const;
   SDValue lowerGET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;

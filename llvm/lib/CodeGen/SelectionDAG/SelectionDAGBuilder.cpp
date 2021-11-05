@@ -6404,7 +6404,8 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
       // We have a full implementation of llvm.experimental.vp.splice
       // that we can use already.
       if (!DisableVPRedIntrinsics ||
-          Intrinsic == Intrinsic::experimental_vp_splice)
+          Intrinsic == Intrinsic::experimental_vp_splice ||
+          Intrinsic == Intrinsic::experimental_vp_reverse)
         visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
       else
         visitTargetIntrinsic(I, Intrinsic);

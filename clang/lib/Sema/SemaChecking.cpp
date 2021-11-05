@@ -1976,9 +1976,18 @@ Sema::CheckBuiltinFunctionCall(FunctionDecl *FDecl, unsigned BuiltinID,
     break;
   }
 
+  case Builtin::BI__builtin_elementwise_abs:
+    if (SemaBuiltinElementwiseMathOneArg(TheCall))
+      return ExprError();
+    break;
   case Builtin::BI__builtin_elementwise_min:
   case Builtin::BI__builtin_elementwise_max:
     if (SemaBuiltinElementwiseMath(TheCall))
+      return ExprError();
+    break;
+  case Builtin::BI__builtin_reduce_max:
+  case Builtin::BI__builtin_reduce_min:
+    if (SemaBuiltinReduceMath(TheCall))
       return ExprError();
     break;
   case Builtin::BI__builtin_matrix_transpose:
@@ -3373,6 +3382,18 @@ bool Sema::CheckPPCBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
   case PPC::BI__builtin_tabortdci:
     return SemaBuiltinConstantArgRange(TheCall, 0, 0, 31) ||
            SemaBuiltinConstantArgRange(TheCall, 2, 0, 31);
+  // According to GCC 'Basic PowerPC Built-in Functions Available on ISA 2.05',
+  // __builtin_(un)pack_longdouble are available only if long double uses IBM
+  // extended double representation.
+  case PPC::BI__builtin_unpack_longdouble:
+    if (SemaBuiltinConstantArgRange(TheCall, 1, 0, 1))
+      return true;
+    LLVM_FALLTHROUGH;
+  case PPC::BI__builtin_pack_longdouble:
+    if (&TI.getLongDoubleFormat() != &llvm::APFloat::PPCDoubleDouble())
+      return Diag(TheCall->getBeginLoc(), diag::err_ppc_builtin_requires_abi)
+             << "ibmlongdouble";
+    return false;
   case PPC::BI__builtin_altivec_dst:
   case PPC::BI__builtin_altivec_dstt:
   case PPC::BI__builtin_altivec_dstst:
@@ -4898,7 +4919,7 @@ void Sema::CheckArgAlignment(SourceLocation Loc, NamedDecl *FDecl,
   if (ArgAlign < ParamAlign)
     Diag(Loc, diag::warn_param_mismatched_alignment)
         << (int)ArgAlign.getQuantity() << (int)ParamAlign.getQuantity()
-        << ParamName << FDecl;
+        << ParamName << (FDecl != nullptr) << FDecl;
 }
 
 /// Handles the checks for format strings, non-POD arguments to vararg
@@ -5298,6 +5319,7 @@ ExprResult Sema::BuildAtomicExpr(SourceRange CallRange, SourceRange ExprRange,
   case AtomicExpr::AO__c11_atomic_fetch_and:
   case AtomicExpr::AO__c11_atomic_fetch_or:
   case AtomicExpr::AO__c11_atomic_fetch_xor:
+  case AtomicExpr::AO__c11_atomic_fetch_nand:
   case AtomicExpr::AO__opencl_atomic_fetch_and:
   case AtomicExpr::AO__opencl_atomic_fetch_or:
   case AtomicExpr::AO__opencl_atomic_fetch_xor:
@@ -7795,11 +7817,11 @@ checkFormatStringExpr(Sema &S, const Expr *E, ArrayRef<const Expr *> Args,
       // }
       if (HasVAListArg) {
         if (const ParmVarDecl *PV = dyn_cast<ParmVarDecl>(VD)) {
-          if (const NamedDecl *ND = dyn_cast<NamedDecl>(PV->getDeclContext())) {
+          if (const Decl *D = dyn_cast<Decl>(PV->getDeclContext())) {
             int PVIndex = PV->getFunctionScopeIndex() + 1;
-            for (const auto *PVFormat : ND->specific_attrs<FormatAttr>()) {
+            for (const auto *PVFormat : D->specific_attrs<FormatAttr>()) {
               // adjust for implicit parameter
-              if (const CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(ND))
+              if (const CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(D))
                 if (MD->isInstance())
                   ++PVIndex;
               // We also check if the formats are compatible.
@@ -16551,6 +16573,31 @@ static bool checkMathBuiltinElementType(Sema &S, SourceLocation Loc,
   return false;
 }
 
+bool Sema::SemaBuiltinElementwiseMathOneArg(CallExpr *TheCall) {
+  if (checkArgCount(*this, TheCall, 1))
+    return true;
+
+  ExprResult A = UsualUnaryConversions(TheCall->getArg(0));
+  SourceLocation ArgLoc = TheCall->getArg(0)->getBeginLoc();
+  if (A.isInvalid())
+    return true;
+
+  TheCall->setArg(0, A.get());
+  QualType TyA = A.get()->getType();
+  if (checkMathBuiltinElementType(*this, ArgLoc, TyA))
+    return true;
+
+  QualType EltTy = TyA;
+  if (auto *VecTy = EltTy->getAs<VectorType>())
+    EltTy = VecTy->getElementType();
+  if (EltTy->isUnsignedIntegerType())
+    return Diag(ArgLoc, diag::err_builtin_invalid_arg_type)
+           << 1 << /*signed integer or float ty*/ 3 << TyA;
+
+  TheCall->setType(TyA);
+  return false;
+}
+
 bool Sema::SemaBuiltinElementwiseMath(CallExpr *TheCall) {
   if (checkArgCount(*this, TheCall, 2))
     return true;
@@ -16578,6 +16625,26 @@ bool Sema::SemaBuiltinElementwiseMath(CallExpr *TheCall) {
   TheCall->setArg(0, A.get());
   TheCall->setArg(1, B.get());
   TheCall->setType(Res);
+  return false;
+}
+
+bool Sema::SemaBuiltinReduceMath(CallExpr *TheCall) {
+  if (checkArgCount(*this, TheCall, 1))
+    return true;
+
+  ExprResult A = UsualUnaryConversions(TheCall->getArg(0));
+  if (A.isInvalid())
+    return true;
+
+  TheCall->setArg(0, A.get());
+  const VectorType *TyA = A.get()->getType()->getAs<VectorType>();
+  if (!TyA) {
+    SourceLocation ArgLoc = TheCall->getArg(0)->getBeginLoc();
+    return Diag(ArgLoc, diag::err_builtin_invalid_arg_type)
+           << 1 << /* vector ty*/ 4 << A.get()->getType();
+  }
+
+  TheCall->setType(TyA->getElementType());
   return false;
 }
 
