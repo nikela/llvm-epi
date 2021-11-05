@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MLIR_DIALECT_LINALG_TRANSFORMS_BUFFERIZABLEOPINTERFACE
-#define MLIR_DIALECT_LINALG_TRANSFORMS_BUFFERIZABLEOPINTERFACE
+#ifndef BUFFERIZABLE_OP_INTERFACE
+#define BUFFERIZABLE_OP_INTERFACE
 
 include "mlir/IR/OpBase.td"
 
@@ -158,7 +158,22 @@ def BufferizableOpInterface : OpInterface<"BufferizableOpInterface"> {
           return failure();
         }]
       >,
+      InterfaceMethod<
+        /*desc=*/[{
+          Return `true` if the given OpOperand can be written to in-place. This
+          is the case for most ops, but some ops such as ConstantOp may
+          bufferize to non-writable (read-only) memory locations. This method
+          will never be called on OpResults that do not have a tensor type.
+        }],
+        /*retType=*/"bool",
+        /*methodName=*/"isWritable",
+        /*args=*/(ins "OpResult":$opResult),
+        /*methodBody=*/"",
+        /*defaultImplementation=*/[{
+          return true;
+        }]
+      >
   ];
 }
 
-#endif  // MLIR_DIALECT_LINALG_TRANSFORMS_BUFFERIZABLEOPINTERFACE
+#endif  // BUFFERIZABLE_OP_INTERFACE
