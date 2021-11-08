@@ -1126,12 +1126,22 @@ TEST(InstructionsTest, ShuffleMaskIsReplicationMask) {
           ReplicatedMask, GuessedReplicationFactor, GuessedVF));
       EXPECT_EQ(GuessedReplicationFactor, ReplicationFactor);
       EXPECT_EQ(GuessedVF, VF);
+
+      for (int OpVF : seq_inclusive(VF, 2 * VF + 1)) {
+        LLVMContext Ctx;
+        Type *OpVFTy = FixedVectorType::get(IntegerType::getInt1Ty(Ctx), OpVF);
+        Value *Op = ConstantVector::getNullValue(OpVFTy);
+        ShuffleVectorInst *SVI = new ShuffleVectorInst(Op, Op, ReplicatedMask);
+        EXPECT_EQ(SVI->isReplicationMask(GuessedReplicationFactor, GuessedVF),
+                  OpVF == VF);
+        delete SVI;
+      }
     }
   }
 }
 
 TEST(InstructionsTest, ShuffleMaskIsReplicationMask_undef) {
-  for (int ReplicationFactor : seq_inclusive(1, 6)) {
+  for (int ReplicationFactor : seq_inclusive(1, 4)) {
     for (int VF : seq_inclusive(1, 4)) {
       const auto ReplicatedMask = createReplicatedMask(ReplicationFactor, VF);
       int GuessedReplicationFactor = -1, GuessedVF = -1;
@@ -1165,7 +1175,7 @@ TEST(InstructionsTest, ShuffleMaskIsReplicationMask_undef) {
 }
 
 TEST(InstructionsTest, ShuffleMaskIsReplicationMask_Exhaustive_Correctness) {
-  for (int ShufMaskNumElts : seq_inclusive(1, 8)) {
+  for (int ShufMaskNumElts : seq_inclusive(1, 6)) {
     SmallVector<int> PossibleShufMaskElts;
     PossibleShufMaskElts.reserve(ShufMaskNumElts + 2);
     for (int PossibleShufMaskElt : seq_inclusive(-1, ShufMaskNumElts))
@@ -1194,8 +1204,9 @@ TEST(InstructionsTest, ShuffleMaskIsReplicationMask_Exhaustive_Correctness) {
         int Elt = std::get<0>(I);
         int ActualElt = std::get<0>(I);
 
-        if (Elt != -1)
+        if (Elt != -1) {
           EXPECT_EQ(Elt, ActualElt);
+        }
       }
 
       return /*Abort=*/false;

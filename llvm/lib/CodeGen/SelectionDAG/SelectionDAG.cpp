@@ -5402,8 +5402,7 @@ SDValue SelectionDAG::FoldConstantArithmetic(unsigned Opcode, const SDLoc &DL,
 // TODO: Merge with FoldConstantArithmetic
 SDValue SelectionDAG::FoldConstantVectorArithmetic(unsigned Opcode,
                                                    const SDLoc &DL, EVT VT,
-                                                   ArrayRef<SDValue> Ops,
-                                                   const SDNodeFlags Flags) {
+                                                   ArrayRef<SDValue> Ops) {
   // If the opcode is a target-specific ISD node, there's nothing we can
   // do here and the operand rules may not line up with the below, so
   // bail early.
@@ -5487,7 +5486,7 @@ SDValue SelectionDAG::FoldConstantVectorArithmetic(unsigned Opcode,
     }
 
     // Constant fold the scalar operands.
-    SDValue ScalarResult = getNode(Opcode, DL, SVT, ScalarOps, Flags);
+    SDValue ScalarResult = getNode(Opcode, DL, SVT, ScalarOps);
 
     // Legalize the (integer) scalar constant if necessary.
     if (LegalSVT != SVT)
@@ -9821,21 +9820,20 @@ unsigned SelectionDAG::AssignTopologicalOrder() {
   // before SortedPos will contain the topological sort index, and the
   // Node Id fields for nodes At SortedPos and after will contain the
   // count of outstanding operands.
-  for (allnodes_iterator I = allnodes_begin(),E = allnodes_end(); I != E; ) {
-    SDNode *N = &*I++;
-    checkForCycles(N, this);
-    unsigned Degree = N->getNumOperands();
+  for (SDNode &N : llvm::make_early_inc_range(allnodes())) {
+    checkForCycles(&N, this);
+    unsigned Degree = N.getNumOperands();
     if (Degree == 0) {
       // A node with no uses, add it to the result array immediately.
-      N->setNodeId(DAGSize++);
-      allnodes_iterator Q(N);
+      N.setNodeId(DAGSize++);
+      allnodes_iterator Q(&N);
       if (Q != SortedPos)
         SortedPos = AllNodes.insert(SortedPos, AllNodes.remove(Q));
       assert(SortedPos != AllNodes.end() && "Overran node list");
       ++SortedPos;
     } else {
       // Temporarily use the Node Id as scratch space for the degree count.
-      N->setNodeId(Degree);
+      N.setNodeId(Degree);
     }
   }
 
