@@ -11,13 +11,13 @@ An example of such misleading code follows:
 
 .. code-block:: c
 
-    #include <stdio.h>
+  #include <stdio.h>
 
-    short int א = (short int)0;
-    short int ג = (short int)12345;
+  short int א = (short int)0;
+  short int ג = (short int)12345;
 
-    int main() {
-      int א = ג; // a local variable, set to zero?
-      printf("ג is %d\n", ג);
-      printf("א is %d\n", א);
-    }
+  int main() {
+    int א = ג; // a local variable, set to zero?
+    printf("ג is %d\n", ג);
+    printf("א is %d\n", א);
+  }
