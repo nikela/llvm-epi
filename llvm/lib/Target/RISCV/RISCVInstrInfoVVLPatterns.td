@@ -26,6 +26,18 @@ def SDT_RISCVVLE_VL : SDTypeProfile<1, 2, [SDTCisVec<0>, SDTCisPtrTy<1>,
                                            SDTCisVT<2, XLenVT>]>;
 def SDT_RISCVVSE_VL : SDTypeProfile<0, 3, [SDTCisVec<0>, SDTCisPtrTy<1>,
                                            SDTCisVT<2, XLenVT>]>;
+def SDT_RISCVVLSE_VL : SDTypeProfile<1, 4, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
+                                           SDTCisInt<2>,
+                                           SDTCVecEltisVT<3, i1>,
+                                           SDTCisSameNumEltsAs<0, 3>,
+                                           SDTCisVT<4, XLenVT>]>;
+def SDT_RISCVVSSE_VL : SDTypeProfile<0, 5, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
+                                           SDTCisInt<2>,
+                                           SDTCVecEltisVT<3, i1>,
+                                           SDTCisSameNumEltsAs<0, 3>,
+                                           SDTCisVT<4, XLenVT>]>;
 
 def SDT_RISCVIntBinOp_VL : SDTypeProfile<1, 4, [SDTCisSameAs<0, 1>,
                                                 SDTCisSameAs<0, 2>,
@@ -68,6 +80,11 @@ def riscv_vfmv_s_f_vl : SDNode<"RISCVISD::VFMV_S_F_VL",
 def riscv_vle_vl : SDNode<"RISCVISD::VLE_VL", SDT_RISCVVLE_VL,
                           [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
 def riscv_vse_vl : SDNode<"RISCVISD::VSE_VL", SDT_RISCVVSE_VL,
+                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+
+def riscv_vlse_vl : SDNode<"RISCVISD::VLSE_VL", SDT_RISCVVLSE_VL,
+                          [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
+def riscv_vsse_vl : SDNode<"RISCVISD::VSSE_VL", SDT_RISCVVSSE_VL,
                           [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
 
 def riscv_add_vl   : SDNode<"RISCVISD::ADD_VL",   SDT_RISCVIntBinOp_VL, [SDNPCommutative]>;
@@ -814,6 +831,43 @@ foreach mti = AllMasks in {
   def : Pat<(riscv_vse_vl (mti.Mask VR:$rs2), BaseAddr:$rs1,
                           VLOpFrag),
             (store_instr VR:$rs2, BaseAddr:$rs1, GPR:$vl, mti.Log2SEW)>;
+}
+
+// Vector Strided Instructions
+foreach vti = AllVectors in {
+  defvar load_instr = !cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_"#vti.LMul.MX);
+  defvar load_instr_masked = !cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
+  defvar store_instr = !cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_"#vti.LMul.MX);
+  defvar store_instr_masked = !cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
+
+  // Load
+  def : Pat<(vti.Vector (riscv_vlse_vl BaseAddr:$rs1,
+                                      GPR:$rs2,
+                                      (vti.Mask true_mask),
+                                      VLOpFrag)),
+            (load_instr BaseAddr:$rs1, GPR:$rs2, GPR:$vl, vti.Log2SEW)>;
+  def : Pat<(vti.Vector (riscv_vlse_vl BaseAddr:$rs1,
+                                      GPR:$rs2,
+                                      (vti.Mask V0),
+                                      VLOpFrag)),
+            (load_instr_masked (vti.Vector (IMPLICIT_DEF)), BaseAddr:$rs1, GPR:$rs2,
+                               (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+
+  // Store
+  def : Pat<(riscv_vsse_vl (vti.Vector vti.RegClass:$rs2),
+                          BaseAddr:$rs1,
+                          GPR:$rs3,
+                          (vti.Mask true_mask),
+                          VLOpFrag),
+            (store_instr vti.RegClass:$rs2, BaseAddr:$rs1,
+                         GPR:$rs3, GPR:$vl, vti.Log2SEW)>;
+  def : Pat<(riscv_vsse_vl (vti.Vector vti.RegClass:$rs2),
+                          BaseAddr:$rs1,
+                          GPR:$rs3,
+                          (vti.Mask V0),
+                          VLOpFrag),
+            (store_instr_masked vti.RegClass:$rs2, BaseAddr:$rs1, GPR:$rs3,
+                                (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
 }
 
 // 12.1. Vector Single-Width Integer Add and Subtract

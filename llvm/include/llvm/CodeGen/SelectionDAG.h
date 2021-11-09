@@ -1352,6 +1352,14 @@ public:
   SDValue getLoadVP(EVT VT, const SDLoc &dl, SDValue Chain, SDValue Ptr,
                     SDValue Mask, SDValue EVL, MachineMemOperand *MMO,
                     bool IsExpanding = false);
+  SDValue getStridedLoadVP(ISD::MemIndexedMode AM, ISD::LoadExtType ExtType,
+                           EVT VT, const SDLoc &DL, SDValue Chain, SDValue Ptr,
+                           SDValue Offset, SDValue Stride, SDValue Mask,
+                           SDValue EVL, EVT MemVT, MachineMemOperand *MMO,
+                           bool IsExpanding);
+  SDValue getStridedLoadVP(EVT VT, const SDLoc &DL, SDValue Chain, SDValue Ptr,
+                           SDValue Stride, SDValue Mask, SDValue EVL,
+                           MachineMemOperand *MMO, bool IsExpanding);
   SDValue getExtLoadVP(ISD::LoadExtType ExtType, const SDLoc &dl, EVT VT,
                        SDValue Chain, SDValue Ptr, SDValue Mask, SDValue EVL,
                        MachinePointerInfo PtrInfo, EVT MemVT,
@@ -1371,6 +1379,10 @@ public:
   SDValue getStoreVP(SDValue Chain, const SDLoc &dl, SDValue Val, SDValue Ptr,
                      SDValue Mask, SDValue EVL, MachineMemOperand *MMO,
                      bool IsCompressing = false);
+  SDValue getStridedStoreVP(SDValue Chain, const SDLoc &DL, SDValue Val,
+                            SDValue Ptr, SDValue Stride, SDValue Mask,
+                            SDValue EVL, MachineMemOperand *MMO,
+                            bool IsCompressing);
   SDValue getTruncStoreVP(SDValue Chain, const SDLoc &dl, SDValue Val,
                           SDValue Ptr, SDValue Mask, SDValue EVL,
                           MachinePointerInfo PtrInfo, EVT SVT, Align Alignment,

@@ -3276,7 +3276,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
               Value *Operands[] = {StoredVal, SAV.BaseAddress, SAV.Stride,
                                    BlockInMaskPart, EVLPart};
               NewSI = Builder.CreateIntrinsic(
-                  Intrinsic::vp_strided_store,
+                  Intrinsic::experimental_vp_strided_store,
                   {StoredVal->getType(), PtrTy, SAV.Stride->getType()},
                   Operands);
               EmittedStridedAccess = true;
@@ -3380,7 +3380,7 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
             Value *Operands[] = {SAV.BaseAddress, SAV.Stride, BlockInMaskPart,
                                  EVLPart};
             NewLI =
-                Builder.CreateIntrinsic(Intrinsic::vp_strided_load,
+                Builder.CreateIntrinsic(Intrinsic::experimental_vp_strided_load,
                                         {DataTy, PtrTy, SAV.Stride->getType()},
                                         Operands, nullptr, "vp.strided.load");
             EmittedStridedAccess = true;

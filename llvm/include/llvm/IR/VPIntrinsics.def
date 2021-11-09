@@ -233,7 +233,7 @@ END_REGISTER_VP_INTRINSIC(vp_fma)
 ///// } Floating-Point Arithmetic
 
 ///// Memory Operations {
-// llvm.vp.store(ptr,val,mask,vlen)
+// llvm.vp.store(val,ptr,mask,vlen)
 BEGIN_REGISTER_VP_INTRINSIC(vp_store, 2, 3)
 // chain = VP_STORE chain,val,base,offset,mask,evl
 BEGIN_REGISTER_VP_SDNODE(VP_STORE, 0, vp_store, 4, 5)
@@ -241,6 +241,13 @@ HANDLE_VP_TO_OPC(Store)
 HANDLE_VP_TO_INTRIN(masked_store)
 HANDLE_VP_IS_MEMOP(vp_store, 1, 0)
 END_REGISTER_VP(vp_store, VP_STORE)
+
+// llvm.experimental.vp.strided.store(val,ptr,stride,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(experimental_vp_strided_store, 3, 4)
+// chain = EXPERIMENTAL_VP_STRIDED_STORE chain,val,base,offset,stride,mask,evl
+BEGIN_REGISTER_VP_SDNODE(EXPERIMENTAL_VP_STRIDED_STORE, 0, experimental_vp_strided_store, 5, 6)
+HANDLE_VP_IS_MEMOP(experimental_vp_strided_store, 1, 0)
+END_REGISTER_VP(experimental_vp_strided_store, EXPERIMENTAL_VP_STRIDED_STORE)
 
 // llvm.vp.scatter(ptr,val,mask,vlen)
 BEGIN_REGISTER_VP_INTRINSIC(vp_scatter, 2, 3)
@@ -258,6 +265,13 @@ HANDLE_VP_TO_OPC(Load)
 HANDLE_VP_TO_INTRIN(masked_load)
 HANDLE_VP_IS_MEMOP(vp_load, 0, None)
 END_REGISTER_VP(vp_load, VP_LOAD)
+
+// llvm.experimental.vp.strided.load(ptr,stride,mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(experimental_vp_strided_load, 2, 3)
+// chain = EXPERIMENTAL_VP_STRIDED_LOAD chain,base,offset,stride,mask,evl
+BEGIN_REGISTER_VP_SDNODE(EXPERIMENTAL_VP_STRIDED_LOAD, -1, experimental_vp_strided_load, 4, 5)
+HANDLE_VP_IS_MEMOP(experimental_vp_strided_load, 0, None)
+END_REGISTER_VP(experimental_vp_strided_load, EXPERIMENTAL_VP_STRIDED_LOAD)
 
 // llvm.vp.gather(ptr,mask,vlen)
 BEGIN_REGISTER_VP_INTRINSIC(vp_gather, 1, 2)

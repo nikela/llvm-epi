@@ -642,6 +642,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       setOperationAction(ISD::VP_LOAD, VT, Custom);
       setOperationAction(ISD::VP_STORE, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_STORE, VT, Custom);
       setOperationAction(ISD::VP_GATHER, VT, Custom);
       setOperationAction(ISD::VP_SCATTER, VT, Custom);
 
@@ -729,6 +731,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       setOperationAction(ISD::VP_LOAD, VT, Custom);
       setOperationAction(ISD::VP_STORE, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_STORE, VT, Custom);
       setOperationAction(ISD::VP_GATHER, VT, Custom);
       setOperationAction(ISD::VP_SCATTER, VT, Custom);
 
@@ -874,6 +878,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
         setOperationAction(ISD::VP_LOAD, VT, Custom);
         setOperationAction(ISD::VP_STORE, VT, Custom);
+        setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, VT, Custom);
+        setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_STORE, VT, Custom);
         setOperationAction(ISD::VP_GATHER, VT, Custom);
         setOperationAction(ISD::VP_SCATTER, VT, Custom);
 
@@ -967,6 +973,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
         setOperationAction(ISD::VP_LOAD, VT, Custom);
         setOperationAction(ISD::VP_STORE, VT, Custom);
+        setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, VT, Custom);
+        setOperationAction(ISD::EXPERIMENTAL_VP_STRIDED_STORE, VT, Custom);
         setOperationAction(ISD::VP_GATHER, VT, Custom);
         setOperationAction(ISD::VP_SCATTER, VT, Custom);
 
@@ -3495,6 +3503,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPSpliceExperimental(Op, DAG);
   case ISD::EXPERIMENTAL_VP_REVERSE:
     return lowerVPReverseExperimental(Op, DAG);
+  case ISD::EXPERIMENTAL_VP_STRIDED_LOAD:
+    return lowerVPStridedLoadExperimental(Op, DAG);
+  case ISD::EXPERIMENTAL_VP_STRIDED_STORE:
+    return lowerVPStridedStoreExperimental(Op, DAG);
   case ISD::VP_SEXT: {
     uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
@@ -4448,12 +4460,12 @@ static SDValue LowerVPIntrinsicConversion(SDValue Op, SelectionDAG &DAG) {
 
 #define VP_INTRINSIC_W_CHAIN_SET                                               \
   VP_INTRINSIC(vp_load)                                                        \
-  VP_INTRINSIC(vp_strided_load)                                                \
+  VP_INTRINSIC(experimental_vp_strided_load)                                                \
   VP_INTRINSIC(vp_gather)
 
 #define VP_INTRINSIC_VOID_SET                                                  \
   VP_INTRINSIC(vp_store)                                                       \
-  VP_INTRINSIC(vp_strided_store)                                               \
+  VP_INTRINSIC(experimental_vp_strided_store)                                               \
   VP_INTRINSIC(vp_scatter)
 
 static SDValue LowerVPINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG,
@@ -5140,7 +5152,7 @@ static SDValue LowerVPINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG,
 
     return DAG.getMergeValues({Result, Result.getValue(1)}, DL);
   }
-  case Intrinsic::vp_strided_load: {
+  case Intrinsic::experimental_vp_strided_load: {
     assert(Op.getOperand(5).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
@@ -5292,7 +5304,7 @@ static SDValue LowerVPINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG,
     return DAG.getNode(ISD::INTRINSIC_VOID, DL, Op->getVTList(), Operands);
     break;
   }
-  case Intrinsic::vp_strided_store: {
+  case Intrinsic::experimental_vp_strided_store: {
     assert(Op.getOperand(6).getValueType() == MVT::i32 && "Unexpected operand");
 
     std::vector<SDValue> Operands;
@@ -5440,11 +5452,11 @@ static SDValue LowerVPIntrinsic(unsigned IntNo, SDValue Op, SelectionDAG &DAG,
   case Intrinsic__vp_inttoptr:
     return LowerVPIntegerPointerConversion(Op, DAG);
   case Intrinsic__vp_load:
-  case Intrinsic__vp_strided_load:
+  case Intrinsic__experimental_vp_strided_load:
   case Intrinsic__vp_gather:
     return LowerVPINTRINSIC_W_CHAIN(Op, DAG, Subtarget);
   case Intrinsic__vp_store:
-  case Intrinsic__vp_strided_store:
+  case Intrinsic__experimental_vp_strided_store:
   case Intrinsic__vp_scatter:
     return LowerVPINTRINSIC_VOID(Op, DAG, Subtarget);
   }
@@ -8040,7 +8052,9 @@ SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
 }
 
-SDValue RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const {
+SDValue
+RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op,
+                                                SelectionDAG &DAG) const {
   SDLoc DL(Op);
   MVT VT = Op.getSimpleValueType();
   MVT XLenVT = Subtarget.getXLenVT();
@@ -8184,6 +8198,49 @@ SDValue RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op, SelectionDAG
   if (!VT.isFixedLengthVector())
     return Result;
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+SDValue
+RISCVTargetLowering::lowerVPStridedLoadExperimental(SDValue Op,
+                                                    SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector())
+    ContainerVT = getContainerForFixedLengthVector(VT);
+
+  SDVTList VTs = DAG.getVTList({ContainerVT, MVT::Other});
+  auto *VPNode = cast<VPStridedLoadSDNode>(Op);
+  SDValue Result = DAG.getMemIntrinsicNode(
+      RISCVISD::VLSE_VL, DL, VTs,
+      {VPNode->getChain(), VPNode->getBasePtr(), VPNode->getStride(),
+       VPNode->getMask(), VPNode->getVectorLength()},
+      VPNode->getMemoryVT(), VPNode->getMemOperand());
+
+  if (VT.isFixedLengthVector())
+    Result = convertFromScalableVector(VT, Result, DAG, Subtarget);
+
+  return DAG.getMergeValues({Result, VPNode->getChain()}, DL);
+}
+
+SDValue
+RISCVTargetLowering::lowerVPStridedStoreExperimental(SDValue Op,
+                                                    SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  auto *VPNode = cast<VPStridedStoreSDNode>(Op);
+  SDValue StoreVal = VPNode->getValue();
+  MVT VT = StoreVal.getSimpleValueType();
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector()) {
+    ContainerVT = getContainerForFixedLengthVector(VT);
+    StoreVal = convertToScalableVector(ContainerVT, StoreVal, DAG, Subtarget);
+  }
+
+  return DAG.getMemIntrinsicNode(
+      RISCVISD::VSSE_VL, DL, DAG.getVTList(MVT::Other),
+      {VPNode->getChain(), StoreVal, VPNode->getBasePtr(), VPNode->getStride(),
+       VPNode->getMask(), VPNode->getVectorLength()},
+      VPNode->getMemoryVT(), VPNode->getMemOperand());
 }
 
 // Custom lower MGATHER/VP_GATHER to a legalized form for RVV. It will then be
@@ -12635,6 +12692,8 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(VCPOP_VL)
   NODE_NAME_CASE(VLE_VL)
   NODE_NAME_CASE(VSE_VL)
+  NODE_NAME_CASE(VLSE_VL)
+  NODE_NAME_CASE(VSSE_VL)
   NODE_NAME_CASE(READ_CSR)
   NODE_NAME_CASE(WRITE_CSR)
   NODE_NAME_CASE(SWAP_CSR)
