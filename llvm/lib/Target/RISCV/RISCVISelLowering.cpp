@@ -1200,6 +1200,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setTargetDAGCombine(ISD::SRL);
     setTargetDAGCombine(ISD::SHL);
     setTargetDAGCombine(ISD::STORE);
+    setTargetDAGCombine(ISD::VP_STORE);
+    setTargetDAGCombine(ISD::EXPERIMENTAL_VP_REVERSE);
   }
 }
 
@@ -10357,6 +10359,66 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                               Store->getOriginalAlign(),
                               Store->getMemOperand()->getFlags());
       }
+    }
+
+    break;
+  }
+  case ISD::EXPERIMENTAL_VP_REVERSE: {
+    SDValue Load = N->getOperand(0);
+    if (Load.getOpcode() == ISD::VP_LOAD) {
+      SDLoc DL(N);
+      MVT XLenVT = Subtarget.getXLenVT();
+      auto *VPLoad = cast<VPLoadSDNode>(Load);
+      MVT VT = VPLoad->getSimpleValueType(0);
+      uint64_t ElementSizeInBytes =
+          VT.getVectorElementType().getFixedSizeInBits() / 8;
+      int8_t StrideValue = 0 - ElementSizeInBytes;
+      SDValue Stride = DAG.getConstant(StrideValue, DL, XLenVT);
+
+      // Base = baseptr + (vl-1)*size_of_element_in_bytes
+      SDValue VLMinus1 =
+          DAG.getNode(ISD::SUB, DL, XLenVT, VPLoad->getVectorLength(),
+                      DAG.getConstant(1, DL, XLenVT));
+      SDValue LastElementOffset =
+          DAG.getNode(ISD::MUL, DL, XLenVT, VLMinus1,
+                      DAG.getConstant(ElementSizeInBytes, DL, XLenVT));
+      SDValue Base = DAG.getNode(ISD::ADD, DL, XLenVT, VPLoad->getBasePtr(),
+                                 LastElementOffset);
+
+      return DAG.getStridedLoadVP(VT, DL, VPLoad->getChain(), Base, Stride,
+                                  VPLoad->getMask(), VPLoad->getVectorLength(),
+                                  VPLoad->getMemOperand(), VPLoad->isExpandingLoad());
+    }
+
+    break;
+  }
+  case ISD::VP_STORE: {
+    SDValue Val = N->getOperand(1);
+    if (Val.getOpcode() == ISD::EXPERIMENTAL_VP_REVERSE) {
+      SDLoc DL(N);
+      MVT XLenVT = Subtarget.getXLenVT();
+      SDValue OrigVal = Val.getOperand(0);
+      uint64_t ElementSizeInBytes =
+          Val.getSimpleValueType().getVectorElementType().getFixedSizeInBits() /
+          8;
+      int8_t StrideValue = 0 - ElementSizeInBytes;
+      SDValue Stride = DAG.getConstant(StrideValue, DL, XLenVT);
+
+      auto *VPStore = cast<VPStoreSDNode>(N);
+      // Base = baseptr + (vl-1)*size_of_element_in_bytes
+      SDValue VLMinus1 =
+          DAG.getNode(ISD::SUB, DL, XLenVT, VPStore->getVectorLength(),
+                      DAG.getConstant(1, DL, XLenVT));
+      SDValue LastElementOffset =
+          DAG.getNode(ISD::MUL, DL, XLenVT, VLMinus1,
+                      DAG.getConstant(ElementSizeInBytes, DL, XLenVT));
+      SDValue Base = DAG.getNode(ISD::ADD, DL, XLenVT, VPStore->getBasePtr(),
+                                 LastElementOffset);
+
+      return DAG.getStridedStoreVP(
+          VPStore->getChain(), DL, OrigVal, Base, Stride, VPStore->getMask(),
+          VPStore->getVectorLength(), VPStore->getMemOperand(),
+          VPStore->isCompressingStore());
     }
 
     break;
