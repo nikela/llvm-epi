@@ -37,10 +37,14 @@ public:
 
     // Each conversion should return a value of type mlir::Type.
     addConversion([&](BoxType box) { return convertBoxType(box); });
+    addConversion(
+        [&](fir::CharacterType charTy) { return convertCharType(charTy); });
     addConversion([&](fir::LogicalType boolTy) {
       return mlir::IntegerType::get(
           &getContext(), kindMapping.getLogicalBitsize(boolTy.getFKind()));
     });
+    addConversion(
+        [&](fir::PointerType pointer) { return convertPointerLike(pointer); });
     addConversion(
         [&](fir::RecordType derived) { return convertRecordType(derived); });
     addConversion(
@@ -146,6 +150,19 @@ public:
     return mlir::LLVM::LLVMPointerType::get(
         mlir::LLVM::LLVMStructType::getLiteral(&getContext(), dataDescFields,
                                                /*isPacked=*/false));
+  }
+
+  unsigned characterBitsize(fir::CharacterType charTy) {
+    return kindMapping.getCharacterBitsize(charTy.getFKind());
+  }
+
+  // fir.char<k,?>  -->  llvm<"ix">          where ix is scaled by kind mapping
+  // fir.char<k,n>  -->  llvm.array<n x "ix">
+  mlir::Type convertCharType(fir::CharacterType charTy) {
+    auto iTy = mlir::IntegerType::get(&getContext(), characterBitsize(charTy));
+    if (charTy.getLen() == fir::CharacterType::unknownLen())
+      return iTy;
+    return mlir::LLVM::LLVMArrayType::get(iTy, charTy.getLen());
   }
 
   // Use the target specifics to figure out how to map complex to LLVM IR. The
