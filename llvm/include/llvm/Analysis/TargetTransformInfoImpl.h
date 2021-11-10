@@ -25,6 +25,7 @@
 #include "llvm/IR/PatternMatch.h"
 #include "llvm/IR/Type.h"
 #include "llvm/Support/TypeSize.h"
+#include <utility>
 
 using namespace llvm::PatternMatch;
 
@@ -110,6 +111,11 @@ public:
   };
 
   unsigned getAssumedAddrSpace(const Value *V) const { return -1; }
+
+  std::pair<const Value *, unsigned>
+  getPredicatedAddrSpace(const Value *V) const {
+    return std::make_pair(nullptr, -1);
+  }
 
   Value *rewriteIntrinsicWithAddressSpace(IntrinsicInst *II, Value *OldV,
                                           Value *NewV) const {
@@ -402,6 +408,7 @@ public:
   unsigned getMinVectorRegisterBitWidth() const { return 128; }
 
   Optional<unsigned> getMaxVScale() const { return None; }
+  Optional<unsigned> getVScaleForTuning() const { return None; }
 
   std::pair<ElementCount, ElementCount>
   getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
@@ -569,13 +576,7 @@ public:
   }
 
   unsigned getReplicationShuffleCost(Type *EltTy, int ReplicationFactor, int VF,
-                                     const APInt &DemandedSrcElts,
                                      const APInt &DemandedReplicatedElts,
-                                     TTI::TargetCostKind CostKind) {
-    return 1;
-  }
-  unsigned getReplicationShuffleCost(Type *EltTy, int ReplicationFactor, int VF,
-                                     ArrayRef<int> Mask,
                                      TTI::TargetCostKind CostKind) {
     return 1;
   }
@@ -1138,10 +1139,17 @@ public:
               FixedVectorType::get(VecTy->getScalarType(), NumSubElts));
 
         int ReplicationFactor, VF;
-        if (Shuffle->isReplicationMask(ReplicationFactor, VF))
+        if (Shuffle->isReplicationMask(ReplicationFactor, VF)) {
+          APInt DemandedReplicatedElts =
+              APInt::getNullValue(Shuffle->getShuffleMask().size());
+          for (auto I : enumerate(Shuffle->getShuffleMask())) {
+            if (I.value() != UndefMaskElem)
+              DemandedReplicatedElts.setBit(I.index());
+          }
           return TargetTTI->getReplicationShuffleCost(
               VecSrcTy->getElementType(), ReplicationFactor, VF,
-              Shuffle->getShuffleMask(), CostKind);
+              DemandedReplicatedElts, CostKind);
+        }
 
         return CostKind == TTI::TCK_RecipThroughput ? -1 : 1;
       }

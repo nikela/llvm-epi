@@ -1574,7 +1574,7 @@ static bool isZeroAttribute(Attribute value) {
   if (auto fpValue = value.dyn_cast<FloatAttr>())
     return fpValue.getValue().isZero();
   if (auto splatValue = value.dyn_cast<SplatElementsAttr>())
-    return isZeroAttribute(splatValue.getSplatValue());
+    return isZeroAttribute(splatValue.getSplatValue<Attribute>());
   if (auto elementsValue = value.dyn_cast<ElementsAttr>())
     return llvm::all_of(elementsValue.getValues<Attribute>(), isZeroAttribute);
   if (auto arrayValue = value.dyn_cast<ArrayAttr>())
@@ -2426,7 +2426,7 @@ static constexpr const FastmathFlags fastmathFlagsList[] = {
 };
 
 void FMFAttr::print(DialectAsmPrinter &printer) const {
-  printer << "fastmath<";
+  printer << "<";
   auto flags = llvm::make_filter_range(fastmathFlagsList, [&](auto flag) {
     return bitEnumContains(this->getFlags(), flag);
   });
@@ -2464,7 +2464,7 @@ Attribute FMFAttr::parse(DialectAsmParser &parser, Type type) {
 }
 
 void LinkageAttr::print(DialectAsmPrinter &printer) const {
-  printer << "linkage<";
+  printer << "<";
   if (static_cast<uint64_t>(getLinkage()) <= getMaxEnumValForLinkage())
     printer << stringifyEnum(getLinkage());
   else
@@ -2580,7 +2580,7 @@ LoopOptionsAttr LoopOptionsAttr::get(MLIRContext *context,
 }
 
 void LoopOptionsAttr::print(DialectAsmPrinter &printer) const {
-  printer << getMnemonic() << "<";
+  printer << "<";
   llvm::interleaveComma(getOptions(), printer, [&](auto option) {
     printer << stringifyEnum(option.first) << " = ";
     switch (option.first) {

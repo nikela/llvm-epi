@@ -1225,11 +1225,10 @@ static OptimizationRemarkAnalysis createLVAnalysis(const char *PassName,
 }
 
 /// Return a value for Step multiplied by VF.
-static Value *createStepForVF(IRBuilder<> &B, Constant *Step, ElementCount VF) {
-  assert(isa<ConstantInt>(Step) && "Expected an integer step");
-  Constant *StepVal = ConstantInt::get(
-      Step->getType(),
-      cast<ConstantInt>(Step)->getSExtValue() * VF.getKnownMinValue());
+static Value *createStepForVF(IRBuilder<> &B, Type *Ty, ElementCount VF,
+                              int64_t Step) {
+  assert(Ty->isIntegerTy() && "Expected an integer step");
+  Constant *StepVal = ConstantInt::get(Ty, Step * VF.getKnownMinValue());
   return VF.isScalable() ? B.CreateVScale(StepVal) : StepVal;
 }
 
@@ -1903,6 +1902,7 @@ private:
   DenseMap<ElementCount, ScalarCostsTy> InstsToScalarize;
 
   /// Holds the instructions known to be uniform after vectorization.
+  /// Entries in Uniforms may demand either the first or last lane.
   /// The data is collected per VF.
   DenseMap<ElementCount, SmallPtrSet<Instruction *, 4>> Uniforms;
 
@@ -2760,8 +2760,7 @@ void InnerLoopVectorizer::buildScalarSteps(Value *ScalarIV, Value *Step,
   }
 
   for (unsigned Part = 0; Part < UF; ++Part) {
-    Value *StartIdx0 =
-        createStepForVF(Builder, ConstantInt::get(IntStepTy, Part), VF);
+    Value *StartIdx0 = createStepForVF(Builder, IntStepTy, VF, Part);
 
     if (!IsUniform && VF.isScalable()) {
       auto *SplatStartIdx = Builder.CreateVectorSplat(VF, StartIdx0);
@@ -3218,7 +3217,8 @@ void InnerLoopVectorizer::vectorizeMemoryInstruction(
         }
       }
     } else {
-      Value *Increment = createStepForVF(Builder, Builder.getInt32(Part), VF);
+      Value *Increment =
+          createStepForVF(Builder, Builder.getInt32Ty(), VF, Part);
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, Ptr, Increment));
       PartPtr->setIsInBounds(InBounds);
@@ -3608,7 +3608,7 @@ Value *InnerLoopVectorizer::getOrCreateVectorTripCount(Loop *L) {
 
   Type *Ty = TC->getType();
   // This is where we can make the step a runtime constant.
-  Value *Step = createStepForVF(Builder, ConstantInt::get(Ty, UF), VF);
+  Value *Step = createStepForVF(Builder, Ty, VF, UF);
 
   // If the tail is to be folded by masking, round the number of iterations N
   // up to a multiple of Step instead of rounding down. This is done by first
@@ -3697,8 +3697,7 @@ void InnerLoopVectorizer::emitMinimumIterationCountCheck(Loop *L,
   // If tail is to be folded, vector loop takes care of all iterations.
   Value *CheckMinIters = Builder.getFalse();
   if (!Cost->foldTailByMasking()) {
-    Value *Step =
-        createStepForVF(Builder, ConstantInt::get(Count->getType(), UF), VF);
+    Value *Step = createStepForVF(Builder, Count->getType(), VF, UF);
     CheckMinIters = Builder.CreateICmp(P, Count, Step, "min.iters.check");
   }
 
@@ -4175,7 +4174,7 @@ BasicBlock *InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // The loop step is equal to the vectorization factor (num of SIMD elements)
   // times the unroll factor (num of SIMD instructions).
   Builder.SetInsertPoint(&*Lp->getHeader()->getFirstInsertionPt());
-  Value *Step = createStepForVF(Builder, ConstantInt::get(IdxTy, UF), VF);
+  Value *Step = createStepForVF(Builder, IdxTy, VF, UF);
   Value *CountRoundDown = getOrCreateVectorTripCount(Lp);
   Induction =
       createInductionVariable(Lp, StartIdx, CountRoundDown, Step,
@@ -5217,8 +5216,8 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
       }
 
       for (unsigned Part = 0; Part < UF; ++Part) {
-        Value *PartStart = createStepForVF(
-            Builder, ConstantInt::get(PtrInd->getType(), Part), VF);
+        Value *PartStart =
+            createStepForVF(Builder, PtrInd->getType(), VF, Part);
 
         if (NeedsVectorIndex) {
           // Here we cache the whole vector, which means we can support the
@@ -6138,9 +6137,8 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
     assert(WideningDecision != CM_Unknown &&
            "Widening decision should be ready at this moment");
 
-    // A uniform memory op is itself uniform.  We exclude uniform stores
-    // here as they demand the last lane, not the first one.
-    if (isa<LoadInst>(I) && Legal->isUniformMemOp(*I) &&
+    // A uniform memory op is itself uniform.
+    if (Legal->isUniformMemOp(*I) &&
         !Hints->isFixedVectorizationDisabled()) {
       assert(WideningDecision == CM_Scalarize);
       return true;
@@ -6166,7 +6164,8 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
   SetVector<Value *> HasUniformUse;
 
   // Scan the loop for instructions which are either a) known to have only
-  // lane 0 demanded or b) are uses which demand only lane 0 of their operand.
+  // lane 0 or the last lane demanded or b) are uses which demand only
+  // lane 0 of their operand.
   for (auto *BB : TheLoop->blocks())
     for (auto &I : *BB) {
       if (IntrinsicInst *II = dyn_cast<IntrinsicInst>(&I)) {
@@ -6198,11 +6197,15 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
       if (!Ptr)
         continue;
 
-      // A uniform memory op is itself uniform.  We exclude uniform stores
-      // here as they demand the last lane, not the first one.
-      if (isa<LoadInst>(I) && Legal->isUniformMemOp(I) &&
-          !Hints->isFixedVectorizationDisabled())
-        addToWorklistIfAllowed(&I);
+      // A uniform memory op is itself uniform. Load instructions are added
+      // to the worklist as they demand the first lane. Since store instructions
+      // demand the last lane, we instead add these to Uniforms only.
+      if (Legal->isUniformMemOp(I) && !Hints->isFixedVectorizationDisabled()) {
+        if (isa<LoadInst>(I))
+          addToWorklistIfAllowed(&I);
+        else if (!isOutOfScope(&I) && !isScalarWithPredication(&I))
+          Uniforms[VF].insert(&I);
+      }
 
       if (isUniformDecision(&I, VF)) {
         assert(isVectorizedMemAccessUse(&I, Ptr) && "consistency check");
@@ -6997,20 +7000,28 @@ bool LoopVectorizationCostModel::isMoreProfitable(
     return RTCostA < RTCostB;
   }
 
-  // When set to preferred, for now assume vscale may be larger than 1, so
-  // that scalable vectorization is slightly favorable over fixed-width
-  // vectorization.
+  // Improve estimate for the vector width if it is scalable.
+  unsigned EstimatedWidthA = A.Width.getKnownMinValue();
+  unsigned EstimatedWidthB = B.Width.getKnownMinValue();
+  if (Optional<unsigned> VScale = TTI.getVScaleForTuning()) {
+    if (A.Width.isScalable())
+      EstimatedWidthA *= VScale.getValue();
+    if (B.Width.isScalable())
+      EstimatedWidthB *= VScale.getValue();
+  }
+
+  // When set to preferred, for now assume vscale may be larger than 1 (or the
+  // one being tuned for), so that scalable vectorization is slightly favorable
+  // over fixed-width vectorization.
   if (Hints->isScalableVectorizationPreferred() ||
       Hints->isFixedVectorizationDisabled())
     if (A.Width.isScalable() && !B.Width.isScalable())
-      return (CostA * B.Width.getKnownMinValue()) <=
-             (CostB * A.Width.getKnownMinValue());
+      return (CostA * B.Width.getFixedValue()) <= (CostB * EstimatedWidthA);
 
   // To avoid the need for FP division:
   //      (CostA / A.Width) < (CostB / B.Width)
   // <=>  (CostA * B.Width) < (CostB * A.Width)
-  return (CostA * B.Width.getKnownMinValue()) <
-         (CostB * A.Width.getKnownMinValue());
+  return (CostA * EstimatedWidthB) < (CostB * EstimatedWidthA);
 }
 
 VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
@@ -7054,11 +7065,22 @@ VectorizationFactor LoopVectorizationCostModel::selectVectorizationFactor(
       continue;
     }
     VectorizationFactor Candidate(i, C.first);
-    LLVM_DEBUG(
-        dbgs() << "LV: Vector loop of width " << i << " costs: "
-               << (Candidate.Cost / Candidate.Width.getKnownMinValue())
-               << (i.isScalable() ? " (assuming a minimum vscale of 1)" : "")
-               << ".\n");
+
+#ifndef NDEBUG
+    unsigned AssumedMinimumVscale = 1;
+    if (Optional<unsigned> VScale = TTI.getVScaleForTuning())
+      AssumedMinimumVscale = VScale.getValue();
+    unsigned Width =
+        Candidate.Width.isScalable()
+            ? Candidate.Width.getKnownMinValue() * AssumedMinimumVscale
+            : Candidate.Width.getFixedValue();
+    LLVM_DEBUG(dbgs() << "LV: Vector loop of width " << i
+                      << " costs: " << (Candidate.Cost / Width));
+    if (i.isScalable())
+      LLVM_DEBUG(dbgs() << " (assuming a minimum vscale of "
+                        << AssumedMinimumVscale << ")");
+    LLVM_DEBUG(dbgs() << ".\n");
+#endif
 
     if (!C.second && !ForceVectorization) {
       LLVM_DEBUG(
@@ -8581,10 +8603,9 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         // relying on instcombine to remove them.
         // Load: Scalar load + broadcast
         // Store: Scalar store + isLoopInvariantStoreValue ? 0 : extract
-        InstructionCost Cost;
         if (isa<StoreInst>(&I) && VF.isScalable() &&
             isLegalGatherOrScatter(&I)) {
-          Cost = getGatherScatterCost(&I, VF);
+          InstructionCost Cost = getGatherScatterCost(&I, VF);
           if (UseStridedAccesses && canUseStridedAccess(&I)) {
             setWideningDecision(&I, VF, CM_Strided, Cost);
             LLVM_DEBUG(llvm::dbgs() << "Can use strided access " << I << "\n");
@@ -8596,9 +8617,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
             setWideningDecision(&I, VF, CM_GatherScatter, Cost);
           }
         } else {
-          assert((isa<LoadInst>(&I) || !VF.isScalable()) &&
-                 "Cannot yet scalarize uniform stores");
-          Cost = getUniformMemOpCost(&I, VF);
+          InstructionCost Cost = getUniformMemOpCost(&I, VF);
           setWideningDecision(&I, VF, CM_Scalarize, Cost);
         }
         continue;
@@ -9603,7 +9622,7 @@ BasicBlock *EpilogueVectorizerMainLoop::emitMinimumIterationCountCheck(
       ICmpInst::ICMP_ULE : ICmpInst::ICMP_ULT;
 
   Value *CheckMinIters = Builder.CreateICmp(
-      P, Count, getRuntimeVF(Builder, Count->getType(), VFactor * UFactor),
+      P, Count, createStepForVF(Builder, Count->getType(), VFactor, UFactor),
       "min.iters.check");
 
   if (!ForEpilogue)
@@ -9755,10 +9774,11 @@ EpilogueVectorizerEpilogueLoop::emitMinimumVectorEpilogueIterCountCheck(
   auto P = Cost->requiresScalarEpilogue(EPI.EpilogueVF) ?
       ICmpInst::ICMP_ULE : ICmpInst::ICMP_ULT;
 
-  Value *CheckMinIters = Builder.CreateICmp(
-      P, Count,
-      getRuntimeVF(Builder, Count->getType(), EPI.EpilogueVF * EPI.EpilogueUF),
-      "min.epilog.iters.check");
+  Value *CheckMinIters =
+      Builder.CreateICmp(P, Count,
+                         createStepForVF(Builder, Count->getType(),
+                                         EPI.EpilogueVF, EPI.EpilogueUF),
+                         "min.epilog.iters.check");
 
   ReplaceInstWithInst(
       Insert->getTerminator(),
@@ -10727,16 +10747,20 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   // first-order recurrence.
   for (VPRecipeBase &R : Plan->getEntry()->getEntryBasicBlock()->phis()) {
     if (auto *RecurPhi = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R)) {
+      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
+      VPBasicBlock *InsertBlock = PrevRecipe->getParent();
+      auto *Region = GetReplicateRegion(PrevRecipe);
+      if (Region)
+        InsertBlock = cast<VPBasicBlock>(Region->getSingleSuccessor());
+      if (Region || PrevRecipe->isPhi())
+        Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
+      else
+        Builder.setInsertPoint(InsertBlock, std::next(PrevRecipe->getIterator()));
+
       auto *RecurSplice = cast<VPInstruction>(
           Builder.createNaryOp(VPInstruction::FirstOrderRecurrenceSplice,
                                {RecurPhi, RecurPhi->getBackedgeValue()}));
 
-      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
-      if (auto *Region = GetReplicateRegion(PrevRecipe)) {
-        VPBasicBlock *Succ = cast<VPBasicBlock>(Region->getSingleSuccessor());
-        RecurSplice->moveBefore(*Succ, Succ->getFirstNonPhi());
-      } else
-        RecurSplice->moveAfter(PrevRecipe);
       RecurPhi->replaceAllUsesWith(RecurSplice);
       // Set the first operand of RecurSplice to RecurPhi again, after replacing
       // all users.
@@ -10815,6 +10839,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   RSO.flush();
   Plan->setName(PlanName);
 
+  assert(VPlanVerifier::verifyPlanIsValid(*Plan) && "VPlan is invalid");
   return Plan;
 }
 
@@ -11182,6 +11207,16 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
     return;
   }
 
+  // If the instruction is a store to a uniform address, we only need to
+  // generate the last lane for the last UF part.
+  Instruction *I = getUnderlyingInstr();
+  if (State.VF.isVector() && IsUniform && isa<StoreInst>(I)) {
+    VPLane Lane = VPLane::getLastLaneForVF(State.VF);
+    State.ILV->scalarizeInstruction(
+        I, this, *this, VPIteration(State.UF - 1, Lane), IsPredicated, State);
+    return;
+  }
+
   // Generate scalar instances for all VF lanes of all UF parts, unless the
   // instruction is uniform inwhich case generate only the first lane for each
   // of the UF parts.
@@ -11190,9 +11225,8 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
          "Can't scalarize a scalable vector");
   for (unsigned Part = 0; Part < State.UF; ++Part)
     for (unsigned Lane = 0; Lane < EndLane; ++Lane)
-      State.ILV->scalarizeInstruction(getUnderlyingInstr(), this, *this,
-                                      VPIteration(Part, Lane), IsPredicated,
-                                      State);
+      State.ILV->scalarizeInstruction(I, this, *this, VPIteration(Part, Lane),
+                                      IsPredicated, State);
 }
 
 void VPBranchOnMaskRecipe::execute(VPTransformState &State) {

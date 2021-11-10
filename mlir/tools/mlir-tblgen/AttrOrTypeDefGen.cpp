@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "AttrOrTypeFormatGen.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/TableGen/AttrOrTypeDef.h"
 #include "mlir/TableGen/CodeGenHelpers.h"
@@ -23,6 +24,17 @@
 
 using namespace mlir;
 using namespace mlir::tblgen;
+
+//===----------------------------------------------------------------------===//
+// Utility Functions
+//===----------------------------------------------------------------------===//
+
+std::string mlir::tblgen::getParameterAccessorName(StringRef name) {
+  assert(!name.empty() && "parameter has empty name");
+  auto ret = "get" + name.str();
+  ret[3] = llvm::toUpper(ret[3]); // uppercase first letter of the name
+  return ret;
+}
 
 /// Find all the AttrOrTypeDef for the specified dialect. If no dialect
 /// specified and can only find one dialect's defs, use that.
@@ -399,7 +411,8 @@ void DefGenerator::emitDefDecl(const AttrOrTypeDef &def) {
        << "    }\n";
 
     // If mnemonic specified, emit print/parse declarations.
-    if (def.getParserCode() || def.getPrinterCode() || !params.empty()) {
+    if (def.getParserCode() || def.getPrinterCode() ||
+        def.getAssemblyFormat() || !params.empty()) {
       os << llvm::formatv(defDeclParsePrintStr, valueType,
                           isAttrGenerator ? ", ::mlir::Type type" : "");
     }
@@ -410,10 +423,8 @@ void DefGenerator::emitDefDecl(const AttrOrTypeDef &def) {
     def.getParameters(parameters);
 
     for (AttrOrTypeParameter &parameter : parameters) {
-      SmallString<16> name = parameter.getName();
-      name[0] = llvm::toUpper(name[0]);
-      os << formatv("    {0} get{1}() const;\n", parameter.getCppAccessorType(),
-                    name);
+      os << formatv("    {0} {1}() const;\n", parameter.getCppAccessorType(),
+                    getParameterAccessorName(parameter.getName()));
     }
   }
 
@@ -487,6 +498,60 @@ static ::mlir::OptionalParseResult generated{0}Parser(
                                       ::mlir::DialectAsmParser &parser,
                                       ::llvm::StringRef mnemonic{1},
                                       ::mlir::{0} &value) {{
+)";
+
+/// The code block for default attribute parser/printer dispatch boilerplate.
+/// {0}: the dialect fully qualified class name.
+static const char *const dialectDefaultAttrPrinterParserDispatch = R"(
+/// Parse an attribute registered to this dialect.
+::mlir::Attribute {0}::parseAttribute(::mlir::DialectAsmParser &parser,
+                                      ::mlir::Type type) const {{
+  ::llvm::SMLoc typeLoc = parser.getCurrentLocation();
+  ::llvm::StringRef attrTag;
+  if (failed(parser.parseKeyword(&attrTag)))
+    return {{};
+  {{
+    ::mlir::Attribute attr;
+    auto parseResult = generatedAttributeParser(parser, attrTag, type, attr);
+    if (parseResult.hasValue())
+      return attr;
+  }
+  parser.emitError(typeLoc) << "unknown  attribute `"
+      << attrTag << "` in dialect `" << getNamespace() << "`";
+  return {{};
+}
+/// Print an attribute registered to this dialect.
+void {0}::printAttribute(::mlir::Attribute attr,
+                         ::mlir::DialectAsmPrinter &printer) const {{
+  if (succeeded(generatedAttributePrinter(attr, printer)))
+    return;
+}
+)";
+
+/// The code block for default type parser/printer dispatch boilerplate.
+/// {0}: the dialect fully qualified class name.
+static const char *const dialectDefaultTypePrinterParserDispatch = R"(
+/// Parse a type registered to this dialect.
+::mlir::Type {0}::parseType(::mlir::DialectAsmParser &parser) const {{
+  llvm::SMLoc typeLoc = parser.getCurrentLocation();
+  StringRef mnemonic;
+  if (parser.parseKeyword(&mnemonic))
+    return Type();
+  Type genType;
+  OptionalParseResult parseResult =
+      generatedTypeParser(parser, mnemonic, genType);
+  if (parseResult.hasValue())
+    return genType;
+  parser.emitError(typeLoc) << "unknown  type `"
+      << mnemonic << "` in dialect `" << getNamespace() << "`";
+  return {{};
+}
+/// Print a type registered to this dialect.
+void {0}::printType(::mlir::Type type,
+                    ::mlir::DialectAsmPrinter &printer) const {{
+  if (succeeded(generatedTypePrinter(type, printer)))
+    return;
+}
 )";
 
 /// The code block used to start the auto-generated printer function.
@@ -700,8 +765,32 @@ void DefGenerator::emitStorageClass(const AttrOrTypeDef &def) {
 }
 
 void DefGenerator::emitParsePrint(const AttrOrTypeDef &def) {
+  auto printerCode = def.getPrinterCode();
+  auto parserCode = def.getParserCode();
+  auto assemblyFormat = def.getAssemblyFormat();
+  if (assemblyFormat && (printerCode || parserCode)) {
+    // Custom assembly format cannot be specified at the same time as either
+    // custom printer or parser code.
+    PrintFatalError(def.getLoc(),
+                    def.getName() + ": assembly format cannot be specified at "
+                                    "the same time as printer or parser code");
+  }
+
+  // Generate a parser and printer based on the assembly format, if specified.
+  if (assemblyFormat) {
+    // A custom assembly format requires accessors to be generated for the
+    // generated printer.
+    if (!def.genAccessors()) {
+      PrintFatalError(def.getLoc(),
+                      def.getName() +
+                          ": the generated printer from 'assemblyFormat' "
+                          "requires 'genAccessors' to be true");
+    }
+    return generateAttrOrTypeFormat(def, os);
+  }
+
   // Emit the printer code, if specified.
-  if (Optional<StringRef> printerCode = def.getPrinterCode()) {
+  if (printerCode) {
     // Both the mnenomic and printerCode must be defined (for parity with
     // parserCode).
     os << "void " << def.getCppClassName()
@@ -717,7 +806,7 @@ void DefGenerator::emitParsePrint(const AttrOrTypeDef &def) {
   }
 
   // Emit the parser code, if specified.
-  if (Optional<StringRef> parserCode = def.getParserCode()) {
+  if (parserCode) {
     FmtContext fmtCtxt;
     fmtCtxt.addSubst("_parser", "parser")
         .addSubst("_ctxt", "parser.getContext()");
@@ -857,11 +946,10 @@ void DefGenerator::emitDefDef(const AttrOrTypeDef &def) {
           paramStorageName = param.getName();
         }
 
-        SmallString<16> name = param.getName();
-        name[0] = llvm::toUpper(name[0]);
-        os << formatv("{0} {3}::get{1}() const {{ return getImpl()->{2}; }\n",
-                      param.getCppAccessorType(), name, paramStorageName,
-                      def.getCppClassName());
+        os << formatv("{0} {3}::{1}() const {{ return getImpl()->{2}; }\n",
+                      param.getCppAccessorType(),
+                      getParameterAccessorName(param.getName()),
+                      paramStorageName, def.getCppClassName());
       }
     }
   }
@@ -919,13 +1007,11 @@ void DefGenerator::emitParsePrintDispatch(ArrayRef<AttrOrTypeDef> defs) {
     os << formatv("    .Case<{0}::{1}>([&]({0}::{1} t) {{\n      ",
                   cppNamespace, cppClassName);
 
+    os << formatv("printer << {0}::{1}::getMnemonic();", cppNamespace,
+                  cppClassName);
     // If the def has no parameters and no printer, just print the mnemonic.
-    if (def.getNumParameters() == 0 && !def.getPrinterCode()) {
-      os << formatv("printer << {0}::{1}::getMnemonic();", cppNamespace,
-                    cppClassName);
-    } else {
+    if (def.getNumParameters() != 0 || def.getPrinterCode())
       os << "t.print(printer);";
-    }
     os << "\n      return ::mlir::success();\n    })\n";
   }
   os << llvm::formatv(
@@ -951,6 +1037,18 @@ bool DefGenerator::emitDefs(StringRef selectedDialect) {
       os << "DEFINE_EXPLICIT_TYPE_ID(" << def.getDialect().getCppNamespace()
          << "::" << def.getCppClassName() << ")\n";
   }
+
+  // Emit the default parser/printer for Attributes if the dialect asked for it.
+  if (valueType == "Attribute" &&
+      defs.front().getDialect().useDefaultAttributePrinterParser())
+    os << llvm::formatv(dialectDefaultAttrPrinterParserDispatch,
+                        defs.front().getDialect().getCppClassName());
+
+  // Emit the default parser/printer for Types if the dialect asked for it.
+  if (valueType == "Type" &&
+      defs.front().getDialect().useDefaultTypePrinterParser())
+    os << llvm::formatv(dialectDefaultTypePrinterParserDispatch,
+                        defs.front().getDialect().getCppClassName());
 
   return false;
 }

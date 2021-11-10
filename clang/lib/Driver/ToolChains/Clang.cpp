@@ -2702,13 +2702,9 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
 
   llvm::DenormalMode DenormalFPMath = DefaultDenormalFPMath;
   llvm::DenormalMode DenormalFP32Math = DefaultDenormalFP32Math;
-  // CUDA and HIP don't rely on the frontend to pass an ffp-contract option.
-  // If one wasn't given by the user, don't pass it here.
-  StringRef FPContract;
-  if (!JA.isDeviceOffloading(Action::OFK_Cuda) &&
-      !JA.isOffloading(Action::OFK_HIP))
-    FPContract = "on";
+  StringRef FPContract = "";
   bool StrictFPModel = false;
+
 
   if (const Arg *A = Args.getLastArg(options::OPT_flimited_precision_EQ)) {
     CmdArgs.push_back("-mlimit-float-precision");
@@ -2731,7 +2727,7 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
       ReciprocalMath = false;
       SignedZeros = true;
       // -fno_fast_math restores default denormal and fpcontract handling
-      FPContract = "on";
+      FPContract = "";
       DenormalFPMath = llvm::DenormalMode::getIEEE();
 
       // FIXME: The target may have picked a non-IEEE default mode here based on
@@ -2751,10 +2747,12 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
       // ffp-model= is a Driver option, it is entirely rewritten into more
       // granular options before being passed into cc1.
       // Use the gcc option in the switch below.
-      if (!FPModel.empty() && !FPModel.equals(Val))
+      if (!FPModel.empty() && !FPModel.equals(Val)) {
         D.Diag(clang::diag::warn_drv_overriding_flag_option)
-            << Args.MakeArgString("-ffp-model=" + FPModel)
-            << Args.MakeArgString("-ffp-model=" + Val);
+          << Args.MakeArgString("-ffp-model=" + FPModel)
+          << Args.MakeArgString("-ffp-model=" + Val);
+        FPContract = "";
+      }
       if (Val.equals("fast")) {
         optID = options::OPT_ffast_math;
         FPModel = Val;
@@ -2762,7 +2760,7 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
       } else if (Val.equals("precise")) {
         optID = options::OPT_ffp_contract;
         FPModel = Val;
-        FPContract = "on";
+        FPContract = "fast";
         PreciseFPModel = true;
       } else if (Val.equals("strict")) {
         StrictFPModel = true;
@@ -2850,9 +2848,9 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
     case options::OPT_ffp_contract: {
       StringRef Val = A->getValue();
       if (PreciseFPModel) {
-        // -ffp-model=precise enables ffp-contract=on.
-        // -ffp-model=precise sets PreciseFPModel to on and Val to
-        // "precise". FPContract is set.
+        // -ffp-model=precise enables ffp-contract=fast as a side effect
+        // the FPContract value has already been set to a string literal
+        // and the Val string isn't a pertinent value.
         ;
       } else if (Val.equals("fast") || Val.equals("on") || Val.equals("off"))
         FPContract = Val;
@@ -2945,27 +2943,23 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
       AssociativeMath = false;
       ReciprocalMath = false;
       SignedZeros = true;
+      TrappingMath = false;
+      RoundingFPMath = false;
       // -fno_fast_math restores default denormal and fpcontract handling
       DenormalFPMath = DefaultDenormalFPMath;
       DenormalFP32Math = llvm::DenormalMode::getIEEE();
-      if (!JA.isDeviceOffloading(Action::OFK_Cuda) &&
-          !JA.isOffloading(Action::OFK_HIP))
-        if (FPContract == "fast") {
-          FPContract = "on";
-          D.Diag(clang::diag::warn_drv_overriding_flag_option)
-              << "-ffp-contract=fast"
-              << "-ffp-contract=on";
-        }
+      FPContract = "";
       break;
     }
     if (StrictFPModel) {
       // If -ffp-model=strict has been specified on command line but
       // subsequent options conflict then emit warning diagnostic.
-      if (HonorINFs && HonorNaNs && !AssociativeMath && !ReciprocalMath &&
-          SignedZeros && TrappingMath && RoundingFPMath &&
-          DenormalFPMath == llvm::DenormalMode::getIEEE() &&
-          DenormalFP32Math == llvm::DenormalMode::getIEEE() &&
-          FPContract.equals("off"))
+      if (HonorINFs && HonorNaNs &&
+        !AssociativeMath && !ReciprocalMath &&
+        SignedZeros && TrappingMath && RoundingFPMath &&
+        (FPContract.equals("off") || FPContract.empty()) &&
+        DenormalFPMath == llvm::DenormalMode::getIEEE() &&
+        DenormalFP32Math == llvm::DenormalMode::getIEEE())
         // OK: Current Arg doesn't conflict with -ffp-model=strict
         ;
       else {
@@ -3204,13 +3198,43 @@ static void RenderSSPOptions(const Driver &D, const ToolChain &TC,
   const std::string &TripleStr = EffectiveTriple.getTriple();
   if (Arg *A = Args.getLastArg(options::OPT_mstack_protector_guard_EQ)) {
     StringRef Value = A->getValue();
-    if (!EffectiveTriple.isX86() && !EffectiveTriple.isAArch64())
+    if (!EffectiveTriple.isX86() && !EffectiveTriple.isAArch64() &&
+        !EffectiveTriple.isARM() && !EffectiveTriple.isThumb())
       D.Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getAsString(Args) << TripleStr;
-    if (EffectiveTriple.isX86() && Value != "tls" && Value != "global") {
+    if ((EffectiveTriple.isX86() || EffectiveTriple.isARM() ||
+         EffectiveTriple.isThumb()) &&
+        Value != "tls" && Value != "global") {
       D.Diag(diag::err_drv_invalid_value_with_suggestion)
           << A->getOption().getName() << Value << "tls global";
       return;
+    }
+    if ((EffectiveTriple.isARM() || EffectiveTriple.isThumb()) &&
+        Value == "tls") {
+      if (!Args.hasArg(options::OPT_mstack_protector_guard_offset_EQ)) {
+        D.Diag(diag::err_drv_ssp_missing_offset_argument)
+            << A->getAsString(Args);
+        return;
+      }
+      // Check whether the target subarch supports the hardware TLS register
+      if (arm::getARMSubArchVersionNumber(EffectiveTriple) < 7 &&
+          llvm::ARM::parseArch(EffectiveTriple.getArchName()) !=
+              llvm::ARM::ArchKind::ARMV6T2) {
+        D.Diag(diag::err_target_unsupported_tp_hard)
+            << EffectiveTriple.getArchName();
+        return;
+      }
+      // Check whether the user asked for something other than -mtp=cp15
+      if (Arg *A = Args.getLastArg(options::OPT_mtp_mode_EQ)) {
+        StringRef Value = A->getValue();
+        if (Value != "cp15") {
+          D.Diag(diag::err_drv_argument_not_allowed_with)
+              << A->getAsString(Args) << "-mstack-protector-guard=tls";
+          return;
+        }
+      }
+      CmdArgs.push_back("-target-feature");
+      CmdArgs.push_back("+read-tp-hard");
     }
     if (EffectiveTriple.isAArch64() && Value != "sysreg" && Value != "global") {
       D.Diag(diag::err_drv_invalid_value_with_suggestion)
@@ -3222,12 +3246,19 @@ static void RenderSSPOptions(const Driver &D, const ToolChain &TC,
 
   if (Arg *A = Args.getLastArg(options::OPT_mstack_protector_guard_offset_EQ)) {
     StringRef Value = A->getValue();
-    if (!EffectiveTriple.isX86() && !EffectiveTriple.isAArch64())
+    if (!EffectiveTriple.isX86() && !EffectiveTriple.isAArch64() &&
+        !EffectiveTriple.isARM() && !EffectiveTriple.isThumb())
       D.Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getAsString(Args) << TripleStr;
     int Offset;
     if (Value.getAsInteger(10, Offset)) {
       D.Diag(diag::err_drv_invalid_value) << A->getOption().getName() << Value;
+      return;
+    }
+    if ((EffectiveTriple.isARM() || EffectiveTriple.isThumb()) &&
+        (Offset < 0 || Offset > 0xfffff)) {
+      D.Diag(diag::err_drv_invalid_int_value)
+          << A->getOption().getName() << Value;
       return;
     }
     A->render(Args, CmdArgs);
