@@ -24,7 +24,7 @@ define dso_local void @simple_scatter(i32 signext %N, double* noalias nocapture 
 ; CHECK-NEXT:    [[TMP4:%.*]] = bitcast i64* [[TMP0]] to <vscale x 8 x i64>*
 ; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i64> @llvm.vp.load.nxv8i64.p0nxv8i64(<vscale x 8 x i64>* [[TMP4]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[ISA:%.*]], <vscale x 8 x i64> [[VP_OP_LOAD]]
-; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> shufflevector (<vscale x 8 x double> insertelement (<vscale x 8 x double> poison, double 0.000000e+00, i32 0), <vscale x 8 x double> poison, <vscale x 8 x i32> zeroinitializer), <vscale x 8 x double*> [[TMP5]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK-NEXT:    call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> zeroinitializer, <vscale x 8 x double*> [[TMP5]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK-NEXT:    [[TMP6:%.*]] = and i64 [[TMP2]], 4294967295
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
 ; CHECK-NEXT:    [[TMP7:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
@@ -48,7 +48,7 @@ define dso_local void @simple_scatter(i32 signext %N, double* noalias nocapture 
 ; CHECK1-NEXT:    [[TMP4:%.*]] = bitcast i64* [[TMP0]] to <vscale x 1 x i64>*
 ; CHECK1-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x i64> @llvm.vp.load.nxv1i64.p0nxv1i64(<vscale x 1 x i64>* [[TMP4]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK1-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[ISA:%.*]], <vscale x 1 x i64> [[VP_OP_LOAD]]
-; CHECK1-NEXT:    call void @llvm.vp.scatter.nxv1f64.nxv1p0f64(<vscale x 1 x double> shufflevector (<vscale x 1 x double> insertelement (<vscale x 1 x double> poison, double 0.000000e+00, i32 0), <vscale x 1 x double> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double*> [[TMP5]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK1-NEXT:    call void @llvm.vp.scatter.nxv1f64.nxv1p0f64(<vscale x 1 x double> zeroinitializer, <vscale x 1 x double*> [[TMP5]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK1-NEXT:    [[TMP6:%.*]] = and i64 [[TMP2]], 4294967295
 ; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
 ; CHECK1-NEXT:    [[TMP7:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]

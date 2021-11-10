@@ -73,7 +73,7 @@ define dso_local void @highRegUage(i32 signext %N, double* noalias nocapture %c,
 ; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[OFFSET_IDX]], i32 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 4 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP2:%.*]] = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
-; CHECK-NEXT:    [[TMP3:%.*]] = add <vscale x 4 x i64> [[TMP2]], shufflevector (<vscale x 4 x i64> insertelement (<vscale x 4 x i64> poison, i64 0, i32 0), <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP3:%.*]] = add <vscale x 4 x i64> [[TMP2]], zeroinitializer
 ; CHECK-NEXT:    [[TMP4:%.*]] = mul <vscale x 4 x i64> [[TMP3]], shufflevector (<vscale x 4 x i64> insertelement (<vscale x 4 x i64> poison, i64 1, i32 0), <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 4 x i64> [[BROADCAST_SPLAT2]], [[TMP4]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = add i64 [[OFFSET_IDX]], 0
@@ -183,7 +183,7 @@ define dso_local void @highRegUage(i32 signext %N, double* noalias nocapture %c,
 ; CHECK1-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[OFFSET_IDX]], i32 0
 ; CHECK1-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK1-NEXT:    [[TMP2:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
-; CHECK1-NEXT:    [[TMP3:%.*]] = add <vscale x 1 x i64> [[TMP2]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 0, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP3:%.*]] = add <vscale x 1 x i64> [[TMP2]], zeroinitializer
 ; CHECK1-NEXT:    [[TMP4:%.*]] = mul <vscale x 1 x i64> [[TMP3]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 1, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[INDUCTION:%.*]] = add <vscale x 1 x i64> [[BROADCAST_SPLAT2]], [[TMP4]]
 ; CHECK1-NEXT:    [[TMP5:%.*]] = add i64 [[OFFSET_IDX]], 0
