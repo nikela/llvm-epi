@@ -10370,6 +10370,10 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       MVT XLenVT = Subtarget.getXLenVT();
       auto *VPLoad = cast<VPLoadSDNode>(Load);
       MVT VT = VPLoad->getSimpleValueType(0);
+      if (VT.getVectorElementType() == MVT::i1) {
+        // We do not have a strided_load version for masks
+        break;
+      }
       uint64_t ElementSizeInBytes =
           VT.getVectorElementType().getFixedSizeInBits() / 8;
       int8_t StrideValue = 0 - ElementSizeInBytes;
@@ -10398,8 +10402,12 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       SDLoc DL(N);
       MVT XLenVT = Subtarget.getXLenVT();
       SDValue OrigVal = Val.getOperand(0);
+      if (OrigVal.getSimpleValueType().getVectorElementType() == MVT::i1) {
+        // We do not have a strided_store version for masks
+        break;
+      }
       uint64_t ElementSizeInBytes =
-          Val.getSimpleValueType().getVectorElementType().getFixedSizeInBits() /
+          OrigVal.getSimpleValueType().getVectorElementType().getFixedSizeInBits() /
           8;
       int8_t StrideValue = 0 - ElementSizeInBytes;
       SDValue Stride = DAG.getConstant(StrideValue, DL, XLenVT);
