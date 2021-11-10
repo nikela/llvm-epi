@@ -44441,7 +44441,6 @@ static SDValue combineMulToPMADDWD(SDNode *N, SelectionDAG &DAG,
   EVT VT = N->getValueType(0);
 
   // Only support vXi32 vectors.
-  // TODO: Can we support > 32-bit elements?
   if (!VT.isVector() || VT.getVectorElementType() != MVT::i32)
     return SDValue();
 
@@ -45553,7 +45552,7 @@ static SDValue combineCompareEqual(SDNode *N, SelectionDAG &DAG,
 }
 
 /// Try to fold: (and (xor X, -1), Y) -> (andnp X, Y).
-static SDValue combineANDXORWithAllOnesIntoANDNP(SDNode *N, SelectionDAG &DAG) {
+static SDValue combineAndNotIntoANDNP(SDNode *N, SelectionDAG &DAG) {
   assert(N->getOpcode() == ISD::AND);
 
   MVT VT = N->getSimpleValueType(0);
@@ -46079,7 +46078,7 @@ static SDValue combineAnd(SDNode *N, SelectionDAG &DAG,
   if (SDValue R = combineCompareEqual(N, DAG, DCI, Subtarget))
     return R;
 
-  if (SDValue R = combineANDXORWithAllOnesIntoANDNP(N, DAG))
+  if (SDValue R = combineAndNotIntoANDNP(N, DAG))
     return R;
 
   if (SDValue ShiftRight = combineAndMaskToShift(N, DAG, Subtarget))
