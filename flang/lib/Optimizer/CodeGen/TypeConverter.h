@@ -50,6 +50,10 @@ public:
 
     // Each conversion should return a value of type mlir::Type.
     addConversion([&](BoxType box) { return convertBoxType(box); });
+    addConversion([&](BoxCharType boxchar) {
+      LLVM_DEBUG(llvm::dbgs() << "type convert: " << boxchar << '\n');
+      return convertType(specifics->boxcharMemoryType(boxchar.getEleTy()));
+    });
     addConversion(
         [&](fir::CharacterType charTy) { return convertCharType(charTy); });
     addConversion([&](fir::LogicalType boolTy) {
@@ -88,6 +92,9 @@ public:
   // i32 is used here because LLVM wants i32 constants when indexing into struct
   // types. Indexing into other aggregate types is more flexible.
   mlir::Type offsetType() { return mlir::IntegerType::get(&getContext(), 32); }
+
+  // i64 can be used to index into aggregates like arrays
+  mlir::Type indexType() { return mlir::IntegerType::get(&getContext(), 64); }
 
   // fir.type<name(p : TY'...){f : TY...}>  -->  llvm<"%name = { ty... }">
   mlir::Type convertRecordType(fir::RecordType derived) {
