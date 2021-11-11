@@ -197,23 +197,74 @@ findValueInReverseUseDefChain(Value value,
 /// is returned regardless of whether it is a memory write or not.
 Value findLastPrecedingWrite(Value value);
 
-/// Callback functions that are used by the comprehensive bufferization pass to
-/// allocate/deallocate memory. The `deallocationFn` is gauranteed to recieve
-/// the `Value` returned by the `allocationFn`.
+struct BufferizationState;
+
+/// Callback functions that are used to allocate/deallocate/copy memory buffers.
+/// Comprehensive Bufferize provides default implementations of these functions.
+// TODO: Could be replaced with a "bufferization strategy" object with virtual
+// functions in the future.
 struct AllocationCallbacks {
   using AllocationFn = std::function<Optional<Value>(
       OpBuilder &, Location, MemRefType, const SmallVector<Value> &)>;
   using DeallocationFn = std::function<void(OpBuilder &, Location, Value)>;
   using MemCpyFn = std::function<void(OpBuilder &, Location, Value, Value)>;
+  using CreateAllocDeallocFn =
+      std::function<Value(OpBuilder &, Location, Value, BufferizationState &)>;
 
   AllocationCallbacks(AllocationFn allocFn, DeallocationFn deallocFn,
-                      MemCpyFn copyFn)
-      : allocationFn(allocFn), deallocationFn(deallocFn), memCpyFn(copyFn) {}
+                      MemCpyFn copyFn, CreateAllocDeallocFn allocDeallocFn)
+      : allocationFn(allocFn), deallocationFn(deallocFn), memCpyFn(copyFn),
+        createAllocDeallocFn(allocDeallocFn) {}
 
+  /// A function that allocates memory.
   AllocationFn allocationFn;
+
+  /// A function that deallocated memory. Must be allocated by `allocationFn`.
   DeallocationFn deallocationFn;
+
+  /// A function that copies memory between two allocations.
   MemCpyFn memCpyFn;
+
+  /// A function that creates an alloc-dealloc pair. This function may perform
+  /// additional optimizations such as buffer allocation hoisting. This function
+  /// calls `allocationFn` and `deallocationFn` to create (de)allocations.
+  CreateAllocDeallocFn createAllocDeallocFn;
 };
+
+/// BufferizationState keeps track of bufferization state and provides access to
+/// the results of the analysis.
+struct BufferizationState {
+  BufferizationState(BufferizationAliasInfo &aliasInfo,
+                     AllocationCallbacks &allocationFns,
+                     BlockAndValueMapping &tensorToBufferMap)
+      : aliasInfo(aliasInfo), allocationFns(allocationFns),
+        tensorToBufferMap(tensorToBufferMap) {}
+
+  /// Map tensor values to memref buffers.
+  void mapBuffer(ValueRange tensors, ValueRange buffers);
+
+  /// Map a tensor value to a memref buffer.
+  void mapBuffer(Value tensor, Value buffer);
+
+  /// Lookup the memref buffer that is associated to the given tensor value.
+  /// Asserts if no buffer is associated.
+  Value lookupBuffer(Value tensor) const;
+
+  /// `aliasInfo` keeps track of aliasing and equivalent values.
+  BufferizationAliasInfo &aliasInfo;
+
+  /// `allocationFns` contains helper functions for creating alloc ops, dealloc
+  /// ops and memcpy ops.
+  AllocationCallbacks &allocationFns;
+
+  /// The mapping of tensors to buffers.
+  BlockAndValueMapping &tensorToBufferMap;
+};
+
+/// Return the result buffer (memref) for a given OpResult (tensor). Allocate
+/// a new buffer and copy over data from the existing buffer if out-of-place
+/// bufferization is necessary.
+Value getResultBuffer(OpBuilder &b, OpResult result, BufferizationState &state);
 
 } // namespace comprehensive_bufferize
 } // namespace linalg
@@ -257,9 +308,7 @@ struct AllocationHoistingBarrierOnly
   bool isWritable(Operation *op, Value value) const { return false; }
 
   LogicalResult bufferize(Operation *op, OpBuilder &b,
-                          BlockAndValueMapping &bvm,
-                          BufferizationAliasInfo &aliasInfo,
-                          AllocationCallbacks &allocationFn) const {
+                          BufferizationState &state) const {
     auto isaTensor = [](Type t) { return t.isa<TensorType>(); };
     if (any_of(op->getOperandTypes(), isaTensor) ||
         any_of(op->getResultTypes(), isaTensor))
