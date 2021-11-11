@@ -138,8 +138,10 @@ using namespace comprehensive_bufferize;
 #define LDBG(X) LLVM_DEBUG(DBGS() << X)
 
 // Forward declarations.
+#ifndef NDEBUG
 static std::string printOperationInfo(Operation *, bool prefix = true);
 static std::string printValueInfo(Value, bool prefix = true);
+#endif
 
 //===----------------------------------------------------------------------===//
 // Generic helpers.
@@ -266,6 +268,7 @@ static void removeBufferizationFuncArguments(BlockArgument bbArg) {
 // Printing helpers.
 //===----------------------------------------------------------------------===//
 
+#ifndef NDEBUG
 /// Helper method printing the bufferization information of a buffer / tensor.
 static void printTensorOrBufferInfo(std::string prefix, Value value,
                                     AsmState &state, llvm::raw_ostream &os) {
@@ -310,6 +313,7 @@ static std::string printValueInfo(Value value, bool prefix) {
   printTensorOrBufferInfo("\n\t - ", value, state, os);
   return result;
 }
+#endif
 
 //===----------------------------------------------------------------------===//
 // Bufferization-specific alias analysis.
@@ -400,84 +404,6 @@ static bool aliasesInPlaceWrite(Value value,
     LDBG("----------->does not alias an inplace write\n");
 
   return foundInplaceWrite;
-}
-
-/// Starting from `value`, follow the use-def chain in reverse, always selecting
-/// the aliasing OpOperands. Find and return Values for which `condition`
-/// evaluates to true. OpOperands of such matching Values are not traversed any
-/// further.
-///
-/// When reaching the end of a chain (BlockArgument or Value without aliasing
-/// OpOperands), also return the last Value of that chain.
-///
-/// Example:
-///
-///                               8
-///                               |
-///   6*         7*         +-----+----+
-///   |          |          |          |
-///   2*         3          4*         5
-///   |          |          |          |
-///   +----------+----------+----------+
-///              |
-///              1
-///
-/// In the above example, Values with a star satisfy the condition. When
-/// starting the traversal from Value 1, the resulting SetVector is:
-/// { 2, 7, 8, 5 }
-static llvm::SetVector<Value>
-findValueInReverseUseDefChain(Value value,
-                              std::function<bool(Value)> condition) {
-  llvm::SetVector<Value> result, workingSet;
-  workingSet.insert(value);
-
-  while (!workingSet.empty()) {
-    Value value = workingSet.pop_back_val();
-    if (condition(value) || value.isa<BlockArgument>()) {
-      result.insert(value);
-      continue;
-    }
-
-    OpResult opResult = value.cast<OpResult>();
-    SmallVector<OpOperand *> opOperands = getAliasingOpOperand(opResult);
-    if (opOperands.empty()) {
-      result.insert(value);
-      continue;
-    }
-
-    for (OpOperand *o : opOperands)
-      workingSet.insert(o->get());
-  }
-
-  return result;
-}
-
-/// Find the Value of the last preceding write of a given Value.
-///
-/// Note: Unknown ops are handled conservatively and assumed to be writes.
-/// Furthermore, BlockArguments are also assumed to be writes. There is no
-/// analysis across block boundaries.
-///
-/// Note: When reaching an end of the reverse SSA use-def chain, that value
-/// is returned regardless of whether it is a memory write or not.
-static Value findLastPrecedingWrite(Value value) {
-  SetVector<Value> result =
-      findValueInReverseUseDefChain(value, [](Value value) {
-        Operation *op = value.getDefiningOp();
-        if (!op)
-          return true;
-        auto bufferizableOp = dyn_cast<BufferizableOpInterface>(op);
-        if (!bufferizableOp)
-          return true;
-        return bufferizableOp.isMemoryWrite(value.cast<OpResult>());
-      });
-
-  // To simplify the analysis, `scf.if` ops are considered memory writes. There
-  // are currently no other ops where one OpResult may alias with multiple
-  // OpOperands. Therefore, this function should return exactly one result at
-  // the moment.
-  assert(result.size() == 1 && "expected exactly one result");
-  return result.front();
 }
 
 /// Return true if `value` is originating from an ExtractSliceOp that matches
@@ -2034,6 +1960,17 @@ LogicalResult mlir::linalg::comprehensive_bufferize::runComprehensiveBufferize(
 
   return success();
 }
+
+std::unique_ptr<AllocationCallbacks>
+mlir::linalg::comprehensive_bufferize::defaultAllocationCallbacks() {
+  return std::make_unique<AllocationCallbacks>(
+      defaultAllocationFn, defaultDeallocationFn, defaultMemCpyFn);
+}
+
+// Default constructor for BufferizationOptions that sets all allocation
+// callbacks to their default functions.
+BufferizationOptions::BufferizationOptions()
+    : allocationFns(defaultAllocationCallbacks()) {}
 
 //===----------------------------------------------------------------------===//
 // BufferizableOpInterface Implementations
