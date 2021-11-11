@@ -482,6 +482,7 @@ private:
   void insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                      const VSETVLIInfo &Info, const VSETVLIInfo &PrevInfo);
 
+  void forwardPropagateAVL(MachineBasicBlock &MBB);
   bool computeVLVTYPEChanges(const MachineBasicBlock &MBB);
   void computeIncomingVLVTYPE(const MachineBasicBlock &MBB);
   void emitVSETVLIs(MachineBasicBlock &MBB);
@@ -1154,6 +1155,55 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   return CurInfo.isCompatibleWithLoadStoreEEW(EEW, Require);
 }
 
+void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
+  for (const MachineInstr &MI : MBB) {
+    if (MI.getOpcode() != RISCV::PseudoVSETVLI &&
+        MI.getOpcode() != RISCV::PseudoVSETVLIX0 &&
+        MI.getOpcode() != RISCV::PseudoVSETIVLI) {
+      continue;
+    }
+
+    VSETVLIInfo VI = getInfoForVSETVLI(MI);
+    const MachineOperand &GVLOp = MI.getOperand(0);
+    assert(GVLOp.isReg());
+    Register GVLReg = GVLOp.getReg();
+    // Cycle through all uses of this GVL
+    for (MachineRegisterInfo::use_nodbg_iterator
+             UI = MRI->use_nodbg_begin(GVLReg),
+             UIEnd = MRI->use_nodbg_end();
+         UI != UIEnd;) {
+      MachineOperand &Use(*UI++);
+      assert(Use.getParent() != nullptr);
+      const MachineInstr &UseInstr = *Use.getParent();
+
+      // EPI instructions
+      if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
+              RISCVEPIPseudosTable::getEPIPseudoInfo(UseInstr.getOpcode())) {
+        VSETVLIInfo UseInfo = computeInfoForEPIInstr(
+            UseInstr, EPI->getVLIndex(), EPI->getSEWIndex(), EPI->VLMul,
+            EPI->getMaskOpIndex(), MRI);
+
+        if (UseInfo.hasSameVLMAX(VI)) {
+          // Propagate
+          if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
+            Use.setImm(VI.getAVLImm());
+          else
+            Use.setReg(VI.getAVLReg());
+        }
+      }
+    }
+
+    // Update liveness.
+    if (MRI->use_nodbg_empty(GVLReg)) {
+      assert(Register::isVirtualRegister(GVLReg));
+      MachineRegisterInfo::def_iterator GVLOpIt = MRI->def_begin(GVLReg);
+      assert(GVLOpIt != MRI->def_end());
+      MachineOperand &GVLOp = *GVLOpIt;
+      GVLOp.setIsDead();
+    }
+  }
+}
+
 bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   bool HadVectorOp = false;
 
@@ -1539,6 +1589,10 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
   BlockInfo.resize(MF.getNumBlockIDs());
 
   bool HaveVectorOp = false;
+
+  // Phase 0 - propagate AVL when VLMAX is the same
+  for (MachineBasicBlock &MBB : MF)
+    forwardPropagateAVL(MBB);
 
   // Phase 1 - determine how VL/VTYPE are affected by the each block.
   for (const MachineBasicBlock &MBB : MF)
