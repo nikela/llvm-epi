@@ -1458,6 +1458,7 @@ cc_library(
         ":LLVMCommonConversion",
         ":LLVMDialect",
         ":StandardOps",
+        ":VectorOps",
         ":X86Vector",
         "//llvm:Core",
         "//llvm:Support",
@@ -1715,6 +1716,7 @@ cc_library(
     deps = [
         ":Affine",
         ":ArithmeticDialect",
+        ":BufferizableOpInterface",
         ":IR",
         ":LLVMDialect",
         ":LinalgOps",
@@ -6302,6 +6304,7 @@ cc_library(
     deps = [
         ":Affine",
         ":ArithmeticDialect",
+        ":BufferizableOpInterface",
         ":CopyOpInterface",
         ":DialectUtils",
         ":IR",
@@ -6401,6 +6404,7 @@ cc_library(
         ":TransformUtils",
         ":VectorOps",
         ":VectorToSCF",
+        ":X86VectorTransforms",
         "//llvm:Support",
     ],
 )
