@@ -959,13 +959,10 @@ bool RISCVInsertVSETVLI::needVSETVLI(const VSETVLIInfo &Require,
   return true;
 }
 
-bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
-                                const VSETVLIInfo &Require,
-                                const VSETVLIInfo &CurInfo) {
-  unsigned EEW;
+unsigned getEEWFromRVVLoadStoreMI(const MachineInstr &MI) {
   switch (MI.getOpcode()) {
   default:
-    return false;
+    return 0;
   case RISCV::PseudoVLE8_V_M1:
   case RISCV::PseudoVLE8_V_M1_MASK:
   case RISCV::PseudoVLE8_V_M2:
@@ -1022,7 +1019,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE8_V_MF4_MASK:
   case RISCV::PseudoVSSE8_V_MF8:
   case RISCV::PseudoVSSE8_V_MF8_MASK:
-    EEW = 8;
+    return 8;
     break;
   case RISCV::PseudoVLE16_V_M1:
   case RISCV::PseudoVLE16_V_M1_MASK:
@@ -1072,7 +1069,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE16_V_MF2_MASK:
   case RISCV::PseudoVSSE16_V_MF4:
   case RISCV::PseudoVSSE16_V_MF4_MASK:
-    EEW = 16;
+    return 16;
     break;
   case RISCV::PseudoVLE32_V_M1:
   case RISCV::PseudoVLE32_V_M1_MASK:
@@ -1114,7 +1111,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE32_V_M8_MASK:
   case RISCV::PseudoVSSE32_V_MF2:
   case RISCV::PseudoVSSE32_V_MF2_MASK:
-    EEW = 32;
+    return 32;
     break;
   case RISCV::PseudoVLE64_V_M1:
   case RISCV::PseudoVLE64_V_M1_MASK:
@@ -1148,11 +1145,18 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE64_V_M4_MASK:
   case RISCV::PseudoVSSE64_V_M8:
   case RISCV::PseudoVSSE64_V_M8_MASK:
-    EEW = 64;
-    break;
+    return 64;
   }
+}
 
-  return CurInfo.isCompatibleWithLoadStoreEEW(EEW, Require);
+bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
+                                const VSETVLIInfo &Require,
+                                const VSETVLIInfo &CurInfo) {
+  auto EEW = getEEWFromRVVLoadStoreMI(MI);
+  if (RISCVVType::isValidSEW(EEW))
+    return CurInfo.isCompatibleWithLoadStoreEEW(EEW, Require);
+
+  return false;
 }
 
 void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
@@ -1184,6 +1188,33 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
             EPI->getMaskOpIndex(), MRI);
 
         if (UseInfo.hasSameVLMAX(VI)) {
+          // Propagate
+          if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
+            Use.setImm(VI.getAVLImm());
+          else
+            Use.setReg(VI.getAVLReg());
+        }
+
+        continue;
+      }
+
+      // RVV instructions
+      uint64_t TSFlags = MI.getDesc().TSFlags;
+      if (RISCVII::hasSEWOp(TSFlags)) {
+        VSETVLIInfo UseInfo = computeInfoForInstr(UseInstr, TSFlags, MRI);
+        if (UseInfo.hasSameVLMAX(VI)) {
+          // Propagate
+          if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
+            Use.setImm(VI.getAVLImm());
+          else
+            Use.setReg(VI.getAVLReg());
+        }
+      } else {
+        auto EEW = getEEWFromRVVLoadStoreMI(UseInstr);
+        RISCVII::VLMUL VLMul = RISCVII::getLMul(TSFlags);
+
+        if (RISCVVType::isValidSEW(EEW) &&
+            VSETVLIInfo::getSEWLMULRatio(EEW, VLMul) == VI.getSEWLMULRatio()) {
           // Propagate
           if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
             Use.setImm(VI.getAVLImm());
