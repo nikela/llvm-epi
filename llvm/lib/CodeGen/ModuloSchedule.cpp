@@ -332,14 +332,10 @@ static void replaceRegUsesAfterLoop(unsigned FromReg, unsigned ToReg,
                                     MachineBasicBlock *MBB,
                                     MachineRegisterInfo &MRI,
                                     LiveIntervals &LIS) {
-  for (MachineRegisterInfo::use_iterator I = MRI.use_begin(FromReg),
-                                         E = MRI.use_end();
-       I != E;) {
-    MachineOperand &O = *I;
-    ++I;
+  for (MachineOperand &O :
+       llvm::make_early_inc_range(MRI.use_operands(FromReg)))
     if (O.getParent()->getParent() != MBB)
       O.setReg(ToReg);
-  }
   if (!LIS.hasInterval(ToReg))
     LIS.createEmptyInterval(ToReg);
 }
@@ -700,11 +696,9 @@ void ModuloScheduleExpander::removeDeadInstructions(MachineBasicBlock *KernelBB,
                                                     MBBVectorTy &EpilogBBs) {
   // For each epilog block, check that the value defined by each instruction
   // is used.  If not, delete it.
-  for (MBBVectorTy::reverse_iterator MBB = EpilogBBs.rbegin(),
-                                     MBE = EpilogBBs.rend();
-       MBB != MBE; ++MBB)
-    for (MachineBasicBlock::reverse_instr_iterator MI = (*MBB)->instr_rbegin(),
-                                                   ME = (*MBB)->instr_rend();
+  for (MachineBasicBlock *MBB : llvm::reverse(EpilogBBs))
+    for (MachineBasicBlock::reverse_instr_iterator MI = MBB->instr_rbegin(),
+                                                   ME = MBB->instr_rend();
          MI != ME;) {
       // From DeadMachineInstructionElem. Don't delete inline assembly.
       if (MI->isInlineAsm()) {
@@ -719,15 +713,13 @@ void ModuloScheduleExpander::removeDeadInstructions(MachineBasicBlock *KernelBB,
         continue;
       }
       bool used = true;
-      for (MachineInstr::mop_iterator MOI = MI->operands_begin(),
-                                      MOE = MI->operands_end();
-           MOI != MOE; ++MOI) {
-        if (!MOI->isReg() || !MOI->isDef())
+      for (const MachineOperand &MO : MI->operands()) {
+        if (!MO.isReg() || !MO.isDef())
           continue;
-        Register reg = MOI->getReg();
+        Register reg = MO.getReg();
         // Assume physical registers are used, unless they are marked dead.
         if (Register::isPhysicalRegister(reg)) {
-          used = !MOI->isDead();
+          used = !MO.isDead();
           if (used)
             break;
           continue;
@@ -1139,12 +1131,9 @@ void ModuloScheduleExpander::rewriteScheduledInstr(
   int StagePhi = Schedule.getStage(Phi) + PhiNum;
   // Rewrite uses that have been scheduled already to use the new
   // Phi register.
-  for (MachineRegisterInfo::use_iterator UI = MRI.use_begin(OldReg),
-                                         EI = MRI.use_end();
-       UI != EI;) {
-    MachineOperand &UseOp = *UI;
+  for (MachineOperand &UseOp :
+       llvm::make_early_inc_range(MRI.use_operands(OldReg))) {
     MachineInstr *UseMI = UseOp.getParent();
-    ++UI;
     if (UseMI->getParent() != BB)
       continue;
     if (UseMI->isPHI()) {

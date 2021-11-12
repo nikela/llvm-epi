@@ -1630,9 +1630,19 @@ const char *PPCTargetLowering::getTargetNodeName(unsigned Opcode) const {
   case PPCISD::CALL:            return "PPCISD::CALL";
   case PPCISD::CALL_NOP:        return "PPCISD::CALL_NOP";
   case PPCISD::CALL_NOTOC:      return "PPCISD::CALL_NOTOC";
+  case PPCISD::CALL_RM:
+    return "PPCISD::CALL_RM";
+  case PPCISD::CALL_NOP_RM:
+    return "PPCISD::CALL_NOP_RM";
+  case PPCISD::CALL_NOTOC_RM:
+    return "PPCISD::CALL_NOTOC_RM";
   case PPCISD::MTCTR:           return "PPCISD::MTCTR";
   case PPCISD::BCTRL:           return "PPCISD::BCTRL";
   case PPCISD::BCTRL_LOAD_TOC:  return "PPCISD::BCTRL_LOAD_TOC";
+  case PPCISD::BCTRL_RM:
+    return "PPCISD::BCTRL_RM";
+  case PPCISD::BCTRL_LOAD_TOC_RM:
+    return "PPCISD::BCTRL_LOAD_TOC_RM";
   case PPCISD::RET_FLAG:        return "PPCISD::RET_FLAG";
   case PPCISD::READ_TIME_BASE:  return "PPCISD::READ_TIME_BASE";
   case PPCISD::EH_SJLJ_SETJMP:  return "PPCISD::EH_SJLJ_SETJMP";
@@ -5172,13 +5182,14 @@ static inline bool isTOCSaveRestoreRequired(const PPCSubtarget &Subtarget) {
 }
 
 static unsigned getCallOpcode(PPCTargetLowering::CallFlags CFlags,
-                              const Function &Caller,
-                              const SDValue &Callee,
+                              const Function &Caller, const SDValue &Callee,
                               const PPCSubtarget &Subtarget,
-                              const TargetMachine &TM) {
+                              const TargetMachine &TM,
+                              bool IsStrictFPCall = false) {
   if (CFlags.IsTailCall)
     return PPCISD::TC_RETURN;
 
+  unsigned RetOpc = 0;
   // This is a call through a function pointer.
   if (CFlags.IsIndirect) {
     // AIX and the 64-bit ELF ABIs need to maintain the TOC pointer accross
@@ -5189,28 +5200,46 @@ static unsigned getCallOpcode(PPCTargetLowering::CallFlags CFlags,
     // immediately followed by a load of the TOC pointer from the the stack save
     // slot into gpr2. For 64-bit ELFv2 ABI with PCRel, do not restore the TOC
     // as it is not saved or used.
-    return isTOCSaveRestoreRequired(Subtarget) ? PPCISD::BCTRL_LOAD_TOC
-                                               : PPCISD::BCTRL;
-  }
-
-  if (Subtarget.isUsingPCRelativeCalls()) {
+    RetOpc = isTOCSaveRestoreRequired(Subtarget) ? PPCISD::BCTRL_LOAD_TOC
+                                                 : PPCISD::BCTRL;
+  } else if (Subtarget.isUsingPCRelativeCalls()) {
     assert(Subtarget.is64BitELFABI() && "PC Relative is only on ELF ABI.");
-    return PPCISD::CALL_NOTOC;
+    RetOpc = PPCISD::CALL_NOTOC;
+  } else if (Subtarget.isAIXABI() || Subtarget.is64BitELFABI())
+    // The ABIs that maintain a TOC pointer accross calls need to have a nop
+    // immediately following the call instruction if the caller and callee may
+    // have different TOC bases. At link time if the linker determines the calls
+    // may not share a TOC base, the call is redirected to a trampoline inserted
+    // by the linker. The trampoline will (among other things) save the callers
+    // TOC pointer at an ABI designated offset in the linkage area and the
+    // linker will rewrite the nop to be a load of the TOC pointer from the
+    // linkage area into gpr2.
+    RetOpc = callsShareTOCBase(&Caller, Callee, TM) ? PPCISD::CALL
+                                                    : PPCISD::CALL_NOP;
+  else
+    RetOpc = PPCISD::CALL;
+  if (IsStrictFPCall) {
+    switch (RetOpc) {
+    default:
+      llvm_unreachable("Unknown call opcode");
+    case PPCISD::BCTRL_LOAD_TOC:
+      RetOpc = PPCISD::BCTRL_LOAD_TOC_RM;
+      break;
+    case PPCISD::BCTRL:
+      RetOpc = PPCISD::BCTRL_RM;
+      break;
+    case PPCISD::CALL_NOTOC:
+      RetOpc = PPCISD::CALL_NOTOC_RM;
+      break;
+    case PPCISD::CALL:
+      RetOpc = PPCISD::CALL_RM;
+      break;
+    case PPCISD::CALL_NOP:
+      RetOpc = PPCISD::CALL_NOP_RM;
+      break;
+    }
   }
-
-  // The ABIs that maintain a TOC pointer accross calls need to have a nop
-  // immediately following the call instruction if the caller and callee may
-  // have different TOC bases. At link time if the linker determines the calls
-  // may not share a TOC base, the call is redirected to a trampoline inserted
-  // by the linker. The trampoline will (among other things) save the callers
-  // TOC pointer at an ABI designated offset in the linkage area and the linker
-  // will rewrite the nop to be a load of the TOC pointer from the linkage area
-  // into gpr2.
-  if (Subtarget.isAIXABI() || Subtarget.is64BitELFABI())
-    return callsShareTOCBase(&Caller, Callee, TM) ? PPCISD::CALL
-                                                  : PPCISD::CALL_NOP;
-
-  return PPCISD::CALL;
+  return RetOpc;
 }
 
 static SDValue transformCallee(const SDValue &Callee, SelectionDAG &DAG,
@@ -5506,7 +5535,7 @@ SDValue PPCTargetLowering::FinishCall(
 
   unsigned CallOpc =
       getCallOpcode(CFlags, DAG.getMachineFunction().getFunction(), Callee,
-                    Subtarget, DAG.getTarget());
+                    Subtarget, DAG.getTarget(), CB ? CB->isStrictFP() : false);
 
   if (!CFlags.IsIndirect)
     Callee = transformCallee(Callee, DAG, dl, Subtarget);
@@ -9079,8 +9108,8 @@ static bool isValidSplatLoad(const PPCSubtarget &Subtarget, const SDValue &Op,
     return true;
 
   if (Ty == MVT::v2i64) {
-    // check the extend type if the input is i32 while the output vector type is
-    // v2i64.
+    // Check the extend type, when the input type is i32, and the output vector
+    // type is v2i64.
     if (cast<LoadSDNode>(Op.getOperand(0))->getMemoryVT() == MVT::i32) {
       if (ISD::isZEXTLoad(InputNode))
         Opcode = PPCISD::ZEXT_LD_SPLAT;
@@ -9164,8 +9193,17 @@ SDValue PPCTargetLowering::LowerBUILD_VECTOR(SDValue Op,
       const SDValue *InputLoad = &Op.getOperand(0);
       LoadSDNode *LD = cast<LoadSDNode>(*InputLoad);
 
-      unsigned ElementSize = LD->getMemoryVT().getScalarSizeInBits() *
-                             ((NewOpcode == PPCISD::LD_SPLAT) ? 1 : 2);
+      // If the input load is an extending load, it will be an i32 -> i64
+      // extending load and isValidSplatLoad() will update NewOpcode.
+      unsigned MemorySize = LD->getMemoryVT().getScalarSizeInBits();
+      unsigned ElementSize =
+          MemorySize * ((NewOpcode == PPCISD::LD_SPLAT) ? 1 : 2);
+
+      assert(((ElementSize == 2 * MemorySize)
+                  ? (NewOpcode == PPCISD::ZEXT_LD_SPLAT ||
+                     NewOpcode == PPCISD::SEXT_LD_SPLAT)
+                  : (NewOpcode == PPCISD::LD_SPLAT)) &&
+             "Unmatched element size and opcode!\n");
 
       // Checking for a single use of this load, we have to check for vector
       // width (128 bits) / ElementSize uses (since each operand of the
@@ -9175,7 +9213,7 @@ SDValue PPCTargetLowering::LowerBUILD_VECTOR(SDValue Op,
         if (BVInOp.isUndef())
           NumUsesOfInputLD--;
 
-      // Execlude somes case where LD_SPLAT is worse than scalar_to_vector:
+      // Exclude somes case where LD_SPLAT is worse than scalar_to_vector:
       // Below cases should also happen for "lfiwzx/lfiwax + LE target + index
       // 1" and "lxvrhx + BE target + index 7" and "lxvrbx + BE target + index
       // 15", but funciton IsValidSplatLoad() now will only return true when
@@ -9193,22 +9231,13 @@ SDValue PPCTargetLowering::LowerBUILD_VECTOR(SDValue Op,
            Subtarget.hasLFIWAX()))
         return SDValue();
 
-      // case 2 - lxvrhx
-      // 2.1: load result is i16;
-      // 2.2: build a v8i16 vector with above loaded value;
+      // case 2 - lxvr[hb]x
+      // 2.1: load result is at most i16;
+      // 2.2: build a vector with above loaded value;
       // 2.3: the vector has only one value at index 0, others are all undef;
-      // 2.4: on LE target, so that lxvrhx does not need any permute.
+      // 2.4: on LE target, so that lxvr[hb]x does not need any permute.
       if (NumUsesOfInputLD == 1 && Subtarget.isLittleEndian() &&
-          Subtarget.isISA3_1() && Op->getValueType(0) == MVT::v16i8)
-        return SDValue();
-
-      // case 3 - lxvrbx
-      // 3.1: load result is i8;
-      // 3.2: build a v16i8 vector with above loaded value;
-      // 3.3: the vector has only one value at index 0, others are all undef;
-      // 3.4: on LE target, so that lxvrbx does not need any permute.
-      if (NumUsesOfInputLD == 1 && Subtarget.isLittleEndian() &&
-          Subtarget.isISA3_1() && Op->getValueType(0) == MVT::v8i16)
+          Subtarget.isISA3_1() && ElementSize <= 16)
         return SDValue();
 
       assert(NumUsesOfInputLD > 0 && "No uses of input LD of a build_vector?");
@@ -10484,6 +10513,17 @@ SDValue PPCTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
              DAG.getTargetConstant(PPC::PRED_EQ, dl, MVT::i32)}),
         0);
   }
+  case Intrinsic::ppc_convert_f128_to_ppcf128:
+  case Intrinsic::ppc_convert_ppcf128_to_f128: {
+    RTLIB::Libcall LC = IntrinsicID == Intrinsic::ppc_convert_ppcf128_to_f128
+                            ? RTLIB::CONVERT_PPCF128_F128
+                            : RTLIB::CONVERT_F128_PPCF128;
+    MakeLibCallOptions CallOptions;
+    std::pair<SDValue, SDValue> Result =
+        makeLibCall(DAG, LC, Op.getValueType(), Op.getOperand(1), CallOptions,
+                    dl, SDValue());
+    return Result.first;
+  }
   }
 
   // If this is a lowered altivec predicate compare, CompareOpc is set to the
@@ -11122,12 +11162,15 @@ void PPCTargetLowering::ReplaceNodeResults(SDNode *N,
     break;
   }
   case ISD::INTRINSIC_WO_CHAIN: {
-    unsigned IntrinsicID =
-        cast<ConstantSDNode>(N->getOperand(0))->getZExtValue();
-
-    if (IntrinsicID == Intrinsic::ppc_pack_longdouble)
+    switch (cast<ConstantSDNode>(N->getOperand(0))->getZExtValue()) {
+    case Intrinsic::ppc_pack_longdouble:
       Results.push_back(DAG.getNode(ISD::BUILD_PAIR, dl, MVT::ppcf128,
                                     N->getOperand(2), N->getOperand(1)));
+      break;
+    case Intrinsic::ppc_convert_f128_to_ppcf128:
+      Results.push_back(LowerINTRINSIC_WO_CHAIN(SDValue(N, 0), DAG));
+      break;
+    }
     break;
   }
   case ISD::VAARG: {

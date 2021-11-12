@@ -25,9 +25,9 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 1024, [[TMP4]]
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
-; CHECK-NEXT:    [[TMP6:%.*]] = add <vscale x 8 x i64> [[TMP5]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 0, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP6:%.*]] = add <vscale x 8 x i64> [[TMP5]], zeroinitializer
 ; CHECK-NEXT:    [[TMP7:%.*]] = mul <vscale x 8 x i64> [[TMP6]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 1, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
-; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 0, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer), [[TMP7]]
+; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> zeroinitializer, [[TMP7]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = mul i64 [[TMP8]], 8
 ; CHECK-NEXT:    [[TMP10:%.*]] = mul i64 1, [[TMP9]]
@@ -40,7 +40,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[TMP11:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
 ; CHECK-NEXT:    [[DOTSPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i32 0
 ; CHECK-NEXT:    [[DOTSPLAT2:%.*]] = shufflevector <vscale x 8 x i64> [[DOTSPLATINSERT1]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
-; CHECK-NEXT:    [[TMP12:%.*]] = add <vscale x 8 x i64> shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 0, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer), [[TMP11]]
+; CHECK-NEXT:    [[TMP12:%.*]] = add <vscale x 8 x i64> zeroinitializer, [[TMP11]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = mul <vscale x 8 x i64> [[TMP12]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 1, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP14:%.*]] = add <vscale x 8 x i64> [[DOTSPLAT2]], [[TMP13]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = add i64 [[INDEX]], 0
@@ -97,9 +97,9 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 1024, [[TMP2]]
 ; CHECK1-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK1-NEXT:    [[TMP3:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
-; CHECK1-NEXT:    [[TMP4:%.*]] = add <vscale x 1 x i64> [[TMP3]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 0, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP4:%.*]] = add <vscale x 1 x i64> [[TMP3]], zeroinitializer
 ; CHECK1-NEXT:    [[TMP5:%.*]] = mul <vscale x 1 x i64> [[TMP4]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 1, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
-; CHECK1-NEXT:    [[INDUCTION:%.*]] = add <vscale x 1 x i64> shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 0, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer), [[TMP5]]
+; CHECK1-NEXT:    [[INDUCTION:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP5]]
 ; CHECK1-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP7:%.*]] = mul i64 1, [[TMP6]]
 ; CHECK1-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TMP7]], i32 0
@@ -111,7 +111,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[TMP8:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK1-NEXT:    [[DOTSPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i32 0
 ; CHECK1-NEXT:    [[DOTSPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[DOTSPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
-; CHECK1-NEXT:    [[TMP9:%.*]] = add <vscale x 1 x i64> shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 0, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer), [[TMP8]]
+; CHECK1-NEXT:    [[TMP9:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP8]]
 ; CHECK1-NEXT:    [[TMP10:%.*]] = mul <vscale x 1 x i64> [[TMP9]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 1, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[TMP11:%.*]] = add <vscale x 1 x i64> [[DOTSPLAT2]], [[TMP10]]
 ; CHECK1-NEXT:    [[TMP12:%.*]] = add i64 [[INDEX]], 0

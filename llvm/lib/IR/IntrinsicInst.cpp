@@ -536,6 +536,12 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
         M, VPID,
         {Params[0]->getType()->getPointerElementType(), Params[0]->getType()});
     break;
+  case Intrinsic::experimental_vp_strided_load:
+    VPFunc = Intrinsic::getDeclaration(
+        M, VPID,
+        {Params[0]->getType()->getPointerElementType(), Params[0]->getType(),
+         Params[1]->getType()});
+    break;
   case Intrinsic::vp_gather:
     VPFunc = Intrinsic::getDeclaration(
         M, VPID,
@@ -549,6 +555,12 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
     VPFunc = Intrinsic::getDeclaration(
         M, VPID,
         {Params[1]->getType()->getPointerElementType(), Params[1]->getType()});
+    break;
+  case Intrinsic::experimental_vp_strided_store:
+    VPFunc = Intrinsic::getDeclaration(
+        M, VPID,
+        {Params[1]->getType()->getPointerElementType(), Params[1]->getType(),
+         Params[2]->getType()});
     break;
   case Intrinsic::vp_scatter:
     VPFunc = Intrinsic::getDeclaration(

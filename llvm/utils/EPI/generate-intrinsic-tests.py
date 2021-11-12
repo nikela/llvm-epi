@@ -2145,7 +2145,7 @@ s = ["s"]
 ################################################################################
 
 intrinsics = [
-        UnaryIntrinsicScalarResult("vpopc", type_generator = generate_mask_to_int_types, scalar_register = "a0", variants = m, bits_per_mask = True),
+        UnaryIntrinsicScalarResult("vpopc", instruction = "vcpop", type_generator = generate_mask_to_int_types, scalar_register = "a0", variants = m, bits_per_mask = True),
         UnaryIntrinsicScalarResult("vfirst", type_generator = generate_mask_to_int_types, scalar_register = "a0", variants = m, bits_per_mask = True),
 
         UnaryIntrinsic("vload", type_generator = generate_unary_integer_float_types, variants = ["vload"], instruction = "vle"),
@@ -2316,11 +2316,11 @@ intrinsics = [
         #BinaryIntrinsic("vfwredsum", instruction="vfwredusum", type_generator = generate_binary_float_types_widened, variants = vs),
         #BinaryIntrinsic("vfwredosum", type_generator = generate_binary_float_types_widened, variants = vs),
 
-        BinaryIntrinsic("vmandnot", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
+        BinaryIntrinsic("vmandnot", instruction = "vmandn", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmand", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmxor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
-        BinaryIntrinsic("vmornot", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
+        BinaryIntrinsic("vmornot", instruction = "vmorn", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmnand", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmnor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),
         BinaryIntrinsic("vmxnor", type_generator = generate_binary_mask_types, variants = mm, generates_mask = True, mask = False),

@@ -574,6 +574,10 @@ private:
   void visitCmpVP(const VPIntrinsic &I);
   void visitVPPtrToInt(const VPIntrinsic &I);
   void visitVPIntToPtr(const VPIntrinsic &I);
+  void visitVPStridedLoad(const VPIntrinsic &VPIntrin, EVT VT,
+                          SmallVector<SDValue, 7> &OpValues);
+  void visitVPStridedStore(const VPIntrinsic &VPIntrin,
+                           SmallVector<SDValue, 7> &OpValues);
   void visitVectorPredicationIntrinsic(const VPIntrinsic &VPIntrin);
 
   void visitVAStart(const CallInst &I);

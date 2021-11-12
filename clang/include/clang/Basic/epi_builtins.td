@@ -1478,10 +1478,14 @@ let HasMask = 0, EPIRVVHeader = 1,
 {
   def vmand : EPIBinBuiltin<"m", "mmm", "csil">;
   def vmnand : EPIBinBuiltin<"m", "mmm", "csil">;
+  let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+    vmandn_mm_b${Boolean}((a), (b), (vl))}] in
   def vmandnot : EPIBinBuiltin<"m", "mmm", "csil">;
   def vmxor : EPIBinBuiltin<"m", "mmm", "csil">;
   def vmor : EPIBinBuiltin<"m", "mmm", "csil">;
   def vmnor : EPIBinBuiltin<"m", "mmm", "csil">;
+  let CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, vl) \
+    vmorn_mm_b${Boolean}((a), (b), (vl))}] in
   def vmornot : EPIBinBuiltin<"m", "mmm", "csil">;
   def vmxnor : EPIBinBuiltin<"m", "mmm", "csil">;
 }
@@ -1491,10 +1495,14 @@ let HasMergeOperand = 0, EPIRVVHeader = 1,
         ${Name}_m_b${Boolean}((a), (vl))}],
     CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, mask, vl) \
         ${Name}_m_b${Boolean}_m((mask), (a), (vl))}] in
-{
-  def vpopc : EPIMaskToScalarBuiltin<"m", "sm", "csil">;
   def vfirst : EPIMaskToScalarBuiltin<"m", "sm", "csil">;
-}
+
+let HasMergeOperand = 0, EPIRVVHeader = 1,
+    CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \
+        vcpop_m_b${Boolean}((a), (vl))}],
+    CompatibilityCodeMasked = [{#define __builtin_epi_${FullName}(a, mask, vl) \
+        vcpop_m_b${Boolean}_m((mask), (a), (vl))}] in
+  def vpopc : EPIMaskToScalarBuiltin<"m", "sm", "csil">;
 
 let HasMergeOperand = 0, EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, vl) \

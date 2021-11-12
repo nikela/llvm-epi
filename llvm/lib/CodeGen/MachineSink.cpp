@@ -476,14 +476,13 @@ bool MachineSinking::runOnMachineFunction(MachineFunction &MF) {
       // of a def-use chain, if there is any.
       // TODO: Sort the candidates using a cost-model.
       unsigned i = 0;
-      for (auto It = Candidates.rbegin(); It != Candidates.rend(); ++It) {
+      for (MachineInstr *I : llvm::reverse(Candidates)) {
         if (i++ == SinkIntoLoopLimit) {
           LLVM_DEBUG(dbgs() << "LoopSink:   Limit reached of instructions to "
                                "be analysed.");
           break;
         }
 
-        MachineInstr *I = *It;
         if (!SinkIntoLoop(L, *I))
           break;
         EverMadeChange = true;
@@ -683,13 +682,9 @@ bool MachineSinking::PostponeSplitCriticalEdge(MachineInstr &MI,
   // There is no need to do this check if all the uses are PHI nodes. PHI
   // sources are only defined on the specific predecessor edges.
   if (!BreakPHIEdge) {
-    for (MachineBasicBlock::pred_iterator PI = ToBB->pred_begin(),
-           E = ToBB->pred_end(); PI != E; ++PI) {
-      if (*PI == FromBB)
-        continue;
-      if (!DT->dominates(ToBB, *PI))
+    for (MachineBasicBlock *Pred : ToBB->predecessors())
+      if (Pred != FromBB && !DT->dominates(ToBB, Pred))
         return false;
-    }
   }
 
   ToSplit.insert(std::make_pair(FromBB, ToBB));

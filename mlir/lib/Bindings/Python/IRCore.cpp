@@ -1153,7 +1153,7 @@ PyOpView::buildGeneric(py::object cls, py::list resultTypeList,
       throw py::value_error((llvm::Twine("Operation \"") + name +
                              "\" requires " +
                              llvm::Twine(resultSegmentSpec.size()) +
-                             "result segments but was provided " +
+                             " result segments but was provided " +
                              llvm::Twine(resultTypeList.size()))
                                 .str());
     }
@@ -1164,7 +1164,7 @@ PyOpView::buildGeneric(py::object cls, py::list resultTypeList,
       if (segmentSpec == 1 || segmentSpec == 0) {
         // Unpack unary element.
         try {
-          auto resultType = py::cast<PyType *>(std::get<0>(it.value()));
+          auto *resultType = py::cast<PyType *>(std::get<0>(it.value()));
           if (resultType) {
             resultTypes.push_back(resultType);
             resultSegmentLengths.push_back(1);
@@ -1845,7 +1845,8 @@ public:
         mlirOperationGetAttribute(operation->get(), index);
     return PyNamedAttribute(
         namedAttr.attribute,
-        std::string(mlirIdentifierStr(namedAttr.name).data));
+        std::string(mlirIdentifierStr(namedAttr.name).data,
+                    mlirIdentifierStr(namedAttr.name).length));
   }
 
   void dunderSetItem(const std::string &name, PyAttribute attr) {
@@ -2601,7 +2602,8 @@ void mlir::python::populateIRCore(py::module &m) {
              PyPrintAccumulator printAccum;
              printAccum.parts.append("NamedAttribute(");
              printAccum.parts.append(
-                 mlirIdentifierStr(self.namedAttr.name).data);
+                 py::str(mlirIdentifierStr(self.namedAttr.name).data,
+                         mlirIdentifierStr(self.namedAttr.name).length));
              printAccum.parts.append("=");
              mlirAttributePrint(self.namedAttr.attribute,
                                 printAccum.getCallback(),

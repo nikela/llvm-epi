@@ -171,16 +171,20 @@ static LogicalResult padOperandToSmallestStaticBoundingBox(
   staticSizes.reserve(opToPad.getRank(opOperand));
   auto shapedOp = cast<OffsetSizeAndStrideOpInterface>(sliceOp.getOperation());
   for (auto size : shapedOp.getMixedSizes()) {
-    auto indexAttr = size.is<Attribute>()
-                         ? size.get<Attribute>().dyn_cast<IntegerAttr>()
-                         : linalg::getSmallestBoundingIndex(size.get<Value>());
-    // SmallestBoundingIndex must exist for all sizes.
-    // For now return an error if we can't find it.
-    if (!indexAttr) {
+    // If the size is an attribute add it directly to `staticSizes`.
+    if (size.is<Attribute>()) {
+      staticSizes.push_back(
+          size.get<Attribute>().dyn_cast<IntegerAttr>().getInt());
+      continue;
+    }
+    // Otherwise, try to compute a constant upper bound for the size value.
+    FailureOr<int64_t> upperBound =
+        getConstantUpperBoundForIndex(size.get<Value>());
+    if (failed(upperBound)) {
       LLVM_DEBUG(DBGS() << "No constant bounding box can be found for padding");
       return failure();
     }
-    staticSizes.push_back(indexAttr.getInt());
+    staticSizes.push_back(upperBound.getValue());
   }
   auto staticTensorType = RankedTensorType::get(
       staticSizes, getElementTypeOrSelf(opOperand->get()));
@@ -335,30 +339,8 @@ LogicalResult mlir::linalg::LinalgBaseTilingPattern::matchAndRewriteBase(
   // Peel loops.
   peelLoops(rewriter, *res, options);
 
-  // Consider padding on the fly only if the op has tensor semantics.
-  if (!options.paddingValueComputationFunction ||
-      !linalgOp.hasTensorSemantics()) {
-    result = *res;
-    return success();
-  }
-
-  // Try to pad on the fly by rewriting res->op as a padded op. If successful,
-  // `res.op` is rewritten in static form with padded operands.
-  LinalgOp paddedOp;
-  FailureOr<SmallVector<Value>> newResults = rewriteAsPaddedOp(
-      rewriter, res->op, options.paddingValueComputationFunction,
-      options.paddingNoFoldComputationFunction, paddedOp);
-  if (succeeded(newResults)) {
-    rewriter.replaceOp(res->op, newResults.getValue());
-    filter.replaceLinalgTransformationFilter(rewriter, paddedOp);
-    res->op = paddedOp;
-    result = *res;
-    // Do not perform replacement of `linalgOp`, let the derived patterns
-    // do this as they see fit, from the resulting TiledLinalgOp.
-    return success();
-  }
-  // Set so RAII guard does not propagate TiledLinalgOp to `result`.
-  return failure();
+  result = *res;
+  return success();
 }
 
 static ValueRange getTiledOpResult(TiledLinalgOp tiledOp) {
@@ -913,9 +895,9 @@ struct DownscaleSizeOneWindowed2DConvolution final
         loc, newOutputType, output, ioReshapeIndices);
 
     // We need to shrink the strides and dilations too.
-    auto stride = convOp.strides().getFlatValue<int64_t>(removeH ? 1 : 0);
+    auto stride = convOp.strides().getValues<int64_t>()[removeH ? 1 : 0];
     auto stridesAttr = rewriter.getI64VectorAttr(stride);
-    auto dilation = convOp.dilations().getFlatValue<int64_t>(removeH ? 1 : 0);
+    auto dilation = convOp.dilations().getValues<int64_t>()[removeH ? 1 : 0];
     auto dilationsAttr = rewriter.getI64VectorAttr(dilation);
 
     auto conv1DOp = rewriter.create<linalg::Conv1DNwcWcfOp>(
