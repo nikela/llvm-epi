@@ -160,6 +160,10 @@ public:
                                    Nontemporal);
   }
 
+  bool isNontemporal() const {
+    return Nontemporal;
+  }
+
   bool hasSEWLMULRatioOnly() const { return SEWLMULRatioOnly; }
 
   bool hasSameVTYPE(const VSETVLIInfo &Other) const {
@@ -700,8 +704,9 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
                                           MachineRegisterInfo *MRI) {
   VSETVLIInfo InstrInfo;
 
-  // TODO: is this still relevant?
+  // TODO: is this still relevant? Yes, but only for nt loads and stores
   unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
+
   unsigned SEW = MI.getOperand(SEWIndex).getImm() & ~(0x1 << 9);
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
 
@@ -810,6 +815,10 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                                        const VSETVLIInfo &Info,
                                        const VSETVLIInfo &PrevInfo) {
   DebugLoc DL = MI.getDebugLoc();
+  unsigned InfoVTYPE = Info.encodeVTYPE();
+  if (PrevInfo.isNontemporal()) {
+    InfoVTYPE |= RISCVVType::NT;
+  }
 
   Register ExtraReg = RISCV::NoRegister;
   ExtraTag ExtraRegIs = Info.getExtraOperand().Tag;
@@ -838,7 +847,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
         .addReg(DestReg, RegState::Define | RegState::Dead)
         .addReg(ScratchReg, RegState::Define | RegState::Dead)
         .addReg(Info.getAVLReg())
-        .addImm(Info.encodeVTYPE())
+        .addImm(InfoVTYPE)
         .addReg(ExtraReg);
 
     // Assure that ExtraReg is not being killed in the predecessor MBB
@@ -854,7 +863,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addReg(RISCV::X0, RegState::Kill)
-        .addImm(Info.encodeVTYPE())
+        .addImm(InfoVTYPE)
         .addReg(RISCV::VL, RegState::Implicit);
     return;
   }
@@ -863,7 +872,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETIVLI))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addImm(Info.getAVLImm())
-        .addImm(Info.encodeVTYPE());
+        .addImm(InfoVTYPE);
     return;
   }
 
@@ -876,7 +885,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
       BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
           .addReg(RISCV::X0, RegState::Define | RegState::Dead)
           .addReg(RISCV::X0, RegState::Kill)
-          .addImm(Info.encodeVTYPE())
+          .addImm(InfoVTYPE)
           .addReg(RISCV::VL, RegState::Implicit);
       return;
     }
@@ -884,7 +893,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETIVLI))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addImm(0)
-        .addImm(Info.encodeVTYPE());
+        .addImm(InfoVTYPE);
     return;
   }
 
@@ -903,7 +912,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   BuildMI(MBB, MI, DL, TII->get(Opcode))
       .addReg(DestReg, RegState::Define | RegState::Dead)
       .addReg(AVLReg)
-      .addImm(Info.encodeVTYPE());
+      .addImm(InfoVTYPE);
 }
 
 // Return a VSETVLIInfo representing the changes made by this VSETVLI or
