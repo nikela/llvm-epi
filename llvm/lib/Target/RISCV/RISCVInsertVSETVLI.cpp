@@ -1177,6 +1177,9 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
     }
 
     VSETVLIInfo VI = getInfoForVSETVLI(MI);
+    if (VI.isNontemporal())
+      continue;
+
     const MachineOperand &GVLOp = MI.getOperand(0);
     assert(GVLOp.isReg());
     Register GVLReg = GVLOp.getReg();
