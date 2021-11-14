@@ -1136,7 +1136,7 @@ public:
   ///   <0,0,0,1,1,1,2,2,2,3,3,3>
   InstructionCost getReplicationShuffleCost(Type *EltTy, int ReplicationFactor,
                                             int VF,
-                                            const APInt &DemandedReplicatedElts,
+                                            const APInt &DemandedDstElts,
                                             TTI::TargetCostKind CostKind);
 
   /// \return The cost of Load and Store instructions.
@@ -1679,7 +1679,7 @@ public:
 
   virtual InstructionCost
   getReplicationShuffleCost(Type *EltTy, int ReplicationFactor, int VF,
-                            const APInt &DemandedReplicatedElts,
+                            const APInt &DemandedDstElts,
                             TTI::TargetCostKind CostKind) = 0;
 
   virtual InstructionCost getMemoryOpCost(unsigned Opcode, Type *Src,
@@ -2207,10 +2207,10 @@ public:
   }
   InstructionCost
   getReplicationShuffleCost(Type *EltTy, int ReplicationFactor, int VF,
-                            const APInt &DemandedReplicatedElts,
+                            const APInt &DemandedDstElts,
                             TTI::TargetCostKind CostKind) override {
     return Impl.getReplicationShuffleCost(EltTy, ReplicationFactor, VF,
-                                          DemandedReplicatedElts, CostKind);
+                                          DemandedDstElts, CostKind);
   }
   InstructionCost getMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
                                   unsigned AddressSpace,
