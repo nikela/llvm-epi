@@ -33,6 +33,7 @@ install(TARGETS omptarget.rtl.epi LIBRARY DESTINATION "${OPENMP_INSTALL_LIBDIR}"
 target_link_libraries(omptarget.rtl.epi
   ${LIBOMPTARGET_DEP_EPI_DRIVER_LIBRARIES}
   ${LIBOMPTARGET_DEP_LIBELF_LIBRARIES}
+  elf_common
   "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../exports")
 
 # Report to the parent scope that we are building a plugin for EPI.
