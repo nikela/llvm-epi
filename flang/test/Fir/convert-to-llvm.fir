@@ -690,6 +690,38 @@ func @convert_complex16(%arg0 : !fir.complex<16>) -> !fir.complex<2> {
 
 // -----
 
+// Test constc.
+
+func @test_constc4() -> !fir.complex<4> {
+  %0 = fir.constc (#fir.real<4, 1.4>, #fir.real<4, 2.3>) : !fir.complex<4>
+  return %0 : !fir.complex<4>
+}
+
+// CHECK-LABEL: @test_constc4
+// CHECK_SAME: () -> !llvm.struct<(f32, f32)>
+// CHECK-DAG: [[rp:%.*]] = llvm.mlir.constant(1.400000e+00 : f32) : f32
+// CHECK-DAG: [[ip:%.*]] = llvm.mlir.constant(2.300000e+00 : f32) : f32
+// CHECK: [[undef:%.*]] = llvm.mlir.undef : !llvm.struct<(f32, f32)>
+// CHECK: [[withr:%.*]] = llvm.insertvalue [[rp]], [[undef]][0 : i32] : !llvm.struct<(f32, f32)>
+// CHECK: [[full:%.*]] = llvm.insertvalue [[ip]], [[withr]][1 : i32] : !llvm.struct<(f32, f32)>
+// CHECK: return [[full]] : !llvm.struct<(f32, f32)>
+
+func @test_constc8() -> !fir.complex<8> {
+  %0 = fir.constc (#fir.real<8, 1.8>, #fir.real<8, 2.3>) : !fir.complex<8>
+  return %0 : !fir.complex<8>
+}
+
+// CHECK-LABEL: @test_constc8
+// CHECK_SAME: () -> !llvm.struct<(f64, f64)>
+// CHECK-DAG: [[rp:%.*]] = llvm.mlir.constant(1.800000e+00 : f64) : f64
+// CHECK-DAG: [[ip:%.*]] = llvm.mlir.constant(2.300000e+00 : f64) : f64
+// CHECK: [[undef:%.*]] = llvm.mlir.undef : !llvm.struct<(f64, f64)>
+// CHECK: [[withr:%.*]] = llvm.insertvalue [[rp]], [[undef]][0 : i32] : !llvm.struct<(f64, f64)>
+// CHECK: [[full:%.*]] = llvm.insertvalue [[ip]], [[withr]][1 : i32] : !llvm.struct<(f64, f64)>
+// CHECK: return [[full]] : !llvm.struct<(f64, f64)>
+
+// -----
+
 // Test `fir.store` --> `llvm.store` conversion
 
 func @test_store_index(%val_to_store : index, %addr : !fir.ref<index>) {
@@ -1271,3 +1303,68 @@ func @string_lit1() {
 
 // CHECK-LABEL: llvm.func @string_lit1
 // %{{.*}} = llvm.mlir.constant(dense<[158, 2345]> : vector<2xi16>) : !llvm.array<2 x i16>
+
+// -----
+
+// Test must be dead conversion.
+
+func @dead_shift() {
+  %c0 = arith.constant 0 : index
+  %0 = fir.shift %c0 : (index) -> !fir.shift<1>
+  return
+}
+
+// CHECK-LABEL: llvm.func @dead_shift
+// CHECK-NOT: fir.shift
+// CHECK: %{{.*}} = llvm.mlir.constant(0 : index) : i{{.*}}
+// CHECK-NEXT: llvm.return
+
+func @dead_shape() {
+  %c0 = arith.constant 0 : index
+  %0 = fir.shape %c0 : (index) -> !fir.shape<1>
+  return
+}
+
+// CHECK-LABEL: llvm.func @dead_shape
+// CHECK-NOT: fir.shape
+// CHECK: %{{.*}} = llvm.mlir.constant(0 : index) : i{{.*}}
+// CHECK-NEXT: llvm.return
+
+func @dead_shapeshift() {
+  %c0 = arith.constant 0 : index
+  %0 = fir.shape_shift %c0, %c0 : (index, index) -> !fir.shapeshift<1>
+  return
+}
+
+// CHECK-LABEL: llvm.func @dead_shapeshift
+// CHECK-NOT: fir.shape_shift
+// CHECK: %{{.*}} = llvm.mlir.constant(0 : index) : i{{.*}}
+// CHECK-NEXT: llvm.return
+
+func @dead_slice() {
+  %c0 = arith.constant 0 : index
+  %0 = fir.slice %c0, %c0, %c0 : (index, index, index) -> !fir.slice<1>
+  return
+}
+
+// CHECK-LABEL: llvm.func @dead_slice
+// CHECK-NOT: fir.slice
+// CHECK: %{{.*}} = llvm.mlir.constant(0 : index) : i{{.*}}
+// CHECK-NEXT: llvm.return
+
+// -----
+
+// Test `fir.box_tdesc` conversion.
+
+func @box_tdesc(%arg0: !fir.box<f64>) {
+  %0 = fir.box_tdesc %arg0 : (!fir.box<f64>) -> !fir.tdesc<f64>
+  return
+}
+
+// CHECK-LABEL: llvm.func @box_tdesc(
+// CHECK-SAME:                       %[[ARG0:.*]]: !llvm.ptr<struct<(ptr<f64>, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}})>>) {
+// CHECK:         %[[C0:.*]] = llvm.mlir.constant(0 : i32) : i32
+// CHECK:         %[[TYPE_POS:.*]] = llvm.mlir.constant(4 : i32) : i32
+// CHECK:         %[[GEP:.*]] = llvm.getelementptr %[[ARG0]][%[[C0]], %[[TYPE_POS]]] : (!llvm.ptr<struct<(ptr<f64>, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}}, i{{.*}})>>, i32, i32) -> !llvm.ptr<i8>
+// CHECK:         %[[LOAD:.*]] = llvm.load %[[GEP]] : !llvm.ptr<i{{.*}}>
+// CHECK:         %{{.*}} = llvm.inttoptr %[[LOAD]] : i{{.*}} to !llvm.ptr<i{{.*}}>

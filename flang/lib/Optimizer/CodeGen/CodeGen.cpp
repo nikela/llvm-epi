@@ -498,6 +498,26 @@ struct StringLitOpConversion : public FIROpConversion<fir::StringLitOp> {
   }
 };
 
+/// Lower `fir.box_tdesc` to the sequence of operations to extract the type
+/// descriptor from the box.
+struct BoxTypeDescOpConversion : public FIROpConversion<fir::BoxTypeDescOp> {
+  using FIROpConversion::FIROpConversion;
+
+  mlir::LogicalResult
+  matchAndRewrite(fir::BoxTypeDescOp boxtypedesc, OpAdaptor adaptor,
+                  mlir::ConversionPatternRewriter &rewriter) const override {
+    mlir::Value box = adaptor.getOperands()[0];
+    auto loc = boxtypedesc.getLoc();
+    mlir::Type typeTy =
+        fir::getDescFieldTypeModel<kTypePosInBox>()(boxtypedesc.getContext());
+    auto result = getValueFromBox(loc, box, typeTy, rewriter, kTypePosInBox);
+    auto typePtrTy = mlir::LLVM::LLVMPointerType::get(typeTy);
+    rewriter.replaceOpWithNewOp<mlir::LLVM::IntToPtrOp>(boxtypedesc, typePtrTy,
+                                                        result);
+    return success();
+  }
+};
+
 // `fir.call` -> `llvm.call`
 struct CallOpConversion : public FIROpConversion<fir::CallOp> {
   using FIROpConversion::FIROpConversion;
@@ -563,6 +583,38 @@ struct CmpcOpConversion : public FIROpConversion<fir::CmpcOp> {
       break;
     }
     return success();
+  }
+};
+
+/// Lower complex constants
+struct ConstcOpConversion : public FIROpConversion<fir::ConstcOp> {
+  using FIROpConversion::FIROpConversion;
+
+  mlir::LogicalResult
+  matchAndRewrite(fir::ConstcOp conc, OpAdaptor,
+                  mlir::ConversionPatternRewriter &rewriter) const override {
+    mlir::Location loc = conc.getLoc();
+    mlir::MLIRContext *ctx = conc.getContext();
+    mlir::Type ty = convertType(conc.getType());
+    mlir::Type ety = convertType(getComplexEleTy(conc.getType()));
+    auto realFloatAttr = mlir::FloatAttr::get(ety, getValue(conc.getReal()));
+    auto realPart =
+        rewriter.create<mlir::LLVM::ConstantOp>(loc, ety, realFloatAttr);
+    auto imFloatAttr = mlir::FloatAttr::get(ety, getValue(conc.getImaginary()));
+    auto imPart =
+        rewriter.create<mlir::LLVM::ConstantOp>(loc, ety, imFloatAttr);
+    auto realIndex = mlir::ArrayAttr::get(ctx, rewriter.getI32IntegerAttr(0));
+    auto imIndex = mlir::ArrayAttr::get(ctx, rewriter.getI32IntegerAttr(1));
+    auto undef = rewriter.create<mlir::LLVM::UndefOp>(loc, ty);
+    auto setReal = rewriter.create<mlir::LLVM::InsertValueOp>(
+        loc, ty, undef, realPart, realIndex);
+    rewriter.replaceOpWithNewOp<mlir::LLVM::InsertValueOp>(conc, ty, setReal,
+                                                           imPart, imIndex);
+    return success();
+  }
+
+  inline APFloat getValue(mlir::Attribute attr) const {
+    return attr.cast<fir::RealAttr>().getValue();
   }
 };
 
@@ -1469,6 +1521,42 @@ struct NegcOpConversion : public FIROpConversion<fir::NegcOp> {
   }
 };
 
+/// Conversion pattern for operation that must be dead. The information in these
+/// operations is used by other operation. At this point they should not have
+/// anymore uses.
+/// These operations are normally dead after the pre-codegen pass.
+template <typename FromOp>
+struct MustBeDeadConversion : public FIROpConversion<FromOp> {
+  explicit MustBeDeadConversion(fir::LLVMTypeConverter &lowering)
+      : FIROpConversion<FromOp>(lowering) {}
+  using OpAdaptor = typename FromOp::Adaptor;
+
+  mlir::LogicalResult
+  matchAndRewrite(FromOp op, OpAdaptor adaptor,
+                  mlir::ConversionPatternRewriter &rewriter) const final {
+    if (!op->getUses().empty())
+      return rewriter.notifyMatchFailure(op, "op must be dead");
+    rewriter.eraseOp(op);
+    return success();
+  }
+};
+
+struct ShapeOpConversion : public MustBeDeadConversion<fir::ShapeOp> {
+  using MustBeDeadConversion::MustBeDeadConversion;
+};
+
+struct ShapeShiftOpConversion : public MustBeDeadConversion<fir::ShapeShiftOp> {
+  using MustBeDeadConversion::MustBeDeadConversion;
+};
+
+struct ShiftOpConversion : public MustBeDeadConversion<fir::ShiftOp> {
+  using MustBeDeadConversion::MustBeDeadConversion;
+};
+
+struct SliceOpConversion : public MustBeDeadConversion<fir::SliceOp> {
+  using MustBeDeadConversion::MustBeDeadConversion;
+};
+
 /// `fir.is_present` -->
 /// ```
 ///  %0 = llvm.mlir.constant(0 : i64)
@@ -1628,17 +1716,19 @@ public:
         AllocaOpConversion, BoxAddrOpConversion, BoxCharLenOpConversion,
         BoxDimsOpConversion, BoxEleSizeOpConversion, BoxIsAllocOpConversion,
         BoxIsArrayOpConversion, BoxIsPtrOpConversion, BoxRankOpConversion,
-        CallOpConversion, CmpcOpConversion, ConvertOpConversion,
-        DispatchOpConversion, DispatchTableOpConversion, DTEntryOpConversion,
-        DivcOpConversion, EmboxCharOpConversion, ExtractValueOpConversion,
-        HasValueOpConversion, GenTypeDescOpConversion, GlobalLenOpConversion,
-        GlobalOpConversion, InsertOnRangeOpConversion, InsertValueOpConversion,
+        BoxTypeDescOpConversion, CallOpConversion, CmpcOpConversion,
+        ConstcOpConversion, ConvertOpConversion, DispatchOpConversion,
+        DispatchTableOpConversion, DTEntryOpConversion, DivcOpConversion,
+        EmboxCharOpConversion, ExtractValueOpConversion, HasValueOpConversion,
+        GenTypeDescOpConversion, GlobalLenOpConversion, GlobalOpConversion,
+        InsertOnRangeOpConversion, InsertValueOpConversion,
         IsPresentOpConversion, LoadOpConversion, NegcOpConversion,
         MulcOpConversion, SelectCaseOpConversion, SelectOpConversion,
-        SelectRankOpConversion, SelectTypeOpConversion, StoreOpConversion,
-        StringLitOpConversion, SubcOpConversion, UnboxCharOpConversion,
-        UndefOpConversion, UnreachableOpConversion, ZeroOpConversion>(
-        typeConverter);
+        SelectRankOpConversion, SelectTypeOpConversion, ShapeOpConversion,
+        ShapeShiftOpConversion, ShiftOpConversion, SliceOpConversion,
+        StoreOpConversion, StringLitOpConversion, SubcOpConversion,
+        UnboxCharOpConversion, UndefOpConversion, UnreachableOpConversion,
+        ZeroOpConversion>(typeConverter);
     mlir::populateStdToLLVMConversionPatterns(typeConverter, pattern);
     mlir::arith::populateArithmeticToLLVMConversionPatterns(typeConverter,
                                                             pattern);

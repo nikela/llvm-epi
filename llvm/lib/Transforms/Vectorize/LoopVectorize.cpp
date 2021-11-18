@@ -8505,13 +8505,14 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
 
   InstructionCost C = getInstructionCost(I, VF, VectorTy);
 
-  // Comparing number of parts for scalable vectors with KnownMin VF does not
-  // make sense, since the actual VF is unknown at compile time. We cannot
-  // scalarize scalable vectors.
-  bool TypeNotScalarized =
-      VF.isVector() && VectorTy->isVectorTy() &&
-      (isa<ScalableVectorType>(VectorTy) ||
-       TTI.getNumberOfParts(VectorTy) < VF.getKnownMinValue());
+  bool TypeNotScalarized = false;
+  if (VF.isVector() && VectorTy->isVectorTy()) {
+    unsigned NumParts = TTI.getNumberOfParts(VectorTy);
+    if (NumParts)
+      TypeNotScalarized = NumParts < VF.getKnownMinValue();
+    else
+      C = InstructionCost::getInvalid();
+  }
   return VectorizationCostTy(C, TypeNotScalarized);
 }
 
