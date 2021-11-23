@@ -7,56 +7,52 @@
 define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O0-LABEL: test_llvm_IR_infinite_loop:
 ; CHECK-O0:       # %bb.0: # %entry
-; CHECK-O0-NEXT:    addi sp, sp, -96
-; CHECK-O0-NEXT:    .cfi_def_cfa_offset 96
-; CHECK-O0-NEXT:    sd a3, 64(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a2, 72(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a1, 80(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    addi sp, sp, -80
+; CHECK-O0-NEXT:    .cfi_def_cfa_offset 80
+; CHECK-O0-NEXT:    sd a3, 48(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a1, 64(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    sd a1, 88(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a1, 72(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    li a0, 0
 ; CHECK-O0-NEXT:    bge a0, a1, .LBB0_4
 ; CHECK-O0-NEXT:    j .LBB0_1
 ; CHECK-O0-NEXT:  .LBB0_1: # %for.body.lr.ph
-; CHECK-O0-NEXT:    ld a1, 88(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a1, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    li a0, 25
 ; CHECK-O0-NEXT:    slt a0, a0, a1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
-; CHECK-O0-NEXT:    sd a0, 48(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    li a2, 1024
 ; CHECK-O0-NEXT:    li a0, 400
-; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a2, 40(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_3
 ; CHECK-O0-NEXT:  # %bb.2: # %for.body.lr.ph
-; CHECK-O0-NEXT:    ld a0, 48(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    sd a0, 56(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    sd a0, 40(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:  .LBB0_3: # %for.body.lr.ph
-; CHECK-O0-NEXT:    ld a0, 64(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a1, 72(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a2, 80(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a3, 88(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a5, 56(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    sd a5, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    ld a0, 48(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a1, 56(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a2, 64(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a3, 72(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a5, 40(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ori a4, a5, 88
 ; CHECK-O0-NEXT:    vsetvl a3, a3, a4
-; CHECK-O0-NEXT:    sd a3, 16(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a2, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a1, 32(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a0, 40(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a3, 0(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a2, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_5
 ; CHECK-O0-NEXT:  .LBB0_4: # %for.cond.cleanup
-; CHECK-O0-NEXT:    addi sp, sp, 96
+; CHECK-O0-NEXT:    addi sp, sp, 80
 ; CHECK-O0-NEXT:    ret
 ; CHECK-O0-NEXT:  .LBB0_5: # %for.body
 ; CHECK-O0-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-O0-NEXT:    ld a0, 40(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a1, 32(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a2, 24(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a3, 16(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a4, 8(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a1, 16(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a2, 8(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a3, 0(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    ori a5, a4, 88
-; CHECK-O0-NEXT:    vsetvl a4, a3, a5
 ; CHECK-O0-NEXT:    vle64.v v9, (a2)
 ; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    vle64.v v10, (a1)
@@ -67,9 +63,9 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O0-NEXT:    add a2, a2, a3
 ; CHECK-O0-NEXT:    add a1, a1, a3
 ; CHECK-O0-NEXT:    add a0, a0, a3
-; CHECK-O0-NEXT:    sd a2, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a1, 32(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a0, 40(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a2, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_5
 ;
 ; CHECK-O2-LABEL: test_llvm_IR_infinite_loop:
@@ -84,22 +80,20 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O2-NEXT:    slt a4, a4, a0
 ; CHECK-O2-NEXT:    slli a6, a4, 9
 ; CHECK-O2-NEXT:  .LBB0_3: # %for.body.lr.ph
-; CHECK-O2-NEXT:    li a5, 0
-; CHECK-O2-NEXT:    ori a4, a6, 88
-; CHECK-O2-NEXT:    vsetvl a7, a0, a4
-; CHECK-O2-NEXT:    slli t0, a7, 3
+; CHECK-O2-NEXT:    li a4, 0
+; CHECK-O2-NEXT:    ori a5, a6, 88
+; CHECK-O2-NEXT:    vsetvl a0, a0, a5
+; CHECK-O2-NEXT:    slli a0, a0, 3
 ; CHECK-O2-NEXT:  .LBB0_4: # %for.body
 ; CHECK-O2-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-O2-NEXT:    add t1, a1, a5
-; CHECK-O2-NEXT:    ori a0, a6, 88
-; CHECK-O2-NEXT:    vsetvl a4, a7, a0
-; CHECK-O2-NEXT:    vle64.v v8, (t1)
-; CHECK-O2-NEXT:    add a0, a2, a5
-; CHECK-O2-NEXT:    vle64.v v9, (a0)
+; CHECK-O2-NEXT:    add a5, a1, a4
+; CHECK-O2-NEXT:    vle64.v v8, (a5)
+; CHECK-O2-NEXT:    add a5, a2, a4
+; CHECK-O2-NEXT:    vle64.v v9, (a5)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-O2-NEXT:    add a0, a3, a5
-; CHECK-O2-NEXT:    vse64.v v8, (a0)
-; CHECK-O2-NEXT:    add a5, a5, t0
+; CHECK-O2-NEXT:    add a5, a3, a4
+; CHECK-O2-NEXT:    vse64.v v8, (a5)
+; CHECK-O2-NEXT:    add a4, a4, a0
 ; CHECK-O2-NEXT:    j .LBB0_4
 ; CHECK-O2-NEXT:  .LBB0_5: # %for.cond.cleanup
 ; CHECK-O2-NEXT:    ret

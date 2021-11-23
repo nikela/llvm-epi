@@ -2377,7 +2377,6 @@ define void @sink_splat_icmp(i32* nocapture %x, i32 signext %y) {
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:  .LBB36_1: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v9, (a0)
 ; CHECK-NEXT:    vmseq.vx v0, v9, a1
 ; CHECK-NEXT:    vse32.v v8, (a0), v0.t
@@ -2417,7 +2416,6 @@ define void @sink_splat_fcmp(float* nocapture %x, float %y) {
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:  .LBB37_1: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v9, (a0)
 ; CHECK-NEXT:    vmfeq.vf v0, v9, ft0
 ; CHECK-NEXT:    vse32.v v8, (a0), v0.t

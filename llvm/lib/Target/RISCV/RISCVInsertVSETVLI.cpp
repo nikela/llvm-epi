@@ -40,10 +40,60 @@ static cl::opt<bool> DisableInsertVSETVLPHIOpt(
 namespace {
 
 using MBBNumber = int;
-enum ExtraTag { isEmpty, isRegister, isFromPHI, isZero };
-struct ExtraOperand {
-  ExtraTag Tag;
-  Register ExtraReg;
+
+class ExtraOperand {
+  enum : uint8_t {
+    isUndefined,   // Extra operand is undefined
+    isRegister,    // Extra operand is stored in a register
+    isNontemporal, // Extra operand sets the NonTemporal bit
+    isFromPHI,     // Extra operand is the result of a PHI
+    isZero         // Instruction behaves like if ExtraOperand = 0
+  } Tag = isUndefined;
+  Register Reg = RISCV::NoRegister;
+
+public:
+  bool isExtraOperandUndefined() const { return Tag == isUndefined; }
+  bool isExtraOperandRegister() const { return Tag == isRegister; }
+  bool isExtraOperandNontemporal() const { return Tag == isNontemporal; }
+  bool isExtraOperandFromPHI() const { return Tag == isFromPHI; }
+  bool isExtraOperandZero() const { return Tag == isZero; }
+
+  void setUndefined() {
+    Tag = isUndefined;
+    Reg = RISCV::NoRegister;
+  }
+  void setReg(Register NewReg) {
+    Tag = isRegister;
+    Reg = NewReg;
+  }
+  void setNontemporal() {
+    Tag = isNontemporal;
+    Reg = RISCV::NoRegister;
+  }
+  void setFromPHI() {
+    Tag = isFromPHI;
+    Reg = RISCV::NoRegister;
+  }
+  void setZero() {
+    Tag = isZero;
+    Reg = RISCV::NoRegister;
+  }
+
+  Register getRegister() const {
+    assert(Tag == isRegister);
+
+    return Reg;
+  }
+
+  bool operator==(const ExtraOperand &Other) const {
+    if (Tag == isRegister)
+      return Tag == Other.Tag && Reg == Other.Reg;
+
+    return Tag == Other.Tag;
+  }
+  bool operator!=(const ExtraOperand &Other) const {
+    return !(*this == Other);
+  }
 };
 
 class VSETVLIInfo {
@@ -67,23 +117,11 @@ class VSETVLIInfo {
   uint8_t MaskRegOp : 1;
   uint8_t StoreOp : 1;
   uint8_t SEWLMULRatioOnly : 1;
-  uint8_t Nontemporal : 1;
-
-  // Extra operand stuff
-  ExtraOperand Extra;
-  SmallMapVector<MBBNumber, ExtraOperand, 4> ExtrasForPHI;
-
-  static bool hasExtraValue(const std::pair<MBBNumber, ExtraOperand> Elem) {
-    ExtraOperand EO = Elem.second;
-    return EO.Tag != isEmpty && EO.Tag != isZero;
-  }
 
 public:
   VSETVLIInfo()
       : AVLImm(0), TailAgnostic(false), MaskAgnostic(false), MaskRegOp(false),
-        StoreOp(false), SEWLMULRatioOnly(false) {
-    this->setExtra();
-  }
+        StoreOp(false), SEWLMULRatioOnly(false) {}
 
   static VSETVLIInfo getUnknown() {
     VSETVLIInfo Info;
@@ -137,11 +175,10 @@ public:
     SEW = RISCVVType::getSEW(VType);
     TailAgnostic = RISCVVType::isTailAgnostic(VType);
     MaskAgnostic = RISCVVType::isMaskAgnostic(VType);
-    Nontemporal = RISCVVType::isNontemporal(VType);
   }
 
   void setVTYPE(RISCVII::VLMUL L, unsigned S, bool TA, bool MA, bool MRO,
-                bool IsStore, bool NT) {
+                bool IsStore) {
     assert(isValid() && !isUnknown() &&
            "Can't set VTYPE for uninitialized or unknown");
     VLMul = L;
@@ -150,18 +187,13 @@ public:
     MaskAgnostic = MA;
     MaskRegOp = MRO;
     StoreOp = IsStore;
-    Nontemporal = NT;
   }
 
   unsigned encodeVTYPE() const {
     assert(isValid() && !isUnknown() && !SEWLMULRatioOnly &&
            "Can't encode VTYPE for uninitialized or unknown");
     return RISCVVType::encodeVTYPE(VLMul, SEW, TailAgnostic, MaskAgnostic,
-                                   Nontemporal);
-  }
-
-  bool isNontemporal() const {
-    return Nontemporal;
+                                   /*Nontemporal*/ false);
   }
 
   bool hasSEWLMULRatioOnly() const { return SEWLMULRatioOnly; }
@@ -173,13 +205,9 @@ public:
            "Can't compare VTYPE in unknown state");
     assert(!SEWLMULRatioOnly && !Other.SEWLMULRatioOnly &&
            "Can't compare when only LMUL/SEW ratio is valid.");
-    bool HasSameStaticVTYPE =
-        std::tie(VLMul, SEW, TailAgnostic, MaskAgnostic, Nontemporal) ==
-        std::tie(Other.VLMul, Other.SEW, Other.TailAgnostic, Other.MaskAgnostic,
-                 Other.Nontemporal);
-    bool HasSameDynamicVTYPE = Other.getExtraOperand().Tag == isEmpty ||
-                               this->hasSameExtraOperand(Other);
-    return HasSameStaticVTYPE && HasSameDynamicVTYPE;
+    return std::tie(VLMul, SEW, TailAgnostic, MaskAgnostic) ==
+           std::tie(Other.VLMul, Other.SEW, Other.TailAgnostic,
+                    Other.MaskAgnostic);
   }
 
   static unsigned getSEWLMULRatio(unsigned SEW, RISCVII::VLMUL VLMul) {
@@ -207,46 +235,6 @@ public:
     assert(!isUnknown() && !Other.isUnknown() &&
            "Can't compare VTYPE in unknown state");
     return getSEWLMULRatio() == Other.getSEWLMULRatio();
-  }
-
-  bool hasExtra() const { return this->Extra.Tag != isEmpty; }
-
-  void setExtra(ExtraTag ET = isEmpty, Register ExtraReg = RISCV::NoRegister) {
-    this->Extra.Tag = ET;
-    this->Extra.ExtraReg = ExtraReg;
-  }
-
-  const ExtraOperand getExtraOperand() const { return this->Extra; }
-
-  void inheritExtraFrom(const VSETVLIInfo &Other) { this->Extra = Other.Extra; }
-
-  bool hasSameExtraOperand(const VSETVLIInfo &Other) const {
-    return this->Extra.Tag == Other.Extra.Tag &&
-           this->Extra.ExtraReg == Other.Extra.ExtraReg;
-  }
-
-  bool isExtrasForPHIEmpty() const { return this->ExtrasForPHI.empty(); }
-
-  size_t sizeOfExtrasForPHI() const { return this->ExtrasForPHI.size(); }
-
-  void insertExtra(MBBNumber MBBN, ExtraOperand EO) {
-    this->ExtrasForPHI.insert(std::make_pair(MBBN, EO));
-  }
-
-  const SmallMapVector<MBBNumber, ExtraOperand, 4> getExtrasForPHI() const {
-    return this->ExtrasForPHI;
-  }
-
-  void resetExtrasForPHI() { this->ExtrasForPHI.clear(); }
-
-  void inheritExtrasForPHIFrom(const VSETVLIInfo &Other) {
-    this->ExtrasForPHI = Other.ExtrasForPHI;
-  }
-
-  bool hasExtrasForPHIValues() const {
-    const auto *const IterPos = std::find_if(
-        this->ExtrasForPHI.begin(), this->ExtrasForPHI.end(), hasExtraValue);
-    return IterPos != this->ExtrasForPHI.end();
   }
 
   bool hasCompatibleVTYPE(const VSETVLIInfo &InstrInfo, bool Strict) const {
@@ -365,50 +353,38 @@ public:
 
   // Calculate the VSETVLIInfo visible to a block assuming this and Other are
   // both predecessors.
-  VSETVLIInfo intersect(VSETVLIInfo &Other, MBBNumber MBBN) {
+  VSETVLIInfo intersect(const VSETVLIInfo &Other) const {
     // If the new value isn't valid, ignore it.
-    if (!Other.isValid()) {
-      this->insertExtra(MBBN, Other.getExtraOperand());
+    if (!Other.isValid())
       return *this;
-    }
 
     // If this value isn't valid, Other must be the first predecessor, use it.
-    if (!isValid()) {
-      VSETVLIInfo ResultInfo = Other;
-      ResultInfo.insertExtra(MBBN, Other.getExtraOperand());
-      return ResultInfo;
-    }
+    if (!isValid())
+      return Other;
 
     // If either is unknown, the result is unknown.
-    if (isUnknown() || Other.isUnknown()) {
-      this->setUnknown();
-      this->insertExtra(MBBN, Other.getExtraOperand());
-      return *this;
-    }
+    if (isUnknown() || Other.isUnknown())
+      return VSETVLIInfo::getUnknown();
 
     // If we have an exact match, return this.
-    if (*this == Other) {
-      this->insertExtra(MBBN, Other.getExtraOperand());
+    if (*this == Other)
       return *this;
-    }
 
     // Not an exact match, but maybe the AVL and VLMAX are the same. If so,
     // return an SEW/LMUL ratio only value.
     if (hasSameAVL(Other) && hasSameVLMAX(Other)) {
-      this->SEWLMULRatioOnly = true;
-      this->insertExtra(MBBN, Other.getExtraOperand());
-      return *this;
+      VSETVLIInfo MergeInfo = *this;
+      MergeInfo.SEWLMULRatioOnly = true;
+      return MergeInfo;
     }
 
     // Otherwise the result is unknown.
-    this->setUnknown();
-    this->insertExtra(MBBN, Other.getExtraOperand());
-    return *this;
+    return VSETVLIInfo::getUnknown();
   }
 
   // Calculate the VSETVLIInfo visible at the end of the block assuming this
   // is the predecessor value, and Other is change for this block.
-  VSETVLIInfo merge(VSETVLIInfo &Other) {
+  VSETVLIInfo merge(const VSETVLIInfo &Other) const {
     assert(isValid() && "Can only merge with a valid VSETVLInfo");
 
     // Nothing changed from the predecessor, keep it.
@@ -417,15 +393,10 @@ public:
 
     // If the change is compatible with the input, we won't create a VSETVLI
     // and should keep the predecessor.
-    if (isCompatible(Other, /*Strict*/ true)) {
-      if (Other.hasExtra())
-        this->inheritExtraFrom(Other);
+    if (isCompatible(Other, /*Strict*/ true))
       return *this;
-    }
 
     // Otherwise just use whatever is in this block.
-    if (!Other.hasExtra())
-      Other.inheritExtraFrom(*this);
     return Other;
   }
 };
@@ -438,21 +409,27 @@ struct BlockData {
   // The VSETVLIInfo that represents the VL/VTYPE settings on exit from this
   // block. Calculated in Phase 2.
   VSETVLIInfo Exit;
+  // Keeps track of the ExtraOperand of the last MI of this MBB
+  ExtraOperand ExitExtra;
 
   // The VSETVLIInfo that represents the VL/VTYPE settings from all predecessor
   // blocks. Calculated in Phase 2, and used by Phase 3.
   VSETVLIInfo Pred;
+  // Keeps track of Extra operands coming from the predecessors
+  ExtraOperand PredExtra;
+  SmallMapVector<MBBNumber, ExtraOperand, 4> AllPredsExtras;
 
   // Keeps track of whether the block is already in the queue.
   bool InQueue = false;
 
   // Keeps track of whether the block already contains a PHI to recover the
   // value of the Extra operand from the predecessors
+  // FIXME: a PHI register for each ExtraOperand PHI
   Optional<Register> ExtraFromPHIReg;
 
   // Keeps track of whether the block already contains the definition of a
-  // virtual register (with an assigned value of 0) to be used in a PHI of the
-  // successor(s)
+  // virtual register (with an assigned value of 0) to be used as a fake Extra
+  // operand value in a PHI of the successor(s)
   Optional<Register> FakeExtraReg;
 
   BlockData() {}
@@ -462,6 +439,7 @@ class RISCVInsertVSETVLI : public MachineFunctionPass {
   const RISCVInstrInfo *TII;
   MachineRegisterInfo *MRI;
 
+  DenseMap<const MachineInstr *, ExtraOperand> ExtraOpInfo;
   std::vector<BlockData> BlockInfo;
   std::queue<const MachineBasicBlock *> WorkList;
 
@@ -485,13 +463,17 @@ private:
   bool needVSETVLIPHI(const VSETVLIInfo &Require, const MachineBasicBlock &MBB);
   void insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                      const VSETVLIInfo &Info, const VSETVLIInfo &PrevInfo);
+  ExtraOperand getExtraOperand(const MachineInstr *MI);
+  void copyExtraOperand(const MachineInstr *From, const MachineInstr *To);
+  void copyExtraOperand(const ExtraOperand EO, const MachineInstr *To);
+  Register &getFakeRegister(MachineBasicBlock *MBB);
+  Register &getRegisterFromPHI(MachineBasicBlock *MBB);
 
+  void computeExtraOperand(const MachineBasicBlock &MBB);
   void forwardPropagateAVL(MachineBasicBlock &MBB);
   bool computeVLVTYPEChanges(const MachineBasicBlock &MBB);
   void computeIncomingVLVTYPE(const MachineBasicBlock &MBB);
   void emitVSETVLIs(MachineBasicBlock &MBB);
-  Register &getFakeRegister(MachineBasicBlock *MBB);
-  Register &getRegisterFromPHI(MachineBasicBlock *MBB);
 };
 
 } // end anonymous namespace
@@ -517,22 +499,18 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
   BlockData &BBInfo = BlockInfo[MBB->getNumber()];
 
   if (!BBInfo.ExtraFromPHIReg.hasValue()) {
-    // If this MBB has a .Pred VSETVLIInfo with an empty ExtrasForPHI,
-    // it can either be because none of the predecessor use an actual value for
-    // the Extra operand (so we fallback to isZero) or because we had
-    // only a predecessor; in this case, we need to introduce a PHI in the
-    // predecessor in order to recover the Extra register.
-    if (BBInfo.Pred.isExtrasForPHIEmpty()) {
-      if (BBInfo.Pred.getExtraOperand().Tag == isZero) {
-        BBInfo.ExtraFromPHIReg = RISCV::NoRegister;
-        return BBInfo.ExtraFromPHIReg.getValue();
-      }
-      assert(!MBB->pred_empty() && "This MBB should have one predecessor");
-      BBInfo.ExtraFromPHIReg = getRegisterFromPHI(*(MBB->pred_begin()));
+    if (BBInfo.AllPredsExtras.empty()) {
+      // This can happen only when there is only one predecessor whose ExitExtra
+      // value == isFromPHI. In this case we can use the ExtraFromPHIReg of the
+      // predecessor MBB
+      assert(BBInfo.PredExtra.isExtraOperandFromPHI());
+      assert(MBB->pred_size() == 1);
+
+      MachineBasicBlock *PredMBB = *(MBB->pred_begin());
+      BBInfo.ExtraFromPHIReg = getRegisterFromPHI(PredMBB);
       return BBInfo.ExtraFromPHIReg.getValue();
     }
 
-    // Otherwise, we create the PHI
     MachineFunction *MF = MBB->getParent();
     DebugLoc DL = MBB->findBranchDebugLoc();
     Register ExtraReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
@@ -540,26 +518,20 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
         BuildMI(*MBB, MBB->begin(), DL, TII->get(RISCV::PHI), ExtraReg);
     BBInfo.ExtraFromPHIReg = ExtraReg;
     // Add operands to the PHI instruction
-    for (const auto &EFM : BBInfo.Pred.getExtrasForPHI()) {
+    for (const auto &EFM : BBInfo.AllPredsExtras) {
       MBBNumber MBBN;
       ExtraOperand EO;
       std::tie(MBBN, EO) = EFM;
+
       MachineBasicBlock *PredMBB = MF->getBlockNumbered(MBBN);
-      Register PredExtra;
-      switch (EO.Tag) {
-      case isEmpty:
-      case isZero:
-        // We need a fake register
-        PredExtra = getFakeRegister(PredMBB);
-        break;
-      case isFromPHI:
-        // We need a register from the PHI output of the predecessor
+      Register PredExtra = RISCV::NoRegister;
+      if (EO.isExtraOperandRegister())
+        PredExtra = EO.getRegister();
+      else if (EO.isExtraOperandFromPHI())
         PredExtra = getRegisterFromPHI(PredMBB);
-        break;
-      case isRegister:
-        PredExtra = EO.ExtraReg;
-        break;
-      }
+      else
+        PredExtra = getFakeRegister(PredMBB);
+
       MIB.addReg(PredExtra); // Extra operand register
       MIB.addMBB(PredMBB);   // Machine Basic Block
 
@@ -567,6 +539,7 @@ Register &RISCVInsertVSETVLI::getRegisterFromPHI(MachineBasicBlock *MBB) {
       MRI->clearKillFlags(PredExtra);
     }
   }
+
   return BBInfo.ExtraFromPHIReg.getValue();
 }
 
@@ -642,58 +615,12 @@ static VSETVLIInfo computeInfoForInstr(const MachineInstr &MI, uint64_t TSFlags,
         InstrInfo.setAVLImm(Imm);
     } else {
       InstrInfo.setAVLReg(VLOp.getReg());
-      // Try to recover the Extra operand value linked to this VL
-      assert((!VLOp.getReg().isPhysical() || VLOp.getReg() == RISCV::X0) &&
-             "We cannot have phisical registers here");
-      if (VLOp.getReg() != RISCV::X0) {
-        if (MachineInstr *DefMI = MRI->getVRegDef(VLOp.getReg())) {
-          switch (DefMI->getOpcode()) {
-          case RISCV::PseudoVSETVLEXT:
-            InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
-            break;
-          case RISCV::PseudoVSETVLI:
-          case RISCV::PseudoVSETIVLI:
-            InstrInfo.setExtra(isZero);
-            break;
-          case RISCV::PHI: {
-            // We go only one level up in the tree in order to check if the
-            // predecessors do have Extra register values or not, even in the
-            // case we meet another VL defined by a MI with Opcode == RISCV::PHI
-            bool NeedPHI = false;
-            for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
-                 PHIOp != NumOps; PHIOp += 2) {
-              assert(DefMI->getOperand(PHIOp).isReg() &&
-                     "PHIOp is not a register");
-              Register InReg = DefMI->getOperand(PHIOp).getReg();
-              MachineInstr *PrevDefMI = MRI->getVRegDef(InReg);
-              if (PrevDefMI &&
-                  (PrevDefMI->getOpcode() == RISCV::PseudoVSETVLEXT ||
-                   PrevDefMI->getOpcode() == RISCV::PHI)) {
-                NeedPHI = true;
-              }
-            }
-
-            if (NeedPHI)
-              InstrInfo.setExtra(isFromPHI);
-            else
-              InstrInfo.setExtra(isZero);
-
-            break;
-          }
-          // In all other cases, we consider the information unrecoverable,
-          // hence we fallback to the default case (isEmpty)
-          default:
-            break;
-          }
-        } // also in this case we fallback to isEmpty
-      }   // also in this case we fallback to isEmpty
     }
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ TailAgnostic,
-                     /*MaskAgnostic*/ false, MaskRegOp, StoreOp,
-                     /* Nontemporal */ false);
+                     /*MaskAgnostic*/ false, MaskRegOp, StoreOp);
 
   return InstrInfo;
 }
@@ -703,9 +630,6 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
                                           int MaskOpIdx,
                                           MachineRegisterInfo *MRI) {
   VSETVLIInfo InstrInfo;
-
-  // TODO: is this still relevant? Yes, but only for nt loads and stores
-  unsigned Nontemporal = (MI.getOperand(SEWIndex).getImm() >> 9) & 0x1;
 
   unsigned SEW = MI.getOperand(SEWIndex).getImm() & ~(0x1 << 9);
   assert(RISCVVType::isValidSEW(SEW) && "Unexpected SEW");
@@ -756,57 +680,11 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
     } else
       R = VLOp.getReg();
     InstrInfo.setAVLReg(R);
-    // Try to recover the Extra operand value linked to this VL
-    assert((!R.isPhysical() || R == RISCV::X0) &&
-           "We cannot have physical registers here");
-    if (R != RISCV::X0) {
-      if (MachineInstr *DefMI = MRI->getVRegDef(R)) {
-        switch (DefMI->getOpcode()) {
-        case RISCV::PseudoVSETVLEXT:
-          InstrInfo.setExtra(isRegister, DefMI->getOperand(4).getReg());
-          break;
-        case RISCV::PseudoVSETVLI:
-        case RISCV::PseudoVSETIVLI:
-          InstrInfo.setExtra(isZero);
-          break;
-        case RISCV::PHI: {
-          // We go only one level up in the tree in order to check if the
-          // predecessors do have Extra register values or not, even in the
-          // case we meet another VL defined by a MI with Opcode == RISCV::PHI
-          bool NeedPHI = false;
-          for (unsigned PHIOp = 1, NumOps = DefMI->getNumOperands();
-               PHIOp != NumOps; PHIOp += 2) {
-            assert(DefMI->getOperand(PHIOp).isReg() &&
-                   "PHIOp is not a register");
-            Register InReg = DefMI->getOperand(PHIOp).getReg();
-            MachineInstr *PrevDefMI = MRI->getVRegDef(InReg);
-            if (PrevDefMI &&
-                (PrevDefMI->getOpcode() == RISCV::PseudoVSETVLEXT ||
-                 PrevDefMI->getOpcode() == RISCV::PHI)) {
-              NeedPHI = true;
-            }
-          }
-
-          if (NeedPHI)
-            InstrInfo.setExtra(isFromPHI);
-          else
-            InstrInfo.setExtra(isZero);
-
-          break;
-        }
-        // In all other cases, we consider the information unrecoverable,
-        // hence we fallback to the default case (isEmpty)
-        default:
-          break;
-        }
-      } // also in this case we fallback to isEmpty
-    }   // also in this case we fallback to isEmpty
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                     /*MaskAgnostic*/ false, /* MaskRegOp */ false, StoreOp,
-                     Nontemporal);
+                     /*MaskAgnostic*/ false, /* MaskRegOp */ false, StoreOp);
 
   return InstrInfo;
 }
@@ -816,22 +694,15 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                                        const VSETVLIInfo &PrevInfo) {
   DebugLoc DL = MI.getDebugLoc();
   unsigned InfoVTYPE = Info.encodeVTYPE();
-  if (PrevInfo.isNontemporal()) {
-    InfoVTYPE |= RISCVVType::NT;
-  }
 
   Register ExtraReg = RISCV::NoRegister;
-  ExtraTag ExtraRegIs = Info.getExtraOperand().Tag;
-  switch (ExtraRegIs) {
-  case isRegister:
-    ExtraReg = Info.getExtraOperand().ExtraReg;
-    break;
-  case isFromPHI:
+  ExtraOperand EO = getExtraOperand(&MI);
+  if (EO.isExtraOperandRegister()) {
+    ExtraReg = EO.getRegister();
+  } else if (EO.isExtraOperandFromPHI()) {
     ExtraReg = getRegisterFromPHI(&MBB);
-    break;
-  case isZero:
-  case isEmpty:
-    break;
+  } else if (EO.isExtraOperandNontemporal()) {
+    InfoVTYPE |= RISCVVType::NT;
   }
 
   // If ExtraReg is a valid register, we use PseudoVSETVLEXT
@@ -922,7 +793,6 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
   if (MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
     NewInfo.setAVLReg(MI.getOperand(2).getReg());
     NewInfo.setVTYPE(MI.getOperand(3).getImm());
-    NewInfo.setExtra(isRegister, MI.getOperand(4).getReg());
   } else {
     if (MI.getOpcode() == RISCV::PseudoVSETIVLI) {
       NewInfo.setAVLImm(MI.getOperand(1).getImm());
@@ -935,7 +805,6 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
       NewInfo.setAVLReg(AVLReg);
     }
     NewInfo.setVTYPE(MI.getOperand(2).getImm());
-    NewInfo.setExtra(isZero);
   }
 
   return NewInfo;
@@ -1164,18 +1033,92 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   return CurInfo.isCompatibleWithLoadStoreEEW(EEW, Require);
 }
 
+ExtraOperand RISCVInsertVSETVLI::getExtraOperand(const MachineInstr *MI) {
+  auto EOIt = ExtraOpInfo.find(MI);
+  assert(EOIt != ExtraOpInfo.end());
+
+  return EOIt->second;
+}
+
+void RISCVInsertVSETVLI::copyExtraOperand(const MachineInstr *From,
+                                          const MachineInstr *To) {
+  auto ToEOIt = ExtraOpInfo.find(To);
+  assert(ToEOIt != ExtraOpInfo.end());
+
+  ToEOIt->second = getExtraOperand(From);
+}
+
+void RISCVInsertVSETVLI::copyExtraOperand(const ExtraOperand EO,
+                                          const MachineInstr *To) {
+  auto ToEOIt = ExtraOpInfo.find(To);
+  assert(ToEOIt != ExtraOpInfo.end());
+
+  ToEOIt->second = EO;
+}
+
+void RISCVInsertVSETVLI::computeExtraOperand(const MachineBasicBlock &MBB) {
+  for (const MachineInstr &MI : MBB) {
+    ExtraOperand EO; // Default: isUndefined
+    switch(MI.getOpcode()) {
+    case RISCV::PseudoVSETVLEXT:
+      EO.setReg(MI.getOperand(4).getReg());
+      break;
+    case RISCV::PseudoVSETVLI:
+    case RISCV::PseudoVSETVLIX0:
+    case RISCV::PseudoVSETIVLI: {
+      if (RISCVVType::isNontemporal(MI.getOperand(2).getImm()))
+        EO.setNontemporal();
+      else
+        EO.setZero();
+
+      break;
+    }
+    default: {
+      // For vector instructions (both EPI and RVV ones) we check if the VL
+      // operand is the result of a PHI; if this is the case, we assign the
+      // isFromPHI tag to the ExtraOperand
+      VSETVLIInfo Info;
+
+      if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
+              RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode())) {
+        // Check if the instruction set the NT bit
+        // NOTE: vload/vstore NT overwrites any Extra info present before them
+        unsigned Nontemporal = (MI.getOperand(EPI->getSEWIndex()).getImm() >> 9) & 0x1;
+        if (Nontemporal) {
+          EO.setNontemporal();
+          break;
+        }
+
+        Info = computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
+                                      EPI->VLMul, EPI->getMaskOpIndex(), MRI);
+      } else if (RISCVII::hasSEWOp(MI.getDesc().TSFlags)) {
+        Info = computeInfoForInstr(MI, MI.getDesc().TSFlags, MRI);
+      }
+
+      if (Info.hasAVLReg()) {
+        MachineInstr *PHI = MRI->getVRegDef(Info.getAVLReg());
+        if (PHI && PHI->getOpcode() == RISCV::PHI && PHI->getParent() == &MBB)
+          EO.setFromPHI();
+      }
+
+      break;
+    }
+    }
+
+    ExtraOpInfo.insert({&MI, EO});
+  }
+}
+
 void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
   for (const MachineInstr &MI : MBB) {
     if (MI.getOpcode() != RISCV::PseudoVSETVLI &&
         MI.getOpcode() != RISCV::PseudoVSETVLIX0 &&
-        MI.getOpcode() != RISCV::PseudoVSETIVLI) {
+        MI.getOpcode() != RISCV::PseudoVSETIVLI &&
+        MI.getOpcode() != RISCV::PseudoVSETVLEXT) {
       continue;
     }
 
     VSETVLIInfo VI = getInfoForVSETVLI(MI);
-    if (VI.isNontemporal())
-      continue;
-
     const MachineOperand &GVLOp = MI.getOperand(0);
     assert(GVLOp.isReg());
     Register GVLReg = GVLOp.getReg();
@@ -1186,37 +1129,34 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
          UI != UIEnd;) {
       MachineOperand &Use(*UI++);
       assert(Use.getParent() != nullptr);
-      const MachineInstr &UseInstr = *Use.getParent();
+      const MachineInstr &UseMI = *Use.getParent();
 
+      bool Propagate = false;
       // EPI instructions
       if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
-              RISCVEPIPseudosTable::getEPIPseudoInfo(UseInstr.getOpcode())) {
+              RISCVEPIPseudosTable::getEPIPseudoInfo(UseMI.getOpcode())) {
         VSETVLIInfo UseInfo = computeInfoForEPIInstr(
-            UseInstr, EPI->getVLIndex(), EPI->getSEWIndex(), EPI->VLMul,
+            UseMI, EPI->getVLIndex(), EPI->getSEWIndex(), EPI->VLMul,
             EPI->getMaskOpIndex(), MRI);
-
-        if (UseInfo.hasSameVLMAX(VI)) {
-          // Propagate
-          if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
-            Use.setImm(VI.getAVLImm());
-          else
-            Use.setReg(VI.getAVLReg());
+        Propagate = UseInfo.hasSameVLMAX(VI);
+      } else {
+        // RVV instructions
+        uint64_t TSFlags = UseMI.getDesc().TSFlags;
+        if (RISCVII::hasSEWOp(TSFlags)) {
+          VSETVLIInfo UseInfo = computeInfoForInstr(UseMI, TSFlags, MRI);
+          Propagate = UseInfo.hasSameVLMAX(VI);
         }
-
-        continue;
       }
 
-      // RVV instructions
-      uint64_t TSFlags = UseInstr.getDesc().TSFlags;
-      if (RISCVII::hasSEWOp(TSFlags)) {
-        VSETVLIInfo UseInfo = computeInfoForInstr(UseInstr, TSFlags, MRI);
-        if (UseInfo.hasSameVLMAX(VI)) {
-          // Propagate
-          if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
-            Use.setImm(VI.getAVLImm());
-          else
-            Use.setReg(VI.getAVLReg());
-        }
+      if (Propagate) {
+        if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
+          Use.setImm(VI.getAVLImm());
+        else
+          Use.setReg(VI.getAVLReg());
+
+        // Also propagate the Extra operand info
+        if (getExtraOperand(&UseMI).isExtraOperandUndefined())
+          copyExtraOperand(&MI, &UseMI);
       }
     }
 
@@ -1235,7 +1175,12 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   bool HadVectorOp = false;
 
   BlockData &BBInfo = BlockInfo[MBB.getNumber()];
+  ExtraOperand LastEO;
   for (const MachineInstr &MI : MBB) {
+    // Save the last defined ExtraOperand
+    if (!getExtraOperand(&MI).isExtraOperandUndefined())
+      LastEO = getExtraOperand(&MI);
+
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
@@ -1264,8 +1209,6 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         // the store the same way.
         if (!canSkipVSETVLIForLoadStore(MI, NewInfo, BBInfo.Change) &&
             needVSETVLI(NewInfo, BBInfo.Change)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(BBInfo.Change);
           BBInfo.Change = NewInfo;
         }
       }
@@ -1295,8 +1238,6 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         // the store the same way.
         if (!canSkipVSETVLIForLoadStore(MI, NewInfo, BBInfo.Change) &&
             needVSETVLI(NewInfo, BBInfo.Change)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(BBInfo.Change);
           BBInfo.Change = NewInfo;
         }
       }
@@ -1313,12 +1254,14 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   // Initial exit state is whatever change we found in the block.
   BBInfo.Exit = BBInfo.Change;
 
+  // The exit ExtraOperand value is the last !isUndefined found in the MBB, if any
+  BBInfo.ExitExtra = LastEO;
+
   return HadVectorOp;
 }
 
 void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   BlockData &BBInfo = BlockInfo[MBB.getNumber()];
-
   BBInfo.InQueue = false;
 
   VSETVLIInfo InInfo;
@@ -1327,59 +1270,165 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
     InInfo.setUnknown();
   } else {
     for (MachineBasicBlock *P : MBB.predecessors()) {
-      InInfo = InInfo.intersect(BlockInfo[P->getNumber()].Exit, P->getNumber());
+      BlockData &PredBBInfo = BlockInfo[P->getNumber()];
+      InInfo = InInfo.intersect(PredBBInfo.Exit);
+      BBInfo.AllPredsExtras.insert({P->getNumber(), PredBBInfo.ExitExtra});
     }
   }
 
   // If we don't have any valid predecessor value, wait until we do.
-  if (!InInfo.isValid())
+  if (!InInfo.isValid()) {
+    BBInfo.AllPredsExtras.clear();
     return;
-
-  // Check the result of the intersection of all predecessors:
-  // - if ExtrasForPHI is empty => no predecessors (nothing to do)
-  // - else if all ExtraOperands stored in ExtrasForPHI are empty or zero, we
-  // can remove it (set ExtraTag to isZero)
-  // - else if ExtrasForPHI.size() == 1, then we can use the Extra of the only
-  // predecessor
-  // - otherwise, set ExtraTag to isFromPHI (=> we need a PHI to recover its
-  // value)
-  if (!InInfo.isExtrasForPHIEmpty()) {
-    if (!InInfo.hasExtrasForPHIValues()) {
-      InInfo.resetExtrasForPHI();
-      InInfo.setExtra(isZero);
-    } else if (InInfo.sizeOfExtrasForPHI() == 1) {
-      ExtraOperand EO = InInfo.getExtrasForPHI().front().second;
-      InInfo.setExtra(EO.Tag, EO.ExtraReg);
-      InInfo.resetExtrasForPHI();
-    } else {
-      InInfo.setExtra(isFromPHI);
-    }
   }
-  // Here Pred has ExtrasForPHI only if we actually need a PHI to recover the
-  // Extra value
+
   BBInfo.Pred = InInfo;
 
-  VSETVLIInfo TmpStatus = BBInfo.Pred.merge(BBInfo.Change);
+  // Update PredExtra acoordingly to what we have in AllPredsExtras
+  switch(BBInfo.AllPredsExtras.size()) {
+  case 0:
+    // No predecessors => nothing to do
+    break;
+  case 1: {
+    // PredExtra == ExtraOperand of the only predecessor (no need for a PHI)
+    BBInfo.PredExtra = BBInfo.AllPredsExtras.front().second;
+    BBInfo.AllPredsExtras.clear();
 
-  // If the new exit value matches the old exit value, we don't need to revisit
-  // any blocks.
-  if (BBInfo.Exit == TmpStatus) {
-    return;
+    break;
+  }
+  default: {
+    bool NeedPHI = false;
+    // Check if at least one of the predecessors ExitExtra is different from
+    // isUndefined; if not, we do not need a PHI
+    for (const auto &Elem : BBInfo.AllPredsExtras) {
+      if (!Elem.second.isExtraOperandUndefined()) {
+        NeedPHI = true;
+        break;
+      }
+    }
+
+    if (NeedPHI) {
+      // If all the !isUndefined ExtraOperand(s) are isZero, no need for a PHI
+      NeedPHI = false;
+      for (const auto &Elem : BBInfo.AllPredsExtras) {
+        if (!Elem.second.isExtraOperandUndefined() &&
+            !Elem.second.isExtraOperandZero()) {
+          NeedPHI = true;
+          break;
+        }
+      }
+      if (!NeedPHI)
+        BBInfo.AllPredsExtras.front().second.setZero();
+    }
+
+    if (NeedPHI) {
+      // We still do not need a PHI when all predecessors ExitExtra are equal to
+      // isNontemporal
+      NeedPHI = false;
+      for (const auto &Elem : BBInfo.AllPredsExtras) {
+        if (!Elem.second.isExtraOperandNontemporal()) {
+          NeedPHI = true;
+          break;
+        }
+      }
+    }
+
+    if (NeedPHI) {
+      // Finally, we also do not need a PHI if all predecessors ExitExtra are
+      // equal to isRegister and the register is the same
+      NeedPHI = false;
+      ExtraOperand FirstEO = BBInfo.AllPredsExtras.front().second;
+      if (FirstEO.isExtraOperandRegister()) {
+        Register ExtraReg = FirstEO.getRegister();
+        for (const auto &Elem : BBInfo.AllPredsExtras) {
+          ExtraOperand EO = Elem.second;
+          if (!EO.isExtraOperandRegister() || EO.getRegister() != ExtraReg) {
+            NeedPHI = true;
+            break;
+          }
+        }
+      } else
+        NeedPHI = true;
+    }
+
+    if (NeedPHI)
+      BBInfo.PredExtra.setFromPHI();
+    else {
+      ExtraOperand FirstEO = BBInfo.AllPredsExtras.front().second;
+      if (FirstEO.isExtraOperandRegister())
+        BBInfo.PredExtra.setReg(FirstEO.getRegister());
+      else if (FirstEO.isExtraOperandNontemporal())
+        BBInfo.PredExtra.setNontemporal();
+      else if (FirstEO.isExtraOperandZero())
+        BBInfo.PredExtra.setZero();
+      else
+        BBInfo.PredExtra.setUndefined();
+
+      BBInfo.AllPredsExtras.clear();
+    }
+
+    break;
+  }
   }
 
-  BBInfo.Exit = TmpStatus;
-  // The .Exit VSETVLIInfo of each MBB must have an empty ExtrasForPHI
-  BBInfo.Exit.resetExtrasForPHI();
+  // We do need a PHI to recover the ExtraOperand only if the PredExtra
+  // field says so; otherwise, all vector instructions that are tagged as
+  // isFromPHI can be retagged to the same value assigned to the PHI
+  // operation from which their VL operand comes (which is safe to assume to
+  // be the same as the PredExtra field, since the PHI operations are always
+  // at the beginning of the MBB)
+  bool Changed = false;
+  if (!BBInfo.PredExtra.isExtraOperandFromPHI()) {
+    for (const MachineInstr &MI : MBB) {
+      if (getExtraOperand(&MI).isExtraOperandFromPHI()) {
+        copyExtraOperand(BBInfo.PredExtra, &MI);
+        Changed = true;
+      }
+    }
+  }
 
-  // Add the successors to the work list so we can propagate the changed exit
-  // status.
-  for (MachineBasicBlock *S : MBB.successors())
-    if (!BlockInfo[S->getNumber()].InQueue)
-      WorkList.push(S);
+  bool UpdatedExtraOperand = false;
+  // If ExtraOperand info of the MBB MachineInstructions has changed, check if
+  // we need to update the ExitExtra value
+  if (Changed) {
+    ExtraOperand EO;
+    for (const MachineInstr &MI : MBB) {
+      if (!getExtraOperand(&MI).isExtraOperandUndefined())
+        EO = getExtraOperand(&MI);
+    }
+
+    if (BBInfo.ExitExtra != EO) {
+      BBInfo.ExitExtra = EO;
+      UpdatedExtraOperand = true;
+    }
+  }
+  // Update ExitExtra with PredExtra value if there are no changes in the MBB
+  if (BBInfo.ExitExtra.isExtraOperandUndefined() &&
+      !BBInfo.PredExtra.isExtraOperandUndefined()) {
+    BBInfo.ExitExtra = BBInfo.PredExtra;
+    UpdatedExtraOperand = true;
+  }
+
+  VSETVLIInfo TmpStatus = BBInfo.Pred.merge(BBInfo.Change);
+  bool UpdatedVSETVLIInfo = false;
+  if (!(BBInfo.Exit == TmpStatus)) {
+    BBInfo.Exit = TmpStatus;
+    UpdatedVSETVLIInfo = true;
+  }
+
+  // If the new exit values match the old exit values,
+  // we don't need to revisit any blocks.
+  if (UpdatedExtraOperand || UpdatedVSETVLIInfo) {
+    // Add the successors to the work list so we can propagate the
+    // changed exit status.
+    for (MachineBasicBlock *S : MBB.successors())
+      if (!BlockInfo[S->getNumber()].InQueue)
+        WorkList.push(S);
+  }
 }
 
 // If we weren't able to prove a vsetvli was directly unneeded, it might still
-// be/ unneeded if the AVL is a phi node where all incoming values are VL
+// be unneeded if the AVL is a phi node where all incoming values are VL
 // outputs from the last VSETVLI in their respective basic blocks.
 bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
                                         const MachineBasicBlock &MBB) {
@@ -1431,11 +1480,23 @@ bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
 }
 
 void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
+  BlockData &BBInfo = BlockInfo[MBB.getNumber()];
   VSETVLIInfo CurInfo;
+  MachineInstr *PrevMI = nullptr;
   // Only be set if current VSETVLIInfo is from an explicit VSET(I)VLI.
   MachineInstr *PrevVSETVLIMI = nullptr;
 
   for (MachineInstr &MI : MBB) {
+    // Retrieve ExtraOperand of previous instruction
+    ExtraOperand PrevEO = PrevMI ? getExtraOperand(PrevMI) : BBInfo.PredExtra;
+
+    // Inherit ExtraOperand, if MI's one isUndefined
+    if (getExtraOperand(&MI).isExtraOperandUndefined())
+      copyExtraOperand(PrevEO, &MI);
+
+    PrevMI = &MI;
+    bool HasSameExtraOperand = getExtraOperand(&MI) == PrevEO;
+
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
     if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
         MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
@@ -1476,13 +1537,13 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       if (!CurInfo.isValid()) {
         // We haven't found any vector instructions or VL/VTYPE changes yet,
         // use the predecessor information.
-        assert(BlockInfo[MBB.getNumber()].Pred.isValid() &&
+        assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
-            needVSETVLIPHI(NewInfo, MBB)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(CurInfo);
-          insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
+        if (!HasSameExtraOperand ||
+            getExtraOperand(&MI).isExtraOperandFromPHI() ||
+            (needVSETVLI(NewInfo, BBInfo.Pred) &&
+             needVSETVLIPHI(NewInfo, MBB))) {
+          insertVSETVLI(MBB, MI, NewInfo, BBInfo.Pred);
           CurInfo = NewInfo;
         }
       } else {
@@ -1493,10 +1554,9 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // NOTE: We can't use predecessor information for the store. We must
         // treat it the same as the first phase so that we produce the correct
         // vl/vtype for succesor blocks.
-        if (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-            needVSETVLI(NewInfo, CurInfo)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(CurInfo);
+        if (!HasSameExtraOperand ||
+            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
+             needVSETVLI(NewInfo, CurInfo))) {
           // If the previous VL/VTYPE is set by VSETVLI and do not use, Merge it
           // with current VL/VTYPE.
           bool NeedInsertVSETVLI = true;
@@ -1507,7 +1567,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
                  NewInfo.getAVLReg() == PrevVSETVLIMI->getOperand(0).getReg());
             // If these two VSETVLI have the same AVL and the same VLMAX,
             // we could merge these two VSETVLI.
-            if (HasSameAVL &&
+            if (HasSameAVL && HasSameExtraOperand &&
                 CurInfo.getSEWLMULRatio() == NewInfo.getSEWLMULRatio()) {
               PrevVSETVLIMI->getOperand(2).setImm(NewInfo.encodeVTYPE());
               NeedInsertVSETVLI = false;
@@ -1548,13 +1608,13 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       if (!CurInfo.isValid()) {
         // We haven't found any vector instructions or VL/VTYPE changes yet,
         // use the predecessor information.
-        assert(BlockInfo[MBB.getNumber()].Pred.isValid() &&
+        assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
-            needVSETVLIPHI(NewInfo, MBB)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(CurInfo);
-          insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
+        if (!HasSameExtraOperand ||
+            getExtraOperand(&MI).isExtraOperandFromPHI() ||
+            (needVSETVLI(NewInfo, BBInfo.Pred) &&
+             needVSETVLIPHI(NewInfo, MBB))) {
+          insertVSETVLI(MBB, MI, NewInfo, BBInfo.Pred);
           CurInfo = NewInfo;
         }
       } else {
@@ -1565,10 +1625,9 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // NOTE: We can't use predecessor information for the store. We must
         // treat it the same as the first phase so that we produce the correct
         // vl/vtype for succesor blocks.
-        if (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-            needVSETVLI(NewInfo, CurInfo)) {
-          if (!NewInfo.hasExtra())
-            NewInfo.inheritExtraFrom(CurInfo);
+        if (!HasSameExtraOperand ||
+            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
+             needVSETVLI(NewInfo, CurInfo))) {
           // If the previous VL/VTYPE is set by VSETVLI and do not use, Merge it
           // with current VL/VTYPE.
           bool NeedInsertVSETVLI = true;
@@ -1579,7 +1638,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
                  NewInfo.getAVLReg() == PrevVSETVLIMI->getOperand(0).getReg());
             // If these two VSETVLI have the same AVL and the same VLMAX,
             // we could merge these two VSETVLI.
-            if (HasSameAVL &&
+            if (HasSameAVL && HasSameExtraOperand &&
                 CurInfo.getSEWLMULRatio() == NewInfo.getSEWLMULRatio()) {
               PrevVSETVLIMI->getOperand(2).setImm(NewInfo.encodeVTYPE());
               NeedInsertVSETVLI = false;
@@ -1614,12 +1673,15 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
 
   assert(BlockInfo.empty() && "Expect empty block infos");
   BlockInfo.resize(MF.getNumBlockIDs());
-
-  bool HaveVectorOp = false;
+  // Map a ExtraOperand info to each MachineInstr
+  for (const MachineBasicBlock &MBB : MF)
+    computeExtraOperand(MBB);
 
   // Phase 0 - propagate AVL when VLMAX is the same
   for (MachineBasicBlock &MBB : MF)
     forwardPropagateAVL(MBB);
+
+  bool HaveVectorOp = false;
 
   // Phase 1 - determine how VL/VTYPE are affected by the each block.
   for (const MachineBasicBlock &MBB : MF)
@@ -1649,6 +1711,7 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
   }
 
   BlockInfo.clear();
+  ExtraOpInfo.clear();
 
   return HaveVectorOp;
 }
