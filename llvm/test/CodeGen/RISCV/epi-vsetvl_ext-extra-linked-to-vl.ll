@@ -184,7 +184,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O0-NEXT:    # in Loop: Header=BB1_4 Depth=1
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu, nt
-; CHECK-O0-NEXT:    li a1, 0
+; CHECK-O0-NEXT:    li a1, 512
 ; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB1_6
@@ -261,7 +261,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O2-NEXT:  # %bb.6: # %if.then6
 ; CHECK-O2-NEXT:    # in Loop: Header=BB1_5 Depth=1
 ; CHECK-O2-NEXT:    vsetvli t1, t0, e64, m1, ta, mu, nt
-; CHECK-O2-NEXT:    li a7, 0
+; CHECK-O2-NEXT:    li a7, 512
 ; CHECK-O2-NEXT:    j .LBB1_4
 ; CHECK-O2-NEXT:  .LBB1_7: # %for.cond.cleanup
 ; CHECK-O2-NEXT:    ret
