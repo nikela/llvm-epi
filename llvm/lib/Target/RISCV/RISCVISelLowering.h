@@ -335,6 +335,8 @@ enum NodeType : unsigned {
   // Memory opcodes start here.
   VLE_VL = ISD::FIRST_TARGET_MEMORY_OPCODE,
   VSE_VL,
+  VLM_VL,
+  VSM_VL,
   VLSE_VL,
   VSSE_VL,
 
@@ -676,6 +678,8 @@ private:
   SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
                              unsigned RISCVISDOpc) const;
   SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPLoad(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStore(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStridedLoadExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStridedStoreExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
