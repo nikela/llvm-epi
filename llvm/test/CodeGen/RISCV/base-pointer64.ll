@@ -27,9 +27,9 @@ define dso_local void @foo(i32 signext %n) nounwind {
 ; CHECK-NEXT:    addiw a0, a0, 1
 ; CHECK-NEXT:    sw a0, 28(s1)
 ; CHECK-NEXT:    addi sp, s0, -64
-; CHECK-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 64
 ; CHECK-NEXT:    ret
 entry:
