@@ -52,13 +52,13 @@ define void @indirect_stack_argument(<vscale x 8 x i32> %a, <vscale x 8 x i1> %m
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a1, zero, 2
-; CHECK-NEXT:    addi a2, zero, 3
-; CHECK-NEXT:    addi a3, zero, 4
-; CHECK-NEXT:    addi a4, zero, 5
-; CHECK-NEXT:    addi a5, zero, 6
-; CHECK-NEXT:    addi a6, zero, 7
-; CHECK-NEXT:    addi a7, zero, 8
+; CHECK-NEXT:    li a1, 2
+; CHECK-NEXT:    li a2, 3
+; CHECK-NEXT:    li a3, 4
+; CHECK-NEXT:    li a4, 5
+; CHECK-NEXT:    li a5, 6
+; CHECK-NEXT:    li a6, 7
+; CHECK-NEXT:    li a7, 8
 ; CHECK-NEXT:    vmv4r.v v12, v8
 ; CHECK-NEXT:    vmv1r.v v16, v0
 ; CHECK-NEXT:    call indirect_stack_param@plt

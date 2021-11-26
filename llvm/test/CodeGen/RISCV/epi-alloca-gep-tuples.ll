@@ -8,8 +8,8 @@ define <vscale x 1 x i64> @n1fv6() nounwind {
 ; CHECK-LABEL: n1fv6:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -32
-; CHECK-NEXT:    addi a0, zero, 2
-; CHECK-NEXT:    addi a1, zero, 64
+; CHECK-NEXT:    li a0, 2
+; CHECK-NEXT:    li a1, 64
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
 ; CHECK-NEXT:    addi a0, sp, 16
@@ -39,8 +39,8 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-LABEL: n1fv6_1:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    addi a0, zero, 2
-; CHECK-NEXT:    addi a1, zero, 64
+; CHECK-NEXT:    li a0, 2
+; CHECK-NEXT:    li a1, 64
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v8, a1
 ; CHECK-NEXT:    addi a0, sp, 16

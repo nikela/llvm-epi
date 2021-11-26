@@ -14,17 +14,17 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O0-NEXT:    sd a1, 80(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    sd a1, 88(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    mv a0, zero
+; CHECK-O0-NEXT:    li a0, 0
 ; CHECK-O0-NEXT:    bge a0, a1, .LBB0_4
 ; CHECK-O0-NEXT:    j .LBB0_1
 ; CHECK-O0-NEXT:  .LBB0_1: # %for.body.lr.ph
 ; CHECK-O0-NEXT:    ld a1, 88(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    addi a0, zero, 25
+; CHECK-O0-NEXT:    li a0, 25
 ; CHECK-O0-NEXT:    slt a0, a0, a1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
 ; CHECK-O0-NEXT:    sd a0, 48(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a2, zero, 1024
-; CHECK-O0-NEXT:    addi a0, zero, 400
+; CHECK-O0-NEXT:    li a2, 1024
+; CHECK-O0-NEXT:    li a0, 400
 ; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_3
 ; CHECK-O0-NEXT:  # %bb.2: # %for.body.lr.ph
@@ -76,15 +76,15 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O2:       # %bb.0: # %entry
 ; CHECK-O2-NEXT:    blez a0, .LBB0_5
 ; CHECK-O2-NEXT:  # %bb.1: # %for.body.lr.ph
-; CHECK-O2-NEXT:    addi a4, zero, 400
-; CHECK-O2-NEXT:    addi a6, zero, 1024
+; CHECK-O2-NEXT:    li a4, 400
+; CHECK-O2-NEXT:    li a6, 1024
 ; CHECK-O2-NEXT:    blt a4, a0, .LBB0_3
 ; CHECK-O2-NEXT:  # %bb.2: # %for.body.lr.ph
-; CHECK-O2-NEXT:    addi a4, zero, 25
+; CHECK-O2-NEXT:    li a4, 25
 ; CHECK-O2-NEXT:    slt a4, a4, a0
 ; CHECK-O2-NEXT:    slli a6, a4, 9
 ; CHECK-O2-NEXT:  .LBB0_3: # %for.body.lr.ph
-; CHECK-O2-NEXT:    mv a5, zero
+; CHECK-O2-NEXT:    li a5, 0
 ; CHECK-O2-NEXT:    ori a4, a6, 88
 ; CHECK-O2-NEXT:    vsetvl a7, a0, a4
 ; CHECK-O2-NEXT:    slli t0, a7, 3

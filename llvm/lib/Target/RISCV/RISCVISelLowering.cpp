@@ -1076,10 +1076,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   // We can use any register for comparisons
   setHasMultipleConditionRegisters();
 
-  if (Subtarget.hasStdExtZbp()) {
-    setTargetDAGCombine(ISD::OR);
-  }
-
   if (Subtarget.hasStdExtV()) {
     // EPI & VPred intrinsics may have illegal operands/results
     for (auto VT : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i32}) {

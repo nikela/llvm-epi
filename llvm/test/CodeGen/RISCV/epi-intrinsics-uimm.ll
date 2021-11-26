@@ -27,9 +27,9 @@ define <vscale x 1 x i64> @foo(<vscale x 1 x i64> %v, <vscale x 2 x i64> %w, i64
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vsll.vi v8, v8, 0
 ; CHECK-NEXT:    vsll.vi v8, v8, 31
-; CHECK-NEXT:    addi a0, zero, -1
+; CHECK-NEXT:    li a0, -1
 ; CHECK-NEXT:    vsll.vx v8, v8, a0
-; CHECK-NEXT:    addi a1, zero, 32
+; CHECK-NEXT:    li a1, 32
 ; CHECK-NEXT:    vsll.vx v8, v8, a1
 ; CHECK-NEXT:    vsrl.vi v8, v8, 0
 ; CHECK-NEXT:    vsrl.vi v8, v8, 31

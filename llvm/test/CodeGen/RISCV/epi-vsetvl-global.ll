@@ -326,7 +326,7 @@ define <vscale x 1 x double> @test7(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    blez a2, .LBB6_5
 ; CHECK-NEXT:  # %bb.1: # %for.body.lr.ph
-; CHECK-NEXT:    mv a3, zero
+; CHECK-NEXT:    li a3, 0
 ; CHECK-NEXT:    seqz a1, a1
 ; CHECK-NEXT:    # implicit-def: $v10
 ; CHECK-NEXT:    j .LBB6_3

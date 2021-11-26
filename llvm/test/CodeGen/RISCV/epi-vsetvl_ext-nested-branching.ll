@@ -15,12 +15,12 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a1, 64(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 72(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, zero, 45
+; CHECK-O0-NEXT:    li a1, 45
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_5
 ; CHECK-O0-NEXT:    j .LBB0_1
 ; CHECK-O0-NEXT:  .LBB0_1: # %if.then
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    addi a1, zero, 124
+; CHECK-O0-NEXT:    li a1, 124
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_3
 ; CHECK-O0-NEXT:    j .LBB0_2
 ; CHECK-O0-NEXT:  .LBB0_2: # %if.then2
@@ -34,7 +34,7 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O0-NEXT:  .LBB0_3: # %if.else
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    mv a1, zero
+; CHECK-O0-NEXT:    li a1, 0
 ; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_4
@@ -78,10 +78,10 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ;
 ; CHECK-O2-LABEL: test_nested_branching:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    addi a6, zero, 45
+; CHECK-O2-NEXT:    li a6, 45
 ; CHECK-O2-NEXT:    blt a0, a6, .LBB0_3
 ; CHECK-O2-NEXT:  # %bb.1: # %if.then
-; CHECK-O2-NEXT:    addi a2, zero, 124
+; CHECK-O2-NEXT:    li a2, 124
 ; CHECK-O2-NEXT:    blt a0, a2, .LBB0_4
 ; CHECK-O2-NEXT:  # %bb.2: # %if.then2
 ; CHECK-O2-NEXT:    ori a2, a1, 80
@@ -93,7 +93,7 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O2-NEXT:    j .LBB0_6
 ; CHECK-O2-NEXT:  .LBB0_4: # %if.else
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    mv a1, zero
+; CHECK-O2-NEXT:    li a1, 0
 ; CHECK-O2-NEXT:  .LBB0_5: # %if.end
 ; CHECK-O2-NEXT:    fld ft0, 0(a3)
 ; CHECK-O2-NEXT:    lui a2, %hi(.LCPI0_0)

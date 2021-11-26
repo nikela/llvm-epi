@@ -14,12 +14,12 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O0-NEXT:    sd a1, 32(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    sd a1, 40(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a0, zero, 25
+; CHECK-O0-NEXT:    li a0, 25
 ; CHECK-O0-NEXT:    slt a0, a0, a1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
 ; CHECK-O0-NEXT:    sd a0, 48(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a2, zero, 1024
-; CHECK-O0-NEXT:    addi a0, zero, 400
+; CHECK-O0-NEXT:    li a2, 1024
+; CHECK-O0-NEXT:    li a0, 400
 ; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_2
 ; CHECK-O0-NEXT:  # %bb.1: # %entry
@@ -29,7 +29,7 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O0-NEXT:    ld a1, 40(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 56(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    sd a0, 0(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    mv a0, zero
+; CHECK-O0-NEXT:    li a0, 0
 ; CHECK-O0-NEXT:    mv a2, a0
 ; CHECK-O0-NEXT:    sd a2, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_4
@@ -70,17 +70,17 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ;
 ; CHECK-O2-LABEL: test_extra_from_gvl:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    addi a5, zero, 400
-; CHECK-O2-NEXT:    addi a6, zero, 1024
+; CHECK-O2-NEXT:    li a5, 400
+; CHECK-O2-NEXT:    li a6, 1024
 ; CHECK-O2-NEXT:    blt a5, a0, .LBB0_2
 ; CHECK-O2-NEXT:  # %bb.1: # %entry
-; CHECK-O2-NEXT:    addi a4, zero, 25
+; CHECK-O2-NEXT:    li a4, 25
 ; CHECK-O2-NEXT:    slt a4, a4, a0
 ; CHECK-O2-NEXT:    slli a6, a4, 9
 ; CHECK-O2-NEXT:  .LBB0_2: # %entry
 ; CHECK-O2-NEXT:    blez a0, .LBB0_5
 ; CHECK-O2-NEXT:  # %bb.3: # %for.body.preheader
-; CHECK-O2-NEXT:    mv t2, zero
+; CHECK-O2-NEXT:    li t2, 0
 ; CHECK-O2-NEXT:  .LBB0_4: # %for.body
 ; CHECK-O2-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-O2-NEXT:    sub t0, a0, t2
@@ -142,12 +142,12 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O0-NEXT:    sd a1, 64(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    sd a1, 72(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a0, zero, 25
+; CHECK-O0-NEXT:    li a0, 25
 ; CHECK-O0-NEXT:    slt a0, a0, a1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
 ; CHECK-O0-NEXT:    sd a0, 80(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a2, zero, 1024
-; CHECK-O0-NEXT:    addi a0, zero, 400
+; CHECK-O0-NEXT:    li a2, 1024
+; CHECK-O0-NEXT:    li a0, 400
 ; CHECK-O0-NEXT:    sd a2, 88(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB1_2
 ; CHECK-O0-NEXT:  # %bb.1: # %entry
@@ -157,7 +157,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O0-NEXT:    ld a1, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 88(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    mv a0, zero
+; CHECK-O0-NEXT:    li a0, 0
 ; CHECK-O0-NEXT:    mv a2, a0
 ; CHECK-O0-NEXT:    sd a2, 40(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB1_4
@@ -184,7 +184,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O0-NEXT:    # in Loop: Header=BB1_4 Depth=1
 ; CHECK-O0-NEXT:    ld a0, 8(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu, nt
-; CHECK-O0-NEXT:    mv a1, zero
+; CHECK-O0-NEXT:    li a1, 0
 ; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB1_6
@@ -222,17 +222,17 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ;
 ; CHECK-O2-LABEL: test_extra_from_gvl_from_phi:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    addi a4, zero, 400
-; CHECK-O2-NEXT:    addi a6, zero, 1024
+; CHECK-O2-NEXT:    li a4, 400
+; CHECK-O2-NEXT:    li a6, 1024
 ; CHECK-O2-NEXT:    blt a4, a0, .LBB1_2
 ; CHECK-O2-NEXT:  # %bb.1: # %entry
-; CHECK-O2-NEXT:    addi a4, zero, 25
+; CHECK-O2-NEXT:    li a4, 25
 ; CHECK-O2-NEXT:    slt a4, a4, a0
 ; CHECK-O2-NEXT:    slli a6, a4, 9
 ; CHECK-O2-NEXT:  .LBB1_2: # %entry
 ; CHECK-O2-NEXT:    blez a0, .LBB1_7
 ; CHECK-O2-NEXT:  # %bb.3: # %for.body.preheader
-; CHECK-O2-NEXT:    mv t4, zero
+; CHECK-O2-NEXT:    li t4, 0
 ; CHECK-O2-NEXT:    j .LBB1_5
 ; CHECK-O2-NEXT:  .LBB1_4: # %if.end8
 ; CHECK-O2-NEXT:    # in Loop: Header=BB1_5 Depth=1
@@ -261,7 +261,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O2-NEXT:  # %bb.6: # %if.then6
 ; CHECK-O2-NEXT:    # in Loop: Header=BB1_5 Depth=1
 ; CHECK-O2-NEXT:    vsetvli t1, t0, e64, m1, ta, mu, nt
-; CHECK-O2-NEXT:    mv a7, zero
+; CHECK-O2-NEXT:    li a7, 0
 ; CHECK-O2-NEXT:    j .LBB1_4
 ; CHECK-O2-NEXT:  .LBB1_7: # %for.cond.cleanup
 ; CHECK-O2-NEXT:    ret
@@ -315,12 +315,12 @@ define void @test_extra_from_gvl_from_phi_from_temp_register(i64 %n, double* %a,
 ; CHECK-O0-NEXT:    sd a1, 64(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    sd a1, 72(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a0, zero, 25
+; CHECK-O0-NEXT:    li a0, 25
 ; CHECK-O0-NEXT:    slt a0, a0, a1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
 ; CHECK-O0-NEXT:    sd a0, 80(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a2, zero, 1024
-; CHECK-O0-NEXT:    addi a0, zero, 400
+; CHECK-O0-NEXT:    li a2, 1024
+; CHECK-O0-NEXT:    li a0, 400
 ; CHECK-O0-NEXT:    sd a2, 88(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB2_2
 ; CHECK-O0-NEXT:  # %bb.1: # %entry
@@ -330,7 +330,7 @@ define void @test_extra_from_gvl_from_phi_from_temp_register(i64 %n, double* %a,
 ; CHECK-O0-NEXT:    ld a1, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 88(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    mv a0, zero
+; CHECK-O0-NEXT:    li a0, 0
 ; CHECK-O0-NEXT:    mv a2, a0
 ; CHECK-O0-NEXT:    sd a2, 40(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB2_4
@@ -398,17 +398,17 @@ define void @test_extra_from_gvl_from_phi_from_temp_register(i64 %n, double* %a,
 ;
 ; CHECK-O2-LABEL: test_extra_from_gvl_from_phi_from_temp_register:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    addi a4, zero, 400
-; CHECK-O2-NEXT:    addi a6, zero, 1024
+; CHECK-O2-NEXT:    li a4, 400
+; CHECK-O2-NEXT:    li a6, 1024
 ; CHECK-O2-NEXT:    blt a4, a0, .LBB2_2
 ; CHECK-O2-NEXT:  # %bb.1: # %entry
-; CHECK-O2-NEXT:    addi a4, zero, 25
+; CHECK-O2-NEXT:    li a4, 25
 ; CHECK-O2-NEXT:    slt a4, a4, a0
 ; CHECK-O2-NEXT:    slli a6, a4, 9
 ; CHECK-O2-NEXT:  .LBB2_2: # %entry
 ; CHECK-O2-NEXT:    blez a0, .LBB2_7
 ; CHECK-O2-NEXT:  # %bb.3: # %for.body.preheader
-; CHECK-O2-NEXT:    mv t4, zero
+; CHECK-O2-NEXT:    li t4, 0
 ; CHECK-O2-NEXT:    j .LBB2_5
 ; CHECK-O2-NEXT:  .LBB2_4: # %if.end9
 ; CHECK-O2-NEXT:    # in Loop: Header=BB2_5 Depth=1

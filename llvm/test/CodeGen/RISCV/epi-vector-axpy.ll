@@ -14,11 +14,11 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    fmv.w.x ft0, a3
 ; CHECK-NEXT:    bgeu a7, t2, .LBB0_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mv t1, zero
+; CHECK-NEXT:    li t1, 0
 ; CHECK-NEXT:    j .LBB0_6
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
-; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    mv a4, zero
+; CHECK-NEXT:    li a0, 0
+; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:    remu a6, a7, t2
 ; CHECK-NEXT:    sub t1, a7, a6
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
@@ -127,11 +127,11 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    fmv.d.x ft0, a3
 ; CHECK-NEXT:    bgeu a7, t2, .LBB1_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mv t1, zero
+; CHECK-NEXT:    li t1, 0
 ; CHECK-NEXT:    j .LBB1_6
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
-; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    mv a4, zero
+; CHECK-NEXT:    li a0, 0
+; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:    remu a6, a7, t2
 ; CHECK-NEXT:    sub t1, a7, a6
 ; CHECK-NEXT:  .LBB1_4: # %vector.body

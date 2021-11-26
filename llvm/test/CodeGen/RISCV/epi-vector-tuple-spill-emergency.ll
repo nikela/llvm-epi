@@ -29,7 +29,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:  # %bb.1: # %for.body.lr.ph
 ; CHECK-NEXT:    slli a1, a4, 6
 ; CHECK-NEXT:    add a1, a1, a2
-; CHECK-NEXT:    addi a2, zero, 2
+; CHECK-NEXT:    li a2, 2
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v8
 ; CHECK-NEXT:    vand.vi v8, v8, 1
@@ -37,37 +37,37 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    sub s10, a5, a4
-; CHECK-NEXT:    addi a2, zero, 24
+; CHECK-NEXT:    li a2, 24
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 64(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    slli a2, a6, 3
 ; CHECK-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 56
+; CHECK-NEXT:    li a2, 56
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 48(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 88
+; CHECK-NEXT:    li a2, 88
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 40(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 120
+; CHECK-NEXT:    li a2, 120
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 32(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 40
+; CHECK-NEXT:    li a2, 40
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 24(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 72
+; CHECK-NEXT:    li a2, 72
 ; CHECK-NEXT:    mul a2, a3, a2
 ; CHECK-NEXT:    sd a2, 16(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    addi a2, zero, 104
+; CHECK-NEXT:    li a2, 104
 ; CHECK-NEXT:    mul t6, a3, a2
 ; CHECK-NEXT:    slli s2, a3, 3
 ; CHECK-NEXT:    slli s3, a3, 4
-; CHECK-NEXT:    addi a2, zero, 48
+; CHECK-NEXT:    li a2, 48
 ; CHECK-NEXT:    mul s4, a3, a2
-; CHECK-NEXT:    addi a2, zero, 80
+; CHECK-NEXT:    li a2, 80
 ; CHECK-NEXT:    mul s5, a3, a2
-; CHECK-NEXT:    addi a2, zero, 112
+; CHECK-NEXT:    li a2, 112
 ; CHECK-NEXT:    mul s6, a3, a2
-; CHECK-NEXT:    addi a2, zero, 96
+; CHECK-NEXT:    li a2, 96
 ; CHECK-NEXT:    lui a4, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a4)
 ; CHECK-NEXT:    lui a4, %hi(.LCPI0_1)
@@ -79,7 +79,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    slli s9, a3, 6
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    addi a2, zero, 2
+; CHECK-NEXT:    li a2, 2
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v8, (a1)
 ; CHECK-NEXT:    addi a2, a1, 16
@@ -388,19 +388,19 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld s11, 72(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s10, 80(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s9, 88(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s8, 96(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s7, 104(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s6, 112(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s5, 120(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s4, 128(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s3, 136(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s2, 144(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s1, 152(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    ld s0, 160(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    ld ra, 168(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s0, 160(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s1, 152(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s2, 144(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s3, 136(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s4, 128(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s5, 120(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s6, 112(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s7, 104(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s8, 96(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s9, 88(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s10, 80(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    ld s11, 72(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 176
 ; CHECK-NEXT:    ret
 entry:

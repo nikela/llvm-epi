@@ -201,19 +201,19 @@ define void @foo(i64 %avl) nounwind {
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    slli a0, a0, 1
 ; SPILL-O0-NEXT:    add sp, sp, a0
-; SPILL-O0-NEXT:    ld s11, 72(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s10, 80(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s9, 88(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s8, 96(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s7, 104(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s6, 112(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s5, 120(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s4, 128(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s3, 136(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s2, 144(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s1, 152(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    ld s0, 160(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    ld ra, 168(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s0, 160(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s1, 152(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s2, 144(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s3, 136(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s4, 128(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s5, 120(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s6, 112(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s7, 104(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s8, 96(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s9, 88(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s10, 80(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    ld s11, 72(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    addi sp, sp, 176
 ; SPILL-O0-NEXT:    ret
   %p1 = getelementptr inbounds i64, i64* @scratch, i64 1

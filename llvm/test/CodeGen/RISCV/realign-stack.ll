@@ -14,8 +14,8 @@ define dso_local void @test1() nounwind {
 ; RV32-NEXT:    addi a0, a0, 1
 ; RV32-NEXT:    sw a0, 0(sp)
 ; RV32-NEXT:    addi sp, s0, -32
-; RV32-NEXT:    lw s0, 24(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    lw ra, 28(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw s0, 24(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    addi sp, sp, 32
 ; RV32-NEXT:    ret
 ;
@@ -30,8 +30,8 @@ define dso_local void @test1() nounwind {
 ; RV64-NEXT:    addiw a0, a0, 1
 ; RV64-NEXT:    sw a0, 0(sp)
 ; RV64-NEXT:    addi sp, s0, -32
-; RV64-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; RV64-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    addi sp, sp, 32
 ; RV64-NEXT:    ret
 entry:
@@ -57,8 +57,8 @@ define dso_local void @test2() nounwind {
 ; RV32-NEXT:    addi a0, a0, 1
 ; RV32-NEXT:    sw a0, 0(sp)
 ; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    addi sp, sp, 64
 ; RV32-NEXT:    ret
 ;
@@ -76,8 +76,8 @@ define dso_local void @test2() nounwind {
 ; RV64-NEXT:    addiw a0, a0, 1
 ; RV64-NEXT:    sw a0, 0(sp)
 ; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
+; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
 entry:
@@ -107,8 +107,8 @@ define dso_local void @test3() nounwind {
 ; RV32-NEXT:    addi a0, a0, 1
 ; RV32-NEXT:    sw a0, 28(sp)
 ; RV32-NEXT:    addi sp, s0, -64
-; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    lw ra, 60(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw s0, 56(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    addi sp, sp, 64
 ; RV32-NEXT:    ret
 ;
@@ -126,8 +126,8 @@ define dso_local void @test3() nounwind {
 ; RV64-NEXT:    addiw a0, a0, 1
 ; RV64-NEXT:    sw a0, 28(sp)
 ; RV64-NEXT:    addi sp, s0, -64
-; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
+; RV64-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    addi sp, sp, 64
 ; RV64-NEXT:    ret
 entry:
@@ -166,8 +166,8 @@ define dso_local void @test4() nounwind {
 ; RV32-NEXT:    lui a0, 2
 ; RV32-NEXT:    addi a0, a0, -2032
 ; RV32-NEXT:    add sp, sp, a0
-; RV32-NEXT:    lw s0, 2024(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    lw ra, 2028(sp) # 4-byte Folded Reload
+; RV32-NEXT:    lw s0, 2024(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    addi sp, sp, 2032
 ; RV32-NEXT:    ret
 ;
@@ -194,8 +194,8 @@ define dso_local void @test4() nounwind {
 ; RV64-NEXT:    lui a0, 2
 ; RV64-NEXT:    addiw a0, a0, -2032
 ; RV64-NEXT:    add sp, sp, a0
-; RV64-NEXT:    ld s0, 2016(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    ld ra, 2024(sp) # 8-byte Folded Reload
+; RV64-NEXT:    ld s0, 2016(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    addi sp, sp, 2032
 ; RV64-NEXT:    ret
 entry:
