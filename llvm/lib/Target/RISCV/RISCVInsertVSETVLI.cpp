@@ -43,51 +43,51 @@ using MBBNumber = int;
 
 class ExtraOperand {
   enum : uint8_t {
-    isUndefined,   // Extra operand is undefined
-    isRegister,    // Extra operand is stored in a register
-    isNontemporal, // Extra operand sets the NonTemporal bit
-    isFromPHI,     // Extra operand is the result of a PHI
-    isZero         // Instruction behaves like if ExtraOperand = 0
-  } Tag = isUndefined;
-  Register Reg = RISCV::NoRegister;
+    Undefined,   // Extra operand is undefined
+    Reg,         // Extra operand is stored in a register
+    Nontemporal, // Extra operand sets the NonTemporal bit
+    FromPHI,     // Extra operand is the result of a PHI
+    Zero         // Instruction behaves like if ExtraOperand = 0
+  } Tag = Undefined;
+  Register ExtraRegister = RISCV::NoRegister;
 
 public:
-  bool isExtraOperandUndefined() const { return Tag == isUndefined; }
-  bool isExtraOperandRegister() const { return Tag == isRegister; }
-  bool isExtraOperandNontemporal() const { return Tag == isNontemporal; }
-  bool isExtraOperandFromPHI() const { return Tag == isFromPHI; }
-  bool isExtraOperandZero() const { return Tag == isZero; }
+  bool isUndefined() const { return Tag == Undefined; }
+  bool isReg() const { return Tag == Reg; }
+  bool isNontemporal() const { return Tag == Nontemporal; }
+  bool isFromPHI() const { return Tag == FromPHI; }
+  bool isZero() const { return Tag == Zero; }
 
   void setUndefined() {
-    Tag = isUndefined;
-    Reg = RISCV::NoRegister;
+    Tag = Undefined;
+    ExtraRegister = RISCV::NoRegister;
   }
   void setReg(Register NewReg) {
-    Tag = isRegister;
-    Reg = NewReg;
+    Tag = Reg;
+    ExtraRegister = NewReg;
   }
   void setNontemporal() {
-    Tag = isNontemporal;
-    Reg = RISCV::NoRegister;
+    Tag = Nontemporal;
+    ExtraRegister = RISCV::NoRegister;
   }
   void setFromPHI() {
-    Tag = isFromPHI;
-    Reg = RISCV::NoRegister;
+    Tag = FromPHI;
+    ExtraRegister = RISCV::NoRegister;
   }
   void setZero() {
-    Tag = isZero;
-    Reg = RISCV::NoRegister;
+    Tag = Zero;
+    ExtraRegister = RISCV::NoRegister;
   }
 
   Register getRegister() const {
-    assert(Tag == isRegister);
+    assert(Tag == Reg);
 
-    return Reg;
+    return ExtraRegister;
   }
 
   bool operator==(const ExtraOperand &Other) const {
-    if (Tag == isRegister)
-      return Tag == Other.Tag && Reg == Other.Reg;
+    if (Tag == Reg)
+      return Tag == Other.Tag && ExtraRegister == Other.ExtraRegister;
 
     return Tag == Other.Tag;
   }
@@ -678,12 +678,12 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   unsigned InfoVTYPE = Info.encodeVTYPE();
 
   Register ExtraReg = RISCV::NoRegister;
-  if (getExtraOperand(&MI).isExtraOperandFromPHI())
+  if (getExtraOperand(&MI).isFromPHI())
     llvm_unreachable(
-        "No ExtraOperand should be isFromPHI when invoking insertVSETVLI");
-  else if (getExtraOperand(&MI).isExtraOperandRegister())
+        "No ExtraOperand should be FromPHI when invoking insertVSETVLI");
+  else if (getExtraOperand(&MI).isReg())
     ExtraReg = getExtraOperand(&MI).getRegister();
-  else if (getExtraOperand(&MI).isExtraOperandNontemporal())
+  else if (getExtraOperand(&MI).isNontemporal())
     InfoVTYPE |= RISCVVType::NT;
 
   // If ExtraReg is a valid register, we use PseudoVSETVLEXT
@@ -1039,7 +1039,7 @@ void RISCVInsertVSETVLI::copyExtraOperand(const ExtraOperand EO,
 
 void RISCVInsertVSETVLI::computeExtraOperand(const MachineBasicBlock &MBB) {
   for (const MachineInstr &MI : MBB) {
-    ExtraOperand EO; // Default: isUndefined
+    ExtraOperand EO; // Default: Undefined
     switch(MI.getOpcode()) {
     case RISCV::PseudoVSETVLEXT:
       EO.setReg(MI.getOperand(4).getReg());
@@ -1057,7 +1057,7 @@ void RISCVInsertVSETVLI::computeExtraOperand(const MachineBasicBlock &MBB) {
     default: {
       // For vector instructions (both EPI and RVV ones) we check if the VL
       // operand is the result of a PHI; if this is the case, we assign the
-      // isFromPHI tag to the ExtraOperand
+      // FromPHI tag to the ExtraOperand
       VSETVLIInfo Info;
 
       if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
@@ -1094,21 +1094,21 @@ ExtraOperand needPHI(const ArrayRef<ExtraOperand> &EOs) {
   ExtraOperand RetEO;
 
   // Check if at least one of the predecessors ExtraOperands is different
-  // from isUndefined; if not, we do not need a PHI
+  // from Undefined; if not, we do not need a PHI
   bool NeedPHI = false;
   for (const auto &EO : EOs) {
-    if (!EO.isExtraOperandUndefined()) {
+    if (!EO.isUndefined()) {
       NeedPHI = true;
       break;
     }
   }
 
   if (NeedPHI) {
-    // If all the !isUndefined ExtraOperand(s) are isZero, no need for a PHI
+    // If all the !Undefined ExtraOperand(s) are Zero, no need for a PHI
     NeedPHI = false;
     for (const auto &EO : EOs) {
-      if (!EO.isExtraOperandUndefined() &&
-          !EO.isExtraOperandZero()) {
+      if (!EO.isUndefined() &&
+          !EO.isZero()) {
         NeedPHI = true;
         break;
       }
@@ -1119,10 +1119,10 @@ ExtraOperand needPHI(const ArrayRef<ExtraOperand> &EOs) {
 
   if (NeedPHI) {
     // We still do not need a PHI when all predecessors ExtraOperands are
-    // equal to isNontemporal
+    // equal to Nontemporal
     NeedPHI = false;
     for (const auto &EO : EOs) {
-      if (!EO.isExtraOperandNontemporal()) {
+      if (!EO.isNontemporal()) {
         NeedPHI = true;
         break;
       }
@@ -1133,12 +1133,12 @@ ExtraOperand needPHI(const ArrayRef<ExtraOperand> &EOs) {
 
   if (NeedPHI) {
     // Finally, we also do not need a PHI if all predecessors ExtraOperands
-    // are equal to isRegister and the register is the same
+    // are equal to Reg and the register is the same
     NeedPHI = false;
-    if (EOs.front().isExtraOperandRegister()) {
+    if (EOs.front().isReg()) {
       Register ExtraReg = EOs.front().getRegister();
       for (const auto &EO : EOs) {
-        if (!EO.isExtraOperandRegister() || EO.getRegister() != ExtraReg) {
+        if (!EO.isReg() || EO.getRegister() != ExtraReg) {
           NeedPHI = true;
           break;
         }
@@ -1192,7 +1192,7 @@ void RISCVInsertVSETVLI::getExtraOperandFromPHI(MachineBasicBlock &MBB,
   }
 
   ExtraOperand NewEO = needPHI(EOs);
-  if (!NewEO.isExtraOperandFromPHI()) {
+  if (!NewEO.isFromPHI()) {
     copyExtraOperand(NewEO, &MI);
     BBInfo.PHIsForExtras.insert({PHI, NewEO});
 
@@ -1219,16 +1219,16 @@ void RISCVInsertVSETVLI::getExtraOperandFromPHI(MachineBasicBlock &MBB,
     MachineInstr *PredMI;
     std::tie(PredMBB, PredMI) = Elem;
 
-    if (getExtraOperand(PredMI).isExtraOperandFromPHI())
+    if (getExtraOperand(PredMI).isFromPHI())
       getExtraOperandFromPHI(*PredMBB, *PredMI);
 
     ExtraOperand PredEO = getExtraOperand(PredMI);
-    assert(!PredEO.isExtraOperandFromPHI());
+    assert(!PredEO.isFromPHI());
 
     Register PredExtra = RISCV::NoRegister;
-    if (PredEO.isExtraOperandRegister())
+    if (PredEO.isReg())
       PredExtra = PredEO.getRegister();
-    else if (PredEO.isExtraOperandNontemporal())
+    else if (PredEO.isNontemporal())
       PredExtra = getNTRegister(PredMBB);
     else
       PredExtra = getFakeRegister(PredMBB);
@@ -1247,7 +1247,7 @@ void RISCVInsertVSETVLI::getExtraOperandFromPHI(MachineBasicBlock &MBB,
 
 void RISCVInsertVSETVLI::emitPHIsForExtras(MachineBasicBlock &MBB) {
   for (const MachineInstr &MI : MBB) {
-    if (!getExtraOperand(&MI).isExtraOperandFromPHI())
+    if (!getExtraOperand(&MI).isFromPHI())
       continue;
 
     getExtraOperandFromPHI(MBB, MI);
@@ -1300,7 +1300,7 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
           Use.setReg(VI.getAVLReg());
 
         // Also propagate the Extra operand info
-        if (getExtraOperand(&UseMI).isExtraOperandUndefined())
+        if (getExtraOperand(&UseMI).isUndefined())
           copyExtraOperand(&MI, &UseMI);
       }
     }
@@ -1323,7 +1323,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   ExtraOperand LastEO;
   for (const MachineInstr &MI : MBB) {
     // Save the last defined ExtraOperand
-    if (!getExtraOperand(&MI).isExtraOperandUndefined())
+    if (!getExtraOperand(&MI).isUndefined())
       LastEO = getExtraOperand(&MI);
 
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
@@ -1399,7 +1399,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
   // Initial exit state is whatever change we found in the block.
   BBInfo.Exit = BBInfo.Change;
 
-  // The exit ExtraOperand value is the last !isUndefined found in the MBB, if any
+  // The exit ExtraOperand value is the last !Undefined found in the MBB, if any
   BBInfo.ExitExtra = LastEO;
 
   return HadVectorOp;
@@ -1446,8 +1446,8 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
 
   bool UpdatedExtraOperand = false;
   // Update ExitExtra with PredExtra value if there are no changes in the MBB
-  if (BBInfo.ExitExtra.isExtraOperandUndefined() &&
-      !BBInfo.PredExtra.isExtraOperandUndefined()) {
+  if (BBInfo.ExitExtra.isUndefined() &&
+      !BBInfo.PredExtra.isUndefined()) {
     BBInfo.ExitExtra = BBInfo.PredExtra;
     UpdatedExtraOperand = true;
   }
@@ -1533,8 +1533,8 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     // Retrieve ExtraOperand of previous instruction
     ExtraOperand PrevEO = PrevMI ? getExtraOperand(PrevMI) : BBInfo.PredExtra;
 
-    // Inherit ExtraOperand, if MI's one isUndefined
-    if (getExtraOperand(&MI).isExtraOperandUndefined())
+    // Inherit ExtraOperand, if MI's one == Undefined
+    if (getExtraOperand(&MI).isUndefined())
       copyExtraOperand(PrevEO, &MI);
 
     PrevMI = &MI;
