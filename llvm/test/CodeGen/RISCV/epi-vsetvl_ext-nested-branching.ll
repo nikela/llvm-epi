@@ -43,7 +43,7 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O0-NEXT:    fld ft1, %lo(.LCPI0_0)(a2)
 ; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
 ; CHECK-O0-NEXT:    fsd ft0, 0(a1)
-; CHECK-O0-NEXT:    mv a1, zero
+; CHECK-O0-NEXT:    li a1, 0
 ; CHECK-O0-NEXT:    sd a1, 8(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_6
@@ -96,7 +96,7 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O2-NEXT:    fld ft1, %lo(.LCPI0_0)(a1)
 ; CHECK-O2-NEXT:    fadd.d ft0, ft0, ft1
 ; CHECK-O2-NEXT:    fsd ft0, 0(a3)
-; CHECK-O2-NEXT:    mv a2, zero
+; CHECK-O2-NEXT:    li a2, 0
 ; CHECK-O2-NEXT:  .LBB0_6: # %if.end4
 ; CHECK-O2-NEXT:    ori a1, a2, 88
 ; CHECK-O2-NEXT:    vsetvl a0, a0, a1

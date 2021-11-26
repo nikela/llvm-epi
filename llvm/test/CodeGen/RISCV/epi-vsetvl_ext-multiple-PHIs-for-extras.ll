@@ -8,19 +8,19 @@ define void @multiple_PHIs_for_extras(i64 %N, double* %c, double* %a, double* %b
 ; CHECK-NEXT:    andi a0, a0, 1
 ; CHECK-NEXT:    bnez a0, .LBB0_2
 ; CHECK-NEXT:  # %bb.1: # %if.then
-; CHECK-NEXT:    addi a6, zero, 64
+; CHECK-NEXT:    li a6, 64
 ; CHECK-NEXT:    vsetvli a7, a6, e64, m1, ta, mu, nt
-; CHECK-NEXT:    addi a0, zero, 5
+; CHECK-NEXT:    li a0, 5
 ; CHECK-NEXT:    ori a4, a0, 88
 ; CHECK-NEXT:    vsetvl a6, a6, a4
-; CHECK-NEXT:    addi a4, zero, 512
+; CHECK-NEXT:    li a4, 512
 ; CHECK-NEXT:    j .LBB0_3
 ; CHECK-NEXT:  .LBB0_2: # %if.else
-; CHECK-NEXT:    addi a0, zero, 64
+; CHECK-NEXT:    li a0, 64
 ; CHECK-NEXT:    vsetvli a7, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vsetvli a6, zero, e64, m1, ta, mu
-; CHECK-NEXT:    mv a0, zero
-; CHECK-NEXT:    mv a4, zero
+; CHECK-NEXT:    li a0, 0
+; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:  .LBB0_3: # %if.end
 ; CHECK-NEXT:    ori a5, a4, 88
 ; CHECK-NEXT:    vsetvl a4, a7, a5

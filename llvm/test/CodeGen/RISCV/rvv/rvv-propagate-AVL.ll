@@ -5,12 +5,12 @@
 define void @rvv_propagate_AVL(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-LABEL: rvv_propagate_AVL:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    addi a4, zero, 64
+; CHECK-NEXT:    li a4, 64
 ; CHECK-NEXT:    vsetvli a6, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    blez a0, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
-; CHECK-NEXT:    mv a5, zero
-; CHECK-NEXT:    mv t0, zero
+; CHECK-NEXT:    li a5, 0
+; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    slli a7, a6, 3
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
@@ -57,8 +57,8 @@ define void @rvv_propagate_AVL_vlmax(i64 %N, double* %c, double* %a, double* %b)
 ; CHECK-NEXT:    vsetvli a6, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    blez a0, .LBB1_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
-; CHECK-NEXT:    mv a5, zero
-; CHECK-NEXT:    mv t0, zero
+; CHECK-NEXT:    li a5, 0
+; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    slli a7, a6, 3
 ; CHECK-NEXT:  .LBB1_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
