@@ -66,6 +66,9 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
 
   unsigned getRegPressureSetScore(const MachineFunction &MF,
                                           unsigned PSetID) const override;
+
+  void getOffsetOpcodes(const StackOffset &Offset,
+                        SmallVectorImpl<uint64_t> &Ops) const override;
 };
 }
 
