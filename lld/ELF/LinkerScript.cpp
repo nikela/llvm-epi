@@ -900,22 +900,6 @@ void LinkerScript::diagnoseOrphanHandling() const {
   }
 }
 
-void LinkerScript::switchTo(OutputSection *sec) {
-  ctx->outSec = sec;
-
-  const uint64_t pos = dot;
-  if (sec->addrExpr && script->hasSectionsCommand) {
-    // The alignment is ignored.
-    ctx->outSec->addr = pos;
-  } else {
-    // ctx->outSec->alignment is the max of ALIGN and the maximum of input
-    // section alignments.
-    dot = alignTo(dot, ctx->outSec->alignment);
-    ctx->outSec->addr = dot;
-    expandMemoryRegions(dot - pos);
-  }
-}
-
 // This function searches for a memory region to place the given output
 // section in. If found, a pointer to the appropriate memory region is
 // returned in the first member of the pair. Otherwise, a nullptr is returned.
@@ -1004,7 +988,18 @@ void LinkerScript::assignOffsets(OutputSection *sec) {
                          sec->name);
   }
 
-  switchTo(sec);
+  ctx->outSec = sec;
+  if (sec->addrExpr && script->hasSectionsCommand) {
+    // The alignment is ignored.
+    sec->addr = dot;
+  } else {
+    // sec->alignment is the max of ALIGN and the maximum of input
+    // section alignments.
+    const uint64_t pos = dot;
+    dot = alignTo(dot, sec->alignment);
+    sec->addr = dot;
+    expandMemoryRegions(dot - pos);
+  }
 
   // ctx->lmaOffset is LMA minus VMA. If LMA is explicitly specified via AT() or
   // AT>, recompute ctx->lmaOffset; otherwise, if both previous/current LMA
@@ -1024,7 +1019,7 @@ void LinkerScript::assignOffsets(OutputSection *sec) {
   }
 
   // Propagate ctx->lmaOffset to the first "non-header" section.
-  if (PhdrEntry *l = ctx->outSec->ptLoad)
+  if (PhdrEntry *l = sec->ptLoad)
     if (sec == findFirstSection(l))
       l->lmaOffset = ctx->lmaOffset;
 
@@ -1046,7 +1041,7 @@ void LinkerScript::assignOffsets(OutputSection *sec) {
 
     // Handle BYTE(), SHORT(), LONG(), or QUAD().
     if (auto *data = dyn_cast<ByteCommand>(cmd)) {
-      data->offset = dot - ctx->outSec->addr;
+      data->offset = dot - sec->addr;
       dot += data->size;
       expandOutputSection(data->size);
       continue;
@@ -1056,10 +1051,10 @@ void LinkerScript::assignOffsets(OutputSection *sec) {
     // It calculates and assigns the offsets for each section and also
     // updates the output section size.
     for (InputSection *isec : cast<InputSectionDescription>(cmd)->sections) {
-      assert(ctx->outSec == isec->getParent());
+      assert(isec->getParent() == sec);
       const uint64_t pos = dot;
       dot = alignTo(dot, isec->alignment);
-      isec->outSecOff = dot - ctx->outSec->addr;
+      isec->outSecOff = dot - sec->addr;
       dot += isec->getSize();
 
       // Update output section size after adding each section. This is so that
@@ -1316,7 +1311,7 @@ const Defined *LinkerScript::assignAddresses() {
   AddressState state;
   ctx = &state;
   errorOnMissingSection = true;
-  switchTo(aether);
+  ctx->outSec = aether;
 
   SymbolAssignmentMap oldValues = getSymbolAssignmentValues(sectionCommands);
   for (SectionCommand *cmd : sectionCommands) {
