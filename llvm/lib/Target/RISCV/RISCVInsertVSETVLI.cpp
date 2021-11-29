@@ -1275,21 +1275,31 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
       MachineOperand &Use(*UI++);
       assert(Use.getParent() != nullptr);
       const MachineInstr &UseMI = *Use.getParent();
+      const int UseIndex = UseMI.getOperandNo(&Use);
 
       bool Propagate = false;
       // EPI instructions
       if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
               RISCVEPIPseudosTable::getEPIPseudoInfo(UseMI.getOpcode())) {
-        VSETVLIInfo UseInfo = computeInfoForEPIInstr(
-            UseMI, EPI->getVLIndex(), EPI->getSEWIndex(), EPI->VLMul,
-            EPI->getMaskOpIndex(), MRI);
-        Propagate = UseInfo.hasSameVLMAX(VI);
+        if (UseIndex == EPI->getVLIndex()) {
+          VSETVLIInfo UseInfo = computeInfoForEPIInstr(
+              UseMI, EPI->getVLIndex(), EPI->getSEWIndex(), EPI->VLMul,
+              EPI->getMaskOpIndex(), MRI);
+          Propagate = UseInfo.hasSameVLMAX(VI);
+        }
       } else {
         // RVV instructions
         uint64_t TSFlags = UseMI.getDesc().TSFlags;
-        if (RISCVII::hasSEWOp(TSFlags)) {
-          VSETVLIInfo UseInfo = computeInfoForInstr(UseMI, TSFlags, MRI);
-          Propagate = UseInfo.hasSameVLMAX(VI);
+        if (RISCVII::hasSEWOp(TSFlags) && RISCVII::hasVLOp(TSFlags)) {
+          int NumOperands = UseMI.getNumExplicitOperands();
+          if (RISCVII::hasVecPolicyOp(TSFlags))
+            --NumOperands;
+
+          // NumOperands - 2 == VLOpIndex
+          if (UseIndex == (NumOperands - 2)) {
+            VSETVLIInfo UseInfo = computeInfoForInstr(UseMI, TSFlags, MRI);
+            Propagate = UseInfo.hasSameVLMAX(VI);
+          }
         }
       }
 
