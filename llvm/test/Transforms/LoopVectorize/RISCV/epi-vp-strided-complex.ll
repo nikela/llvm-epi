@@ -105,7 +105,7 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED:       for.body.preheader:
 ; STRIDED-NEXT:    [[IDXPROM1:%.*]] = sext i32 [[J]] to i64
 ; STRIDED-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[J]] to i64
-; STRIDED-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
+; STRIDED-NEXT:    [[ARRAYIDX:%.*]] = getelementptr { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
 ; STRIDED-NEXT:    [[SCEVGEP:%.*]] = getelementptr { float, float }, { float, float }* [[X:%.*]], i64 0, i32 1
 ; STRIDED-NEXT:    [[SCEVGEP6:%.*]] = getelementptr { float, float }, { float, float }* [[Y:%.*]], i64 0, i32 1
 ; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT9:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i32 0
