@@ -580,6 +580,8 @@ public:
                           ArrayRef<RISCVVTToLibCall> TypeToCall,
                           EVT VT) const;
 
+  bool shouldConvertFpToSat(unsigned Op, EVT FPVT, EVT VT) const override;
+
 private:
   /// RISCVCCAssignFn - This target-specific function extends the default
   /// CCValAssign with additional information used to lower RISC-V calling
