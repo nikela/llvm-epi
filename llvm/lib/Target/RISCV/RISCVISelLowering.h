@@ -335,6 +335,8 @@ enum NodeType : unsigned {
   // Memory opcodes start here.
   VLE_VL = ISD::FIRST_TARGET_MEMORY_OPCODE,
   VSE_VL,
+  VLM_VL,
+  VSM_VL,
   VLSE_VL,
   VSSE_VL,
 
@@ -578,6 +580,8 @@ public:
                           ArrayRef<RISCVVTToLibCall> TypeToCall,
                           EVT VT) const;
 
+  bool shouldConvertFpToSat(unsigned Op, EVT FPVT, EVT VT) const override;
+
 private:
   /// RISCVCCAssignFn - This target-specific function extends the default
   /// CCValAssign with additional information used to lower RISC-V calling
@@ -676,6 +680,8 @@ private:
   SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
                              unsigned RISCVISDOpc) const;
   SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPLoad(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStore(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStridedLoadExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStridedStoreExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
@@ -707,6 +713,14 @@ private:
   /// NOTE: Once BUILD_VECTOR can be custom lowered for all legal vector types,
   /// this override can be removed.
   bool mergeStoresAfterLegalization(EVT VT) const override;
+
+  /// Disable normalizing
+  /// select(N0&N1, X, Y) => select(N0, select(N1, X, Y), Y) and
+  /// select(N0|N1, X, Y) => select(N0, select(N1, X, Y, Y))
+  /// RISCV doesn't have flags so it's better to perform the and/or in a GPR.
+  bool shouldNormalizeToSelectSequence(LLVMContext &, EVT) const override {
+    return false;
+  };
 };
 
 namespace RISCV {

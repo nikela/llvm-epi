@@ -66,7 +66,7 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vredsum.vs v10, v8, v9
 ; CHECK-NEXT:    vmv.x.s a6, v10
-; CHECK-NEXT:    addi a1, zero, -1
+; CHECK-NEXT:    li a1, -1
 ; CHECK-NEXT:    slli a2, a1, 63
 ; CHECK-NEXT:    vmv.v.x v10, a2
 ; CHECK-NEXT:    vredmax.vs v10, v8, v10
@@ -125,7 +125,7 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vredsum.vs v11, v8, v10
 ; CHECK-NEXT:    vmv.x.s a6, v11
-; CHECK-NEXT:    addi a1, zero, -1
+; CHECK-NEXT:    li a1, -1
 ; CHECK-NEXT:    slli a2, a1, 63
 ; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.x v11, a2

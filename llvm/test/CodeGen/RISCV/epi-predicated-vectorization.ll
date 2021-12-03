@@ -9,7 +9,7 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    lui a5, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a5)
-; CHECK-NEXT:    mv a5, zero
+; CHECK-NEXT:    li a5, 0
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a6, a0, 32
 ; CHECK-NEXT:  .LBB0_2: # %vector.body

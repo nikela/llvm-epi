@@ -15,55 +15,52 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O0-NEXT:    sd a2, 56(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a1, 64(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 72(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, zero, 45
+; CHECK-O0-NEXT:    li a1, 45
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_5
 ; CHECK-O0-NEXT:    j .LBB0_1
 ; CHECK-O0-NEXT:  .LBB0_1: # %if.then
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    addi a1, zero, 124
+; CHECK-O0-NEXT:    li a1, 124
 ; CHECK-O0-NEXT:    blt a0, a1, .LBB0_3
 ; CHECK-O0-NEXT:    j .LBB0_2
 ; CHECK-O0-NEXT:  .LBB0_2: # %if.then2
-; CHECK-O0-NEXT:    ld a1, 64(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ori a2, a1, 80
-; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    ld a2, 64(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ori a1, a2, 80
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
 ; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_4
 ; CHECK-O0-NEXT:  .LBB0_3: # %if.else
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O0-NEXT:    mv a1, zero
-; CHECK-O0-NEXT:    sd a1, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    sd a0, 24(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_4
 ; CHECK-O0-NEXT:  .LBB0_4: # %if.end
-; CHECK-O0-NEXT:    ld a2, 48(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a1, 16(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a1, 48(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    fld ft0, 0(a2)
-; CHECK-O0-NEXT:    lui a3, %hi(.LCPI0_0)
-; CHECK-O0-NEXT:    fld ft1, %lo(.LCPI0_0)(a3)
+; CHECK-O0-NEXT:    fld ft0, 0(a1)
+; CHECK-O0-NEXT:    lui a2, %hi(.LCPI0_0)
+; CHECK-O0-NEXT:    fld ft1, %lo(.LCPI0_0)(a2)
 ; CHECK-O0-NEXT:    fadd.d ft0, ft0, ft1
-; CHECK-O0-NEXT:    fsd ft0, 0(a2)
-; CHECK-O0-NEXT:    sd a1, 0(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a0, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    fsd ft0, 0(a1)
+; CHECK-O0-NEXT:    li a1, 0
+; CHECK-O0-NEXT:    sd a1, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a0, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_6
 ; CHECK-O0-NEXT:  .LBB0_5: # %if.else3
 ; CHECK-O0-NEXT:    ld a1, 56(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a0, 72(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ori a2, a1, 88
 ; CHECK-O0-NEXT:    vsetvl a0, a0, a2
-; CHECK-O0-NEXT:    sd a1, 0(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    sd a0, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a1, 8(sp) # 8-byte Folded Spill
+; CHECK-O0-NEXT:    sd a0, 16(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    j .LBB0_6
 ; CHECK-O0-NEXT:  .LBB0_6: # %if.end4
 ; CHECK-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a1, 40(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a2, 48(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a5, 0(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a3, 8(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a5, 8(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a3, 16(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    ori a4, a5, 88
 ; CHECK-O0-NEXT:    vsetvl a3, a3, a4
@@ -78,10 +75,10 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ;
 ; CHECK-O2-LABEL: test_nested_branching:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    addi a6, zero, 45
+; CHECK-O2-NEXT:    li a6, 45
 ; CHECK-O2-NEXT:    blt a0, a6, .LBB0_3
 ; CHECK-O2-NEXT:  # %bb.1: # %if.then
-; CHECK-O2-NEXT:    addi a2, zero, 124
+; CHECK-O2-NEXT:    li a2, 124
 ; CHECK-O2-NEXT:    blt a0, a2, .LBB0_4
 ; CHECK-O2-NEXT:  # %bb.2: # %if.then2
 ; CHECK-O2-NEXT:    ori a2, a1, 80
@@ -93,14 +90,13 @@ define void @test_nested_branching(i64 %rvl, i64 %extra1, i64 %extra2, double* %
 ; CHECK-O2-NEXT:    j .LBB0_6
 ; CHECK-O2-NEXT:  .LBB0_4: # %if.else
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    mv a1, zero
 ; CHECK-O2-NEXT:  .LBB0_5: # %if.end
 ; CHECK-O2-NEXT:    fld ft0, 0(a3)
-; CHECK-O2-NEXT:    lui a2, %hi(.LCPI0_0)
-; CHECK-O2-NEXT:    fld ft1, %lo(.LCPI0_0)(a2)
+; CHECK-O2-NEXT:    lui a1, %hi(.LCPI0_0)
+; CHECK-O2-NEXT:    fld ft1, %lo(.LCPI0_0)(a1)
 ; CHECK-O2-NEXT:    fadd.d ft0, ft0, ft1
 ; CHECK-O2-NEXT:    fsd ft0, 0(a3)
-; CHECK-O2-NEXT:    mv a2, a1
+; CHECK-O2-NEXT:    li a2, 0
 ; CHECK-O2-NEXT:  .LBB0_6: # %if.end4
 ; CHECK-O2-NEXT:    ori a1, a2, 88
 ; CHECK-O2-NEXT:    vsetvl a0, a0, a1

@@ -16,60 +16,190 @@ define void @foo() nounwind {
 ; LP64F-LABEL: foo:
 ; LP64F:       # %bb.0:
 ; LP64F-NEXT:    addi sp, sp, -48
-; LP64F-NEXT:    fsw fs0, 44(sp)
-; LP64F-NEXT:    fsw fs1, 40(sp)
-; LP64F-NEXT:    fsw fs2, 36(sp)
-; LP64F-NEXT:    fsw fs3, 32(sp)
-; LP64F-NEXT:    fsw fs4, 28(sp)
-; LP64F-NEXT:    fsw fs5, 24(sp)
-; LP64F-NEXT:    fsw fs6, 20(sp)
-; LP64F-NEXT:    fsw fs7, 16(sp)
-; LP64F-NEXT:    fsw fs8, 12(sp)
-; LP64F-NEXT:    fsw fs9, 8(sp)
-; LP64F-NEXT:    fsw fs10, 4(sp)
-; LP64F-NEXT:    fsw fs11, 0(sp)
-; LP64F:         flw fs11, 0(sp)
-; LP64F-NEXT:    flw fs10, 4(sp)
-; LP64F-NEXT:    flw fs9, 8(sp)
-; LP64F-NEXT:    flw fs8, 12(sp)
-; LP64F-NEXT:    flw fs7, 16(sp)
-; LP64F-NEXT:    flw fs6, 20(sp)
-; LP64F-NEXT:    flw fs5, 24(sp)
-; LP64F-NEXT:    flw fs4, 28(sp)
-; LP64F-NEXT:    flw fs3, 32(sp)
-; LP64F-NEXT:    flw fs2, 36(sp)
-; LP64F-NEXT:    flw fs1, 40(sp)
-; LP64F-NEXT:    flw fs0, 44(sp)
+; LP64F-NEXT:    fsw fs0, 44(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs1, 40(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs2, 36(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs3, 32(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs4, 28(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs5, 24(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs6, 20(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs7, 16(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs8, 12(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs9, 8(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs10, 4(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    fsw fs11, 0(sp) # 4-byte Folded Spill
+; LP64F-NEXT:    lui a0, %hi(var)
+; LP64F-NEXT:    flw ft0, %lo(var)(a0)
+; LP64F-NEXT:    flw ft1, %lo(var)(a0)
+; LP64F-NEXT:    flw ft2, %lo(var)(a0)
+; LP64F-NEXT:    flw ft3, %lo(var)(a0)
+; LP64F-NEXT:    flw ft4, %lo(var)(a0)
+; LP64F-NEXT:    flw ft5, %lo(var)(a0)
+; LP64F-NEXT:    flw ft6, %lo(var)(a0)
+; LP64F-NEXT:    flw ft7, %lo(var)(a0)
+; LP64F-NEXT:    flw fa0, %lo(var)(a0)
+; LP64F-NEXT:    flw fa1, %lo(var)(a0)
+; LP64F-NEXT:    flw fa2, %lo(var)(a0)
+; LP64F-NEXT:    flw fa3, %lo(var)(a0)
+; LP64F-NEXT:    flw fa4, %lo(var)(a0)
+; LP64F-NEXT:    flw fa5, %lo(var)(a0)
+; LP64F-NEXT:    flw fa6, %lo(var)(a0)
+; LP64F-NEXT:    flw fa7, %lo(var)(a0)
+; LP64F-NEXT:    flw ft8, %lo(var)(a0)
+; LP64F-NEXT:    flw ft9, %lo(var)(a0)
+; LP64F-NEXT:    flw ft10, %lo(var)(a0)
+; LP64F-NEXT:    flw ft11, %lo(var)(a0)
+; LP64F-NEXT:    flw fs0, %lo(var)(a0)
+; LP64F-NEXT:    flw fs1, %lo(var)(a0)
+; LP64F-NEXT:    flw fs2, %lo(var)(a0)
+; LP64F-NEXT:    flw fs3, %lo(var)(a0)
+; LP64F-NEXT:    flw fs4, %lo(var)(a0)
+; LP64F-NEXT:    flw fs5, %lo(var)(a0)
+; LP64F-NEXT:    flw fs6, %lo(var)(a0)
+; LP64F-NEXT:    flw fs7, %lo(var)(a0)
+; LP64F-NEXT:    flw fs8, %lo(var)(a0)
+; LP64F-NEXT:    flw fs9, %lo(var)(a0)
+; LP64F-NEXT:    flw fs10, %lo(var)(a0)
+; LP64F-NEXT:    flw fs11, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft0, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft1, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft2, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft3, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft4, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft5, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft6, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft7, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa0, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa1, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa2, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa3, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa4, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa5, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa6, %lo(var)(a0)
+; LP64F-NEXT:    fsw fa7, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft8, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft9, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft10, %lo(var)(a0)
+; LP64F-NEXT:    fsw ft11, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs0, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs1, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs2, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs3, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs4, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs5, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs6, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs7, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs8, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs9, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs10, %lo(var)(a0)
+; LP64F-NEXT:    fsw fs11, %lo(var)(a0)
+; LP64F-NEXT:    flw fs0, 44(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs1, 40(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs2, 36(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs3, 32(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs4, 28(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs5, 24(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs6, 20(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs7, 16(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs8, 12(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs9, 8(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs10, 4(sp) # 4-byte Folded Reload
+; LP64F-NEXT:    flw fs11, 0(sp) # 4-byte Folded Reload
 ; LP64F-NEXT:    addi sp, sp, 48
 ; LP64F-NEXT:    ret
 ;
 ; LP64D-LABEL: foo:
 ; LP64D:       # %bb.0:
 ; LP64D-NEXT:    addi sp, sp, -96
-; LP64D-NEXT:    fsd fs0, 88(sp)
-; LP64D-NEXT:    fsd fs1, 80(sp)
-; LP64D-NEXT:    fsd fs2, 72(sp)
-; LP64D-NEXT:    fsd fs3, 64(sp)
-; LP64D-NEXT:    fsd fs4, 56(sp)
-; LP64D-NEXT:    fsd fs5, 48(sp)
-; LP64D-NEXT:    fsd fs6, 40(sp)
-; LP64D-NEXT:    fsd fs7, 32(sp)
-; LP64D-NEXT:    fsd fs8, 24(sp)
-; LP64D-NEXT:    fsd fs9, 16(sp)
-; LP64D-NEXT:    fsd fs10, 8(sp)
-; LP64D-NEXT:    fsd fs11, 0(sp)
-; LP64D:         fld fs11, 0(sp)
-; LP64D-NEXT:    fld fs10, 8(sp)
-; LP64D-NEXT:    fld fs9, 16(sp)
-; LP64D-NEXT:    fld fs8, 24(sp)
-; LP64D-NEXT:    fld fs7, 32(sp)
-; LP64D-NEXT:    fld fs6, 40(sp)
-; LP64D-NEXT:    fld fs5, 48(sp)
-; LP64D-NEXT:    fld fs4, 56(sp)
-; LP64D-NEXT:    fld fs3, 64(sp)
-; LP64D-NEXT:    fld fs2, 72(sp)
-; LP64D-NEXT:    fld fs1, 80(sp)
-; LP64D-NEXT:    fld fs0, 88(sp)
+; LP64D-NEXT:    fsd fs0, 88(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs1, 80(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs2, 72(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs3, 64(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs4, 56(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs5, 48(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs6, 40(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs7, 32(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs8, 24(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs9, 16(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs10, 8(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    fsd fs11, 0(sp) # 8-byte Folded Spill
+; LP64D-NEXT:    lui a0, %hi(var)
+; LP64D-NEXT:    flw ft0, %lo(var)(a0)
+; LP64D-NEXT:    flw ft1, %lo(var)(a0)
+; LP64D-NEXT:    flw ft2, %lo(var)(a0)
+; LP64D-NEXT:    flw ft3, %lo(var)(a0)
+; LP64D-NEXT:    flw ft4, %lo(var)(a0)
+; LP64D-NEXT:    flw ft5, %lo(var)(a0)
+; LP64D-NEXT:    flw ft6, %lo(var)(a0)
+; LP64D-NEXT:    flw ft7, %lo(var)(a0)
+; LP64D-NEXT:    flw fa0, %lo(var)(a0)
+; LP64D-NEXT:    flw fa1, %lo(var)(a0)
+; LP64D-NEXT:    flw fa2, %lo(var)(a0)
+; LP64D-NEXT:    flw fa3, %lo(var)(a0)
+; LP64D-NEXT:    flw fa4, %lo(var)(a0)
+; LP64D-NEXT:    flw fa5, %lo(var)(a0)
+; LP64D-NEXT:    flw fa6, %lo(var)(a0)
+; LP64D-NEXT:    flw fa7, %lo(var)(a0)
+; LP64D-NEXT:    flw ft8, %lo(var)(a0)
+; LP64D-NEXT:    flw ft9, %lo(var)(a0)
+; LP64D-NEXT:    flw ft10, %lo(var)(a0)
+; LP64D-NEXT:    flw ft11, %lo(var)(a0)
+; LP64D-NEXT:    flw fs0, %lo(var)(a0)
+; LP64D-NEXT:    flw fs1, %lo(var)(a0)
+; LP64D-NEXT:    flw fs2, %lo(var)(a0)
+; LP64D-NEXT:    flw fs3, %lo(var)(a0)
+; LP64D-NEXT:    flw fs4, %lo(var)(a0)
+; LP64D-NEXT:    flw fs5, %lo(var)(a0)
+; LP64D-NEXT:    flw fs6, %lo(var)(a0)
+; LP64D-NEXT:    flw fs7, %lo(var)(a0)
+; LP64D-NEXT:    flw fs8, %lo(var)(a0)
+; LP64D-NEXT:    flw fs9, %lo(var)(a0)
+; LP64D-NEXT:    flw fs10, %lo(var)(a0)
+; LP64D-NEXT:    flw fs11, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft0, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft1, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft2, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft3, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft4, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft5, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft6, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft7, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa0, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa1, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa2, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa3, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa4, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa5, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa6, %lo(var)(a0)
+; LP64D-NEXT:    fsw fa7, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft8, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft9, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft10, %lo(var)(a0)
+; LP64D-NEXT:    fsw ft11, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs0, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs1, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs2, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs3, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs4, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs5, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs6, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs7, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs8, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs9, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs10, %lo(var)(a0)
+; LP64D-NEXT:    fsw fs11, %lo(var)(a0)
+; LP64D-NEXT:    fld fs0, 88(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs1, 80(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs2, 72(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs3, 64(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs4, 56(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs5, 48(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs6, 40(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs7, 32(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs8, 24(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs9, 16(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs10, 8(sp) # 8-byte Folded Reload
+; LP64D-NEXT:    fld fs11, 0(sp) # 8-byte Folded Reload
 ; LP64D-NEXT:    addi sp, sp, 96
 ; LP64D-NEXT:    ret
   %val1 = load volatile float, float* @var

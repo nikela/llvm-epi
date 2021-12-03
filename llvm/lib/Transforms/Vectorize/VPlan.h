@@ -62,6 +62,7 @@ class Value;
 class VPBasicBlock;
 class VPRegionBlock;
 class VPlan;
+class VPReplicateRecipe;
 class VPlanSlp;
 
 /// Returns a calculation for the total number of elements for a given \p VF.
@@ -352,6 +353,10 @@ struct VPTransformState {
 
   /// Pointer to the VPlan code is generated for.
   VPlan *Plan;
+
+  /// Holds recipes that may generate a poison value that is used after
+  /// vectorization, even when their operands are not poison.
+  SmallPtrSet<VPRecipeBase *, 16> MayGeneratePoisonRecipes;
 };
 
 /// VPUsers instance used by VPBlockBase to manage CondBit and the block
@@ -800,6 +805,7 @@ public:
 private:
   typedef unsigned char OpcodeTy;
   OpcodeTy Opcode;
+  FastMathFlags FMF;
 
   /// Utility method serving execute(): generates a single instance of the
   /// modeled instruction.
@@ -812,13 +818,6 @@ public:
   VPInstruction(unsigned Opcode, ArrayRef<VPValue *> Operands)
       : VPRecipeBase(VPRecipeBase::VPInstructionSC, Operands),
         VPValue(VPValue::VPVInstructionSC, nullptr, this), Opcode(Opcode) {}
-
-  VPInstruction(unsigned Opcode, ArrayRef<VPInstruction *> Operands)
-      : VPRecipeBase(VPRecipeBase::VPInstructionSC, {}),
-        VPValue(VPValue::VPVInstructionSC, nullptr, this), Opcode(Opcode) {
-    for (auto *I : Operands)
-      addOperand(I->getVPSingleValue());
-  }
 
   VPInstruction(unsigned Opcode, std::initializer_list<VPValue *> Operands)
       : VPInstruction(Opcode, ArrayRef<VPValue *>(Operands)) {}
@@ -881,6 +880,9 @@ public:
       return true;
     }
   }
+
+  /// Set the fast-math flags.
+  void setFastMathFlags(FastMathFlags FMFNew);
 };
 
 /// VPWidenRecipe is a recipe for producing a copy of vector type its
@@ -1638,18 +1640,7 @@ public:
 /// - For store: Address, stored value, optional mask
 /// TODO: We currently execute only per-part unless a specific instance is
 /// provided.
-class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
-  void setMask(VPValue *Mask) {
-    if (!Mask)
-      return;
-    addOperand(Mask);
-  }
-
-  bool isMasked() const {
-    return isStore() ? getNumOperands() == 3 : getNumOperands() == 2;
-  }
-
-protected:
+class VPWidenMemoryInstructionRecipe : public VPRecipeBase, public VPValue {
   Instruction &Ingredient;
 
   // Whether the loaded-from / stored-to addresses are consecutive.
@@ -1658,35 +1649,39 @@ protected:
   // Whether the consecutive loaded/stored addresses are in reverse order.
   bool Reverse;
 
-  VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
-                                 bool Consecutive, bool Reverse,
-                                 const unsigned char RecipeSC,
-                                 const unsigned char ValueSC)
-      : VPRecipeBase(RecipeSC, {Addr}), Ingredient(Load),
-        Consecutive(Consecutive), Reverse(Reverse) {
-    new VPValue(ValueSC, &Load, this);
+  void setMask(VPValue *Mask) {
+    if (!Mask)
+      return;
+    addOperand(Mask);
   }
 
-  VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                 VPValue *StoredValue, bool Consecutive,
-                                 bool Reverse, const unsigned char RecipeSC)
-      : VPRecipeBase(RecipeSC, {Addr, StoredValue}), Ingredient(Store),
-        Consecutive(Consecutive), Reverse(Reverse) {}
+  virtual
+  bool isMasked() const {
+    return isStore() ? getNumOperands() == 3 : getNumOperands() == 2;
+  }
 
 public:
   VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask,
-                                 bool Consecutive, bool Reverse)
-      : VPWidenMemoryInstructionRecipe(Load, Addr, Consecutive, Reverse,
-                                       VPWidenMemoryInstructionSC,
-                                       VPValue::VPVMemoryInstructionSC) {
+                                 bool Consecutive, bool Reverse,
+                                 unsigned char RecipeSC = VPWidenMemoryInstructionSC,
+                                 unsigned char ValueSC = VPValue::VPVMemoryInstructionSC
+                                 )
+      : VPRecipeBase(RecipeSC, {Addr}),
+        VPValue(ValueSC, &Load, this), Ingredient(Load),
+        Consecutive(Consecutive), Reverse(Reverse) {
+    assert((Consecutive || !Reverse) && "Reverse implies consecutive");
     setMask(Mask);
   }
 
-  VPWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                 VPValue *StoredValue, VPValue *Mask,
-                                 bool Consecutive, bool Reverse)
-      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Consecutive,
-                                       Reverse, VPWidenMemoryInstructionSC) {
+  VPWidenMemoryInstructionRecipe(
+      StoreInst &Store, VPValue *Addr, VPValue *StoredValue, VPValue *Mask,
+      bool Consecutive, bool Reverse,
+      unsigned char RecipeSC = VPWidenMemoryInstructionSC,
+      unsigned char ValueSC = VPValue::VPVMemoryInstructionSC)
+      : VPRecipeBase(RecipeSC, {Addr, StoredValue}),
+        VPValue(ValueSC, &Store, this), Ingredient(Store),
+        Consecutive(Consecutive), Reverse(Reverse) {
+    assert((Consecutive || !Reverse) && "Reverse implies consecutive");
     setMask(Mask);
   }
 
@@ -1726,6 +1721,13 @@ public:
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
 
+  const Instruction &getIngredient() const { return Ingredient; }
+  Instruction &getIngredient() { return Ingredient; }
+
+  bool getConsecutive() const { return Consecutive; }
+
+  bool getReverse() const { return Reverse; }
+
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,
@@ -1745,10 +1747,9 @@ public:
                                            VPValue *Mask, bool Consecutive,
                                            bool Reverse, VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(
-            Load, Addr, Consecutive, Reverse,
+            Load, Addr, Mask, Consecutive, Reverse,
             VPPredicatedWidenMemoryInstructionSC,
             VPValue::VPVPredicatedMemoryInstructionSC) {
-    addOperand(Mask);
     addOperand(EVL);
   }
 
@@ -1756,10 +1757,10 @@ public:
                                            VPValue *StoredValue, VPValue *Mask,
                                            bool Consecutive, bool Reverse,
                                            VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Consecutive,
-                                       Reverse,
-                                       VPPredicatedWidenMemoryInstructionSC) {
-    addOperand(Mask);
+      : VPWidenMemoryInstructionRecipe(
+            Store, Addr, StoredValue, Mask, Consecutive, Reverse,
+            VPPredicatedWidenMemoryInstructionSC,
+            VPValue::VPVPredicatedMemoryInstructionSC) {
     addOperand(EVL);
   }
 
@@ -1769,16 +1770,17 @@ public:
            VPRecipeBase::VPPredicatedWidenMemoryInstructionSC;
   }
 
-  /// Return the mask used by this recipe.
-  VPValue *getMask() const {
-    // Mask is the second last, mandatory operand.
-    return getOperand(getNumOperands() - 2);
-  }
-
   /// Return the EVL used by this recipe.
   VPValue *getEVL() const {
     // EVL is the last, mandatory operand.
     return getOperand(getNumOperands() - 1);
+  }
+
+  /// Return the mask used by this recipe. Note that a full mask is represented
+  /// by a nullptr.
+  VPValue *getMask() const {
+    // Mask is the before the last, mandatory operand.
+    return getOperand(getNumOperands() - 2);
   }
 
   /// Generate the wide load/store.

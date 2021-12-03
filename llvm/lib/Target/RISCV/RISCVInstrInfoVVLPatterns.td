@@ -22,10 +22,24 @@
 // Helpers to define the VL patterns.
 //===----------------------------------------------------------------------===//
 
-def SDT_RISCVVLE_VL : SDTypeProfile<1, 2, [SDTCisVec<0>, SDTCisPtrTy<1>,
+def SDT_RISCVVLE_VL : SDTypeProfile<1, 3, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
+                                           SDTCVecEltisVT<2, i1>,
+                                           SDTCisSameNumEltsAs<0, 2>,
+                                           SDTCisVT<3, XLenVT>]>;
+def SDT_RISCVVSE_VL : SDTypeProfile<0, 4, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
+                                           SDTCVecEltisVT<2, i1>,
+                                           SDTCisSameNumEltsAs<0, 2>,
+                                           SDTCisVT<3, XLenVT>]>;
+
+def SDT_RISCVVLM_VL : SDTypeProfile<1, 2, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
                                            SDTCisVT<2, XLenVT>]>;
-def SDT_RISCVVSE_VL : SDTypeProfile<0, 3, [SDTCisVec<0>, SDTCisPtrTy<1>,
+def SDT_RISCVVSM_VL : SDTypeProfile<0, 3, [SDTCisVec<0>,
+                                           SDTCisPtrTy<1>,
                                            SDTCisVT<2, XLenVT>]>;
+
 def SDT_RISCVVLSE_VL : SDTypeProfile<1, 4, [SDTCisVec<0>,
                                            SDTCisPtrTy<1>,
                                            SDTCisInt<2>,
@@ -80,6 +94,11 @@ def riscv_vfmv_s_f_vl : SDNode<"RISCVISD::VFMV_S_F_VL",
 def riscv_vle_vl : SDNode<"RISCVISD::VLE_VL", SDT_RISCVVLE_VL,
                           [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
 def riscv_vse_vl : SDNode<"RISCVISD::VSE_VL", SDT_RISCVVSE_VL,
+                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+
+def riscv_vlm_vl : SDNode<"RISCVISD::VLM_VL", SDT_RISCVVLM_VL,
+                          [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
+def riscv_vsm_vl : SDNode<"RISCVISD::VSM_VL", SDT_RISCVVSM_VL,
                           [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
 
 def riscv_vlse_vl : SDNode<"RISCVISD::VLSE_VL", SDT_RISCVVLSE_VL,
@@ -813,23 +832,35 @@ let Predicates = [HasVInstructions] in {
 // 7.4. Vector Unit-Stride Instructions
 foreach vti = AllVectors in {
   defvar load_instr = !cast<Instruction>("PseudoVLE"#vti.SEW#"_V_"#vti.LMul.MX);
+  defvar load_instr_masked = !cast<Instruction>("PseudoVLE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
   defvar store_instr = !cast<Instruction>("PseudoVSE"#vti.SEW#"_V_"#vti.LMul.MX);
+  defvar store_instr_masked = !cast<Instruction>("PseudoVSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
   // Load
-  def : Pat<(vti.Vector (riscv_vle_vl BaseAddr:$rs1, VLOpFrag)),
+  def : Pat<(vti.Vector (riscv_vle_vl BaseAddr:$rs1, (vti.Mask true_mask), VLOpFrag)),
             (load_instr BaseAddr:$rs1, GPR:$vl, vti.Log2SEW)>;
+  def : Pat<(vti.Vector (riscv_vle_vl BaseAddr:$rs1, (vti.Mask V0), VLOpFrag)),
+            (load_instr_masked (vti.Vector (IMPLICIT_DEF)), BaseAddr:$rs1,
+                               (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+
   // Store
   def : Pat<(riscv_vse_vl (vti.Vector vti.RegClass:$rs2), BaseAddr:$rs1,
-                          VLOpFrag),
+                          (vti.Mask true_mask), VLOpFrag),
             (store_instr vti.RegClass:$rs2, BaseAddr:$rs1, GPR:$vl, vti.Log2SEW)>;
+  def : Pat<(riscv_vse_vl (vti.Vector vti.RegClass:$rs2), BaseAddr:$rs1,
+                          (vti.Mask V0), VLOpFrag),
+            (store_instr_masked vti.RegClass:$rs2, BaseAddr:$rs1, (vti.Mask V0),
+                                GPR:$vl, vti.Log2SEW)>;
 }
 
 foreach mti = AllMasks in {
   defvar load_instr = !cast<Instruction>("PseudoVLM_V_"#mti.BX);
   defvar store_instr = !cast<Instruction>("PseudoVSM_V_"#mti.BX);
-  def : Pat<(mti.Mask (riscv_vle_vl BaseAddr:$rs1, VLOpFrag)),
+  // Load
+  def : Pat<(mti.Mask (riscv_vlm_vl BaseAddr:$rs1, VLOpFrag)),
             (load_instr BaseAddr:$rs1, GPR:$vl, mti.Log2SEW)>;
-  def : Pat<(riscv_vse_vl (mti.Mask VR:$rs2), BaseAddr:$rs1,
-                          VLOpFrag),
+
+  // Store
+  def : Pat<(riscv_vsm_vl (mti.Mask VR:$rs2), BaseAddr:$rs1, VLOpFrag),
             (store_instr VR:$rs2, BaseAddr:$rs1, GPR:$vl, mti.Log2SEW)>;
 }
 

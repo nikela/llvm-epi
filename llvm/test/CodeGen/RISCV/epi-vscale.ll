@@ -16,7 +16,7 @@ define i64 @vscale_neg() nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
-; CHECK-NEXT:    addi a1, zero, 1
+; CHECK-NEXT:    li a1, 1
 ; CHECK-NEXT:    sub a0, a1, a0
 ; CHECK-NEXT:    ret
   %1 = call i64 @llvm.vscale.i64()

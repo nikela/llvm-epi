@@ -14,11 +14,11 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:    srli t2, t0, 1
 ; CHECK-NEXT:    bgeu a6, t2, .LBB0_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mv t1, zero
+; CHECK-NEXT:    li t1, 0
 ; CHECK-NEXT:    j .LBB0_6
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
-; CHECK-NEXT:    mv a4, zero
-; CHECK-NEXT:    mv a5, zero
+; CHECK-NEXT:    li a4, 0
+; CHECK-NEXT:    li a5, 0
 ; CHECK-NEXT:    remu a7, a6, t2
 ; CHECK-NEXT:    sub t1, a6, a7
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
@@ -127,11 +127,11 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:    srli t2, t0, 2
 ; CHECK-NEXT:    bgeu a6, t2, .LBB1_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mv t1, zero
+; CHECK-NEXT:    li t1, 0
 ; CHECK-NEXT:    j .LBB1_6
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
-; CHECK-NEXT:    mv a4, zero
-; CHECK-NEXT:    mv a5, zero
+; CHECK-NEXT:    li a4, 0
+; CHECK-NEXT:    li a5, 0
 ; CHECK-NEXT:    remu a7, a6, t2
 ; CHECK-NEXT:    sub t1, a6, a7
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
@@ -239,11 +239,11 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:    srli t1, a6, 3
 ; CHECK-NEXT:    bgeu a0, t1, .LBB2_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    mv t0, zero
+; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    j .LBB2_6
 ; CHECK-NEXT:  .LBB2_3: # %vector.ph
-; CHECK-NEXT:    mv a5, zero
-; CHECK-NEXT:    mv t2, zero
+; CHECK-NEXT:    li a5, 0
+; CHECK-NEXT:    li t2, 0
 ; CHECK-NEXT:    remu a7, a0, t1
 ; CHECK-NEXT:    sub t0, a0, a7
 ; CHECK-NEXT:  .LBB2_4: # %vector.body

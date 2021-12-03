@@ -377,9 +377,9 @@ define void @test_vsetvl_chain_6(i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a0, s1, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    ld s1, 8(sp) # 8-byte Folded Reload
-; CHECK-O2-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-O2-NEXT:    ld s0, 16(sp) # 8-byte Folded Reload
+; CHECK-O2-NEXT:    ld s1, 8(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 32
 ; CHECK-O2-NEXT:    ret
 {
@@ -826,8 +826,8 @@ define void @test_vsetvl_chain_18(i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m2, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a0, a0, e8, m4, ta, mu
 ; CHECK-O2-NEXT:    call use@plt
-; CHECK-O2-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
+; CHECK-O2-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; CHECK-O2-NEXT:    addi sp, sp, 16
 ; CHECK-O2-NEXT:    ret
 {

@@ -80,9 +80,9 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    csrr a0, vlenb
 ; SPILL-O2-NEXT:    slli a0, a0, 1
 ; SPILL-O2-NEXT:    add sp, sp, a0
-; SPILL-O2-NEXT:    ld s1, 24(sp) # 8-byte Folded Reload
-; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s1, 24(sp) # 8-byte Folded Reload
 ; SPILL-O2-NEXT:    addi sp, sp, 48
 ; SPILL-O2-NEXT:    ret
 entry:
