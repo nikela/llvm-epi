@@ -137,12 +137,6 @@ static cl::opt<unsigned> SwitchPeelThreshold(
              "switch statement. A value greater than 100 will void this "
              "optimization"));
 
-// EPI: temporary until we have patterns for vpred.
-// FIXME: Remove
-static cl::opt<bool> DisableVPRedIntrinsics("disable-vpred-sdags", cl::init(false),
-                     cl::desc("Do not create sdags for VPred intrinsics"),
-                     cl::ReallyHidden);
-
 // Limit the width of DAG chains. This is important in general to prevent
 // DAG-based analysis from blowing up. For example, alias analysis and
 // load clustering may not complete in reasonable time. It is difficult to
@@ -6389,16 +6383,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     return;
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #include "llvm/IR/VPIntrinsics.def"
-    {
-      // We have a full implementation of llvm.experimental.vp.splice
-      // that we can use already.
-      if (!DisableVPRedIntrinsics ||
-          Intrinsic == Intrinsic::experimental_vp_splice ||
-          Intrinsic == Intrinsic::experimental_vp_reverse)
-        visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
-      else
-        visitTargetIntrinsic(I, Intrinsic);
-    }
+    visitVectorPredicationIntrinsic(cast<VPIntrinsic>(I));
     return;
   case Intrinsic::fmuladd: {
     EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
