@@ -2167,10 +2167,6 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
     // the budget to 8.
     CmdArgs.push_back("-mllvm");
     CmdArgs.push_back("-scev-cheap-expansion-budget=8");
-
-    // FIXME: Remove this.
-    CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back("-disable-vpred-sdags");
   }
 }
 
