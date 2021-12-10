@@ -510,7 +510,7 @@ public:
   /// the corresponding type.
   void widenIntOrFpInduction(PHINode *IV, const InductionDescriptor &ID,
                              Value *Start, TruncInst *Trunc, VPValue *Def,
-                             VPValue *CastDef, VPTransformState &State);
+                             VPTransformState &State);
 
   /// Construct the vector value of a scalarized value \p V one lane at a time.
   void packScalarIntoVectorValue(VPValue *Def, const VPIteration &Instance,
@@ -621,7 +621,7 @@ protected:
   /// can also be a truncate instruction.
   void buildScalarSteps(Value *ScalarIV, Value *Step, Instruction *EntryVal,
                         const InductionDescriptor &ID, VPValue *Def,
-                        VPValue *CastDef, VPTransformState &State);
+                        VPTransformState &State);
 
   /// Create a vector induction phi node based on an existing scalar one. \p
   /// EntryVal is the value from the original loop that maps to the vector phi
@@ -631,7 +631,6 @@ protected:
   void createVectorIntOrFpInductionPHI(const InductionDescriptor &II,
                                        Value *Step, Value *Start,
                                        Instruction *EntryVal, VPValue *Def,
-                                       VPValue *CastDef,
                                        VPTransformState &State);
 
   /// Returns true if an instruction \p I should be scalarized instead of
@@ -640,29 +639,6 @@ protected:
 
   /// Returns true if we should generate a scalar version of \p IV.
   bool needsScalarInduction(Instruction *IV) const;
-
-  /// If there is a cast involved in the induction variable \p ID, which should
-  /// be ignored in the vectorized loop body, this function records the
-  /// VectorLoopValue of the respective Phi also as the VectorLoopValue of the
-  /// cast. We had already proved that the casted Phi is equal to the uncasted
-  /// Phi in the vectorized loop (under a runtime guard), and therefore
-  /// there is no need to vectorize the cast - the same value can be used in the
-  /// vector loop for both the Phi and the cast.
-  /// If \p VectorLoopValue is a scalarized value, \p Lane is also specified,
-  /// Otherwise, \p VectorLoopValue is a widened/vectorized value.
-  ///
-  /// \p EntryVal is the value from the original loop that maps to the vector
-  /// phi node and is used to distinguish what is the IV currently being
-  /// processed - original one (if \p EntryVal is a phi corresponding to the
-  /// original IV) or the "newly-created" one based on the proof mentioned above
-  /// (see also buildScalarSteps() and createVectorIntOrFPInductionPHI()). In the
-  /// latter case \p EntryVal is a TruncInst and we must not record anything for
-  /// that IV, but it's error-prone to expect callers of this routine to care
-  /// about that, hence this explicit parameter.
-  void recordVectorLoopValueForInductionCast(
-      const InductionDescriptor &ID, const Instruction *EntryVal,
-      Value *VectorLoopValue, VPValue *CastDef, VPTransformState &State,
-      unsigned Part, unsigned Lane = UINT_MAX);
 
   /// Generate a shuffle sequence that will reverse the vector Vec.
   virtual Value *reverseVector(Value *Vec);
@@ -2358,8 +2334,7 @@ Value *InnerLoopVectorizer::getBroadcastInstrs(Value *V) {
 
 void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
     const InductionDescriptor &II, Value *Step, Value *Start,
-    Instruction *EntryVal, VPValue *Def, VPValue *CastDef,
-    VPTransformState &State) {
+    Instruction *EntryVal, VPValue *Def, VPTransformState &State) {
   assert((isa<PHINode>(EntryVal) || isa<TruncInst>(EntryVal)) &&
          "Expected either an induction phi-node or a truncate of it!");
 
@@ -2422,8 +2397,6 @@ void InnerLoopVectorizer::createVectorIntOrFpInductionPHI(
 
     if (isa<TruncInst>(EntryVal))
       addMetadata(LastInduction, EntryVal);
-    recordVectorLoopValueForInductionCast(II, EntryVal, LastInduction, CastDef,
-                                          State, Part);
 
     LastInduction = cast<Instruction>(
         Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
@@ -2457,42 +2430,10 @@ bool InnerLoopVectorizer::needsScalarInduction(Instruction *IV) const {
   return llvm::any_of(IV->users(), isScalarInst);
 }
 
-void InnerLoopVectorizer::recordVectorLoopValueForInductionCast(
-    const InductionDescriptor &ID, const Instruction *EntryVal,
-    Value *VectorLoopVal, VPValue *CastDef, VPTransformState &State,
-    unsigned Part, unsigned Lane) {
-  assert((isa<PHINode>(EntryVal) || isa<TruncInst>(EntryVal)) &&
-         "Expected either an induction phi-node or a truncate of it!");
-
-  // This induction variable is not the phi from the original loop but the
-  // newly-created IV based on the proof that casted Phi is equal to the
-  // uncasted Phi in the vectorized loop (under a runtime guard possibly). It
-  // re-uses the same InductionDescriptor that original IV uses but we don't
-  // have to do any recording in this case - that is done when original IV is
-  // processed.
-  if (isa<TruncInst>(EntryVal))
-    return;
-
-  if (!CastDef) {
-    assert(ID.getCastInsts().empty() &&
-           "there are casts for ID, but no CastDef");
-    return;
-  }
-  assert(!ID.getCastInsts().empty() &&
-         "there is a CastDef, but no casts for ID");
-  // Only the first Cast instruction in the Casts vector is of interest.
-  // The rest of the Casts (if exist) have no uses outside the
-  // induction update chain itself.
-  if (Lane < UINT_MAX)
-    State.set(CastDef, VectorLoopVal, VPIteration(Part, Lane));
-  else
-    State.set(CastDef, VectorLoopVal, Part);
-}
-
 void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
                                                 const InductionDescriptor &ID,
                                                 Value *Start, TruncInst *Trunc,
-                                                VPValue *Def, VPValue *CastDef,
+                                                VPValue *Def,
                                                 VPTransformState &State) {
   assert((IV->getType()->isIntegerTy() || IV != OldInduction) &&
          "Primary induction variable must have an integer type");
@@ -2558,8 +2499,6 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
       State.set(Def, EntryPart, Part);
       if (Trunc)
         addMetadata(EntryPart, Trunc);
-      recordVectorLoopValueForInductionCast(ID, EntryVal, EntryPart, CastDef,
-                                            State, Part);
     }
   };
 
@@ -2581,8 +2520,7 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
   // least one user in the loop that is not widened.
   auto NeedsScalarIV = needsScalarInduction(EntryVal);
   if (!NeedsScalarIV) {
-    createVectorIntOrFpInductionPHI(ID, Step, Start, EntryVal, Def, CastDef,
-                                    State);
+    createVectorIntOrFpInductionPHI(ID, Step, Start, EntryVal, Def, State);
     return;
   }
 
@@ -2590,14 +2528,13 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
   // create the phi node, we will splat the scalar induction variable in each
   // loop iteration.
   if (!shouldScalarizeInstruction(EntryVal)) {
-    createVectorIntOrFpInductionPHI(ID, Step, Start, EntryVal, Def, CastDef,
-                                    State);
+    createVectorIntOrFpInductionPHI(ID, Step, Start, EntryVal, Def, State);
     Value *ScalarIV = CreateScalarIV(Step);
     // Create scalar steps that can be used by instructions we will later
     // scalarize. Note that the addition of the scalar steps will not increase
     // the number of instructions in the loop in the common case prior to
     // InstCombine. We will be trading one vector extract for each scalar step.
-    buildScalarSteps(ScalarIV, Step, EntryVal, ID, Def, CastDef, State);
+    buildScalarSteps(ScalarIV, Step, EntryVal, ID, Def, State);
     return;
   }
 
@@ -2607,7 +2544,7 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
   Value *ScalarIV = CreateScalarIV(Step);
   if (!Cost->isScalarEpilogueAllowed())
     CreateSplatIV(ScalarIV, Step);
-  buildScalarSteps(ScalarIV, Step, EntryVal, ID, Def, CastDef, State);
+  buildScalarSteps(ScalarIV, Step, EntryVal, ID, Def, State);
 }
 
 Value *InnerLoopVectorizer::getStepVector(Value *Val, Value *StartIdx,
@@ -2661,7 +2598,7 @@ Value *InnerLoopVectorizer::getStepVector(Value *Val, Value *StartIdx,
 void InnerLoopVectorizer::buildScalarSteps(Value *ScalarIV, Value *Step,
                                            Instruction *EntryVal,
                                            const InductionDescriptor &ID,
-                                           VPValue *Def, VPValue *CastDef,
+                                           VPValue *Def,
                                            VPTransformState &State) {
   // We shouldn't have to build scalar steps if we aren't vectorizing.
   assert(VF.isVector() && "VF should be greater than one");
@@ -2711,8 +2648,6 @@ void InnerLoopVectorizer::buildScalarSteps(Value *ScalarIV, Value *Step,
       auto *Mul = Builder.CreateBinOp(MulOp, InitVec, SplatStep);
       auto *Add = Builder.CreateBinOp(AddOp, SplatIV, Mul);
       State.set(Def, Add, Part);
-      recordVectorLoopValueForInductionCast(ID, EntryVal, Add, CastDef, State,
-                                            Part);
       // It's useful to record the lane values too for the known minimum number
       // of elements so we do those below. This improves the code quality when
       // trying to extract the first element, for example.
@@ -2732,8 +2667,6 @@ void InnerLoopVectorizer::buildScalarSteps(Value *ScalarIV, Value *Step,
       auto *Mul = Builder.CreateBinOp(MulOp, StartIdx, Step);
       auto *Add = Builder.CreateBinOp(AddOp, ScalarIV, Mul);
       State.set(Def, Add, VPIteration(Part, Lane));
-      recordVectorLoopValueForInductionCast(ID, EntryVal, Add, CastDef, State,
-                                            Part, Lane);
     }
   }
 }
@@ -7073,22 +7006,41 @@ Optional<InstructionCost> LoopVectorizationCostModel::getReductionPatternCost(
              match(RedOp, m_Mul(m_Instruction(Op0), m_Instruction(Op1)))) {
     if (match(Op0, m_ZExtOrSExt(m_Value())) &&
         Op0->getOpcode() == Op1->getOpcode() &&
-        Op0->getOperand(0)->getType() == Op1->getOperand(0)->getType() &&
         !TheLoop->isLoopInvariant(Op0) && !TheLoop->isLoopInvariant(Op1)) {
       bool IsUnsigned = isa<ZExtInst>(Op0);
-      auto *ExtType = VectorType::get(Op0->getOperand(0)->getType(), VectorTy);
-      // Matched reduce(mul(ext, ext))
-      InstructionCost ExtCost =
-          TTI.getCastInstrCost(Op0->getOpcode(), VectorTy, ExtType,
-                               TTI::CastContextHint::None, CostKind, Op0);
+      Type *Op0Ty = Op0->getOperand(0)->getType();
+      Type *Op1Ty = Op1->getOperand(0)->getType();
+      Type *LargestOpTy =
+          Op0Ty->getIntegerBitWidth() < Op1Ty->getIntegerBitWidth() ? Op1Ty
+                                                                    : Op0Ty;
+      auto *ExtType = VectorType::get(LargestOpTy, VectorTy);
+
+      // Matched reduce(mul(ext(A), ext(B))), where the two ext may be of
+      // different sizes. We take the largest type as the ext to reduce, and add
+      // the remaining cost as, for example reduce(mul(ext(ext(A)), ext(B))).
+      InstructionCost ExtCost0 = TTI.getCastInstrCost(
+          Op0->getOpcode(), VectorTy, VectorType::get(Op0Ty, VectorTy),
+          TTI::CastContextHint::None, CostKind, Op0);
+      InstructionCost ExtCost1 = TTI.getCastInstrCost(
+          Op1->getOpcode(), VectorTy, VectorType::get(Op1Ty, VectorTy),
+          TTI::CastContextHint::None, CostKind, Op1);
       InstructionCost MulCost =
           TTI.getArithmeticInstrCost(Instruction::Mul, VectorTy, CostKind);
 
       InstructionCost RedCost = TTI.getExtendedAddReductionCost(
           /*IsMLA=*/true, IsUnsigned, RdxDesc.getRecurrenceType(), ExtType,
           CostKind);
+      InstructionCost ExtraExtCost = 0;
+      if (Op0Ty != LargestOpTy || Op1Ty != LargestOpTy) {
+        Instruction *ExtraExtOp = (Op0Ty != LargestOpTy) ? Op0 : Op1;
+        ExtraExtCost = TTI.getCastInstrCost(
+            ExtraExtOp->getOpcode(), ExtType,
+            VectorType::get(ExtraExtOp->getOperand(0)->getType(), VectorTy),
+            TTI::CastContextHint::None, CostKind, ExtraExtOp);
+      }
 
-      if (RedCost.isValid() && RedCost < ExtCost * 2 + MulCost + BaseCost)
+      if (RedCost.isValid() &&
+          (RedCost + ExtraExtCost) < (ExtCost0 + ExtCost1 + MulCost + BaseCost))
         return I == RetI ? RedCost : 0;
     } else if (!match(I, m_ZExtOrSExt(m_Value()))) {
       // Matched reduce(mul())
@@ -8063,18 +8015,6 @@ void LoopVectorizationPlanner::collectTriviallyDeadInstructions(
           return U == Ind || DeadInstructions.count(cast<Instruction>(U));
         }))
       DeadInstructions.insert(IndUpdate);
-
-    // We record as "Dead" also the type-casting instructions we had identified
-    // during induction analysis. We don't need any handling for them in the
-    // vectorized loop because we have proven that, under a proper runtime
-    // test guarding the vectorized loop, the value of the phi, and the casted
-    // value of the phi, are the same. The last instruction in this casting chain
-    // will get its scalar/vector/widened def from the scalar/vector/widened def
-    // of the respective phi node. Any other casts in the induction def-use chain
-    // have no other uses outside the phi update chain, and will be ignored.
-    const InductionDescriptor &IndDes = Induction.second;
-    const SmallVectorImpl<Instruction *> &Casts = IndDes.getCastInsts();
-    DeadInstructions.insert(Casts.begin(), Casts.end());
   }
 }
 
@@ -8593,9 +8533,7 @@ VPRecipeBuilder::tryToOptimizeInductionPHI(PHINode *Phi,
   if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi)) {
     assert(II->getStartValue() ==
            Phi->getIncomingValueForBlock(OrigLoop->getLoopPreheader()));
-    const SmallVectorImpl<Instruction *> &Casts = II->getCastInsts();
-    return new VPWidenIntOrFpInductionRecipe(
-        Phi, Operands[0], *II, Casts.empty() ? nullptr : Casts.front());
+    return new VPWidenIntOrFpInductionRecipe(Phi, Operands[0], *II);
   }
 
   return nullptr;
@@ -9235,6 +9173,8 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
   cast<VPRegionBlock>(Plan->getEntry())->setExit(VPBB);
 
+  VPlanTransforms::removeRedundantInductionCasts(*Plan);
+
   // Now that sink-after is done, move induction recipes for optimized truncates
   // to the phi section of the header block.
   for (VPWidenIntOrFpInductionRecipe *Ind : InductionsToMove)
@@ -9715,9 +9655,9 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
 
 void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
   assert(!State.Instance && "Int or FP induction being replicated.");
-  State.ILV->widenIntOrFpInduction(
-      IV, getInductionDescriptor(), getStartValue()->getLiveInIRValue(),
-      getTruncInst(), getVPValue(0), getCastValue(), State);
+  State.ILV->widenIntOrFpInduction(IV, getInductionDescriptor(),
+                                   getStartValue()->getLiveInIRValue(),
+                                   getTruncInst(), getVPValue(0), State);
 }
 
 void VPWidenPHIRecipe::execute(VPTransformState &State) {
