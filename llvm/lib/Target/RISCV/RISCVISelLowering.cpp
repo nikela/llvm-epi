@@ -564,6 +564,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::VP_SETCC, VT, Custom);
 
       setOperationAction(ISD::VP_SELECT, VT, Custom);
+      setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
       setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
       setOperationAction(ISD::VP_TRUNC, VT, Custom);
@@ -875,6 +876,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::VP_FPTOUI, VT, Custom);
 
           setOperationAction(ISD::VP_SELECT, VT, Custom);
+          setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
           setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
           setOperationAction(ISD::VP_TRUNC, VT, Custom);
@@ -6493,10 +6495,6 @@ SDValue RISCVTargetLowering::lowerVPSelectMaskOp(SDValue Op,
 SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
                                                SelectionDAG &DAG) const {
   SDLoc DL(Op);
-  MVT VT = Op.getSimpleValueType();
-  assert(VT.getVectorElementType() != MVT::i1 &&
-         "VP_SPLICE for masks unimplemented");
-  const MVT XLenVT = Subtarget.getXLenVT();
 
   // Ops indexes: 0->Op1, 1->Op2, 2->Offset, 3->Mask, 4->EVL1, 5->EVL2
   SmallVector<SDValue, 6> Ops;
@@ -6516,9 +6514,50 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
     Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
   }
 
+  const MVT XLenVT = Subtarget.getXLenVT();
+  MVT VT = Op.getSimpleValueType();
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector())
     ContainerVT = getContainerForFixedLengthVector(VT);
+
+  bool IsMaskVector = VT.getVectorElementType() == MVT::i1;
+  if (IsMaskVector) {
+    switch(ContainerVT.getVectorElementCount().getKnownMinValue()) {
+    default: llvm_unreachable("Invalid factor size");
+    case 1:
+      ContainerVT = ContainerVT.changeVectorElementType(MVT::i64);
+      break;
+    case 2:
+      ContainerVT = ContainerVT.changeVectorElementType(MVT::i32);
+      break;
+    case 4:
+      ContainerVT = ContainerVT.changeVectorElementType(MVT::i16);
+      break;
+    case 8:
+    case 16:
+    case 32:
+    case 64:
+      ContainerVT = ContainerVT.changeVectorElementType(MVT::i8);
+      break;
+    }
+
+    // Expand input operands
+    SDValue SplatOneOp1 = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                                    DAG.getConstant(1, DL, XLenVT), Ops[4]);
+    SDValue VMV0Op1 = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                                    DAG.getConstant(0, DL, XLenVT), Ops[4]);
+    SDValue VMERGEOp1 = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, Ops[0],
+                                 SplatOneOp1, VMV0Op1, Ops[4]);
+    Ops[0] = VMERGEOp1;
+
+    SDValue SplatOneOp2 = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                                    DAG.getConstant(1, DL, XLenVT), Ops[5]);
+    SDValue VMV0Op2 = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                                    DAG.getConstant(0, DL, XLenVT), Ops[5]);
+    SDValue VMERGEOp2 = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, Ops[1],
+                                 SplatOneOp2, VMV0Op2, Ops[5]);
+    Ops[1] = VMERGEOp2;
+  }
 
   MVT MaskVT = ContainerVT.changeVectorElementType(MVT::i1);
   SDValue Undef = DAG.getUNDEF(ContainerVT);
@@ -6554,6 +6593,14 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
                   DAG.getCondCode(ISD::SETULT), Ops[3], Ops[5]);
   SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, MergeMask,
                                SLIDEDOWN, SLIDEUP, Ops[5]);
+
+  if (IsMaskVector) {
+    // Truncate Result back to a mask vector (Result has same EVL as Op2)
+    Result = DAG.getNode(RISCVISD::SETCC_VL, DL,
+                         ContainerVT.changeVectorElementType(MVT::i1), Result,
+                         DAG.getConstant(0, DL, ContainerVT),
+                         DAG.getCondCode(ISD::SETNE), Ops[3], Ops[5]);
+  }
 
   if (!VT.isFixedLengthVector())
     return Result;
