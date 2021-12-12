@@ -525,8 +525,8 @@ def AtomWrite1_5 : SchedWriteRes<[AtomPort1]> {
   let Latency = 5;
   let ResourceCycles = [5];
 }
-def : InstRW<[AtomWrite1_5], (instrs MMX_CVTPI2PSirr, MMX_CVTPI2PSirm,
-                                     MMX_CVTPS2PIirr, MMX_CVTTPS2PIirr)>;
+def : InstRW<[AtomWrite1_5], (instrs MMX_CVTPI2PSrr, MMX_CVTPI2PSrm,
+                                     MMX_CVTPS2PIrr, MMX_CVTTPS2PIrr)>;
 
 // Port0 and Port1
 def AtomWrite0_1_1 : SchedWriteRes<[AtomPort0, AtomPort1]> {
@@ -547,7 +547,7 @@ def AtomWrite0_1_5 : SchedWriteRes<[AtomPort0, AtomPort1]> {
   let Latency = 5;
   let ResourceCycles = [5, 5];
 }
-def : InstRW<[AtomWrite0_1_5], (instrs MMX_CVTPS2PIirm, MMX_CVTTPS2PIirm)>;
+def : InstRW<[AtomWrite0_1_5], (instrs MMX_CVTPS2PIrm, MMX_CVTTPS2PIrm)>;
 def : InstRW<[AtomWrite0_1_5], (instregex "ILD_F(16|32|64)")>;
 
 // Port0 or Port1
@@ -570,7 +570,7 @@ def : InstRW<[AtomWrite01_2], (instrs LEAVE, LEAVE64, POP16r,
                                       SCASB, SCASL, SCASQ, SCASW)>;
 def : InstRW<[AtomWrite01_2], (instregex "PUSH(CS|DS|ES|FS|GS|SS)(16|32|64)",
                                          "(ST|ISTT)_F(P)?(16|32|64)?(m|rr)",
-                                         "MMX_P(ADD|SUB)Qirr",
+                                         "MMX_P(ADD|SUB)Qrr",
                                          "MOV(S|Z)X16rr8",
                                          "MOV(UPS|UPD|DQU)mr",
                                          "MASKMOVDQU(64)?",
@@ -589,7 +589,7 @@ def : InstRW<[AtomWrite01_3], (instregex "XADD(8|16|32|64)rm",
                                          "XCHG(8|16|32|64)rm",
                                          "PH(ADD|SUB)Drr",
                                          "MOV(S|Z)X16rm8",
-                                         "MMX_P(ADD|SUB)Qirm",
+                                         "MMX_P(ADD|SUB)Qrm",
                                          "MOV(UPS|UPD|DQU)rm",
                                          "P(ADD|SUB)Qrm")>;
 
