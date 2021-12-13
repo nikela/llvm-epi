@@ -1690,7 +1690,7 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
   case tok::kw__Atomic:
     return TPResult::True;
 
-    // EPI types
+  // EPI types
 #define EPI_VECTOR_TYPE(Scale, TypeName)                                       \
   case tok::kw___epi_##Scale##x##TypeName:                                     \
     return TPResult::True;
@@ -1699,6 +1699,7 @@ Parser::isCXXDeclarationSpecifier(Parser::TPResult BracedCastResult,
     return TPResult::True;
 #include "clang/Basic/EPITypes.def"
 
+  case tok::kw__BitInt:
   case tok::kw__ExtInt: {
     if (NextToken().isNot(tok::l_paren))
       return TPResult::Error;
@@ -1750,6 +1751,7 @@ bool Parser::isCXXDeclarationSpecifierAType() {
   case tok::kw_short:
   case tok::kw_int:
   case tok::kw__ExtInt:
+  case tok::kw__BitInt:
   case tok::kw_long:
   case tok::kw___int64:
   case tok::kw___int128:

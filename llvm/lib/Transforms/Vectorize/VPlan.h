@@ -54,6 +54,7 @@ namespace llvm {
 
 class BasicBlock;
 class DominatorTree;
+class InductionDescriptor;
 class InnerLoopVectorizer;
 class LoopInfo;
 class raw_ostream;
@@ -344,6 +345,8 @@ struct VPTransformState {
 
   /// Hold the canonical scalar IV of the vector loop (start=0, step=VF*UF).
   Value *CanonicalIV = nullptr;
+
+  ScalarEvolution *SE = nullptr;
 
   /// Hold the trip count of the scalar loop.
   Value *TripCount = nullptr;
@@ -1066,19 +1069,28 @@ public:
 /// producing their vector and scalar values.
 class VPWidenIntOrFpInductionRecipe : public VPRecipeBase {
   PHINode *IV;
+  const InductionDescriptor &IndDesc;
 
 public:
-  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, Instruction *Cast,
-                                TruncInst *Trunc = nullptr)
-      : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start}), IV(IV) {
-    if (Trunc)
-      new VPValue(Trunc, this);
-    else
-      new VPValue(IV, this);
+  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start,
+                                const InductionDescriptor &IndDesc,
+                                Instruction *Cast = nullptr)
+      : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start}), IV(IV),
+        IndDesc(IndDesc) {
+    new VPValue(IV, this);
 
     if (Cast)
       new VPValue(Cast, this);
   }
+
+  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start,
+                                const InductionDescriptor &IndDesc,
+                                TruncInst *Trunc)
+      : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start}), IV(IV),
+        IndDesc(IndDesc) {
+    new VPValue(Trunc, this);
+  }
+
   ~VPWidenIntOrFpInductionRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
@@ -1114,6 +1126,9 @@ public:
   const TruncInst *getTruncInst() const {
     return dyn_cast_or_null<TruncInst>(getVPValue(0)->getUnderlyingValue());
   }
+
+  /// Returns the induction descriptor for the recipe.
+  const InductionDescriptor &getInductionDescriptor() const { return IndDesc; }
 };
 
 /// A recipe for handling first order recurrences and pointer inductions. For
@@ -1296,7 +1311,7 @@ private:
 /// operand.
 class VPReductionPHIRecipe : public VPWidenPHIRecipe {
   /// Descriptor for the reduction.
-  RecurrenceDescriptor &RdxDesc;
+  const RecurrenceDescriptor &RdxDesc;
 
   /// The phi is part of an in-loop reduction.
   bool IsInLoop;
@@ -1307,7 +1322,7 @@ class VPReductionPHIRecipe : public VPWidenPHIRecipe {
 public:
   /// Create a new VPReductionPHIRecipe for the reduction \p Phi described by \p
   /// RdxDesc.
-  VPReductionPHIRecipe(PHINode *Phi, RecurrenceDescriptor &RdxDesc,
+  VPReductionPHIRecipe(PHINode *Phi, const RecurrenceDescriptor &RdxDesc,
                        VPValue &Start, bool IsInLoop = false,
                        bool IsOrdered = false)
       : VPWidenPHIRecipe(VPVReductionPHISC, VPReductionPHISC, Phi, &Start),
@@ -1337,7 +1352,9 @@ public:
              VPSlotTracker &SlotTracker) const override;
 #endif
 
-  RecurrenceDescriptor &getRecurrenceDescriptor() { return RdxDesc; }
+  const RecurrenceDescriptor &getRecurrenceDescriptor() const {
+    return RdxDesc;
+  }
 
   /// Returns true, if the phi is part of an ordered reduction.
   bool isOrdered() const { return IsOrdered; }
@@ -1467,13 +1484,13 @@ public:
 /// The Operands are {ChainOp, VecOp, [Condition]}.
 class VPReductionRecipe : public VPRecipeBase, public VPValue {
   /// The recurrence decriptor for the reduction in question.
-  RecurrenceDescriptor *RdxDesc;
+  const RecurrenceDescriptor *RdxDesc;
   /// Pointer to the TTI, needed to create the target reduction
   const TargetTransformInfo *TTI;
 
 public:
-  VPReductionRecipe(RecurrenceDescriptor *R, Instruction *I, VPValue *ChainOp,
-                    VPValue *VecOp, VPValue *CondOp,
+  VPReductionRecipe(const RecurrenceDescriptor *R, Instruction *I,
+                    VPValue *ChainOp, VPValue *VecOp, VPValue *CondOp,
                     const TargetTransformInfo *TTI)
       : VPRecipeBase(VPRecipeBase::VPReductionSC, {ChainOp, VecOp}),
         VPValue(VPValue::VPVReductionSC, I, this), RdxDesc(R), TTI(TTI) {
@@ -1660,6 +1677,11 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase, public VPValue {
     return isStore() ? getNumOperands() == 3 : getNumOperands() == 2;
   }
 
+// FIXME
+protected:
+  // Wheter NonConsecutive loads/stores can be strided
+  bool Strided = false;
+
 public:
   VPWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr, VPValue *Mask,
                                  bool Consecutive, bool Reverse,
@@ -1697,10 +1719,12 @@ public:
 
   /// Return the mask used by this recipe. Note that a full mask is represented
   /// by a nullptr.
-  VPValue *getMask() const {
+  virtual VPValue *getMask() const {
     // Mask is optional and therefore the last operand.
     return isMasked() ? getOperand(getNumOperands() - 1) : nullptr;
   }
+
+  virtual VPValue *getEVL() const { return nullptr; }
 
   /// Returns true if this recipe is a store.
   bool isStore() const { return isa<StoreInst>(Ingredient); }
@@ -1717,6 +1741,9 @@ public:
   // Return whether the consecutive loaded/stored addresses are in reverse
   // order.
   bool isReverse() const { return Reverse; }
+
+  // Return wheter NonConsecutive loads/stores can be strided
+  bool isStrided() const { return Strided; }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -1745,22 +1772,26 @@ class VPPredicatedWidenMemoryInstructionRecipe
 public:
   VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
                                            VPValue *Mask, bool Consecutive,
-                                           bool Reverse, VPValue *EVL)
+                                           bool Reverse, bool Strided,
+                                           VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(
             Load, Addr, Mask, Consecutive, Reverse,
             VPPredicatedWidenMemoryInstructionSC,
             VPValue::VPVPredicatedMemoryInstructionSC) {
+    this->Strided = Strided;
     addOperand(EVL);
   }
 
   VPPredicatedWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
                                            VPValue *StoredValue, VPValue *Mask,
                                            bool Consecutive, bool Reverse,
+                                           bool Strided,
                                            VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(
             Store, Addr, StoredValue, Mask, Consecutive, Reverse,
             VPPredicatedWidenMemoryInstructionSC,
             VPValue::VPVPredicatedMemoryInstructionSC) {
+    this->Strided = Strided;
     addOperand(EVL);
   }
 
@@ -1771,20 +1802,17 @@ public:
   }
 
   /// Return the EVL used by this recipe.
-  VPValue *getEVL() const {
+  VPValue *getEVL() const override {
     // EVL is the last, mandatory operand.
     return getOperand(getNumOperands() - 1);
   }
 
   /// Return the mask used by this recipe. Note that a full mask is represented
   /// by a nullptr.
-  VPValue *getMask() const {
+  VPValue *getMask() const override {
     // Mask is the before the last, mandatory operand.
     return getOperand(getNumOperands() - 2);
   }
-
-  /// Generate the wide load/store.
-  void execute(VPTransformState &State) override;
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
@@ -2549,6 +2577,12 @@ public:
     return map_range(Operands, Fn);
   }
 
+  /// Returns true if \p VPV is uniform after vectorization.
+  bool isUniformAfterVectorization(VPValue *VPV) const {
+    auto RepR = dyn_cast_or_null<VPReplicateRecipe>(VPV->getDef());
+    return !VPV->getDef() || (RepR && RepR->isUniform());
+  }
+
 private:
   /// Add to the given dominator tree the header block and every new basic block
   /// that was created between it and the latch block, inclusive.
@@ -2880,6 +2914,46 @@ public:
   /// Return true if all visited instruction can be combined.
   bool isCompletelySLP() const { return CompletelySLP; }
 };
+
+// Strided accesses.
+struct StrideAccessInfo {
+  bool Valid = false;
+  const SCEV *SCEVExpr = nullptr;
+
+  explicit operator bool() const { return Valid; }
+
+  const SCEV *getSCEVExpr() const { return SCEVExpr; }
+
+  void print(raw_ostream &OS) const {
+    OS << "StrideAccessInfo: ";
+    if (!Valid) {
+      OS << "<<invalid>> ";
+    }
+    OS << "SCEV: ";
+    if (SCEVExpr) {
+      OS << *SCEVExpr;
+    } else {
+      OS << "<<unknown>>";
+    }
+  }
+
+  Value *emitStride();
+  Value *emitBaseAddress();
+};
+
+raw_ostream &operator<<(raw_ostream &OS, const StrideAccessInfo &SAI);
+
+struct StridedAccessValues {
+  Value* BaseAddress;
+  Value* Stride;
+};
+
+StrideAccessInfo computeStrideAccessInfo(const VPTransformState &State,
+                                         Value *Addr);
+StridedAccessValues computeStrideAddressing(const VPTransformState &State,
+                                            Type *PtrTy,
+                                            const StrideAccessInfo &SAI);
+
 } // end namespace llvm
 
 #endif // LLVM_TRANSFORMS_VECTORIZE_VPLAN_H

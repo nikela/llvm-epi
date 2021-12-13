@@ -621,9 +621,13 @@ void Verifier::visitGlobalValue(const GlobalValue &GV) {
   Assert(!GV.isDeclaration() || GV.hasValidDeclarationLinkage(),
          "Global is external, but doesn't have external or weak linkage!", &GV);
 
-  if (const GlobalObject *GO = dyn_cast<GlobalObject>(&GV))
-    Assert(GO->getAlignment() <= Value::MaximumAlignment,
-           "huge alignment values are unsupported", GO);
+  if (const GlobalObject *GO = dyn_cast<GlobalObject>(&GV)) {
+
+    if (MaybeAlign A = GO->getAlign()) {
+      Assert(A->value() <= Value::MaximumAlignment,
+             "huge alignment values are unsupported", GO);
+    }
+  }
   Assert(!GV.hasAppendingLinkage() || isa<GlobalVariable>(GV),
          "Only global variables can have appending linkage!", &GV);
 
@@ -2055,10 +2059,12 @@ void Verifier::verifyFunctionAttrs(FunctionType *FT, AttributeList Attrs,
   }
 
   if (Attrs.hasFnAttr(Attribute::VScaleRange)) {
-    std::pair<unsigned, unsigned> Args =
-        Attrs.getFnAttrs().getVScaleRangeArgs();
+    unsigned VScaleMin = Attrs.getFnAttrs().getVScaleRangeMin();
+    if (VScaleMin == 0)
+      CheckFailed("'vscale_range' minimum must be greater than 0", V);
 
-    if (Args.first > Args.second && Args.second != 0)
+    Optional<unsigned> VScaleMax = Attrs.getFnAttrs().getVScaleRangeMax();
+    if (VScaleMax && VScaleMin > VScaleMax)
       CheckFailed("'vscale_range' minimum cannot be greater than maximum", V);
   }
 
@@ -3733,15 +3739,15 @@ void Verifier::visitLoadInst(LoadInst &LI) {
   PointerType *PTy = dyn_cast<PointerType>(LI.getOperand(0)->getType());
   Assert(PTy, "Load operand must be a pointer.", &LI);
   Type *ElTy = LI.getType();
-  Assert(LI.getAlignment() <= Value::MaximumAlignment,
-         "huge alignment values are unsupported", &LI);
+  if (MaybeAlign A = LI.getAlign()) {
+    Assert(A->value() <= Value::MaximumAlignment,
+           "huge alignment values are unsupported", &LI);
+  }
   Assert(ElTy->isSized(), "loading unsized types is not allowed", &LI);
   if (LI.isAtomic()) {
     Assert(LI.getOrdering() != AtomicOrdering::Release &&
                LI.getOrdering() != AtomicOrdering::AcquireRelease,
            "Load cannot have Release ordering", &LI);
-    Assert(LI.getAlignment() != 0,
-           "Atomic load must specify explicit alignment", &LI);
     Assert(ElTy->isIntOrPtrTy() || ElTy->isFloatingPointTy(),
            "atomic load operand must have integer, pointer, or floating point "
            "type!",
@@ -3761,15 +3767,15 @@ void Verifier::visitStoreInst(StoreInst &SI) {
   Type *ElTy = SI.getOperand(0)->getType();
   Assert(PTy->isOpaqueOrPointeeTypeMatches(ElTy),
          "Stored value type does not match pointer operand type!", &SI, ElTy);
-  Assert(SI.getAlignment() <= Value::MaximumAlignment,
-         "huge alignment values are unsupported", &SI);
+  if (MaybeAlign A = SI.getAlign()) {
+    Assert(A->value() <= Value::MaximumAlignment,
+           "huge alignment values are unsupported", &SI);
+  }
   Assert(ElTy->isSized(), "storing unsized types is not allowed", &SI);
   if (SI.isAtomic()) {
     Assert(SI.getOrdering() != AtomicOrdering::Acquire &&
                SI.getOrdering() != AtomicOrdering::AcquireRelease,
            "Store cannot have Acquire ordering", &SI);
-    Assert(SI.getAlignment() != 0,
-           "Atomic store must specify explicit alignment", &SI);
     Assert(ElTy->isIntOrPtrTy() || ElTy->isFloatingPointTy(),
            "atomic store operand must have integer, pointer, or floating point "
            "type!",
@@ -3820,8 +3826,10 @@ void Verifier::visitAllocaInst(AllocaInst &AI) {
          "Cannot allocate unsized type", &AI);
   Assert(AI.getArraySize()->getType()->isIntegerTy(),
          "Alloca array size must have integer type", &AI);
-  Assert(AI.getAlignment() <= Value::MaximumAlignment,
-         "huge alignment values are unsupported", &AI);
+  if (MaybeAlign A = AI.getAlign()) {
+    Assert(A->value() <= Value::MaximumAlignment,
+           "huge alignment values are unsupported", &AI);
+  }
 
   if (AI.isSwiftError()) {
     verifySwiftErrorValue(&AI);
@@ -5269,24 +5277,32 @@ void Verifier::visitIntrinsicCall(Intrinsic::ID ID, CallBase &Call) {
       Op0ElemTy =
           cast<VectorType>(Call.getArgOperand(0)->getType())->getElementType();
       break;
-    case Intrinsic::matrix_column_major_load:
+    case Intrinsic::matrix_column_major_load: {
       Stride = dyn_cast<ConstantInt>(Call.getArgOperand(1));
       NumRows = cast<ConstantInt>(Call.getArgOperand(3));
       NumColumns = cast<ConstantInt>(Call.getArgOperand(4));
       ResultTy = cast<VectorType>(Call.getType());
-      Op0ElemTy =
-          cast<PointerType>(Call.getArgOperand(0)->getType())->getElementType();
+
+      PointerType *Op0PtrTy =
+          cast<PointerType>(Call.getArgOperand(0)->getType());
+      if (!Op0PtrTy->isOpaque())
+        Op0ElemTy = Op0PtrTy->getElementType();
       break;
-    case Intrinsic::matrix_column_major_store:
+    }
+    case Intrinsic::matrix_column_major_store: {
       Stride = dyn_cast<ConstantInt>(Call.getArgOperand(2));
       NumRows = cast<ConstantInt>(Call.getArgOperand(4));
       NumColumns = cast<ConstantInt>(Call.getArgOperand(5));
       ResultTy = cast<VectorType>(Call.getArgOperand(0)->getType());
       Op0ElemTy =
           cast<VectorType>(Call.getArgOperand(0)->getType())->getElementType();
-      Op1ElemTy =
-          cast<PointerType>(Call.getArgOperand(1)->getType())->getElementType();
+
+      PointerType *Op1PtrTy =
+          cast<PointerType>(Call.getArgOperand(1)->getType());
+      if (!Op1PtrTy->isOpaque())
+        Op1ElemTy = Op1PtrTy->getElementType();
       break;
+    }
     default:
       llvm_unreachable("unexpected intrinsic");
     }
@@ -5295,9 +5311,10 @@ void Verifier::visitIntrinsicCall(Intrinsic::ID ID, CallBase &Call) {
            ResultTy->getElementType()->isFloatingPointTy(),
            "Result type must be an integer or floating-point type!", IF);
 
-    Assert(ResultTy->getElementType() == Op0ElemTy,
-           "Vector element type mismatch of the result and first operand "
-           "vector!", IF);
+    if (Op0ElemTy)
+      Assert(ResultTy->getElementType() == Op0ElemTy,
+             "Vector element type mismatch of the result and first operand "
+             "vector!", IF);
 
     if (Op1ElemTy)
       Assert(ResultTy->getElementType() == Op1ElemTy,

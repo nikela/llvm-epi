@@ -947,6 +947,9 @@ private:
   }
 };
 
+// Reorganise this
+const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE);
+
 } // llvm namespace
 
 #endif

@@ -45,6 +45,7 @@
 #include "llvm/Support/GraphWriter.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/Transforms/Utils/ScalarEvolutionExpander.h"
 #include <cassert>
 #include <iterator>
 #include <string>
@@ -61,6 +62,11 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, const VPValue &V) {
   VPSlotTracker SlotTracker(
       (Instr && Instr->getParent()) ? Instr->getParent()->getPlan() : nullptr);
   V.print(OS, SlotTracker);
+  return OS;
+}
+
+raw_ostream &llvm::operator<<(raw_ostream &OS, const StrideAccessInfo &SAI) {
+  SAI.print(OS);
   return OS;
 }
 #endif
@@ -1721,4 +1727,64 @@ void VPSlotTracker::assignSlots(const VPlan &Plan) {
     for (const VPRecipeBase &Recipe : *VPBB)
       for (VPValue *Def : Recipe.definedValues())
         assignSlot(Def);
+}
+
+llvm::StrideAccessInfo
+llvm::computeStrideAccessInfo(const VPTransformState &State, Value *Ptr) {
+  StrideAccessInfo SAI;
+
+  const SCEV *V = isStridedAddressing(Ptr, State.SE);
+  assert(V && "The SCEV should be valid at this point");
+
+  SAI.SCEVExpr = V;
+  // Remove this.
+  SAI.Valid = true;
+
+  return SAI;
+}
+
+llvm::StridedAccessValues
+llvm::computeStrideAddressing(const VPTransformState &State, Type *PtrTy,
+                              const StrideAccessInfo &SAI) {
+  // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
+  // what part of it should. We should be using Addr but AFAIU it represents
+  // the vectorised address already, which is not useful. When doing
+  // interleaving, we should use the Part to adjust the access correctly.
+  // Perhaps we should not have received a WIDEN-GEP here in the first place
+  // and make the VP build process aware of the stride access option?
+  auto &DL = State.CFG.LastBB->getModule()->getDataLayout();
+  auto &Builder = State.Builder;
+  LLVMContext &Context = PtrTy->getContext();
+
+  SCEVExpander Exp(*(State.SE), DL, "stride");
+  const SCEVAddRecExpr *S = cast<SCEVAddRecExpr>(SAI.getSCEVExpr());
+
+  LLVM_DEBUG(llvm::dbgs() << "SCEV = " << *S << "\n";);
+
+  const SCEV *Stride = S->getStepRecurrence(*(State.SE));
+  assert(Stride);
+  LLVM_DEBUG(llvm::dbgs() << "Stride = " << *Stride << "\n";);
+
+  const SCEV *Start = S->getStart();
+  auto *PointerStart =
+      Exp.expandCodeFor(Start, Start->getType(), &*Builder.GetInsertPoint());
+  LLVM_DEBUG(llvm::dbgs() << "PointerStart = " << *PointerStart << "\n";);
+  auto *BytesStride =
+      Exp.expandCodeFor(Stride, Stride->getType(), &*Builder.GetInsertPoint());
+  LLVM_DEBUG(llvm::dbgs() << "BytesStride = " << *BytesStride << "\n";);
+
+  auto *BytesStrideIter = Builder.CreateMul(
+      State.CanonicalIV,
+      Builder.CreateZExtOrTrunc(BytesStride, State.CanonicalIV->getType()));
+  auto *StrideBaseAddress = Builder.CreateGEP(
+      Type::getInt8Ty(Context),
+      Builder.CreatePointerCast(PointerStart, Type::getInt8PtrTy(Context)),
+      BytesStrideIter);
+  StrideBaseAddress = Builder.CreateBitCast(StrideBaseAddress, PtrTy);
+
+  StridedAccessValues Ret;
+  Ret.BaseAddress = StrideBaseAddress;
+  Ret.Stride = BytesStride;
+
+  return Ret;
 }

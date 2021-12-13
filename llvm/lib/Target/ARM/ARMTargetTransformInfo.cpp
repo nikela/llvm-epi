@@ -371,7 +371,8 @@ static Value *isSSATMinMaxPattern(Instruction *Inst, const APInt &Imm) {
 // Look for a FP Saturation pattern, where the instruction can be simplified to
 // a fptosi.sat. max(min(fptosi)). The constant in this case is always free.
 static bool isFPSatMinMaxPattern(Instruction *Inst, const APInt &Imm) {
-  if (Imm != -2147483648)
+  if (Imm.getBitWidth() != 64 ||
+      Imm != APInt::getHighBitsSet(64, 33)) // -2147483648
     return false;
   Value *FP = isSSATMinMaxPattern(Inst, Imm);
   if (!FP && isa<ICmpInst>(Inst) && Inst->hasOneUse())
