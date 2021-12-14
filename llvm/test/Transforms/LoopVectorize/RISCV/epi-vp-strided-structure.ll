@@ -29,7 +29,7 @@ define dso_local void @struct_gather(i32* noalias nocapture %A, %struct.foo* noa
 ; GATHER:       vector.body:
 ; GATHER-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[ENTRY:%.*]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; GATHER-NEXT:    [[TMP0:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
-; GATHER-NEXT:    [[DOTSPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i32 0
+; GATHER-NEXT:    [[DOTSPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i64 0
 ; GATHER-NEXT:    [[DOTSPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; GATHER-NEXT:    [[TMP1:%.*]] = add <vscale x 2 x i64> [[DOTSPLAT2]], [[TMP0]]
 ; GATHER-NEXT:    [[TMP2:%.*]] = getelementptr inbounds [[STRUCT_FOO:%.*]], %struct.foo* [[B:%.*]], <vscale x 2 x i64> [[TMP1]], i32 1

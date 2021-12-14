@@ -37,7 +37,7 @@ define dso_local void @induction_float(i32 signext %N, float* noalias nocapture 
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = uitofp i32 [[TMP5]] to float
 ; CHECK-NEXT:    [[TMP11:%.*]] = fmul float [[TMP10]], 2.000000e+00
-; CHECK-NEXT:    [[DOTSPLATINSERT6:%.*]] = insertelement <vscale x 2 x float> poison, float [[TMP11]], i32 0
+; CHECK-NEXT:    [[DOTSPLATINSERT6:%.*]] = insertelement <vscale x 2 x float> poison, float [[TMP11]], i64 0
 ; CHECK-NEXT:    [[DOTSPLAT7:%.*]] = shufflevector <vscale x 2 x float> [[DOTSPLATINSERT6]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = fadd fast <vscale x 2 x float> [[VEC_IND]], [[DOTSPLAT7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]

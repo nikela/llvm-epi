@@ -472,8 +472,8 @@ CmpInst::Predicate VPIntrinsic::getCmpPredicate() const {
       cast<ConstantInt>(getArgOperand(2))->getZExtValue());
 }
 
-Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
-                                               Intrinsic::ID VPID,
+Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
+                                               Type *ReturnType,
                                                ArrayRef<Value *> Params) {
   assert(isVPIntrinsic(VPID) && "not a VP intrinsic");
   Function *VPFunc;
@@ -498,15 +498,14 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
   case Intrinsic::vp_uitofp:
   case Intrinsic::vp_fptosi:
   case Intrinsic::vp_fptoui:
-    VPFunc = Intrinsic::getDeclaration(M, VPID, {RetType, Params[0]->getType()});
+    VPFunc = Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
     break;
   case Intrinsic::vp_select:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {Params[1]->getType()});
     break;
   case Intrinsic::vp_load:
     VPFunc = Intrinsic::getDeclaration(
-        M, VPID,
-        {Params[0]->getType()->getPointerElementType(), Params[0]->getType()});
+        M, VPID, {ReturnType, Params[0]->getType()});
     break;
   case Intrinsic::experimental_vp_strided_load:
     VPFunc = Intrinsic::getDeclaration(
@@ -516,17 +515,11 @@ Function *VPIntrinsic::getDeclarationForParams(Type *RetType, Module *M,
     break;
   case Intrinsic::vp_gather:
     VPFunc = Intrinsic::getDeclaration(
-        M, VPID,
-        {VectorType::get(cast<VectorType>(Params[0]->getType())
-                             ->getElementType()
-                             ->getPointerElementType(),
-                         cast<VectorType>(Params[0]->getType())),
-         Params[0]->getType()});
+        M, VPID, {ReturnType, Params[0]->getType()});
     break;
   case Intrinsic::vp_store:
     VPFunc = Intrinsic::getDeclaration(
-        M, VPID,
-        {Params[1]->getType()->getPointerElementType(), Params[1]->getType()});
+        M, VPID, {Params[0]->getType(), Params[1]->getType()});
     break;
   case Intrinsic::experimental_vp_strided_store:
     VPFunc = Intrinsic::getDeclaration(

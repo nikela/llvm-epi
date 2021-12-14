@@ -36,7 +36,7 @@
 ## Experimental extensions require version string to be explicitly specified
 
 .attribute arch, "rv32iv0p10"
-# CHECK: attribute      5, "rv32i2p0_v0p10_zvlsseg0p10"
+# CHECK: attribute      5, "rv32i2p0_v0p10"
 
 .attribute arch, "rv32izba1p0"
 # CHECK: attribute      5, "rv32i2p0_zba1p0"
