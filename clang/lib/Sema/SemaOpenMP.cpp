@@ -10967,6 +10967,9 @@ StmtResult Sema::ActOnOpenMPAtomicDirective(ArrayRef<OMPClause *> Clauses,
       }
       break;
     }
+    // The following clauses are allowed, but we don't need to do anything here.
+    case OMPC_hint:
+      break;
     default:
       llvm_unreachable("unknown clause is encountered");
     }
