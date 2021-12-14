@@ -58,7 +58,7 @@ static std::vector<Defined *> getSymbols() {
     for (Symbol *b : file->getSymbols())
       if (auto *dr = dyn_cast<Defined>(b))
         if (!dr->isSection() && dr->section && dr->section->isLive() &&
-            (dr->file == file || dr->needsPltAddr || dr->section->bss))
+            (dr->file == file || dr->needsCopy || dr->section->bss))
           v.push_back(dr);
   return v;
 }
@@ -72,10 +72,17 @@ static SymbolMapTy getSectionSyms(ArrayRef<Defined *> syms) {
   // Sort symbols by address. We want to print out symbols in the
   // order in the output file rather than the order they appeared
   // in the input files.
-  for (auto &it : ret)
+  SmallPtrSet<Defined *, 4> set;
+  for (auto &it : ret) {
+    // Deduplicate symbols which need a canonical PLT entry/copy relocation.
+    set.clear();
+    llvm::erase_if(it.second,
+                   [&](Defined *sym) { return !set.insert(sym).second; });
+
     llvm::stable_sort(it.second, [](Defined *a, Defined *b) {
       return a->getVA() < b->getVA();
     });
+  }
   return ret;
 }
 
