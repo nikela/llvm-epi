@@ -709,8 +709,9 @@ void RISCVISAInfo::updateImplication() {
   }
 
   if (HasV) {
-    auto Version = findDefaultVersion("zvlsseg");
-    addExtension("zvlsseg", Version->Major, Version->Minor);
+    // We are using linkers that don't support this extension.
+    // auto Version = findDefaultVersion("zvlsseg");
+    // addExtension("zvlsseg", Version->Major, Version->Minor);
   }
 
   if (HasZfh) {
