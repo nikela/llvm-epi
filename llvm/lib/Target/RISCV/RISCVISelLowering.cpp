@@ -1153,6 +1153,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
     setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
 
+    setLibcallName(RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64");
+    setLibcallName(RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64");
+    setLibcallName(RTLIB::FRINT_NXV4F64, "__epi_frint_nxv4f64");
+    setLibcallName(RTLIB::FRINT_NXV8F64, "__epi_frint_nxv8f64");
+    setLibcallName(RTLIB::FRINT_NXV1F32, "__epi_frint_nxv1f32");
+    setLibcallName(RTLIB::FRINT_NXV2F32, "__epi_frint_nxv2f32");
+    setLibcallName(RTLIB::FRINT_NXV4F32, "__epi_frint_nxv4f32");
+    setLibcallName(RTLIB::FRINT_NXV8F32, "__epi_frint_nxv8f32");
+    setLibcallName(RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32");
+
     // Register libcalls for VP SDNodes.
     setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_frem_nxv1f64");
     setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_frem_nxv2f64");
@@ -1215,6 +1225,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
       setOperationAction(ISD::FREM, VT, Custom);
+
+      setOperationAction(ISD::FRINT, VT, Custom);
+
       setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
   }
@@ -3064,6 +3077,20 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerFCOS(Op, DAG);
   case ISD::FREM:
     return lowerFREM(Op, DAG);
+  case ISD::FRINT: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FRINT_NXV1F64},
+        {MVT::nxv2f64, RTLIB::FRINT_NXV2F64},
+        {MVT::nxv4f64, RTLIB::FRINT_NXV4F64},
+        {MVT::nxv8f64, RTLIB::FRINT_NXV8F64},
+        {MVT::nxv1f32, RTLIB::FRINT_NXV1F32},
+        {MVT::nxv2f32, RTLIB::FRINT_NXV2F32},
+        {MVT::nxv4f32, RTLIB::FRINT_NXV4F32},
+        {MVT::nxv8f32, RTLIB::FRINT_NXV8F32},
+        {MVT::nxv16f32, RTLIB::FRINT_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  }
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
     // Convert BSWAP/BITREVERSE to GREVI to enable GREVI combinining.
