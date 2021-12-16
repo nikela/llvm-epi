@@ -1049,7 +1049,9 @@ template <class ELFT> void ObjFile<ELFT>::initializeSymbols() {
   ArrayRef<Elf_Sym> eSyms = this->getELFSyms<ELFT>();
   this->symbols.resize(eSyms.size());
   SymbolUnion *locals =
-      getSpecificAllocSingleton<SymbolUnion>().Allocate(firstGlobal);
+      firstGlobal == 0
+          ? nullptr
+          : getSpecificAllocSingleton<SymbolUnion>().Allocate(firstGlobal);
 
   for (size_t i = 0; i != firstGlobal; ++i) {
     const Elf_Sym &eSym = eSyms[i];
@@ -1490,7 +1492,7 @@ template <class ELFT> void SharedFile::parse() {
 
   // Add symbols to the symbol table.
   ArrayRef<Elf_Sym> syms = this->getGlobalELFSyms<ELFT>();
-  for (size_t i = 0; i < syms.size(); ++i) {
+  for (size_t i = 0, e = syms.size(); i != e; ++i) {
     const Elf_Sym &sym = syms[i];
 
     // ELF spec requires that all local symbols precede weak or global
