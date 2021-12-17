@@ -26,7 +26,7 @@ class StackStoreTest : public testing::Test {
   template <typename Fn>
   void ForEachTrace(Fn fn, uptr n = 1000000) {
     std::vector<uptr> frames(kStackTraceMax);
-    std::iota(frames.begin(), frames.end(), 1);
+    std::iota(frames.begin(), frames.end(), 0x100000);
     MurMur2HashBuilder h(0);
     for (uptr i = 0; i < n; ++i) {
       h.add(i);
@@ -137,6 +137,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn({
         StackStorePackTest::ParamType(StackStore::Compression::Delta,
                                       FIRST_32_SECOND_64(2, 6)),
+        StackStorePackTest::ParamType(StackStore::Compression::LZW,
+                                      FIRST_32_SECOND_64(60, 130)),
     }));
 
 TEST_P(StackStorePackTest, PackUnpack) {

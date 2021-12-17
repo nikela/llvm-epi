@@ -171,7 +171,7 @@ void RISCVInstPrinter::printVTypeI(const MCInst *MI, unsigned OpNo,
                                    const MCSubtargetInfo &STI, raw_ostream &O) {
   unsigned Imm = MI->getOperand(OpNo).getImm();
   // Print the raw immediate for reserved values: vlmul[2:0]=4, vsew[2:0]=0b1xx,
-  // or non-zero bits 8/9/10.
+  // or non-zero in bits 8 and above.
   if (RISCVVType::getVLMUL(Imm) == RISCVII::VLMUL::LMUL_RESERVED ||
       // EPI: The original mask is 0x700 but we have some bits in 0x200 so use
       // 0x500 instead.

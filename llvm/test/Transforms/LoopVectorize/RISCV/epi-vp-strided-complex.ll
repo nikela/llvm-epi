@@ -36,15 +36,15 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[J]] to i64
 ; GATHER-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
 ; GATHER-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
-; GATHER-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP0]], i32 0
+; GATHER-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP0]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; GATHER-NEXT:    [[BROADCAST_SPLATINSERT6:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i32 0
+; GATHER-NEXT:    [[BROADCAST_SPLATINSERT6:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT7:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT6]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
-; GATHER-NEXT:    [[BROADCAST_SPLATINSERT9:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE0:%.*]], i32 0
+; GATHER-NEXT:    [[BROADCAST_SPLATINSERT9:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE0:%.*]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT10:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT9]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
-; GATHER-NEXT:    [[BROADCAST_SPLATINSERT15:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE1:%.*]], i32 0
+; GATHER-NEXT:    [[BROADCAST_SPLATINSERT15:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE1:%.*]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT16:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT15]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
-; GATHER-NEXT:    [[BROADCAST_SPLATINSERT18:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE0:%.*]], i32 0
+; GATHER-NEXT:    [[BROADCAST_SPLATINSERT18:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE0:%.*]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT19:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT18]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
 ; GATHER-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; GATHER:       vector.body:
@@ -89,7 +89,7 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP12]]
 ; GATHER-NEXT:    [[SEXT:%.*]] = shl i64 [[TMP3]], 32
 ; GATHER-NEXT:    [[TMP13:%.*]] = ashr exact i64 [[SEXT]], 32
-; GATHER-NEXT:    [[DOTSPLATINSERT32:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP13]], i32 0
+; GATHER-NEXT:    [[DOTSPLATINSERT32:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP13]], i64 0
 ; GATHER-NEXT:    [[DOTSPLAT33:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT32]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; GATHER-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT33]]
 ; GATHER-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
@@ -108,15 +108,15 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED-NEXT:    [[ARRAYIDX:%.*]] = getelementptr { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
 ; STRIDED-NEXT:    [[SCEVGEP:%.*]] = getelementptr { float, float }, { float, float }* [[X:%.*]], i64 0, i32 1
 ; STRIDED-NEXT:    [[SCEVGEP6:%.*]] = getelementptr { float, float }, { float, float }* [[Y:%.*]], i64 0, i32 1
-; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT9:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i32 0
+; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT9:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i64 0
 ; STRIDED-NEXT:    [[BROADCAST_SPLAT10:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT9]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
-; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT12:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE0:%.*]], i32 0
+; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT12:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE0:%.*]], i64 0
 ; STRIDED-NEXT:    [[BROADCAST_SPLAT13:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT12]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
 ; STRIDED-NEXT:    [[SCEVGEP17:%.*]] = getelementptr { float, float }, { float, float }* [[A]], i64 [[IDXPROM1]], i32 1
 ; STRIDED-NEXT:    [[TMP1:%.*]] = shl nuw nsw i64 [[TMP0]], 3
-; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT20:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE1:%.*]], i32 0
+; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT20:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE1:%.*]], i64 0
 ; STRIDED-NEXT:    [[BROADCAST_SPLAT21:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT20]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
-; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT23:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE0:%.*]], i32 0
+; STRIDED-NEXT:    [[BROADCAST_SPLATINSERT23:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP1_COERCE0:%.*]], i64 0
 ; STRIDED-NEXT:    [[BROADCAST_SPLAT24:%.*]] = shufflevector <vscale x 2 x float> [[BROADCAST_SPLATINSERT23]], <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer
 ; STRIDED-NEXT:    [[TMP2:%.*]] = shl nuw nsw i64 [[TMP0]], 3
 ; STRIDED-NEXT:    [[TMP3:%.*]] = shl nuw nsw i64 [[TMP0]], 3

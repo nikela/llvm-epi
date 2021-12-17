@@ -1438,3 +1438,21 @@ bool VFShape::hasValidParameterList() const {
   }
   return true;
 }
+
+// Reorganise this
+const SCEV *llvm::isStridedAddressing(Value *Ptr, ScalarEvolution *SE) {
+  auto *PtrTy = dyn_cast<PointerType>(Ptr->getType());
+  if (!PtrTy || PtrTy->isAggregateType())
+    return nullptr;
+
+  const SCEV *V = SE->getSCEV(Ptr);
+
+  const SCEVAddRecExpr *S = dyn_cast<SCEVAddRecExpr>(V);
+  if (!S)
+    return nullptr;
+
+  if (!S->isAffine())
+    return nullptr;
+
+  return V;
+}
