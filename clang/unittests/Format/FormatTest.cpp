@@ -3548,6 +3548,14 @@ TEST_F(FormatTest, FormatsNamespaces) {
                    "} // namespace in\n"
                    "} // namespace out",
                    Style));
+
+  Style.NamespaceIndentation = FormatStyle::NI_None;
+  verifyFormat("template <class T>\n"
+               "concept a_concept = X<>;\n"
+               "namespace B {\n"
+               "struct b_struct {};\n"
+               "} // namespace B\n",
+               Style);
 }
 
 TEST_F(FormatTest, NamespaceMacros) {
@@ -11515,6 +11523,17 @@ TEST_F(FormatTest, LayoutCxx11BraceInitializers) {
                "  };\n"
                "};");
   verifyFormat("#define A {a, a},");
+  // Don't confuse braced list initializers with compound statements.
+  verifyFormat(
+      "class A {\n"
+      "  A() : a{} {}\n"
+      "  A(int b) : b(b) {}\n"
+      "  A(int a, int b) : a(a), bs{{bs...}} { f(); }\n"
+      "  int a, b;\n"
+      "  explicit Expr(const Scalar<Result> &x) : u{Constant<Result>{x}} {}\n"
+      "  explicit Expr(Scalar<Result> &&x) : u{Constant<Result>{std::move(x)}} "
+      "{}\n"
+      "};");
 
   // Avoid breaking between equal sign and opening brace
   FormatStyle AvoidBreakingFirstArgument = getLLVMStyle();
@@ -11866,27 +11885,6 @@ TEST_F(FormatTest, FormatsBracedListsInColumnLayout) {
                "  struct Dummy {};\n"
                "  f(v);\n"
                "}");
-
-  verifyFormat("void foo() {\n"
-               "  { // asdf\n"
-               "    { int a; }\n"
-               "  }\n"
-               "  {\n"
-               "    { int b; }\n"
-               "  }\n"
-               "}");
-  verifyFormat("namespace n {\n"
-               "void foo() {\n"
-               "  {\n"
-               "    {\n"
-               "      statement();\n"
-               "      if (false) {\n"
-               "      }\n"
-               "    }\n"
-               "  }\n"
-               "  {}\n"
-               "}\n"
-               "} // namespace n");
 
   // Long lists should be formatted in columns even if they are nested.
   verifyFormat(
