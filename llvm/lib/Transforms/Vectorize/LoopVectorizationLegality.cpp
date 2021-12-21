@@ -66,6 +66,10 @@ static cl::opt<LoopVectorizeHints::ScalableForceKind>
             clEnumValN(LoopVectorizeHints::SK_FixedWidthOnly, "off",
                        "Scalable vectorization is disabled."),
             clEnumValN(
+                LoopVectorizeHints::SK_PreferScalable, "preferred",
+                "Scalable vectorization is available and favored when the "
+                "cost is inconclusive."),
+            clEnumValN(
                 LoopVectorizeHints::SK_PreferScalable, "on",
                 "Scalable vectorization is available and favored when the "
                 "cost is inconclusive."),
