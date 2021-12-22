@@ -9256,8 +9256,9 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
   if (Legal->getPrimaryInduction())
     IV = Plan->getOrAddVPValue(Legal->getPrimaryInduction());
   else {
+    VPBasicBlock *HeaderVPBB = Plan->getEntry()->getEntryBasicBlock();
     auto *IVRecipe = new VPWidenCanonicalIVRecipe();
-    Builder.getInsertBlock()->insert(IVRecipe, Builder.getInsertPoint());
+    HeaderVPBB->insert(IVRecipe, HeaderVPBB->getFirstNonPhi());
     IV = IVRecipe;
   }
   return IVCache[VPBB] = IV;
@@ -9279,15 +9280,16 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     if (!CM.blockNeedsPredicationForAnyReason(BB))
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
 
+    // Introduce the early-exit compare IV <= BTC to form header block mask.
+    // This is used instead of IV < TC because TC may wrap, unlike BTC.
+    // Start by constructing the desired canonical IV.
+    VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
+
     // Create the block in mask as the first non-phi instruction in the block.
     VPBuilder::InsertPointGuard Guard(Builder);
     auto NewInsertionPoint = Builder.getInsertBlock()->getFirstNonPhi();
     Builder.setInsertPoint(Builder.getInsertBlock(), NewInsertionPoint);
 
-    // Introduce the early-exit compare IV <= BTC to form header block mask.
-    // This is used instead of IV < TC because TC may wrap, unlike BTC.
-    // Start by constructing the desired canonical IV.
-    VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
     VPValue *BTC = Plan->getOrCreateBackedgeTakenCount();
     bool TailFolded = !CM.isScalarEpilogueAllowed();
 
