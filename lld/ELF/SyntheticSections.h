@@ -519,18 +519,18 @@ public:
   /// using relocations on the input section (e.g. MipsGotSection::writeTo()).
   void addReloc(const DynamicReloc &reloc);
   /// Add a dynamic relocation against \p sym with an optional addend.
-  void addSymbolReloc(RelType dynType, InputSectionBase *isec,
+  void addSymbolReloc(RelType dynType, InputSectionBase &isec,
                       uint64_t offsetInSec, Symbol &sym, int64_t addend = 0,
                       llvm::Optional<RelType> addendRelType = llvm::None);
   /// Add a relative dynamic relocation that uses the target address of \p sym
   /// (i.e. InputSection::getRelocTargetVA()) + \p addend as the addend.
-  void addRelativeReloc(RelType dynType, InputSectionBase *isec,
+  void addRelativeReloc(RelType dynType, InputSectionBase &isec,
                         uint64_t offsetInSec, Symbol &sym, int64_t addend,
                         RelType addendRelType, RelExpr expr);
   /// Add a dynamic relocation using the target address of \p sym as the addend
   /// if \p sym is non-preemptible. Otherwise add a relocation against \p sym.
   void addAddendOnlyRelocIfNonPreemptible(RelType dynType,
-                                          InputSectionBase *isec,
+                                          InputSectionBase &isec,
                                           uint64_t offsetInSec, Symbol &sym,
                                           RelType addendRelType);
   void addReloc(DynamicReloc::Kind kind, RelType dynType,
@@ -1235,27 +1235,27 @@ inline Partition &SectionBase::getPartition() const {
 // Linker generated sections which can be used as inputs and are not specific to
 // a partition.
 struct InStruct {
-  InputSection *attributes;
-  BssSection *bss;
-  BssSection *bssRelRo;
-  GotSection *got;
-  GotPltSection *gotPlt;
-  IgotPltSection *igotPlt;
-  PPC64LongBranchTargetSection *ppc64LongBranchTarget;
-  MipsGotSection *mipsGot;
-  MipsRldMapSection *mipsRldMap;
-  SyntheticSection *partEnd;
-  SyntheticSection *partIndex;
-  PltSection *plt;
-  IpltSection *iplt;
-  PPC32Got2Section *ppc32Got2;
-  IBTPltSection *ibtPlt;
-  RelocationBaseSection *relaPlt;
-  RelocationBaseSection *relaIplt;
-  StringTableSection *shStrTab;
-  StringTableSection *strTab;
-  SymbolTableBaseSection *symTab;
-  SymtabShndxSection *symTabShndx;
+  std::unique_ptr<InputSection> attributes;
+  std::unique_ptr<BssSection> bss;
+  std::unique_ptr<BssSection> bssRelRo;
+  std::unique_ptr<GotSection> got;
+  std::unique_ptr<GotPltSection> gotPlt;
+  std::unique_ptr<IgotPltSection> igotPlt;
+  std::unique_ptr<PPC64LongBranchTargetSection> ppc64LongBranchTarget;
+  std::unique_ptr<MipsGotSection> mipsGot;
+  std::unique_ptr<MipsRldMapSection> mipsRldMap;
+  std::unique_ptr<SyntheticSection> partEnd;
+  std::unique_ptr<SyntheticSection> partIndex;
+  std::unique_ptr<PltSection> plt;
+  std::unique_ptr<IpltSection> iplt;
+  std::unique_ptr<PPC32Got2Section> ppc32Got2;
+  std::unique_ptr<IBTPltSection> ibtPlt;
+  std::unique_ptr<RelocationBaseSection> relaPlt;
+  std::unique_ptr<RelocationBaseSection> relaIplt;
+  std::unique_ptr<StringTableSection> shStrTab;
+  std::unique_ptr<StringTableSection> strTab;
+  std::unique_ptr<SymbolTableBaseSection> symTab;
+  std::unique_ptr<SymtabShndxSection> symTabShndx;
 };
 
 extern InStruct in;
