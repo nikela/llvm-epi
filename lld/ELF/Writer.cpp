@@ -299,18 +299,18 @@ template <class ELFT> void elf::createSyntheticSections() {
 
   auto add = [](SyntheticSection &sec) { inputSections.push_back(&sec); };
 
-  in.shStrTab = std::make_unique<StringTableSection>(".shstrtab", false);
+  in.shStrTab = make<StringTableSection>(".shstrtab", false);
 
   Out::programHeaders = make<OutputSection>("", 0, SHF_ALLOC);
   Out::programHeaders->alignment = config->wordsize;
 
   if (config->strip != StripPolicy::All) {
-    in.strTab = std::make_unique<StringTableSection>(".strtab", false);
-    in.symTab = std::make_unique<SymbolTableSection<ELFT>>(*in.strTab);
-    in.symTabShndx = std::make_unique<SymtabShndxSection>();
+    in.strTab = make<StringTableSection>(".strtab", false);
+    in.symTab = make<SymbolTableSection<ELFT>>(*in.strTab);
+    in.symTabShndx = make<SymtabShndxSection>();
   }
 
-  in.bss = std::make_unique<BssSection>(".bss", 0, 1);
+  in.bss = make<BssSection>(".bss", 0, 1);
   add(*in.bss);
 
   // If there is a SECTIONS command and a .data.rel.ro section name use name
@@ -318,14 +318,14 @@ template <class ELFT> void elf::createSyntheticSections() {
   // This makes sure our relro is contiguous.
   bool hasDataRelRo =
       script->hasSectionsCommand && findSection(".data.rel.ro", 0);
-  in.bssRelRo = std::make_unique<BssSection>(
-      hasDataRelRo ? ".data.rel.ro.bss" : ".bss.rel.ro", 0, 1);
+  in.bssRelRo =
+      make<BssSection>(hasDataRelRo ? ".data.rel.ro.bss" : ".bss.rel.ro", 0, 1);
   add(*in.bssRelRo);
 
   // Add MIPS-specific sections.
   if (config->emachine == EM_MIPS) {
     if (!config->shared && config->hasDynSymTab) {
-      in.mipsRldMap = std::make_unique<MipsRldMapSection>();
+      in.mipsRldMap = make<MipsRldMapSection>();
       add(*in.mipsRldMap);
     }
     if (auto *sec = MipsAbiFlagsSection<ELFT>::create())
@@ -422,14 +422,13 @@ template <class ELFT> void elf::createSyntheticSections() {
     // Create the partition end marker. This needs to be in partition number 255
     // so that it is sorted after all other partitions. It also has other
     // special handling (see createPhdrs() and combineEhSections()).
-    in.partEnd =
-        std::make_unique<BssSection>(".part.end", config->maxPageSize, 1);
+    in.partEnd = make<BssSection>(".part.end", config->maxPageSize, 1);
     in.partEnd->partition = 255;
     add(*in.partEnd);
 
-    in.partIndex = std::make_unique<PartitionIndexSection>();
-    addOptionalRegular("__part_index_begin", in.partIndex.get(), 0);
-    addOptionalRegular("__part_index_end", in.partIndex.get(),
+    in.partIndex = make<PartitionIndexSection>();
+    addOptionalRegular("__part_index_begin", in.partIndex, 0);
+    addOptionalRegular("__part_index_end", in.partIndex,
                        in.partIndex->getSize());
     add(*in.partIndex);
   }
@@ -437,26 +436,26 @@ template <class ELFT> void elf::createSyntheticSections() {
   // Add .got. MIPS' .got is so different from the other archs,
   // it has its own class.
   if (config->emachine == EM_MIPS) {
-    in.mipsGot = std::make_unique<MipsGotSection>();
+    in.mipsGot = make<MipsGotSection>();
     add(*in.mipsGot);
   } else {
-    in.got = std::make_unique<GotSection>();
+    in.got = make<GotSection>();
     add(*in.got);
   }
 
   if (config->emachine == EM_PPC) {
-    in.ppc32Got2 = std::make_unique<PPC32Got2Section>();
+    in.ppc32Got2 = make<PPC32Got2Section>();
     add(*in.ppc32Got2);
   }
 
   if (config->emachine == EM_PPC64) {
-    in.ppc64LongBranchTarget = std::make_unique<PPC64LongBranchTargetSection>();
+    in.ppc64LongBranchTarget = make<PPC64LongBranchTargetSection>();
     add(*in.ppc64LongBranchTarget);
   }
 
-  in.gotPlt = std::make_unique<GotPltSection>();
+  in.gotPlt = make<GotPltSection>();
   add(*in.gotPlt);
-  in.igotPlt = std::make_unique<IgotPltSection>();
+  in.igotPlt = make<IgotPltSection>();
   add(*in.igotPlt);
 
   // _GLOBAL_OFFSET_TABLE_ is defined relative to either .got.plt or .got. Treat
@@ -473,7 +472,7 @@ template <class ELFT> void elf::createSyntheticSections() {
 
   // We always need to add rel[a].plt to output if it has entries.
   // Even for static linking it can contain R_[*]_IRELATIVE relocations.
-  in.relaPlt = std::make_unique<RelocationSection<ELFT>>(
+  in.relaPlt = make<RelocationSection<ELFT>>(
       config->isRela ? ".rela.plt" : ".rel.plt", /*sort=*/false);
   add(*in.relaPlt);
 
@@ -483,23 +482,21 @@ template <class ELFT> void elf::createSyntheticSections() {
   // that would cause a section type mismatch. However, because the Android
   // dynamic loader reads .rel.plt after .rel.dyn, we can get the desired
   // behaviour by placing the iplt section in .rel.plt.
-  in.relaIplt = std::make_unique<RelocationSection<ELFT>>(
+  in.relaIplt = make<RelocationSection<ELFT>>(
       config->androidPackDynRelocs ? in.relaPlt->name : relaDynName,
       /*sort=*/false);
   add(*in.relaIplt);
 
   if ((config->emachine == EM_386 || config->emachine == EM_X86_64) &&
       (config->andFeatures & GNU_PROPERTY_X86_FEATURE_1_IBT)) {
-    in.ibtPlt = std::make_unique<IBTPltSection>();
+    in.ibtPlt = make<IBTPltSection>();
     add(*in.ibtPlt);
   }
 
-  if (config->emachine == EM_PPC)
-    in.plt = std::make_unique<PPC32GlinkSection>();
-  else
-    in.plt = std::make_unique<PltSection>();
+  in.plt = config->emachine == EM_PPC ? make<PPC32GlinkSection>()
+                                      : make<PltSection>();
   add(*in.plt);
-  in.iplt = std::make_unique<IpltSection>();
+  in.iplt = make<IpltSection>();
   add(*in.iplt);
 
   if (config->andFeatures)
@@ -677,9 +674,6 @@ static bool shouldKeepInSymtab(const Defined &sym) {
 }
 
 static bool includeInSymtab(const Symbol &b) {
-  if (!b.isLocal() && !b.isUsedInRegularObj)
-    return false;
-
   if (auto *d = dyn_cast<Defined>(&b)) {
     // Always include absolute symbols.
     SectionBase *sec = d->section;
@@ -715,11 +709,8 @@ template <class ELFT> void Writer<ELFT>::copyLocalSymbols() {
       // No reason to keep local undefined symbol in symtab.
       if (!dr)
         continue;
-      if (!includeInSymtab(*b))
-        continue;
-      if (!shouldKeepInSymtab(*dr))
-        continue;
-      in.symTab->addSymbol(b);
+      if (includeInSymtab(*b) && shouldKeepInSymtab(*dr))
+        in.symTab->addSymbol(b);
     }
   }
 }
@@ -1069,17 +1060,17 @@ template <class ELFT> void Writer<ELFT>::setReservedSymbolSections() {
   if (ElfSym::globalOffsetTable) {
     // The _GLOBAL_OFFSET_TABLE_ symbol is defined by target convention usually
     // to the start of the .got or .got.plt section.
-    InputSection *sec = in.gotPlt.get();
+    InputSection *gotSection = in.gotPlt;
     if (!target->gotBaseSymInGotPlt)
-      sec = in.mipsGot.get() ? cast<InputSection>(in.mipsGot.get())
-                             : cast<InputSection>(in.got.get());
-    ElfSym::globalOffsetTable->section = sec;
+      gotSection = in.mipsGot ? cast<InputSection>(in.mipsGot)
+                              : cast<InputSection>(in.got);
+    ElfSym::globalOffsetTable->section = gotSection;
   }
 
   // .rela_iplt_{start,end} mark the start and the end of in.relaIplt.
   if (ElfSym::relaIpltStart && in.relaIplt->isNeeded()) {
-    ElfSym::relaIpltStart->section = in.relaIplt.get();
-    ElfSym::relaIpltEnd->section = in.relaIplt.get();
+    ElfSym::relaIpltStart->section = in.relaIplt;
+    ElfSym::relaIpltEnd->section = in.relaIplt;
     ElfSym::relaIpltEnd->value = in.relaIplt->getSize();
   }
 
@@ -1243,7 +1234,7 @@ static void maybeShuffle(DenseMap<const InputSectionBase *, int> &order) {
   if (config->shuffleSections.empty())
     return;
 
-  std::vector<InputSectionBase *> matched, sections = inputSections;
+  SmallVector<InputSectionBase *, 0> matched, sections = inputSections;
   matched.reserve(sections.size());
   for (const auto &patAndSeed : config->shuffleSections) {
     matched.clear();
@@ -1478,13 +1469,6 @@ template <class ELFT> void Writer<ELFT>::sortSections() {
     if (!os)
       continue;
     os->sortRank = getSectionRank(os);
-
-    // We want to assign rude approximation values to outSecOff fields
-    // to know the relative order of the input sections. We use it for
-    // sorting SHF_LINK_ORDER sections. See resolveShfLinkOrder().
-    uint64_t i = 0;
-    for (InputSection *sec : getInputSections(os))
-      sec->outSecOff = i++;
   }
 
   if (!script->hasSectionsCommand) {
@@ -1646,9 +1630,6 @@ static void finalizeSynthetic(SyntheticSection *sec) {
     llvm::TimeTraceScope timeScope("Finalize synthetic sections", sec->name);
     sec->finalizeContents();
   }
-}
-template <typename T> static void finalizeSynthetic(std::unique_ptr<T> &sec) {
-  finalizeSynthetic(sec.get());
 }
 
 // We need to generate and finalize the content that depends on the address of
@@ -1991,7 +1972,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
     // Now that we have defined all possible global symbols including linker-
     // synthesized ones. Visit all symbols to give the finishing touches.
     for (Symbol *sym : symtab->symbols()) {
-      if (!includeInSymtab(*sym))
+      if (!sym->isUsedInRegularObj || !includeInSymtab(*sym))
         continue;
       if (in.symTab)
         in.symTab->addSymbol(sym);
