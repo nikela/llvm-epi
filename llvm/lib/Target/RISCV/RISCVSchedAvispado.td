@@ -19,7 +19,7 @@ def AvispadoModel : SchedMachineModel {
   let IssueWidth = 1;        // One instruction per cycle can be dispatched.
   let LoadLatency = 3;
   let MispredictPenalty = 3;
-  let UnsupportedFeatures = [HasStdExtZbb, HasStdExtZvamo, HasStdExtZvlsseg];
+  let UnsupportedFeatures = [HasStdExtZbb, HasStdExtZvlsseg];
 
   // We should be able to remove this when all the instructions
   // have scheduling information.
