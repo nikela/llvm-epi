@@ -550,6 +550,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SELECT_CC, VT, Expand);
       setOperationAction(ISD::VSELECT, VT, Expand);
 
+      setOperationAction(ISD::VP_AND, VT, Custom);
+      setOperationAction(ISD::VP_OR, VT, Custom);
+      setOperationAction(ISD::VP_XOR, VT, Custom);
+
       setOperationAction(ISD::VECREDUCE_AND, VT, Custom);
       setOperationAction(ISD::VECREDUCE_OR, VT, Custom);
       setOperationAction(ISD::VECREDUCE_XOR, VT, Custom);
@@ -894,6 +898,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         if (VT.getVectorElementType() == MVT::i1) {
           setOperationAction(ISD::VP_LOAD, VT, Custom);
           setOperationAction(ISD::VP_STORE, VT, Custom);
+
+          setOperationAction(ISD::VP_AND, VT, Custom);
+          setOperationAction(ISD::VP_OR, VT, Custom);
+          setOperationAction(ISD::VP_XOR, VT, Custom);
 
           setOperationAction(ISD::AND, VT, Custom);
           setOperationAction(ISD::OR, VT, Custom);
@@ -3223,7 +3231,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     // We define our scalable vector types for lmul=1 to use a 64 bit known
     // minimum size. e.g. <vscale x 2 x i32>. VLENB is in bytes so we calculate
     // vscale as VLENB / 8.
-    assert(RISCV::RVVBitsPerBlock == 64 && "Unexpected bits per block!");
+    static_assert(RISCV::RVVBitsPerBlock == 64, "Unexpected bits per block!");
     if (isa<ConstantSDNode>(Op.getOperand(0))) {
       // We assume VLENB is a multiple of 8. We manually choose the best shift
       // here because SimplifyDemandedBits isn't always able to simplify it.
@@ -3703,21 +3711,12 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::SREM_VL);
   case ISD::VP_UREM:
     return lowerVPOp(Op, DAG, RISCVISD::UREM_VL);
-  case ISD::VP_AND: {
-    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPMaskOp(Op, DAG, RISCVISD::VMAND_VL);
-    return lowerVPOp(Op, DAG, RISCVISD::AND_VL);
-  }
-  case ISD::VP_OR: {
-    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPMaskOp(Op, DAG, RISCVISD::VMOR_VL);
-    return lowerVPOp(Op, DAG, RISCVISD::OR_VL);
-  }
-  case ISD::VP_XOR: {
-    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPMaskOp(Op, DAG, RISCVISD::VMXOR_VL);
-    return lowerVPOp(Op, DAG, RISCVISD::XOR_VL);
-  }
+  case ISD::VP_AND:
+    return lowerLogicVPOp(Op, DAG, RISCVISD::VMAND_VL, RISCVISD::AND_VL);
+  case ISD::VP_OR:
+    return lowerLogicVPOp(Op, DAG, RISCVISD::VMOR_VL, RISCVISD::OR_VL);
+  case ISD::VP_XOR:
+    return lowerLogicVPOp(Op, DAG, RISCVISD::VMXOR_VL, RISCVISD::XOR_VL);
   case ISD::VP_ASHR:
     return lowerVPOp(Op, DAG, RISCVISD::SRA_VL);
   case ISD::VP_LSHR:
@@ -7204,6 +7203,33 @@ RISCVTargetLowering::lowerVPStridedStoreExperimental(SDValue Op,
       VPNode->getMemoryVT(), VPNode->getMemOperand());
 }
 
+SDValue RISCVTargetLowering::lowerLogicVPOp(SDValue Op, SelectionDAG &DAG,
+                                            unsigned MaskOpc,
+                                            unsigned VecOpc) const {
+  MVT VT = Op.getSimpleValueType();
+  if (VT.getVectorElementType() != MVT::i1)
+    return lowerVPOp(Op, DAG, VecOpc);
+
+  // It is safe to drop mask parameter as masked-off elements are undef.
+  SDValue Op1 = Op->getOperand(0);
+  SDValue Op2 = Op->getOperand(1);
+  SDValue VL = Op->getOperand(3);
+
+  MVT ContainerVT = VT;
+  const bool IsFixed = VT.isFixedLengthVector();
+  if (IsFixed) {
+    ContainerVT = getContainerForFixedLengthVector(VT);
+    Op1 = convertToScalableVector(ContainerVT, Op1, DAG, Subtarget);
+    Op2 = convertToScalableVector(ContainerVT, Op2, DAG, Subtarget);
+  }
+
+  SDLoc DL(Op);
+  SDValue Val = DAG.getNode(MaskOpc, DL, ContainerVT, Op1, Op2, VL);
+  if (!IsFixed)
+    return Val;
+  return convertFromScalableVector(VT, Val, DAG, Subtarget);
+}
+
 // Custom lower MGATHER/VP_GATHER to a legalized form for RVV. It will then be
 // matched to a RVV indexed load. The RVV indexed load instructions only
 // support the "unsigned unscaled" addressing mode; indices are implicitly
@@ -8938,7 +8964,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
     if (SimplifyDemandedLowBitsHelper(1, Log2_32(BitWidth)))
       return SDValue(N, 0);
 
-    return combineGREVI_GORCI(N, DCI.DAG);
+    return combineGREVI_GORCI(N, DAG);
   }
   case RISCVISD::GREVW:
   case RISCVISD::GORCW: {
@@ -8947,7 +8973,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
         SimplifyDemandedLowBitsHelper(1, 5))
       return SDValue(N, 0);
 
-    return combineGREVI_GORCI(N, DCI.DAG);
+    return combineGREVI_GORCI(N, DAG);
   }
   case RISCVISD::SHFL:
   case RISCVISD::UNSHFL: {
@@ -10501,7 +10527,8 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
         LocVT = XLenVT;
         LocInfo = CCValAssign::Indirect;
       } else if (ValVT.isScalableVector()) {
-        report_fatal_error("Unable to pass scalable vector types on the stack");
+        LocVT = XLenVT;
+        LocInfo = CCValAssign::Indirect;
       } else {
         // Pass fixed-length vectors on the stack.
         LocVT = ValVT;
@@ -10700,6 +10727,12 @@ static SDValue unpackFromMemLoc(SelectionDAG &DAG, SDValue Chain,
   EVT LocVT = VA.getLocVT();
   EVT ValVT = VA.getValVT();
   EVT PtrVT = MVT::getIntegerVT(DAG.getDataLayout().getPointerSizeInBits(0));
+  if (ValVT.isScalableVector()) {
+    // When the value is a scalable vector, we save the pointer which points to
+    // the scalable vector value in the stack. The ValVT will be the pointer
+    // type, instead of the scalable vector type.
+    ValVT = LocVT;
+  }
   int FI = MFI.CreateFixedObject(ValVT.getStoreSize(), VA.getLocMemOffset(),
                                  /*Immutable=*/true);
   SDValue FIN = DAG.getFrameIndex(FI, PtrVT);
@@ -11792,6 +11825,9 @@ RISCVTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
   if (Constraint.size() == 1) {
     switch (Constraint[0]) {
     case 'r':
+      // TODO: Support fixed vectors up to XLen for P extension?
+      if (VT.isVector())
+        break;
       return std::make_pair(0U, &RISCV::GPRRegClass);
     case 'f':
       if (Subtarget.hasStdExtZfh() && VT == MVT::f16)
@@ -11804,17 +11840,15 @@ RISCVTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
     default:
       break;
     }
-  } else {
-    if (Constraint == "vr") {
-      for (const auto *RC : {&RISCV::VRRegClass, &RISCV::VRM2RegClass,
-                             &RISCV::VRM4RegClass, &RISCV::VRM8RegClass}) {
-        if (TRI->isTypeLegalForClass(*RC, VT.SimpleTy))
-          return std::make_pair(0U, RC);
-      }
-    } else if (Constraint == "vm") {
-      if (TRI->isTypeLegalForClass(RISCV::VMV0RegClass, VT.SimpleTy))
-        return std::make_pair(0U, &RISCV::VMV0RegClass);
+  } else if (Constraint == "vr") {
+    for (const auto *RC : {&RISCV::VRRegClass, &RISCV::VRM2RegClass,
+                           &RISCV::VRM4RegClass, &RISCV::VRM8RegClass}) {
+      if (TRI->isTypeLegalForClass(*RC, VT.SimpleTy))
+        return std::make_pair(0U, RC);
     }
+  } else if (Constraint == "vm") {
+    if (TRI->isTypeLegalForClass(RISCV::VMV0RegClass, VT.SimpleTy))
+      return std::make_pair(0U, &RISCV::VMV0RegClass);
   }
 
   // Clang will correctly decode the usage of register name aliases into their
