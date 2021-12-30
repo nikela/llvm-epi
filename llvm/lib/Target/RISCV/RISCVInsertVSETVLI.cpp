@@ -591,27 +591,37 @@ static bool isScalarMoveInstr(const MachineInstr &MI) {
   case RISCV::PseudoVMV_S_X_MF2:
   case RISCV::PseudoVMV_S_X_MF4:
   case RISCV::PseudoVMV_S_X_MF8:
-  case RISCV::PseudoVFMV_F16_S_M1:
-  case RISCV::PseudoVFMV_F16_S_M2:
-  case RISCV::PseudoVFMV_F16_S_M4:
-  case RISCV::PseudoVFMV_F16_S_M8:
-  case RISCV::PseudoVFMV_F16_S_MF2:
-  case RISCV::PseudoVFMV_F16_S_MF4:
-  case RISCV::PseudoVFMV_F16_S_MF8:
-  case RISCV::PseudoVFMV_F32_S_M1:
-  case RISCV::PseudoVFMV_F32_S_M2:
-  case RISCV::PseudoVFMV_F32_S_M4:
-  case RISCV::PseudoVFMV_F32_S_M8:
-  case RISCV::PseudoVFMV_F32_S_MF2:
-  case RISCV::PseudoVFMV_F32_S_MF4:
-  case RISCV::PseudoVFMV_F32_S_MF8:
-  case RISCV::PseudoVFMV_F64_S_M1:
-  case RISCV::PseudoVFMV_F64_S_M2:
-  case RISCV::PseudoVFMV_F64_S_M4:
-  case RISCV::PseudoVFMV_F64_S_M8:
-  case RISCV::PseudoVFMV_F64_S_MF2:
-  case RISCV::PseudoVFMV_F64_S_MF4:
-  case RISCV::PseudoVFMV_F64_S_MF8:
+  case RISCV::PseudoVFMV_S_F16_M1:
+  case RISCV::PseudoVFMV_S_F16_M2:
+  case RISCV::PseudoVFMV_S_F16_M4:
+  case RISCV::PseudoVFMV_S_F16_M8:
+  case RISCV::PseudoVFMV_S_F16_MF2:
+  case RISCV::PseudoVFMV_S_F16_MF4:
+  case RISCV::PseudoVFMV_S_F16_MF8:
+  case RISCV::PseudoVFMV_S_F32_M1:
+  case RISCV::PseudoVFMV_S_F32_M2:
+  case RISCV::PseudoVFMV_S_F32_M4:
+  case RISCV::PseudoVFMV_S_F32_M8:
+  case RISCV::PseudoVFMV_S_F32_MF2:
+  case RISCV::PseudoVFMV_S_F32_MF4:
+  case RISCV::PseudoVFMV_S_F32_MF8:
+  case RISCV::PseudoVFMV_S_F64_M1:
+  case RISCV::PseudoVFMV_S_F64_M2:
+  case RISCV::PseudoVFMV_S_F64_M4:
+  case RISCV::PseudoVFMV_S_F64_M8:
+  case RISCV::PseudoVFMV_S_F64_MF2:
+  case RISCV::PseudoVFMV_S_F64_MF4:
+  case RISCV::PseudoVFMV_S_F64_MF8:
+    return true;
+  // EPI
+  case RISCV::PseudoEPIVMV_S_X_M1:
+  case RISCV::PseudoEPIVMV_S_X_M2:
+  case RISCV::PseudoEPIVMV_S_X_M4:
+  case RISCV::PseudoEPIVMV_S_X_M8:
+  case RISCV::PseudoEPIVFMV_S_F_M1:
+  case RISCV::PseudoEPIVFMV_S_F_M2:
+  case RISCV::PseudoEPIVFMV_S_F_M4:
+  case RISCV::PseudoEPIVFMV_S_F_M8:
     return true;
   }
 }
@@ -744,8 +754,10 @@ static VSETVLIInfo computeInfoForEPIInstr(const MachineInstr &MI, int VLIndex,
   } else
     InstrInfo.setAVLReg(RISCV::NoRegister);
 
+  bool ScalarMovOp = isScalarMoveInstr(MI);
   InstrInfo.setVTYPE(VLMul, SEW, /*TailAgnostic*/ true,
-                     /*MaskAgnostic*/ false, /* MaskRegOp */ false, StoreOp);
+                     /*MaskAgnostic*/ false, /* MaskRegOp */ false, StoreOp,
+                     ScalarMovOp);
 
   return InstrInfo;
 }
@@ -1703,6 +1715,13 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
               PrevVSETVLIMI->getOperand(2).setImm(NewInfo.encodeVTYPE());
               NeedInsertVSETVLI = false;
             }
+            if (isScalarMoveInstr(MI) && HasSameExtraOperand &&
+                ((CurInfo.hasNonZeroAVL() && NewInfo.hasNonZeroAVL()) ||
+                 (CurInfo.hasZeroAVL() && NewInfo.hasZeroAVL())) &&
+                NewInfo.hasSameVLMAX(CurInfo)) {
+              PrevVSETVLIMI->getOperand(2).setImm(NewInfo.encodeVTYPE());
+              NeedInsertVSETVLI = false;
+            }
           }
           if (NeedInsertVSETVLI)
             insertVSETVLI(MBB, MI, NewInfo, CurInfo);
@@ -1773,7 +1792,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
               PrevVSETVLIMI->getOperand(2).setImm(NewInfo.encodeVTYPE());
               NeedInsertVSETVLI = false;
             }
-            if (isScalarMoveInstr(MI) &&
+            if (isScalarMoveInstr(MI) && HasSameExtraOperand &&
                 ((CurInfo.hasNonZeroAVL() && NewInfo.hasNonZeroAVL()) ||
                  (CurInfo.hasZeroAVL() && NewInfo.hasZeroAVL())) &&
                 NewInfo.hasSameVLMAX(CurInfo)) {
