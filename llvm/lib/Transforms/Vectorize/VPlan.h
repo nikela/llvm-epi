@@ -347,10 +347,9 @@ struct VPTransformState {
   /// Hold the canonical scalar IV of the vector loop (start=0, step=VF*UF).
   Value *CanonicalIV = nullptr;
 
+  /// Hold a pointer to ScalarEvolution which will be used during the IR
+  /// generation.
   ScalarEvolution *SE = nullptr;
-
-  /// Hold the trip count of the scalar loop.
-  Value *TripCount = nullptr;
 
   /// Hold a pointer to InnerLoopVectorizer to reuse its IR generation methods.
   InnerLoopVectorizer *ILV;
@@ -1122,34 +1121,21 @@ public:
   const InductionDescriptor &getInductionDescriptor() const { return IndDesc; }
 };
 
-/// A recipe for handling first order recurrences and pointer inductions. For
-/// first-order recurrences, the start value is the first operand of the recipe
-/// and the incoming value from the backedge is the second operand. It also
-/// serves as base class for VPReductionPHIRecipe. In the VPlan native path, all
-/// incoming VPValues & VPBasicBlock pairs are managed in the recipe directly.
-class VPWidenPHIRecipe : public VPRecipeBase, public VPValue {
-  /// List of incoming blocks. Only used in the VPlan native path.
-  SmallVector<VPBasicBlock *, 2> IncomingBlocks;
-
+/// A pure virtual base class for all recipes modeling header phis, including
+/// phis for first order recurrences, pointer inductions and reductions. The
+/// start value is the first operand of the recipe and the incoming value from
+/// the backedge is the second operand.
+class VPHeaderPHIRecipe : public VPRecipeBase, public VPValue {
 protected:
-  VPWidenPHIRecipe(unsigned char VPVID, unsigned char VPDefID, PHINode *Phi,
-                   VPValue *Start = nullptr)
+  VPHeaderPHIRecipe(unsigned char VPVID, unsigned char VPDefID, PHINode *Phi,
+                    VPValue *Start = nullptr)
       : VPRecipeBase(VPDefID, {}), VPValue(VPVID, Phi, this) {
     if (Start)
       addOperand(Start);
   }
 
 public:
-  /// Create a VPWidenPHIRecipe for \p Phi
-  VPWidenPHIRecipe(PHINode *Phi)
-      : VPWidenPHIRecipe(VPVWidenPHISC, VPWidenPHISC, Phi) {}
-
-  /// Create a new VPWidenPHIRecipe for \p Phi with start value \p Start.
-  VPWidenPHIRecipe(PHINode *Phi, VPValue &Start) : VPWidenPHIRecipe(Phi) {
-    addOperand(&Start);
-  }
-
-  ~VPWidenPHIRecipe() override = default;
+  ~VPHeaderPHIRecipe() override = default;
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *B) {
@@ -1167,23 +1153,21 @@ public:
            V->getVPValueID() == VPValue::VPVReductionPHISC;
   }
 
-  /// Generate the phi/select nodes.
-  void execute(VPTransformState &State) override;
+  /// Generate the phi nodes.
+  void execute(VPTransformState &State) override = 0;
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,
-             VPSlotTracker &SlotTracker) const override;
+             VPSlotTracker &SlotTracker) const override = 0;
 #endif
 
-  /// Returns the start value of the phi, if it is a reduction or first-order
-  /// recurrence.
+  /// Returns the start value of the phi, if one is set.
   VPValue *getStartValue() {
     return getNumOperands() == 0 ? nullptr : getOperand(0);
   }
 
-  /// Returns the incoming value from the loop backedge, if it is a reduction or
-  /// first-order recurrence.
+  /// Returns the incoming value from the loop backedge.
   VPValue *getBackedgeValue() {
     return getOperand(1);
   }
@@ -1193,6 +1177,43 @@ public:
   VPRecipeBase *getBackedgeRecipe() {
     return cast<VPRecipeBase>(getBackedgeValue()->getDef());
   }
+};
+
+/// A recipe for handling header phis that are widened in the vector loop.
+/// In the VPlan native path, all incoming VPValues & VPBasicBlock pairs are
+/// managed in the recipe directly.
+class VPWidenPHIRecipe : public VPHeaderPHIRecipe {
+  /// List of incoming blocks. Only used in the VPlan native path.
+  SmallVector<VPBasicBlock *, 2> IncomingBlocks;
+
+public:
+  /// Create a VPWidenPHIRecipe for \p Phi
+  VPWidenPHIRecipe(PHINode *Phi)
+      : VPHeaderPHIRecipe(VPVWidenPHISC, VPWidenPHISC, Phi) {}
+
+  /// Create a new VPWidenPHIRecipe for \p Phi with start value \p Start.
+  VPWidenPHIRecipe(PHINode *Phi, VPValue &Start) : VPWidenPHIRecipe(Phi) {
+    addOperand(&Start);
+  }
+
+  ~VPWidenPHIRecipe() override = default;
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPRecipeBase *B) {
+    return B->getVPDefID() == VPRecipeBase::VPWidenPHISC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVWidenPHISC;
+  }
+
+  /// Generate the phi/select nodes.
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
 
   /// Adds a pair (\p IncomingV, \p IncomingBlock) to the phi.
   void addIncoming(VPValue *IncomingV, VPBasicBlock *IncomingBlock) {
@@ -1200,20 +1221,20 @@ public:
     IncomingBlocks.push_back(IncomingBlock);
   }
 
-  /// Returns the \p I th incoming VPValue.
-  VPValue *getIncomingValue(unsigned I) { return getOperand(I); }
-
   /// Returns the \p I th incoming VPBasicBlock.
   VPBasicBlock *getIncomingBlock(unsigned I) { return IncomingBlocks[I]; }
+
+  /// Returns the \p I th incoming VPValue.
+  VPValue *getIncomingValue(unsigned I) { return getOperand(I); }
 };
 
 /// A recipe for handling first-order recurrence phis. The start value is the
 /// first operand of the recipe and the incoming value from the backedge is the
 /// second operand.
-struct VPFirstOrderRecurrencePHIRecipe : public VPWidenPHIRecipe {
+struct VPFirstOrderRecurrencePHIRecipe : public VPHeaderPHIRecipe {
   VPFirstOrderRecurrencePHIRecipe(PHINode *Phi, VPValue &Start)
-      : VPWidenPHIRecipe(VPVFirstOrderRecurrencePHISC,
-                         VPFirstOrderRecurrencePHISC, Phi, &Start) {}
+      : VPHeaderPHIRecipe(VPVFirstOrderRecurrencePHISC,
+                          VPFirstOrderRecurrencePHISC, Phi, &Start) {}
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *R) {
@@ -1264,14 +1285,18 @@ struct VPEVLPHIRecipe : public VPRecipeBase, public VPValue {
 /// A recipe for handling first-order recurrence phis under predication. The
 /// start value is the first operand of the recipe and the incoming value from
 /// the backedge is the second operand.
-struct VPPredicatedFirstOrderRecurrencePHIRecipe : public VPWidenPHIRecipe {
+struct VPPredicatedFirstOrderRecurrencePHIRecipe : public VPHeaderPHIRecipe {
   VPPredicatedFirstOrderRecurrencePHIRecipe(PHINode *Phi, VPValue &Start)
-      : VPWidenPHIRecipe(VPVPredicatedFirstOrderRecurrencePHISC,
+      : VPHeaderPHIRecipe(VPVPredicatedFirstOrderRecurrencePHISC,
                          VPPredicatedFirstOrderRecurrencePHISC, Phi, &Start) {}
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *R) {
     return R->getVPDefID() ==
+           VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC;
+  }
+  static inline bool classof(const VPHeaderPHIRecipe *D) {
+    return D->getVPDefID() ==
            VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC;
   }
   static inline bool classof(const VPWidenPHIRecipe *D) {
@@ -1300,7 +1325,7 @@ private:
 /// A recipe for handling reduction phis. The start value is the first operand
 /// of the recipe and the incoming value from the backedge is the second
 /// operand.
-class VPReductionPHIRecipe : public VPWidenPHIRecipe {
+class VPReductionPHIRecipe : public VPHeaderPHIRecipe {
   /// Descriptor for the reduction.
   const RecurrenceDescriptor &RdxDesc;
 
@@ -1316,7 +1341,7 @@ public:
   VPReductionPHIRecipe(PHINode *Phi, const RecurrenceDescriptor &RdxDesc,
                        VPValue &Start, bool IsInLoop = false,
                        bool IsOrdered = false)
-      : VPWidenPHIRecipe(VPVReductionPHISC, VPReductionPHISC, Phi, &Start),
+      : VPHeaderPHIRecipe(VPVReductionPHISC, VPReductionPHISC, Phi, &Start),
         RdxDesc(RdxDesc), IsInLoop(IsInLoop), IsOrdered(IsOrdered) {
     assert((!IsOrdered || IsInLoop) && "IsOrdered requires IsInLoop");
   }
@@ -2393,12 +2418,13 @@ class VPlan {
   // (operators '==' and '<').
   SetVector<VPValue *> VPExternalDefs;
 
-  /// Represents the backedge taken count of the original loop, for folding
+  /// Represents the trip count of the original loop, for folding
   /// the tail.
-  VPValue *BackedgeTakenCount = nullptr;
-
-  /// Represents the trip count of the original loop, for computing EVL.
   VPValue *TripCount = nullptr;
+
+  /// Represents the backedge taken count of the original loop, for folding
+  /// the tail. It equals TripCount - 1.
+  VPValue *BackedgeTakenCount = nullptr;
 
   /// Represents the runtime VF. Some recipes like Vector Predicated recipes may
   /// use runtime VF as an operand. At the time of plan construction while it is
@@ -2438,15 +2464,18 @@ public:
     }
     for (VPValue *VPV : VPValuesToFree)
       delete VPV;
-    if (BackedgeTakenCount)
-      delete BackedgeTakenCount;
     if (TripCount)
       delete TripCount;
+    if (BackedgeTakenCount)
+      delete BackedgeTakenCount;
     if (RuntimeVF)
       delete RuntimeVF;
     for (VPValue *Def : VPExternalDefs)
       delete Def;
   }
+
+  /// Prepare the plan for execution, setting up the required live-in values.
+  void prepareToExecute(Value *TripCount, VPTransformState &State);
 
   /// Generate the IR code for this VPlan.
   void execute(struct VPTransformState *State);
@@ -2460,18 +2489,18 @@ public:
     return Entry;
   }
 
+  /// The trip count of the original loop.
+  VPValue *getOrCreateTripCount() {
+    if (!TripCount)
+      TripCount = new VPValue();
+    return TripCount;
+  }
+
   /// The backedge taken count of the original loop.
   VPValue *getOrCreateBackedgeTakenCount() {
     if (!BackedgeTakenCount)
       BackedgeTakenCount = new VPValue();
     return BackedgeTakenCount;
-  }
-
-  /// The trip count for the original loop.
-  VPValue *getOrCreateTripCount() {
-    if (!TripCount)
-      TripCount = new VPValue();
-    return TripCount;
   }
 
   /// A VPValue representing the loop invariant runtime VF to be expanded at
