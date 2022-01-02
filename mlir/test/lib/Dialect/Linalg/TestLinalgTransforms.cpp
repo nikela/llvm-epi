@@ -34,7 +34,7 @@ namespace {
 struct TestLinalgTransforms
     : public PassWrapper<TestLinalgTransforms, FunctionPass> {
   TestLinalgTransforms() = default;
-  TestLinalgTransforms(const TestLinalgTransforms &pass) {}
+  TestLinalgTransforms(const TestLinalgTransforms &pass) : PassWrapper(pass) {}
 
   void getDependentDialects(DialectRegistry &registry) const override {
     // clang-format off
@@ -528,8 +528,7 @@ applyMatmulToVectorPatterns(FuncOp funcOp,
   llvm::move(stage1Patterns, std::back_inserter(frozenStage1Patterns));
   FrozenRewritePatternSet stage2Patterns =
       getLinalgTilingCanonicalizationPatterns(ctx);
-  (void)applyStagedPatterns(funcOp, frozenStage1Patterns,
-                            std::move(stage2Patterns));
+  (void)applyStagedPatterns(funcOp, frozenStage1Patterns, stage2Patterns);
 }
 
 static void applyVectorTransferForwardingPatterns(FuncOp funcOp) {
