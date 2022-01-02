@@ -151,7 +151,7 @@ void ComputationSliceState::dump() const {
 /// if both the src and the dst loops don't have the same bounds. Returns
 /// llvm::None if none of the above can be proven.
 Optional<bool> ComputationSliceState::isSliceMaximalFastCheck() const {
-  assert(lbs.size() == ubs.size() && lbs.size() && ivs.size() &&
+  assert(lbs.size() == ubs.size() && !lbs.empty() && !ivs.empty() &&
          "Unexpected number of lbs, ubs and ivs in slice");
 
   for (unsigned i = 0, end = lbs.size(); i < end; ++i) {
@@ -564,7 +564,7 @@ LogicalResult MemRefRegion::compute(Operation *op, unsigned loopDepth,
   for (auto id : ids) {
     AffineForOp iv;
     if ((iv = getForInductionVarOwner(id)) &&
-        llvm::is_contained(enclosingIVs, iv) == false) {
+        !llvm::is_contained(enclosingIVs, iv)) {
       cst.projectOut(id);
     }
   }
