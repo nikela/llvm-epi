@@ -34,7 +34,7 @@ static SmallVector<StringRef> getNParallelLoopsAttrs(unsigned nParallelLoops) {
 
 template <typename T>
 static arith::ConstantOp
-createConstFromIntAttribute(Operation *op, std::string attrName,
+createConstFromIntAttribute(Operation *op, const std::string &attrName,
                             Type requiredAttrType, OpBuilder &rewriter) {
   auto castedN = static_cast<T>(
       op->getAttr(attrName).cast<IntegerAttr>().getValue().getSExtValue());
@@ -61,7 +61,7 @@ static mlir::SelectOp clampHelper(Location loc, Value arg,
   return rewriter.create<mlir::SelectOp>(loc, largerThanMax, max, minOrArg);
 }
 
-static SmallVector<Value> filterDynamicDims(SmallVector<Value> dynDims) {
+static SmallVector<Value> filterDynamicDims(const SmallVector<Value> &dynDims) {
   SmallVector<Value> filteredDims;
   for (auto dim : dynDims)
     if (dim)
@@ -694,7 +694,7 @@ elementwiseMatchAndRewriteHelper(Operation *operation,
     SmallVector<int64_t, 5> newShape;
     SmallVector<AffineExpr, 4> affineExprs;
     newShape.reserve(type.getRank());
-    for (auto it : llvm::enumerate(type.getShape())) {
+    for (const auto &it : llvm::enumerate(type.getShape())) {
       if (it.value() == resultTy.getDimSize(it.index())) {
         newShape.push_back(it.value());
         affineExprs.push_back(
@@ -1014,11 +1014,7 @@ static bool createReassociationMapsForCollapse(
 
   // If both iterators didn't reach the end, we have leftover dimentions which
   // implies that we have a mismatch in shape.
-  if (currSrcDim != srcShape.size() || currDstDim != dstShape.size()) {
-    return false;
-  }
-
-  return true;
+  return !(currSrcDim != srcShape.size() || currDstDim != dstShape.size());
 }
 
 namespace {
@@ -1179,7 +1175,7 @@ public:
     SmallVector<AffineExpr, 2> inputExprs;
     inputExprs.resize(resultTy.getRank());
     auto operandTy = input.getType().cast<ShapedType>();
-    for (auto permutation : llvm::enumerate(perms.getValues<APInt>())) {
+    for (const auto &permutation : llvm::enumerate(perms.getValues<APInt>())) {
       auto index = permutation.index();
       auto value = permutation.value().getZExtValue();
       if (!operandTy.hasRank() || operandTy.isDynamicDim(index)) {

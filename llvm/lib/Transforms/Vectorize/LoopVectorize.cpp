@@ -689,9 +689,6 @@ protected:
   /// Returns true if vectorization prefers using predicated vector intrinsics.
   bool preferPredicatedVectorOps() const;
 
-  /// Generate a shuffle sequence that will reverse the vector Vec.
-  virtual Value *reverseVector(Value *Vec);
-
   /// Returns (and creates if needed) the original loop trip count.
   Value *getOrCreateTripCount(Loop *NewLoop);
 
@@ -921,7 +918,6 @@ public:
 
 private:
   Value *getBroadcastInstrs(Value *V) override;
-  Value *reverseVector(Value *Vec) override;
 };
 
 /// Encapsulate information regarding vectorization of a loop and its epilogue.
@@ -2596,6 +2592,7 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
   assert((IV->getType()->isIntegerTy() || IV != OldInduction) &&
          "Primary induction variable must have an integer type");
   assert(IV->getType() == ID.getStartValue()->getType() && "Types must match");
+  assert(!State.VF.isZero() && "VF must be non-zero");
 
   // The value from the original loop to which we are mapping the new induction
   // variable.
@@ -2669,7 +2666,7 @@ void InnerLoopVectorizer::widenIntOrFpInduction(PHINode *IV,
 
   // Now do the actual transformations, and start with creating the step value.
   Value *Step = CreateStepValue(ID.getStep());
-  if (State.VF.isZero() || State.VF.isScalar()) {
+  if (State.VF.isScalar()) {
     Value *ScalarIV = CreateScalarIV(Step);
     CreateSplatIV(ScalarIV, Step);
     return;
@@ -2794,11 +2791,6 @@ void InnerLoopVectorizer::packScalarIntoVectorValue(VPValue *Def,
       VectorValue, ScalarInst,
       Instance.Lane.getAsRuntimeExpr(State.Builder, VF));
   State.set(Def, VectorValue, Instance.Part);
-}
-
-Value *InnerLoopVectorizer::reverseVector(Value *Vec) {
-  assert(Vec->getType()->isVectorTy() && "Invalid type");
-  return Builder.CreateVectorReverse(Vec, "reverse");
 }
 
 bool InnerLoopVectorizer::preferPredicatedVectorOps() const {
@@ -2968,7 +2960,7 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
         }
 
         if (Group->isReverse())
-          StridedVec = reverseVector(StridedVec);
+          StridedVec = Builder.CreateVectorReverse(StridedVec, "reverse");
 
         State.set(VPDefs[J], StridedVec, Part);
       }
@@ -3004,7 +2996,7 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
       Value *StoredVec = State.get(StoredValues[i], Part);
 
       if (Group->isReverse())
-        StoredVec = reverseVector(StoredVec);
+        StoredVec = Builder.CreateVectorReverse(StoredVec, "reverse");
 
       // If this member has different type, cast it to a unified type.
 
@@ -4756,7 +4748,7 @@ void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
     Type *PhiType = II.getStep()->getType();
 
     // Build a pointer phi
-    Value *ScalarStartValue = II.getStartValue();
+    Value *ScalarStartValue = PhiR->getStartValue()->getLiveInIRValue();
     Type *ScStValueType = ScalarStartValue->getType();
     PHINode *NewPointerPhi =
         PHINode::Create(ScStValueType, 2, "pointer.phi", Induction);
@@ -8860,8 +8852,6 @@ void LoopVectorizationPlanner::collectTriviallyDeadInstructions(
   }
 }
 
-Value *InnerLoopUnroller::reverseVector(Value *Vec) { return Vec; }
-
 Value *InnerLoopUnroller::getBroadcastInstrs(Value *V) { return V; }
 
 static void AddRuntimeUnrollDisableMetaData(Loop *L) {
@@ -9253,8 +9243,9 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
     IV = Plan->getOrAddVPValue(Legal->getPrimaryInduction());
   else {
     VPBasicBlock *HeaderVPBB = Plan->getEntry()->getEntryBasicBlock();
+    auto NewInsertionPoint = HeaderVPBB->getFirstNonPhi();
     auto *IVRecipe = new VPWidenCanonicalIVRecipe();
-    HeaderVPBB->insert(IVRecipe, HeaderVPBB->getFirstNonPhi());
+    HeaderVPBB->insert(IVRecipe, NewInsertionPoint);
     IV = IVRecipe;
   }
   return IVCache[VPBB] = IV;
@@ -9279,15 +9270,12 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     // Introduce the early-exit compare IV <= BTC to form header block mask.
     // This is used instead of IV < TC because TC may wrap, unlike BTC.
     // Start by constructing the desired canonical IV.
+    VPBasicBlock *HeaderVPBB = Plan->getEntry()->getEntryBasicBlock();
+    auto NewInsertionPoint = HeaderVPBB->getFirstNonPhi();
     VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
 
-    // Create the block in mask as the first non-phi instruction in the block.
     VPBuilder::InsertPointGuard Guard(Builder);
-    auto NewInsertionPoint = Builder.getInsertBlock()->getFirstNonPhi();
-    Builder.setInsertPoint(Builder.getInsertBlock(), NewInsertionPoint);
-
-    assert(CM.foldTailByMasking() && "must fold the tail");
-
+    Builder.setInsertPoint(HeaderVPBB, NewInsertionPoint);
     if (CM.TTI.emitGetActiveLaneMask()) {
       VPValue *TC = Plan->getOrCreateTripCount();
       BlockMask = Builder.createNaryOp(VPInstruction::ActiveLaneMask, {IV, TC});
@@ -9802,11 +9790,14 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
           Phi->getIncomingValueForBlock(OrigLoop->getLoopLatch())));
       PhisToFix.push_back(PhiRecipe);
     } else {
-      // TODO: record start and backedge value for remaining pointer induction
-      // phis.
+      // TODO: record backedge value for remaining pointer induction phis.
       assert(Phi->getType()->isPointerTy() &&
              "only pointer phis should be handled here");
-      PhiRecipe = new VPWidenPHIRecipe(Phi);
+      assert(Legal->getInductionVars().count(Phi) &&
+             "Not an induction variable");
+      InductionDescriptor II = Legal->getInductionVars().lookup(Phi);
+      VPValue *Start = Plan->getOrAddVPValue(II.getStartValue());
+      PhiRecipe = new VPWidenPHIRecipe(Phi, Start);
     }
 
     return toVPRecipeResult(PhiRecipe);
