@@ -646,6 +646,7 @@ private:
   SDValue lowerFEXP(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFSIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFCOS(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerFPOW(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFREM(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPREDUCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVECREDUCE(SDValue Op, SelectionDAG &DAG) const;

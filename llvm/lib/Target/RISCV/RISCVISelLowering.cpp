@@ -1193,6 +1193,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
     setLibcallName(RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32");
 
+    setLibcallName(RTLIB::POW_NXV1F64, "__epi_pow_nxv1f64");
+    setLibcallName(RTLIB::POW_NXV2F64, "__epi_pow_nxv2f64");
+    setLibcallName(RTLIB::POW_NXV4F64, "__epi_pow_nxv4f64");
+    setLibcallName(RTLIB::POW_NXV8F64, "__epi_pow_nxv8f64");
+    setLibcallName(RTLIB::POW_NXV1F32, "__epi_pow_nxv1f32");
+    setLibcallName(RTLIB::POW_NXV2F32, "__epi_pow_nxv2f32");
+    setLibcallName(RTLIB::POW_NXV4F32, "__epi_pow_nxv4f32");
+    setLibcallName(RTLIB::POW_NXV8F32, "__epi_pow_nxv8f32");
+    setLibcallName(RTLIB::POW_NXV16F32, "__epi_pow_nxv16f32");
+
     setLibcallName(RTLIB::REM_NXV1F64, "__epi_fmod_nxv1f64");
     setLibcallName(RTLIB::REM_NXV2F64, "__epi_fmod_nxv2f64");
     setLibcallName(RTLIB::REM_NXV4F64, "__epi_fmod_nxv4f64");
@@ -1275,6 +1285,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
       setOperationAction(ISD::FREM, VT, Custom);
+      setOperationAction(ISD::FPOW, VT, Custom);
 
       setOperationAction(ISD::FRINT, VT, Custom);
 
@@ -1772,6 +1783,21 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv1f32, RTLIB::COS_NXV1F32},   {MVT::nxv2f32, RTLIB::COS_NXV2F32},
       {MVT::nxv4f32, RTLIB::COS_NXV4F32},   {MVT::nxv8f32, RTLIB::COS_NXV8F32},
       {MVT::nxv16f32, RTLIB::COS_NXV16F32},
+  };
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+}
+
+SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
+  RISCVVTToLibCall VTToLC[] = {
+      {MVT::nxv1f64, RTLIB::POW_NXV1F64},
+      {MVT::nxv2f64, RTLIB::POW_NXV2F64},
+      {MVT::nxv4f64, RTLIB::POW_NXV4F64},
+      {MVT::nxv8f64, RTLIB::POW_NXV8F64},
+      {MVT::nxv1f32, RTLIB::POW_NXV1F32},
+      {MVT::nxv2f32, RTLIB::POW_NXV2F32},
+      {MVT::nxv4f32, RTLIB::POW_NXV4F32},
+      {MVT::nxv8f32, RTLIB::POW_NXV8F32},
+      {MVT::nxv16f32, RTLIB::POW_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
 }
@@ -3128,6 +3154,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerFSIN(Op, DAG);
   case ISD::FCOS:
     return lowerFCOS(Op, DAG);
+  case ISD::FPOW:
+    return lowerFPOW(Op, DAG);
   case ISD::FREM:
     return lowerFREM(Op, DAG);
   case ISD::FRINT: {
