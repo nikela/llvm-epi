@@ -6,7 +6,7 @@ define <vscale x 1 x double> @test_vp_frem_nxv1f64(<vscale x 1 x double> %f0, <v
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv1f64@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv1f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -20,7 +20,7 @@ define <vscale x 2 x double> @test_vp_frem_nxv2f64(<vscale x 2 x double> %f0, <v
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv2f64@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv2f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -34,7 +34,7 @@ define <vscale x 4 x double> @test_vp_frem_nxv4f64(<vscale x 4 x double> %f0, <v
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv4f64@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv4f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -48,7 +48,7 @@ define <vscale x 8 x double> @test_vp_frem_nxv8f64(<vscale x 8 x double> %f0, <v
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv8f64@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv8f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -62,7 +62,7 @@ define <vscale x 1 x float> @test_vp_frem_nxv1f32(<vscale x 1 x float> %f0, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv1f32@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv1f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -76,7 +76,7 @@ define <vscale x 2 x float> @test_vp_frem_nxv2f32(<vscale x 2 x float> %f0, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv2f32@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv2f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -90,7 +90,7 @@ define <vscale x 4 x float> @test_vp_frem_nxv4f32(<vscale x 4 x float> %f0, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv4f32@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv4f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -104,7 +104,7 @@ define <vscale x 8 x float> @test_vp_frem_nxv8f32(<vscale x 8 x float> %f0, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv8f32@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv8f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -118,7 +118,7 @@ define <vscale x 16 x float> @test_vp_frem_nxv16f32(<vscale x 16 x float> %f0, <
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; CHECK-NEXT:    call __epi_vp_frem_nxv16f32@plt
+; CHECK-NEXT:    call __epi_vp_fmod_nxv16f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret

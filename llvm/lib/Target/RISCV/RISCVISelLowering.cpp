@@ -1193,15 +1193,15 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
     setLibcallName(RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32");
 
-    setLibcallName(RTLIB::FMOD_NXV1F64, "__epi_fmod_nxv1f64");
-    setLibcallName(RTLIB::FMOD_NXV2F64, "__epi_fmod_nxv2f64");
-    setLibcallName(RTLIB::FMOD_NXV4F64, "__epi_fmod_nxv4f64");
-    setLibcallName(RTLIB::FMOD_NXV8F64, "__epi_fmod_nxv8f64");
-    setLibcallName(RTLIB::FMOD_NXV1F32, "__epi_fmod_nxv1f32");
-    setLibcallName(RTLIB::FMOD_NXV2F32, "__epi_fmod_nxv2f32");
-    setLibcallName(RTLIB::FMOD_NXV4F32, "__epi_fmod_nxv4f32");
-    setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
-    setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
+    setLibcallName(RTLIB::REM_NXV1F64, "__epi_fmod_nxv1f64");
+    setLibcallName(RTLIB::REM_NXV2F64, "__epi_fmod_nxv2f64");
+    setLibcallName(RTLIB::REM_NXV4F64, "__epi_fmod_nxv4f64");
+    setLibcallName(RTLIB::REM_NXV8F64, "__epi_fmod_nxv8f64");
+    setLibcallName(RTLIB::REM_NXV1F32, "__epi_fmod_nxv1f32");
+    setLibcallName(RTLIB::REM_NXV2F32, "__epi_fmod_nxv2f32");
+    setLibcallName(RTLIB::REM_NXV4F32, "__epi_fmod_nxv4f32");
+    setLibcallName(RTLIB::REM_NXV8F32, "__epi_fmod_nxv8f32");
+    setLibcallName(RTLIB::REM_NXV16F32, "__epi_fmod_nxv16f32");
 
     setLibcallName(RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64");
     setLibcallName(RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64");
@@ -1214,15 +1214,15 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32");
 
     // Register libcalls for VP SDNodes.
-    setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_frem_nxv1f64");
-    setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_frem_nxv2f64");
-    setLibcallName(RTLIB::VP_FREM_NXV4F64, "__epi_vp_frem_nxv4f64");
-    setLibcallName(RTLIB::VP_FREM_NXV8F64, "__epi_vp_frem_nxv8f64");
-    setLibcallName(RTLIB::VP_FREM_NXV1F32, "__epi_vp_frem_nxv1f32");
-    setLibcallName(RTLIB::VP_FREM_NXV2F32, "__epi_vp_frem_nxv2f32");
-    setLibcallName(RTLIB::VP_FREM_NXV4F32, "__epi_vp_frem_nxv4f32");
-    setLibcallName(RTLIB::VP_FREM_NXV8F32, "__epi_vp_frem_nxv8f32");
-    setLibcallName(RTLIB::VP_FREM_NXV16F32, "__epi_vp_frem_nxv16f32");
+    setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_fmod_nxv1f64");
+    setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_fmod_nxv2f64");
+    setLibcallName(RTLIB::VP_FREM_NXV4F64, "__epi_vp_fmod_nxv4f64");
+    setLibcallName(RTLIB::VP_FREM_NXV8F64, "__epi_vp_fmod_nxv8f64");
+    setLibcallName(RTLIB::VP_FREM_NXV1F32, "__epi_vp_fmod_nxv1f32");
+    setLibcallName(RTLIB::VP_FREM_NXV2F32, "__epi_vp_fmod_nxv2f32");
+    setLibcallName(RTLIB::VP_FREM_NXV4F32, "__epi_vp_fmod_nxv4f32");
+    setLibcallName(RTLIB::VP_FREM_NXV8F32, "__epi_vp_fmod_nxv8f32");
+    setLibcallName(RTLIB::VP_FREM_NXV16F32, "__epi_vp_fmod_nxv16f32");
 
     setLibcallName(RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64");
     setLibcallName(RTLIB::VP_REDUCE_FMUL_NXV2F64, "__epi_vp_reduce_fmul_nxv2f64");
@@ -1778,15 +1778,15 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
 
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
   RISCVVTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64},
-      {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
-      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64},
-      {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
-      {MVT::nxv1f32, RTLIB::FMOD_NXV1F32},
-      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32},
-      {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
-      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32},
-      {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
+      {MVT::nxv1f64, RTLIB::REM_NXV1F64},
+      {MVT::nxv2f64, RTLIB::REM_NXV2F64},
+      {MVT::nxv4f64, RTLIB::REM_NXV4F64},
+      {MVT::nxv8f64, RTLIB::REM_NXV8F64},
+      {MVT::nxv1f32, RTLIB::REM_NXV1F32},
+      {MVT::nxv2f32, RTLIB::REM_NXV2F32},
+      {MVT::nxv4f32, RTLIB::REM_NXV4F32},
+      {MVT::nxv8f32, RTLIB::REM_NXV8F32},
+      {MVT::nxv16f32, RTLIB::REM_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
 }
