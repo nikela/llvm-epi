@@ -99,6 +99,52 @@ func @extSIOfExtSI(%arg0: i1) -> i64 {
 
 // -----
 
+// CHECK-LABEL: @andOfExtSI
+//       CHECK:  %[[comb:.+]] = arith.andi %arg0, %arg1 : i8
+//       CHECK:  %[[ext:.+]] = arith.extsi %[[comb]] : i8 to i64
+//       CHECK:   return %[[ext]]
+func @andOfExtSI(%arg0: i8, %arg1: i8) -> i64 {
+  %ext0 = arith.extsi %arg0 : i8 to i64
+  %ext1 = arith.extsi %arg1 : i8 to i64
+  %res = arith.andi %ext0, %ext1 : i64
+  return %res : i64
+}
+
+// CHECK-LABEL: @andOfExtUI
+//       CHECK:  %[[comb:.+]] = arith.andi %arg0, %arg1 : i8
+//       CHECK:  %[[ext:.+]] = arith.extui %[[comb]] : i8 to i64
+//       CHECK:   return %[[ext]]
+func @andOfExtUI(%arg0: i8, %arg1: i8) -> i64 {
+  %ext0 = arith.extui %arg0 : i8 to i64
+  %ext1 = arith.extui %arg1 : i8 to i64
+  %res = arith.andi %ext0, %ext1 : i64
+  return %res : i64
+}
+
+// CHECK-LABEL: @orOfExtSI
+//       CHECK:  %[[comb:.+]] = arith.ori %arg0, %arg1 : i8
+//       CHECK:  %[[ext:.+]] = arith.extsi %[[comb]] : i8 to i64
+//       CHECK:   return %[[ext]]
+func @orOfExtSI(%arg0: i8, %arg1: i8) -> i64 {
+  %ext0 = arith.extsi %arg0 : i8 to i64
+  %ext1 = arith.extsi %arg1 : i8 to i64
+  %res = arith.ori %ext0, %ext1 : i64
+  return %res : i64
+}
+
+// CHECK-LABEL: @orOfExtUI
+//       CHECK:  %[[comb:.+]] = arith.ori %arg0, %arg1 : i8
+//       CHECK:  %[[ext:.+]] = arith.extui %[[comb]] : i8 to i64
+//       CHECK:   return %[[ext]]
+func @orOfExtUI(%arg0: i8, %arg1: i8) -> i64 {
+  %ext0 = arith.extui %arg0 : i8 to i64
+  %ext1 = arith.extui %arg1 : i8 to i64
+  %res = arith.ori %ext0, %ext1 : i64
+  return %res : i64
+}
+
+// -----
+
 // CHECK-LABEL: @indexCastOfSignExtend
 //       CHECK:   %[[res:.+]] = arith.index_cast %arg0 : i8 to index
 //       CHECK:   return %[[res]]
@@ -251,6 +297,22 @@ func @tripleSubSub3(%arg0: index) -> index {
   %add1 = arith.subi %arg0, %c17 : index
   %add2 = arith.subi %add1, %c42 : index
   return %add2 : index
+}
+
+// CHECK-LABEL: @doubleAddSub1
+//  CHECK-NEXT:   return %arg0
+func @doubleAddSub1(%arg0: index, %arg1 : index) -> index {
+  %sub = arith.subi %arg0, %arg1 : index
+  %add = arith.addi %sub, %arg1 : index
+  return %add : index
+}
+
+// CHECK-LABEL: @doubleAddSub2
+//  CHECK-NEXT:   return %arg0
+func @doubleAddSub2(%arg0: index, %arg1 : index) -> index {
+  %sub = arith.subi %arg0, %arg1 : index
+  %add = arith.addi %arg1, %sub : index
+  return %add : index
 }
 
 // CHECK-LABEL: @notCmpEQ
