@@ -682,7 +682,6 @@ private:
   SDValue lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
                         unsigned RISCVISDOpc) const;
   SDValue lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPSelectMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPSpliceExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPExtMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const;
