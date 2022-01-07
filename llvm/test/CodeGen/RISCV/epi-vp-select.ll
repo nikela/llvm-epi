@@ -177,17 +177,27 @@ define void @test_vp_select_fp_3(<vscale x 2 x double> %a, <vscale x 2 x double>
 define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    vmv1r.v v10, v9
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
-; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vmandn.mm v9, v9, v8
+; CHECK-O0-NEXT:    vmand.mm v8, v0, v8
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask:
@@ -195,9 +205,9 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
-; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmandn.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmand.mm v9, v0, v9
+; CHECK-O2-NEXT:    vmor.mm v8, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -212,17 +222,27 @@ define void @test_vp_select_mask(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, <vs
 define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_2:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    vmv1r.v v10, v9
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
-; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vmandn.mm v9, v9, v8
+; CHECK-O0-NEXT:    vmand.mm v8, v0, v8
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_2:
@@ -230,9 +250,9 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
-; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmandn.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmand.mm v9, v0, v9
+; CHECK-O2-NEXT:    vmor.mm v8, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -247,17 +267,27 @@ define void @test_vp_select_mask_2(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_select_mask_3:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    vmv1r.v v10, v9
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v9, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmxor.mm v9, v8, v0
-; CHECK-O0-NEXT:    vmand.mm v9, v9, v10
-; CHECK-O0-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vmandn.mm v9, v9, v8
+; CHECK-O0-NEXT:    vmand.mm v8, v0, v8
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_select_mask_3:
@@ -265,9 +295,9 @@ define void @test_vp_select_mask_3(<vscale x 2 x i1> %a, <vscale x 2 x i1> %b, <
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmxor.mm v10, v8, v0
-; CHECK-O2-NEXT:    vmand.mm v9, v10, v9
-; CHECK-O2-NEXT:    vmxor.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmandn.mm v8, v8, v9
+; CHECK-O2-NEXT:    vmand.mm v9, v0, v9
+; CHECK-O2-NEXT:    vmor.mm v8, v9, v8
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret

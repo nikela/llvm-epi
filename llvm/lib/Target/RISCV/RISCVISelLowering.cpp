@@ -564,6 +564,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SELECT, VT, Custom);
       setOperationAction(ISD::SELECT_CC, VT, Expand);
       setOperationAction(ISD::VSELECT, VT, Expand);
+      setOperationAction(ISD::VP_SELECT, VT, Expand);
 
       setOperationAction(ISD::VP_AND, VT, Custom);
       setOperationAction(ISD::VP_OR, VT, Custom);
@@ -609,7 +610,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       // Comparisons
       setOperationAction(ISD::VP_SETCC, VT, Custom);
 
-      setOperationAction(ISD::VP_SELECT, VT, Custom);
       setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
       setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
@@ -925,7 +925,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           setOperationAction(ISD::VP_FPTOSI, VT, Custom);
           setOperationAction(ISD::VP_FPTOUI, VT, Custom);
 
-          setOperationAction(ISD::VP_SELECT, VT, Custom);
           setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
           setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
 
@@ -1193,15 +1192,25 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32");
     setLibcallName(RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32");
 
-    setLibcallName(RTLIB::FMOD_NXV1F64, "__epi_fmod_nxv1f64");
-    setLibcallName(RTLIB::FMOD_NXV2F64, "__epi_fmod_nxv2f64");
-    setLibcallName(RTLIB::FMOD_NXV4F64, "__epi_fmod_nxv4f64");
-    setLibcallName(RTLIB::FMOD_NXV8F64, "__epi_fmod_nxv8f64");
-    setLibcallName(RTLIB::FMOD_NXV1F32, "__epi_fmod_nxv1f32");
-    setLibcallName(RTLIB::FMOD_NXV2F32, "__epi_fmod_nxv2f32");
-    setLibcallName(RTLIB::FMOD_NXV4F32, "__epi_fmod_nxv4f32");
-    setLibcallName(RTLIB::FMOD_NXV8F32, "__epi_fmod_nxv8f32");
-    setLibcallName(RTLIB::FMOD_NXV16F32, "__epi_fmod_nxv16f32");
+    setLibcallName(RTLIB::POW_NXV1F64, "__epi_pow_nxv1f64");
+    setLibcallName(RTLIB::POW_NXV2F64, "__epi_pow_nxv2f64");
+    setLibcallName(RTLIB::POW_NXV4F64, "__epi_pow_nxv4f64");
+    setLibcallName(RTLIB::POW_NXV8F64, "__epi_pow_nxv8f64");
+    setLibcallName(RTLIB::POW_NXV1F32, "__epi_pow_nxv1f32");
+    setLibcallName(RTLIB::POW_NXV2F32, "__epi_pow_nxv2f32");
+    setLibcallName(RTLIB::POW_NXV4F32, "__epi_pow_nxv4f32");
+    setLibcallName(RTLIB::POW_NXV8F32, "__epi_pow_nxv8f32");
+    setLibcallName(RTLIB::POW_NXV16F32, "__epi_pow_nxv16f32");
+
+    setLibcallName(RTLIB::REM_NXV1F64, "__epi_fmod_nxv1f64");
+    setLibcallName(RTLIB::REM_NXV2F64, "__epi_fmod_nxv2f64");
+    setLibcallName(RTLIB::REM_NXV4F64, "__epi_fmod_nxv4f64");
+    setLibcallName(RTLIB::REM_NXV8F64, "__epi_fmod_nxv8f64");
+    setLibcallName(RTLIB::REM_NXV1F32, "__epi_fmod_nxv1f32");
+    setLibcallName(RTLIB::REM_NXV2F32, "__epi_fmod_nxv2f32");
+    setLibcallName(RTLIB::REM_NXV4F32, "__epi_fmod_nxv4f32");
+    setLibcallName(RTLIB::REM_NXV8F32, "__epi_fmod_nxv8f32");
+    setLibcallName(RTLIB::REM_NXV16F32, "__epi_fmod_nxv16f32");
 
     setLibcallName(RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64");
     setLibcallName(RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64");
@@ -1214,15 +1223,15 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setLibcallName(RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32");
 
     // Register libcalls for VP SDNodes.
-    setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_frem_nxv1f64");
-    setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_frem_nxv2f64");
-    setLibcallName(RTLIB::VP_FREM_NXV4F64, "__epi_vp_frem_nxv4f64");
-    setLibcallName(RTLIB::VP_FREM_NXV8F64, "__epi_vp_frem_nxv8f64");
-    setLibcallName(RTLIB::VP_FREM_NXV1F32, "__epi_vp_frem_nxv1f32");
-    setLibcallName(RTLIB::VP_FREM_NXV2F32, "__epi_vp_frem_nxv2f32");
-    setLibcallName(RTLIB::VP_FREM_NXV4F32, "__epi_vp_frem_nxv4f32");
-    setLibcallName(RTLIB::VP_FREM_NXV8F32, "__epi_vp_frem_nxv8f32");
-    setLibcallName(RTLIB::VP_FREM_NXV16F32, "__epi_vp_frem_nxv16f32");
+    setLibcallName(RTLIB::VP_FREM_NXV1F64, "__epi_vp_fmod_nxv1f64");
+    setLibcallName(RTLIB::VP_FREM_NXV2F64, "__epi_vp_fmod_nxv2f64");
+    setLibcallName(RTLIB::VP_FREM_NXV4F64, "__epi_vp_fmod_nxv4f64");
+    setLibcallName(RTLIB::VP_FREM_NXV8F64, "__epi_vp_fmod_nxv8f64");
+    setLibcallName(RTLIB::VP_FREM_NXV1F32, "__epi_vp_fmod_nxv1f32");
+    setLibcallName(RTLIB::VP_FREM_NXV2F32, "__epi_vp_fmod_nxv2f32");
+    setLibcallName(RTLIB::VP_FREM_NXV4F32, "__epi_vp_fmod_nxv4f32");
+    setLibcallName(RTLIB::VP_FREM_NXV8F32, "__epi_vp_fmod_nxv8f32");
+    setLibcallName(RTLIB::VP_FREM_NXV16F32, "__epi_vp_fmod_nxv16f32");
 
     setLibcallName(RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64");
     setLibcallName(RTLIB::VP_REDUCE_FMUL_NXV2F64, "__epi_vp_reduce_fmul_nxv2f64");
@@ -1275,6 +1284,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FSIN, VT, Custom);
       setOperationAction(ISD::FCOS, VT, Custom);
       setOperationAction(ISD::FREM, VT, Custom);
+      setOperationAction(ISD::FPOW, VT, Custom);
 
       setOperationAction(ISD::FRINT, VT, Custom);
 
@@ -1776,17 +1786,32 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
 }
 
+SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
+  RISCVVTToLibCall VTToLC[] = {
+      {MVT::nxv1f64, RTLIB::POW_NXV1F64},
+      {MVT::nxv2f64, RTLIB::POW_NXV2F64},
+      {MVT::nxv4f64, RTLIB::POW_NXV4F64},
+      {MVT::nxv8f64, RTLIB::POW_NXV8F64},
+      {MVT::nxv1f32, RTLIB::POW_NXV1F32},
+      {MVT::nxv2f32, RTLIB::POW_NXV2F32},
+      {MVT::nxv4f32, RTLIB::POW_NXV4F32},
+      {MVT::nxv8f32, RTLIB::POW_NXV8F32},
+      {MVT::nxv16f32, RTLIB::POW_NXV16F32},
+  };
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+}
+
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
   RISCVVTToLibCall VTToLC[] = {
-      {MVT::nxv1f64, RTLIB::FMOD_NXV1F64},
-      {MVT::nxv2f64, RTLIB::FMOD_NXV2F64},
-      {MVT::nxv4f64, RTLIB::FMOD_NXV4F64},
-      {MVT::nxv8f64, RTLIB::FMOD_NXV8F64},
-      {MVT::nxv1f32, RTLIB::FMOD_NXV1F32},
-      {MVT::nxv2f32, RTLIB::FMOD_NXV2F32},
-      {MVT::nxv4f32, RTLIB::FMOD_NXV4F32},
-      {MVT::nxv8f32, RTLIB::FMOD_NXV8F32},
-      {MVT::nxv16f32, RTLIB::FMOD_NXV16F32},
+      {MVT::nxv1f64, RTLIB::REM_NXV1F64},
+      {MVT::nxv2f64, RTLIB::REM_NXV2F64},
+      {MVT::nxv4f64, RTLIB::REM_NXV4F64},
+      {MVT::nxv8f64, RTLIB::REM_NXV8F64},
+      {MVT::nxv1f32, RTLIB::REM_NXV1F32},
+      {MVT::nxv2f32, RTLIB::REM_NXV2F32},
+      {MVT::nxv4f32, RTLIB::REM_NXV4F32},
+      {MVT::nxv8f32, RTLIB::REM_NXV8F32},
+      {MVT::nxv16f32, RTLIB::REM_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
 }
@@ -3128,6 +3153,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerFSIN(Op, DAG);
   case ISD::FCOS:
     return lowerFCOS(Op, DAG);
+  case ISD::FPOW:
+    return lowerFPOW(Op, DAG);
   case ISD::FREM:
     return lowerFREM(Op, DAG);
   case ISD::FRINT: {
@@ -3709,8 +3736,6 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_STORE:
     return lowerVPStore(Op, DAG);
   case ISD::VP_SELECT:
-    if (Op.getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPSelectMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG, RISCVISD::VSELECT_VL);
   case ISD::VP_ADD:
     return lowerVPOp(Op, DAG, RISCVISD::ADD_VL);
@@ -6518,48 +6543,6 @@ SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
 
   SDValue Result = DAG.getNode(RISCVISD::VMOR_VL, DL, ContainerVT, SetCC,
                      DAG.getNOT(DL, NanAnd, ContainerVT), EVL);
-
-  if (!VT.isFixedLengthVector())
-    return Result;
-  return convertFromScalableVector(VT, Result, DAG, Subtarget);
-}
-
-SDValue RISCVTargetLowering::lowerVPSelectMaskOp(SDValue Op,
-                                                 SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  MVT VT = Op.getSimpleValueType();
-  // FIXME
-  assert(!VT.isFixedLengthVector() &&
-         "Fixed length vector masks not implemented yet");
-
-  // Ops indexes: 0->Mask, 1->Op1, 2->Op2, 3->EVL
-  SmallVector<SDValue, 4> Ops;
-  for (const auto &OpIdx : enumerate(Op->ops())) {
-    SDValue V = OpIdx.value();
-    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
-    // Pass through operands which aren't fixed-length vectors.
-    if (!V.getValueType().isFixedLengthVector()) {
-      Ops.push_back(V);
-      continue;
-    }
-    // "cast" fixed length vector to a scalable vector.
-    MVT OpVT = V.getSimpleValueType();
-    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
-    assert(useRVVForFixedLengthVectorVT(OpVT) &&
-           "Only fixed length vectors are supported!");
-    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
-  }
-
-  MVT ContainerVT = VT;
-  if (VT.isFixedLengthVector())
-    ContainerVT = getContainerForFixedLengthVector(VT);
-
-  SDValue XOR =
-      DAG.getNode(RISCVISD::VMXOR_VL, DL, ContainerVT, Ops[2], Ops[1], Ops[3]);
-  SDValue AND =
-      DAG.getNode(RISCVISD::VMAND_VL, DL, ContainerVT, XOR, Ops[0], Ops[3]);
-  SDValue Result =
-      DAG.getNode(RISCVISD::VMXOR_VL, DL, ContainerVT, Ops[2], AND, Ops[3]);
 
   if (!VT.isFixedLengthVector())
     return Result;
