@@ -178,12 +178,15 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
     switch (Kind) {
     case TTI::SK_Broadcast:
-      return getBroadcastShuffleOverhead(cast<ScalableVectorType>(Tp));
+      // Broadcasts from lane 0 should not be slow.
+      return 1;
     case TTI::SK_Select:
     case TTI::SK_Reverse:
     case TTI::SK_Transpose:
     case TTI::SK_PermuteSingleSrc:
     case TTI::SK_PermuteTwoSrc:
+      // This may seem strange but the more elements out there the more work is
+      // for the VPU.
       return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
     case TTI::SK_ExtractSubvector:
       return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
@@ -191,6 +194,9 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
     case TTI::SK_InsertSubvector:
       return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
                                         cast<ScalableVectorType>(SubTp));
+      // Use the default.
+    case TTI::SK_Splice:
+      break;
     }
   }
   return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
