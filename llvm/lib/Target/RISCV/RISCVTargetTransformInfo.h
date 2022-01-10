@@ -186,20 +186,8 @@ public:
   InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
                                          bool IsUnsigned,
                                          TTI::TargetCostKind CostKind);
-  TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
-    switch (K) {
-    case TargetTransformInfo::RGK_Scalar:
-      return TypeSize::getFixed(ST->getXLen());
-    case TargetTransformInfo::RGK_FixedWidthVector:
-      return TypeSize::getFixed(
-          ST->hasVInstructions() ? ST->getMinRVVVectorSizeInBits() : 0);
-    case TargetTransformInfo::RGK_ScalableVector:
-      return TypeSize::getScalable(
-          ST->hasVInstructions() ? RISCV::RVVBitsPerBlock : 0);
-    }
 
-    llvm_unreachable("Unsupported register kind");
-  }
+  TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const;
 
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
                                         Align Alignment, unsigned AddressSpace,
@@ -212,7 +200,7 @@ public:
                              TTI::PeelingPreferences &PP);
 
   unsigned getMinVectorRegisterBitWidth() const {
-    return ST->hasVInstructions() ? ST->getMinRVVVectorSizeInBits() : 0;
+    return ST->useRVVForFixedLengthVectors() ? 16 : 0;
   }
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,

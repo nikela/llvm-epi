@@ -20,6 +20,13 @@ using namespace llvm;
 
 #define DEBUG_TYPE "riscvtti"
 
+static cl::opt<unsigned> RVVRegisterWidthLMUL(
+    "riscv-v-register-bit-width-lmul",
+    cl::desc(
+        "The LMUL to use for getRegisterBitWidth queries. Affects LMUL used "
+        "by autovectorized code. Fractional LMULs are not supported."),
+    cl::init(1), cl::Hidden);
+
 InstructionCost RISCVTTIImpl::getIntImmCost(const APInt &Imm, Type *Ty,
                                             TTI::TargetCostKind CostKind) {
   assert(Ty->isIntegerTy() &&
@@ -280,7 +287,7 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
                                         bool IsScalable) const {
   return ST->hasStdExtV() && IsScalable
              ? ElementCount::get(
-                   std::max<unsigned>(1, getMinVectorRegisterBitWidth() /
+                   std::max<unsigned>(1, ST->getMinRVVVectorSizeInBits() /
                                              ElemWidth),
                    IsScalable)
              : ElementCount::getNull();
@@ -298,7 +305,7 @@ InstructionCost RISCVTTIImpl::getRegUsageForType(Type *Ty) {
   unsigned VectorSizeBits =
       ETy->getScalarSizeInBits() * VTy->getElementCount().getKnownMinValue();
 
-  unsigned RegisterBitSize = getMinVectorRegisterBitWidth();
+  unsigned RegisterBitSize = ST->getMinRVVVectorSizeInBits();
   return std::max<unsigned>(1, VectorSizeBits / RegisterBitSize);
 }
 
@@ -317,10 +324,9 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
   SmallestType = std::max<unsigned>(8, SmallestType);
   WidestType = std::max<unsigned>(8, WidestType);
   unsigned WidestRegister = std::min<unsigned>(
-      getMinVectorRegisterBitWidth() * RegWidthFactor,
-      MaxSafeRegisterWidth);
+      ST->getMinRVVVectorSizeInBits() * RegWidthFactor, MaxSafeRegisterWidth);
   unsigned SmallestRegister =
-      std::min(getMinVectorRegisterBitWidth(), MaxSafeRegisterWidth);
+      std::min(ST->getMinRVVVectorSizeInBits(), MaxSafeRegisterWidth);
 
   unsigned LowerBoundVFKnownMin =
       std::max<unsigned>(1, PowerOf2Floor(SmallestRegister / SmallestType));
@@ -456,6 +462,24 @@ RISCVTTIImpl::getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
                                         CostKind);
 
   return TLI->getTypeLegalizationCost(DL, Src).first;
+}
+
+TypeSize
+RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
+  unsigned LMUL = PowerOf2Floor(
+      std::max<unsigned>(std::min<unsigned>(RVVRegisterWidthLMUL, 8), 1));
+  switch (K) {
+  case TargetTransformInfo::RGK_Scalar:
+    return TypeSize::getFixed(ST->getXLen());
+  case TargetTransformInfo::RGK_FixedWidthVector:
+    return TypeSize::getFixed(
+        ST->hasVInstructions() ? LMUL * ST->getMinRVVVectorSizeInBits() : 0);
+  case TargetTransformInfo::RGK_ScalableVector:
+    return TypeSize::getScalable(
+        ST->hasVInstructions() ? LMUL * RISCV::RVVBitsPerBlock : 0);
+  }
+
+  llvm_unreachable("Unsupported register kind");
 }
 
 InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
