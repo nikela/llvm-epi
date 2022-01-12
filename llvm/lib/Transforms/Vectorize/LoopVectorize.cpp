@@ -3165,8 +3165,9 @@ Value *InnerLoopVectorizer::getOrCreateVectorTripCount(Loop *L) {
     // TODO: Fix for scalable vectors.
     assert(isPowerOf2_32(VF.getKnownMinValue() * UF) &&
            "VF*UF must be a power of 2 when folding tail by masking");
-    Value *Stepm = Builder.CreateSub(Step, ConstantInt::get(Ty, 1));
-    TC = Builder.CreateAdd(TC, Stepm, "n.rnd.up");
+    Value *NumLanes = getRuntimeVF(Builder, Ty, VF * UF);
+    TC = Builder.CreateAdd(
+        TC, Builder.CreateSub(NumLanes, ConstantInt::get(Ty, 1)), "n.rnd.up");
   }
 
   // Now we need to generate the expression for the part of the loop that the
@@ -6113,11 +6114,12 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
     }
   }
 
-  // For scalable vectors, don't use tail folding as this is currently not yet
-  // supported. The code is likely to have ended up here if the tripcount is
-  // low, in which case it makes sense not to use scalable vectors. That
-  // said, allow this if we explicitly requested no fixed size vectorization.
-  if (MaxFactors.ScalableVF.isVector() &&
+  // For scalable vectors don't use tail folding for low trip counts or
+  // optimizing for code size. We only permit this if the user has explicitly
+  // requested it.
+  if (ScalarEpilogueStatus != CM_ScalarEpilogueNotNeededUsePredicate &&
+      ScalarEpilogueStatus != CM_ScalarEpilogueNotAllowedUsePredicate &&
+      MaxFactors.ScalableVF.isVector() &&
       !Hints->isFixedVectorizationDisabled())
     MaxFactors.ScalableVF = ElementCount::getScalable(0);
 

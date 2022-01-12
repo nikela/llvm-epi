@@ -7,9 +7,8 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    blez a0, .LBB0_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
-; CHECK-NEXT:    lui a4, 16
-; CHECK-NEXT:    addiw a4, a4, -1
-; CHECK-NEXT:    and a6, a0, a4
+; CHECK-NEXT:    slli a0, a0, 48
+; CHECK-NEXT:    srli a6, a0, 48
 ; CHECK-NEXT:    csrr t0, vlenb
 ; CHECK-NEXT:    srli t2, t0, 1
 ; CHECK-NEXT:    bgeu a6, t2, .LBB0_3

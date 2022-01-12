@@ -21,6 +21,7 @@
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/LinalgInterfaceImpl.h"
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/ModuleBufferization.h"
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/SCFInterfaceImpl.h"
+#include "mlir/Dialect/Linalg/ComprehensiveBufferize/StdInterfaceImpl.h"
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/TensorInterfaceImpl.h"
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/VectorInterfaceImpl.h"
 #include "mlir/Dialect/Linalg/IR/Linalg.h"
@@ -55,13 +56,14 @@ struct TestComprehensiveFunctionBufferize
   void getDependentDialects(DialectRegistry &registry) const override {
     registry.insert<bufferization::BufferizationDialect, linalg::LinalgDialect,
                     memref::MemRefDialect, tensor::TensorDialect,
-                    vector::VectorDialect, scf::SCFDialect,
+                    vector::VectorDialect, scf::SCFDialect, StandardOpsDialect,
                     arith::ArithmeticDialect, AffineDialect>();
     affine_ext::registerBufferizableOpInterfaceExternalModels(registry);
     arith_ext::registerBufferizableOpInterfaceExternalModels(registry);
     bufferization_ext::registerBufferizableOpInterfaceExternalModels(registry);
     linalg_ext::registerBufferizableOpInterfaceExternalModels(registry);
     scf_ext::registerBufferizableOpInterfaceExternalModels(registry);
+    std_ext::registerBufferizableOpInterfaceExternalModels(registry);
     tensor_ext::registerBufferizableOpInterfaceExternalModels(registry);
     vector_ext::registerBufferizableOpInterfaceExternalModels(registry);
   }
@@ -96,9 +98,6 @@ struct TestComprehensiveFunctionBufferize
 void TestComprehensiveFunctionBufferize::runOnFunction() {
   auto options = std::make_unique<BufferizationOptions>();
 
-  // Enable InitTensorOp elimination.
-  options->addPostAnalysisStep<
-      linalg_ext::InsertSliceAnchoredInitTensorEliminationStep>();
   if (!allowReturnMemref)
     options->addPostAnalysisStep<scf_ext::AssertDestinationPassingStyle>();
 
@@ -115,6 +114,9 @@ void TestComprehensiveFunctionBufferize::runOnFunction() {
 
   Operation *op = getFunction().getOperation();
   if (failed(runComprehensiveBufferize(op, std::move(options))))
+    return;
+
+  if (testAnalysisOnly)
     return;
 
   OpPassManager cleanupPipeline("builtin.func");

@@ -1449,49 +1449,16 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.get(getParent()->getPlan()->getCanonicalIV(), 0);
   Type *STy = CanonicalIV->getType();
   IRBuilder<> Builder(State.CFG.PrevBB->getTerminator());
-  Value *VStart =
-      State.VF.isScalar()
-          ? CanonicalIV
-          : Builder.CreateVectorSplat(State.VF, CanonicalIV, "broadcast");
+  ElementCount VF = State.VF;
+  Value *VStart = VF.isScalar()
+                      ? CanonicalIV
+                      : Builder.CreateVectorSplat(VF, CanonicalIV, "broadcast");
   for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part) {
-    Value *VStep = nullptr;
-    if (!State.VF.isScalable()) {
-      auto VF = State.VF.getKnownMinValue();
-      SmallVector<Constant *, 8> Indices;
-      for (unsigned Lane = 0; Lane < VF; ++Lane)
-        Indices.push_back(ConstantInt::get(STy, Part * VF + Lane));
-      // If VF == 1, there is only one iteration in the loop above, thus the
-      // element pushed back into Indices is ConstantInt::get(STy, Part)
-      VStep = State.VF.isScalar() ? Indices.back() : ConstantVector::get(Indices);
-    } else {
-      // FIXME: For predicated vectorization if interleaving is enabled, each
-      // part will work on EVL lanes, which means the lanes for part Part will
-      // start from index (Part * EVL/*of previous part*/) rather than (Part *
-      // VF) or (Part * Vscale * VF) for scalable vectors.
-      // For now, since we do not support interleaving for predicated
-      // vectorization, instruction for (Part * EVL) is 0 and not generated.
-      // Note that, if interleaving is forced with predicated vectorizations the
-      // loop vectorizer would have already bailed out.
-      VStep = Builder.CreateIntrinsic(
-          Intrinsic::experimental_stepvector,
-          VectorType::get(STy, State.VF), {}, nullptr,
-          "stepvector");
-
-      if (!State.PreferPredicatedVectorOps) {
-        Value *Vscale = Builder.CreateIntrinsic(
-            Intrinsic::vscale, Type::getInt32Ty(Builder.getContext()), {},
-            nullptr, "vscale");
-        // Actual VF is vscale x VF, so generate a splat of (Part * vscale * VF)
-        Value *VFxVscale = Builder.CreateMul(
-            ConstantInt::get(STy, Part * State.VF.getKnownMinValue()), Vscale);
-        Value *SplatVFxVscale =
-            Builder.CreateVectorSplat(State.VF, VFxVscale);
-        // Finally add to step vector, equivalent to Part * VF + Lane.
-        VStep = Builder.CreateAdd(VStep, SplatVFxVscale);
-      }
+    Value *VStep = createStepForVF(Builder, STy, VF, Part);
+    if (VF.isVector()) {
+      VStep = Builder.CreateVectorSplat(VF, VStep);
+      VStep = Builder.CreateAdd(VStep, Builder.CreateStepVector(VStep->getType()));
     }
-
-    // Add the consecutive indices to the vector value.
     Value *CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
     State.set(this, CanonicalVectorIV, Part);
   }
