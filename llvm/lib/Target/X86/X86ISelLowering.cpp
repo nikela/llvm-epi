@@ -16544,23 +16544,30 @@ static SDValue lowerShuffleAsLanePermuteAndShuffle(
             lowerShuffleAsLanePermuteAndSHUFP(DL, VT, V1, V2, Mask, DAG))
       return V;
 
+  // Always allow ElementRotate patterns - these are sometimes hidden but its
+  // still better to avoid splitting.
+  SDValue RotV1 = V1, RotV2 = V2;
+  bool IsElementRotate = 0 <= matchShuffleAsElementRotate(RotV1, RotV2, Mask);
+
   // If there are only inputs from one 128-bit lane, splitting will in fact be
   // less expensive. The flags track whether the given lane contains an element
   // that crosses to another lane.
-  if (!Subtarget.hasAVX2()) {
-    bool LaneCrossing[2] = {false, false};
-    for (int i = 0; i < Size; ++i)
-      if (Mask[i] >= 0 && ((Mask[i] % Size) / LaneSize) != (i / LaneSize))
-        LaneCrossing[(Mask[i] % Size) / LaneSize] = true;
-    if (!LaneCrossing[0] || !LaneCrossing[1])
-      return splitAndLowerShuffle(DL, VT, V1, V2, Mask, DAG);
-  } else {
-    bool LaneUsed[2] = {false, false};
-    for (int i = 0; i < Size; ++i)
-      if (Mask[i] >= 0)
-        LaneUsed[(Mask[i] % Size) / LaneSize] = true;
-    if (!LaneUsed[0] || !LaneUsed[1])
-      return splitAndLowerShuffle(DL, VT, V1, V2, Mask, DAG);
+  if (!IsElementRotate) {
+    if (!Subtarget.hasAVX2()) {
+      bool LaneCrossing[2] = {false, false};
+      for (int i = 0; i < Size; ++i)
+        if (Mask[i] >= 0 && ((Mask[i] % Size) / LaneSize) != (i / LaneSize))
+          LaneCrossing[(Mask[i] % Size) / LaneSize] = true;
+      if (!LaneCrossing[0] || !LaneCrossing[1])
+        return splitAndLowerShuffle(DL, VT, V1, V2, Mask, DAG);
+    } else {
+      bool LaneUsed[2] = {false, false};
+      for (int i = 0; i < Size; ++i)
+        if (Mask[i] >= 0)
+          LaneUsed[(Mask[i] % Size) / LaneSize] = true;
+      if (!LaneUsed[0] || !LaneUsed[1])
+        return splitAndLowerShuffle(DL, VT, V1, V2, Mask, DAG);
+    }
   }
 
   // TODO - we could support shuffling V2 in the Flipped input.
@@ -40080,6 +40087,24 @@ bool X86TargetLowering::SimplifyDemandedVectorEltsForTargetNode(
               Src, DemandedElts, TLO.DAG, Depth + 1))
         return TLO.CombineTo(
             Op, TLO.DAG.getNode(Opc, SDLoc(Op), VT, NewSrc, Op.getOperand(1)));
+    break;
+  }
+  case X86ISD::VPSHA:
+  case X86ISD::VPSHL:
+  case X86ISD::VSHLV:
+  case X86ISD::VSRLV:
+  case X86ISD::VSRAV: {
+    APInt LHSUndef, LHSZero;
+    APInt RHSUndef, RHSZero;
+    SDValue LHS = Op.getOperand(0);
+    SDValue RHS = Op.getOperand(1);
+    if (SimplifyDemandedVectorElts(LHS, DemandedElts, LHSUndef, LHSZero, TLO,
+                                   Depth + 1))
+      return true;
+    if (SimplifyDemandedVectorElts(RHS, DemandedElts, RHSUndef, RHSZero, TLO,
+                                   Depth + 1))
+      return true;
+    KnownZero = LHSZero;
     break;
   }
   case X86ISD::KSHIFTL: {

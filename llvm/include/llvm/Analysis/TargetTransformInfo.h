@@ -664,6 +664,12 @@ public:
   bool isLegalMaskedScatter(Type *DataType, Align Alignment) const;
   /// Return true if the target supports masked gather.
   bool isLegalMaskedGather(Type *DataType, Align Alignment) const;
+  /// Return true if the target forces scalarizing of llvm.masked.gather
+  /// intrinsics.
+  bool forceScalarizeMaskedGather(VectorType *Type, Align Alignment) const;
+  /// Return true if the target forces scalarizing of llvm.masked.scatter
+  /// intrinsics.
+  bool forceScalarizeMaskedScatter(VectorType *Type, Align Alignment) const;
 
   /// Return true if the target supports masked compress store.
   bool isLegalMaskedCompressStore(Type *DataType) const;
@@ -1557,6 +1563,10 @@ public:
   virtual bool isLegalNTLoad(Type *DataType, Align Alignment) = 0;
   virtual bool isLegalMaskedScatter(Type *DataType, Align Alignment) = 0;
   virtual bool isLegalMaskedGather(Type *DataType, Align Alignment) = 0;
+  virtual bool forceScalarizeMaskedGather(VectorType *DataType,
+                                          Align Alignment) = 0;
+  virtual bool forceScalarizeMaskedScatter(VectorType *DataType,
+                                           Align Alignment) = 0;
   virtual bool isLegalMaskedCompressStore(Type *DataType) = 0;
   virtual bool isLegalMaskedExpandLoad(Type *DataType) = 0;
   virtual bool enableOrderedReductions() = 0;
@@ -1967,6 +1977,14 @@ public:
   }
   bool isLegalMaskedGather(Type *DataType, Align Alignment) override {
     return Impl.isLegalMaskedGather(DataType, Alignment);
+  }
+  bool forceScalarizeMaskedGather(VectorType *DataType,
+                                  Align Alignment) override {
+    return Impl.forceScalarizeMaskedGather(DataType, Alignment);
+  }
+  bool forceScalarizeMaskedScatter(VectorType *DataType,
+                                   Align Alignment) override {
+    return Impl.forceScalarizeMaskedScatter(DataType, Alignment);
   }
   bool isLegalMaskedCompressStore(Type *DataType) override {
     return Impl.isLegalMaskedCompressStore(DataType);

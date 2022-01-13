@@ -3377,6 +3377,8 @@ KnownBits SelectionDAG::computeKnownBits(SDValue Op, const APInt &DemandedElts,
   case ISD::AssertAlign: {
     unsigned LogOfAlign = Log2(cast<AssertAlignSDNode>(Op)->getAlign());
     assert(LogOfAlign != 0);
+
+    // TODO: Should use maximum with source
     // If a node is guaranteed to be aligned, set low zero bits accordingly as
     // well as clearing one bits.
     Known.Zero.setLowBits(LogOfAlign);
@@ -4779,7 +4781,7 @@ SDValue SelectionDAG::getNode(unsigned Opcode, const SDLoc &DL, EVT VT,
                          C->isTargetOpcode(), C->isOpaque());
     case ISD::ANY_EXTEND:
       // Some targets like RISCV prefer to sign extend some types.
-      if (TLI->isSExtCheaperThanZExt(Operand.getValueType(), VT))
+      if (TLI->isSExtCheaperThanZExt(Operand.getValueType(), VT, Operand))
         return getConstant(Val.sextOrTrunc(VT.getSizeInBits()), DL, VT,
                            C->isTargetOpcode(), C->isOpaque());
       return getConstant(Val.zextOrTrunc(VT.getSizeInBits()), DL, VT,

@@ -500,6 +500,7 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
   case Intrinsic::vp_fptoui:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
     break;
+  case Intrinsic::vp_merge:
   case Intrinsic::vp_select:
     VPFunc = Intrinsic::getDeclaration(M, VPID, {Params[1]->getType()});
     break;

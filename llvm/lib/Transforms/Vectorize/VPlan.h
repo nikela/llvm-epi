@@ -823,6 +823,7 @@ public:
     ActiveLaneMask,
     CanonicalIVIncrement,
     CanonicalIVIncrementNUW,
+    BranchOnCount,
   };
 
 private:
@@ -901,6 +902,7 @@ public:
     case Instruction::Unreachable:
     case Instruction::Fence:
     case Instruction::AtomicRMW:
+    case VPInstruction::BranchOnCount:
       return false;
     default:
       return true;
@@ -1893,8 +1895,8 @@ public:
 /// A Recipe for widening the canonical induction variable of the vector loop.
 class VPWidenCanonicalIVRecipe : public VPRecipeBase, public VPValue {
 public:
-  VPWidenCanonicalIVRecipe()
-      : VPRecipeBase(VPWidenCanonicalIVSC, {}),
+  VPWidenCanonicalIVRecipe(VPCanonicalIVPHIRecipe *CanonicalIV)
+      : VPRecipeBase(VPWidenCanonicalIVSC, {CanonicalIV}),
         VPValue(VPValue::VPVWidenCanonicalIVSC, nullptr, this) {}
 
   ~VPWidenCanonicalIVRecipe() override = default;
