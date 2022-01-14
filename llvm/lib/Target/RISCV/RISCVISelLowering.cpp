@@ -1801,9 +1801,19 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   MakeLibCallOptions CallOptions;
   SDValue Chain;
   SDValue Result;
+  // FIXME: for VP Ops, only add mask operand when needed
   std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
 
-  // We use this function for some intrinsics. Skip the first operand which 
+  // Add vector length operand for not-VP Op
+  if (!ISD::isVPOpcode(Op.getOpcode())) {
+    MVT VT = Op.getSimpleValueType();
+    SDValue VL = DAG.getNode(
+        ISD::VSCALE, DL, MVT::i64,
+        DAG.getTargetConstant(VT.getVectorMinNumElements(), DL, MVT::i64));
+    Operands.push_back(VL);
+  }
+
+  // We use this function for some intrinsics. Skip the first operand which
   // is the opcode for the intrinsic itself.
   if (Op.getOpcode() == ISD::INTRINSIC_VOID ||
       Op.getOpcode() == ISD::INTRINSIC_W_CHAIN ||
