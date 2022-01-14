@@ -3994,6 +3994,11 @@ ScalarEvolution::getSequentialMinMaxExpr(SCEVTypes Kind,
   assert(!Ops.empty() && "Cannot get empty (u|s)(min|max)!");
   if (Ops.size() == 1)
     return Ops[0];
+  if (Ops.size() == 2 &&
+      any_of(Ops, [](const SCEV *Op) { return isa<SCEVConstant>(Op); }))
+    return getMinMaxExpr(
+        SCEVSequentialMinMaxExpr::getEquivalentNonSequentialSCEVType(Kind),
+        Ops);
 #ifndef NDEBUG
   Type *ETy = getEffectiveSCEVType(Ops[0]->getType());
   for (unsigned i = 1, e = Ops.size(); i != e; ++i) {
@@ -8364,26 +8369,11 @@ ScalarEvolution::computeExitLimitFromCondFromBinOp(
   if (EitherMayExit) {
     // Both conditions must be same for the loop to continue executing.
     // Choose the less conservative count.
-    // If ExitCond is a short-circuit form (select), using
-    // umin(EL0.ExactNotTaken, EL1.ExactNotTaken) is unsafe in general.
-    // To see the detailed examples, please see
-    // test/Analysis/ScalarEvolution/exit-count-select.ll
-    bool PoisonSafe = isa<BinaryOperator>(ExitCond);
-    if (!PoisonSafe)
-      // Even if ExitCond is select, we can safely derive BECount using both
-      // EL0 and EL1 in these cases:
-      // (1) EL0.ExactNotTaken is non-zero
-      // (2) EL1.ExactNotTaken is non-poison
-      // (3) EL0.ExactNotTaken is zero (BECount should be simply zero and
-      //     it cannot be umin(0, ..))
-      // The PoisonSafe assignment below is simplified and the assertion after
-      // BECount calculation fully guarantees the condition (3).
-      PoisonSafe = isa<SCEVConstant>(EL0.ExactNotTaken) ||
-                   isa<SCEVConstant>(EL1.ExactNotTaken);
     if (EL0.ExactNotTaken != getCouldNotCompute() &&
         EL1.ExactNotTaken != getCouldNotCompute()) {
-      BECount = getUMinFromMismatchedTypes(EL0.ExactNotTaken, EL1.ExactNotTaken,
-                                           /*Sequential=*/!PoisonSafe);
+      BECount = getUMinFromMismatchedTypes(
+          EL0.ExactNotTaken, EL1.ExactNotTaken,
+          /*Sequential=*/!isa<BinaryOperator>(ExitCond));
 
       // If EL0.ExactNotTaken was zero and ExitCond was a short-circuit form,
       // it should have been simplified to zero (see the condition (3) above)
