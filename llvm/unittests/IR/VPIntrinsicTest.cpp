@@ -109,6 +109,8 @@ protected:
 
     Str << " declare <8 x i32> @llvm.experimental.vp.reverse.v8i32(<8 x i32>, <8 x i1>, i32) ";
 
+    Str << " declare <8 x float> @llvm.vp.cos.v8f32(<8 x float>, <8 x i1>, i32) ";
+
     return parseAssemblyString(Str.str(), Err, C);
   }
 };

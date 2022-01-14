@@ -550,6 +550,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_FREM,
                                                   ISD::VP_FNEG,
                                                   ISD::VP_FMA,
+                                                  ISD::VP_COS,
                                                   ISD::VP_REDUCE_FADD,
                                                   ISD::VP_REDUCE_SEQ_FADD,
                                                   ISD::VP_REDUCE_FMUL,
@@ -1248,6 +1249,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                      {RTLIB::COS_NXV4F32, "__epi_cos_nxv4f32"},
                      {RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32"},
                      {RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32"}});
+
+    RegisterLibCall({{RTLIB::COS_NXV1F64_MASKED, "__epi_cos_nxv1f64_m"},
+                     {RTLIB::COS_NXV2F64_MASKED, "__epi_cos_nxv2f64_m"},
+                     {RTLIB::COS_NXV4F64_MASKED, "__epi_cos_nxv4f64_m"},
+                     {RTLIB::COS_NXV8F64_MASKED, "__epi_cos_nxv8f64_m"},
+                     {RTLIB::COS_NXV1F32_MASKED, "__epi_cos_nxv1f32_m"},
+                     {RTLIB::COS_NXV2F32_MASKED, "__epi_cos_nxv2f32_m"},
+                     {RTLIB::COS_NXV4F32_MASKED, "__epi_cos_nxv4f32_m"},
+                     {RTLIB::COS_NXV8F32_MASKED, "__epi_cos_nxv8f32_m"},
+                     {RTLIB::COS_NXV16F32_MASKED, "__epi_cos_nxv16f32_m"}});
 
     RegisterLibCall({{RTLIB::POW_NXV1F64, "__epi_pow_nxv1f64"},
                      {RTLIB::POW_NXV2F64, "__epi_pow_nxv2f64"},
@@ -4351,6 +4362,40 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
     assert(DstSize < SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_ROUND_VL);
+  }
+  case ISD::VP_COS: {
+    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
+        ISD::isConstantSplatVectorAllOnes(
+            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
+                .getNode())) {
+      RISCVVTToLibCall VTToLC[] = {
+          {MVT::nxv1f64, RTLIB::COS_NXV1F64},
+          {MVT::nxv2f64, RTLIB::COS_NXV2F64},
+          {MVT::nxv4f64, RTLIB::COS_NXV4F64},
+          {MVT::nxv8f64, RTLIB::COS_NXV8F64},
+          {MVT::nxv1f32, RTLIB::COS_NXV1F32},
+          {MVT::nxv2f32, RTLIB::COS_NXV2F32},
+          {MVT::nxv4f32, RTLIB::COS_NXV4F32},
+          {MVT::nxv8f32, RTLIB::COS_NXV8F32},
+          {MVT::nxv16f32, RTLIB::COS_NXV16F32},
+      };
+      return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                             /*IsMasked*/ false);
+    }
+
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::COS_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::COS_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::COS_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::COS_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::COS_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::COS_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::COS_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::COS_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::COS_NXV16F32_MASKED},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*IsMasked*/ true);
   }
   }
 }
