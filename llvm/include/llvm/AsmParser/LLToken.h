@@ -173,6 +173,7 @@ enum Kind {
   kw_amdgpu_cs,
   kw_amdgpu_kernel,
   kw_amdgpu_gfx,
+  kw_epi_vectorcall,
   kw_tailcc,
 
   // Attributes:

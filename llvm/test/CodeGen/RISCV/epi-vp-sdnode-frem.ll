@@ -46,11 +46,21 @@ declare <vscale x 4 x double> @llvm.vp.frem.nxv4f64(<vscale x 4 x double>, <vsca
 define <vscale x 8 x double> @test_vp_frem_nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_frem_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a1, vlenb
+; CHECK-NEXT:    slli a1, a1, 3
+; CHECK-NEXT:    sub sp, sp, a1
+; CHECK-NEXT:    mv a1, a0
+; CHECK-NEXT:    addi a0, sp, 24
+; CHECK-NEXT:    addi a2, sp, 24
+; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_vp_fmod_nxv8f64_m@plt
-; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 8 x double> @llvm.vp.frem.nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 %n)
   ret <vscale x 8 x double> %r0
@@ -116,11 +126,21 @@ declare <vscale x 8 x float> @llvm.vp.frem.nxv8f32(<vscale x 8 x float>, <vscale
 define <vscale x 16 x float> @test_vp_frem_nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_frem_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a1, vlenb
+; CHECK-NEXT:    slli a1, a1, 3
+; CHECK-NEXT:    sub sp, sp, a1
+; CHECK-NEXT:    mv a1, a0
+; CHECK-NEXT:    addi a0, sp, 24
+; CHECK-NEXT:    addi a2, sp, 24
+; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_vp_fmod_nxv16f32_m@plt
-; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 16 x float> @llvm.vp.frem.nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 %n)
   ret <vscale x 16 x float> %r0

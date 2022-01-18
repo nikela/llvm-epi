@@ -58,6 +58,8 @@ RISCVRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
       return CSR_XLEN_F32_Interrupt_SaveList;
     return CSR_Interrupt_SaveList;
   }
+  if (MF->getFunction().getCallingConv() == CallingConv::EPI_VectorCall)
+    return CSR_ILP32D_LP64D_VECLIB_SaveList;
 
   switch (Subtarget.getTargetABI()) {
   default:
@@ -301,6 +303,9 @@ RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
 
   if (CC == CallingConv::GHC)
     return CSR_NoRegs_RegMask;
+  if (CC == CallingConv::EPI_VectorCall)
+    return CSR_ILP32D_LP64D_VECLIB_RegMask;
+
   switch (Subtarget.getTargetABI()) {
   default:
     llvm_unreachable("Unrecognized ABI");

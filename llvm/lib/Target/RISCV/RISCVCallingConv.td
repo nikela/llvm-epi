@@ -24,6 +24,10 @@ def CSR_ILP32D_LP64D
     : CalleeSavedRegs<(add CSR_ILP32_LP64,
                        F8_D, F9_D, (sequence "F%u_D", 18, 27))>;
 
+def CSR_ILP32D_LP64D_VECLIB
+    : CalleeSavedRegs<(add CSR_ILP32D_LP64D,
+                       (sequence "V%u", 1, 7), (sequence "V%u", 16, 31))>;
+
 // Needed for implementation of RISCVRegisterInfo::getNoPreservedMask()
 def CSR_NoRegs : CalleeSavedRegs<(add)>;
 
