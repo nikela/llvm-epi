@@ -1372,13 +1372,9 @@ public:
   SDValue getIndexedLoadVP(SDValue OrigLoad, const SDLoc &dl, SDValue Base,
                            SDValue Offset, ISD::MemIndexedMode AM);
   SDValue getStoreVP(SDValue Chain, const SDLoc &dl, SDValue Val, SDValue Ptr,
-                     SDValue Mask, SDValue EVL, MachinePointerInfo PtrInfo,
-                     Align Alignment, MachineMemOperand::Flags MMOFlags,
-                     const AAMDNodes &AAInfo = AAMDNodes(),
-                     bool IsCompressing = false);
-  SDValue getStoreVP(SDValue Chain, const SDLoc &dl, SDValue Val, SDValue Ptr,
-                     SDValue Mask, SDValue EVL, MachineMemOperand *MMO,
-                     bool IsCompressing = false);
+                     SDValue Offset, SDValue Mask, SDValue EVL, EVT MemVT,
+                     MachineMemOperand *MMO, ISD::MemIndexedMode AM,
+                     bool IsTruncating = false, bool IsCompressing = false);
   SDValue getStridedStoreVP(SDValue Chain, const SDLoc &DL, SDValue Val,
                             SDValue Ptr, SDValue Stride, SDValue Mask,
                             SDValue EVL, MachineMemOperand *MMO,

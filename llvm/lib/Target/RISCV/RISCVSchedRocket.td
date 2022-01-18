@@ -238,5 +238,6 @@ def : ReadAdvance<ReadFClass64, 0>;
 defm : UnsupportedSchedV;
 defm : UnsupportedSchedZba;
 defm : UnsupportedSchedZbb;
+defm : UnsupportedSchedZbf;
 defm : UnsupportedSchedZfh;
 }

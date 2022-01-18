@@ -1140,7 +1140,7 @@ private:
                                               LLT Ty2) const override;
 
   bool isSExtCheaperThanZExt(EVT SrcVT, EVT DstVT, SDValue V) const override {
-    if (!V)
+    if (!V || SrcVT.getScalarType() == MVT::i1)
       return false;
     if (ConstantSDNode *C = isConstOrConstSplat(V))
       return C->getAPIntValue().isNegative();
