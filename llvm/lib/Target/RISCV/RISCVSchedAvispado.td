@@ -614,7 +614,9 @@ def : ReadAdvance<ReadVMask, 0>;
 // Unsupported extensions
 defm : UnsupportedSchedZba;
 defm : UnsupportedSchedZbb;
+defm : UnsupportedSchedZbc;
 defm : UnsupportedSchedZbf;
 defm : UnsupportedSchedZfh;
+defm : UnsupportedSchedZbs;
 
 }

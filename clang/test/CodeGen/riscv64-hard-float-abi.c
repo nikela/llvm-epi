@@ -38,21 +38,21 @@ void last_still_ok_for_homogeneous_pair(float a1, float a2, float a3, float a4, 
 // RISCV64-LP64-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
-// RISCV64-LP64-NEXT:    call void @last_still_ok_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, i64 [[TMP0]])
+// RISCV64-LP64-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
 // RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
-// RISCV64-LP64F-NEXT:    call void @last_still_ok_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float [[TMP0]], float [[TMP1]])
+// RISCV64-LP64F-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
 // RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
-// RISCV64-LP64D-NEXT:    call void @last_still_ok_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float [[TMP0]], float [[TMP1]])
+// RISCV64-LP64D-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_last_still_ok_for_homogeneous_pair(void) {
@@ -64,19 +64,19 @@ void too_many_floats_1_for_homogeneous_pair(float a1, float a2, float a3, float 
 // RISCV64-LP64-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
-// RISCV64-LP64-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, i64 [[TMP0]])
+// RISCV64-LP64-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
-// RISCV64-LP64F-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, i64 [[TMP0]])
+// RISCV64-LP64F-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
-// RISCV64-LP64D-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, float 0.000000e+00, i64 [[TMP0]])
+// RISCV64-LP64D-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_too_many_floats_1_for_homogeneous_pair(void) {
@@ -326,7 +326,7 @@ void mixed_float_short(struct mixed_float_short_t, short c);
 // RISCV64-LP64-NEXT:    store i16 1, i16* [[S]], align 2
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load i64, i64* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to i64*), align 4
-// RISCV64-LP64-NEXT:    call void @mixed_float_short(i64 [[TMP1]], i16 signext [[TMP0]])
+// RISCV64-LP64-NEXT:    call void @mixed_float_short(i64 [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_mixed_float_short(
@@ -336,7 +336,7 @@ void mixed_float_short(struct mixed_float_short_t, short c);
 // RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 0), align 4
 // RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 1), align 4
-// RISCV64-LP64F-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 signext [[TMP0]])
+// RISCV64-LP64F-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_mixed_float_short(
@@ -346,7 +346,7 @@ void mixed_float_short(struct mixed_float_short_t, short c);
 // RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 0), align 4
 // RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 1), align 4
-// RISCV64-LP64D-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 signext [[TMP0]])
+// RISCV64-LP64D-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_mixed_float_short(void)
@@ -368,7 +368,7 @@ void mixed_double_short(struct mixed_double_short_t, short c);
 // RISCV64-LP64-NEXT:    store i16 1, i16* [[S]], align 2
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to [2 x i64]*), align 8
-// RISCV64-LP64-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 signext [[TMP0]])
+// RISCV64-LP64-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_mixed_double_short(
@@ -377,7 +377,7 @@ void mixed_double_short(struct mixed_double_short_t, short c);
 // RISCV64-LP64F-NEXT:    store i16 1, i16* [[S]], align 2
 // RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to [2 x i64]*), align 8
-// RISCV64-LP64F-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 signext [[TMP0]])
+// RISCV64-LP64F-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_mixed_double_short(
@@ -387,7 +387,7 @@ void mixed_double_short(struct mixed_double_short_t, short c);
 // RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
 // RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* getelementptr inbounds ({ double, i16 }, { double, i16 }* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to { double, i16 }*), i32 0, i32 0), align 8
 // RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ double, i16 }, { double, i16 }* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to { double, i16 }*), i32 0, i32 1), align 8
-// RISCV64-LP64D-NEXT:    call void @mixed_double_short(double [[TMP1]], i16 [[TMP2]], i16 signext [[TMP0]])
+// RISCV64-LP64D-NEXT:    call void @mixed_double_short(double [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_mixed_double_short(void)
@@ -416,7 +416,7 @@ void complex_float(_Complex float d);
 // RISCV64-LP64-NEXT:    store float [[D_IMAG]], float* [[COERCE_IMAGP]], align 4
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = bitcast { float, float }* [[COERCE]] to i64*
 // RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load i64, i64* [[TMP0]], align 4
-// RISCV64-LP64-NEXT:    call void @complex_float(i64 [[TMP1]])
+// RISCV64-LP64-NEXT:    call void @complex_float(i64 noundef [[TMP1]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_complex_float(
@@ -439,7 +439,7 @@ void complex_float(_Complex float d);
 // RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* [[TMP0]], align 4
 // RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
 // RISCV64-LP64F-NEXT:    [[TMP3:%.*]] = load float, float* [[TMP2]], align 4
-// RISCV64-LP64F-NEXT:    call void @complex_float(float [[TMP1]], float [[TMP3]])
+// RISCV64-LP64F-NEXT:    call void @complex_float(float noundef [[TMP1]], float noundef [[TMP3]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_complex_float(
@@ -462,7 +462,7 @@ void complex_float(_Complex float d);
 // RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* [[TMP0]], align 4
 // RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
 // RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load float, float* [[TMP2]], align 4
-// RISCV64-LP64D-NEXT:    call void @complex_float(float [[TMP1]], float [[TMP3]])
+// RISCV64-LP64D-NEXT:    call void @complex_float(float noundef [[TMP1]], float noundef [[TMP3]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_complex_float(void)
@@ -491,7 +491,7 @@ void complex_double(_Complex double d);
 // RISCV64-LP64-NEXT:    store double [[D_IMAG]], double* [[COERCE_IMAGP]], align 8
 // RISCV64-LP64-NEXT:    [[TMP0:%.*]] = bitcast { double, double }* [[COERCE]] to [2 x i64]*
 // RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* [[TMP0]], align 8
-// RISCV64-LP64-NEXT:    call void @complex_double([2 x i64] [[TMP1]])
+// RISCV64-LP64-NEXT:    call void @complex_double([2 x i64] noundef [[TMP1]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_complex_double(
@@ -512,7 +512,7 @@ void complex_double(_Complex double d);
 // RISCV64-LP64F-NEXT:    store double [[D_IMAG]], double* [[COERCE_IMAGP]], align 8
 // RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = bitcast { double, double }* [[COERCE]] to [2 x i64]*
 // RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* [[TMP0]], align 8
-// RISCV64-LP64F-NEXT:    call void @complex_double([2 x i64] [[TMP1]])
+// RISCV64-LP64F-NEXT:    call void @complex_double([2 x i64] noundef [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_complex_double(
@@ -535,7 +535,7 @@ void complex_double(_Complex double d);
 // RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* [[TMP0]], align 8
 // RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 1
 // RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load double, double* [[TMP2]], align 8
-// RISCV64-LP64D-NEXT:    call void @complex_double(double [[TMP1]], double [[TMP3]])
+// RISCV64-LP64D-NEXT:    call void @complex_double(double noundef [[TMP1]], double noundef [[TMP3]])
 // RISCV64-LP64D-NEXT:    ret void
 //
 void test_complex_double(void)
