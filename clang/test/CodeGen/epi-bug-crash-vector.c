@@ -41,7 +41,7 @@ __attribute__((noinline)) __epi_2xi32 second(__epi_2xi32 a, __epi_2xi32 b) {
 // CHECK-NEXT:    store <vscale x 2 x i32> [[TMP4]], <vscale x 2 x i32>* [[VB]], align 4
 // CHECK-NEXT:    [[TMP5:%.*]] = load <vscale x 2 x i32>, <vscale x 2 x i32>* [[VA]], align 4
 // CHECK-NEXT:    [[TMP6:%.*]] = load <vscale x 2 x i32>, <vscale x 2 x i32>* [[VB]], align 4
-// CHECK-NEXT:    [[CALL:%.*]] = call <vscale x 2 x i32> @second(<vscale x 2 x i32> [[TMP5]], <vscale x 2 x i32> [[TMP6]])
+// CHECK-NEXT:    [[CALL:%.*]] = call <vscale x 2 x i32> @second(<vscale x 2 x i32> noundef [[TMP5]], <vscale x 2 x i32> noundef [[TMP6]])
 // CHECK-NEXT:    store <vscale x 2 x i32> [[CALL]], <vscale x 2 x i32>* [[VC]], align 4
 // CHECK-NEXT:    ret i32 0
 //

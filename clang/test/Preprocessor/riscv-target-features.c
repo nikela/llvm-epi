@@ -257,7 +257,9 @@
 // RUN: %clang -target riscv32-unknown-linux-gnu -menable-experimental-extensions \
 // RUN: -march=rv64iv0p10 -x c -E -dM %s -o - \
 // RUN: | FileCheck --check-prefix=CHECK-V-MINVLEN %s
-// CHECK-V-MINVLEN: __riscv_v_min_vlen 128
+// We have hacked RISCVISAInfo so v does not imply Zvl128b, so for now
+// we do not have a minimal vlen.
+// CHECK-V-MINVLEN-NOT: __riscv_v_min_vlen 128
 
 // RUN: %clang -target riscv32-unknown-linux-gnu -menable-experimental-extensions \
 // RUN: -march=rv64iv0p10_zvl256b0p10 -x c -E -dM %s -o - \
