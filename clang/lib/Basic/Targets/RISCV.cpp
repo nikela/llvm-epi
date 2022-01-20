@@ -288,6 +288,17 @@ bool RISCVTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
   return true;
 }
 
+TargetInfo::CallingConvCheckResult
+RISCVTargetInfo::checkCallingConvention(CallingConv CC) const {
+  switch (CC) {
+  case CC_C:
+  case CC_EPIVectorCall:
+    return CCCR_OK;
+  default:
+    return CCCR_Warning;
+  }
+}
+
 void RISCVTargetInfo::adjust(DiagnosticsEngine &Diags, LangOptions &Opts) {
   TargetInfo::adjust(Diags, Opts);
 }

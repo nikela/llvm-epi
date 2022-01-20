@@ -95,6 +95,8 @@ public:
   bool handleTargetFeatures(std::vector<std::string> &Features,
                             DiagnosticsEngine &Diags) override;
 
+  CallingConvCheckResult checkCallingConvention(CallingConv CC) const override;
+
   void adjust(DiagnosticsEngine &Diags, LangOptions &Opts) override;
 
   bool hasBitIntType() const override { return true; }

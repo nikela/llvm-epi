@@ -1036,6 +1036,9 @@ void TypePrinter::printFunctionAfter(const FunctionType::ExtInfo &Info,
     case CC_PreserveAll:
       OS << " __attribute__((preserve_all))";
       break;
+    case CC_EPIVectorCall:
+      OS << "__attribute__((epi_vectorcall))";
+      break;
     }
   }
 
@@ -1815,6 +1818,7 @@ void TypePrinter::printAttributedAfter(const AttributedType *T,
   case attr::BTFTypeTag:
     OS << "btf_type_tag";
     break;
+  case attr::EPIVectorCall: OS << "epi_vectorcall"; break;
   }
   OS << "))";
 }
