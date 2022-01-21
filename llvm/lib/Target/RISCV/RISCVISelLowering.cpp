@@ -1788,7 +1788,7 @@ RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
 
 SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
                                              ArrayRef<RISCVVTToLibCall> VTToLC,
-                                             EVT VT) const {
+                                             EVT VT, bool IsMasked) const {
   SDLoc DL(Op);
 
   auto LCIt = std::find_if(
@@ -1801,12 +1801,20 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   MakeLibCallOptions CallOptions;
   SDValue Chain;
   SDValue Result;
-  // FIXME: for VP Ops, only add mask operand when needed
-  std::vector<SDValue> Operands(Op->op_begin(), Op->op_end());
-
-  // Add vector length operand for not-VP Op
-  if (!ISD::isVPOpcode(Op.getOpcode())) {
-    MVT VT = Op.getSimpleValueType();
+  std::vector<SDValue> Operands;
+  if (ISD::isVPOpcode(Op.getOpcode())) {
+    if (!IsMasked && ISD::getVPMaskIdx(Op.getOpcode()).hasValue()) {
+      auto MaskIdx = ISD::getVPMaskIdx(Op.getOpcode()).getValue();
+      for (const auto &OpIdx : enumerate(Op->ops())) {
+        if (OpIdx.index() == MaskIdx)
+          continue;
+        Operands.push_back(OpIdx.value());
+      }
+    } else
+      Operands.assign(Op->op_begin(), Op->op_end());
+  } else {
+    Operands.assign(Op->op_begin(), Op->op_end());
+    // Add vector length operand for not-VP Op
     SDValue VL = DAG.getNode(
         ISD::VSCALE, DL, MVT::i64,
         DAG.getTargetConstant(VT.getVectorMinNumElements(), DL, MVT::i64));
@@ -1833,7 +1841,8 @@ SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv4f32, RTLIB::EXP_NXV4F32},   {MVT::nxv8f32, RTLIB::EXP_NXV8F32},
       {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
   };
-  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                         /*IsMasked*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
@@ -1844,7 +1853,8 @@ SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv4f32, RTLIB::SIN_NXV4F32},   {MVT::nxv8f32, RTLIB::SIN_NXV8F32},
       {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
   };
-  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                         /*IsMasked*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
@@ -1855,7 +1865,8 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv4f32, RTLIB::COS_NXV4F32},   {MVT::nxv8f32, RTLIB::COS_NXV8F32},
       {MVT::nxv16f32, RTLIB::COS_NXV16F32},
   };
-  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                         /*IsMasked*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
@@ -1870,7 +1881,8 @@ SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv8f32, RTLIB::POW_NXV8F32},
       {MVT::nxv16f32, RTLIB::POW_NXV16F32},
   };
-  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                         /*IsMasked*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
@@ -1885,7 +1897,8 @@ SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv8f32, RTLIB::REM_NXV8F32},
       {MVT::nxv16f32, RTLIB::REM_NXV16F32},
   };
-  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+  return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                         /*IsMasked*/ false);
 }
 
 RISCVII::VLMUL RISCVTargetLowering::getLMUL(MVT VT) {
@@ -3448,7 +3461,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv8f32, RTLIB::FRINT_NXV8F32},
         {MVT::nxv16f32, RTLIB::FRINT_NXV16F32},
     };
-    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*IsMasked*/ false);
   }
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
@@ -3823,7 +3837,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv8f32, RTLIB::VP_REDUCE_FMUL_NXV8F32},
         {MVT::nxv16f32, RTLIB::VP_REDUCE_FMUL_NXV16F32},
     };
-    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType());
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
+                           /*IsMasked*/ true);
   }
   case ISD::VP_REDUCE_SEQ_FMUL: {
     RISCVVTToLibCall VTToLC[] = {
@@ -3837,7 +3852,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv8f32, RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F32},
         {MVT::nxv16f32, RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32},
     };
-    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType());
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
+                           /*IsMasked*/ true);
   }
   case ISD::VP_REDUCE_MUL: {
     RISCVVTToLibCall VTToLC[] = {
@@ -3864,7 +3880,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv4i64, RTLIB::VP_REDUCE_MUL_NXV4I64},
         {MVT::nxv8i64, RTLIB::VP_REDUCE_MUL_NXV8I64},
     };
-    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType());
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
+                           /*IsMasked*/ true);
   }
   case ISD::VP_REDUCE_ADD:
   case ISD::VP_REDUCE_UMAX:
@@ -4079,7 +4096,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
         {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
     };
-    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType());
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*IsMasked*/ true);
   }
   case ISD::VP_FNEG:
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
