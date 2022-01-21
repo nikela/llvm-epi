@@ -127,6 +127,8 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
   StringRef CodeModel = getTargetOpts().CodeModel;
   unsigned FLen = ISAInfo->getFLen();
   unsigned MinVLen = ISAInfo->getMinVLen();
+  unsigned MaxELen = ISAInfo->getMaxELen();
+  unsigned MaxELenFp = ISAInfo->getMaxELenFp();
   if (CodeModel == "default")
     CodeModel = "small";
 
@@ -178,16 +180,19 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
     Builder.defineMacro("__riscv_fsqrt");
   }
 
-  if (MinVLen)
+  if (MinVLen) {
     Builder.defineMacro("__riscv_v_min_vlen", Twine(MinVLen));
+    Builder.defineMacro("__riscv_v_elen", Twine(MaxELen));
+    Builder.defineMacro("__riscv_v_elen_fp", Twine(MaxELenFp));
+  }
 
   if (ISAInfo->hasExtension("c"))
     Builder.defineMacro("__riscv_compressed");
 
-  if (ISAInfo->hasExtension("v"))
+  if (ISAInfo->hasExtension("zve32x"))
     Builder.defineMacro("__riscv_vector");
 
-  if (ISAInfo->hasExtension("v") && Opts.EPI) {
+  if (Opts.EPI) {
     Builder.defineMacro("__epi");
     // EPI: specific, remove now that we have __riscv_vector
     // Version computed as: major*100^2 + minor*100 + patch
@@ -220,10 +225,26 @@ bool RISCVTargetInfo::initFeatureMap(
     llvm::StringMap<bool> &Features, DiagnosticsEngine &Diags, StringRef CPU,
     const std::vector<std::string> &FeaturesVec) const {
 
-  if (getTriple().getArch() == llvm::Triple::riscv64)
-    Features["64bit"] = true;
+  unsigned XLen = 32;
 
-  return TargetInfo::initFeatureMap(Features, Diags, CPU, FeaturesVec);
+  if (getTriple().getArch() == llvm::Triple::riscv64) {
+    Features["64bit"] = true;
+    XLen = 64;
+  }
+
+  auto ParseResult = llvm::RISCVISAInfo::parseFeatures(XLen, FeaturesVec);
+  if (!ParseResult) {
+    std::string Buffer;
+    llvm::raw_string_ostream OutputErrMsg(Buffer);
+    handleAllErrors(ParseResult.takeError(), [&](llvm::StringError &ErrMsg) {
+      OutputErrMsg << ErrMsg.getMessage();
+    });
+    Diags.Report(diag::err_invalid_feature_combination) << OutputErrMsg.str();
+    return false;
+  }
+
+  return TargetInfo::initFeatureMap(Features, Diags, CPU,
+                                    (*ParseResult)->toFeatureVector());
 }
 
 /// Return true if has this feature, need to sync with handleTargetFeatures.

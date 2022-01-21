@@ -4265,7 +4265,7 @@ defm PseudoVFWREDOSUM  : VPseudoVFWRED_VS;
 // 16.1 Vector Mask-Register Logical Instructions
 //===----------------------------------------------------------------------===//
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 defm PseudoVMAND: VPseudoVALU_MM;
 defm PseudoVMNAND: VPseudoVALU_MM;
 defm PseudoVMANDN: VPseudoVALU_MM;
@@ -4317,7 +4317,7 @@ defm PseudoVIOTA_M: VPseudoVIOT_M;
 // 16.9. Vector Element Index Instruction
 //===----------------------------------------------------------------------===//
 defm PseudoVID : VPseudoVID_V;
-} // Predicates = [HasStdExtV]
+} // Predicates = [HasVInstructions]
 
 //===----------------------------------------------------------------------===//
 // 17. Vector Permutation Instructions
@@ -4397,17 +4397,17 @@ let Predicates = [HasVInstructionsAnyF] in {
 //===----------------------------------------------------------------------===//
 // 17.4. Vector Register Gather Instructions
 //===----------------------------------------------------------------------===//
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
   defm PseudoVRGATHER     : VPseudoVGTR_VV_VX_VI<uimm5, "@earlyclobber $rd">;
   defm PseudoVRGATHEREI16 : VPseudoVGTR_VV_EEW</* eew */ 16, "@earlyclobber $rd">;
-} // Predicates = [HasStdExtV]
+} // Predicates = [HasVInstructions]
 
 //===----------------------------------------------------------------------===//
 // 17.5. Vector Compress Instruction
 //===----------------------------------------------------------------------===//
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
   defm PseudoVCOMPRESS : VPseudoVCPR_V;
-} // Predicates = [HasStdExtV]
+} // Predicates = [HasVInstructions]
 
 //===----------------------------------------------------------------------===//
 // Patterns.

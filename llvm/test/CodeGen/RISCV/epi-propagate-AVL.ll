@@ -6,24 +6,24 @@ define void @epi_propagate_AVL(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-LABEL: epi_propagate_AVL:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    li a4, 64
-; CHECK-NEXT:    vsetvli a6, a4, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a4, a4, e64, m1, ta, mu
 ; CHECK-NEXT:    blez a0, .LBB0_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    slli a7, a6, 3
+; CHECK-NEXT:    li a6, 0
+; CHECK-NEXT:    slli a7, a4, 3
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle64.v v8, (a4)
-; CHECK-NEXT:    add a4, a3, a5
-; CHECK-NEXT:    vle64.v v9, (a4)
+; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vle64.v v8, (t0)
+; CHECK-NEXT:    add t0, a3, a5
+; CHECK-NEXT:    vle64.v v9, (t0)
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vse64.v v8, (a4)
-; CHECK-NEXT:    add t0, t0, a6
+; CHECK-NEXT:    add t0, a1, a5
+; CHECK-NEXT:    vse64.v v8, (t0)
+; CHECK-NEXT:    add a6, a6, a4
 ; CHECK-NEXT:    add a5, a5, a7
-; CHECK-NEXT:    blt t0, a0, .LBB0_2
+; CHECK-NEXT:    blt a6, a0, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.end
 ; CHECK-NEXT:    ret
 entry:
@@ -54,24 +54,24 @@ for.end:                                          ; preds = %for.body, %entry
 define void @epi_propagate_AVL_vlmax(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-LABEL: epi_propagate_AVL_vlmax:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a6, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a4, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    blez a0, .LBB1_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    slli a7, a6, 3
+; CHECK-NEXT:    li a6, 0
+; CHECK-NEXT:    slli a7, a4, 3
 ; CHECK-NEXT:  .LBB1_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle64.v v8, (a4)
-; CHECK-NEXT:    add a4, a3, a5
-; CHECK-NEXT:    vle64.v v9, (a4)
+; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vle64.v v8, (t0)
+; CHECK-NEXT:    add t0, a3, a5
+; CHECK-NEXT:    vle64.v v9, (t0)
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vse64.v v8, (a4)
-; CHECK-NEXT:    add t0, t0, a6
+; CHECK-NEXT:    add t0, a1, a5
+; CHECK-NEXT:    vse64.v v8, (t0)
+; CHECK-NEXT:    add a6, a6, a4
 ; CHECK-NEXT:    add a5, a5, a7
-; CHECK-NEXT:    blt t0, a0, .LBB1_2
+; CHECK-NEXT:    blt a6, a0, .LBB1_2
 ; CHECK-NEXT:  .LBB1_3: # %for.end
 ; CHECK-NEXT:    ret
 entry:
@@ -102,27 +102,27 @@ for.end:                                          ; preds = %for.body, %entry
 define void @epi_propagate_AVL_extra(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-LABEL: epi_propagate_AVL_extra:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    li a6, 5
+; CHECK-NEXT:    li a4, 5
 ; CHECK-NEXT:    li a5, 64
-; CHECK-NEXT:    ori a4, a6, 88
-; CHECK-NEXT:    vsetvl a6, a5, a4
+; CHECK-NEXT:    ori a6, a4, 88
+; CHECK-NEXT:    vsetvl a4, a5, a6
 ; CHECK-NEXT:    blez a0, .LBB2_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    slli a7, a6, 3
+; CHECK-NEXT:    li a6, 0
+; CHECK-NEXT:    slli a7, a4, 3
 ; CHECK-NEXT:  .LBB2_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle64.v v8, (a4)
-; CHECK-NEXT:    add a4, a3, a5
-; CHECK-NEXT:    vle64.v v9, (a4)
+; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vle64.v v8, (t0)
+; CHECK-NEXT:    add t0, a3, a5
+; CHECK-NEXT:    vle64.v v9, (t0)
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vse64.v v8, (a4)
-; CHECK-NEXT:    add t0, t0, a6
+; CHECK-NEXT:    add t0, a1, a5
+; CHECK-NEXT:    vse64.v v8, (t0)
+; CHECK-NEXT:    add a6, a6, a4
 ; CHECK-NEXT:    add a5, a5, a7
-; CHECK-NEXT:    blt t0, a0, .LBB2_2
+; CHECK-NEXT:    blt a6, a0, .LBB2_2
 ; CHECK-NEXT:  .LBB2_3: # %for.end
 ; CHECK-NEXT:    ret
 entry:
@@ -154,24 +154,24 @@ define void @epi_propagate_AVL_NT(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-LABEL: epi_propagate_AVL_NT:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    li a4, 64
-; CHECK-NEXT:    vsetvli a6, a4, e64, m1, ta, mu, nt
+; CHECK-NEXT:    vsetvli a4, a4, e64, m1, ta, mu, nt
 ; CHECK-NEXT:    blez a0, .LBB3_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    slli a7, a6, 3
+; CHECK-NEXT:    li a6, 0
+; CHECK-NEXT:    slli a7, a4, 3
 ; CHECK-NEXT:  .LBB3_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a4, a2, a5
-; CHECK-NEXT:    vle64.v v8, (a4)
-; CHECK-NEXT:    add a4, a3, a5
-; CHECK-NEXT:    vle64.v v9, (a4)
+; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vle64.v v8, (t0)
+; CHECK-NEXT:    add t0, a3, a5
+; CHECK-NEXT:    vle64.v v9, (t0)
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    add a4, a1, a5
-; CHECK-NEXT:    vse64.v v8, (a4)
-; CHECK-NEXT:    add t0, t0, a6
+; CHECK-NEXT:    add t0, a1, a5
+; CHECK-NEXT:    vse64.v v8, (t0)
+; CHECK-NEXT:    add a6, a6, a4
 ; CHECK-NEXT:    add a5, a5, a7
-; CHECK-NEXT:    blt t0, a0, .LBB3_2
+; CHECK-NEXT:    blt a6, a0, .LBB3_2
 ; CHECK-NEXT:  .LBB3_3: # %for.end
 ; CHECK-NEXT:    ret
 entry:

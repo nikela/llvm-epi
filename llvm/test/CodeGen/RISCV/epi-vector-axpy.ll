@@ -8,36 +8,36 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    blez a0, .LBB0_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
-; CHECK-NEXT:    srli a7, a0, 32
-; CHECK-NEXT:    csrr t0, vlenb
-; CHECK-NEXT:    srli t2, t0, 2
+; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    csrr a4, vlenb
+; CHECK-NEXT:    srli a5, a4, 2
 ; CHECK-NEXT:    fmv.w.x ft0, a3
-; CHECK-NEXT:    bgeu a7, t2, .LBB0_3
+; CHECK-NEXT:    bgeu a0, a5, .LBB0_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    li t1, 0
+; CHECK-NEXT:    li a3, 0
 ; CHECK-NEXT:    j .LBB0_6
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
-; CHECK-NEXT:    li a0, 0
-; CHECK-NEXT:    li a4, 0
-; CHECK-NEXT:    remu a6, a7, t2
-; CHECK-NEXT:    sub t1, a7, a6
+; CHECK-NEXT:    li a7, 0
+; CHECK-NEXT:    li t0, 0
+; CHECK-NEXT:    remu a6, a0, a5
+; CHECK-NEXT:    sub a3, a0, a6
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a3, a2, a0
-; CHECK-NEXT:    vl1re32.v v8, (a3)
-; CHECK-NEXT:    add a3, a1, a0
-; CHECK-NEXT:    vl1re32.v v9, (a3)
-; CHECK-NEXT:    vsetvli a5, zero, e32, m1, ta, mu
+; CHECK-NEXT:    add t1, a2, a7
+; CHECK-NEXT:    vl1re32.v v8, (t1)
+; CHECK-NEXT:    add t1, a1, a7
+; CHECK-NEXT:    vl1re32.v v9, (t1)
+; CHECK-NEXT:    vsetvli t2, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmacc.vf v9, ft0, v8
-; CHECK-NEXT:    vs1r.v v9, (a3)
-; CHECK-NEXT:    add a4, a4, t2
-; CHECK-NEXT:    add a0, a0, t0
-; CHECK-NEXT:    bne a4, t1, .LBB0_4
+; CHECK-NEXT:    vs1r.v v9, (t1)
+; CHECK-NEXT:    add t0, t0, a5
+; CHECK-NEXT:    add a7, a7, a4
+; CHECK-NEXT:    bne t0, a3, .LBB0_4
 ; CHECK-NEXT:  # %bb.5: # %middle.block
 ; CHECK-NEXT:    beqz a6, .LBB0_8
 ; CHECK-NEXT:  .LBB0_6: # %for.body.preheader17
-; CHECK-NEXT:    sub a0, a7, t1
-; CHECK-NEXT:    slli a3, t1, 2
+; CHECK-NEXT:    sub a0, a0, a3
+; CHECK-NEXT:    slli a3, a3, 2
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:  .LBB0_7: # %for.body
@@ -121,36 +121,36 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    blez a0, .LBB1_8
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
-; CHECK-NEXT:    srli a7, a0, 32
-; CHECK-NEXT:    csrr t0, vlenb
-; CHECK-NEXT:    srli t2, t0, 3
+; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    csrr a4, vlenb
+; CHECK-NEXT:    srli a5, a4, 3
 ; CHECK-NEXT:    fmv.d.x ft0, a3
-; CHECK-NEXT:    bgeu a7, t2, .LBB1_3
+; CHECK-NEXT:    bgeu a0, a5, .LBB1_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    li t1, 0
+; CHECK-NEXT:    li a3, 0
 ; CHECK-NEXT:    j .LBB1_6
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
-; CHECK-NEXT:    li a0, 0
-; CHECK-NEXT:    li a4, 0
-; CHECK-NEXT:    remu a6, a7, t2
-; CHECK-NEXT:    sub t1, a7, a6
+; CHECK-NEXT:    li a7, 0
+; CHECK-NEXT:    li t0, 0
+; CHECK-NEXT:    remu a6, a0, a5
+; CHECK-NEXT:    sub a3, a0, a6
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    add a3, a2, a0
-; CHECK-NEXT:    vl1re64.v v8, (a3)
-; CHECK-NEXT:    add a3, a1, a0
-; CHECK-NEXT:    vl1re64.v v9, (a3)
-; CHECK-NEXT:    vsetvli a5, zero, e64, m1, ta, mu
+; CHECK-NEXT:    add t1, a2, a7
+; CHECK-NEXT:    vl1re64.v v8, (t1)
+; CHECK-NEXT:    add t1, a1, a7
+; CHECK-NEXT:    vl1re64.v v9, (t1)
+; CHECK-NEXT:    vsetvli t2, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmacc.vf v9, ft0, v8
-; CHECK-NEXT:    vs1r.v v9, (a3)
-; CHECK-NEXT:    add a4, a4, t2
-; CHECK-NEXT:    add a0, a0, t0
-; CHECK-NEXT:    bne a4, t1, .LBB1_4
+; CHECK-NEXT:    vs1r.v v9, (t1)
+; CHECK-NEXT:    add t0, t0, a5
+; CHECK-NEXT:    add a7, a7, a4
+; CHECK-NEXT:    bne t0, a3, .LBB1_4
 ; CHECK-NEXT:  # %bb.5: # %middle.block
 ; CHECK-NEXT:    beqz a6, .LBB1_8
 ; CHECK-NEXT:  .LBB1_6: # %for.body.preheader17
-; CHECK-NEXT:    sub a0, a7, t1
-; CHECK-NEXT:    slli a3, t1, 3
+; CHECK-NEXT:    sub a0, a0, a3
+; CHECK-NEXT:    slli a3, a3, 3
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:  .LBB1_7: # %for.body

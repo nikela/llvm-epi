@@ -16,10 +16,10 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    slli a3, a1, 2
 ; CHECK-NEXT:    add a1, a3, a1
 ; CHECK-NEXT:    sub sp, sp, a1
-; CHECK-NEXT:    mv s2, a5
-; CHECK-NEXT:    mv s0, a4
-; CHECK-NEXT:    mv s3, a2
-; CHECK-NEXT:    mv s1, a0
+; CHECK-NEXT:    mv s0, a5
+; CHECK-NEXT:    mv s2, a4
+; CHECK-NEXT:    mv s1, a2
+; CHECK-NEXT:    mv s3, a0
 ; CHECK-NEXT:    li s4, 8
 ; CHECK-NEXT:    vsetvli zero, s4, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
@@ -73,31 +73,31 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    addi a0, a0, 16
 ; CHECK-NEXT:    vl1r.v v28, (a0) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vluxei64.v v19, (a0), v28
-; CHECK-NEXT:    slli a0, s0, 7
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    slli a0, s2, 7
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v10, (a0), v28
 ; CHECK-NEXT:    li a0, 192
-; CHECK-NEXT:    mul a0, s0, a0
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    mul a0, s2, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v11, (a0), v28
-; CHECK-NEXT:    slli a1, s0, 4
+; CHECK-NEXT:    slli a1, s2, 4
 ; CHECK-NEXT:    vfsub.vv v12, v19, v10
 ; CHECK-NEXT:    vfadd.vv v13, v19, v10
 ; CHECK-NEXT:    vfsub.vv v10, v8, v11
-; CHECK-NEXT:    slli a0, s0, 5
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    slli a0, s2, 5
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v14, (a0), v28
 ; CHECK-NEXT:    li a0, 160
-; CHECK-NEXT:    mul a0, s0, a0
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    mul a0, s2, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v15, (a0), v28
 ; CHECK-NEXT:    li a0, 224
-; CHECK-NEXT:    mul a0, s0, a0
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    mul a0, s2, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v16, (a0), v28
 ; CHECK-NEXT:    li a0, 96
-; CHECK-NEXT:    mul a0, s0, a0
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    mul a0, s2, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v17, (a0), v28
 ; CHECK-NEXT:    vfadd.vv v11, v8, v11
 ; CHECK-NEXT:    vfsub.vv v18, v14, v15
@@ -126,13 +126,13 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfmsac.vf v18, ft0, v15
 ; CHECK-NEXT:    vfneg.v v18, v18
 ; CHECK-NEXT:    li a0, 136
-; CHECK-NEXT:    mul a0, s0, a0
-; CHECK-NEXT:    add a0, s1, a0
+; CHECK-NEXT:    mul a0, s2, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    vluxei64.v v20, (a0), v28
-; CHECK-NEXT:    vluxei64.v v21, (s1), v28
+; CHECK-NEXT:    vluxei64.v v21, (s3), v28
 ; CHECK-NEXT:    li a0, 104
-; CHECK-NEXT:    mul a2, s0, a0
-; CHECK-NEXT:    add a2, s1, a2
+; CHECK-NEXT:    mul a2, s2, a0
+; CHECK-NEXT:    add a2, s3, a2
 ; CHECK-NEXT:    vluxei64.v v22, (a2), v28
 ; CHECK-NEXT:    vfmacc.vf v15, ft0, v14
 ; CHECK-NEXT:    vfsub.vv v14, v19, v20
@@ -147,23 +147,23 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vmv1r.v v21, v22
 ; CHECK-NEXT:    vfmsac.vf v21, ft0, v20
 ; CHECK-NEXT:    vfneg.v v21, v21
-; CHECK-NEXT:    add a1, s1, a1
+; CHECK-NEXT:    add a1, s3, a1
 ; CHECK-NEXT:    vluxei64.v v24, (a1), v28
 ; CHECK-NEXT:    li a1, 48
-; CHECK-NEXT:    mul a1, s0, a1
-; CHECK-NEXT:    add a1, s1, a1
+; CHECK-NEXT:    mul a1, s2, a1
+; CHECK-NEXT:    add a1, s3, a1
 ; CHECK-NEXT:    vluxei64.v v25, (a1), v28
 ; CHECK-NEXT:    vfmacc.vf v20, ft0, v22
 ; CHECK-NEXT:    vfsub.vv v22, v24, v19
 ; CHECK-NEXT:    vfadd.vv v24, v24, v19
 ; CHECK-NEXT:    vfsub.vv v26, v8, v25
 ; CHECK-NEXT:    li a1, 80
-; CHECK-NEXT:    mul a1, s0, a1
-; CHECK-NEXT:    add a1, s1, a1
+; CHECK-NEXT:    mul a1, s2, a1
+; CHECK-NEXT:    add a1, s3, a1
 ; CHECK-NEXT:    vluxei64.v v27, (a1), v28
 ; CHECK-NEXT:    li a1, 240
-; CHECK-NEXT:    mul a1, s0, a1
-; CHECK-NEXT:    add a1, s1, a1
+; CHECK-NEXT:    mul a1, s2, a1
+; CHECK-NEXT:    add a1, s3, a1
 ; CHECK-NEXT:    vluxei64.v v28, (a1), v28
 ; CHECK-NEXT:    vfadd.vv v25, v25, v8
 ; CHECK-NEXT:    vfsub.vv v29, v27, v8
@@ -205,8 +205,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vl1r.v v1, (a1) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vrgather.vv v31, v30, v1
 ; CHECK-NEXT:    vsuxei64.v v31, (a0), v8
-; CHECK-NEXT:    slli a1, s2, 5
-; CHECK-NEXT:    add a1, s3, a1
+; CHECK-NEXT:    slli a1, s0, 5
+; CHECK-NEXT:    add a1, s1, a1
 ; CHECK-NEXT:    vfneg.v v29, v29, v0.t
 ; CHECK-NEXT:    vrgather.vv v30, v29, v9
 ; CHECK-NEXT:    vfadd.vv v29, v26, v30
@@ -229,10 +229,10 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vsuxei64.v v17, (a0), v8
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
 ; CHECK-NEXT:    li a1, 208
-; CHECK-NEXT:    mul a1, s2, a1
+; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    lui a2, %hi(.LCPI0_1)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_1)(a2)
-; CHECK-NEXT:    add a1, s3, a1
+; CHECK-NEXT:    add a1, s1, a1
 ; CHECK-NEXT:    vsuxei64.v v17, (a1), v8
 ; CHECK-NEXT:    vfadd.vv v16, v21, v18
 ; CHECK-NEXT:    vfmsac.vf v16, ft0, v16
@@ -241,8 +241,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfsub.vv v15, v15, v20
 ; CHECK-NEXT:    vfmacc.vf v13, ft0, v15
 ; CHECK-NEXT:    li a1, 112
-; CHECK-NEXT:    mul a1, s2, a1
-; CHECK-NEXT:    add a1, s3, a1
+; CHECK-NEXT:    mul a1, s0, a1
+; CHECK-NEXT:    add a1, s1, a1
 ; CHECK-NEXT:    vrgather.vv v15, v8, v9
 ; CHECK-NEXT:    vfsub.vv v15, v16, v15
 ; CHECK-NEXT:    vrgather.vv v16, v15, v1
@@ -269,8 +269,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfneg.v v11, v11
 ; CHECK-NEXT:    vfmsac.vf v10, ft0, v12
 ; CHECK-NEXT:    vfneg.v v10, v10
-; CHECK-NEXT:    mul a0, s2, a0
-; CHECK-NEXT:    add a0, s3, a0
+; CHECK-NEXT:    mul a0, s0, a0
+; CHECK-NEXT:    add a0, s1, a0
 ; CHECK-NEXT:    vfneg.v v10, v10, v0.t
 ; CHECK-NEXT:    vrgather.vv v12, v10, v9
 ; CHECK-NEXT:    vfsub.vv v9, v11, v12

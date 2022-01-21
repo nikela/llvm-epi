@@ -8,26 +8,26 @@ define void @multiple_PHIs_for_extras(i64 %N, double* %c, double* %a, double* %b
 ; CHECK-NEXT:    andi a0, a0, 1
 ; CHECK-NEXT:    bnez a0, .LBB0_2
 ; CHECK-NEXT:  # %bb.1: # %if.then
-; CHECK-NEXT:    li a6, 64
-; CHECK-NEXT:    vsetvli a7, a6, e64, m1, ta, mu, nt
+; CHECK-NEXT:    li a4, 64
+; CHECK-NEXT:    vsetvli a5, a4, e64, m1, ta, mu, nt
 ; CHECK-NEXT:    li a0, 5
-; CHECK-NEXT:    ori a4, a0, 88
-; CHECK-NEXT:    vsetvl a6, a6, a4
-; CHECK-NEXT:    li a4, 512
+; CHECK-NEXT:    ori a6, a0, 88
+; CHECK-NEXT:    vsetvl a4, a4, a6
+; CHECK-NEXT:    li a6, 512
 ; CHECK-NEXT:    j .LBB0_3
 ; CHECK-NEXT:  .LBB0_2: # %if.else
 ; CHECK-NEXT:    li a0, 64
-; CHECK-NEXT:    vsetvli a7, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vsetvli a6, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a5, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a4, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    li a0, 0
-; CHECK-NEXT:    li a4, 0
+; CHECK-NEXT:    li a6, 0
 ; CHECK-NEXT:  .LBB0_3: # %if.end
-; CHECK-NEXT:    ori a5, a4, 88
-; CHECK-NEXT:    vsetvl a4, a7, a5
+; CHECK-NEXT:    ori a7, a6, 88
+; CHECK-NEXT:    vsetvl a5, a5, a7
 ; CHECK-NEXT:    vle64.v v8, (a2)
 ; CHECK-NEXT:    vle64.v v9, (a3)
 ; CHECK-NEXT:    ori a2, a0, 88
-; CHECK-NEXT:    vsetvl a0, a6, a2
+; CHECK-NEXT:    vsetvl a0, a4, a2
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    vse64.v v8, (a1)
 ; CHECK-NEXT:    ret

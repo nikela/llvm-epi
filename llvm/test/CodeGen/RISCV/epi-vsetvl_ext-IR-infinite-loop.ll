@@ -73,16 +73,16 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O2-NEXT:    blez a0, .LBB0_5
 ; CHECK-O2-NEXT:  # %bb.1: # %for.body.lr.ph
 ; CHECK-O2-NEXT:    li a4, 400
-; CHECK-O2-NEXT:    li a6, 1024
+; CHECK-O2-NEXT:    li a5, 1024
 ; CHECK-O2-NEXT:    blt a4, a0, .LBB0_3
 ; CHECK-O2-NEXT:  # %bb.2: # %for.body.lr.ph
 ; CHECK-O2-NEXT:    li a4, 25
 ; CHECK-O2-NEXT:    slt a4, a4, a0
-; CHECK-O2-NEXT:    slli a6, a4, 9
+; CHECK-O2-NEXT:    slli a5, a4, 9
 ; CHECK-O2-NEXT:  .LBB0_3: # %for.body.lr.ph
 ; CHECK-O2-NEXT:    li a4, 0
-; CHECK-O2-NEXT:    ori a5, a6, 88
-; CHECK-O2-NEXT:    vsetvl a0, a0, a5
+; CHECK-O2-NEXT:    ori a6, a5, 88
+; CHECK-O2-NEXT:    vsetvl a0, a0, a6
 ; CHECK-O2-NEXT:    slli a0, a0, 3
 ; CHECK-O2-NEXT:  .LBB0_4: # %for.body
 ; CHECK-O2-NEXT:    # =>This Inner Loop Header: Depth=1

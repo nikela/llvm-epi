@@ -49,19 +49,6 @@ void RISCVTargetStreamer::emitTargetAttributes(const MCSubtargetInfo &STI) {
   std::vector<std::string> FeatureVector;
   // We are using linkers that don't support these features.
   auto FeatureBits = STI.getFeatureBits();
-  FeatureBits.reset(RISCV::FeatureStdExtZvlsseg);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl32b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl64b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl128b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl256b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl512b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl1024b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl2048b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl4096b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl8192b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl16384b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl32768b);
-
   RISCVFeatures::toFeatureVector(FeatureVector, FeatureBits);
 
   auto ParseResult = llvm::RISCVISAInfo::parseFeatures(XLen, FeatureVector);

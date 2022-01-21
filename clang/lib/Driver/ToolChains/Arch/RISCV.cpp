@@ -170,9 +170,9 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
       if (!HasRV64 || !HasM || !HasA || !HasF || !HasD)
         D.Diag(diag::err_drv_invalid_riscv_epi_ext);
       else {
-        Features.push_back("+epi");
-        Features.push_back("+experimental-v");
-        Features.push_back("+experimental-zvlsseg");
+        Features.push_back("+zepi");
+        // ????? What happened here?
+        // Features.push_back("+experimental-zvlsseg");
       }
     }
   }
