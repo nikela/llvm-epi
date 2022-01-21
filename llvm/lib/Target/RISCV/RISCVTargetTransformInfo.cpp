@@ -115,20 +115,6 @@ RISCVTTIImpl::getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx,
   return TTI::TCC_Free;
 }
 
-unsigned RISCVTTIImpl::getNumberOfRegisters(unsigned ClassID) const {
-  if (ClassID == 1 && ST->hasStdExtV())
-    // Although there are 32 vector registers, v0 is special in that it is the
-    // only register that can be used to hold a mask. We conservatively return
-    // 31 as the number of usable vector registers.
-    return 31;
-  else if (ClassID == 0)
-    // Similarly for scalar registers, x0(zero), x1(ra) and x2(sp) are special
-    // and we return 29 usable registers.
-    return 29;
-  else
-    return 0;
-}
-
 unsigned RISCVTTIImpl::getMaxElementWidth() const {
   // Returns ELEN. This is the value for which k-scale-factor would be one.
   // Current EPI implementation plans this to be 64. 
@@ -291,22 +277,6 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
                                              ElemWidth),
                    IsScalable)
              : ElementCount::getNull();
-}
-
-InstructionCost RISCVTTIImpl::getRegUsageForType(Type *Ty) {
-  if (!ST->hasStdExtV()) {
-    return BaseT::getRegUsageForType(Ty);
-  }
-
-  // FIXME: May need some thought for fixed vectors.
-  VectorType *VTy = cast<VectorType>(Ty);
-  Type *ETy = VTy->getElementType();
-  // Size in bits of this vector type.
-  unsigned VectorSizeBits =
-      ETy->getScalarSizeInBits() * VTy->getElementCount().getKnownMinValue();
-
-  unsigned RegisterBitSize = ST->getMinRVVVectorSizeInBits();
-  return std::max<unsigned>(1, VectorSizeBits / RegisterBitSize);
 }
 
 std::pair<ElementCount, ElementCount>
@@ -602,10 +572,7 @@ void RISCVTTIImpl::getUnrollingPreferences(Loop *L, ScalarEvolution &SE,
   // Support explicit targets enabled for SiFive with the unrolling preferences
   // below
   bool UseDefaultPreferences = true;
-  if (ST->getTuneCPU().contains("sifive-e76") ||
-      ST->getTuneCPU().contains("sifive-s76") ||
-      ST->getTuneCPU().contains("sifive-u74") ||
-      ST->getTuneCPU().contains("sifive-7"))
+  if (ST->getProcFamily() == RISCVSubtarget::SiFive7)
     UseDefaultPreferences = false;
 
   if (UseDefaultPreferences)
@@ -682,4 +649,17 @@ void RISCVTTIImpl::getUnrollingPreferences(Loop *L, ScalarEvolution &SE,
 void RISCVTTIImpl::getPeelingPreferences(Loop *L, ScalarEvolution &SE,
                                          TTI::PeelingPreferences &PP) {
   BaseT::getPeelingPreferences(L, SE, PP);
+}
+
+InstructionCost RISCVTTIImpl::getRegUsageForType(Type *Ty) {
+  TypeSize Size = Ty->getPrimitiveSizeInBits();
+  if (Ty->isVectorTy()) {
+    if (Size.isScalable() && ST->hasVInstructions())
+      return divideCeil(Size.getKnownMinValue(), RISCV::RVVBitsPerBlock);
+
+    if (ST->useRVVForFixedLengthVectors())
+      return divideCeil(Size, ST->getMinRVVVectorSizeInBits());
+  }
+
+  return BaseT::getRegUsageForType(Ty);
 }

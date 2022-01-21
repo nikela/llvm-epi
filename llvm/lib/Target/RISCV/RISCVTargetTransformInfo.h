@@ -138,7 +138,6 @@ public:
                                       const APInt &Imm, Type *Ty,
                                       TTI::TargetCostKind CostKind);
 
-  unsigned getNumberOfRegisters(unsigned ClassID) const;
   unsigned getMaxElementWidth() const;
   bool preferPredicatedVectorOps() const;
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
@@ -192,6 +191,8 @@ public:
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
                                         Align Alignment, unsigned AddressSpace,
                                         TTI::TargetCostKind CostKind);
+  InstructionCost getRegUsageForType(Type *Ty);
+
   void getUnrollingPreferences(Loop *L, ScalarEvolution &SE,
                                TTI::UnrollingPreferences &UP,
                                OptimizationRemarkEmitter *ORE);
@@ -314,7 +315,36 @@ public:
     return VF == 1 ? 1 : ST->getMaxInterleaveFactor();
   }
 
-  InstructionCost getRegUsageForType(Type *Ty);
+  unsigned getNumberOfRegistersEPI(unsigned ClassID) const {
+    if (ClassID == 1 && ST->hasStdExtV())
+      // Although there are 32 vector registers, v0 is special in that it is
+      // the only register that can be used to hold a mask. We conservatively
+      // return 31 as the number of usable vector registers.
+      return 31;
+    else if (ClassID == 0)
+      // Similarly for scalar registers, x0(zero), x1(ra) and x2(sp) are
+      // special and we return 29 usable registers.
+      return 29;
+    else
+      return 0;
+  }
+
+  // TODO: We should define RISC-V's own register classes.
+  //       e.g. register class for FPR.
+  unsigned getNumberOfRegisters(unsigned ClassID) const {
+    if (ST->hasEPI())
+      return getNumberOfRegistersEPI(ClassID);
+
+    bool Vector = (ClassID == 1);
+    if (Vector) {
+      if (ST->hasVInstructions())
+        return 32;
+      return 0;
+    }
+    // 31 = 32 GPR - x0 (zero register)
+    // FIXME: Should we exclude fixed registers like SP, TP or GP?
+    return 31;
+  }
 };
 
 } // end namespace llvm

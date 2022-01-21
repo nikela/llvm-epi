@@ -165,6 +165,15 @@ C Language Changes in Clang
   `this thread <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103640>` for more
   info.
 
+- Implemented `WG14 N2412 <http://www.open-std.org/jtc1/sc22/wg14/www/docs/n2412.pdf>`_,
+  which adds ``*_WIDTH`` macros to limits.h and stdint.h to report the bit
+  width of various integer datatypes.
+
+- The ``ATOMIC_VAR_INIT`` macro from ``<stdatomic.h>`` is now diagnosed as
+  deprecated in C17 and later. The diagnostic can be disabled by defining the
+  ``_CLANG_DISABLE_CRT_DEPRECATION_WARNINGS`` macro prior to including the
+  header.
+
 C++ Language Changes in Clang
 -----------------------------
 
@@ -172,7 +181,15 @@ C++ Language Changes in Clang
 
 C++20 Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
-...
+
+- The ``ATOMIC_VAR_INIT`` and ``ATOMIC_FLAG_INIT`` macros from the C standard
+  library ``<stdatomic.h>`` header are now diagnosed as deprecated in C++20 and
+  later. Note, the behavior is specific to the inclusion of ``<stdatomic.h>``
+  in C++ code; the STL ``<atomic>`` header also controls the behavior of these
+  macros and is not affected by these changes. The ``<stdatomic.h>`` diagnostic
+  can be disabled by defining the ``_CLANG_DISABLE_CRT_DEPRECATION_WARNINGS``
+  macro prior to including the header.
+
 
 C++2b Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -296,6 +313,10 @@ clang-format
 - Option ``AllowShortEnumsOnASingleLine: false`` has been improved, it now
   correctly places the opening brace according to ``BraceWrapping.AfterEnum``.
 
+- Option ``AlignAfterOpenBracket: BlockIndent`` has been added. If set, it will
+  always break after an open bracket, if the parameters don't fit on a single
+  line. Closing brackets will be placed on a new line.
+
 - Option ``QualifierAlignment`` has been added in order to auto-arrange the
   positioning of specifiers/qualifiers
   `const` `volatile` `static` `inline` `constexpr` `restrict`
@@ -305,6 +326,9 @@ clang-format
 - Option ``QualifierOrder`` has been added to allow the order
   `const` `volatile` `static` `inline` `constexpr` `restrict`
   to be controlled relative to the `type`.
+
+- Option ``RemoveBracesLLVM`` has been added to remove optional braces of
+  control statements for the LLVM style.
 
 - Option ``SeparateDefinitionBlocks`` has been added to insert or remove empty
   lines between definition blocks including functions, classes, structs, enums,

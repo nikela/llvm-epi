@@ -444,7 +444,7 @@ static LogicalResult bufferizeFuncOpBoundary(FuncOp funcOp,
     auto tensorType = bbArg.getType().dyn_cast<TensorType>();
     // Non-tensor types are just forwarded.
     if (!tensorType) {
-      frontBlock.addArgument(bbArg.getType());
+      frontBlock.addArgument(bbArg.getType(), bbArg.getLoc());
       bbArg.replaceAllUsesWith(frontBlock.getArguments().back());
       frontBlock.eraseArgument(0);
       continue;
@@ -452,7 +452,7 @@ static LogicalResult bufferizeFuncOpBoundary(FuncOp funcOp,
 
     // Get the buffer type from the bufferized function type.
     Type memrefType = bufferizedFuncType.getInput(idx);
-    Value memref = frontBlock.addArgument(memrefType);
+    Value memref = frontBlock.addArgument(memrefType, bbArg.getLoc());
     OpBuilder b(funcOp->getContext());
     b.setInsertionPointToStart(&frontBlock);
     // Replace all uses of bbArg through a ToMemRefOp by a memref::CastOp.
@@ -737,7 +737,6 @@ struct CallOpInterface
   }
 
   BufferRelation bufferRelation(Operation *op, OpResult opResult,
-                                const BufferizationAliasInfo &aliasInfo,
                                 const BufferizationState &state) const {
     return BufferRelation::Equivalent;
   }
@@ -964,9 +963,9 @@ annotateOpsWithBufferizationMarkers(FuncOp funcOp,
 }
 
 LogicalResult mlir::linalg::comprehensive_bufferize::runComprehensiveBufferize(
-    ModuleOp moduleOp, std::unique_ptr<BufferizationOptions> options) {
+    ModuleOp moduleOp, std::unique_ptr<AnalysisBufferizationOptions> options) {
   IRRewriter rewriter(moduleOp.getContext());
-  BufferizationState state(moduleOp, *options);
+  AnalysisBufferizationState state(moduleOp, *options);
   ModuleBufferizationState &moduleState = getModuleBufferizationState(state);
   BufferizationAliasInfo &aliasInfo = state.getAliasInfo();
 

@@ -183,7 +183,7 @@ public:
 
   /// A helper function to compute runtime EVL mask per vector iteration by
   /// current EVL and step vector.
-  VPValue *getOrCreateEVLMask(VPlanPtr &Plan);
+  VPValue *getOrCreateEVLMask(VPBasicBlock *VPBB, VPlanPtr &Plan);
 
   /// Mark given ingredient for recording its recipe once one is created for
   /// it.

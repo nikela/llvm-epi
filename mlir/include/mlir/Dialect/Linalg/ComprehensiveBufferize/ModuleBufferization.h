@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULE_BUFFERIZATION_H
-#define MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULE_BUFFERIZATION_H
+#ifndef MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULEBUFFERIZATION_H
+#define MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULEBUFFERIZATION_H
 
 #include <memory>
 
@@ -20,14 +20,13 @@ class ModuleOp;
 namespace linalg {
 namespace comprehensive_bufferize {
 
-struct BufferizationOptions;
+struct AnalysisBufferizationOptions;
 
 /// Run Module Bufferization on the given module. Performs a simple function
 /// call analysis to determine which function arguments are inplaceable. Then
 /// analyzes and bufferizes FuncOps one-by-one with Comprehensive Bufferization.
-LogicalResult
-runComprehensiveBufferize(ModuleOp moduleOp,
-                          std::unique_ptr<BufferizationOptions> options);
+LogicalResult runComprehensiveBufferize(
+    ModuleOp moduleOp, std::unique_ptr<AnalysisBufferizationOptions> options);
 
 namespace std_ext {
 
@@ -38,4 +37,4 @@ void registerModuleBufferizationExternalModels(DialectRegistry &registry);
 } // namespace linalg
 } // namespace mlir
 
-#endif // MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULE_BUFFERIZATION_H
+#endif // MLIR_DIALECT_LINALG_COMPREHENSIVEBUFFERIZE_MODULEBUFFERIZATION_H
