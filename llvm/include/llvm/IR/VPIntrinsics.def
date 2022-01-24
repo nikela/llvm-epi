@@ -500,6 +500,10 @@ END_REGISTER_VP(vp_sin, VP_SIN)
 BEGIN_REGISTER_VP(vp_exp, 1, 2, VP_EXP, -1)
 END_REGISTER_VP(vp_exp, VP_EXP)
 
+// llvm.vp.pow(val,power,mask,vlen)
+BEGIN_REGISTER_VP(vp_pow, 2, 3, VP_POW, -1)
+END_REGISTER_VP(vp_pow, VP_POW)
+
 ///// } libm functions
 
 #undef BEGIN_REGISTER_VP
