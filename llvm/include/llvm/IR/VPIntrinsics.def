@@ -496,6 +496,10 @@ END_REGISTER_VP(vp_cos, VP_COS)
 BEGIN_REGISTER_VP(vp_sin, 1, 2, VP_SIN, -1)
 END_REGISTER_VP(vp_sin, VP_SIN)
 
+// llvm.vp.exp(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_exp, 1, 2, VP_EXP, -1)
+END_REGISTER_VP(vp_exp, VP_EXP)
+
 ///// } libm functions
 
 #undef BEGIN_REGISTER_VP
