@@ -1313,6 +1313,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                      {RTLIB::REM_NXV8F32, "__epi_fmod_nxv8f32"},
                      {RTLIB::REM_NXV16F32, "__epi_fmod_nxv16f32"}});
 
+    RegisterLibCall({{RTLIB::REM_NXV1F64_MASKED, "__epi_fmod_nxv1f64_m"},
+                     {RTLIB::REM_NXV2F64_MASKED, "__epi_fmod_nxv2f64_m"},
+                     {RTLIB::REM_NXV4F64_MASKED, "__epi_fmod_nxv4f64_m"},
+                     {RTLIB::REM_NXV8F64_MASKED, "__epi_fmod_nxv8f64_m"},
+                     {RTLIB::REM_NXV1F32_MASKED, "__epi_fmod_nxv1f32_m"},
+                     {RTLIB::REM_NXV2F32_MASKED, "__epi_fmod_nxv2f32_m"},
+                     {RTLIB::REM_NXV4F32_MASKED, "__epi_fmod_nxv4f32_m"},
+                     {RTLIB::REM_NXV8F32_MASKED, "__epi_fmod_nxv8f32_m"},
+                     {RTLIB::REM_NXV16F32_MASKED, "__epi_fmod_nxv16f32_m"}});
+
     RegisterLibCall({{RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64"},
                      {RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64"},
                      {RTLIB::FRINT_NXV4F64, "__epi_frint_nxv4f64"},
@@ -1324,27 +1334,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                      {RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32"}});
 
     // Register libcalls for VP SDNodes.
-    RegisterLibCall({{RTLIB::VP_FREM_NXV1F64, "__epi_vp_fmod_nxv1f64"},
-                     {RTLIB::VP_FREM_NXV2F64, "__epi_vp_fmod_nxv2f64"},
-                     {RTLIB::VP_FREM_NXV4F64, "__epi_vp_fmod_nxv4f64"},
-                     {RTLIB::VP_FREM_NXV8F64, "__epi_vp_fmod_nxv8f64"},
-                     {RTLIB::VP_FREM_NXV1F32, "__epi_vp_fmod_nxv1f32"},
-                     {RTLIB::VP_FREM_NXV2F32, "__epi_vp_fmod_nxv2f32"},
-                     {RTLIB::VP_FREM_NXV4F32, "__epi_vp_fmod_nxv4f32"},
-                     {RTLIB::VP_FREM_NXV8F32, "__epi_vp_fmod_nxv8f32"},
-                     {RTLIB::VP_FREM_NXV16F32, "__epi_vp_fmod_nxv16f32"}});
-
-    RegisterLibCall(
-        {{RTLIB::VP_FREM_NXV1F64_MASKED, "__epi_vp_fmod_nxv1f64_m"},
-         {RTLIB::VP_FREM_NXV2F64_MASKED, "__epi_vp_fmod_nxv2f64_m"},
-         {RTLIB::VP_FREM_NXV4F64_MASKED, "__epi_vp_fmod_nxv4f64_m"},
-         {RTLIB::VP_FREM_NXV8F64_MASKED, "__epi_vp_fmod_nxv8f64_m"},
-         {RTLIB::VP_FREM_NXV1F32_MASKED, "__epi_vp_fmod_nxv1f32_m"},
-         {RTLIB::VP_FREM_NXV2F32_MASKED, "__epi_vp_fmod_nxv2f32_m"},
-         {RTLIB::VP_FREM_NXV4F32_MASKED, "__epi_vp_fmod_nxv4f32_m"},
-         {RTLIB::VP_FREM_NXV8F32_MASKED, "__epi_vp_fmod_nxv8f32_m"},
-         {RTLIB::VP_FREM_NXV16F32_MASKED, "__epi_vp_fmod_nxv16f32_m"}});
-
     RegisterLibCall(
         {{RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64"},
          {RTLIB::VP_REDUCE_FMUL_NXV2F64, "__epi_vp_reduce_fmul_nxv2f64"},
@@ -4308,30 +4297,30 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
             Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
                 .getNode())) {
       RISCVVTToLibCall VTToLC[] = {
-          {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64},
-          {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64},
-          {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64},
-          {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64},
-          {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32},
-          {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32},
-          {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32},
-          {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32},
-          {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32},
+          {MVT::nxv1f64, RTLIB::REM_NXV1F64},
+          {MVT::nxv2f64, RTLIB::REM_NXV2F64},
+          {MVT::nxv4f64, RTLIB::REM_NXV4F64},
+          {MVT::nxv8f64, RTLIB::REM_NXV8F64},
+          {MVT::nxv1f32, RTLIB::REM_NXV1F32},
+          {MVT::nxv2f32, RTLIB::REM_NXV2F32},
+          {MVT::nxv4f32, RTLIB::REM_NXV4F32},
+          {MVT::nxv8f32, RTLIB::REM_NXV8F32},
+          {MVT::nxv16f32, RTLIB::REM_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                              /*IsMasked*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
-        {MVT::nxv1f64, RTLIB::VP_FREM_NXV1F64_MASKED},
-        {MVT::nxv2f64, RTLIB::VP_FREM_NXV2F64_MASKED},
-        {MVT::nxv4f64, RTLIB::VP_FREM_NXV4F64_MASKED},
-        {MVT::nxv8f64, RTLIB::VP_FREM_NXV8F64_MASKED},
-        {MVT::nxv1f32, RTLIB::VP_FREM_NXV1F32_MASKED},
-        {MVT::nxv2f32, RTLIB::VP_FREM_NXV2F32_MASKED},
-        {MVT::nxv4f32, RTLIB::VP_FREM_NXV4F32_MASKED},
-        {MVT::nxv8f32, RTLIB::VP_FREM_NXV8F32_MASKED},
-        {MVT::nxv16f32, RTLIB::VP_FREM_NXV16F32_MASKED},
+        {MVT::nxv1f64, RTLIB::REM_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::REM_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::REM_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::REM_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::REM_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::REM_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::REM_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::REM_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::REM_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                            /*IsMasked*/ true);
