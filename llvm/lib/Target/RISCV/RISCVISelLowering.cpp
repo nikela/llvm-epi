@@ -551,6 +551,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_FNEG,
                                                   ISD::VP_FMA,
                                                   ISD::VP_COS,
+                                                  ISD::VP_SIN,
                                                   ISD::VP_REDUCE_FADD,
                                                   ISD::VP_REDUCE_SEQ_FADD,
                                                   ISD::VP_REDUCE_FMUL,
@@ -1239,6 +1240,16 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                      {RTLIB::SIN_NXV4F32, "__epi_sin_nxv4f32"},
                      {RTLIB::SIN_NXV8F32, "__epi_sin_nxv8f32"},
                      {RTLIB::SIN_NXV16F32, "__epi_sin_nxv16f32"}});
+
+    RegisterLibCall({{RTLIB::SIN_NXV1F64_MASKED, "__epi_sin_nxv1f64_m"},
+                     {RTLIB::SIN_NXV2F64_MASKED, "__epi_sin_nxv2f64_m"},
+                     {RTLIB::SIN_NXV4F64_MASKED, "__epi_sin_nxv4f64_m"},
+                     {RTLIB::SIN_NXV8F64_MASKED, "__epi_sin_nxv8f64_m"},
+                     {RTLIB::SIN_NXV1F32_MASKED, "__epi_sin_nxv1f32_m"},
+                     {RTLIB::SIN_NXV2F32_MASKED, "__epi_sin_nxv2f32_m"},
+                     {RTLIB::SIN_NXV4F32_MASKED, "__epi_sin_nxv4f32_m"},
+                     {RTLIB::SIN_NXV8F32_MASKED, "__epi_sin_nxv8f32_m"},
+                     {RTLIB::SIN_NXV16F32_MASKED, "__epi_sin_nxv16f32_m"}});
 
     RegisterLibCall({{RTLIB::COS_NXV1F64, "__epi_cos_nxv1f64"},
                      {RTLIB::COS_NXV2F64, "__epi_cos_nxv2f64"},
@@ -4393,6 +4404,40 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv4f32, RTLIB::COS_NXV4F32_MASKED},
         {MVT::nxv8f32, RTLIB::COS_NXV8F32_MASKED},
         {MVT::nxv16f32, RTLIB::COS_NXV16F32_MASKED},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*IsMasked*/ true);
+  }
+  case ISD::VP_SIN: {
+    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
+        ISD::isConstantSplatVectorAllOnes(
+            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
+                .getNode())) {
+      RISCVVTToLibCall VTToLC[] = {
+          {MVT::nxv1f64, RTLIB::SIN_NXV1F64},
+          {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
+          {MVT::nxv4f64, RTLIB::SIN_NXV4F64},
+          {MVT::nxv8f64, RTLIB::SIN_NXV8F64},
+          {MVT::nxv1f32, RTLIB::SIN_NXV1F32},
+          {MVT::nxv2f32, RTLIB::SIN_NXV2F32},
+          {MVT::nxv4f32, RTLIB::SIN_NXV4F32},
+          {MVT::nxv8f32, RTLIB::SIN_NXV8F32},
+          {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
+      };
+      return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                             /*IsMasked*/ false);
+    }
+
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::SIN_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::SIN_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::SIN_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::SIN_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::SIN_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::SIN_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::SIN_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::SIN_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::SIN_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                            /*IsMasked*/ true);

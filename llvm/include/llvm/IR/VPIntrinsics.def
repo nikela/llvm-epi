@@ -492,6 +492,10 @@ END_REGISTER_VP_INTRINSIC(vp_fptoui)
 BEGIN_REGISTER_VP(vp_cos, 1, 2, VP_COS, -1)
 END_REGISTER_VP(vp_cos, VP_COS)
 
+// llvm.vp.sin(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_sin, 1, 2, VP_SIN, -1)
+END_REGISTER_VP(vp_sin, VP_SIN)
+
 ///// } libm functions
 
 #undef BEGIN_REGISTER_VP
