@@ -360,12 +360,20 @@ private:
     bool visitDbgInfoIntrinsic(DbgInfoIntrinsic &DII) { return true; }
     // TODO: Handle specific intrinsics individually from those that can be
     // handled.
-    bool IntrinsicInst(IntrinsicInst &II) { return false; }
+    bool IntrinsicInst(IntrinsicInst &II) { return EnableIntrinsics; }
     // We only handle CallInsts that are not indirect, since we cannot guarantee
     // that they have a name in these cases.
     bool visitCallInst(CallInst &CI) {
       Function *F = CI.getCalledFunction();
-      if (!F || CI.isIndirectCall() || !F->hasName())
+      bool IsIndirectCall = CI.isIndirectCall();
+      if (IsIndirectCall && !EnableIndirectCalls)
+        return false;
+      if (!F && !IsIndirectCall)
+        return false;
+      // Returning twice can cause issues with the state of the function call
+      // that were not expected when the function was used, so we do not include
+      // the call in outlined functions.
+      if (CI.canReturnTwice())
         return false;
       return true;
     }
@@ -384,6 +392,14 @@ private:
     // The flag variable that marks whether we should allow branch instructions
     // to be outlined.
     bool EnableBranches = false;
+
+    // The flag variable that marks whether we should allow indirect calls
+    // to be outlined.
+    bool EnableIndirectCalls = true;
+
+    // The flag variable that marks whether we should allow intrinsics
+    // instructions to be outlined.
+    bool EnableIntrinsics = false;
   };
 
   /// A InstVisitor used to exclude certain instructions from being outlined.
