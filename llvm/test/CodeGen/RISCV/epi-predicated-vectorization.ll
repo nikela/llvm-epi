@@ -14,24 +14,21 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:    srli a6, a0, 32
 ; CHECK-NEXT:  .LBB0_2: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    slli t0, a5, 3
-; CHECK-NEXT:    add a7, a1, t0
-; CHECK-NEXT:    sub a0, a6, a5
-; CHECK-NEXT:    vsetvli t1, a0, e64, m1, ta, mu
-; CHECK-NEXT:    slli a0, t1, 32
-; CHECK-NEXT:    srli t2, a0, 32
-; CHECK-NEXT:    vsetvli zero, t2, e64, m1, ta, mu
+; CHECK-NEXT:    slli t2, a5, 3
+; CHECK-NEXT:    add a7, a1, t2
+; CHECK-NEXT:    sub t0, a6, a5
+; CHECK-NEXT:    vsetvli t1, t0, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v8, (a7)
 ; CHECK-NEXT:    vmflt.vf v8, v8, ft0
-; CHECK-NEXT:    add a0, a2, t0
+; CHECK-NEXT:    add a0, a2, t2
 ; CHECK-NEXT:    vle64.v v9, (a0)
-; CHECK-NEXT:    add a0, a3, t0
+; CHECK-NEXT:    add a0, a3, t2
 ; CHECK-NEXT:    vle64.v v10, (a0)
 ; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-NEXT:    vmnand.mm v0, v8, v8
-; CHECK-NEXT:    vsetvli zero, t2, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, t0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v11, v9, v10, v0.t
-; CHECK-NEXT:    add a0, a4, t0
+; CHECK-NEXT:    add a0, a4, t2
 ; CHECK-NEXT:    vse64.v v11, (a0), v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vfadd.vv v9, v9, v10, v0.t
