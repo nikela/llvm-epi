@@ -1,4 +1,4 @@
-# RUN: not llvm-mc < %s -arch=riscv64 -mattr=+experimental-v 2>&1 | FileCheck %s
+# RUN: not llvm-mc < %s -arch=riscv64 -mattr=+v 2>&1 | FileCheck %s
 
 # CHECK: :18: error: expected '.t' suffix
 vle8.v v0, (a0), x0

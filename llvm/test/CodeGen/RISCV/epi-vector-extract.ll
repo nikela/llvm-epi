@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=riscv64 -mattr=+experimental-v,+f,+d -target-abi lp64d \
+; RUN: llc -mtriple=riscv64 -mattr=+v,+f,+d -target-abi lp64d \
 ; RUN:    -verify-machineinstrs < %s -epi-pipeline -o /dev/null
 
 define i1 @extract_nxv1i1(<vscale x 1 x i1> %v, i64 %idx)

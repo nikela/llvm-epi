@@ -1,5 +1,5 @@
 # RUN: llvm-mc --disassemble --triple riscv64 \
-# RUN:    -mattr m,+a,+f,+d,+c,+experimental-v < %s | FileCheck %s
+# RUN:    -mattr m,+a,+f,+d,+c,+v < %s | FileCheck %s
 
 # CHECK: vmerge.vvm  v1, v2, v3, v0
 [0xd7,0x80,0x21,0x5c]

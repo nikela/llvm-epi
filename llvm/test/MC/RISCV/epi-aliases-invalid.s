@@ -1,6 +1,6 @@
-# RUN: not llvm-mc --triple=riscv64 -mattr +experimental-v < %s \
+# RUN: not llvm-mc --triple=riscv64 -mattr +v < %s \
 # RUN:    --show-encoding 2>&1 | FileCheck --check-prefix=ALIAS %s
-# RUN: not llvm-mc --triple=riscv64 -mattr=+experimental-v --riscv-no-aliases \
+# RUN: not llvm-mc --triple=riscv64 -mattr=+v --riscv-no-aliases \
 # RUN:    < %s --show-encoding 2>&1 | FileCheck --check-prefix=NO-ALIAS %s
 
 # Note: In this test we check the error messages given when exceeding the
