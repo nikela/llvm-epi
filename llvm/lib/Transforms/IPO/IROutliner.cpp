@@ -38,6 +38,15 @@ using namespace IRSimilarity;
 // matching and outlining.
 namespace llvm {
 extern cl::opt<bool> DisableBranches;
+
+// A command flag to be used for debugging to indirect calls from similarity
+// matching and outlining.
+extern cl::opt<bool> DisableIndirectCalls;
+
+// A command flag to be used for debugging to exclude intrinsics from similarity
+// matching and outlining.
+extern cl::opt<bool> DisableIntrinsics;
+
 } // namespace llvm
 
 // Set to true if the user wants the ir outliner to run on linkonceodr linkage
@@ -2519,6 +2528,9 @@ bool IROutliner::extractSection(OutlinableRegion &Region) {
 unsigned IROutliner::doOutline(Module &M) {
   // Find the possible similarity sections.
   InstructionClassifier.EnableBranches = !DisableBranches;
+  InstructionClassifier.EnableIndirectCalls = !DisableIndirectCalls;
+  InstructionClassifier.EnableIntrinsics = !DisableIntrinsics;
+
   IRSimilarityIdentifier &Identifier = getIRSI(M);
   SimilarityGroupList &SimilarityCandidates = *Identifier.getSimilarity();
 
