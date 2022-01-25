@@ -504,6 +504,10 @@ END_REGISTER_VP(vp_exp, VP_EXP)
 BEGIN_REGISTER_VP(vp_pow, 2, 3, VP_POW, -1)
 END_REGISTER_VP(vp_pow, VP_POW)
 
+// llvm.vp.frint(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_frint, 1, 2, VP_FRINT, -1)
+END_REGISTER_VP(vp_frint, VP_FRINT)
+
 ///// } libm functions
 
 #undef BEGIN_REGISTER_VP
