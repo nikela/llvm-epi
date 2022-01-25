@@ -1,4 +1,4 @@
-//===-- Implementation of the cos function for x86_64 ---------------------===//
+//===-- Implementation header for log10f ------------------------*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,15 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "src/math/cos.h"
-#include "src/__support/common.h"
+#ifndef LLVM_LIBC_SRC_MATH_LOG10F_H
+#define LLVM_LIBC_SRC_MATH_LOG10F_H
 
 namespace __llvm_libc {
 
-LLVM_LIBC_FUNCTION(double, cos, (double x)) {
-  double result;
-  __asm__ __volatile__("fcos" : "=t"(result) : "f"(x) : "cc");
-  return result;
-}
+float log10f(float x);
 
 } // namespace __llvm_libc
+
+#endif // LLVM_LIBC_SRC_MATH_LOG10F_H
