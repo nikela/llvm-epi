@@ -46,6 +46,10 @@ using namespace llvm;
 
 STATISTIC(NumTailCalls, "Number of tail calls");
 
+static void registerVecLibCalls(
+    const std::function<
+        void(const ArrayRef<std::pair<RTLIB::Libcall, const char *>>)> &);
+
 RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                          const RISCVSubtarget &STI)
     : TargetLowering(TM), Subtarget(STI) {
@@ -1215,7 +1219,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SELECT, VT, Custom);
     }
 
-    // Register libcalls for fp vector functions.
+    // Register libcalls for VP nodes and fp vector functions.
     const auto RegisterLibCall =
         [&](const ArrayRef<std::pair<RTLIB::Libcall, const char *>> LCsNames) {
           for (const auto &Pair : LCsNames) {
@@ -1223,247 +1227,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
             setLibcallCallingConv(Pair.first, CallingConv::EPI_VectorCall);
           }
         };
-
-    RegisterLibCall({{RTLIB::EXP_NXV1F64, "__epi_exp_nxv1f64"},
-                     {RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64"},
-                     {RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64"},
-                     {RTLIB::EXP_NXV8F64, "__epi_exp_nxv8f64"},
-                     {RTLIB::EXP_NXV1F32, "__epi_exp_nxv1f32"},
-                     {RTLIB::EXP_NXV2F32, "__epi_exp_nxv2f32"},
-                     {RTLIB::EXP_NXV4F32, "__epi_exp_nxv4f32"},
-                     {RTLIB::EXP_NXV8F32, "__epi_exp_nxv8f32"},
-                     {RTLIB::EXP_NXV16F32, "__epi_exp_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::EXP_NXV1F64_MASKED, "__epi_exp_nxv1f64_m"},
-                     {RTLIB::EXP_NXV2F64_MASKED, "__epi_exp_nxv2f64_m"},
-                     {RTLIB::EXP_NXV4F64_MASKED, "__epi_exp_nxv4f64_m"},
-                     {RTLIB::EXP_NXV8F64_MASKED, "__epi_exp_nxv8f64_m"},
-                     {RTLIB::EXP_NXV1F32_MASKED, "__epi_exp_nxv1f32_m"},
-                     {RTLIB::EXP_NXV2F32_MASKED, "__epi_exp_nxv2f32_m"},
-                     {RTLIB::EXP_NXV4F32_MASKED, "__epi_exp_nxv4f32_m"},
-                     {RTLIB::EXP_NXV8F32_MASKED, "__epi_exp_nxv8f32_m"},
-                     {RTLIB::EXP_NXV16F32_MASKED, "__epi_exp_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::SIN_NXV1F64, "__epi_sin_nxv1f64"},
-                     {RTLIB::SIN_NXV2F64, "__epi_sin_nxv2f64"},
-                     {RTLIB::SIN_NXV4F64, "__epi_sin_nxv4f64"},
-                     {RTLIB::SIN_NXV8F64, "__epi_sin_nxv8f64"},
-                     {RTLIB::SIN_NXV1F32, "__epi_sin_nxv1f32"},
-                     {RTLIB::SIN_NXV2F32, "__epi_sin_nxv2f32"},
-                     {RTLIB::SIN_NXV4F32, "__epi_sin_nxv4f32"},
-                     {RTLIB::SIN_NXV8F32, "__epi_sin_nxv8f32"},
-                     {RTLIB::SIN_NXV16F32, "__epi_sin_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::SIN_NXV1F64_MASKED, "__epi_sin_nxv1f64_m"},
-                     {RTLIB::SIN_NXV2F64_MASKED, "__epi_sin_nxv2f64_m"},
-                     {RTLIB::SIN_NXV4F64_MASKED, "__epi_sin_nxv4f64_m"},
-                     {RTLIB::SIN_NXV8F64_MASKED, "__epi_sin_nxv8f64_m"},
-                     {RTLIB::SIN_NXV1F32_MASKED, "__epi_sin_nxv1f32_m"},
-                     {RTLIB::SIN_NXV2F32_MASKED, "__epi_sin_nxv2f32_m"},
-                     {RTLIB::SIN_NXV4F32_MASKED, "__epi_sin_nxv4f32_m"},
-                     {RTLIB::SIN_NXV8F32_MASKED, "__epi_sin_nxv8f32_m"},
-                     {RTLIB::SIN_NXV16F32_MASKED, "__epi_sin_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::COS_NXV1F64, "__epi_cos_nxv1f64"},
-                     {RTLIB::COS_NXV2F64, "__epi_cos_nxv2f64"},
-                     {RTLIB::COS_NXV4F64, "__epi_cos_nxv4f64"},
-                     {RTLIB::COS_NXV8F64, "__epi_cos_nxv8f64"},
-                     {RTLIB::COS_NXV1F32, "__epi_cos_nxv1f32"},
-                     {RTLIB::COS_NXV2F32, "__epi_cos_nxv2f32"},
-                     {RTLIB::COS_NXV4F32, "__epi_cos_nxv4f32"},
-                     {RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32"},
-                     {RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::COS_NXV1F64_MASKED, "__epi_cos_nxv1f64_m"},
-                     {RTLIB::COS_NXV2F64_MASKED, "__epi_cos_nxv2f64_m"},
-                     {RTLIB::COS_NXV4F64_MASKED, "__epi_cos_nxv4f64_m"},
-                     {RTLIB::COS_NXV8F64_MASKED, "__epi_cos_nxv8f64_m"},
-                     {RTLIB::COS_NXV1F32_MASKED, "__epi_cos_nxv1f32_m"},
-                     {RTLIB::COS_NXV2F32_MASKED, "__epi_cos_nxv2f32_m"},
-                     {RTLIB::COS_NXV4F32_MASKED, "__epi_cos_nxv4f32_m"},
-                     {RTLIB::COS_NXV8F32_MASKED, "__epi_cos_nxv8f32_m"},
-                     {RTLIB::COS_NXV16F32_MASKED, "__epi_cos_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::POW_NXV1F64, "__epi_pow_nxv1f64"},
-                     {RTLIB::POW_NXV2F64, "__epi_pow_nxv2f64"},
-                     {RTLIB::POW_NXV4F64, "__epi_pow_nxv4f64"},
-                     {RTLIB::POW_NXV8F64, "__epi_pow_nxv8f64"},
-                     {RTLIB::POW_NXV1F32, "__epi_pow_nxv1f32"},
-                     {RTLIB::POW_NXV2F32, "__epi_pow_nxv2f32"},
-                     {RTLIB::POW_NXV4F32, "__epi_pow_nxv4f32"},
-                     {RTLIB::POW_NXV8F32, "__epi_pow_nxv8f32"},
-                     {RTLIB::POW_NXV16F32, "__epi_pow_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::POW_NXV1F64_MASKED, "__epi_pow_nxv1f64_m"},
-                     {RTLIB::POW_NXV2F64_MASKED, "__epi_pow_nxv2f64_m"},
-                     {RTLIB::POW_NXV4F64_MASKED, "__epi_pow_nxv4f64_m"},
-                     {RTLIB::POW_NXV8F64_MASKED, "__epi_pow_nxv8f64_m"},
-                     {RTLIB::POW_NXV1F32_MASKED, "__epi_pow_nxv1f32_m"},
-                     {RTLIB::POW_NXV2F32_MASKED, "__epi_pow_nxv2f32_m"},
-                     {RTLIB::POW_NXV4F32_MASKED, "__epi_pow_nxv4f32_m"},
-                     {RTLIB::POW_NXV8F32_MASKED, "__epi_pow_nxv8f32_m"},
-                     {RTLIB::POW_NXV16F32_MASKED, "__epi_pow_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::REM_NXV1F64, "__epi_fmod_nxv1f64"},
-                     {RTLIB::REM_NXV2F64, "__epi_fmod_nxv2f64"},
-                     {RTLIB::REM_NXV4F64, "__epi_fmod_nxv4f64"},
-                     {RTLIB::REM_NXV8F64, "__epi_fmod_nxv8f64"},
-                     {RTLIB::REM_NXV1F32, "__epi_fmod_nxv1f32"},
-                     {RTLIB::REM_NXV2F32, "__epi_fmod_nxv2f32"},
-                     {RTLIB::REM_NXV4F32, "__epi_fmod_nxv4f32"},
-                     {RTLIB::REM_NXV8F32, "__epi_fmod_nxv8f32"},
-                     {RTLIB::REM_NXV16F32, "__epi_fmod_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::REM_NXV1F64_MASKED, "__epi_fmod_nxv1f64_m"},
-                     {RTLIB::REM_NXV2F64_MASKED, "__epi_fmod_nxv2f64_m"},
-                     {RTLIB::REM_NXV4F64_MASKED, "__epi_fmod_nxv4f64_m"},
-                     {RTLIB::REM_NXV8F64_MASKED, "__epi_fmod_nxv8f64_m"},
-                     {RTLIB::REM_NXV1F32_MASKED, "__epi_fmod_nxv1f32_m"},
-                     {RTLIB::REM_NXV2F32_MASKED, "__epi_fmod_nxv2f32_m"},
-                     {RTLIB::REM_NXV4F32_MASKED, "__epi_fmod_nxv4f32_m"},
-                     {RTLIB::REM_NXV8F32_MASKED, "__epi_fmod_nxv8f32_m"},
-                     {RTLIB::REM_NXV16F32_MASKED, "__epi_fmod_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64"},
-                     {RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64"},
-                     {RTLIB::FRINT_NXV4F64, "__epi_frint_nxv4f64"},
-                     {RTLIB::FRINT_NXV8F64, "__epi_frint_nxv8f64"},
-                     {RTLIB::FRINT_NXV1F32, "__epi_frint_nxv1f32"},
-                     {RTLIB::FRINT_NXV2F32, "__epi_frint_nxv2f32"},
-                     {RTLIB::FRINT_NXV4F32, "__epi_frint_nxv4f32"},
-                     {RTLIB::FRINT_NXV8F32, "__epi_frint_nxv8f32"},
-                     {RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::FRINT_NXV1F64_MASKED, "__epi_frint_nxv1f64_m"},
-                     {RTLIB::FRINT_NXV2F64_MASKED, "__epi_frint_nxv2f64_m"},
-                     {RTLIB::FRINT_NXV4F64_MASKED, "__epi_frint_nxv4f64_m"},
-                     {RTLIB::FRINT_NXV8F64_MASKED, "__epi_frint_nxv8f64_m"},
-                     {RTLIB::FRINT_NXV1F32_MASKED, "__epi_frint_nxv1f32_m"},
-                     {RTLIB::FRINT_NXV2F32_MASKED, "__epi_frint_nxv2f32_m"},
-                     {RTLIB::FRINT_NXV4F32_MASKED, "__epi_frint_nxv4f32_m"},
-                     {RTLIB::FRINT_NXV8F32_MASKED, "__epi_frint_nxv8f32_m"},
-                     {RTLIB::FRINT_NXV16F32_MASKED, "__epi_frint_nxv16f32_m"}});
-
-    // Register libcalls for VP SDNodes.
-    RegisterLibCall(
-        {{RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64"},
-         {RTLIB::VP_REDUCE_FMUL_NXV2F64, "__epi_vp_reduce_fmul_nxv2f64"},
-         {RTLIB::VP_REDUCE_FMUL_NXV4F64, "__epi_vp_reduce_fmul_nxv4f64"},
-         {RTLIB::VP_REDUCE_FMUL_NXV8F64, "__epi_vp_reduce_fmul_nxv8f64"},
-         {RTLIB::VP_REDUCE_FMUL_NXV1F32, "__epi_vp_reduce_fmul_nxv1f32"},
-         {RTLIB::VP_REDUCE_FMUL_NXV2F32, "__epi_vp_reduce_fmul_nxv2f32"},
-         {RTLIB::VP_REDUCE_FMUL_NXV4F32, "__epi_vp_reduce_fmul_nxv4f32"},
-         {RTLIB::VP_REDUCE_FMUL_NXV8F32, "__epi_vp_reduce_fmul_nxv8f32"},
-         {RTLIB::VP_REDUCE_FMUL_NXV16F32, "__epi_vp_reduce_fmul_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::VP_REDUCE_FMUL_NXV1F64_MASKED,
-                      "__epi_vp_reduce_fmul_nxv1f64_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV2F64_MASKED,
-                      "__epi_vp_reduce_fmul_nxv2f64_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV4F64_MASKED,
-                      "__epi_vp_reduce_fmul_nxv4f64_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV8F64_MASKED,
-                      "__epi_vp_reduce_fmul_nxv8f64_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV1F32_MASKED,
-                      "__epi_vp_reduce_fmul_nxv1f32_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV2F32_MASKED,
-                      "__epi_vp_reduce_fmul_nxv2f32_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV4F32_MASKED,
-                      "__epi_vp_reduce_fmul_nxv4f32_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV8F32_MASKED,
-                      "__epi_vp_reduce_fmul_nxv8f32_m"},
-                     {RTLIB::VP_REDUCE_FMUL_NXV16F32_MASKED,
-                      "__epi_vp_reduce_fmul_nxv16f32_m"}});
-
-    RegisterLibCall({{RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F64,
-                      "__epi_vp_reduce_seq_fmul_nxv1f64"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F64,
-                      "__epi_vp_reduce_seq_fmul_nxv2f64"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F64,
-                      "__epi_vp_reduce_seq_fmul_nxv4f64"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F64,
-                      "__epi_vp_reduce_seq_fmul_nxv8f64"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F32,
-                      "__epi_vp_reduce_seq_fmul_nxv1f32"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F32,
-                      "__epi_vp_reduce_seq_fmul_nxv2f32"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F32,
-                      "__epi_vp_reduce_seq_fmul_nxv4f32"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F32,
-                      "__epi_vp_reduce_seq_fmul_nxv8f32"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32,
-                      "__epi_vp_reduce_seq_fmul_nxv16f32"}});
-
-    RegisterLibCall({{RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F64_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv1f64_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F64_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv2f64_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F64_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv4f64_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F64_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv8f64_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F32_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv1f32_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F32_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv2f32_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F32_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv4f32_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F32_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv8f32_m"},
-                     {RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32_MASKED,
-                      "__epi_vp_reduce_seq_fmul_nxv16f32_m"}});
-
-    RegisterLibCall(
-        {{RTLIB::VP_REDUCE_MUL_NXV1I8, "__epi_vp_reduce_mul_nxv1i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I8, "__epi_vp_reduce_mul_nxv2i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I8, "__epi_vp_reduce_mul_nxv4i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I8, "__epi_vp_reduce_mul_nxv8i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I8, "__epi_vp_reduce_mul_nxv16i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV32I8, "__epi_vp_reduce_mul_nxv32i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV64I8, "__epi_vp_reduce_mul_nxv64i8"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I16, "__epi_vp_reduce_mul_nxv1i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I16, "__epi_vp_reduce_mul_nxv2i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I16, "__epi_vp_reduce_mul_nxv4i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I16, "__epi_vp_reduce_mul_nxv8i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I16, "__epi_vp_reduce_mul_nxv16i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV32I16, "__epi_vp_reduce_mul_nxv32i16"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I32, "__epi_vp_reduce_mul_nxv1i32"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I32, "__epi_vp_reduce_mul_nxv2i32"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I32, "__epi_vp_reduce_mul_nxv4i32"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I32, "__epi_vp_reduce_mul_nxv8i32"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I32, "__epi_vp_reduce_mul_nxv16i32"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I64, "__epi_vp_reduce_mul_nxv1i64"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I64, "__epi_vp_reduce_mul_nxv2i64"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I64, "__epi_vp_reduce_mul_nxv4i64"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I64, "__epi_vp_reduce_mul_nxv8i64"}});
-
-    RegisterLibCall(
-        {{RTLIB::VP_REDUCE_MUL_NXV1I8_MASKED, "__epi_vp_reduce_mul_nxv1i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I8_MASKED, "__epi_vp_reduce_mul_nxv2i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I8_MASKED, "__epi_vp_reduce_mul_nxv4i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I8_MASKED, "__epi_vp_reduce_mul_nxv8i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I8_MASKED, "__epi_vp_reduce_mul_nxv16i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV32I8_MASKED, "__epi_vp_reduce_mul_nxv32i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV64I8_MASKED, "__epi_vp_reduce_mul_nxv64i8_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I16_MASKED, "__epi_vp_reduce_mul_nxv1i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I16_MASKED, "__epi_vp_reduce_mul_nxv2i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I16_MASKED, "__epi_vp_reduce_mul_nxv4i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I16_MASKED, "__epi_vp_reduce_mul_nxv8i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I16_MASKED,
-          "__epi_vp_reduce_mul_nxv16i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV32I16_MASKED,
-          "__epi_vp_reduce_mul_nxv32i16_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I32_MASKED, "__epi_vp_reduce_mul_nxv1i32_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I32_MASKED, "__epi_vp_reduce_mul_nxv2i32_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I32_MASKED, "__epi_vp_reduce_mul_nxv4i32_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I32_MASKED, "__epi_vp_reduce_mul_nxv8i32_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV16I32_MASKED,
-          "__epi_vp_reduce_mul_nxv16i32_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV1I64_MASKED, "__epi_vp_reduce_mul_nxv1i64_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV2I64_MASKED, "__epi_vp_reduce_mul_nxv2i64_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV4I64_MASKED, "__epi_vp_reduce_mul_nxv4i64_m"},
-         {RTLIB::VP_REDUCE_MUL_NXV8I64_MASKED,
-          "__epi_vp_reduce_mul_nxv8i64_m"}});
+    registerVecLibCalls(RegisterLibCall);
 
     // Custom-legalize these nodes for fp scalable vectors.
     for (auto VT :
@@ -1507,6 +1271,233 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setTargetDAGCombine(ISD::VP_STORE);
     setTargetDAGCombine(ISD::EXPERIMENTAL_VP_REVERSE);
   }
+}
+
+static void registerVecLibCalls(
+    const std::function<
+        void(const ArrayRef<std::pair<RTLIB::Libcall, const char *>>)>
+        &RegisterLibCall) {
+  RegisterLibCall({{RTLIB::EXP_NXV1F64, "__epi_exp_nxv1f64"},
+                   {RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64"},
+                   {RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64"},
+                   {RTLIB::EXP_NXV8F64, "__epi_exp_nxv8f64"},
+                   {RTLIB::EXP_NXV1F32, "__epi_exp_nxv1f32"},
+                   {RTLIB::EXP_NXV2F32, "__epi_exp_nxv2f32"},
+                   {RTLIB::EXP_NXV4F32, "__epi_exp_nxv4f32"},
+                   {RTLIB::EXP_NXV8F32, "__epi_exp_nxv8f32"},
+                   {RTLIB::EXP_NXV16F32, "__epi_exp_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::EXP_NXV1F64_MASKED, "__epi_exp_nxv1f64_m"},
+                   {RTLIB::EXP_NXV2F64_MASKED, "__epi_exp_nxv2f64_m"},
+                   {RTLIB::EXP_NXV4F64_MASKED, "__epi_exp_nxv4f64_m"},
+                   {RTLIB::EXP_NXV8F64_MASKED, "__epi_exp_nxv8f64_m"},
+                   {RTLIB::EXP_NXV1F32_MASKED, "__epi_exp_nxv1f32_m"},
+                   {RTLIB::EXP_NXV2F32_MASKED, "__epi_exp_nxv2f32_m"},
+                   {RTLIB::EXP_NXV4F32_MASKED, "__epi_exp_nxv4f32_m"},
+                   {RTLIB::EXP_NXV8F32_MASKED, "__epi_exp_nxv8f32_m"},
+                   {RTLIB::EXP_NXV16F32_MASKED, "__epi_exp_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::SIN_NXV1F64, "__epi_sin_nxv1f64"},
+                   {RTLIB::SIN_NXV2F64, "__epi_sin_nxv2f64"},
+                   {RTLIB::SIN_NXV4F64, "__epi_sin_nxv4f64"},
+                   {RTLIB::SIN_NXV8F64, "__epi_sin_nxv8f64"},
+                   {RTLIB::SIN_NXV1F32, "__epi_sin_nxv1f32"},
+                   {RTLIB::SIN_NXV2F32, "__epi_sin_nxv2f32"},
+                   {RTLIB::SIN_NXV4F32, "__epi_sin_nxv4f32"},
+                   {RTLIB::SIN_NXV8F32, "__epi_sin_nxv8f32"},
+                   {RTLIB::SIN_NXV16F32, "__epi_sin_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::SIN_NXV1F64_MASKED, "__epi_sin_nxv1f64_m"},
+                   {RTLIB::SIN_NXV2F64_MASKED, "__epi_sin_nxv2f64_m"},
+                   {RTLIB::SIN_NXV4F64_MASKED, "__epi_sin_nxv4f64_m"},
+                   {RTLIB::SIN_NXV8F64_MASKED, "__epi_sin_nxv8f64_m"},
+                   {RTLIB::SIN_NXV1F32_MASKED, "__epi_sin_nxv1f32_m"},
+                   {RTLIB::SIN_NXV2F32_MASKED, "__epi_sin_nxv2f32_m"},
+                   {RTLIB::SIN_NXV4F32_MASKED, "__epi_sin_nxv4f32_m"},
+                   {RTLIB::SIN_NXV8F32_MASKED, "__epi_sin_nxv8f32_m"},
+                   {RTLIB::SIN_NXV16F32_MASKED, "__epi_sin_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::COS_NXV1F64, "__epi_cos_nxv1f64"},
+                   {RTLIB::COS_NXV2F64, "__epi_cos_nxv2f64"},
+                   {RTLIB::COS_NXV4F64, "__epi_cos_nxv4f64"},
+                   {RTLIB::COS_NXV8F64, "__epi_cos_nxv8f64"},
+                   {RTLIB::COS_NXV1F32, "__epi_cos_nxv1f32"},
+                   {RTLIB::COS_NXV2F32, "__epi_cos_nxv2f32"},
+                   {RTLIB::COS_NXV4F32, "__epi_cos_nxv4f32"},
+                   {RTLIB::COS_NXV8F32, "__epi_cos_nxv8f32"},
+                   {RTLIB::COS_NXV16F32, "__epi_cos_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::COS_NXV1F64_MASKED, "__epi_cos_nxv1f64_m"},
+                   {RTLIB::COS_NXV2F64_MASKED, "__epi_cos_nxv2f64_m"},
+                   {RTLIB::COS_NXV4F64_MASKED, "__epi_cos_nxv4f64_m"},
+                   {RTLIB::COS_NXV8F64_MASKED, "__epi_cos_nxv8f64_m"},
+                   {RTLIB::COS_NXV1F32_MASKED, "__epi_cos_nxv1f32_m"},
+                   {RTLIB::COS_NXV2F32_MASKED, "__epi_cos_nxv2f32_m"},
+                   {RTLIB::COS_NXV4F32_MASKED, "__epi_cos_nxv4f32_m"},
+                   {RTLIB::COS_NXV8F32_MASKED, "__epi_cos_nxv8f32_m"},
+                   {RTLIB::COS_NXV16F32_MASKED, "__epi_cos_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::POW_NXV1F64, "__epi_pow_nxv1f64"},
+                   {RTLIB::POW_NXV2F64, "__epi_pow_nxv2f64"},
+                   {RTLIB::POW_NXV4F64, "__epi_pow_nxv4f64"},
+                   {RTLIB::POW_NXV8F64, "__epi_pow_nxv8f64"},
+                   {RTLIB::POW_NXV1F32, "__epi_pow_nxv1f32"},
+                   {RTLIB::POW_NXV2F32, "__epi_pow_nxv2f32"},
+                   {RTLIB::POW_NXV4F32, "__epi_pow_nxv4f32"},
+                   {RTLIB::POW_NXV8F32, "__epi_pow_nxv8f32"},
+                   {RTLIB::POW_NXV16F32, "__epi_pow_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::POW_NXV1F64_MASKED, "__epi_pow_nxv1f64_m"},
+                   {RTLIB::POW_NXV2F64_MASKED, "__epi_pow_nxv2f64_m"},
+                   {RTLIB::POW_NXV4F64_MASKED, "__epi_pow_nxv4f64_m"},
+                   {RTLIB::POW_NXV8F64_MASKED, "__epi_pow_nxv8f64_m"},
+                   {RTLIB::POW_NXV1F32_MASKED, "__epi_pow_nxv1f32_m"},
+                   {RTLIB::POW_NXV2F32_MASKED, "__epi_pow_nxv2f32_m"},
+                   {RTLIB::POW_NXV4F32_MASKED, "__epi_pow_nxv4f32_m"},
+                   {RTLIB::POW_NXV8F32_MASKED, "__epi_pow_nxv8f32_m"},
+                   {RTLIB::POW_NXV16F32_MASKED, "__epi_pow_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::REM_NXV1F64, "__epi_fmod_nxv1f64"},
+                   {RTLIB::REM_NXV2F64, "__epi_fmod_nxv2f64"},
+                   {RTLIB::REM_NXV4F64, "__epi_fmod_nxv4f64"},
+                   {RTLIB::REM_NXV8F64, "__epi_fmod_nxv8f64"},
+                   {RTLIB::REM_NXV1F32, "__epi_fmod_nxv1f32"},
+                   {RTLIB::REM_NXV2F32, "__epi_fmod_nxv2f32"},
+                   {RTLIB::REM_NXV4F32, "__epi_fmod_nxv4f32"},
+                   {RTLIB::REM_NXV8F32, "__epi_fmod_nxv8f32"},
+                   {RTLIB::REM_NXV16F32, "__epi_fmod_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::REM_NXV1F64_MASKED, "__epi_fmod_nxv1f64_m"},
+                   {RTLIB::REM_NXV2F64_MASKED, "__epi_fmod_nxv2f64_m"},
+                   {RTLIB::REM_NXV4F64_MASKED, "__epi_fmod_nxv4f64_m"},
+                   {RTLIB::REM_NXV8F64_MASKED, "__epi_fmod_nxv8f64_m"},
+                   {RTLIB::REM_NXV1F32_MASKED, "__epi_fmod_nxv1f32_m"},
+                   {RTLIB::REM_NXV2F32_MASKED, "__epi_fmod_nxv2f32_m"},
+                   {RTLIB::REM_NXV4F32_MASKED, "__epi_fmod_nxv4f32_m"},
+                   {RTLIB::REM_NXV8F32_MASKED, "__epi_fmod_nxv8f32_m"},
+                   {RTLIB::REM_NXV16F32_MASKED, "__epi_fmod_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::FRINT_NXV1F64, "__epi_frint_nxv1f64"},
+                   {RTLIB::FRINT_NXV2F64, "__epi_frint_nxv2f64"},
+                   {RTLIB::FRINT_NXV4F64, "__epi_frint_nxv4f64"},
+                   {RTLIB::FRINT_NXV8F64, "__epi_frint_nxv8f64"},
+                   {RTLIB::FRINT_NXV1F32, "__epi_frint_nxv1f32"},
+                   {RTLIB::FRINT_NXV2F32, "__epi_frint_nxv2f32"},
+                   {RTLIB::FRINT_NXV4F32, "__epi_frint_nxv4f32"},
+                   {RTLIB::FRINT_NXV8F32, "__epi_frint_nxv8f32"},
+                   {RTLIB::FRINT_NXV16F32, "__epi_frint_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::FRINT_NXV1F64_MASKED, "__epi_frint_nxv1f64_m"},
+                   {RTLIB::FRINT_NXV2F64_MASKED, "__epi_frint_nxv2f64_m"},
+                   {RTLIB::FRINT_NXV4F64_MASKED, "__epi_frint_nxv4f64_m"},
+                   {RTLIB::FRINT_NXV8F64_MASKED, "__epi_frint_nxv8f64_m"},
+                   {RTLIB::FRINT_NXV1F32_MASKED, "__epi_frint_nxv1f32_m"},
+                   {RTLIB::FRINT_NXV2F32_MASKED, "__epi_frint_nxv2f32_m"},
+                   {RTLIB::FRINT_NXV4F32_MASKED, "__epi_frint_nxv4f32_m"},
+                   {RTLIB::FRINT_NXV8F32_MASKED, "__epi_frint_nxv8f32_m"},
+                   {RTLIB::FRINT_NXV16F32_MASKED, "__epi_frint_nxv16f32_m"}});
+
+  RegisterLibCall(
+      {{RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64"},
+       {RTLIB::VP_REDUCE_FMUL_NXV2F64, "__epi_vp_reduce_fmul_nxv2f64"},
+       {RTLIB::VP_REDUCE_FMUL_NXV4F64, "__epi_vp_reduce_fmul_nxv4f64"},
+       {RTLIB::VP_REDUCE_FMUL_NXV8F64, "__epi_vp_reduce_fmul_nxv8f64"},
+       {RTLIB::VP_REDUCE_FMUL_NXV1F32, "__epi_vp_reduce_fmul_nxv1f32"},
+       {RTLIB::VP_REDUCE_FMUL_NXV2F32, "__epi_vp_reduce_fmul_nxv2f32"},
+       {RTLIB::VP_REDUCE_FMUL_NXV4F32, "__epi_vp_reduce_fmul_nxv4f32"},
+       {RTLIB::VP_REDUCE_FMUL_NXV8F32, "__epi_vp_reduce_fmul_nxv8f32"},
+       {RTLIB::VP_REDUCE_FMUL_NXV16F32, "__epi_vp_reduce_fmul_nxv16f32"}});
+
+  RegisterLibCall(
+      {{RTLIB::VP_REDUCE_FMUL_NXV1F64_MASKED, "__epi_vp_reduce_fmul_nxv1f64_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV2F64_MASKED, "__epi_vp_reduce_fmul_nxv2f64_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV4F64_MASKED, "__epi_vp_reduce_fmul_nxv4f64_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV8F64_MASKED, "__epi_vp_reduce_fmul_nxv8f64_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV1F32_MASKED, "__epi_vp_reduce_fmul_nxv1f32_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV2F32_MASKED, "__epi_vp_reduce_fmul_nxv2f32_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV4F32_MASKED, "__epi_vp_reduce_fmul_nxv4f32_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV8F32_MASKED, "__epi_vp_reduce_fmul_nxv8f32_m"},
+       {RTLIB::VP_REDUCE_FMUL_NXV16F32_MASKED,
+        "__epi_vp_reduce_fmul_nxv16f32_m"}});
+
+  RegisterLibCall(
+      {{RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F64, "__epi_vp_reduce_seq_fmul_nxv1f64"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F64, "__epi_vp_reduce_seq_fmul_nxv2f64"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F64, "__epi_vp_reduce_seq_fmul_nxv4f64"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F64, "__epi_vp_reduce_seq_fmul_nxv8f64"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F32, "__epi_vp_reduce_seq_fmul_nxv1f32"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F32, "__epi_vp_reduce_seq_fmul_nxv2f32"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F32, "__epi_vp_reduce_seq_fmul_nxv4f32"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F32, "__epi_vp_reduce_seq_fmul_nxv8f32"},
+       {RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32,
+        "__epi_vp_reduce_seq_fmul_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F64_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv1f64_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F64_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv2f64_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F64_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv4f64_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F64_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv8f64_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F32_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv1f32_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F32_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv2f32_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV4F32_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv4f32_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV8F32_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv8f32_m"},
+                   {RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32_MASKED,
+                    "__epi_vp_reduce_seq_fmul_nxv16f32_m"}});
+
+  RegisterLibCall(
+      {{RTLIB::VP_REDUCE_MUL_NXV1I8, "__epi_vp_reduce_mul_nxv1i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I8, "__epi_vp_reduce_mul_nxv2i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I8, "__epi_vp_reduce_mul_nxv4i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I8, "__epi_vp_reduce_mul_nxv8i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I8, "__epi_vp_reduce_mul_nxv16i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV32I8, "__epi_vp_reduce_mul_nxv32i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV64I8, "__epi_vp_reduce_mul_nxv64i8"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I16, "__epi_vp_reduce_mul_nxv1i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I16, "__epi_vp_reduce_mul_nxv2i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I16, "__epi_vp_reduce_mul_nxv4i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I16, "__epi_vp_reduce_mul_nxv8i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I16, "__epi_vp_reduce_mul_nxv16i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV32I16, "__epi_vp_reduce_mul_nxv32i16"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I32, "__epi_vp_reduce_mul_nxv1i32"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I32, "__epi_vp_reduce_mul_nxv2i32"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I32, "__epi_vp_reduce_mul_nxv4i32"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I32, "__epi_vp_reduce_mul_nxv8i32"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I32, "__epi_vp_reduce_mul_nxv16i32"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I64, "__epi_vp_reduce_mul_nxv1i64"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I64, "__epi_vp_reduce_mul_nxv2i64"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I64, "__epi_vp_reduce_mul_nxv4i64"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I64, "__epi_vp_reduce_mul_nxv8i64"}});
+
+  RegisterLibCall(
+      {{RTLIB::VP_REDUCE_MUL_NXV1I8_MASKED, "__epi_vp_reduce_mul_nxv1i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I8_MASKED, "__epi_vp_reduce_mul_nxv2i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I8_MASKED, "__epi_vp_reduce_mul_nxv4i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I8_MASKED, "__epi_vp_reduce_mul_nxv8i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I8_MASKED, "__epi_vp_reduce_mul_nxv16i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV32I8_MASKED, "__epi_vp_reduce_mul_nxv32i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV64I8_MASKED, "__epi_vp_reduce_mul_nxv64i8_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I16_MASKED, "__epi_vp_reduce_mul_nxv1i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I16_MASKED, "__epi_vp_reduce_mul_nxv2i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I16_MASKED, "__epi_vp_reduce_mul_nxv4i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I16_MASKED, "__epi_vp_reduce_mul_nxv8i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I16_MASKED, "__epi_vp_reduce_mul_nxv16i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV32I16_MASKED, "__epi_vp_reduce_mul_nxv32i16_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I32_MASKED, "__epi_vp_reduce_mul_nxv1i32_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I32_MASKED, "__epi_vp_reduce_mul_nxv2i32_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I32_MASKED, "__epi_vp_reduce_mul_nxv4i32_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I32_MASKED, "__epi_vp_reduce_mul_nxv8i32_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV16I32_MASKED, "__epi_vp_reduce_mul_nxv16i32_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV1I64_MASKED, "__epi_vp_reduce_mul_nxv1i64_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV2I64_MASKED, "__epi_vp_reduce_mul_nxv2i64_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV4I64_MASKED, "__epi_vp_reduce_mul_nxv4i64_m"},
+       {RTLIB::VP_REDUCE_MUL_NXV8I64_MASKED, "__epi_vp_reduce_mul_nxv8i64_m"}});
 }
 
 EVT RISCVTargetLowering::getSetCCResultType(const DataLayout &DL,
@@ -1928,7 +1919,7 @@ RISCVTargetLowering::lowerZERO_EXTEND_VECTOR_INREG(SDValue Op,
 
 SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
                                              ArrayRef<RISCVVTToLibCall> VTToLC,
-                                             EVT VT, bool IsMasked) const {
+                                             EVT VT, bool NeedsMask) const {
   SDLoc DL(Op);
 
   auto LCIt = std::find_if(
@@ -1943,10 +1934,10 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   SDValue Result;
   std::vector<SDValue> Operands;
   if (ISD::isVPOpcode(Op.getOpcode())) {
-    if (!IsMasked && ISD::getVPMaskIdx(Op.getOpcode()).hasValue()) {
-      auto MaskIdx = ISD::getVPMaskIdx(Op.getOpcode()).getValue();
+    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    if (!NeedsMask && MaskIdx) {
       for (const auto &OpIdx : enumerate(Op->ops())) {
-        if (OpIdx.index() == MaskIdx)
+        if (OpIdx.index() == *MaskIdx)
           continue;
         Operands.push_back(OpIdx.value());
       }
@@ -1982,7 +1973,7 @@ SDValue RISCVTargetLowering::lowerFEXP(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                         /*IsMasked*/ false);
+                         /*NeedsMask*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
@@ -1994,7 +1985,7 @@ SDValue RISCVTargetLowering::lowerFSIN(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                         /*IsMasked*/ false);
+                         /*NeedsMask*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
@@ -2006,7 +1997,7 @@ SDValue RISCVTargetLowering::lowerFCOS(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv16f32, RTLIB::COS_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                         /*IsMasked*/ false);
+                         /*NeedsMask*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
@@ -2022,7 +2013,7 @@ SDValue RISCVTargetLowering::lowerFPOW(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv16f32, RTLIB::POW_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                         /*IsMasked*/ false);
+                         /*NeedsMask*/ false);
 }
 
 SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
@@ -2038,7 +2029,7 @@ SDValue RISCVTargetLowering::lowerFREM(SDValue Op, SelectionDAG &DAG) const {
       {MVT::nxv16f32, RTLIB::REM_NXV16F32},
   };
   return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                         /*IsMasked*/ false);
+                         /*NeedsMask*/ false);
 }
 
 RISCVII::VLMUL RISCVTargetLowering::getLMUL(MVT VT) {
@@ -3491,6 +3482,12 @@ SDValue RISCVTargetLowering::expandUnalignedRVVStore(SDValue Op,
 
 SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
                                             SelectionDAG &DAG) const {
+  auto NeedsMask = [](SDValue Op) {
+    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    return MaskIdx &&
+           !ISD::isConstantSplatVectorAllOnes(Op.getOperand(*MaskIdx).getNode());
+  };
+
   switch (Op.getOpcode()) {
   default:
     report_fatal_error("unimplemented operand");
@@ -3602,7 +3599,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::FRINT_NXV16F32},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ false);
+                           /*NeedsMask*/ false);
   }
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
@@ -3968,10 +3965,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_REDUCE_FMUL: {
     // Use unmasked enum if the mask operand is missing or the mask is an
     // all-ones vector
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::VP_REDUCE_FMUL_NXV1F64},
           {MVT::nxv2f64, RTLIB::VP_REDUCE_FMUL_NXV2F64},
@@ -3984,7 +3978,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::VP_REDUCE_FMUL_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -3999,15 +3993,12 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::VP_REDUCE_FMUL_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_REDUCE_SEQ_FMUL: {
     // Use unmasked enum if the mask operand is missing or the mask is an
     // all-ones vector
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::VP_REDUCE_SEQ_FMUL_NXV1F64},
           {MVT::nxv2f64, RTLIB::VP_REDUCE_SEQ_FMUL_NXV2F64},
@@ -4020,7 +4011,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4035,15 +4026,12 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::VP_REDUCE_SEQ_FMUL_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_REDUCE_MUL: {
     // Use unmasked enum if the mask operand is missing or the mask is an
     // all-ones vector
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1i8, RTLIB::VP_REDUCE_MUL_NXV1I8},
           {MVT::nxv2i8, RTLIB::VP_REDUCE_MUL_NXV2I8},
@@ -4069,7 +4057,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv8i64, RTLIB::VP_REDUCE_MUL_NXV8I64},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4097,7 +4085,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv8i64, RTLIB::VP_REDUCE_MUL_NXV8I64_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getOperand(1).getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_REDUCE_ADD:
   case ISD::VP_REDUCE_UMAX:
@@ -4303,10 +4291,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_FREM: {
     // Use unmasked enum if the mask operand is missing or the mask is an
     // all-ones vector
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::REM_NXV1F64},
           {MVT::nxv2f64, RTLIB::REM_NXV2F64},
@@ -4319,7 +4304,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::REM_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4334,7 +4319,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::REM_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_FNEG:
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
@@ -4397,10 +4382,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::FP_ROUND_VL);
   }
   case ISD::VP_COS: {
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::COS_NXV1F64},
           {MVT::nxv2f64, RTLIB::COS_NXV2F64},
@@ -4413,7 +4395,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::COS_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4428,13 +4410,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::COS_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_SIN: {
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::SIN_NXV1F64},
           {MVT::nxv2f64, RTLIB::SIN_NXV2F64},
@@ -4447,7 +4426,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::SIN_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4462,13 +4441,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::SIN_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_EXP: {
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::EXP_NXV1F64},
           {MVT::nxv2f64, RTLIB::EXP_NXV2F64},
@@ -4481,7 +4457,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::EXP_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4496,13 +4472,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::EXP_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_POW: {
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::POW_NXV1F64},
           {MVT::nxv2f64, RTLIB::POW_NXV2F64},
@@ -4515,7 +4488,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::POW_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4530,13 +4503,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::POW_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   case ISD::VP_FRINT: {
-    if (!ISD::getVPMaskIdx(Op.getOpcode()).hasValue() ||
-        ISD::isConstantSplatVectorAllOnes(
-            Op.getOperand(ISD::getVPMaskIdx(Op.getOpcode()).getValue())
-                .getNode())) {
+    if (!NeedsMask(Op)) {
       RISCVVTToLibCall VTToLC[] = {
           {MVT::nxv1f64, RTLIB::FRINT_NXV1F64},
           {MVT::nxv2f64, RTLIB::FRINT_NXV2F64},
@@ -4549,7 +4519,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
           {MVT::nxv16f32, RTLIB::FRINT_NXV16F32},
       };
       return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                             /*IsMasked*/ false);
+                             /*NeedsMask*/ false);
     }
 
     RISCVVTToLibCall VTToLC[] = {
@@ -4564,7 +4534,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv16f32, RTLIB::FRINT_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
-                           /*IsMasked*/ true);
+                           /*NeedsMask*/ true);
   }
   }
 }
@@ -11302,7 +11272,10 @@ static bool CC_RISCVAssign2XLen(unsigned XLen, CCState &State, CCValAssign VA1,
 
 static unsigned allocateRVVReg(MVT ValVT, unsigned ValNo,
                                Optional<unsigned> FirstMaskArgument,
-                               CCState &State, const RISCVTargetLowering &TLI) {
+                               CCState &State, const RISCVTargetLowering &TLI,
+                               ArrayRef<MCPhysReg> VR, ArrayRef<MCPhysReg> VRM2,
+                               ArrayRef<MCPhysReg> VRM4,
+                               ArrayRef<MCPhysReg> VRM8) {
   const TargetRegisterClass *RC = TLI.getRegClassFor(ValVT);
   if (RC == &RISCV::VRRegClass) {
     // Assign the first mask argument to V0.
@@ -11310,26 +11283,29 @@ static unsigned allocateRVVReg(MVT ValVT, unsigned ValNo,
     // future.
     if (FirstMaskArgument.hasValue() && ValNo == FirstMaskArgument.getValue())
       return State.AllocateReg(RISCV::V0);
-    if (State.getCallingConv() == CallingConv::EPI_VectorCall)
-      return State.AllocateReg(ArgVRsLibm);
-    return State.AllocateReg(ArgVRs);
+    return State.AllocateReg(VR);
   }
   if (RC == &RISCV::VRM2RegClass) {
-    if (State.getCallingConv() == CallingConv::EPI_VectorCall)
-      return State.AllocateReg(ArgVRM2sLibm);
-    return State.AllocateReg(ArgVRM2s);
+    return State.AllocateReg(VRM2);
   }
   if (RC == &RISCV::VRM4RegClass) {
-    if (State.getCallingConv() == CallingConv::EPI_VectorCall)
-      return State.AllocateReg(ArgVRM4sLibm);
-    return State.AllocateReg(ArgVRM4s);
+    return State.AllocateReg(VRM4);
   }
   if (RC == &RISCV::VRM8RegClass) {
-    if (State.getCallingConv() == CallingConv::EPI_VectorCall)
-      return State.AllocateReg(ArgVRM8sLibm);
-    return State.AllocateReg(ArgVRM8s);
+    return State.AllocateReg(VRM8);
   }
   llvm_unreachable("Unhandled register class for ValueType");
+}
+
+static unsigned allocateRVVReg(MVT ValVT, unsigned ValNo,
+                               Optional<unsigned> FirstMaskArgument,
+                               CCState &State, const RISCVTargetLowering &TLI) {
+  if (State.getCallingConv() == CallingConv::EPI_VectorCall) {
+    return allocateRVVReg(ValVT, ValNo, FirstMaskArgument, State, TLI, ArgVRsLibm,
+                   ArgVRM2sLibm, ArgVRM4sLibm, ArgVRM8sLibm);
+  }
+  return allocateRVVReg(ValVT, ValNo, FirstMaskArgument, State, TLI, ArgVRs,
+                        ArgVRM2s, ArgVRM4s, ArgVRM8s);
 }
 
 // Implements the RISC-V calling convention. Returns true upon failure.

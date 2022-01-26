@@ -602,7 +602,7 @@ public:
   // FIXME: This is not ideal.
   SDValue lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
                           ArrayRef<RISCVVTToLibCall> TypeToCall,
-                          EVT VT, bool IsMasked) const;
+                          EVT VT, bool NeedsMask) const;
 
   bool shouldConvertFpToSat(unsigned Op, EVT FPVT, EVT VT) const override;
 
