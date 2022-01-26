@@ -46,10 +46,6 @@ using namespace llvm;
 
 STATISTIC(NumTailCalls, "Number of tail calls");
 
-static void registerVecLibCalls(
-    const std::function<
-        void(const ArrayRef<std::pair<RTLIB::Libcall, const char *>>)> &);
-
 RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                          const RISCVSubtarget &STI)
     : TargetLowering(TM), Subtarget(STI) {
@@ -1220,14 +1216,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     }
 
     // Register libcalls for VP nodes and fp vector functions.
-    const auto RegisterLibCall =
-        [&](const ArrayRef<std::pair<RTLIB::Libcall, const char *>> LCsNames) {
-          for (const auto &Pair : LCsNames) {
-            setLibcallName(Pair.first, Pair.second);
-            setLibcallCallingConv(Pair.first, CallingConv::EPI_VectorCall);
-          }
-        };
-    registerVecLibCalls(RegisterLibCall);
+    registerVecLibCalls();
 
     // Custom-legalize these nodes for fp scalable vectors.
     for (auto VT :
@@ -1273,10 +1262,14 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   }
 }
 
-static void registerVecLibCalls(
-    const std::function<
-        void(const ArrayRef<std::pair<RTLIB::Libcall, const char *>>)>
-        &RegisterLibCall) {
+void RISCVTargetLowering::registerVecLibCalls() {
+  const auto RegisterLibCall =
+      [&](const ArrayRef<std::pair<RTLIB::Libcall, const char *>> LCsNames) {
+        for (const auto &Pair : LCsNames) {
+          setLibcallName(Pair.first, Pair.second);
+          setLibcallCallingConv(Pair.first, CallingConv::EPI_VectorCall);
+        }
+      };
   RegisterLibCall({{RTLIB::EXP_NXV1F64, "__epi_exp_nxv1f64"},
                    {RTLIB::EXP_NXV2F64, "__epi_exp_nxv2f64"},
                    {RTLIB::EXP_NXV4F64, "__epi_exp_nxv4f64"},
