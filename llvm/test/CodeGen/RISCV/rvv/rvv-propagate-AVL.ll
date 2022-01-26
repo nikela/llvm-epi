@@ -35,10 +35,10 @@ for.body:                                         ; preds = %entry, %for.body
   %i.014 = phi i64 [ %add, %for.body ], [ 0, %entry ]
   %arrayidx = getelementptr inbounds double, double* %a, i64 %i.014
   %1 = bitcast double* %arrayidx to <vscale x 1 x double>*
-  %2 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>* %1, i64 %0)
+  %2 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64(<vscale x 1 x double> undef, <vscale x 1 x double>* %1, i64 %0)
   %arrayidx1 = getelementptr inbounds double, double* %b, i64 %i.014
   %3 = bitcast double* %arrayidx1 to <vscale x 1 x double>*
-  %4 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>* %3, i64 %0)
+  %4 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64(<vscale x 1 x double> undef, <vscale x 1 x double>* %3, i64 %0)
   %5 = tail call <vscale x 1 x double> @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(<vscale x 1 x double> %2, <vscale x 1 x double> %4, i64 %0)
   %arrayidx2 = getelementptr inbounds double, double* %c, i64 %i.014
   %6 = bitcast double* %arrayidx2 to <vscale x 1 x double>*
@@ -83,10 +83,10 @@ for.body:                                         ; preds = %entry, %for.body
   %i.014 = phi i64 [ %add, %for.body ], [ 0, %entry ]
   %arrayidx = getelementptr inbounds double, double* %a, i64 %i.014
   %1 = bitcast double* %arrayidx to <vscale x 1 x double>*
-  %2 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>* %1, i64 %0)
+  %2 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64(<vscale x 1 x double> undef, <vscale x 1 x double>* %1, i64 %0)
   %arrayidx1 = getelementptr inbounds double, double* %b, i64 %i.014
   %3 = bitcast double* %arrayidx1 to <vscale x 1 x double>*
-  %4 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>* %3, i64 %0)
+  %4 = tail call <vscale x 1 x double> @llvm.riscv.vle.nxv1f64(<vscale x 1 x double> undef, <vscale x 1 x double>* %3, i64 %0)
   %5 = tail call <vscale x 1 x double> @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(<vscale x 1 x double> %2, <vscale x 1 x double> %4, i64 %0)
   %arrayidx2 = getelementptr inbounds double, double* %c, i64 %i.014
   %6 = bitcast double* %arrayidx2 to <vscale x 1 x double>*
@@ -102,6 +102,6 @@ for.end:                                          ; preds = %for.body, %entry
 declare i64 @llvm.riscv.vsetvli.i64(i64, i64 immarg, i64 immarg)
 declare i64 @llvm.riscv.vsetvlimax.i64(i64 immarg, i64 immarg)
 
-declare <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>* nocapture, i64)
+declare <vscale x 1 x double> @llvm.riscv.vle.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i64)
 declare <vscale x 1 x double> @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(<vscale x 1 x double>, <vscale x 1 x double>, i64)
 declare void @llvm.riscv.vse.nxv1f64.i64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i64)
