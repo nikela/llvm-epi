@@ -187,6 +187,10 @@ getConstraint(CmpInst::Predicate Pred, Value *Op0, Value *Op1,
                          Value2Index, NewIndices);
 
   if (Pred == CmpInst::ICMP_EQ) {
+    if (match(Op1, m_Zero()))
+      return getConstraint(CmpInst::ICMP_ULE, Op0, Op1, Value2Index,
+                           NewIndices);
+
     auto A =
         getConstraint(CmpInst::ICMP_UGE, Op0, Op1, Value2Index, NewIndices);
     auto B =
@@ -433,7 +437,7 @@ static bool eliminateConstraints(Function &F, DominatorTree &DT) {
         if (R.size() != 1)
           continue;
 
-        if (R.needsNewIndices(NewIndices) || R.get(0).size() == 1)
+        if (R.needsNewIndices(NewIndices))
           continue;
 
         if (CS.isConditionImplied(R.get(0).Coefficients)) {
