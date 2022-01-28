@@ -65,7 +65,7 @@ static StringRef computeDataLayout(const Triple &TT, StringRef FS) {
 
     // Vectors in V-ext can be aligned to 16 bytes.
     // FIXME: Assuming ELEN=64.
-    bool HasV = llvm::is_contained(Split, "+experimental-v");
+    bool HasV = llvm::is_contained(Split, "+v");
     if (HasV)
       return "e-m:e-p:64:64-i64:64-i128:128-n64-S128-v128:128:128-v256:128:128-"
              "v512:128:128-v1024:128:128";

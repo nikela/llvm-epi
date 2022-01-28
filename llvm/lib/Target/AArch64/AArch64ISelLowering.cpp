@@ -1206,6 +1206,8 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SRL, VT, Custom);
       setOperationAction(ISD::SRA, VT, Custom);
       setOperationAction(ISD::ABS, VT, Custom);
+      setOperationAction(ISD::ABDS, VT, Custom);
+      setOperationAction(ISD::ABDU, VT, Custom);
       setOperationAction(ISD::VECREDUCE_ADD, VT, Custom);
       setOperationAction(ISD::VECREDUCE_AND, VT, Custom);
       setOperationAction(ISD::VECREDUCE_OR, VT, Custom);
@@ -1994,6 +1996,8 @@ const char *AArch64TargetLowering::getTargetNodeName(unsigned Opcode) const {
     MAKE_CASE(AArch64ISD::CSINC)
     MAKE_CASE(AArch64ISD::THREAD_POINTER)
     MAKE_CASE(AArch64ISD::TLSDESC_CALLSEQ)
+    MAKE_CASE(AArch64ISD::ABDS_PRED)
+    MAKE_CASE(AArch64ISD::ABDU_PRED)
     MAKE_CASE(AArch64ISD::ADD_PRED)
     MAKE_CASE(AArch64ISD::MUL_PRED)
     MAKE_CASE(AArch64ISD::MULHS_PRED)
@@ -5196,6 +5200,10 @@ SDValue AArch64TargetLowering::LowerOperation(SDValue Op,
     return LowerFixedLengthVectorSelectToSVE(Op, DAG);
   case ISD::ABS:
     return LowerABS(Op, DAG);
+  case ISD::ABDS:
+    return LowerToPredicatedOp(Op, DAG, AArch64ISD::ABDS_PRED);
+  case ISD::ABDU:
+    return LowerToPredicatedOp(Op, DAG, AArch64ISD::ABDU_PRED);
   case ISD::BITREVERSE:
     return LowerBitreverse(Op, DAG);
   case ISD::BSWAP:
@@ -11781,10 +11789,10 @@ bool AArch64TargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
   case Intrinsic::aarch64_ldxr: {
     PointerType *PtrTy = cast<PointerType>(I.getArgOperand(0)->getType());
     Info.opc = ISD::INTRINSIC_W_CHAIN;
-    Info.memVT = MVT::getVT(PtrTy->getElementType());
+    Info.memVT = MVT::getVT(PtrTy->getPointerElementType());
     Info.ptrVal = I.getArgOperand(0);
     Info.offset = 0;
-    Info.align = DL.getABITypeAlign(PtrTy->getElementType());
+    Info.align = DL.getABITypeAlign(PtrTy->getPointerElementType());
     Info.flags = MachineMemOperand::MOLoad | MachineMemOperand::MOVolatile;
     return true;
   }
@@ -11792,10 +11800,10 @@ bool AArch64TargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
   case Intrinsic::aarch64_stxr: {
     PointerType *PtrTy = cast<PointerType>(I.getArgOperand(1)->getType());
     Info.opc = ISD::INTRINSIC_W_CHAIN;
-    Info.memVT = MVT::getVT(PtrTy->getElementType());
+    Info.memVT = MVT::getVT(PtrTy->getPointerElementType());
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = DL.getABITypeAlign(PtrTy->getElementType());
+    Info.align = DL.getABITypeAlign(PtrTy->getPointerElementType());
     Info.flags = MachineMemOperand::MOStore | MachineMemOperand::MOVolatile;
     return true;
   }
@@ -11823,7 +11831,7 @@ bool AArch64TargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     Info.memVT = MVT::getVT(I.getType());
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = DL.getABITypeAlign(PtrTy->getElementType());
+    Info.align = DL.getABITypeAlign(PtrTy->getPointerElementType());
     Info.flags = MachineMemOperand::MOLoad | MachineMemOperand::MONonTemporal;
     return true;
   }
@@ -11833,7 +11841,7 @@ bool AArch64TargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     Info.memVT = MVT::getVT(I.getOperand(0)->getType());
     Info.ptrVal = I.getArgOperand(2);
     Info.offset = 0;
-    Info.align = DL.getABITypeAlign(PtrTy->getElementType());
+    Info.align = DL.getABITypeAlign(PtrTy->getPointerElementType());
     Info.flags = MachineMemOperand::MOStore | MachineMemOperand::MONonTemporal;
     return true;
   }
@@ -15338,40 +15346,6 @@ static SDValue performIntrinsicCombine(SDNode *N,
   return SDValue();
 }
 
-static bool isCheapToExtend(const SDValue &N) {
-  unsigned OC = N->getOpcode();
-  return OC == ISD::LOAD || OC == ISD::MLOAD ||
-         ISD::isConstantSplatVectorAllZeros(N.getNode());
-}
-
-static SDValue
-performSignExtendSetCCCombine(SDNode *N, TargetLowering::DAGCombinerInfo &DCI,
-                              SelectionDAG &DAG) {
-  // If we have (sext (setcc A B)) and A and B are cheap to extend,
-  // we can move the sext into the arguments and have the same result. For
-  // example, if A and B are both loads, we can make those extending loads and
-  // avoid an extra instruction. This pattern appears often in VLS code
-  // generation where the inputs to the setcc have a different size to the
-  // instruction that wants to use the result of the setcc.
-  assert(N->getOpcode() == ISD::SIGN_EXTEND &&
-         N->getOperand(0)->getOpcode() == ISD::SETCC);
-  const SDValue SetCC = N->getOperand(0);
-
-  if (isCheapToExtend(SetCC.getOperand(0)) &&
-      isCheapToExtend(SetCC.getOperand(1))) {
-    const SDValue Ext1 = DAG.getNode(ISD::SIGN_EXTEND, SDLoc(N),
-                                     N->getValueType(0), SetCC.getOperand(0));
-    const SDValue Ext2 = DAG.getNode(ISD::SIGN_EXTEND, SDLoc(N),
-                                     N->getValueType(0), SetCC.getOperand(1));
-
-    return DAG.getSetCC(
-        SDLoc(SetCC), N->getValueType(0), Ext1, Ext2,
-        cast<CondCodeSDNode>(SetCC->getOperand(2).getNode())->get());
-  }
-
-  return SDValue();
-}
-
 static SDValue performExtendCombine(SDNode *N,
                                     TargetLowering::DAGCombinerInfo &DCI,
                                     SelectionDAG &DAG) {
@@ -15390,11 +15364,6 @@ static SDValue performExtendCombine(SDNode *N,
 
     return DAG.getNode(ISD::ZERO_EXTEND, SDLoc(N), N->getValueType(0), NewABD);
   }
-
-  if (N->getOpcode() == ISD::SIGN_EXTEND &&
-      N->getOperand(0)->getOpcode() == ISD::SETCC)
-    return performSignExtendSetCCCombine(N, DCI, DAG);
-
   return SDValue();
 }
 
@@ -15960,7 +15929,7 @@ static SDValue performPostLD1Combine(SDNode *N,
   SelectionDAG &DAG = DCI.DAG;
   EVT VT = N->getValueType(0);
 
-  if (VT.isScalableVector())
+  if (!VT.is128BitVector() && !VT.is64BitVector())
     return SDValue();
 
   unsigned LoadIdx = IsLaneOp ? 1 : 0;

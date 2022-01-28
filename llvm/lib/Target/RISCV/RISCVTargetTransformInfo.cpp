@@ -126,7 +126,7 @@ bool RISCVTTIImpl::preferPredicatedVectorOps() const {
 }
 
 bool RISCVTTIImpl::isLegalMaskedLoadStore(Type *DataType) const {
-  if (!ST->hasStdExtV())
+  if (!ST->hasVInstructions())
     return false;
   Type *ScalarTy = DataType->getScalarType();
   return (ScalarTy->isFloatTy() || ScalarTy->isDoubleTy() ||
@@ -266,12 +266,12 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
 }
 
 bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
-  return ST->hasStdExtV();
+  return ST->hasVInstructions();
 }
 
 ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
                                         bool IsScalable) const {
-  return ST->hasStdExtV() && IsScalable
+  return ST->hasVInstructions() && IsScalable
              ? ElementCount::get(
                    std::max<unsigned>(1, ST->getMinRVVVectorSizeInBits() /
                                              ElemWidth),

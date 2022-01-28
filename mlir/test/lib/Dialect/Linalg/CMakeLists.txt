@@ -16,8 +16,8 @@ add_mlir_library(MLIRLinalgTestPasses
   MLIRAffineBufferizableOpInterfaceImpl
   MLIRArithBufferizableOpInterfaceImpl
   MLIRArithmetic
-  MLIRBufferizableOpInterface
-  MLIRComprehensiveBufferize
+  MLIRBufferization
+  MLIRBufferizationTransforms
   MLIRGPUTransforms
   MLIRLinalg
   MLIRLinalgBufferizableOpInterfaceImpl
@@ -30,7 +30,7 @@ add_mlir_library(MLIRLinalgTestPasses
   MLIRStdBufferizableOpInterfaceImpl
   MLIRStandard
   MLIRTensor
-  MLIRTensorBufferizableOpInterfaceImpl
+  MLIRTensorTransforms
   MLIRTransformUtils
   MLIRVector
   MLIRVectorBufferizableOpInterfaceImpl

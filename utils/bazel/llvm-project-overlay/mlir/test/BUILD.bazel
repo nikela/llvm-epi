@@ -6,6 +6,7 @@ load("//mlir:tblgen.bzl", "gentbl_cc_library", "td_library")
 
 package(
     default_visibility = ["//visibility:public"],
+    features = ["layering_check"],
     licenses = ["notice"],
 )
 
@@ -332,6 +333,8 @@ cc_library(
         "//mlir:IR",
         "//mlir:MemRefDialect",
         "//mlir:Pass",
+        "//mlir:SCFDialect",
+        "//mlir:StandardOps",
         "//mlir:Support",
         "//mlir:Transforms",
         "//mlir:VectorOps",
@@ -388,9 +391,8 @@ cc_library(
         "//mlir:AffineBufferizableOpInterfaceImpl",
         "//mlir:ArithBufferizableOpInterfaceImpl",
         "//mlir:ArithmeticDialect",
-        "//mlir:BufferizableOpInterface",
         "//mlir:BufferizationDialect",
-        "//mlir:ComprehensiveBufferize",
+        "//mlir:BufferizationTransforms",
         "//mlir:GPUDialect",
         "//mlir:IR",
         "//mlir:LinalgBufferizableOpInterfaceImpl",
@@ -403,8 +405,8 @@ cc_library(
         "//mlir:SCFTransforms",
         "//mlir:StandardOps",
         "//mlir:StdBufferizableOpInterfaceImpl",
-        "//mlir:TensorBufferizableOpInterfaceImpl",
         "//mlir:TensorDialect",
+        "//mlir:TensorTransforms",
         "//mlir:TransformUtils",
         "//mlir:VectorBufferizableOpInterfaceImpl",
         "//mlir:VectorOps",

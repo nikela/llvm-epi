@@ -114,7 +114,7 @@ class VCustom_VV_VV<bits<6> funct6, RISCVVFormat opv, string opcodestr>
 }
 
 // FIXME: Should we use some other predicate?
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 def VZIP2_VV : VCustom_VV_VV<0b110101, OPIVV, "vzip2.vv">;
 def VUNZIP2_VV : VCustom_VV_VV<0b110110, OPIVV, "vunzip2.vv">;
@@ -140,7 +140,7 @@ class EPILookupIntrinsic<string basename> {
 // Common definitions
 //===----------------------------------------------------------------------===//
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 0,
     Uses = [VL] in
@@ -1146,7 +1146,7 @@ class RegisterClassForIndex<int vlmul_, int sew, int eew, RegisterClass vr>
                     );
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 defm PseudoEPIVADD        : pseudo_binary_v_vv_vx_vi;
 defm PseudoEPIVSUB        : pseudo_binary_v_vv_vx;
@@ -1503,7 +1503,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 1,
 
 }
 
-let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
+let Predicates = [HasVInstructions] in {
 
 // FIXME: Generalize for LMUL>1
 
@@ -1586,7 +1586,7 @@ foreach eew = AllEEW in
 
 } // tsize
 
-} // [HasStdExtV, HasStdExtZvlsseg]
+} // [HasVInstructions]
 
 //===----------------------------------------------------------------------===//
 // Patterns. Essential
@@ -1657,7 +1657,7 @@ multiclass epi_pat_load_store<ValueType type,
              VLMax, eew)>;
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
   foreach vti = EPIAllVectors in
   {
     defm : epi_pat_load_store<vti.Vector, vti.Mask, vti.SEW, vti.MInfo,
@@ -1708,7 +1708,7 @@ def Log2 : SDNodeXForm<imm,
         MVT::i64);
 }]>;
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 def : Pat<(int_vscale), (PseudoEPIVSCALE)>;
 
@@ -2775,7 +2775,7 @@ multiclass pat_intrinsic_unary_fp_v_int_w<string intrinsic_name,
 //def FloatNarrowedSize : ValueTypeVarList<
 //  [ ValueTypePair<nxv1f32, nxv1f64> ]>;
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 defm "" : pat_intrinsic_binary_int_v_vv_vx_vi<"int_epi_vadd", "PseudoEPIVADD">;
 defm "" : pat_intrinsic_binary_int_v_vv_vx<"int_epi_vsub", "PseudoEPIVSUB">;
@@ -3527,7 +3527,7 @@ multiclass pat_vop_unary_fp_v_v<SDPatternOperator vop,
   }
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 // defm "" : pat_vop_binary_int_v_vv_vx_vi<add, "PseudoEPIVADD">;
 // defm "" : pat_vop_binary_int_v_vv_vx_vi<shl, "PseudoEPIVSLL", uimm5>;
@@ -3700,7 +3700,7 @@ multiclass pat_vop_binary_int_m_vv_vx_vi<SDPatternOperator vop,
   }
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 defm "" : pat_vop_binary_int_m_vv_vx_vi<seteq, "PseudoEPIVMSEQ">;
 defm "" : pat_vop_binary_int_m_vv_vx_vi<setne, "PseudoEPIVMSNE">;
@@ -3730,7 +3730,7 @@ multiclass pat_vop_binary_m_mm<SDPatternOperator vop,
   }
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 defm "" : pat_vop_binary_m_mm<and, "PseudoEPIVMAND">;
 defm "" : pat_vop_binary_m_mm<xor, "PseudoEPIVMXOR">;
@@ -3996,7 +3996,7 @@ multiclass pat_store {
   }
 }
 
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 def : Pat<(nxv1f64 (masked_ld GPR:$addr, undef, (nxv1i1 V0), (nxv1f64 VR:$merge))),
           (PseudoEPIVLE64_V_M1
@@ -4019,7 +4019,7 @@ defm "" : pat_store;
 
 }
 
-let Predicates = [HasStdExtV, HasStdExtZvlsseg] in {
+let Predicates = [HasVInstructions] in {
 
 foreach tsize = 2 ... 8 in {
 
@@ -4090,12 +4090,12 @@ def PseudoEPIVBuildVRN#tsize#M1 :
 
 } // tsize
 
-} // [HasStdExtV, HasStdExtZvlsseg]
+} // [HasVInstructions]
 
 //===----------------------------------------------------------------------===//
 // EPI custom instructions
 //===----------------------------------------------------------------------===//
-let Predicates = [HasStdExtV] in {
+let Predicates = [HasVInstructions] in {
 
 let VLMul = 0, hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 

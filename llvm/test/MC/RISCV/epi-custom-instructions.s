@@ -1,7 +1,7 @@
-// RUN: llvm-mc -triple=riscv64 -show-encoding -mattr=+experimental-v < %s \
+// RUN: llvm-mc -triple=riscv64 -show-encoding -mattr=+v < %s \
 // RUN:        | FileCheck %s --check-prefixes=CHECK-ENCODING,CHECK-INST
-// RUN: llvm-mc -triple=riscv64 -filetype=obj -mattr=+experimental-v < %s \
-// RUN:        | llvm-objdump -d --mattr=+experimental-v - \
+// RUN: llvm-mc -triple=riscv64 -filetype=obj -mattr=+v < %s \
+// RUN:        | llvm-objdump -d --mattr=+v - \
 // RUN:        | FileCheck %s --check-prefix=CHECK-INST
 
 # CHECK-INST: vzip2.vv v1, v2, v3

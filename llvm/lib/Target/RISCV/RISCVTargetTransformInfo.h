@@ -272,7 +272,7 @@ public:
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
     // FIXME: we may want to be more selective.
-    if (ST->hasStdExtV())
+    if (ST->hasVInstructions())
       return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
               /* Op */ TargetTransformInfo::VPLegalization::Legal};
 
@@ -316,7 +316,7 @@ public:
   }
 
   unsigned getNumberOfRegistersEPI(unsigned ClassID) const {
-    if (ClassID == 1 && ST->hasStdExtV())
+    if (ClassID == 1 && ST->hasVInstructions())
       // Although there are 32 vector registers, v0 is special in that it is
       // the only register that can be used to hold a mask. We conservatively
       // return 31 as the number of usable vector registers.

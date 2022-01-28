@@ -823,6 +823,9 @@ private:
   /// Split mask operator of a VP intrinsic.
   std::pair<SDValue, SDValue> SplitMask(SDValue Mask);
 
+  /// Split mask operator of a VP intrinsic in a given location.
+  std::pair<SDValue, SDValue> SplitMask(SDValue Mask, const SDLoc &DL);
+
   // Helper function for incrementing the pointer when splitting
   // memory operations
   void IncrementPointer(MemSDNode *N, EVT MemVT, MachinePointerInfo &MPI,
@@ -853,7 +856,8 @@ private:
   void SplitVecRes_LOAD(LoadSDNode *LD, SDValue &Lo, SDValue &Hi);
   void SplitVecRes_VP_LOAD(VPLoadSDNode *LD, SDValue &Lo, SDValue &Hi);
   void SplitVecRes_MLOAD(MaskedLoadSDNode *MLD, SDValue &Lo, SDValue &Hi);
-  void SplitVecRes_MGATHER(MaskedGatherSDNode *MGT, SDValue &Lo, SDValue &Hi);
+  void SplitVecRes_Gather(MemSDNode *VPGT, SDValue &Lo, SDValue &Hi,
+                          bool SplitSETCC = false);
   void SplitVecRes_ScalarOp(SDNode *N, SDValue &Lo, SDValue &Hi);
   void SplitVecRes_STEP_VECTOR(SDNode *N, SDValue &Lo, SDValue &Hi);
   void SplitVecRes_SETCC(SDNode *N, SDValue &Lo, SDValue &Hi);
@@ -881,8 +885,8 @@ private:
   SDValue SplitVecOp_STORE(StoreSDNode *N, unsigned OpNo);
   SDValue SplitVecOp_VP_STORE(VPStoreSDNode *N, unsigned OpNo);
   SDValue SplitVecOp_MSTORE(MaskedStoreSDNode *N, unsigned OpNo);
-  SDValue SplitVecOp_MSCATTER(MaskedScatterSDNode *N, unsigned OpNo);
-  SDValue SplitVecOp_MGATHER(MaskedGatherSDNode *MGT, unsigned OpNo);
+  SDValue SplitVecOp_Scatter(MemSDNode *N, unsigned OpNo);
+  SDValue SplitVecOp_Gather(MemSDNode *MGT, unsigned OpNo);
   SDValue SplitVecOp_CONCAT_VECTORS(SDNode *N);
   SDValue SplitVecOp_VSETCC(SDNode *N);
   SDValue SplitVecOp_FP_ROUND(SDNode *N);
@@ -938,6 +942,7 @@ private:
   SDValue WidenVecRes_VP_LOAD(VPLoadSDNode *N);
   SDValue WidenVecRes_MLOAD(MaskedLoadSDNode* N);
   SDValue WidenVecRes_MGATHER(MaskedGatherSDNode* N);
+  SDValue WidenVecRes_VP_GATHER(VPGatherSDNode* N);
   SDValue WidenVecRes_ScalarOp(SDNode* N);
   SDValue WidenVecRes_Select(SDNode *N);
   SDValue WidenVSELECTMask(SDNode *N);
@@ -974,6 +979,7 @@ private:
   SDValue WidenVecOp_MSTORE(SDNode* N, unsigned OpNo);
   SDValue WidenVecOp_MGATHER(SDNode* N, unsigned OpNo);
   SDValue WidenVecOp_MSCATTER(SDNode* N, unsigned OpNo);
+  SDValue WidenVecOp_VP_SCATTER(SDNode* N, unsigned OpNo);
   SDValue WidenVecOp_SETCC(SDNode* N);
   SDValue WidenVecOp_STRICT_FSETCC(SDNode* N);
   SDValue WidenVecOp_VSELECT(SDNode *N);

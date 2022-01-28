@@ -47,21 +47,27 @@ void RISCVTargetStreamer::emitTargetAttributes(const MCSubtargetInfo &STI) {
 
   unsigned XLen = STI.hasFeature(RISCV::Feature64Bit) ? 64 : 32;
   std::vector<std::string> FeatureVector;
-  // We are using linkers that don't support these features.
   auto FeatureBits = STI.getFeatureBits();
-  FeatureBits.reset(RISCV::FeatureStdExtZvlsseg);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl32b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl64b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl128b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl256b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl512b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl1024b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl2048b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl4096b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl8192b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl16384b);
-  FeatureBits.reset(RISCV::FeatureStdExtZvl32768b);
-
+  if (FeatureBits.test(RISCV::FeatureEPI)) {
+    // We are using linkers that don't support these features.
+    FeatureBits.reset(RISCV::FeatureStdExtZvl32b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl64b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl128b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl256b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl512b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl1024b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl2048b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl4096b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl8192b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl16384b);
+    FeatureBits.reset(RISCV::FeatureStdExtZvl32768b);
+    FeatureBits.reset(RISCV::FeatureStdExtZve32x);
+    FeatureBits.reset(RISCV::FeatureStdExtZve32f);
+    FeatureBits.reset(RISCV::FeatureStdExtZve64x);
+    FeatureBits.reset(RISCV::FeatureStdExtZve64f);
+    FeatureBits.reset(RISCV::FeatureStdExtZve64d);
+    FeatureBits.reset(RISCV::FeatureEPI);
+  }
   RISCVFeatures::toFeatureVector(FeatureVector, FeatureBits);
 
   auto ParseResult = llvm::RISCVISAInfo::parseFeatures(XLen, FeatureVector);

@@ -465,4 +465,4 @@ declare <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double>, <vsca
 
 declare <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double>, <vscale x 1 x i1>, i32)
 
-attributes #0 = { nofree norecurse nounwind "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="true" "no-jump-tables"="false" "no-nans-fp-math"="true" "no-signed-zeros-fp-math"="true" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+experimental-v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" "unsafe-fp-math"="true" "use-soft-float"="false" }
+attributes #0 = { nofree norecurse nounwind "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="true" "no-jump-tables"="false" "no-nans-fp-math"="true" "no-signed-zeros-fp-math"="true" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" "unsafe-fp-math"="true" "use-soft-float"="false" }

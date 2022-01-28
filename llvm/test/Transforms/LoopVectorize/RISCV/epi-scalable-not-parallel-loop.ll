@@ -1,13 +1,13 @@
-; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
+; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi -S -riscv-v-vector-bits-min=64 \
 ; RUN:    -loop-vectorize -scalable-vectorization=only < %s -o - | FileCheck %s --check-prefix=CHECK-IR
-; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
+; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi -S -riscv-v-vector-bits-min=64 \
 ; RUN:    -loop-vectorize -scalable-vectorization=only \
 ; RUN:    -prefer-predicate-over-epilogue=predicate-dont-vectorize < %s -o - \
 ; RUN:    | FileCheck %s --check-prefix=CHECK-IR
-; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
+; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi -S -riscv-v-vector-bits-min=64 \
 ; RUN:    -loop-vectorize -scalable-vectorization=only -debug-only=loop-vectorize \
 ; RUN:    < %s -o - 2>&1 | FileCheck %s --check-prefix=CHECK-DBG
-; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+epi,+experimental-v -S -riscv-v-vector-bits-min=64 \
+; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi -S -riscv-v-vector-bits-min=64 \
 ; RUN:    -loop-vectorize -scalable-vectorization=only -debug-only=loop-vectorize \
 ; RUN:    -prefer-predicate-over-epilogue=predicate-dont-vectorize < %s -o - \
 ; RUN:    2>&1 | FileCheck %s --check-prefix=CHECK-DBG
@@ -52,7 +52,7 @@ for.body:                                         ; preds = %for.body.preheader,
   br i1 %exitcond.not, label %for.cond.cleanup.loopexit, label %for.body, !dbg !11, !llvm.loop !24
 }
 
-attributes #0 = { nofree norecurse nounwind "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+epi,+experimental-v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
+attributes #0 = { nofree norecurse nounwind "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+zepi,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!3, !4, !5, !6}

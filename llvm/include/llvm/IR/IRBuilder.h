@@ -1361,12 +1361,8 @@ public:
   }
 
   Value *CreateAnd(Value *LHS, Value *RHS, const Twine &Name = "") {
-    if (auto *RC = dyn_cast<Constant>(RHS)) {
-      if (isa<ConstantInt>(RC) && cast<ConstantInt>(RC)->isMinusOne())
-        return LHS;  // LHS & -1 -> LHS
-      if (auto *LC = dyn_cast<Constant>(LHS))
-        return Insert(Folder.CreateAnd(LC, RC), Name);
-    }
+    if (auto *V = Folder.FoldAnd(LHS, RHS))
+      return V;
     return Insert(BinaryOperator::CreateAnd(LHS, RHS), Name);
   }
 
@@ -2419,7 +2415,8 @@ public:
   /// This is intended to implement C-style pointer subtraction. As such, the
   /// pointers must be appropriately aligned for their element types and
   /// pointing into the same object.
-  Value *CreatePtrDiff(Value *LHS, Value *RHS, const Twine &Name = "");
+  Value *CreatePtrDiff(Type *ElemTy, Value *LHS, Value *RHS,
+                       const Twine &Name = "");
 
   /// Create a launder.invariant.group intrinsic call. If Ptr type is
   /// different from pointer to i8, it's casted to pointer to i8 in the same
