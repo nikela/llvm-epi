@@ -197,6 +197,8 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
     // EPI: specific, remove now that we have __riscv_vector
     // Version computed as: major*100^2 + minor*100 + patch
     Builder.defineMacro("__riscv_vector_version", "800");
+    if (!ISAInfo->hasExtension("v"))
+      Builder.defineMacro("__riscv_v", "1000000");
   }
 }
 
