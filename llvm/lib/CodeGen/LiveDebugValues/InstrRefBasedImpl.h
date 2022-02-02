@@ -616,7 +616,9 @@ public:
   void writeRegMask(const MachineOperand *MO, unsigned CurBB, unsigned InstID);
 
   /// Find LocIdx for SpillLoc \p L, creating a new one if it's not tracked.
-  SpillLocationNo getOrTrackSpillLoc(SpillLoc L);
+  /// Returns None when in scenarios where a spill slot could be tracked, but
+  /// we would likely run into resource limitations.
+  Optional<SpillLocationNo> getOrTrackSpillLoc(SpillLoc L);
 
   // Get LocIdx of a spill ID.
   LocIdx getSpillMLoc(unsigned SpillID) {
@@ -678,7 +680,7 @@ public:
   /// movement of values between locations inside of a block is handled at a
   /// much later stage, in the TransferTracker class.
   MapVector<DebugVariable, DbgValue> Vars;
-  DenseMap<DebugVariable, const DILocation *> Scopes;
+  SmallDenseMap<DebugVariable, const DILocation *, 8> Scopes;
   MachineBasicBlock *MBB = nullptr;
   const OverlapMap &OverlappingFragments;
   DbgValueProperties EmptyProperties;
@@ -746,6 +748,11 @@ public:
         Result.first->second = Rec;
       Scopes[Overlapped] = Loc;
     }
+  }
+
+  void clear() {
+    Vars.clear();
+    Scopes.clear();
   }
 };
 
@@ -862,6 +869,12 @@ private:
   OverlapMap OverlapFragments;
   VarToFragments SeenFragments;
 
+  /// Mapping of DBG_INSTR_REF instructions to their values, for those
+  /// DBG_INSTR_REFs that call resolveDbgPHIs. These variable references solve
+  /// a mini SSA problem caused by DBG_PHIs being cloned, this collection caches
+  /// the result.
+  DenseMap<MachineInstr *, Optional<ValueIDNum>> SeenDbgPHIs;
+
   /// True if we need to examine call instructions for stack clobbers. We
   /// normally assume that they don't clobber SP, but stack probes on Windows
   /// do.
@@ -873,7 +886,8 @@ private:
   StringRef StackProbeSymbolName;
 
   /// Tests whether this instruction is a spill to a stack slot.
-  bool isSpillInstruction(const MachineInstr &MI, MachineFunction *MF);
+  Optional<SpillLocationNo> isSpillInstruction(const MachineInstr &MI,
+                                               MachineFunction *MF);
 
   /// Decide if @MI is a spill instruction and return true if it is. We use 2
   /// criteria to make this decision:
@@ -891,7 +905,8 @@ private:
 
   /// Given a spill instruction, extract the spill slot information, ensure it's
   /// tracked, and return the spill number.
-  SpillLocationNo extractSpillBaseRegAndOffset(const MachineInstr &MI);
+  Optional<SpillLocationNo>
+  extractSpillBaseRegAndOffset(const MachineInstr &MI);
 
   /// Observe a single instruction while stepping through a block.
   void process(MachineInstr &MI, ValueIDNum **MLiveOuts = nullptr,
@@ -939,6 +954,12 @@ private:
                                       ValueIDNum **MLiveOuts,
                                       ValueIDNum **MLiveIns, MachineInstr &Here,
                                       uint64_t InstrNum);
+
+  Optional<ValueIDNum> resolveDbgPHIsImpl(MachineFunction &MF,
+                                          ValueIDNum **MLiveOuts,
+                                          ValueIDNum **MLiveIns,
+                                          MachineInstr &Here,
+                                          uint64_t InstrNum);
 
   /// Step through the function, recording register definitions and movements
   /// in an MLocTracker. Convert the observations into a per-block transfer
