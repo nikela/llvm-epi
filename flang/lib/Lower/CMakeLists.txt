@@ -1,17 +1,15 @@
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 
 add_flang_library(FortranLower
-  CharacterExpr.cpp
-  CharacterRuntime.cpp
+  Bridge.cpp
+  CallInterface.cpp
   Coarray.cpp
-  ComplexExpr.cpp
   ConvertType.cpp
-  IntrinsicCall.cpp
-  IO.cpp
   Mangler.cpp
   OpenACC.cpp
   OpenMP.cpp
   PFTBuilder.cpp
+  SymbolMap.cpp
 
   DEPENDS
   FIRDialect

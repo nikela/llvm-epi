@@ -1824,6 +1824,12 @@ void VPSlotTracker::assignSlots(const VPlan &Plan) {
         assignSlot(Def);
 }
 
+bool vputils::onlyFirstLaneUsed(VPValue *Def) {
+  return all_of(Def->users(), [Def](VPUser *U) {
+    return cast<VPRecipeBase>(U)->onlyFirstLaneUsed(Def);
+  });
+}
+
 llvm::StrideAccessInfo
 llvm::computeStrideAccessInfo(const VPTransformState &State, Value *Ptr) {
   StrideAccessInfo SAI;
