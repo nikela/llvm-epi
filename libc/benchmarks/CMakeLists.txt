@@ -29,6 +29,7 @@ function(add_libc_benchmark_unittest target_name)
     gtest
     ${LIBC_BENCHMARKS_UNITTEST_DEPENDS}
   )
+  llvm_update_compile_flags(${target_name})
 
   add_custom_command(
     TARGET ${target_name}
@@ -58,6 +59,7 @@ target_link_libraries(libc-benchmark
     LLVMSupport
     Threads::Threads
 )
+llvm_update_compile_flags(libc-benchmark)
 
 add_libc_benchmark_unittest(libc-benchmark-test
     SRCS LibcBenchmarkTest.cpp
@@ -82,6 +84,7 @@ target_link_libraries(libc-memory-benchmark
     PUBLIC
     libc-benchmark
 )
+llvm_update_compile_flags(libc-memory-benchmark)
 
 add_libc_benchmark_unittest(libc-memory-benchmark-test
     SRCS LibcMemoryBenchmarkTest.cpp
@@ -96,6 +99,7 @@ add_library(json
     JSON.h
 )
 target_link_libraries(json PUBLIC libc-memory-benchmark)
+llvm_update_compile_flags(json)
 
 add_libc_benchmark_unittest(json-test
     SRCS JSONTest.cpp
@@ -122,6 +126,7 @@ function(add_libc_multi_impl_benchmark name)
         target_link_libraries(${benchmark_name} PUBLIC json ${entrypoint_object_file})
         string(TOUPPER ${name} name_upper)
         target_compile_definitions(${benchmark_name} PRIVATE "-DLIBC_BENCHMARK_FUNCTION_${name_upper}=__llvm_libc::${name}" "-DLIBC_BENCHMARK_FUNCTION_NAME=\"${fq_config_name}\"")
+        llvm_update_compile_flags(${benchmark_name})
     else()
       message(STATUS "Skipping benchmark for '${fq_config_name}' insufficient host cpu features '${required_cpu_features}'")
     endif()
@@ -147,7 +152,6 @@ add_executable(libc.benchmarks.memory_functions.opt_host
   LibcMemoryGoogleBenchmarkMain.cpp
   LibcDefaultImplementations.cpp
 )
-
 target_link_libraries(libc.benchmarks.memory_functions.opt_host
   PRIVATE
   libc-memory-benchmark
@@ -159,5 +163,6 @@ target_link_libraries(libc.benchmarks.memory_functions.opt_host
   libc.src.string.memmove_opt_host
   benchmark_main
 )
+llvm_update_compile_flags(libc.benchmarks.memory_functions.opt_host)
 
 add_subdirectory(automemcpy)
