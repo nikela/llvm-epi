@@ -11929,6 +11929,84 @@ static void emitAArch64DeclareSimdFunction(
   }
 }
 
+static void emitRISCV64DeclareSimdFunction(
+    CodeGenModule &CGM, const FunctionDecl *FD, llvm::Function *Fn,
+    const llvm::APSInt &VLENVal, ArrayRef<ParamAttrTy> ParamAttrs,
+    OMPDeclareSimdDeclAttr::BranchStateTy State, SourceLocation SLoc) {
+  unsigned TypeSize = evaluateCDTSize(FD, ParamAttrs);
+  assert(TypeSize && "Non-zero simdlen/cdtsize expected");
+  llvm::SmallVector<unsigned, 4> VecSizes = {64, 128, 256,
+                                             512}; // FIXME? Hardcoded sizes
+  llvm::SmallVector<unsigned, 4> LMULs;
+  if (!VLENVal) {
+    for (unsigned VecSize : VecSizes)
+      LMULs.push_back(VecSize / TypeSize);
+  } else {
+    unsigned UserVLEN = VLENVal.getExtValue();
+    if (!llvm::isPowerOf2_32(UserVLEN)) {
+      unsigned DiagID = CGM.getDiags().getCustomDiagID(
+          DiagnosticsEngine::Warning,
+          "The value specified in simdlen must be a power of 2.");
+      CGM.getDiags().Report(SLoc, DiagID);
+      return;
+    }
+    if ((UserVLEN * TypeSize) < VecSizes.front() ||
+        (UserVLEN * TypeSize) > VecSizes.back()) {
+      unsigned DiagID = CGM.getDiags().getCustomDiagID(
+          DiagnosticsEngine::Warning,
+          "The value specified in simdlen multiplied by the size of the data "
+          "type must be included in the [64,512] range.");
+      CGM.getDiags().Report(SLoc, DiagID);
+      return;
+    }
+    LMULs.push_back(UserVLEN);
+  }
+
+  llvm::SmallVector<char, 2> Masked;
+  switch (State) {
+  case OMPDeclareSimdDeclAttr::BS_Undefined:
+    Masked.push_back('N');
+    Masked.push_back('M');
+    break;
+  case OMPDeclareSimdDeclAttr::BS_Notinbranch:
+    Masked.push_back('N');
+    break;
+  case OMPDeclareSimdDeclAttr::BS_Inbranch:
+    Masked.push_back('M');
+    break;
+  }
+
+  // NOTE: hardcoding 'E' since it's the only ISA code we use at the moment
+  StringRef Prefix = "_ZGVE";
+  for (char Mask : Masked) {
+    for (unsigned LMUL : LMULs) {
+      SmallString<256> Buffer;
+      llvm::raw_svector_ostream Out(Buffer);
+      Out << Prefix << Mask << LMUL;
+      for (const ParamAttrTy &ParamAttr : ParamAttrs) {
+        switch (ParamAttr.Kind){
+        case LinearWithVarStride:
+          Out << 's' << ParamAttr.StrideOrArg;
+          break;
+        case Linear:
+          Out << 'l';
+          if (ParamAttr.StrideOrArg != 1)
+            Out << ParamAttr.StrideOrArg;
+          break;
+        case Uniform:
+          Out << 'u';
+          break;
+        case Vector:
+          Out << 'v';
+          break;
+        }
+      }
+      Out << '_' << Fn->getName();
+      Fn->addFnAttr(Out.str());
+    }
+  }
+}
+
 void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
                                               llvm::Function *Fn) {
   ASTContext &C = CGM.getContext();
@@ -12047,6 +12125,10 @@ void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
         if (CGM.getTarget().hasFeature("neon"))
           emitAArch64DeclareSimdFunction(CGM, FD, VLEN, ParamAttrs, State,
                                          MangledName, 'n', 128, Fn, ExprLoc);
+      } else if (CGM.getTriple().isRISCV() &&
+                 CGM.getTarget().hasFeature("zepi")) {
+        emitRISCV64DeclareSimdFunction(CGM, FD, Fn, VLENVal, ParamAttrs, State,
+                                       ExprLoc);
       }
     }
     FD = FD->getPreviousDecl();
