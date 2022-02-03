@@ -5106,5 +5106,5 @@ let Predicates = [HasVInstructionsAnyF] in {
 } // Predicates = [HasVInstructionsAnyF]
 
 // Include the non-intrinsic ISel patterns
-include "RISCVInstrInfoVSDPatterns.td"
 include "RISCVInstrInfoVVLPatterns.td"
+include "RISCVInstrInfoVSDPatterns.td"
