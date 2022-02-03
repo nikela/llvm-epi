@@ -1382,7 +1382,7 @@ bool HWAddressSanitizer::instrumentStack(
     };
     bool StandardLifetime =
         UnrecognizedLifetimes.empty() &&
-        isStandardLifetime(Info.LifetimeStart, Info.LifetimeEnd, GetDT(),
+        isStandardLifetime(Info.LifetimeStart, Info.LifetimeEnd, &GetDT(),
                            ClMaxLifetimes);
     if (ShouldDetectUseAfterScope && StandardLifetime) {
       IntrinsicInst *Start = Info.LifetimeStart[0];
@@ -1511,14 +1511,9 @@ bool HWAddressSanitizer::sanitizeFunction(
         }
       }
 
-      if (isa<ReturnInst>(Inst)) {
-        if (CallInst *CI = Inst.getParent()->getTerminatingMustTailCall())
-          RetVec.push_back(CI);
-        else
-          RetVec.push_back(&Inst);
-      } else if (isa<ResumeInst, CleanupReturnInst>(Inst)) {
-        RetVec.push_back(&Inst);
-      }
+      Instruction *ExitUntag = getUntagLocationIfFunctionExit(Inst);
+      if (ExitUntag)
+        RetVec.push_back(ExitUntag);
 
       if (auto *DVI = dyn_cast<DbgVariableIntrinsic>(&Inst)) {
         for (Value *V : DVI->location_ops()) {

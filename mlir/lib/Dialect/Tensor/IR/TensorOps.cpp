@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arithmetic/Utils/Utils.h"
 #include "mlir/Dialect/Complex/IR/Complex.h"
-#include "mlir/Dialect/StandardOps/Utils/Utils.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/Dialect/Utils/ReshapeOpsUtils.h"
 #include "mlir/Dialect/Utils/StaticValueUtils.h"
@@ -33,8 +33,6 @@ Operation *TensorDialect::materializeConstant(OpBuilder &builder,
   if (complex::ConstantOp::isBuildableWith(value, type))
     return builder.create<complex::ConstantOp>(loc, type,
                                                value.cast<ArrayAttr>());
-  if (ConstantOp::isBuildableWith(value, type))
-    return builder.create<ConstantOp>(loc, value, type);
   return nullptr;
 }
 
@@ -1798,6 +1796,19 @@ OpFoldResult PadOp::fold(ArrayRef<Attribute>) {
       !nofold())
     return source();
   return {};
+}
+
+//===----------------------------------------------------------------------===//
+// SplatOp
+//===----------------------------------------------------------------------===//
+
+OpFoldResult SplatOp::fold(ArrayRef<Attribute> operands) {
+  auto constOperand = operands.front();
+  if (!constOperand.isa_and_nonnull<IntegerAttr, FloatAttr>())
+    return {};
+
+  // SplatElementsAttr::get treats single value for second arg as being a splat.
+  return SplatElementsAttr::get(getType(), {constOperand});
 }
 
 //===----------------------------------------------------------------------===//
