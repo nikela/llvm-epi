@@ -109,25 +109,25 @@ define { i128, i8 } @muloti_test(i128 %l, i128 %r) #0 {
 ;
 ; RISCV64-LABEL: muloti_test:
 ; RISCV64:       # %bb.0: # %start
-; RISCV64-NEXT:    mul a6, a4, a1
-; RISCV64-NEXT:    mul a5, a2, a3
-; RISCV64-NEXT:    add a6, a5, a6
-; RISCV64-NEXT:    mulhu a5, a1, a3
-; RISCV64-NEXT:    add a6, a5, a6
-; RISCV64-NEXT:    sltu a7, a6, a5
-; RISCV64-NEXT:    snez t0, a4
-; RISCV64-NEXT:    snez a5, a2
-; RISCV64-NEXT:    and a5, a5, t0
+; RISCV64-NEXT:    mul a5, a4, a1
+; RISCV64-NEXT:    mul a6, a2, a3
+; RISCV64-NEXT:    add a5, a6, a5
+; RISCV64-NEXT:    mulhu a6, a1, a3
+; RISCV64-NEXT:    add a5, a6, a5
+; RISCV64-NEXT:    sltu a6, a5, a6
+; RISCV64-NEXT:    snez a7, a4
+; RISCV64-NEXT:    snez t0, a2
+; RISCV64-NEXT:    and a7, t0, a7
 ; RISCV64-NEXT:    mulhu a2, a2, a3
 ; RISCV64-NEXT:    snez a2, a2
-; RISCV64-NEXT:    or a2, a5, a2
+; RISCV64-NEXT:    or a2, a7, a2
 ; RISCV64-NEXT:    mulhu a4, a4, a1
 ; RISCV64-NEXT:    snez a4, a4
 ; RISCV64-NEXT:    or a2, a2, a4
-; RISCV64-NEXT:    or a2, a2, a7
+; RISCV64-NEXT:    or a2, a2, a6
 ; RISCV64-NEXT:    mul a1, a1, a3
 ; RISCV64-NEXT:    sd a1, 0(a0)
-; RISCV64-NEXT:    sd a6, 8(a0)
+; RISCV64-NEXT:    sd a5, 8(a0)
 ; RISCV64-NEXT:    sb a2, 16(a0)
 ; RISCV64-NEXT:    ret
 start:

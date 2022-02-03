@@ -16,16 +16,16 @@ define i32 @callee(i32 %a, i64 %b, i32 %c, i32 %d, double %e) {
 ; CHECK-NEXT:    .cfi_offset s1, -12
 ; CHECK-NEXT:    .cfi_offset s2, -16
 ; CHECK-NEXT:    .cfi_offset s3, -20
-; CHECK-NEXT:    mv s2, a4
-; CHECK-NEXT:    mv s3, a3
-; CHECK-NEXT:    mv s0, a1
-; CHECK-NEXT:    mv s1, a0
+; CHECK-NEXT:    mv s0, a4
+; CHECK-NEXT:    mv s1, a3
+; CHECK-NEXT:    mv s2, a1
+; CHECK-NEXT:    mv s3, a0
 ; CHECK-NEXT:    mv a0, a5
 ; CHECK-NEXT:    mv a1, a6
 ; CHECK-NEXT:    call __fixdfsi@plt
-; CHECK-NEXT:    add a1, s1, s0
-; CHECK-NEXT:    add a1, a1, s3
-; CHECK-NEXT:    add a1, a1, s2
+; CHECK-NEXT:    add a1, s3, s2
+; CHECK-NEXT:    add a1, a1, s1
+; CHECK-NEXT:    add a1, a1, s0
 ; CHECK-NEXT:    add a0, a1, a0
 ; CHECK-NEXT:    lw ra, 28(sp) # 4-byte Folded Reload
 ; CHECK-NEXT:    lw s0, 24(sp) # 4-byte Folded Reload
