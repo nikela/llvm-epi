@@ -18,7 +18,6 @@
 #include "mlir/Dialect/Linalg/IR/Linalg.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/SCF/SCF.h"
-#include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/Dialect/Utils/StructuredOpsUtils.h"
 
 #include "mlir/Dialect/Vector/Transforms/VectorTransforms.h"
@@ -270,7 +269,7 @@ createFullPartialLinalgCopy(RewriterBase &b, vector::TransferReadOp xferOp,
         std::pair<Value, Value> copyArgs = createSubViewIntersection(
             rewriter, cast<VectorTransferOpInterface>(xferOp.getOperation()),
             alloc);
-        b.create<linalg::CopyOp>(loc, copyArgs.first, copyArgs.second);
+        b.create<memref::CopyOp>(loc, copyArgs.first, copyArgs.second);
         Value casted =
             b.create<memref::CastOp>(loc, alloc, compatibleMemRefType);
         scf::ValueVector viewAndIndices{casted};
@@ -403,7 +402,7 @@ static void createFullPartialLinalgCopy(RewriterBase &b,
     std::pair<Value, Value> copyArgs = createSubViewIntersection(
         rewriter, cast<VectorTransferOpInterface>(xferOp.getOperation()),
         alloc);
-    b.create<linalg::CopyOp>(loc, copyArgs.first, copyArgs.second);
+    b.create<memref::CopyOp>(loc, copyArgs.first, copyArgs.second);
     b.create<scf::YieldOp>(loc, ValueRange{});
   });
 }
@@ -436,6 +435,14 @@ static void createFullPartialVectorTransferWrite(RewriterBase &b,
     b.clone(*xferOp.getOperation(), mapping);
     b.create<scf::YieldOp>(loc, ValueRange{});
   });
+}
+
+// TODO: Parallelism and threadlocal considerations with a ParallelScope trait.
+static Operation *getAutomaticAllocationScope(Operation *op) {
+  Operation *scope =
+      op->getParentWithTrait<OpTrait::AutomaticAllocationScope>();
+  assert(scope && "Expected op to be inside automatic allocation scope");
+  return scope;
 }
 
 /// Split a vector.transfer operation into an in-bounds (i.e., no out-of-bounds
@@ -538,12 +545,14 @@ LogicalResult mlir::vector::splitFullAndPartialTransfer(
   // Top of the function `alloc` for transient storage.
   Value alloc;
   {
-    FuncOp funcOp = xferOp->getParentOfType<FuncOp>();
     RewriterBase::InsertionGuard guard(b);
-    b.setInsertionPointToStart(&funcOp.getRegion().front());
+    Operation *scope = getAutomaticAllocationScope(xferOp);
+    assert(scope->getNumRegions() == 1 &&
+           "AutomaticAllocationScope with >1 regions");
+    b.setInsertionPointToStart(&scope->getRegion(0).front());
     auto shape = xferOp.getVectorType().getShape();
     Type elementType = xferOp.getVectorType().getElementType();
-    alloc = b.create<memref::AllocaOp>(funcOp.getLoc(),
+    alloc = b.create<memref::AllocaOp>(scope->getLoc(),
                                        MemRefType::get(shape, elementType),
                                        ValueRange{}, b.getI64IntegerAttr(32));
   }

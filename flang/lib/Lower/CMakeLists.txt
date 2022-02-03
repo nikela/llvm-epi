@@ -4,11 +4,13 @@ add_flang_library(FortranLower
   Bridge.cpp
   CallInterface.cpp
   Coarray.cpp
+  ConvertExpr.cpp
   ConvertType.cpp
   Mangler.cpp
   OpenACC.cpp
   OpenMP.cpp
   PFTBuilder.cpp
+  Runtime.cpp
   SymbolMap.cpp
 
   DEPENDS

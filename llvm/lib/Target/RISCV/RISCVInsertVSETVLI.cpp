@@ -1621,6 +1621,13 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
   BlockData &BBInfo = BlockInfo[MBB.getNumber()];
   VSETVLIInfo CurInfo;
   MachineInstr *PrevMI = nullptr;
+
+  // BBLocalInfo tracks the VL/VTYPE state the same way BBInfo.Change was
+  // calculated in computeIncomingVLVTYPE. We need this to apply
+  // canSkipVSETVLIForLoadStore the same way computeIncomingVLVTYPE did. We
+  // can't include predecessor information in that decision to avoid disagreeing
+  // with the global analysis.
+  VSETVLIInfo BBLocalInfo;
   // Only be set if current VSETVLIInfo is from an explicit VSET(I)VLI.
   MachineInstr *PrevVSETVLIMI = nullptr;
 
@@ -1648,6 +1655,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       MI.getOperand(NumOperands - 2).setIsDead(false);
       MI.getOperand(NumOperands - 1).setIsDead(false);
       CurInfo = getInfoForVSETVLI(MI);
+      BBLocalInfo = getInfoForVSETVLI(MI);
       PrevVSETVLIMI = &MI;
       continue;
     }
@@ -1677,13 +1685,21 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (!HasSameExtraOperand ||
-            (needVSETVLI(NewInfo, BBInfo.Pred) &&
-             needVSETVLIPHI(NewInfo, MBB))) {
-          insertVSETVLI(MBB, MI, NewInfo, BBInfo.Pred);
+        // Don't use predecessor information if there was an earlier instruction
+        // in this block that allowed a vsetvli to be skipped for load/store.
+        if (!HasSameExtraOperand || (!(BBLocalInfo.isValid() &&
+              canSkipVSETVLIForLoadStore(MI, NewInfo, BBLocalInfo)) &&
+            needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
+            needVSETVLIPHI(NewInfo, MBB))) {
+          insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
           CurInfo = NewInfo;
+          BBLocalInfo = NewInfo;
         }
+        // We must update BBLocalInfo for every vector instruction.
+        if (!BBLocalInfo.isValid())
+          BBLocalInfo = NewInfo;
       } else {
+        assert(BBLocalInfo.isValid());
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         // If this is a unit-stride or strided load/store, we may be able to use
@@ -1720,6 +1736,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
           if (NeedInsertVSETVLI)
             insertVSETVLI(MBB, MI, NewInfo, CurInfo);
           CurInfo = NewInfo;
+          BBLocalInfo = NewInfo;
         }
       }
       PrevVSETVLIMI = nullptr;
@@ -1754,13 +1771,22 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (!HasSameExtraOperand ||
-            (needVSETVLI(NewInfo, BBInfo.Pred) &&
-             needVSETVLIPHI(NewInfo, MBB))) {
-          insertVSETVLI(MBB, MI, NewInfo, BBInfo.Pred);
+        // Don't use predecessor information if there was an earlier instruction
+        // in this block that allowed a vsetvli to be skipped for load/store.
+        if (!HasSameExtraOperand || (!(BBLocalInfo.isValid() &&
+              canSkipVSETVLIForLoadStore(MI, NewInfo, BBLocalInfo)) &&
+            needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred) &&
+            needVSETVLIPHI(NewInfo, MBB))) {
+          insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
           CurInfo = NewInfo;
+          BBLocalInfo = NewInfo;
         }
+
+        // We must update BBLocalInfo for every vector instruction.
+        if (!BBLocalInfo.isValid())
+          BBLocalInfo = NewInfo;
       } else {
+        assert(BBLocalInfo.isValid());
         // If this instruction isn't compatible with the previous VL/VTYPE
         // we need to insert a VSETVLI.
         // If this is a unit-stride or strided load/store, we may be able to use
@@ -1797,6 +1823,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
           if (NeedInsertVSETVLI)
             insertVSETVLI(MBB, MI, NewInfo, CurInfo);
           CurInfo = NewInfo;
+          BBLocalInfo = NewInfo;
         }
       }
       PrevVSETVLIMI = nullptr;
@@ -1807,6 +1834,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     if (MI.isCall() || MI.isInlineAsm() || MI.modifiesRegister(RISCV::VL) ||
         MI.modifiesRegister(RISCV::VTYPE)) {
       CurInfo = VSETVLIInfo::getUnknown();
+      BBLocalInfo = VSETVLIInfo::getUnknown();
       PrevVSETVLIMI = nullptr;
     }
   }

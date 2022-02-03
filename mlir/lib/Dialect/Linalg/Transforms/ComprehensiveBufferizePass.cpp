@@ -17,7 +17,6 @@
 #include "mlir/Dialect/Linalg/ComprehensiveBufferize/ModuleBufferization.h"
 #include "mlir/Dialect/Linalg/Passes.h"
 #include "mlir/Dialect/SCF/BufferizableOpInterfaceImpl.h"
-#include "mlir/Dialect/StandardOps/Transforms/BufferizableOpInterfaceImpl.h"
 #include "mlir/Dialect/Tensor/Transforms/BufferizableOpInterfaceImpl.h"
 #include "mlir/Dialect/Vector/Transforms/BufferizableOpInterfaceImpl.h"
 #include "mlir/Pass/Pass.h"
@@ -56,7 +55,6 @@ struct LinalgComprehensiveModuleBufferize
     linalg_ext::registerBufferizableOpInterfaceExternalModels(registry);
     scf::registerBufferizableOpInterfaceExternalModels(registry);
     std_ext::registerModuleBufferizationExternalModels(registry);
-    mlir::registerBufferizableOpInterfaceExternalModels(registry);
     tensor::registerBufferizableOpInterfaceExternalModels(registry);
     vector::registerBufferizableOpInterfaceExternalModels(registry);
   }
@@ -81,7 +79,7 @@ static FailureOr<Value> allocationFnUsingAlloca(OpBuilder &b, Location loc,
 /// Create a linalg::GenericOp version of an n-D copy that can further tile,
 /// lower to loops or vectorize, unlike the current implementation of
 /// memref::CopyOp.
-/// Do not depend on linalg::CopyOp that is getting deprecated.
+/// Do not depend on memref::CopyOp that is getting deprecated.
 static LogicalResult createLinalgCopyOp(OpBuilder &b, Location loc, Value from,
                                         Value to) {
   auto memrefTypeFrom = from.getType().cast<MemRefType>();
