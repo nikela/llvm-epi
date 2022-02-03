@@ -290,6 +290,9 @@ TEST_F(VFABIParserTest, ISA) {
 
   EXPECT_TRUE(invokeParser("_ZGVeN2v_sin"));
   EXPECT_EQ(ISA, VFISAKind::AVX512);
+
+  EXPECT_TRUE(invokeParser("_ZGVEN2v_sin"));
+  EXPECT_EQ(ISA, VFISAKind::EPI);
 }
 
 TEST_F(VFABIParserTest, LLVM_ISA) {
@@ -399,6 +402,12 @@ TEST_F(VFABIParserTest, ISAIndependentMangling) {
   __COMMON_CHECKS;
   EXPECT_EQ(VectorName, "_ZGVeN2vls2Ls27Us4Rs5l1L10U100R1000u_sin");
 
+  // EPI: <isa> = "E"
+  EXPECT_TRUE(invokeParser("_ZGVEN2vls2Ls27Us4Rs5l1L10U100R1000u_sin"));
+  EXPECT_EQ(ISA, VFISAKind::EPI);
+  __COMMON_CHECKS;
+  EXPECT_EQ(VectorName, "_ZGVEN2vls2Ls27Us4Rs5l1L10U100R1000u_sin");
+
   // LLVM: <isa> = "_LLVM_" internal vector function.
   EXPECT_TRUE(invokeParser(
       "_ZGV_LLVM_N2vls2Ls27Us4Rs5l1L10U100R1000u_sin(vectorf)", "vectorf"));
@@ -488,6 +497,17 @@ TEST_F(VFABIParserTest, ParseMaskingAVX512) {
   EXPECT_EQ(VF, ElementCount::getFixed(2));
   EXPECT_TRUE(IsMasked());
   EXPECT_EQ(ISA, VFISAKind::AVX512);
+  EXPECT_EQ(Parameters.size(), (unsigned)2);
+  EXPECT_EQ(Parameters[0], VFParameter({0, VFParamKind::Vector}));
+  EXPECT_EQ(Parameters[1], VFParameter({1, VFParamKind::GlobalPredicate}));
+  EXPECT_EQ(ScalarName, "sin");
+}
+
+TEST_F(VFABIParserTest, ParseMaskingEPI) {
+  EXPECT_TRUE(invokeParser("_ZGVEM2v_sin"));
+  EXPECT_EQ(VF, ElementCount::getFixed(2));
+  EXPECT_TRUE(IsMasked());
+  EXPECT_EQ(ISA, VFISAKind::EPI);
   EXPECT_EQ(Parameters.size(), (unsigned)2);
   EXPECT_EQ(Parameters[0], VFParameter({0, VFParamKind::Vector}));
   EXPECT_EQ(Parameters[1], VFParameter({1, VFParamKind::GlobalPredicate}));
