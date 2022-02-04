@@ -11983,7 +11983,7 @@ static void emitRISCV64DeclareSimdFunction(
     for (unsigned LMUL : LMULs) {
       SmallString<256> Buffer;
       llvm::raw_svector_ostream Out(Buffer);
-      Out << Prefix << Mask << LMUL;
+      Out << Prefix << Mask << "k" << LMUL;
       for (const ParamAttrTy &ParamAttr : ParamAttrs) {
         switch (ParamAttr.Kind){
         case LinearWithVarStride:
