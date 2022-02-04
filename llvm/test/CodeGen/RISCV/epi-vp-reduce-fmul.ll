@@ -9,7 +9,7 @@ define float @test_vp_reduce_fmul_nxv1f32(float %x, <vscale x 1 x float> %v, <vs
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv1f32@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv1f32_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -24,7 +24,7 @@ define float @test_vp_reduce_fmul_nxv2f32(float %x, <vscale x 2 x float> %v, <vs
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv2f32@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv2f32_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -39,7 +39,7 @@ define float @test_vp_reduce_fmul_nxv4f32(float %x, <vscale x 4 x float> %v, <vs
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv4f32@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv4f32_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -54,7 +54,7 @@ define float @test_vp_reduce_fmul_nxv8f32(float %x, <vscale x 8 x float> %v, <vs
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv8f32@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv8f32_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -69,7 +69,7 @@ define float @test_vp_reduce_fmul_nxv16f32(float %x, <vscale x 16 x float> %v, <
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv16f32@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv16f32_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -84,7 +84,7 @@ define double @test_vp_reduce_fmul_nxv1f64(double %x, <vscale x 1 x double> %v, 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv1f64@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv1f64_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -99,7 +99,7 @@ define double @test_vp_reduce_fmul_nxv2f64(double %x, <vscale x 2 x double> %v, 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv2f64@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv2f64_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -114,7 +114,7 @@ define double @test_vp_reduce_fmul_nxv4f64(double %x, <vscale x 4 x double> %v, 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv4f64@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv4f64_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -129,7 +129,7 @@ define double @test_vp_reduce_fmul_nxv8f64(double %x, <vscale x 8 x double> %v, 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
-; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv8f64@plt
+; CHECK-NEXT:    call __epi_vp_reduce_fmul_nxv8f64_m@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret

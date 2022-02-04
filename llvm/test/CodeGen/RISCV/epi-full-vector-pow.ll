@@ -6,6 +6,8 @@ define <vscale x 1 x double> @pow_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    call __epi_pow_nxv1f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -19,6 +21,8 @@ define <vscale x 2 x double> @pow_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    call __epi_pow_nxv2f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -32,6 +36,8 @@ define <vscale x 4 x double> @pow_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call __epi_pow_nxv4f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -43,11 +49,21 @@ define <vscale x 4 x double> @pow_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 
 define <vscale x 8 x double> @pow_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b) nounwind {
 ; CHECK-LABEL: pow_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    sub sp, sp, a0
+; CHECK-NEXT:    csrr a1, vlenb
+; CHECK-NEXT:    addi a0, sp, 24
+; CHECK-NEXT:    addi a2, sp, 24
+; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv8f64@plt
-; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 8 x double> @llvm.pow.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b)
   ret <vscale x 8 x double> %1
@@ -58,6 +74,8 @@ define <vscale x 1 x float> @pow_nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    call __epi_pow_nxv1f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -71,6 +89,8 @@ define <vscale x 2 x float> @pow_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    call __epi_pow_nxv2f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -84,6 +104,8 @@ define <vscale x 4 x float> @pow_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call __epi_pow_nxv4f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -97,6 +119,7 @@ define <vscale x 8 x float> @pow_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    call __epi_pow_nxv8f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -108,11 +131,22 @@ define <vscale x 8 x float> @pow_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x 
 define <vscale x 16 x float> @pow_nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b) nounwind {
 ; CHECK-LABEL: pow_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -16
-; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    sub sp, sp, a0
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    addi a0, sp, 24
+; CHECK-NEXT:    addi a2, sp, 24
+; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv16f32@plt
-; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 16
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 3
+; CHECK-NEXT:    add sp, sp, a0
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 16 x float> @llvm.pow.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b)
   ret <vscale x 16 x float> %1

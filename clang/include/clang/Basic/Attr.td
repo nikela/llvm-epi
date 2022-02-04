@@ -2587,6 +2587,11 @@ def PreserveAll : DeclOrTypeAttr {
   let Documentation = [PreserveAllDocs];
 }
 
+def EPIVectorCall : DeclOrTypeAttr {
+  let Spellings = [Clang<"epi_vectorcall">];
+  let Documentation = [Undocumented];
+}
+
 def Target : InheritableAttr {
   let Spellings = [GCC<"target">];
   let Args = [StringArgument<"featuresStr">];

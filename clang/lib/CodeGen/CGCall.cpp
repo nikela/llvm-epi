@@ -67,6 +67,7 @@ unsigned CodeGenTypes::ClangCallConvToLLVMCallConv(CallingConv CC) {
   case CC_PreserveAll: return llvm::CallingConv::PreserveAll;
   case CC_Swift: return llvm::CallingConv::Swift;
   case CC_SwiftAsync: return llvm::CallingConv::SwiftTail;
+  case CC_EPIVectorCall: return llvm::CallingConv::EPI_VectorCall;
   }
 }
 
@@ -241,6 +242,9 @@ static CallingConv getCallingConventionForDecl(const ObjCMethodDecl *D,
 
   if (D->hasAttr<PreserveAllAttr>())
     return CC_PreserveAll;
+
+  if (D->hasAttr<EPIVectorCallAttr>())
+    return CC_EPIVectorCall;
 
   return CC_C;
 }

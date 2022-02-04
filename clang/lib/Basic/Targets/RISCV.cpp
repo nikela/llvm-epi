@@ -197,6 +197,8 @@ void RISCVTargetInfo::getTargetDefines(const LangOptions &Opts,
     // EPI: specific, remove now that we have __riscv_vector
     // Version computed as: major*100^2 + minor*100 + patch
     Builder.defineMacro("__riscv_vector_version", "800");
+    if (!ISAInfo->hasExtension("v"))
+      Builder.defineMacro("__riscv_v", "1000000");
   }
 }
 
@@ -286,6 +288,17 @@ bool RISCVTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
     ABI = llvm::RISCV::computeDefaultABIFromArch(*ISAInfo).str();
 
   return true;
+}
+
+TargetInfo::CallingConvCheckResult
+RISCVTargetInfo::checkCallingConvention(CallingConv CC) const {
+  switch (CC) {
+  case CC_C:
+  case CC_EPIVectorCall:
+    return CCCR_OK;
+  default:
+    return CCCR_Warning;
+  }
 }
 
 void RISCVTargetInfo::adjust(DiagnosticsEngine &Diags, LangOptions &Opts) {

@@ -20,6 +20,8 @@ define <vscale x 1 x float> @test_llvm_rint_nxv1f32(<vscale x 1 x float> %vf) {
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    call __epi_frint_nxv1f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -35,6 +37,8 @@ define <vscale x 2 x float> @test_llvm_rint_nxv2f32(<vscale x 2 x float> %vf) {
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    call __epi_frint_nxv2f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -50,6 +54,8 @@ define <vscale x 4 x float> @test_llvm_rint_nxv4f32(<vscale x 4 x float> %vf) {
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call __epi_frint_nxv4f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -65,6 +71,7 @@ define <vscale x 8 x float> @test_llvm_rint_nxv8f32(<vscale x 8 x float> %vf) {
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    call __epi_frint_nxv8f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -80,6 +87,8 @@ define <vscale x 16 x float> @test_llvm_rint_nxv16f32(<vscale x 16 x float> %vf)
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    call __epi_frint_nxv16f32@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -95,6 +104,8 @@ define <vscale x 1 x double> @test_llvm_rint_nxv1f64(<vscale x 1 x double> %vd) 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    call __epi_frint_nxv1f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -110,6 +121,8 @@ define <vscale x 2 x double> @test_llvm_rint_nxv2f64(<vscale x 2 x double> %vd) 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    call __epi_frint_nxv2f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -125,6 +138,8 @@ define <vscale x 4 x double> @test_llvm_rint_nxv4f64(<vscale x 4 x double> %vd) 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
 ; CHECK-NEXT:    call __epi_frint_nxv4f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16
@@ -140,6 +155,7 @@ define <vscale x 8 x double> @test_llvm_rint_nxv8f64(<vscale x 8 x double> %vd) 
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    .cfi_offset ra, -8
+; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    call __epi_frint_nxv8f64@plt
 ; CHECK-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; CHECK-NEXT:    addi sp, sp, 16

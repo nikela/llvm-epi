@@ -548,10 +548,15 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(vp_urem)                                                        \
   VP_INTRINSIC(vp_xor)                                                         \
   VP_INTRINSIC(vp_zext)                                                        \
-  VP_INTRINSIC(experimental_vp_strided_load)                                                \
-  VP_INTRINSIC(experimental_vp_strided_store)                                               \
+  VP_INTRINSIC(experimental_vp_strided_load)                                   \
+  VP_INTRINSIC(experimental_vp_strided_store)                                  \
   VP_INTRINSIC(experimental_vp_splice)                                         \
-  VP_INTRINSIC(experimental_vp_reverse)
+  VP_INTRINSIC(experimental_vp_reverse)                                        \
+  VP_INTRINSIC(vp_cos)                                                         \
+  VP_INTRINSIC(vp_sin)                                                         \
+  VP_INTRINSIC(vp_exp)                                                         \
+  VP_INTRINSIC(vp_pow)                                                         \
+  VP_INTRINSIC(vp_frint)
 #define VP_INTRINSIC(name) case Intrinsic::name:
   VP_INTRINSIC_LIST
 #undef VP_INTRINSIC

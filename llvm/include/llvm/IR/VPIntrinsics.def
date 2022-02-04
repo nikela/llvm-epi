@@ -486,6 +486,30 @@ VP_PROPERTY_FUNCTIONAL_OPC(FPToUI)
 END_REGISTER_VP_INTRINSIC(vp_fptoui)
 ///// } Floating-point/Integer Conversions
 
+///// libm functions {
+
+// llvm.vp.cos(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_cos, 1, 2, VP_COS, -1)
+END_REGISTER_VP(vp_cos, VP_COS)
+
+// llvm.vp.sin(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_sin, 1, 2, VP_SIN, -1)
+END_REGISTER_VP(vp_sin, VP_SIN)
+
+// llvm.vp.exp(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_exp, 1, 2, VP_EXP, -1)
+END_REGISTER_VP(vp_exp, VP_EXP)
+
+// llvm.vp.pow(val,power,mask,vlen)
+BEGIN_REGISTER_VP(vp_pow, 2, 3, VP_POW, -1)
+END_REGISTER_VP(vp_pow, VP_POW)
+
+// llvm.vp.frint(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_frint, 1, 2, VP_FRINT, -1)
+END_REGISTER_VP(vp_frint, VP_FRINT)
+
+///// } libm functions
+
 #undef BEGIN_REGISTER_VP
 #undef BEGIN_REGISTER_VP_INTRINSIC
 #undef BEGIN_REGISTER_VP_SDNODE
