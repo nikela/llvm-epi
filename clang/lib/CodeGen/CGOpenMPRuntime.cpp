@@ -11935,8 +11935,9 @@ static void emitRISCV64DeclareSimdFunction(
     OMPDeclareSimdDeclAttr::BranchStateTy State, SourceLocation SLoc) {
   unsigned TypeSize = evaluateCDTSize(FD, ParamAttrs);
   assert(TypeSize && "Non-zero simdlen/cdtsize expected");
-  llvm::SmallVector<unsigned, 4> VecSizes = {64, 128, 256,
-                                             512}; // FIXME? Hardcoded sizes
+  // These values represent the feasible vector (group) sizes currently allowed
+  // in EPI
+  llvm::SmallVector<unsigned, 4> VecSizes = {64, 128, 256, 512};
   llvm::SmallVector<unsigned, 4> LMULs;
   if (!VLENVal) {
     for (unsigned VecSize : VecSizes)
@@ -12125,7 +12126,7 @@ void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
         if (CGM.getTarget().hasFeature("neon"))
           emitAArch64DeclareSimdFunction(CGM, FD, VLEN, ParamAttrs, State,
                                          MangledName, 'n', 128, Fn, ExprLoc);
-      } else if (CGM.getTriple().isRISCV() &&
+      } else if (CGM.getTriple().getArch() == llvm::Triple::riscv64 &&
                  CGM.getTarget().hasFeature("zepi")) {
         emitRISCV64DeclareSimdFunction(CGM, FD, Fn, VLENVal, ParamAttrs, State,
                                        ExprLoc);
