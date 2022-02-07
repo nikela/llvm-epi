@@ -1115,13 +1115,8 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
 
     uint64_t C1 = N1C->getZExtValue();
 
-    // Keep track of whether this is a andi, zext.h, or zext.w.
-    bool ZExtOrANDI = isInt<12>(N1C->getSExtValue());
-    if (C1 == UINT64_C(0xFFFF) &&
-        (Subtarget->hasStdExtZbb() || Subtarget->hasStdExtZbp()))
-      ZExtOrANDI = true;
-    if (C1 == UINT64_C(0xFFFFFFFF) && Subtarget->hasStdExtZba())
-      ZExtOrANDI = true;
+    // Keep track of whether this is an andi.
+    bool IsANDI = isInt<12>(N1C->getSExtValue());
 
     // Clear irrelevant bits in the mask.
     if (LeftShift)
@@ -1154,11 +1149,11 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         //
         // This pattern occurs when (i32 (srl (sra 31), c3 - 32)) is type
         // legalized and goes through DAG combine.
-        SDValue Y;
         if (C2 >= 32 && (C3 - C2) == 1 && N0.hasOneUse() &&
-            selectSExti32(X, Y)) {
+            X.getOpcode() == ISD::SIGN_EXTEND_INREG &&
+            cast<VTSDNode>(X.getOperand(1))->getVT() == MVT::i32) {
           SDNode *SRAIW =
-              CurDAG->getMachineNode(RISCV::SRAIW, DL, XLenVT, Y,
+              CurDAG->getMachineNode(RISCV::SRAIW, DL, XLenVT, X.getOperand(0),
                                      CurDAG->getTargetConstant(31, DL, XLenVT));
           SDNode *SRLIW = CurDAG->getMachineNode(
               RISCV::SRLIW, DL, XLenVT, SDValue(SRAIW, 0),
@@ -1168,7 +1163,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         }
 
         // (srli (slli x, c3-c2), c3).
-        if (OneUseOrZExtW && !ZExtOrANDI) {
+        if (OneUseOrZExtW && !IsANDI) {
           SDNode *SLLI = CurDAG->getMachineNode(
               RISCV::SLLI, DL, XLenVT, X,
               CurDAG->getTargetConstant(C3 - C2, DL, XLenVT));
@@ -1198,7 +1193,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         }
 
         // (srli (slli c2+c3), c3)
-        if (OneUseOrZExtW && !ZExtOrANDI) {
+        if (OneUseOrZExtW && !IsANDI) {
           SDNode *SLLI = CurDAG->getMachineNode(
               RISCV::SLLI, DL, XLenVT, X,
               CurDAG->getTargetConstant(C2 + C3, DL, XLenVT));
@@ -1216,7 +1211,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     if (!LeftShift && isShiftedMask_64(C1)) {
       uint64_t Leading = XLen - (64 - countLeadingZeros(C1));
       uint64_t C3 = countTrailingZeros(C1);
-      if (Leading == C2 && C2 + C3 < XLen && OneUseOrZExtW && !ZExtOrANDI) {
+      if (Leading == C2 && C2 + C3 < XLen && OneUseOrZExtW && !IsANDI) {
         SDNode *SRLI = CurDAG->getMachineNode(
             RISCV::SRLI, DL, XLenVT, X,
             CurDAG->getTargetConstant(C2 + C3, DL, XLenVT));
@@ -1228,7 +1223,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       }
       // If the leading zero count is C2+32, we can use SRLIW instead of SRLI.
       if (Leading > 32 && (Leading - 32) == C2 && C2 + C3 < 32 &&
-          OneUseOrZExtW && !ZExtOrANDI) {
+          OneUseOrZExtW && !IsANDI) {
         SDNode *SRLIW = CurDAG->getMachineNode(
             RISCV::SRLIW, DL, XLenVT, X,
             CurDAG->getTargetConstant(C2 + C3, DL, XLenVT));
@@ -1245,7 +1240,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     if (LeftShift && isShiftedMask_64(C1)) {
       uint64_t Leading = XLen - (64 - countLeadingZeros(C1));
       uint64_t C3 = countTrailingZeros(C1);
-      if (Leading == 0 && C2 < C3 && OneUseOrZExtW && !ZExtOrANDI) {
+      if (Leading == 0 && C2 < C3 && OneUseOrZExtW && !IsANDI) {
         SDNode *SRLI = CurDAG->getMachineNode(
             RISCV::SRLI, DL, XLenVT, X,
             CurDAG->getTargetConstant(C3 - C2, DL, XLenVT));
@@ -1256,7 +1251,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         return;
       }
       // If we have (32-C2) leading zeros, we can use SRLIW instead of SRLI.
-      if (C2 < C3 && Leading + C2 == 32 && OneUseOrZExtW && !ZExtOrANDI) {
+      if (C2 < C3 && Leading + C2 == 32 && OneUseOrZExtW && !IsANDI) {
         SDNode *SRLIW = CurDAG->getMachineNode(
             RISCV::SRLIW, DL, XLenVT, X,
             CurDAG->getTargetConstant(C3 - C2, DL, XLenVT));

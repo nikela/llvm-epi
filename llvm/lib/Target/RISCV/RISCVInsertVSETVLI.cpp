@@ -476,7 +476,7 @@ struct BlockData {
   // operand value in a PHI of the successor(s)
   Optional<Register> FakeExtraReg;
 
-  BlockData() {}
+  BlockData() = default;
 };
 
 class RISCVInsertVSETVLI : public MachineFunctionPass {
