@@ -267,6 +267,13 @@ then
   info "Build in Debug mode"
 fi
 
+if [ -d "${SRCDIR}/rv" ];
+then
+  info "Enabling Region Vectorizer"
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DLLVM_EXTERNAL_PROJECTS=rv")
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DLLVM_EXTERNAL_RV_SOURCE_DIR=${SRCDIR}/rv")
+fi
+
 info "Running cmake..."
 run cmake -G "${BUILD_SYSTEM}" ${SRCDIR}/llvm \
    -DLLVM_ENABLE_PROJECTS="clang" \
