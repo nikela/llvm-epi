@@ -1442,15 +1442,6 @@ def int_vp_fneg : Intrinsic<[ llvm_anyvector_ty ],
                               llvm_i32_ty],
                             [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]>;
 
-def int_vp_fma : Intrinsic<[ llvm_anyvector_ty ],
-                           [ LLVMMatchType<0>,
-                             LLVMMatchType<0>,
-                             LLVMMatchType<0>,
-                             LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                             llvm_i32_ty ],
-                           [ IntrNoMem, IntrNoSync, IntrWillReturn
-                             /*, Mask<5>, VectorLength<6>*/ ]>;
-
 // Comparison
 // TODO add signalling fcmp
 // The last argument is the comparison predicate
@@ -1636,6 +1627,13 @@ let IntrProperties =
                                 llvm_i32_ty]>;
   def int_vp_frem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                               [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+
+  def int_vp_fma : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
                                 LLVMMatchType<0>,
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 llvm_i32_ty]>;

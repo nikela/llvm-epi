@@ -219,11 +219,10 @@ VP_PROPERTY_FUNCTIONAL_OPC(FNeg)
 END_REGISTER_VP_INTRINSIC(vp_fneg)
 
 // llvm.vp.fma(x,y,z,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_fma, 3, 4)
-BEGIN_REGISTER_VP_SDNODE(VP_FMA, -1, vp_fma, 3, 4)
-END_REGISTER_VP_SDNODE(VP_FMA)
+BEGIN_REGISTER_VP(vp_fma, 3, 4, VP_FMA, -1)
 VP_PROPERTY_CONSTRAINEDFP(1, 1, experimental_constrained_fma)
-END_REGISTER_VP_INTRINSIC(vp_fma)
+END_REGISTER_VP(vp_fma, VP_FMA)
+
 ///// } Floating-Point Arithmetic
 
 ///// Memory Operations {
