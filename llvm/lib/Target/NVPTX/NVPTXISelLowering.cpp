@@ -1571,10 +1571,8 @@ SDValue NVPTXTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
     // ByVal arguments
     SmallVector<EVT, 16> VTs;
     SmallVector<uint64_t, 16> Offsets;
-    auto *PTy = dyn_cast<PointerType>(Args[i].Ty);
-    assert(PTy && "Type of a byval parameter should be pointer");
-    ComputePTXValueVTs(*this, DL, PTy->getPointerElementType(), VTs, &Offsets,
-                       0);
+    assert(Args[i].IndirectType && "byval arg must have indirect type");
+    ComputePTXValueVTs(*this, DL, Args[i].IndirectType, VTs, &Offsets, 0);
 
     // declare .param .align <align> .b8 .param<n>[<size>];
     unsigned sz = Outs[OIdx].Flags.getByValSize();
@@ -2430,7 +2428,7 @@ NVPTXTargetLowering::getParamSymbol(SelectionDAG &DAG, int idx, EVT v) const {
 
 // Check to see if the kernel argument is image*_t or sampler_t
 
-static bool isImageOrSamplerVal(const Value *arg, const Module *context) {
+static bool isImageOrSamplerVal(const Value *arg) {
   static const char *const specialTypes[] = { "struct._image2d_t",
                                               "struct._image3d_t",
                                               "struct._sampler_t" };
@@ -2439,9 +2437,6 @@ static bool isImageOrSamplerVal(const Value *arg, const Module *context) {
   auto *PTy = dyn_cast<PointerType>(Ty);
 
   if (!PTy)
-    return false;
-
-  if (!context)
     return false;
 
   auto *STy = dyn_cast<StructType>(PTy->getPointerElementType());
@@ -2495,10 +2490,7 @@ SDValue NVPTXTargetLowering::LowerFormalArguments(
     // If the kernel argument is image*_t or sampler_t, convert it to
     // a i32 constant holding the parameter position. This can later
     // matched in the AsmPrinter to output the correct mangled name.
-    if (isImageOrSamplerVal(
-            theArgs[i],
-            (theArgs[i]->getParent() ? theArgs[i]->getParent()->getParent()
-                                     : nullptr))) {
+    if (isImageOrSamplerVal(theArgs[i])) {
       assert(isKernelFunction(*F) &&
              "Only kernels can have image/sampler params");
       InVals.push_back(DAG.getConstant(i + 1, dl, MVT::i32));
