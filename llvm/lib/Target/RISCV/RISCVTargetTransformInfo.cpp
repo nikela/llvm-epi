@@ -164,37 +164,6 @@ InstructionCost RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
   return BaseT::getVectorInstrCost(Opcode, Val, Index);
 }
 
-InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
-                                             VectorType *Tp, ArrayRef<int> Mask,
-                                             int Index, VectorType *SubTp) {
-  if (isa<ScalableVectorType>(Tp) &&
-      (!SubTp || isa<ScalableVectorType>(SubTp))) {
-    switch (Kind) {
-    case TTI::SK_Broadcast:
-      // Broadcasts from lane 0 should not be slow.
-      return 1;
-    case TTI::SK_Select:
-    case TTI::SK_Reverse:
-    case TTI::SK_Transpose:
-    case TTI::SK_PermuteSingleSrc:
-    case TTI::SK_PermuteTwoSrc:
-      // This may seem strange but the more elements out there the more work is
-      // for the VPU.
-      return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
-    case TTI::SK_ExtractSubvector:
-      return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
-                                         cast<ScalableVectorType>(SubTp));
-    case TTI::SK_InsertSubvector:
-      return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
-                                        cast<ScalableVectorType>(SubTp));
-      // Use the default.
-    case TTI::SK_Splice:
-      break;
-    }
-  }
-  return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
-}
-
 /// Estimate the overhead of scalarizing an instructions unique
 /// non-constant operands. The types of the arguments are ordinarily
 /// scalar, in which case the costs are multiplied with VF.
@@ -450,6 +419,47 @@ RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
   }
 
   llvm_unreachable("Unsupported register kind");
+}
+
+InstructionCost RISCVTTIImpl::getSpliceCost(VectorType *Tp, int Index) {
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Tp);
+
+  unsigned Cost = 2; // vslidedown+vslideup.
+  // TODO: LMUL should increase cost.
+  // TODO: Multiplying by LT.first implies this legalizes into multiple copies
+  // of similar code, but I think we expand through memory.
+  return Cost * LT.first;
+}
+
+InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
+                                             VectorType *Tp, ArrayRef<int> Mask,
+                                             int Index, VectorType *SubTp) {
+  if (isa<ScalableVectorType>(Tp) &&
+      (!SubTp || isa<ScalableVectorType>(SubTp))) {
+    switch (Kind) {
+    case TTI::SK_Broadcast:
+      // Broadcasts from lane 0 should not be slow.
+      return 1;
+    case TTI::SK_Select:
+    case TTI::SK_Reverse:
+    case TTI::SK_Transpose:
+    case TTI::SK_PermuteSingleSrc:
+    case TTI::SK_PermuteTwoSrc:
+      // This may seem strange but the more elements out there the more work is
+      // for the VPU.
+      return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
+    case TTI::SK_ExtractSubvector:
+      return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                         cast<ScalableVectorType>(SubTp));
+    case TTI::SK_InsertSubvector:
+      return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+                                        cast<ScalableVectorType>(SubTp));
+      // Use the default.
+    case TTI::SK_Splice:
+      return getSpliceCost(Tp, Index);
+    }
+  }
+  return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
 }
 
 InstructionCost RISCVTTIImpl::getGatherScatterOpCost(

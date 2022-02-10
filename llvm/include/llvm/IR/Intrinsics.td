@@ -1436,11 +1436,6 @@ def int_experimental_vp_strided_load  : DefaultAttrsIntrinsic<[llvm_anyvector_ty
 // standard fp-math intrinsics.
 // Note: rounding mode and exception control is planned to be integrated using
 // operand bundles. For now we assume the default environment for both.
-def int_vp_fneg : Intrinsic<[ llvm_anyvector_ty ],
-                            [ LLVMMatchType<0>,
-                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty],
-                            [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]>;
 
 // Comparison
 // TODO add signalling fcmp
@@ -1628,6 +1623,11 @@ let IntrProperties =
   def int_vp_frem : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                               [ LLVMMatchType<0>,
                                 LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+
+  def int_vp_fneg : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 llvm_i32_ty]>;
 
