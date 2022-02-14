@@ -12336,9 +12336,9 @@ SDValue RISCVTargetLowering::LowerFormalArguments(
   case CallingConv::EPI_VectorCall:
     if (!MF.getSubtarget().getFeatureBits()[RISCV::FeatureStdExtF] ||
         !MF.getSubtarget().getFeatureBits()[RISCV::FeatureStdExtD] ||
-        !MF.getSubtarget().getFeatureBits()[RISCV::FeatureStdExtV])
+        !MF.getSubtarget().getFeatureBits()[RISCV::FeatureEPI])
       report_fatal_error("EPI_VectorCall calling convention requires the F,D "
-                         "and V instruction set extensions");
+                         "and EPI feature sets enabled");
     break;
   }
 
