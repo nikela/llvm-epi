@@ -179,9 +179,9 @@ TEST(MemProf, PortableWrapper) {
   // Here we compare directly with the actual counts instead of MemInfoBlock
   // members. Since the MemInfoBlock struct is packed and the EXPECT_EQ macros
   // take a reference to the params, this results in unaligned accesses.
-  EXPECT_EQ(1, ReadBlock.getAllocCount());
-  EXPECT_EQ(7, ReadBlock.getTotalAccessCount());
-  EXPECT_EQ(3, ReadBlock.getAllocCpuId());
+  EXPECT_EQ(1UL, ReadBlock.getAllocCount());
+  EXPECT_EQ(7ULL, ReadBlock.getTotalAccessCount());
+  EXPECT_EQ(3UL, ReadBlock.getAllocCpuId());
 }
 
 } // namespace
