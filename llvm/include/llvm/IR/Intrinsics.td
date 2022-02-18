@@ -1495,11 +1495,6 @@ def int_vp_inttoptr : Intrinsic<[ llvm_anyvector_ty ],
 }
 
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ] in {
-  def int_vp_fptosi : Intrinsic<[ llvm_anyvector_ty ],
-                                [ llvm_anyvector_ty,
-                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                  llvm_i32_ty ]>;
-
   def int_vp_fptoui : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
@@ -1644,6 +1639,13 @@ let IntrProperties =
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 llvm_i32_ty]>;
 }
+
+// Casts.
+def int_vp_fptosi : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                            [ llvm_anyvector_ty,
+                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                              llvm_i32_ty]>;
+
 // Shuffles.
 let IntrProperties =
     [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {

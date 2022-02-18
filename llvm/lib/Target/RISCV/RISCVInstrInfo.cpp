@@ -1055,8 +1055,6 @@ bool RISCVInstrInfo::isAsCheapAsAMove(const MachineInstr &MI) const {
     return (MI.getOperand(1).isReg() &&
             MI.getOperand(1).getReg() == RISCV::X0) ||
            (MI.getOperand(2).isImm() && MI.getOperand(2).getImm() == 0);
-  case RISCV::LUI:
-    return MI.getOperand(1).getTargetFlags() != RISCVII::MO_HI;
   }
   return MI.isAsCheapAsAMove();
 }
@@ -1262,10 +1260,7 @@ outliner::OutlinedFunction RISCVInstrInfo::getOutliningCandidateInfo(
   // be used to setup the function call.
   auto CannotInsertCall = [](outliner::Candidate &C) {
     const TargetRegisterInfo *TRI = C.getMF()->getSubtarget().getRegisterInfo();
-
-    C.initLRU(*TRI);
-    LiveRegUnits LRU = C.LRU;
-    return !LRU.available(RISCV::X5);
+    return !C.isAvailableAcrossAndOutOfSeq(RISCV::X5, *TRI);
   };
 
   llvm::erase_if(RepeatedSequenceLocs, CannotInsertCall);
@@ -1375,7 +1370,7 @@ void RISCVInstrInfo::buildOutlinedFrame(
 
 MachineBasicBlock::iterator RISCVInstrInfo::insertOutlinedCall(
     Module &M, MachineBasicBlock &MBB, MachineBasicBlock::iterator &It,
-    MachineFunction &MF, const outliner::Candidate &C) const {
+    MachineFunction &MF, outliner::Candidate &C) const {
 
   // Add in a call instruction to the outlined function at the given location.
   It = MBB.insert(It,
