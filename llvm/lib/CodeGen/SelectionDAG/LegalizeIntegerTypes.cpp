@@ -2495,7 +2495,7 @@ void DAGTypeLegalizer::ExpandShiftByConstant(SDNode *N, const APInt &Amt,
   EVT ShTy = N->getOperand(1).getValueType();
 
   if (N->getOpcode() == ISD::SHL) {
-    if (Amt.ugt(VTBits)) {
+    if (Amt.uge(VTBits)) {
       Lo = Hi = DAG.getConstant(0, DL, NVT);
     } else if (Amt.ugt(NVTBits)) {
       Lo = DAG.getConstant(0, DL, NVT);
@@ -2516,7 +2516,7 @@ void DAGTypeLegalizer::ExpandShiftByConstant(SDNode *N, const APInt &Amt,
   }
 
   if (N->getOpcode() == ISD::SRL) {
-    if (Amt.ugt(VTBits)) {
+    if (Amt.uge(VTBits)) {
       Lo = Hi = DAG.getConstant(0, DL, NVT);
     } else if (Amt.ugt(NVTBits)) {
       Lo = DAG.getNode(ISD::SRL, DL,
@@ -2537,7 +2537,7 @@ void DAGTypeLegalizer::ExpandShiftByConstant(SDNode *N, const APInt &Amt,
   }
 
   assert(N->getOpcode() == ISD::SRA && "Unknown shift!");
-  if (Amt.ugt(VTBits)) {
+  if (Amt.uge(VTBits)) {
     Hi = Lo = DAG.getNode(ISD::SRA, DL, NVT, InH,
                           DAG.getConstant(NVTBits - 1, DL, ShTy));
   } else if (Amt.ugt(NVTBits)) {
