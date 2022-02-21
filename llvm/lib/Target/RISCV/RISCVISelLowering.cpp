@@ -1741,6 +1741,7 @@ bool RISCVTargetLowering::shouldSinkOperands(
 
         switch (II->getIntrinsicID()) {
         case Intrinsic::fma:
+        case Intrinsic::vp_fma:
           return Operand == 0 || Operand == 1;
         // FIXME: Our patterns can only match vx/vf instructions when the splat
         // it on the RHS, because TableGen doesn't recognize our VP operations
