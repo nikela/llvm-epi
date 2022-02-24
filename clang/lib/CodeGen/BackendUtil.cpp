@@ -766,6 +766,7 @@ void EmitAssemblyHelper::RunOptimizationPipeline(
   // unrolling.
   PTO.LoopInterleaving = CodeGenOpts.UnrollLoops;
   PTO.LoopVectorization = CodeGenOpts.VectorizeLoop;
+  PTO.WFVVectorization = CodeGenOpts.VectorizeWFV;
   PTO.SLPVectorization = CodeGenOpts.VectorizeSLP;
   PTO.MergeFunctions = CodeGenOpts.MergeFunctions;
   // Only enable CGProfilePass when using integrated assembler, since
@@ -1074,6 +1075,7 @@ static void runThinLTOBackend(
   // unrolling.
   Conf.PTO.LoopInterleaving = CGOpts.UnrollLoops;
   Conf.PTO.LoopVectorization = CGOpts.VectorizeLoop;
+  Conf.PTO.WFVVectorization = CGOpts.VectorizeWFV;
   Conf.PTO.SLPVectorization = CGOpts.VectorizeSLP;
   // Only enable CGProfilePass when using integrated assembler, since
   // non-integrated assemblers don't recognize .cgprofile section.

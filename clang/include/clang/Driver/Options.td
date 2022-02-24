@@ -5347,6 +5347,9 @@ def vectorize_loops : Flag<["-"], "vectorize-loops">,
 def vectorize_slp : Flag<["-"], "vectorize-slp">,
   HelpText<"Run the SLP vectorization passes">,
   MarshallingInfoFlag<CodeGenOpts<"VectorizeSLP">>;
+def vectorize_wfv : Flag<["-"], "vectorize-wfv">,
+  HelpText<"Run the WFV vectorization passes">,
+  MarshallingInfoFlag<CodeGenOpts<"VectorizeWFV">>;
 def dependent_lib : Joined<["--"], "dependent-lib=">,
   HelpText<"Add dependent library">,
   MarshallingInfoStringVector<CodeGenOpts<"DependentLibraries">>;

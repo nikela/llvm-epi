@@ -124,6 +124,7 @@
 #include "llvm/Transforms/Utils/NameAnonGlobals.h"
 #include "llvm/Transforms/Utils/RelLookupTableConverter.h"
 #include "llvm/Transforms/Utils/SimplifyCFGOptions.h"
+#include "llvm/Transforms/Utils/VecCloneVP.h"
 #include "llvm/Transforms/Vectorize/LoopVectorize.h"
 #include "llvm/Transforms/Vectorize/SLPVectorizer.h"
 #include "llvm/Transforms/Vectorize/VectorCombine.h"
@@ -184,6 +185,7 @@ static cl::opt<bool> EnableMergeFunctions(
 
 PipelineTuningOptions::PipelineTuningOptions() {
   LoopInterleaving = true;
+  WFVVectorization = false;
   LoopVectorization = true;
   SLPVectorization = false;
   LoopUnrolling = true;
@@ -1000,7 +1002,14 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
 
 /// TODO: Should LTO cause any differences to this set of passes?
 void PassBuilder::addVectorPasses(OptimizationLevel Level,
+                                  ModulePassManager &MPM,
                                   FunctionPassManager &FPM, bool IsFullLTO) {
+  // Run the VecCloneVP pass if we want WFV vectorization.
+  // This is caused by #pragma omp declare simd.
+  if (PTO.WFVVectorization) {
+    MPM.addPass(VecCloneVPPass());
+  }
+
   FPM.addPass(LoopVectorizePass(
       LoopVectorizeOptions(!PTO.LoopInterleaving, !PTO.LoopVectorization)));
 
@@ -1226,7 +1235,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // from the TargetLibraryInfo.
   OptimizePM.addPass(InjectTLIMappings());
 
-  addVectorPasses(Level, OptimizePM, /* IsFullLTO */ false);
+  addVectorPasses(Level, MPM, OptimizePM, /* IsFullLTO */ false);
 
   // LoopSink pass sinks instructions hoisted by LICM, which serves as a
   // canonicalization pass that enables other optimizations. As a result,
@@ -1693,7 +1702,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
 
   MainFPM.addPass(LoopDistributePass());
 
-  addVectorPasses(Level, MainFPM, /* IsFullLTO */ true);
+  addVectorPasses(Level, MPM, MainFPM, /* IsFullLTO */ true);
 
   // Run the OpenMPOpt CGSCC pass again late.
   MPM.addPass(
