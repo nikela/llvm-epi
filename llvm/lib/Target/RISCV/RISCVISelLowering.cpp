@@ -1767,8 +1767,6 @@ bool RISCVTargetLowering::shouldSinkOperands(
         case Intrinsic::vp_fsub:
         case Intrinsic::vp_fdiv:
           return Operand == 0 || Operand == 1;
-        case Intrinsic::vp_fma:
-          return Operand == 0 || Operand == 1;
         default:
           return false;
         }

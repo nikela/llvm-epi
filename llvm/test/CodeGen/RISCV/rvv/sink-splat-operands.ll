@@ -3739,7 +3739,7 @@ define void @sink_splat_vp_fma(float* noalias nocapture %a, float* nocapture rea
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
 ; CHECK-NEXT:    vle32.v v9, (a1)
-; CHECK-NEXT:    vsetvli zero, a3, e32, m1, tu, mu
+; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmadd.vf v8, ft0, v9, v0.t
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
@@ -3783,7 +3783,7 @@ define void @sink_splat_vp_fma_commute(float* noalias nocapture %a, float* nocap
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
 ; CHECK-NEXT:    vle32.v v9, (a1)
-; CHECK-NEXT:    vsetvli zero, a3, e32, m1, tu, mu
+; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmadd.vf v8, ft0, v9, v0.t
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
