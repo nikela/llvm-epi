@@ -9,18 +9,17 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    csrr a4, vlenb
-; CHECK-NEXT:    srli a5, a4, 2
-; CHECK-NEXT:    fmv.w.x ft0, a3
+; CHECK-NEXT:    csrr a3, vlenb
+; CHECK-NEXT:    srli a5, a3, 2
 ; CHECK-NEXT:    bgeu a0, a5, .LBB0_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    li a3, 0
+; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:    j .LBB0_6
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
 ; CHECK-NEXT:    li a7, 0
 ; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    remu a6, a0, a5
-; CHECK-NEXT:    sub a3, a0, a6
+; CHECK-NEXT:    sub a4, a0, a6
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t1, a2, a7
@@ -28,24 +27,24 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    add t1, a1, a7
 ; CHECK-NEXT:    vl1re32.v v9, (t1)
 ; CHECK-NEXT:    vsetvli t2, zero, e32, m1, ta, mu
-; CHECK-NEXT:    vfmacc.vf v9, ft0, v8
+; CHECK-NEXT:    vfmacc.vf v9, fa0, v8
 ; CHECK-NEXT:    vs1r.v v9, (t1)
 ; CHECK-NEXT:    add t0, t0, a5
-; CHECK-NEXT:    add a7, a7, a4
-; CHECK-NEXT:    bne t0, a3, .LBB0_4
+; CHECK-NEXT:    add a7, a7, a3
+; CHECK-NEXT:    bne t0, a4, .LBB0_4
 ; CHECK-NEXT:  # %bb.5: # %middle.block
 ; CHECK-NEXT:    beqz a6, .LBB0_8
 ; CHECK-NEXT:  .LBB0_6: # %for.body.preheader17
-; CHECK-NEXT:    sub a0, a0, a3
-; CHECK-NEXT:    slli a3, a3, 2
+; CHECK-NEXT:    sub a0, a0, a4
+; CHECK-NEXT:    slli a3, a4, 2
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:  .LBB0_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    flw ft1, 0(a2)
-; CHECK-NEXT:    flw ft2, 0(a1)
-; CHECK-NEXT:    fmadd.s ft1, ft1, ft0, ft2
-; CHECK-NEXT:    fsw ft1, 0(a1)
+; CHECK-NEXT:    flw ft0, 0(a2)
+; CHECK-NEXT:    flw ft1, 0(a1)
+; CHECK-NEXT:    fmadd.s ft0, ft0, fa0, ft1
+; CHECK-NEXT:    fsw ft0, 0(a1)
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    addi a1, a1, 4
 ; CHECK-NEXT:    addi a2, a2, 4
@@ -122,18 +121,17 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    csrr a4, vlenb
-; CHECK-NEXT:    srli a5, a4, 3
-; CHECK-NEXT:    fmv.d.x ft0, a3
+; CHECK-NEXT:    csrr a3, vlenb
+; CHECK-NEXT:    srli a5, a3, 3
 ; CHECK-NEXT:    bgeu a0, a5, .LBB1_3
 ; CHECK-NEXT:  # %bb.2:
-; CHECK-NEXT:    li a3, 0
+; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:    j .LBB1_6
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
 ; CHECK-NEXT:    li a7, 0
 ; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    remu a6, a0, a5
-; CHECK-NEXT:    sub a3, a0, a6
+; CHECK-NEXT:    sub a4, a0, a6
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t1, a2, a7
@@ -141,24 +139,24 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    add t1, a1, a7
 ; CHECK-NEXT:    vl1re64.v v9, (t1)
 ; CHECK-NEXT:    vsetvli t2, zero, e64, m1, ta, mu
-; CHECK-NEXT:    vfmacc.vf v9, ft0, v8
+; CHECK-NEXT:    vfmacc.vf v9, fa0, v8
 ; CHECK-NEXT:    vs1r.v v9, (t1)
 ; CHECK-NEXT:    add t0, t0, a5
-; CHECK-NEXT:    add a7, a7, a4
-; CHECK-NEXT:    bne t0, a3, .LBB1_4
+; CHECK-NEXT:    add a7, a7, a3
+; CHECK-NEXT:    bne t0, a4, .LBB1_4
 ; CHECK-NEXT:  # %bb.5: # %middle.block
 ; CHECK-NEXT:    beqz a6, .LBB1_8
 ; CHECK-NEXT:  .LBB1_6: # %for.body.preheader17
-; CHECK-NEXT:    sub a0, a0, a3
-; CHECK-NEXT:    slli a3, a3, 3
+; CHECK-NEXT:    sub a0, a0, a4
+; CHECK-NEXT:    slli a3, a4, 3
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a2, a2, a3
 ; CHECK-NEXT:  .LBB1_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    fld ft1, 0(a2)
-; CHECK-NEXT:    fld ft2, 0(a1)
-; CHECK-NEXT:    fmadd.d ft1, ft1, ft0, ft2
-; CHECK-NEXT:    fsd ft1, 0(a1)
+; CHECK-NEXT:    fld ft0, 0(a2)
+; CHECK-NEXT:    fld ft1, 0(a1)
+; CHECK-NEXT:    fmadd.d ft0, ft0, fa0, ft1
+; CHECK-NEXT:    fsd ft0, 0(a1)
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    addi a1, a1, 8
 ; CHECK-NEXT:    addi a2, a2, 8

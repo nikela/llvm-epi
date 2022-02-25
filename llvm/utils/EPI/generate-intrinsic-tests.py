@@ -2184,7 +2184,7 @@ intrinsics = [
 
         UnaryIntrinsic("viota", type_generator = generate_unary_mask_to_integer_types, variants = m),
 
-        UnaryIntrinsicScalarResultNoVL("vfmv.f.s", type_generator = generate_unary_float_types, variants = s, instruction = "vfmv.f", scalar_register = "ft0", mask = False),
+        UnaryIntrinsicScalarResultNoVL("vfmv.f.s", type_generator = generate_unary_float_types, variants = s, instruction = "vfmv.f", scalar_register = "fa0", mask = False),
 
         NullaryIntrinsic("vid", type_generator = generate_nullary_integer_types, variants = v),
 

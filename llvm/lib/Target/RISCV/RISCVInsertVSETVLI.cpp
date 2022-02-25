@@ -571,6 +571,13 @@ Register RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock *MBB) {
   return BBInfo.FakeExtraReg.getValue();
 }
 
+static bool isVectorConfigInstr(const MachineInstr &MI) {
+  return MI.getOpcode() == RISCV::PseudoVSETVLI ||
+         MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
+         MI.getOpcode() == RISCV::PseudoVSETIVLI ||
+         MI.getOpcode() == RISCV::PseudoVSETVLEXT;
+}
+
 static MachineInstr *elideCopies(MachineInstr *MI,
                                  const MachineRegisterInfo *MRI) {
   while (true) {
@@ -893,10 +900,7 @@ bool RISCVInsertVSETVLI::needVSETVLI(const VSETVLIInfo &Require,
       Require.getAVLReg().isVirtual() && !CurInfo.hasSEWLMULRatioOnly() &&
       CurInfo.hasCompatibleVTYPE(Require, /*Strict*/ false)) {
     if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
-      if (DefMI->getOpcode() == RISCV::PseudoVSETVLI ||
-          DefMI->getOpcode() == RISCV::PseudoVSETVLIX0 ||
-          DefMI->getOpcode() == RISCV::PseudoVSETIVLI ||
-          DefMI->getOpcode() == RISCV::PseudoVSETVLEXT) {
+      if (isVectorConfigInstr(*DefMI)) {
         VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
         if (DefInfo.hasSameAVL(CurInfo) && DefInfo.hasSameVTYPE(CurInfo))
           return false;
@@ -1426,10 +1430,7 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
       LastEO = getExtraOperand(&MI);
 
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
-    if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
-        MI.getOpcode() == RISCV::PseudoVSETIVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
+    if (isVectorConfigInstr(MI)) {
       HadVectorOp = true;
       BBInfo.Change = getInfoForVSETVLI(MI);
       continue;
@@ -1602,10 +1603,7 @@ bool RISCVInsertVSETVLI::needVSETVLIPHI(const VSETVLIInfo &Require,
 
     // We need the PHI input to the be the output of a VSET(I)VLI(EXT).
     MachineInstr *DefMI = MRI->getVRegDef(InReg);
-    if (!DefMI || (DefMI->getOpcode() != RISCV::PseudoVSETVLI &&
-                   DefMI->getOpcode() != RISCV::PseudoVSETVLIX0 &&
-                   DefMI->getOpcode() != RISCV::PseudoVSETIVLI &&
-                   DefMI->getOpcode() != RISCV::PseudoVSETVLEXT))
+    if (!DefMI || !isVectorConfigInstr(*DefMI))
       return true;
 
     // We found a VSET(I)VLI(EXT) make sure it matches the output of the
@@ -1641,10 +1639,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     bool HasSameExtraOperand = getExtraOperand(&MI) == PrevEO;
 
     // If this is an explicit VSETVLI, VSETIVLI or VSETVLEXT, update our state.
-    if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLIX0 ||
-        MI.getOpcode() == RISCV::PseudoVSETIVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLEXT) {
+    if (isVectorConfigInstr(MI)) {
       // Conservatively, mark the VL and VTYPE as live.
       unsigned NumOperands = MI.getNumOperands();
       assert(MI.getOperand(NumOperands - 2).getReg() == RISCV::VL &&

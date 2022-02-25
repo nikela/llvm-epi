@@ -380,22 +380,22 @@ for.inc:                                          ; preds = %for.body, %if.then
 define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: test8:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    fmv.w.x ft1, a1
+; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli a1, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    lui a1, %hi(.LCPI7_0)
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI7_0)(a1)
 ; CHECK-NEXT:    lui a1, %hi(scratch)
 ; CHECK-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-NEXT:    fmv.w.x ft2, zero
+; CHECK-NEXT:    fmv.w.x ft1, zero
 ; CHECK-NEXT:    j .LBB7_2
 ; CHECK-NEXT:  .LBB7_1: # %do.cond
 ; CHECK-NEXT:    # in Loop: Header=BB7_2 Depth=1
-; CHECK-NEXT:    feq.s a2, ft1, ft2
+; CHECK-NEXT:    feq.s a2, fa0, ft1
 ; CHECK-NEXT:    bnez a2, .LBB7_4
 ; CHECK-NEXT:  .LBB7_2: # %do.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    flt.s a2, ft0, ft1
+; CHECK-NEXT:    flt.s a2, ft0, fa0
 ; CHECK-NEXT:    beqz a2, .LBB7_1
 ; CHECK-NEXT:  # %bb.3: # %if.then
 ; CHECK-NEXT:    # in Loop: Header=BB7_2 Depth=1
@@ -403,7 +403,7 @@ define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double>
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    vsetvli a2, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v10, (a1)
-; CHECK-NEXT:    vfmv.f.s ft1, v10
+; CHECK-NEXT:    vfmv.f.s fa0, v10
 ; CHECK-NEXT:    j .LBB7_1
 ; CHECK-NEXT:  .LBB7_4: # %do.end
 ; CHECK-NEXT:    ret

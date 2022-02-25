@@ -19,7 +19,9 @@ def AvispadoModel : SchedMachineModel {
   let IssueWidth = 1;        // One instruction per cycle can be dispatched.
   let LoadLatency = 3;
   let MispredictPenalty = 3;
-  let UnsupportedFeatures = [HasStdExtZbb];
+  let UnsupportedFeatures = [HasStdExtZbkb, HasStdExtZbkc, HasStdExtZbkx,
+                             HasStdExtZknd, HasStdExtZkne, HasStdExtZknh,
+                             HasStdExtZksed, HasStdExtZksh, HasStdExtZkr];
 
   // We should be able to remove this when all the instructions
   // have scheduling information.
@@ -615,8 +617,11 @@ def : ReadAdvance<ReadVMask, 0>;
 defm : UnsupportedSchedZba;
 defm : UnsupportedSchedZbb;
 defm : UnsupportedSchedZbc;
-defm : UnsupportedSchedZbf;
-defm : UnsupportedSchedZfh;
 defm : UnsupportedSchedZbs;
+defm : UnsupportedSchedZbe;
+defm : UnsupportedSchedZbf;
+defm : UnsupportedSchedZbm;
+defm : UnsupportedSchedZbt;
+defm : UnsupportedSchedZfh;
 
 }
