@@ -1493,6 +1493,27 @@ void VPCanonicalIVPHIRecipe::print(raw_ostream &O, const Twine &Indent,
 }
 #endif
 
+void VPExpandSCEVRecipe::execute(VPTransformState &State) {
+  assert(!State.Instance && "cannot be used in per-lane");
+  const DataLayout &DL =
+      State.CFG.VectorPreHeader->getModule()->getDataLayout();
+  SCEVExpander Exp(SE, DL, "induction");
+  Value *Res = Exp.expandCodeFor(Expr, Expr->getType(),
+                                 State.CFG.VectorPreHeader->getTerminator());
+
+  for (unsigned Part = 0, UF = State.UF; Part < UF; ++Part)
+    State.set(this, Res, Part);
+}
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+void VPExpandSCEVRecipe::print(raw_ostream &O, const Twine &Indent,
+                               VPSlotTracker &SlotTracker) const {
+  O << Indent << "EMIT ";
+  getVPSingleValue()->printAsOperand(O, SlotTracker);
+  O << " = EXPAND SCEV " << *Expr;
+}
+#endif
+
 void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.get(getOperand(0), 0);
   Type *STy = CanonicalIV->getType();
