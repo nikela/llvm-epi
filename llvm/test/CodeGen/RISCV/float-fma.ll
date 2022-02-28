@@ -13,20 +13,12 @@ declare double @llvm.fmuladd.f64(double, double, double)
 define float @fmadd_s_fma_intrinsic(float %a, float %b, float %c) nounwind {
 ; RV32IFD-LABEL: fmadd_s_fma_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    fmv.w.x ft0, a2
-; RV32IFD-NEXT:    fmv.w.x ft1, a1
-; RV32IFD-NEXT:    fmv.w.x ft2, a0
-; RV32IFD-NEXT:    fmadd.s ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fmv.x.w a0, ft0
+; RV32IFD-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmadd_s_fma_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    fmv.w.x ft0, a2
-; RV64IFD-NEXT:    fmv.w.x ft1, a1
-; RV64IFD-NEXT:    fmv.w.x ft2, a0
-; RV64IFD-NEXT:    fmadd.s ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.w a0, ft0
+; RV64IFD-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = call float @llvm.fma.f32(float %a, float %b, float %c)
   ret float %1
@@ -36,20 +28,12 @@ define float @fmadd_s_fmuladd_intrinsic(float %a, float %b, float %c) nounwind {
 ; Use of fmadd depends on TargetLowering::isFMAFasterthanFMulAndFAdd
 ; RV32IFD-LABEL: fmadd_s_fmuladd_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    fmv.w.x ft0, a2
-; RV32IFD-NEXT:    fmv.w.x ft1, a1
-; RV32IFD-NEXT:    fmv.w.x ft2, a0
-; RV32IFD-NEXT:    fmadd.s ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fmv.x.w a0, ft0
+; RV32IFD-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmadd_s_fmuladd_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    fmv.w.x ft0, a2
-; RV64IFD-NEXT:    fmv.w.x ft1, a1
-; RV64IFD-NEXT:    fmv.w.x ft2, a0
-; RV64IFD-NEXT:    fmadd.s ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.w a0, ft0
+; RV64IFD-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = call float @llvm.fmuladd.f32(float %a, float %b, float %c)
   ret float %1
@@ -60,22 +44,12 @@ define float @fmsub_s_fma_intrinsic(float %a, float %b, float %c) nounwind {
 ;       meaning the fmsub pattern fails
 ; RV32IFD-LABEL: fmsub_s_fma_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    lui a3, 524288
-; RV32IFD-NEXT:    xor a2, a2, a3
-; RV32IFD-NEXT:    fmv.w.x ft0, a2
-; RV32IFD-NEXT:    fmv.w.x ft1, a1
-; RV32IFD-NEXT:    fmv.w.x ft2, a0
-; RV32IFD-NEXT:    fmadd.s ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fmv.x.w a0, ft0
+; RV32IFD-NEXT:    fmsub.s fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmsub_s_fma_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    fmv.w.x ft0, a2
-; RV64IFD-NEXT:    fmv.w.x ft1, a1
-; RV64IFD-NEXT:    fmv.w.x ft2, a0
-; RV64IFD-NEXT:    fmsub.s ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.w a0, ft0
+; RV64IFD-NEXT:    fmsub.s fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = fsub float -0.00, %c
   %2 = call float @llvm.fma.f32(float %a, float %b, float %1)
@@ -85,30 +59,12 @@ define float @fmsub_s_fma_intrinsic(float %a, float %b, float %c) nounwind {
 define double @fmadd_d_fma_intrinsic(double %a, double %b, double %c) nounwind {
 ; RV32IFD-LABEL: fmadd_d_fma_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    addi sp, sp, -16
-; RV32IFD-NEXT:    sw a4, 8(sp)
-; RV32IFD-NEXT:    sw a5, 12(sp)
-; RV32IFD-NEXT:    fld ft0, 8(sp)
-; RV32IFD-NEXT:    sw a2, 8(sp)
-; RV32IFD-NEXT:    sw a3, 12(sp)
-; RV32IFD-NEXT:    fld ft1, 8(sp)
-; RV32IFD-NEXT:    sw a0, 8(sp)
-; RV32IFD-NEXT:    sw a1, 12(sp)
-; RV32IFD-NEXT:    fld ft2, 8(sp)
-; RV32IFD-NEXT:    fmadd.d ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fsd ft0, 8(sp)
-; RV32IFD-NEXT:    lw a0, 8(sp)
-; RV32IFD-NEXT:    lw a1, 12(sp)
-; RV32IFD-NEXT:    addi sp, sp, 16
+; RV32IFD-NEXT:    fmadd.d fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmadd_d_fma_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    fmv.d.x ft0, a2
-; RV64IFD-NEXT:    fmv.d.x ft1, a1
-; RV64IFD-NEXT:    fmv.d.x ft2, a0
-; RV64IFD-NEXT:    fmadd.d ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.d a0, ft0
+; RV64IFD-NEXT:    fmadd.d fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = call double @llvm.fma.f64(double %a, double %b, double %c)
   ret double %1
@@ -117,30 +73,12 @@ define double @fmadd_d_fma_intrinsic(double %a, double %b, double %c) nounwind {
 define double @fmadd_d_fmuladd_intrinsic(double %a, double %b, double %c) nounwind {
 ; RV32IFD-LABEL: fmadd_d_fmuladd_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    addi sp, sp, -16
-; RV32IFD-NEXT:    sw a4, 8(sp)
-; RV32IFD-NEXT:    sw a5, 12(sp)
-; RV32IFD-NEXT:    fld ft0, 8(sp)
-; RV32IFD-NEXT:    sw a2, 8(sp)
-; RV32IFD-NEXT:    sw a3, 12(sp)
-; RV32IFD-NEXT:    fld ft1, 8(sp)
-; RV32IFD-NEXT:    sw a0, 8(sp)
-; RV32IFD-NEXT:    sw a1, 12(sp)
-; RV32IFD-NEXT:    fld ft2, 8(sp)
-; RV32IFD-NEXT:    fmadd.d ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fsd ft0, 8(sp)
-; RV32IFD-NEXT:    lw a0, 8(sp)
-; RV32IFD-NEXT:    lw a1, 12(sp)
-; RV32IFD-NEXT:    addi sp, sp, 16
+; RV32IFD-NEXT:    fmadd.d fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmadd_d_fmuladd_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    fmv.d.x ft0, a2
-; RV64IFD-NEXT:    fmv.d.x ft1, a1
-; RV64IFD-NEXT:    fmv.d.x ft2, a0
-; RV64IFD-NEXT:    fmadd.d ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.d a0, ft0
+; RV64IFD-NEXT:    fmadd.d fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = call double @llvm.fmuladd.f64(double %a, double %b, double %c)
   ret double %1
@@ -151,33 +89,12 @@ define double @fmsub_d_fma_intrinsic(double %a, double %b, double %c) nounwind {
 ;       meaning the fmsub may not trigger
 ; RV32IFD-LABEL: fmsub_d_fma_intrinsic:
 ; RV32IFD:       # %bb.0:
-; RV32IFD-NEXT:    addi sp, sp, -16
-; RV32IFD-NEXT:    sw a4, 8(sp)
-; RV32IFD-NEXT:    sw a5, 12(sp)
-; RV32IFD-NEXT:    fld ft0, 8(sp)
-; RV32IFD-NEXT:    sw a2, 8(sp)
-; RV32IFD-NEXT:    sw a3, 12(sp)
-; RV32IFD-NEXT:    fld ft1, 8(sp)
-; RV32IFD-NEXT:    sw a0, 8(sp)
-; RV32IFD-NEXT:    sw a1, 12(sp)
-; RV32IFD-NEXT:    fld ft2, 8(sp)
-; RV32IFD-NEXT:    fmsub.d ft0, ft2, ft1, ft0
-; RV32IFD-NEXT:    fsd ft0, 8(sp)
-; RV32IFD-NEXT:    lw a0, 8(sp)
-; RV32IFD-NEXT:    lw a1, 12(sp)
-; RV32IFD-NEXT:    addi sp, sp, 16
+; RV32IFD-NEXT:    fmsub.d fa0, fa0, fa1, fa2
 ; RV32IFD-NEXT:    ret
 ;
 ; RV64IFD-LABEL: fmsub_d_fma_intrinsic:
 ; RV64IFD:       # %bb.0:
-; RV64IFD-NEXT:    li a3, -1
-; RV64IFD-NEXT:    slli a3, a3, 63
-; RV64IFD-NEXT:    xor a2, a2, a3
-; RV64IFD-NEXT:    fmv.d.x ft0, a2
-; RV64IFD-NEXT:    fmv.d.x ft1, a1
-; RV64IFD-NEXT:    fmv.d.x ft2, a0
-; RV64IFD-NEXT:    fmadd.d ft0, ft2, ft1, ft0
-; RV64IFD-NEXT:    fmv.x.d a0, ft0
+; RV64IFD-NEXT:    fmsub.d fa0, fa0, fa1, fa2
 ; RV64IFD-NEXT:    ret
   %1 = fsub double -0.00, %c
   %2 = call double @llvm.fma.f64(double %a, double %b, double %1)

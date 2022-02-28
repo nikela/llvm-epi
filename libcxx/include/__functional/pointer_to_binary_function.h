@@ -14,7 +14,8 @@
 #include <__functional/binary_function.h>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#pragma GCC system_header
+#  pragma GCC system_header
+#  pragma clang include_instead(<functional>)
 #endif
 
 _LIBCPP_BEGIN_NAMESPACE_STD

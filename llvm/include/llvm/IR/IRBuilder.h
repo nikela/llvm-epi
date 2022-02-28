@@ -25,7 +25,7 @@
 #include "llvm/IR/ConstantFolder.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
-#include "llvm/IR/DebugInfoMetadata.h"
+//#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/DebugLoc.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/FPEnv.h"
@@ -126,21 +126,18 @@ protected:
   MDNode *DefaultFPMathTag;
   FastMathFlags FMF;
 
-  bool IsFPConstrained;
-  fp::ExceptionBehavior DefaultConstrainedExcept;
-  RoundingMode DefaultConstrainedRounding;
+  bool IsFPConstrained = false;
+  fp::ExceptionBehavior DefaultConstrainedExcept = fp::ebStrict;
+  RoundingMode DefaultConstrainedRounding = RoundingMode::Dynamic;
 
   ArrayRef<OperandBundleDef> DefaultOperandBundles;
 
 public:
   IRBuilderBase(LLVMContext &context, const IRBuilderFolder &Folder,
-                const IRBuilderDefaultInserter &Inserter,
-                MDNode *FPMathTag, ArrayRef<OperandBundleDef> OpBundles)
+                const IRBuilderDefaultInserter &Inserter, MDNode *FPMathTag,
+                ArrayRef<OperandBundleDef> OpBundles)
       : Context(context), Folder(Folder), Inserter(Inserter),
-        DefaultFPMathTag(FPMathTag), IsFPConstrained(false),
-        DefaultConstrainedExcept(fp::ebStrict),
-        DefaultConstrainedRounding(RoundingMode::Dynamic),
-        DefaultOperandBundles(OpBundles) {
+        DefaultFPMathTag(FPMathTag), DefaultOperandBundles(OpBundles) {
     ClearInsertionPoint();
   }
 
@@ -219,23 +216,11 @@ public:
   }
 
   /// Get location information used by debugging information.
-  DebugLoc getCurrentDebugLocation() const {
-    for (auto &KV : MetadataToCopy)
-      if (KV.first == LLVMContext::MD_dbg)
-        return {cast<DILocation>(KV.second)};
-
-    return {};
-  }
+  DebugLoc getCurrentDebugLocation() const;
 
   /// If this builder has a current debug location, set it on the
   /// specified instruction.
-  void SetInstDebugLocation(Instruction *I) const {
-    for (const auto &KV : MetadataToCopy)
-      if (KV.first == LLVMContext::MD_dbg) {
-        I->setDebugLoc(DebugLoc(KV.second));
-        return;
-      }
-  }
+  void SetInstDebugLocation(Instruction *I) const;
 
   /// Add all entries in MetadataToCopy to \p I.
   void AddMetadataToInst(Instruction *I) const {
@@ -790,7 +775,7 @@ public:
   /// Create a call to the experimental.gc.statepoint intrinsic to
   /// start a new statepoint sequence.
   CallInst *CreateGCStatepointCall(uint64_t ID, uint32_t NumPatchBytes,
-                                   Value *ActualCallee,
+                                   FunctionCallee ActualCallee,
                                    ArrayRef<Value *> CallArgs,
                                    Optional<ArrayRef<Value *>> DeoptArgs,
                                    ArrayRef<Value *> GCArgs,
@@ -799,7 +784,7 @@ public:
   /// Create a call to the experimental.gc.statepoint intrinsic to
   /// start a new statepoint sequence.
   CallInst *CreateGCStatepointCall(uint64_t ID, uint32_t NumPatchBytes,
-                                   Value *ActualCallee, uint32_t Flags,
+                                   FunctionCallee ActualCallee, uint32_t Flags,
                                    ArrayRef<Value *> CallArgs,
                                    Optional<ArrayRef<Use>> TransitionArgs,
                                    Optional<ArrayRef<Use>> DeoptArgs,
@@ -810,7 +795,8 @@ public:
   /// in using makeArrayRef(CS.arg_begin(), CS.arg_end()); Use needs to be
   /// .get()'ed to get the Value pointer.
   CallInst *CreateGCStatepointCall(uint64_t ID, uint32_t NumPatchBytes,
-                                   Value *ActualCallee, ArrayRef<Use> CallArgs,
+                                   FunctionCallee ActualCallee,
+                                   ArrayRef<Use> CallArgs,
                                    Optional<ArrayRef<Value *>> DeoptArgs,
                                    ArrayRef<Value *> GCArgs,
                                    const Twine &Name = "");
@@ -819,7 +805,7 @@ public:
   /// start a new statepoint sequence.
   InvokeInst *
   CreateGCStatepointInvoke(uint64_t ID, uint32_t NumPatchBytes,
-                           Value *ActualInvokee, BasicBlock *NormalDest,
+                           FunctionCallee ActualInvokee, BasicBlock *NormalDest,
                            BasicBlock *UnwindDest, ArrayRef<Value *> InvokeArgs,
                            Optional<ArrayRef<Value *>> DeoptArgs,
                            ArrayRef<Value *> GCArgs, const Twine &Name = "");
@@ -827,7 +813,7 @@ public:
   /// Create an invoke to the experimental.gc.statepoint intrinsic to
   /// start a new statepoint sequence.
   InvokeInst *CreateGCStatepointInvoke(
-      uint64_t ID, uint32_t NumPatchBytes, Value *ActualInvokee,
+      uint64_t ID, uint32_t NumPatchBytes, FunctionCallee ActualInvokee,
       BasicBlock *NormalDest, BasicBlock *UnwindDest, uint32_t Flags,
       ArrayRef<Value *> InvokeArgs, Optional<ArrayRef<Use>> TransitionArgs,
       Optional<ArrayRef<Use>> DeoptArgs, ArrayRef<Value *> GCArgs,
@@ -838,7 +824,7 @@ public:
   // get the Value *.
   InvokeInst *
   CreateGCStatepointInvoke(uint64_t ID, uint32_t NumPatchBytes,
-                           Value *ActualInvokee, BasicBlock *NormalDest,
+                           FunctionCallee ActualInvokee, BasicBlock *NormalDest,
                            BasicBlock *UnwindDest, ArrayRef<Use> InvokeArgs,
                            Optional<ArrayRef<Value *>> DeoptArgs,
                            ArrayRef<Value *> GCArgs, const Twine &Name = "");

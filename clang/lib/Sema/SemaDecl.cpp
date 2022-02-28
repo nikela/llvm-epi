@@ -1608,6 +1608,14 @@ bool Sema::CheckRedeclarationModuleOwnership(NamedDecl *New, NamedDecl *Old) {
   if (OldM && OldM->Kind == Module::PrivateModuleFragment)
     OldM = OldM->Parent;
 
+  // If we have a decl in a module partition, it is part of the containing
+  // module (which is the only thing that can be importing it).
+  if (NewM && OldM &&
+      (OldM->Kind == Module::ModulePartitionInterface ||
+       OldM->Kind == Module::ModulePartitionImplementation)) {
+    return false;
+  }
+
   if (NewM == OldM)
     return false;
 
@@ -2006,6 +2014,12 @@ void Sema::DiagnoseUnusedButSetDecl(const VarDecl *VD) {
   // be assigned in the block but not used elsewhere for the purpose of lifetime
   // extension.
   if (VD->hasAttr<BlocksAttr>() && Ty->isObjCObjectPointerType())
+    return;
+
+  // Don't warn about Objective-C pointer variables with precise lifetime
+  // semantics; they can be used to ensure ARC releases the object at a known
+  // time, which may mean assignment but no other references.
+  if (VD->hasAttr<ObjCPreciseLifetimeAttr>() && Ty->isObjCObjectPointerType())
     return;
 
   auto iter = RefsMinusAssignments.find(VD);
@@ -15329,28 +15343,32 @@ void Sema::AddKnownFunctionAttributes(FunctionDecl *FD) {
 
     // Add known guaranteed alignment for allocation functions.
     switch (BuiltinID) {
+    case Builtin::BImemalign:
     case Builtin::BIaligned_alloc:
       if (!FD->hasAttr<AllocAlignAttr>())
         FD->addAttr(AllocAlignAttr::CreateImplicit(Context, ParamIdx(1, FD),
                                                    FD->getLocation()));
-      LLVM_FALLTHROUGH;
-    case Builtin::BIcalloc:
-    case Builtin::BImalloc:
-    case Builtin::BImemalign:
-    case Builtin::BIrealloc:
-    case Builtin::BIstrdup:
-    case Builtin::BIstrndup: {
-      if (!FD->hasAttr<AssumeAlignedAttr>()) {
-        unsigned NewAlign = Context.getTargetInfo().getNewAlign() /
-                            Context.getTargetInfo().getCharWidth();
-        IntegerLiteral *Alignment = IntegerLiteral::Create(
-            Context, Context.MakeIntValue(NewAlign, Context.UnsignedIntTy),
-            Context.UnsignedIntTy, FD->getLocation());
-        FD->addAttr(AssumeAlignedAttr::CreateImplicit(
-            Context, Alignment, /*Offset=*/nullptr, FD->getLocation()));
-      }
+      break;
+    default:
       break;
     }
+
+    // Add allocsize attribute for allocation functions.
+    switch (BuiltinID) {
+    case Builtin::BIcalloc:
+      FD->addAttr(AllocSizeAttr::CreateImplicit(
+          Context, ParamIdx(1, FD), ParamIdx(2, FD), FD->getLocation()));
+      break;
+    case Builtin::BImemalign:
+    case Builtin::BIaligned_alloc:
+    case Builtin::BIrealloc:
+      FD->addAttr(AllocSizeAttr::CreateImplicit(Context, ParamIdx(2, FD),
+                                                ParamIdx(), FD->getLocation()));
+      break;
+    case Builtin::BImalloc:
+      FD->addAttr(AllocSizeAttr::CreateImplicit(Context, ParamIdx(1, FD),
+                                                ParamIdx(), FD->getLocation()));
+      break;
     default:
       break;
     }

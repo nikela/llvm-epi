@@ -1164,13 +1164,21 @@ static Value *findBasePointer(Value *I, DefiningValueMapTy &Cache) {
 #ifndef NDEBUG
           Value *OldBase = BlockToValue[InBB];
           Value *Base = getBaseForInput(InVal, nullptr);
+
+          // We can't use `stripPointerCasts` instead of this function because
+          // `stripPointerCasts` doesn't handle vectors of pointers.
+          auto StripBitCasts = [](Value *V) -> Value * {
+            while (auto *BC = dyn_cast<BitCastInst>(V))
+              V = BC->getOperand(0);
+            return V;
+          };
           // In essence this assert states: the only way two values
           // incoming from the same basic block may be different is by
           // being different bitcasts of the same value.  A cleanup
           // that remains TODO is changing findBaseOrBDV to return an
           // llvm::Value of the correct type (and still remain pure).
           // This will remove the need to add bitcasts.
-          assert(Base->stripPointerCasts() == OldBase->stripPointerCasts() &&
+          assert(StripBitCasts(Base) == StripBitCasts(OldBase) &&
                  "findBaseOrBDV should be pure!");
 #endif
         }
@@ -1359,23 +1367,23 @@ static constexpr Attribute::AttrKind FnAttrsToStrip[] =
 // Create new attribute set containing only attributes which can be transferred
 // from original call to the safepoint.
 static AttributeList legalizeCallAttributes(LLVMContext &Ctx,
-                                            AttributeList AL) {
-  if (AL.isEmpty())
-    return AL;
+                                            AttributeList OrigAL,
+                                            AttributeList StatepointAL) {
+  if (OrigAL.isEmpty())
+    return StatepointAL;
 
   // Remove the readonly, readnone, and statepoint function attributes.
-  AttrBuilder FnAttrs(Ctx, AL.getFnAttrs());
+  AttrBuilder FnAttrs(Ctx, OrigAL.getFnAttrs());
   for (auto Attr : FnAttrsToStrip)
     FnAttrs.removeAttribute(Attr);
 
-  for (Attribute A : AL.getFnAttrs()) {
+  for (Attribute A : OrigAL.getFnAttrs()) {
     if (isStatepointDirectiveAttr(A))
       FnAttrs.removeAttribute(A);
   }
 
   // Just skip parameter and return attributes for now
-  return AttributeList::get(Ctx, AttributeList::FunctionIndex,
-                            AttributeSet::get(Ctx, FnAttrs));
+  return StatepointAL.addFnAttributes(Ctx, FnAttrs);
 }
 
 /// Helper function to place all gc relocates necessary for the given
@@ -1580,8 +1588,8 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
     assert(DeoptLowering.equals("live-through") && "Unsupported value!");
   }
 
-  Value *CallTarget = Call->getCalledOperand();
-  if (Function *F = dyn_cast<Function>(CallTarget)) {
+  FunctionCallee CallTarget(Call->getFunctionType(), Call->getCalledOperand());
+  if (Function *F = dyn_cast<Function>(CallTarget.getCallee())) {
     auto IID = F->getIntrinsicID();
     if (IID == Intrinsic::experimental_deoptimize) {
       // Calls to llvm.experimental.deoptimize are lowered to calls to the
@@ -1599,8 +1607,7 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
       // the same module.  This is fine -- we assume the frontend knew what it
       // was doing when generating this kind of IR.
       CallTarget = F->getParent()
-                       ->getOrInsertFunction("__llvm_deoptimize", FTy)
-                       .getCallee();
+                       ->getOrInsertFunction("__llvm_deoptimize", FTy);
 
       IsDeoptimize = true;
     } else if (IID == Intrinsic::memcpy_element_unordered_atomic ||
@@ -1696,8 +1703,7 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
 
       CallTarget =
           F->getParent()
-              ->getOrInsertFunction(GetFunctionName(IID, ElementSizeCI), FTy)
-              .getCallee();
+              ->getOrInsertFunction(GetFunctionName(IID, ElementSizeCI), FTy);
     }
   }
 
@@ -1715,8 +1721,8 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
     // function attributes.  In case if we can handle this set of attributes -
     // set up function attrs directly on statepoint and return attrs later for
     // gc_result intrinsic.
-    SPCall->setAttributes(
-        legalizeCallAttributes(CI->getContext(), CI->getAttributes()));
+    SPCall->setAttributes(legalizeCallAttributes(
+        CI->getContext(), CI->getAttributes(), SPCall->getAttributes()));
 
     Token = cast<GCStatepointInst>(SPCall);
 
@@ -1742,8 +1748,8 @@ makeStatepointExplicitImpl(CallBase *Call, /* to replace */
     // function attributes.  In case if we can handle this set of attributes -
     // set up function attrs directly on statepoint and return attrs later for
     // gc_result intrinsic.
-    SPInvoke->setAttributes(
-        legalizeCallAttributes(II->getContext(), II->getAttributes()));
+    SPInvoke->setAttributes(legalizeCallAttributes(
+        II->getContext(), II->getAttributes(), SPInvoke->getAttributes()));
 
     Token = cast<GCStatepointInst>(SPInvoke);
 

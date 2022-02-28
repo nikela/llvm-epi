@@ -14572,7 +14572,7 @@ define float @intrinsic_vfmv.f.s_s_f32_nxv2f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f32_nxv2f32
 ; CHECK:       vsetivli zero, 0, e32, m1, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call float @llvm.epi.vfmv.f.s.f32.nxv2f32(
     <vscale x 2 x float> undef)
 
@@ -14587,7 +14587,7 @@ define float @intrinsic_vfmv.f.s_s_f32_nxv4f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f32_nxv4f32
 ; CHECK:       vsetivli zero, 0, e32, m2, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call float @llvm.epi.vfmv.f.s.f32.nxv4f32(
     <vscale x 4 x float> undef)
 
@@ -14602,7 +14602,7 @@ define float @intrinsic_vfmv.f.s_s_f32_nxv8f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f32_nxv8f32
 ; CHECK:       vsetivli zero, 0, e32, m4, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call float @llvm.epi.vfmv.f.s.f32.nxv8f32(
     <vscale x 8 x float> undef)
 
@@ -14617,7 +14617,7 @@ define float @intrinsic_vfmv.f.s_s_f32_nxv16f32() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f32_nxv16f32
 ; CHECK:       vsetivli zero, 0, e32, m8, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call float @llvm.epi.vfmv.f.s.f32.nxv16f32(
     <vscale x 16 x float> undef)
 
@@ -14632,7 +14632,7 @@ define double @intrinsic_vfmv.f.s_s_f64_nxv1f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f64_nxv1f64
 ; CHECK:       vsetivli zero, 0, e64, m1, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call double @llvm.epi.vfmv.f.s.f64.nxv1f64(
     <vscale x 1 x double> undef)
 
@@ -14647,7 +14647,7 @@ define double @intrinsic_vfmv.f.s_s_f64_nxv2f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f64_nxv2f64
 ; CHECK:       vsetivli zero, 0, e64, m2, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call double @llvm.epi.vfmv.f.s.f64.nxv2f64(
     <vscale x 2 x double> undef)
 
@@ -14662,7 +14662,7 @@ define double @intrinsic_vfmv.f.s_s_f64_nxv4f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f64_nxv4f64
 ; CHECK:       vsetivli zero, 0, e64, m4, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call double @llvm.epi.vfmv.f.s.f64.nxv4f64(
     <vscale x 4 x double> undef)
 
@@ -14677,7 +14677,7 @@ define double @intrinsic_vfmv.f.s_s_f64_nxv8f64() nounwind {
 entry:
 ; CHECK-LABEL: intrinsic_vfmv.f.s_s_f64_nxv8f64
 ; CHECK:       vsetivli zero, 0, e64, m8, ta, mu
-; CHECK:       vfmv.f.s ft0, {{v[0-9]+}}
+; CHECK:       vfmv.f.s fa0, {{v[0-9]+}}
   %a = call double @llvm.epi.vfmv.f.s.f64.nxv8f64(
     <vscale x 8 x double> undef)
 

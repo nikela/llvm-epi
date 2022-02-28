@@ -506,9 +506,10 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
   case Intrinsic::vp_inttoptr:
   case Intrinsic::vp_sitofp:
   case Intrinsic::vp_uitofp:
-  case Intrinsic::vp_fptosi:
   case Intrinsic::vp_fptoui:
-    VPFunc = Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
+  case Intrinsic::vp_fptosi:
+    VPFunc =
+        Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
     break;
   case Intrinsic::vp_merge:
   case Intrinsic::vp_select:
@@ -553,6 +554,18 @@ bool VPReductionIntrinsic::isVPReduction(Intrinsic::ID ID) {
     break;
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #define VP_PROPERTY_REDUCTION(STARTPOS, ...) return true;
+#define END_REGISTER_VP_INTRINSIC(VPID) break;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+  return false;
+}
+
+bool VPCastIntrinsic::isVPCast(Intrinsic::ID ID) {
+  switch (ID) {
+  default:
+    break;
+#define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
+#define VP_PROPERTY_CASTOP return true;
 #define END_REGISTER_VP_INTRINSIC(VPID) break;
 #include "llvm/IR/VPIntrinsics.def"
   }

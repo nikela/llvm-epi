@@ -236,6 +236,15 @@ TEST_F(VFABIParserTest, ParseFixedWidthSVE) {
   EXPECT_EQ(VectorName, "_ZGVsM2v_sin");
 }
 
+TEST_F(VFABIParserTest, ParseEPI) {
+  EXPECT_TRUE(invokeParser("_ZGVEMk2v_sin"));
+  EXPECT_EQ(VF, ElementCount::getScalable(2));
+  EXPECT_TRUE(IsMasked());
+  EXPECT_EQ(ISA, VFISAKind::EPI);
+  EXPECT_EQ(ScalarName, "sin");
+  EXPECT_EQ(VectorName, "_ZGVEMk2v_sin");
+}
+
 TEST_F(VFABIParserTest, NotAVectorFunctionABIName) {
   // Vector names should start with `_ZGV`.
   EXPECT_FALSE(invokeParser("ZGVnN2v_sin"));

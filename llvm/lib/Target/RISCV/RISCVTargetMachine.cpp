@@ -34,7 +34,6 @@
 
 using namespace llvm;
 
-
 static cl::opt<bool>
 EnableGEPOpt("riscv-gep-opt", cl::Hidden,
              cl::desc("Enable optimizations on complex GEPs"),
@@ -42,6 +41,11 @@ EnableGEPOpt("riscv-gep-opt", cl::Hidden,
 
 cl::opt<bool> EPIPipeline("epi-pipeline", cl::Hidden,
                           cl::desc("Use EPI pipeline passes"), cl::init(false));
+
+static cl::opt<bool> EnableRedundantCopyElimination(
+    "riscv-enable-copyelim",
+    cl::desc("Enable the redundant copy elimination pass"), cl::init(true),
+    cl::Hidden);
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
@@ -135,7 +139,7 @@ RISCVTargetMachine::getSubtargetImpl(const Function &F) const {
 }
 
 TargetTransformInfo
-RISCVTargetMachine::getTargetTransformInfo(const Function &F) {
+RISCVTargetMachine::getTargetTransformInfo(const Function &F) const {
   return TargetTransformInfo(RISCVTTIImpl(this, F));
 }
 
@@ -169,6 +173,7 @@ public:
   void addPreSched2() override;
   void addMachineSSAOptimization() override;
   void addPreRegAlloc() override;
+  void addPostRegAlloc() override;
 };
 } // namespace
 
@@ -248,4 +253,9 @@ void RISCVPassConfig::addPreRegAlloc() {
   if (TM->getOptLevel() != CodeGenOpt::None)
     addPass(createRISCVMergeBaseOffsetOptPass());
   addPass(createRISCVInsertVSETVLIPass());
+}
+
+void RISCVPassConfig::addPostRegAlloc() {
+  if (TM->getOptLevel() != CodeGenOpt::None && EnableRedundantCopyElimination)
+    addPass(createRISCVRedundantCopyEliminationPass());
 }

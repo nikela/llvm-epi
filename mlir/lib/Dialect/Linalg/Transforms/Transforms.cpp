@@ -19,6 +19,7 @@
 #include "mlir/Dialect/Linalg/Utils/Utils.h"
 #include "mlir/Dialect/SCF/Transforms.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Tensor/IR/TensorTilingInterfaceImpl.h"
 #include "mlir/Dialect/Utils/StaticValueUtils.h"
 #include "mlir/Dialect/Utils/StructuredOpsUtils.h"
 #include "mlir/Dialect/Vector/IR/VectorOps.h"
@@ -187,7 +188,7 @@ static LogicalResult padOperandToSmallestStaticBoundingBox(
     return failure(hasDynamicShape);
 
   // Compute the dropped dimensions if `sliceOp` is ranke-reducing.
-  llvm::SmallDenseSet<unsigned> droppedDims = sliceOp.getDroppedDims();
+  llvm::SmallBitVector droppedDims = sliceOp.getDroppedDims();
 
   // Upper bound the `sliceOp` sizes to obtain a static bounding box.
   SmallVector<int64_t> staticSizes;
@@ -195,7 +196,7 @@ static LogicalResult padOperandToSmallestStaticBoundingBox(
   auto shapedOp = cast<OffsetSizeAndStrideOpInterface>(sliceOp.getOperation());
   for (const auto &en : enumerate(shapedOp.getMixedSizes())) {
     // Skip dropped dimensions.
-    if (droppedDims.contains(en.index()))
+    if (droppedDims.test(en.index()))
       continue;
     // If the size is an attribute add it directly to `staticSizes`.
     if (en.value().is<Attribute>()) {
@@ -592,16 +593,17 @@ LogicalResult mlir::linalg::LinalgTileAndFuseTensorOpsPattern::matchAndRewrite(
   SmallVector<int64_t> rootTileSizes(options.tileSizes.begin(),
                                      options.tileSizes.begin() +
                                          rootOp.getNumLoops());
-  if (llvm::all_of(rootTileSizes, [](int64_t ts) { return ts == 0; })) {
-    return rewriter.notifyMatchFailure(
-        op, "all tile sizes are zero, nothing to do");
-  }
   SmallVector<int64_t> rootInterchange =
       options.tileInterchange.empty()
           ? llvm::to_vector<6>(llvm::seq<int64_t>(0, rootOp.getNumLoops()))
           : SmallVector<int64_t>(options.tileInterchange.begin(),
                                  options.tileInterchange.begin() +
                                      rootOp.getNumLoops());
+
+  // Check `rootTileSizes` contains non-zero tile sizes.
+  if (llvm::count(rootTileSizes, 0) == static_cast<long>(rootTileSizes.size()))
+    return rewriter.notifyMatchFailure(
+        op, "expect at least one non-zero tile size");
 
   // Check `rootInterchange` is a permutation of the `rootOp` loop dimensions.
   // It has to be a permutation since the tiling cannot tile the same loop
@@ -611,8 +613,9 @@ LogicalResult mlir::linalg::LinalgTileAndFuseTensorOpsPattern::matchAndRewrite(
         op, "expect the tile interchange permutes the root loops");
 
   // Tile `rootOp` and fuse its producers.
-  FailureOr<TileLoopNest> tileLoopNest = tileConsumerAndFuseProducers(
-      rewriter, rootOp, rootTileSizes, rootInterchange);
+  FailureOr<TileLoopNest> tileLoopNest =
+      tileConsumerAndFuseProducers(rewriter, rootOp, rootTileSizes,
+                                   rootInterchange, options.tileDistribution);
   if (failed(tileLoopNest))
     return rewriter.notifyMatchFailure(
         op, "tileConsumerAndFuseProducers failed unexpectedly");
@@ -623,7 +626,7 @@ LogicalResult mlir::linalg::LinalgTileAndFuseTensorOpsPattern::matchAndRewrite(
   // Apply the filter if specified.
   for (LinalgOp linalgOp : tileLoopNest->getAllTiledAndFusedOps())
     filter.replaceLinalgTransformationFilter(rewriter, linalgOp);
-  return failure();
+  return success();
 }
 
 /// Linalg generic interchange pattern.
@@ -910,23 +913,26 @@ GeneralizePadOpPattern::matchAndRewrite(tensor::PadOp padOp,
 
 LogicalResult ExtractSliceOfPadTensorSwapPattern::matchAndRewrite(
     tensor::ExtractSliceOp sliceOp, PatternRewriter &rewriter) const {
-  auto padOp = sliceOp.source().getDefiningOp<tensor::PadOp>();
-  if (!padOp)
-    return failure();
-  // Only unit stride supported.
   if (!sliceOp.hasUnitStride())
     return failure();
 
-  TilingInterface tilingInterface =
-      dyn_cast<TilingInterface>(padOp.getOperation());
+  auto padOp = sliceOp.source().getDefiningOp<tensor::PadOp>();
+  if (!padOp)
+    return failure();
+
+  bool zeroSliceGuard = true;
+  if (controlFn) {
+    if (Optional<bool> control = controlFn(sliceOp))
+      zeroSliceGuard = control.getValue();
+    else
+      return failure();
+  }
+
   Operation *tiledPadOp =
-      tilingInterface
-          .getTiledImplementation(
-              rewriter, /*dest=*/ValueRange{}, sliceOp.getMixedOffsets(),
-              sliceOp.getMixedSizes(), /*tileDestOperands=*/false)
-          .front();
+      tensor::bubbleUpPadSlice(rewriter, padOp, sliceOp.getMixedOffsets(),
+                               sliceOp.getMixedSizes(), zeroSliceGuard);
   // All shapes are static and the data source is actually used. Rewrite into
-  // pad_tensor(subtensor(x)).
+  // pad(extract_slice(x)).
   rewriter.replaceOp(sliceOp, tiledPadOp->getResults());
   return success();
 }

@@ -145,9 +145,6 @@ public:
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
   InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
-  InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
-                                 ArrayRef<int> Mask, int Index,
-                                 VectorType *SubTp);
   InstructionCost getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                                    ArrayRef<Type *> Tys);
   InstructionCost getScalarizationOverhead(VectorType *InTy,
@@ -203,6 +200,11 @@ public:
   unsigned getMinVectorRegisterBitWidth() const {
     return ST->useRVVForFixedLengthVectors() ? 16 : 0;
   }
+
+  InstructionCost getSpliceCost(VectorType *Tp, int Index);
+  InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
+                                 ArrayRef<int> Mask, int Index,
+                                 VectorType *SubTp);
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,

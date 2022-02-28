@@ -909,6 +909,12 @@ let IntrProperties = [IntrInaccessibleMemOnly, IntrWillReturn] in {
 }
 // FIXME: Consider maybe adding intrinsics for sitofp, uitofp.
 
+
+// Truncate a floating point number with a specific rounding mode
+def int_fptrunc_round : DefaultAttrsIntrinsic<[ llvm_anyfloat_ty ],
+                                              [ llvm_anyfloat_ty, llvm_metadata_ty ],
+                                              [ IntrNoMem, IntrWillReturn ]>;
+
 //===------------------------- Expect Intrinsics --------------------------===//
 //
 def int_expect : DefaultAttrsIntrinsic<[llvm_anyint_ty],
@@ -1436,20 +1442,6 @@ def int_experimental_vp_strided_load  : DefaultAttrsIntrinsic<[llvm_anyvector_ty
 // standard fp-math intrinsics.
 // Note: rounding mode and exception control is planned to be integrated using
 // operand bundles. For now we assume the default environment for both.
-def int_vp_fneg : Intrinsic<[ llvm_anyvector_ty ],
-                            [ LLVMMatchType<0>,
-                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty],
-                            [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ]>;
-
-def int_vp_fma : Intrinsic<[ llvm_anyvector_ty ],
-                           [ LLVMMatchType<0>,
-                             LLVMMatchType<0>,
-                             LLVMMatchType<0>,
-                             LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                             llvm_i32_ty ],
-                           [ IntrNoMem, IntrNoSync, IntrWillReturn
-                             /*, Mask<5>, VectorLength<6>*/ ]>;
 
 // Comparison
 // TODO add signalling fcmp
@@ -1503,11 +1495,6 @@ def int_vp_inttoptr : Intrinsic<[ llvm_anyvector_ty ],
 }
 
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<2>, VectorLength<3>*/ ] in {
-  def int_vp_fptosi : Intrinsic<[ llvm_anyvector_ty ],
-                                [ llvm_anyvector_ty,
-                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                                  llvm_i32_ty ]>;
-
   def int_vp_fptoui : Intrinsic<[ llvm_anyvector_ty ],
                                 [ llvm_anyvector_ty,
                                   LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
@@ -1639,7 +1626,26 @@ let IntrProperties =
                                 LLVMMatchType<0>,
                                 LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                 llvm_i32_ty]>;
+
+  def int_vp_fneg : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
+
+  def int_vp_fma : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                              [ LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMMatchType<0>,
+                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                llvm_i32_ty]>;
 }
+
+// Casts.
+def int_vp_fptosi : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
+                            [ llvm_anyvector_ty,
+                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                              llvm_i32_ty]>;
+
 // Shuffles.
 let IntrProperties =
     [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {

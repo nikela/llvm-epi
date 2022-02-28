@@ -10,6 +10,8 @@
 #ifndef _LIBCPP___FILESYSTEM_PATH_H
 #define _LIBCPP___FILESYSTEM_PATH_H
 
+#include <__algorithm/replace.h>
+#include <__algorithm/replace_copy.h>
 #include <__availability>
 #include <__config>
 #include <__iterator/back_insert_iterator.h>
@@ -22,6 +24,11 @@
 #if !defined(_LIBCPP_HAS_NO_LOCALIZATION)
 # include <iomanip> // for quoted
 # include <locale>
+#endif
+
+#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+#  pragma GCC system_header
+#  pragma clang include_instead(<filesystem>)
 #endif
 
 #ifndef _LIBCPP_CXX03_LANG

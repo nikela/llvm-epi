@@ -1,4 +1,5 @@
-// RUN: %clang --target=riscv64-unknown-linux-gnu -emit-llvm -S -o- %s | \
+// RUN: %clang --target=riscv64-unknown-linux-gnu -fno-PIC \
+// RUN:        -emit-llvm -S -o- %s | \
 // RUN:     FileCheck %s
 
 // CHECK: @x = external thread_local(localexec) global i32, align 4

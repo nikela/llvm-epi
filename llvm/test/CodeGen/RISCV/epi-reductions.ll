@@ -216,8 +216,7 @@ define float @red_nxv2f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-NEXT:    vfmv.f.s ft2, v8
 ; CHECK-NEXT:    fadd.s ft0, ft1, ft0
 ; CHECK-NEXT:    fadd.s ft0, ft0, ft3
-; CHECK-NEXT:    fadd.s ft0, ft0, ft2
-; CHECK-NEXT:    fmv.x.w a0, ft0
+; CHECK-NEXT:    fadd.s fa0, ft0, ft2
 ; CHECK-NEXT:    ret
   %fadd = call float @llvm.vector.reduce.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a)
   %unord_fadd = call reassoc float @llvm.vector.reduce.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a) ; unordered reduction
@@ -266,8 +265,7 @@ define double @red_nxv1f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK-NEXT:    vfmv.f.s ft2, v8
 ; CHECK-NEXT:    fadd.d ft0, ft1, ft0
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft3
-; CHECK-NEXT:    fadd.d ft0, ft0, ft2
-; CHECK-NEXT:    fmv.x.d a0, ft0
+; CHECK-NEXT:    fadd.d fa0, ft0, ft2
 ; CHECK-NEXT:    ret
   %fadd = call double @llvm.vector.reduce.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a)
   %unord_fadd = call reassoc double @llvm.vector.reduce.fadd.f64.nxv1f64(double 4.0, <vscale x 1 x double> %a) ; unordered reduction
@@ -316,8 +314,7 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK-NEXT:    vfmv.f.s ft2, v8
 ; CHECK-NEXT:    fadd.d ft0, ft1, ft0
 ; CHECK-NEXT:    fadd.d ft0, ft0, ft3
-; CHECK-NEXT:    fadd.d ft0, ft0, ft2
-; CHECK-NEXT:    fmv.x.d a0, ft0
+; CHECK-NEXT:    fadd.d fa0, ft0, ft2
 ; CHECK-NEXT:    ret
   %fadd = call double @llvm.vector.reduce.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a)
   %unord_fadd = call reassoc double @llvm.vector.reduce.fadd.f64.nxv2f64(double 4.0, <vscale x 2 x double> %a) ; unordered reduction

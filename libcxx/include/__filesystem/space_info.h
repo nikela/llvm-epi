@@ -14,6 +14,11 @@
 #include <__config>
 #include <cstdint>
 
+#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+#  pragma GCC system_header
+#  pragma clang include_instead(<filesystem>)
+#endif
+
 #ifndef _LIBCPP_CXX03_LANG
 
 _LIBCPP_BEGIN_NAMESPACE_FILESYSTEM

@@ -11,12 +11,13 @@
 
 #include <__algorithm/unwrap_iter.h>
 #include <__config>
+#include <__utility/move.h>
 #include <cstring>
 #include <type_traits>
-#include <utility>
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#pragma GCC system_header
+#  pragma GCC system_header
+#  pragma clang include_instead(<algorithm>)
 #endif
 
 _LIBCPP_BEGIN_NAMESPACE_STD

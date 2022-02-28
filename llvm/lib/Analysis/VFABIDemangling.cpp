@@ -66,8 +66,9 @@ ParseRet tryParseMask(StringRef &MangledName, bool &IsMasked) {
 
 /// Extract the `<vlen>` information from the mangled string, and
 /// sets `VF` accordingly. A `<vlen> == "x"` token is interpreted as a scalable
-/// vector length. On success, the `<vlen>` token is removed from
-/// the input string `ParseString`.
+/// vector length. A `<vlen> == "k"` token followed by a number N is interpreted
+/// as a scalable vector length with VF == N. On success, the `<vlen>` token is
+/// removed from the input string `ParseString`.
 ///
 ParseRet tryParseVLEN(StringRef &ParseString, unsigned &VF, bool &IsScalable) {
   if (ParseString.consume_front("x")) {
@@ -79,6 +80,8 @@ ParseRet tryParseVLEN(StringRef &ParseString, unsigned &VF, bool &IsScalable) {
     return ParseRet::OK;
   }
 
+  IsScalable = ParseString.consume_front("k");
+
   if (ParseString.consumeInteger(10, VF))
     return ParseRet::Error;
 
@@ -86,7 +89,6 @@ ParseRet tryParseVLEN(StringRef &ParseString, unsigned &VF, bool &IsScalable) {
   if (VF == 0)
     return ParseRet::Error;
 
-  IsScalable = false;
   return ParseRet::OK;
 }
 
@@ -429,14 +431,14 @@ Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
     assert(Parameters.back().ParamKind == VFParamKind::GlobalPredicate &&
            "The global predicate must be the last parameter");
 
-  // Adjust the VF for scalable signatures. The EC.Min is not encoded
-  // in the name of the function, but it is encoded in the IR
-  // signature of the function. We need to extract this information
-  // because it is needed by the loop vectorizer, which reasons in
+  // Adjust the VF for signatures defined as scalable through the use of "x" for
+  // <vlen>. The EC.Min is not encoded in the name of the function, but it is
+  // encoded in the IR signature of the function. We need to extract this
+  // information because it is needed by the loop vectorizer, which reasons in
   // terms of VectorizationFactor or ElementCount. In particular, we
   // need to make sure that the VF field of the VFShape class is never
   // set to 0.
-  if (IsScalable) {
+  if (IsScalable && !VF) {
     const Function *F = M.getFunction(VectorName);
     // The declaration of the function must be present in the module
     // to be able to retrieve its signature.

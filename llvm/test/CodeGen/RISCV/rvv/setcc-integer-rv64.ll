@@ -296,7 +296,7 @@ define <vscale x 8 x i1> @icmp_uge_vi_nxv8i8_6(<vscale x 8 x i8> %va, i64 %vl) {
 ; CHECK-NEXT:    vsetvli a0, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmsleu.vv v0, v9, v8
 ; CHECK-NEXT:    ret
-  %splat = call <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(i8 0, i64 %vl)
+  %splat = call <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(<vscale x 8 x i8> undef, i8 0, i64 %vl)
   %vc = icmp uge <vscale x 8 x i8> %va, %splat
   ret <vscale x 8 x i1> %vc
 }
@@ -409,7 +409,7 @@ define <vscale x 8 x i1> @icmp_ult_vi_nxv8i8_4(<vscale x 8 x i8> %va) {
   ret <vscale x 8 x i1> %vc
 }
 
-declare <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(i8, i64);
+declare <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(<vscale x 8 x i8>, i8, i64);
 
 ; Test that we don't optimize ult x, 0 -> ule x, -1
 define <vscale x 8 x i1> @icmp_ult_vi_nxv8i8_5(<vscale x 8 x i8> %va, i64 %vl) {
@@ -418,7 +418,7 @@ define <vscale x 8 x i1> @icmp_ult_vi_nxv8i8_5(<vscale x 8 x i8> %va, i64 %vl) {
 ; CHECK-NEXT:    vsetvli a0, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmsltu.vx v0, v8, zero
 ; CHECK-NEXT:    ret
-  %splat = call <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(i8 0, i64 %vl)
+  %splat = call <vscale x 8 x i8> @llvm.riscv.vmv.v.x.nxv8i8(<vscale x 8 x i8> undef, i8 0, i64 %vl)
   %vc = icmp ult <vscale x 8 x i8> %va, %splat
   ret <vscale x 8 x i1> %vc
 }
@@ -2946,14 +2946,14 @@ define <vscale x 8 x i1> @icmp_sle_vi_nxv8i64_0(<vscale x 8 x i64> %va) {
 define <vscale x 16 x i1> @icmp_eq_vi_nx16i64(<vscale x 16 x i64> %va) {
 ; CHECK-LABEL: icmp_eq_vi_nx16i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
-; CHECK-NEXT:    vmseq.vi v16, v16, 0
-; CHECK-NEXT:    vmseq.vi v0, v8, 0
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    add a1, a0, a0
+; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vmseq.vi v24, v16, 0
+; CHECK-NEXT:    vmseq.vi v0, v8, 0
 ; CHECK-NEXT:    vsetvli zero, a1, e8, mf4, tu, mu
-; CHECK-NEXT:    vslideup.vx v0, v16, a0
+; CHECK-NEXT:    vslideup.vx v0, v24, a0
 ; CHECK-NEXT:    ret
   %vc = icmp eq <vscale x 16 x i64> %va, zeroinitializer
   ret <vscale x 16 x i1> %vc

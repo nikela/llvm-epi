@@ -39,13 +39,13 @@ void RISCVTargetStreamer::emitIntTextAttribute(unsigned Attribute,
                                                unsigned IntValue,
                                                StringRef StringValue) {}
 
+
 void RISCVTargetStreamer::emitTargetAttributes(const MCSubtargetInfo &STI) {
   if (STI.hasFeature(RISCV::FeatureRV32E))
     emitAttribute(RISCVAttrs::STACK_ALIGN, RISCVAttrs::ALIGN_4);
   else
     emitAttribute(RISCVAttrs::STACK_ALIGN, RISCVAttrs::ALIGN_16);
 
-  unsigned XLen = STI.hasFeature(RISCV::Feature64Bit) ? 64 : 32;
   std::vector<std::string> FeatureVector;
   auto FeatureBits = STI.getFeatureBits();
   if (FeatureBits.test(RISCV::FeatureEPI)) {
@@ -68,13 +68,11 @@ void RISCVTargetStreamer::emitTargetAttributes(const MCSubtargetInfo &STI) {
     FeatureBits.reset(RISCV::FeatureStdExtZve64d);
     FeatureBits.reset(RISCV::FeatureEPI);
   }
-  RISCVFeatures::toFeatureVector(FeatureVector, FeatureBits);
 
-  auto ParseResult = llvm::RISCVISAInfo::parseFeatures(XLen, FeatureVector);
+  auto ParseResult = RISCVFeatures::parseFeatureBits(
+      STI.hasFeature(RISCV::Feature64Bit), FeatureBits);
   if (!ParseResult) {
-    /* Assume any error about features should handled earlier.  */
-    consumeError(ParseResult.takeError());
-    llvm_unreachable("Parsing feature error when emitTargetAttributes?");
+    report_fatal_error(ParseResult.takeError());
   } else {
     auto &ISAInfo = *ParseResult;
     emitTextAttribute(RISCVAttrs::ARCH, ISAInfo->toString());

@@ -693,11 +693,9 @@ Error RISCVISAInfo::checkDependency() {
   bool HasE = Exts.count("e") != 0;
   bool HasD = Exts.count("d") != 0;
   bool HasF = Exts.count("f") != 0;
-  bool HasZve32x = Exts.count("zve32x") != 0;
+  bool HasVector = Exts.count("zve32x") != 0;
   bool HasZve32f = Exts.count("zve32f") != 0;
   bool HasZve64d = Exts.count("zve64d") != 0;
-  bool HasV = Exts.count("v") != 0;
-  bool HasVector = HasZve32x || HasV;
   bool HasZvl = MinVLen != 0;
 
   if (HasE && !IsRv32)
@@ -737,7 +735,7 @@ Error RISCVISAInfo::checkDependency() {
   return Error::success();
 }
 
-static const char *ImpliedExtsV[] = {"zvl128b", "f", "d"};
+static const char *ImpliedExtsV[] = {"zvl128b", "zve64d", "f", "d"};
 static const char *ImpliedExtsZepi[] = {"zvl64b", "zve64d", "f", "d"};
 static const char *ImpliedExtsZfhmin[] = {"f"};
 static const char *ImpliedExtsZfh[] = {"f"};
@@ -871,11 +869,6 @@ void RISCVISAInfo::updateMaxELen() {
       ExtName.getAsInteger(10, ZveELen);
       MaxELen = std::max(MaxELen, ZveELen);
     }
-    if (ExtName == "v") {
-      MaxELenFp = 64;
-      MaxELen = 64;
-      return;
-    }
   }
 }
 
@@ -920,4 +913,19 @@ RISCVISAInfo::postProcessAndChecking(std::unique_ptr<RISCVISAInfo> &&ISAInfo) {
   if (Error Result = ISAInfo->checkDependency())
     return std::move(Result);
   return std::move(ISAInfo);
+}
+
+StringRef RISCVISAInfo::computeDefaultABI() const {
+  if (XLen == 32) {
+    if (hasExtension("d"))
+      return "ilp32d";
+    if (hasExtension("e"))
+      return "ilp32e";
+    return "ilp32";
+  } else if (XLen == 64) {
+    if (hasExtension("d"))
+      return "lp64d";
+    return "lp64";
+  }
+  llvm_unreachable("Invalid XLEN");
 }

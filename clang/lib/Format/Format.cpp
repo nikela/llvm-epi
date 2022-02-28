@@ -18,6 +18,7 @@
 #include "ContinuationIndenter.h"
 #include "DefinitionBlockSeparator.h"
 #include "FormatInternal.h"
+#include "FormatToken.h"
 #include "FormatTokenLexer.h"
 #include "NamespaceEndCommentsFixer.h"
 #include "QualifierAlignmentFixer.h"
@@ -257,6 +258,21 @@ struct ScalarEnumerationTraits<
 };
 
 template <>
+struct ScalarEnumerationTraits<
+    FormatStyle::BreakBeforeConceptDeclarationsStyle> {
+  static void
+  enumeration(IO &IO, FormatStyle::BreakBeforeConceptDeclarationsStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::BBCDS_Never);
+    IO.enumCase(Value, "Allowed", FormatStyle::BBCDS_Allowed);
+    IO.enumCase(Value, "Always", FormatStyle::BBCDS_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "true", FormatStyle::BBCDS_Always);
+    IO.enumCase(Value, "false", FormatStyle::BBCDS_Allowed);
+  }
+};
+
+template <>
 struct ScalarEnumerationTraits<FormatStyle::BreakConstructorInitializersStyle> {
   static void
   enumeration(IO &IO, FormatStyle::BreakConstructorInitializersStyle &Value) {
@@ -463,6 +479,17 @@ struct ScalarEnumerationTraits<FormatStyle::ReferenceAlignmentStyle> {
 };
 
 template <>
+struct ScalarEnumerationTraits<FormatStyle::RequiresClausePositionStyle> {
+  static void enumeration(IO &IO,
+                          FormatStyle::RequiresClausePositionStyle &Value) {
+    IO.enumCase(Value, "OwnLine", FormatStyle::RCPS_OwnLine);
+    IO.enumCase(Value, "WithPreceding", FormatStyle::RCPS_WithPreceding);
+    IO.enumCase(Value, "WithFollowing", FormatStyle::RCPS_WithFollowing);
+    IO.enumCase(Value, "SingleLine", FormatStyle::RCPS_SingleLine);
+  }
+};
+
+template <>
 struct ScalarEnumerationTraits<FormatStyle::SpaceBeforeParensStyle> {
   static void enumeration(IO &IO, FormatStyle::SpaceBeforeParensStyle &Value) {
     IO.enumCase(Value, "Never", FormatStyle::SBPO_Never);
@@ -564,6 +591,7 @@ template <> struct MappingTraits<FormatStyle> {
       IO.mapOptional("DerivePointerBinding", Style.DerivePointerAlignment);
       IO.mapOptional("IndentFunctionDeclarationAfterType",
                      Style.IndentWrappedFunctionNames);
+      IO.mapOptional("IndentRequires", Style.IndentRequiresClause);
       IO.mapOptional("PointerBindsToType", Style.PointerAlignment);
       IO.mapOptional("SpaceAfterControlStatementKeyword",
                      Style.SpaceBeforeParens);
@@ -736,10 +764,11 @@ template <> struct MappingTraits<FormatStyle> {
     IO.mapOptional("IndentGotoLabels", Style.IndentGotoLabels);
     IO.mapOptional("IndentPPDirectives", Style.IndentPPDirectives);
     IO.mapOptional("IndentExternBlock", Style.IndentExternBlock);
-    IO.mapOptional("IndentRequires", Style.IndentRequires);
+    IO.mapOptional("IndentRequiresClause", Style.IndentRequiresClause);
     IO.mapOptional("IndentWidth", Style.IndentWidth);
     IO.mapOptional("IndentWrappedFunctionNames",
                    Style.IndentWrappedFunctionNames);
+    IO.mapOptional("InsertBraces", Style.InsertBraces);
     IO.mapOptional("InsertTrailingCommas", Style.InsertTrailingCommas);
     IO.mapOptional("JavaImportGroups", Style.JavaImportGroups);
     IO.mapOptional("JavaScriptQuotes", Style.JavaScriptQuotes);
@@ -781,6 +810,7 @@ template <> struct MappingTraits<FormatStyle> {
     IO.mapOptional("ReferenceAlignment", Style.ReferenceAlignment);
     IO.mapOptional("ReflowComments", Style.ReflowComments);
     IO.mapOptional("RemoveBracesLLVM", Style.RemoveBracesLLVM);
+    IO.mapOptional("RequiresClausePosition", Style.RequiresClausePosition);
     IO.mapOptional("SeparateDefinitionBlocks", Style.SeparateDefinitionBlocks);
     IO.mapOptional("ShortNamespaceLines", Style.ShortNamespaceLines);
     IO.mapOptional("SortIncludes", Style.SortIncludes);
@@ -869,6 +899,9 @@ template <> struct MappingTraits<FormatStyle::SpaceBeforeParensCustom> {
                    Spacing.AfterFunctionDeclarationName);
     IO.mapOptional("AfterIfMacros", Spacing.AfterIfMacros);
     IO.mapOptional("AfterOverloadedOperator", Spacing.AfterOverloadedOperator);
+    IO.mapOptional("AfterRequiresInClause", Spacing.AfterRequiresInClause);
+    IO.mapOptional("AfterRequiresInExpression",
+                   Spacing.AfterRequiresInExpression);
     IO.mapOptional("BeforeNonEmptyParentheses",
                    Spacing.BeforeNonEmptyParentheses);
   }
@@ -958,11 +991,11 @@ std::string ParseErrorCategory::message(int EV) const {
   case ParseError::InvalidQualifierSpecified:
     return "Invalid qualifier specified in QualifierOrder";
   case ParseError::DuplicateQualifierSpecified:
-    return "Duplicate qualifier specified in QualfierOrder";
+    return "Duplicate qualifier specified in QualifierOrder";
   case ParseError::MissingQualifierType:
-    return "Missing type in QualfierOrder";
+    return "Missing type in QualifierOrder";
   case ParseError::MissingQualifierOrder:
-    return "Missing QualfierOrder";
+    return "Missing QualifierOrder";
   }
   llvm_unreachable("unexpected parse error");
 }
@@ -1129,7 +1162,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.BinPackArguments = true;
   LLVMStyle.BinPackParameters = true;
   LLVMStyle.BreakBeforeBinaryOperators = FormatStyle::BOS_None;
-  LLVMStyle.BreakBeforeConceptDeclarations = true;
+  LLVMStyle.BreakBeforeConceptDeclarations = FormatStyle::BBCDS_Always;
   LLVMStyle.BreakBeforeTernaryOperators = true;
   LLVMStyle.BreakBeforeBraces = FormatStyle::BS_Attach;
   LLVMStyle.BraceWrapping = {/*AfterCaseLabel=*/false,
@@ -1187,10 +1220,11 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.IndentCaseBlocks = false;
   LLVMStyle.IndentGotoLabels = true;
   LLVMStyle.IndentPPDirectives = FormatStyle::PPDIS_None;
-  LLVMStyle.IndentRequires = false;
+  LLVMStyle.IndentRequiresClause = true;
   LLVMStyle.IndentWrappedFunctionNames = false;
   LLVMStyle.IndentWidth = 2;
   LLVMStyle.PPIndentWidth = -1;
+  LLVMStyle.InsertBraces = false;
   LLVMStyle.InsertTrailingCommas = FormatStyle::TCS_None;
   LLVMStyle.JavaScriptQuotes = FormatStyle::JSQS_Leave;
   LLVMStyle.JavaScriptWrapImports = true;
@@ -1206,6 +1240,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.ObjCSpaceBeforeProtocolList = true;
   LLVMStyle.PointerAlignment = FormatStyle::PAS_Right;
   LLVMStyle.ReferenceAlignment = FormatStyle::RAS_Pointer;
+  LLVMStyle.RequiresClausePosition = FormatStyle::RCPS_OwnLine;
   LLVMStyle.SeparateDefinitionBlocks = FormatStyle::SDS_Leave;
   LLVMStyle.ShortNamespaceLines = 1;
   LLVMStyle.SpacesBeforeTrailingComments = 1;
@@ -1229,6 +1264,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.SpaceBeforeCtorInitializerColon = true;
   LLVMStyle.SpaceBeforeInheritanceColon = true;
   LLVMStyle.SpaceBeforeParens = FormatStyle::SBPO_ControlStatements;
+  LLVMStyle.SpaceBeforeParensOptions = {};
   LLVMStyle.SpaceBeforeParensOptions.AfterControlStatements = true;
   LLVMStyle.SpaceBeforeParensOptions.AfterForeachMacros = true;
   LLVMStyle.SpaceBeforeParensOptions.AfterIfMacros = true;
@@ -1616,7 +1652,8 @@ ParseError validateQualifierOrder(FormatStyle *Style) {
     if (token == tok::identifier)
       return ParseError::InvalidQualifierSpecified;
   }
-  // Ensure the list is unqiue (no duplicates).
+
+  // Ensure the list is unique (no duplicates).
   std::set<std::string> UniqueQualifiers(Style->QualifierOrder.begin(),
                                          Style->QualifierOrder.end());
   if (Style->QualifierOrder.size() != UniqueQualifiers.size()) {
@@ -1626,10 +1663,12 @@ ParseError validateQualifierOrder(FormatStyle *Style) {
     return ParseError::DuplicateQualifierSpecified;
   }
 
+  // Ensure the list has 'type' in it.
   auto type = std::find(Style->QualifierOrder.begin(),
                         Style->QualifierOrder.end(), "type");
   if (type == Style->QualifierOrder.end())
     return ParseError::MissingQualifierType;
+
   return ParseError::Success;
 }
 
@@ -1779,6 +1818,48 @@ private:
         const auto Range =
             CharSourceRange::getCharRange(Start, Token->Tok.getEndLoc());
         cantFail(Result.add(tooling::Replacement(SourceMgr, Range, "")));
+      }
+    }
+  }
+};
+
+class BracesInserter : public TokenAnalyzer {
+public:
+  BracesInserter(const Environment &Env, const FormatStyle &Style)
+      : TokenAnalyzer(Env, Style) {}
+
+  std::pair<tooling::Replacements, unsigned>
+  analyze(TokenAnnotator &Annotator,
+          SmallVectorImpl<AnnotatedLine *> &AnnotatedLines,
+          FormatTokenLexer &Tokens) override {
+    AffectedRangeMgr.computeAffectedLines(AnnotatedLines);
+    tooling::Replacements Result;
+    insertBraces(AnnotatedLines, Result);
+    return {Result, 0};
+  }
+
+private:
+  void insertBraces(SmallVectorImpl<AnnotatedLine *> &Lines,
+                    tooling::Replacements &Result) {
+    const auto &SourceMgr = Env.getSourceManager();
+    for (AnnotatedLine *Line : Lines) {
+      insertBraces(Line->Children, Result);
+      if (!Line->Affected)
+        continue;
+      for (FormatToken *Token = Line->First; Token && !Token->Finalized;
+           Token = Token->Next) {
+        if (Token->BraceCount == 0)
+          continue;
+        std::string Brace;
+        if (Token->BraceCount < 0) {
+          assert(Token->BraceCount == -1);
+          Brace = '{';
+        } else {
+          Brace = '\n' + std::string(Token->BraceCount, '}');
+        }
+        Token->BraceCount = 0;
+        const auto Start = Token->Tok.getEndLoc();
+        cantFail(Result.add(tooling::Replacement(SourceMgr, Start, 0, Brace)));
       }
     }
   }
@@ -1940,6 +2021,14 @@ private:
       for (FormatToken *Tok = Line->First; Tok && Tok->Next; Tok = Tok->Next) {
         if (!Tok->is(TT_PointerOrReference))
           continue;
+        // Don't treat space in `void foo() &&` as evidence.
+        if (const auto *Prev = Tok->getPreviousNonComment()) {
+          if (Prev->is(tok::r_paren) && Prev->MatchingParen)
+            if (const auto *Func = Prev->MatchingParen->getPreviousNonComment())
+              if (Func->isOneOf(TT_FunctionDeclarationName, TT_StartOfName,
+                                TT_OverloadedOperator))
+                continue;
+        }
         bool SpaceBefore = Tok->hasWhitespaceBefore();
         bool SpaceAfter = Tok->Next->hasWhitespaceBefore();
         if (SpaceBefore && !SpaceAfter)
@@ -3039,6 +3128,15 @@ reformat(const FormatStyle &Style, StringRef Code,
   FormatStyle Expanded = Style;
   expandPresetsBraceWrapping(Expanded);
   expandPresetsSpaceBeforeParens(Expanded);
+  switch (Expanded.RequiresClausePosition) {
+  case FormatStyle::RCPS_SingleLine:
+  case FormatStyle::RCPS_WithPreceding:
+    Expanded.IndentRequiresClause = false;
+    break;
+  default:
+    break;
+  }
+
   if (Expanded.DisableFormat)
     return {tooling::Replacements(), 0};
   if (isLikelyXml(Code))
@@ -3078,6 +3176,11 @@ reformat(const FormatStyle &Style, StringRef Code,
           .process();
     });
   }
+
+  if (Style.isCpp() && Style.InsertBraces)
+    Passes.emplace_back([&](const Environment &Env) {
+      return BracesInserter(Env, Expanded).process();
+    });
 
   if (Style.isCpp() && Style.RemoveBracesLLVM)
     Passes.emplace_back([&](const Environment &Env) {
