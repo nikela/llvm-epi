@@ -41,6 +41,7 @@
 #include "llvm/Analysis/VectorUtils.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DebugLoc.h"
+#include "llvm/IR/FMF.h"
 #include "llvm/IR/ModuleSlotTracker.h"
 #include "llvm/IR/Type.h"
 #include "llvm/Support/InstructionCost.h"
