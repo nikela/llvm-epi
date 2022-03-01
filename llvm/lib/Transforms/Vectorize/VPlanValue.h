@@ -342,6 +342,7 @@ public:
     VPPredicatedWidenSC,
     VPReductionSC,
     VPReplicateSC,
+    VPScalarIVStepsSC,
     VPWidenCallSC,
     VPWidenEVLSC,
     VPWidenEVLMaskSC,
