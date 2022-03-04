@@ -392,17 +392,6 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   return LegalizationCost + /*Cost of horizontal reduction*/ 2;
 }
 
-InstructionCost
-RISCVTTIImpl::getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
-                                    unsigned AddressSpace,
-                                    TTI::TargetCostKind CostKind) {
-  if (!isa<ScalableVectorType>(Src))
-    return BaseT::getMaskedMemoryOpCost(Opcode, Src, Alignment, AddressSpace,
-                                        CostKind);
-
-  return TLI->getTypeLegalizationCost(DL, Src).first;
-}
-
 TypeSize
 RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
   unsigned LMUL = PowerOf2Floor(
