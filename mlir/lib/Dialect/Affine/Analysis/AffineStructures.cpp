@@ -17,7 +17,6 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Affine/IR/AffineValueMap.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
-#include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/AffineExprVisitor.h"
 #include "mlir/IR/IntegerSet.h"
 #include "mlir/Support/LLVM.h"
@@ -231,6 +230,25 @@ FlatAffineValueConstraints::getHyperrectangular(ValueRange ivs, ValueRange lbs,
       llvm_unreachable("Unexpected FlatAffineValueConstraints creation error");
   }
   return res;
+}
+
+void FlatAffineConstraints::reset(unsigned numReservedInequalities,
+                                  unsigned numReservedEqualities,
+                                  unsigned newNumReservedCols,
+                                  unsigned newNumDims, unsigned newNumSymbols,
+                                  unsigned newNumLocals) {
+  assert(newNumReservedCols >= newNumDims + newNumSymbols + newNumLocals + 1 &&
+         "minimum 1 column");
+  *this = FlatAffineConstraints(numReservedInequalities, numReservedEqualities,
+                                newNumReservedCols, newNumDims, newNumSymbols,
+                                newNumLocals);
+}
+
+void FlatAffineConstraints::reset(unsigned newNumDims, unsigned newNumSymbols,
+                                  unsigned newNumLocals) {
+  reset(/*numReservedInequalities=*/0, /*numReservedEqualities=*/0,
+        /*numReservedCols=*/newNumDims + newNumSymbols + newNumLocals + 1,
+        newNumDims, newNumSymbols, newNumLocals);
 }
 
 void FlatAffineValueConstraints::reset(unsigned numReservedInequalities,
@@ -1347,7 +1365,7 @@ void FlatAffineConstraints::printSpace(raw_ostream &os) const {
   os << " const)\n";
 }
 
-void FlatAffineConstraints::clearAndCopyFrom(const IntegerPolyhedron &other) {
+void FlatAffineConstraints::clearAndCopyFrom(const IntegerRelation &other) {
   if (auto *otherValueSet = dyn_cast<const FlatAffineValueConstraints>(&other))
     assert(!otherValueSet->hasValues() &&
            "cannot copy associated Values into FlatAffineConstraints");
@@ -1357,11 +1375,11 @@ void FlatAffineConstraints::clearAndCopyFrom(const IntegerPolyhedron &other) {
   if (auto *otherValueSet = dyn_cast<const FlatAffineConstraints>(&other))
     *this = *otherValueSet;
   else
-    *static_cast<IntegerPolyhedron *>(this) = other;
+    *static_cast<IntegerRelation *>(this) = other;
 }
 
 void FlatAffineValueConstraints::clearAndCopyFrom(
-    const IntegerPolyhedron &other) {
+    const IntegerRelation &other) {
 
   if (auto *otherValueSet =
           dyn_cast<const FlatAffineValueConstraints>(&other)) {
@@ -1372,7 +1390,7 @@ void FlatAffineValueConstraints::clearAndCopyFrom(
   if (auto *otherValueSet = dyn_cast<const FlatAffineValueConstraints>(&other))
     *static_cast<FlatAffineConstraints *>(this) = *otherValueSet;
   else
-    *static_cast<IntegerPolyhedron *>(this) = other;
+    *static_cast<IntegerRelation *>(this) = other;
 
   values.clear();
   values.resize(getNumIds(), None);

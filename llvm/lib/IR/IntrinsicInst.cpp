@@ -504,10 +504,10 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
   case Intrinsic::vp_fptrunc:
   case Intrinsic::vp_ptrtoint:
   case Intrinsic::vp_inttoptr:
-  case Intrinsic::vp_sitofp:
   case Intrinsic::vp_uitofp:
   case Intrinsic::vp_fptoui:
   case Intrinsic::vp_fptosi:
+  case Intrinsic::vp_sitofp:
     VPFunc =
         Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
     break;

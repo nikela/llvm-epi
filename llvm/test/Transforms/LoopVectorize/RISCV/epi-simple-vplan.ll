@@ -12,31 +12,30 @@ target triple = "riscv64-unknown-linux-gnu"
 
 ; CHECK-LABEL: simple_add
 ; CHECK: VPlan 'Initial VPlan for VF={vscale x 1,vscale x 2,vscale x 4,vscale x 8,vscale x 16},UF>=1' {
-; CHECK-NEXT: Live-in vp<%0> = vector-trip-count
+; CHECK-NEXT: Live-in vp<%1> = vector-trip-count
 ; CHECK-EMPTY:
-; CHECK-NEXT: Live-in vp<%1> = backedge-taken count
+; CHECK-NEXT: Live-in vp<%2> = backedge-taken count
 ; CHECK-EMPTY:
 ; CHECK-NEXT: <x1> vector loop: {
 ; CHECK-NEXT:   for.body:
-; CHECK-NEXT:     EMIT vp<%3> = CANONICAL-INDUCTION
-; CHECK-NEXT:     WIDEN-INDUCTION %indvars.iv = phi 0, %indvars.iv.next
-; CHECK-NEXT:     EMIT vp<%5> = WIDEN-CANONICAL-INDUCTION vp<%3>
-; CHECK-NEXT:     EMIT vp<%6> = icmp ule vp<%5> vp<%1>
-; CHECK-NEXT:     CLONE ir<%arrayidx> = getelementptr ir<%a>, ir<%indvars.iv>
-; CHECK-NEXT:     EMIT vp<%8> = GENERATE-EXPLICIT-VECTOR-LENGTH vp<%5>, vp<%2>
-; CHECK-NEXT:     PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%6>, vp<%8> (ALL-ONES-MASK)
-; CHECK-NEXT:     CLONE ir<%arrayidx2> = getelementptr ir<%b>, ir<%indvars.iv>
-; CHECK-NEXT:     PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%6>, vp<%8> (ALL-ONES-MASK)
-; CHECK-NEXT:     PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%6>, vp<%8>
-; CHECK-NEXT:     CLONE ir<%arrayidx4> = getelementptr ir<%c>, ir<%indvars.iv>
-; CHECK-NEXT:     PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%6>, vp<%8> (ALL-ONES-MASK)
-; CHECK-NEXT:     EMIT vp<%15> = VF * UF +  vp<%3>
-; CHECK-NEXT:     EMIT branch-on-count  vp<%15> vp<%0>
+; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
+; CHECK-NEXT:     vp<%5>    = SCALAR-STEPS vp<%4>, ir<0>, ir<1>
+; CHECK-NEXT:     EMIT vp<%6> = WIDEN-CANONICAL-INDUCTION vp<%4>
+; CHECK-NEXT:     EMIT vp<%7> = icmp ule vp<%6> vp<%2>
+; CHECK-NEXT:     CLONE ir<%arrayidx> = getelementptr ir<%a>, vp<%5>
+; CHECK-NEXT:     EMIT vp<%9> = GENERATE-EXPLICIT-VECTOR-LENGTH vp<%6>, vp<%3>
+; CHECK-NEXT:     PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%7>, vp<%9> (ALL-ONES-MASK)
+; CHECK-NEXT:     CLONE ir<%arrayidx2> = getelementptr ir<%b>, vp<%5>
+; CHECK-NEXT:     PREDICATED-WIDEN ir<%1> = load ir<%arrayidx2>, vp<%7>, vp<%9> (ALL-ONES-MASK)
+; CHECK-NEXT:     PREDICATED-WIDEN ir<%add> = add ir<%1>, ir<%0>, vp<%7>, vp<%9>
+; CHECK-NEXT:     CLONE ir<%arrayidx4> = getelementptr ir<%c>, vp<%5>
+; CHECK-NEXT:     PREDICATED-WIDEN store ir<%arrayidx4>, ir<%add>, vp<%7>, vp<%9> (ALL-ONES-MASK)
+; CHECK-NEXT:     EMIT vp<%16> = VF * UF +  vp<%4>
+; CHECK-NEXT:     EMIT branch-on-count  vp<%16> vp<%1>
 ; CHECK-NEXT:   No successors
 ; CHECK-NEXT: }
 ; CHECK-NEXT: No successors
 ; CHECK-NEXT: }
-
 
 ; Function Attrs: nofree norecurse nounwind
 define dso_local void @simple_add(i32 signext %N, i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {

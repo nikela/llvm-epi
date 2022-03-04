@@ -228,7 +228,7 @@ private:
   void resolveLazy(const LazyObject &other);
   void resolveShared(const SharedSymbol &other);
 
-  bool compare(const Defined &other) const;
+  bool shouldReplace(const Defined &other) const;
 
   inline size_t getSymbolSize() const;
 
@@ -562,17 +562,6 @@ void reportDuplicate(const Symbol &sym, InputFile *newFile,
 void maybeWarnUnorderableSymbol(const Symbol *sym);
 bool computeIsPreemptible(const Symbol &sym);
 void reportBackrefs();
-
-// A mapping from a symbol to an InputFile referencing it backward. Used by
-// --warn-backrefs.
-extern llvm::DenseMap<const Symbol *,
-                      std::pair<const InputFile *, const InputFile *>>
-    backwardReferences;
-
-// A tuple of (reference, extractedFile, sym). Used by --why-extract=.
-extern SmallVector<std::tuple<std::string, const InputFile *, const Symbol &>,
-                   0>
-    whyExtract;
 
 } // namespace elf
 } // namespace lld

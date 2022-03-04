@@ -535,7 +535,7 @@ X86TargetLowering::X86TargetLowering(const X86TargetMachine &TM,
 
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
   setOperationAction(ISD::DEBUGTRAP, MVT::Other, Legal);
-  if (Subtarget.getTargetTriple().isPS4CPU())
+  if (Subtarget.getTargetTriple().isPS4())
     setOperationAction(ISD::UBSANTRAP, MVT::Other, Expand);
   else
     setOperationAction(ISD::UBSANTRAP, MVT::Other, Legal);
@@ -1701,6 +1701,8 @@ X86TargetLowering::X86TargetLowering(const X86TargetMachine &TM,
 
     setOperationAction(ISD::FSHL,       MVT::v64i8, Custom);
     setOperationAction(ISD::FSHR,       MVT::v64i8, Custom);
+    setOperationAction(ISD::FSHL,      MVT::v32i16, Custom);
+    setOperationAction(ISD::FSHR,      MVT::v32i16, Custom);
     setOperationAction(ISD::FSHL,      MVT::v16i32, Custom);
     setOperationAction(ISD::FSHR,      MVT::v16i32, Custom);
 
@@ -5442,6 +5444,18 @@ bool X86TargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
       Info.align = Align(1);
       Info.flags |= MachineMemOperand::MOLoad;
       return true;
+    case Intrinsic::x86_atomic_bts:
+    case Intrinsic::x86_atomic_btc:
+    case Intrinsic::x86_atomic_btr: {
+      Info.opc = ISD::INTRINSIC_W_CHAIN;
+      Info.ptrVal = I.getArgOperand(0);
+      unsigned Size = I.getType()->getScalarSizeInBits();
+      Info.memVT = EVT::getIntegerVT(I.getType()->getContext(), Size);
+      Info.align = Align(Size);
+      Info.flags |= MachineMemOperand::MOLoad | MachineMemOperand::MOStore |
+                    MachineMemOperand::MOVolatile;
+      return true;
+    }
     }
     return false;
   }
@@ -27510,6 +27524,30 @@ static SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, const X86Subtarget &Subtarget,
       return DAG.getNode(ISD::MERGE_VALUES, dl, Op->getVTList(), SetCC,
                          Operation.getValue(1));
     }
+    case Intrinsic::x86_atomic_bts:
+    case Intrinsic::x86_atomic_btc:
+    case Intrinsic::x86_atomic_btr: {
+      SDLoc DL(Op);
+      MVT VT = Op.getSimpleValueType();
+      SDValue Chain = Op.getOperand(0);
+      SDValue Op1 = Op.getOperand(2);
+      SDValue Op2 = Op.getOperand(3);
+      unsigned Opc = IntNo == Intrinsic::x86_atomic_bts   ? X86ISD::LBTS
+                     : IntNo == Intrinsic::x86_atomic_btc ? X86ISD::LBTC
+                                                          : X86ISD::LBTR;
+      SDValue Size = DAG.getConstant(VT.getScalarSizeInBits(), DL, MVT::i32);
+      MachineMemOperand *MMO = cast<MemIntrinsicSDNode>(Op)->getMemOperand();
+      SDValue Res =
+          DAG.getMemIntrinsicNode(Opc, DL, DAG.getVTList(MVT::i32, MVT::Other),
+                                  {Chain, Op1, Op2, Size}, VT, MMO);
+      Chain = Res.getValue(1);
+      Res = DAG.getZExtOrTrunc(getSETCC(X86::COND_B, Res, DL, DAG), DL, VT);
+      unsigned Imm = cast<ConstantSDNode>(Op2)->getZExtValue();
+      if (Imm)
+        Res = DAG.getNode(ISD::SHL, DL, VT, Res,
+                          DAG.getShiftAmountConstant(Imm, VT, DL));
+      return DAG.getNode(ISD::MERGE_VALUES, DL, Op->getVTList(), Res, Chain);
+    }
     }
     return SDValue();
   }
@@ -29302,7 +29340,6 @@ static SDValue LowerShiftByScalarVariable(SDValue Op, SelectionDAG &DAG,
   SDValue Amt = Op.getOperand(1);
   unsigned Opcode = Op.getOpcode();
   unsigned X86OpcI = getTargetVShiftUniformOpcode(Opcode, false);
-  unsigned X86OpcV = getTargetVShiftUniformOpcode(Opcode, true);
 
   // TODO: Use getSplatSourceVector.
   if (SDValue BaseShAmt = DAG.getSplatValue(Amt)) {
@@ -29365,23 +29402,6 @@ static SDValue LowerShiftByScalarVariable(SDValue Op, SelectionDAG &DAG,
     }
   }
 
-  // Check cases (mainly 32-bit) where i64 is expanded into high and low parts.
-  if (VT == MVT::v2i64 && Amt.getOpcode() == ISD::BITCAST &&
-      Amt.getOperand(0).getOpcode() == ISD::BUILD_VECTOR) {
-    Amt = Amt.getOperand(0);
-    unsigned Ratio = 64 / Amt.getScalarValueSizeInBits();
-    std::vector<SDValue> Vals(Ratio);
-    for (unsigned i = 0; i != Ratio; ++i)
-      Vals[i] = Amt.getOperand(i);
-    for (unsigned i = Ratio, e = Amt.getNumOperands(); i != e; i += Ratio) {
-      for (unsigned j = 0; j != Ratio; ++j)
-        if (Vals[j] != Amt.getOperand(i + j))
-          return SDValue();
-    }
-
-    if (supportedVectorShiftWithBaseAmnt(VT, Subtarget, Op.getOpcode()))
-      return DAG.getNode(X86OpcV, dl, VT, R, Op.getOperand(1));
-  }
   return SDValue();
 }
 
@@ -29961,8 +29981,8 @@ static SDValue LowerFunnelShift(SDValue Op, const X86Subtarget &Subtarget,
                            {Op0, Op1, Amt}, DAG, Subtarget);
     }
     assert((VT == MVT::v16i8 || VT == MVT::v32i8 || VT == MVT::v64i8 ||
-            VT == MVT::v8i16 || VT == MVT::v16i16 || VT == MVT::v4i32 ||
-            VT == MVT::v8i32 || VT == MVT::v16i32) &&
+            VT == MVT::v8i16 || VT == MVT::v16i16 || VT == MVT::v32i16 ||
+            VT == MVT::v4i32 || VT == MVT::v8i32 || VT == MVT::v16i32) &&
            "Unexpected funnel shift type!");
 
     // fshl(x,y,z) -> unpack(y,x) << (z & (bw-1))) >> bw.
@@ -30432,6 +30452,65 @@ X86TargetLowering::shouldExpandAtomicLoadInIR(LoadInst *LI) const {
 }
 
 TargetLowering::AtomicExpansionKind
+X86TargetLowering::shouldExpandLogicAtomicRMWInIR(AtomicRMWInst *AI) const {
+  // If the atomicrmw's result isn't actually used, we can just add a "lock"
+  // prefix to a normal instruction for these operations.
+  if (AI->use_empty())
+    return AtomicExpansionKind::None;
+
+  // If the atomicrmw's result is used by a single bit AND, we may use
+  // bts/btr/btc instruction for these operations.
+  auto *C1 = dyn_cast<ConstantInt>(AI->getValOperand());
+  Instruction *I = AI->user_back();
+  if (!C1 || !AI->hasOneUse() || I->getOpcode() != Instruction::And ||
+      AI->getParent() != I->getParent())
+    return AtomicExpansionKind::CmpXChg;
+  // The following instruction must be a AND single bit.
+  auto *C2 = dyn_cast<ConstantInt>(I->getOperand(1));
+  unsigned Bits = AI->getType()->getPrimitiveSizeInBits();
+  if (!C2 || Bits == 8 || !isPowerOf2_64(C2->getZExtValue()))
+    return AtomicExpansionKind::CmpXChg;
+
+  if (AI->getOperation() == AtomicRMWInst::And)
+    return ~C1->getValue() == C2->getValue()
+               ? AtomicExpansionKind::BitTestIntrinsic
+               : AtomicExpansionKind::CmpXChg;
+
+  return C1 == C2 ? AtomicExpansionKind::BitTestIntrinsic
+                  : AtomicExpansionKind::CmpXChg;
+}
+
+void X86TargetLowering::emitBitTestAtomicRMWIntrinsic(AtomicRMWInst *AI) const {
+  IRBuilder<> Builder(AI);
+  Intrinsic::ID IID = Intrinsic::not_intrinsic;
+  switch (AI->getOperation()) {
+  default:
+    llvm_unreachable("Unknown atomic operation");
+  case AtomicRMWInst::Or:
+    IID = Intrinsic::x86_atomic_bts;
+    break;
+  case AtomicRMWInst::Xor:
+    IID = Intrinsic::x86_atomic_btc;
+    break;
+  case AtomicRMWInst::And:
+    IID = Intrinsic::x86_atomic_btr;
+    break;
+  }
+  Instruction *I = AI->user_back();
+  LLVMContext &Ctx = AI->getContext();
+  unsigned Imm =
+      countTrailingZeros(cast<ConstantInt>(I->getOperand(1))->getZExtValue());
+  Function *BitTest =
+      Intrinsic::getDeclaration(AI->getModule(), IID, AI->getType());
+  Value *Addr = Builder.CreatePointerCast(AI->getPointerOperand(),
+                                          Type::getInt8PtrTy(Ctx));
+  Value *Result = Builder.CreateCall(BitTest, {Addr, Builder.getInt8(Imm)});
+  I->replaceAllUsesWith(Result);
+  I->eraseFromParent();
+  AI->eraseFromParent();
+}
+
+TargetLowering::AtomicExpansionKind
 X86TargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   unsigned NativeWidth = Subtarget.is64Bit() ? 64 : 32;
   Type *MemType = AI->getType();
@@ -30455,10 +30534,7 @@ X86TargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   case AtomicRMWInst::Or:
   case AtomicRMWInst::And:
   case AtomicRMWInst::Xor:
-    // If the atomicrmw's result isn't actually used, we can just add a "lock"
-    // prefix to a normal instruction for these operations.
-    return !AI->use_empty() ? AtomicExpansionKind::CmpXChg
-                            : AtomicExpansionKind::None;
+    return shouldExpandLogicAtomicRMWInIR(AI);
   case AtomicRMWInst::Nand:
   case AtomicRMWInst::Max:
   case AtomicRMWInst::Min:
@@ -32939,6 +33015,9 @@ const char *X86TargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(LOR)
   NODE_NAME_CASE(LXOR)
   NODE_NAME_CASE(LAND)
+  NODE_NAME_CASE(LBTS)
+  NODE_NAME_CASE(LBTC)
+  NODE_NAME_CASE(LBTR)
   NODE_NAME_CASE(VZEXT_MOVL)
   NODE_NAME_CASE(VZEXT_LOAD)
   NODE_NAME_CASE(VEXTRACT_STORE)
@@ -43009,10 +43088,11 @@ static SDValue combineArithReduction(SDNode *ExtElt, SelectionDAG &DAG,
 
   SDLoc DL(ExtElt);
   unsigned NumElts = VecVT.getVectorNumElements();
+  unsigned EltSizeInBits = VecVT.getScalarSizeInBits();
 
   // Extend v4i8/v8i8 vector to v16i8, with undef upper 64-bits.
   auto WidenToV16I8 = [&](SDValue V, bool ZeroExtend) {
-    if (VecVT == MVT::v4i8) {
+    if (V.getValueType() == MVT::v4i8) {
       if (ZeroExtend && Subtarget.hasSSE41()) {
         V = DAG.getNode(ISD::INSERT_VECTOR_ELT, DL, MVT::v4i32,
                         DAG.getConstant(0, DL, MVT::v4i32),
@@ -43092,6 +43172,48 @@ static SDValue combineArithReduction(SDNode *ExtElt, SelectionDAG &DAG,
     Rdx = DAG.getNode(X86ISD::PSADBW, DL, MVT::v2i64, Rdx,
                       getZeroVector(MVT::v16i8, Subtarget, DAG, DL));
     Rdx = DAG.getBitcast(MVT::v16i8, Rdx);
+    return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, VT, Rdx, Index);
+  }
+
+  // See if we can use vXi8 PSADBW add reduction for larger zext types.
+  // If the source vector values are 0-255, then we can use PSADBW to
+  // sum+zext v8i8 subvectors to vXi64, then perform the reduction.
+  // TODO: See if its worth avoiding vXi16/i32 truncations?
+  if (Opc == ISD::ADD && NumElts >= 4 && EltSizeInBits >= 16 &&
+      DAG.computeKnownBits(Rdx).getMaxValue().ule(255) &&
+      (EltSizeInBits == 16 || Rdx.getOpcode() == ISD::ZERO_EXTEND ||
+       Subtarget.hasAVX512())) {
+    EVT ByteVT = VecVT.changeVectorElementType(MVT::i8);
+    Rdx = DAG.getNode(ISD::TRUNCATE, DL, ByteVT, Rdx);
+    if (ByteVT.getSizeInBits() < 128)
+      Rdx = WidenToV16I8(Rdx, true);
+
+    // Build the PSADBW, split as 128/256/512 bits for SSE/AVX2/AVX512BW.
+    auto PSADBWBuilder = [](SelectionDAG &DAG, const SDLoc &DL,
+                            ArrayRef<SDValue> Ops) {
+      MVT VT = MVT::getVectorVT(MVT::i64, Ops[0].getValueSizeInBits() / 64);
+      SDValue Zero = DAG.getConstant(0, DL, Ops[0].getValueType());
+      return DAG.getNode(X86ISD::PSADBW, DL, VT, Ops[0], Zero);
+    };
+    MVT SadVT = MVT::getVectorVT(MVT::i64, Rdx.getValueSizeInBits() / 64);
+    Rdx = SplitOpsAndApply(DAG, Subtarget, DL, SadVT, {Rdx}, PSADBWBuilder);
+
+    // TODO: We could truncate to vXi16/vXi32 before performing the reduction.
+    while (Rdx.getValueSizeInBits() > 128) {
+      SDValue Lo, Hi;
+      std::tie(Lo, Hi) = splitVector(Rdx, DAG, DL);
+      VecVT = Lo.getValueType();
+      Rdx = DAG.getNode(ISD::ADD, DL, VecVT, Lo, Hi);
+    }
+    assert(Rdx.getValueType() == MVT::v2i64 && "v2i64 reduction expected");
+
+    if (NumElts > 8) {
+      SDValue RdxHi = DAG.getVectorShuffle(MVT::v2i64, DL, Rdx, Rdx, {1, -1});
+      Rdx = DAG.getNode(ISD::ADD, DL, MVT::v2i64, Rdx, RdxHi);
+    }
+
+    VecVT = MVT::getVectorVT(VT.getSimpleVT(), 128 / VT.getSizeInBits());
+    Rdx = DAG.getBitcast(VecVT, Rdx);
     return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, VT, Rdx, Index);
   }
 

@@ -335,12 +335,14 @@ public:
   /// type identification.
   using VPRecipeTy = enum {
     VPBranchOnMaskSC,
+    VPExpandSCEVSC,
     VPInstructionSC,
     VPInterleaveSC,
     VPPredicatedWidenMemoryInstructionSC,
     VPPredicatedWidenSC,
     VPReductionSC,
     VPReplicateSC,
+    VPScalarIVStepsSC,
     VPWidenCallSC,
     VPWidenEVLSC,
     VPWidenEVLMaskSC,

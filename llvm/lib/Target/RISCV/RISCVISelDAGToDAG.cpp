@@ -1187,7 +1187,10 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
         }
 
         // (srli (slli x, c3-c2), c3).
-        if (OneUseOrZExtW && !IsANDI) {
+        // Skip it in order to select sraiw.
+        bool Skip = Subtarget->hasStdExtZba() && C3 == 32 &&
+                    X.getOpcode() == ISD::SIGN_EXTEND_INREG;
+        if (OneUseOrZExtW && !IsANDI && !Skip) {
           SDNode *SLLI = CurDAG->getMachineNode(
               RISCV::SLLI, DL, XLenVT, X,
               CurDAG->getTargetConstant(C3 - C2, DL, XLenVT));
@@ -2335,6 +2338,7 @@ bool RISCVDAGToDAGISel::hasAllNBitUsers(SDNode *Node, unsigned Bits) const {
     case RISCV::CTZW:
     case RISCV::CPOPW:
     case RISCV::SLLI_UW:
+    case RISCV::FMV_W_X:
     case RISCV::FCVT_H_W:
     case RISCV::FCVT_H_WU:
     case RISCV::FCVT_S_W:
@@ -2358,6 +2362,7 @@ bool RISCVDAGToDAGISel::hasAllNBitUsers(SDNode *Node, unsigned Bits) const {
         return false;
       break;
     case RISCV::SEXT_H:
+    case RISCV::FMV_H_X:
     case RISCV::ZEXT_H_RV32:
     case RISCV::ZEXT_H_RV64:
       if (Bits < 16)
