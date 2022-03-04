@@ -178,6 +178,7 @@ enum Kind {
 
   // Attributes:
   kw_attributes,
+  kw_allocalign,
   kw_allocsize,
   kw_alwaysinline,
   kw_argmemonly,
