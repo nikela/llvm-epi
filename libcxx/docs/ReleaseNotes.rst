@@ -66,6 +66,14 @@ API Changes
   (as an extension) ``__int128_t``, and the unsigned versions thereof.
   In particular, ``uniform_int_distribution<int8_t>`` is no longer supported.
 
+- The C++14 function ``std::quoted(const char*)`` is no longer supported in
+  C++03 or C++11 modes.
+
+- libc++ no longer supports containers of ``const``-qualified element type,
+  such as ``vector<const T>`` and ``list<const T>``. This used to be supported
+  as an extension. Likewise, ``std::allocator<const T>`` is no longer supported.
+  If you were using ``vector<const T>``, replace it with ``vector<T>`` instead.
+
 ABI Changes
 -----------
 
@@ -85,3 +93,8 @@ Build System Changes
   ``{LIBCXX,LIBCXXABI,LIBUNWIND}_GCC_TOOLCHAIN`` CMake variables have been removed. Instead, please
   use the ``CMAKE_CXX_COMPILER_TARGET``, ``CMAKE_SYSROOT`` and ``CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN``
   variables provided by CMake.
+
+- When building for Windows, vendors who want to avoid dll-exporting symbols from the static libc++abi
+  library should set ``LIBCXXABI_HERMETIC_STATIC_LIBRARY=ON`` when configuring CMake. The current
+  behavior, which tries to guess the correct dll-export semantics based on whether we're building
+  the libc++ shared library, will be removed in LLVM 16.
