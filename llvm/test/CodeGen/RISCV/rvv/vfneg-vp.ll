@@ -356,7 +356,7 @@ define <vscale x 7 x double> @vfneg_vv_nxv7f64_unmasked(<vscale x 7 x double> %v
 ; CHECK-LABEL: vfneg_vv_nxv7f64_unmasked:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
-; CHECK-NEXT:    vfsgnjn.vv v8, v8, v8
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 7 x i1> poison, i1 true, i32 0
   %m = shufflevector <vscale x 7 x i1> %head, <vscale x 7 x i1> poison, <vscale x 7 x i32> zeroinitializer
@@ -431,13 +431,13 @@ define <vscale x 16 x double> @vfneg_vv_nxv16f64_unmasked(<vscale x 16 x double>
 ; CHECK-NEXT:    li a3, 0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m8, ta, mu
 ; CHECK-NEXT:    sub a1, a0, a1
-; CHECK-NEXT:    vfsgnjn.vv v8, v8, v8
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    bltu a0, a1, .LBB33_4
 ; CHECK-NEXT:  # %bb.3:
 ; CHECK-NEXT:    mv a3, a1
 ; CHECK-NEXT:  .LBB33_4:
 ; CHECK-NEXT:    vsetvli zero, a3, e64, m8, ta, mu
-; CHECK-NEXT:    vfsgnjn.vv v16, v16, v16
+; CHECK-NEXT:    vfneg.v v16, v16
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 16 x i1> poison, i1 true, i32 0
   %m = shufflevector <vscale x 16 x i1> %head, <vscale x 16 x i1> poison, <vscale x 16 x i32> zeroinitializer

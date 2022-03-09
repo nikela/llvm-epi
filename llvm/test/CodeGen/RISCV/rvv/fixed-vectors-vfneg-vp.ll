@@ -284,7 +284,7 @@ define <15 x double> @vfneg_vv_v15f64_unmasked(<15 x double> %va, i32 zeroext %e
 ; CHECK-LABEL: vfneg_vv_v15f64_unmasked:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
-; CHECK-NEXT:    vfsgnjn.vv v8, v8, v8
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <15 x i1> poison, i1 true, i32 0
   %m = shufflevector <15 x i1> %head, <15 x i1> poison, <15 x i32> zeroinitializer
@@ -356,13 +356,13 @@ define <32 x double> @vfneg_vv_v32f64_unmasked(<32 x double> %va, i32 zeroext %e
 ; CHECK-NEXT:  .LBB27_2:
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m8, ta, mu
 ; CHECK-NEXT:    li a1, 16
-; CHECK-NEXT:    vfsgnjn.vv v16, v16, v16
+; CHECK-NEXT:    vfneg.v v16, v16
 ; CHECK-NEXT:    bltu a0, a1, .LBB27_4
 ; CHECK-NEXT:  # %bb.3:
 ; CHECK-NEXT:    li a0, 16
 ; CHECK-NEXT:  .LBB27_4:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
-; CHECK-NEXT:    vfsgnjn.vv v8, v8, v8
+; CHECK-NEXT:    vfneg.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <32 x i1> poison, i1 true, i32 0
   %m = shufflevector <32 x i1> %head, <32 x i1> poison, <32 x i32> zeroinitializer
