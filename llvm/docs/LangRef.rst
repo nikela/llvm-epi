@@ -1379,6 +1379,14 @@ Currently, only the following parameter attributes are defined:
     information that is not mapped to base types in the backend (for example,
     over-alignment specification through language attributes).
 
+``allocalign``
+    The function parameter marked with this attribute is is the alignment in bytes of the
+    newly allocated block returned by this function. The returned value must either have
+    the specified alignment or be the null pointer. The return value MAY be more aligned
+    than the requested alignment, but not less aligned.  Invalid (e.g. non-power-of-2)
+    alignments are permitted for the allocalign parameter, so long as the returned pointer
+    is null. This attribute may only be applied to integer parameters.
+
 .. _gc:
 
 Garbage Collector Strategy Names
@@ -2106,6 +2114,11 @@ example:
     function with a tail call. The prototype of a thunk should not be used for
     optimization purposes. The caller is expected to cast the thunk prototype to
     match the thunk target prototype.
+
+``"tls-load-hoist"``
+    This attribute indicates that the function will try to reduce redundant
+    tls address caculation by hoisting tls variable.
+
 ``uwtable[(sync|async)]``
     This attribute indicates that the ABI being targeted requires that
     an unwind table entry be produced for this function even if we can

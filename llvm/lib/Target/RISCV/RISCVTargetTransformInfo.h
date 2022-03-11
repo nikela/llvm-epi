@@ -185,9 +185,6 @@ public:
 
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const;
 
-  InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
-                                        Align Alignment, unsigned AddressSpace,
-                                        TTI::TargetCostKind CostKind);
   InstructionCost getRegUsageForType(Type *Ty);
 
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
