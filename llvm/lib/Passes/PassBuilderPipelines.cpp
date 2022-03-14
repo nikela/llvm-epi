@@ -1131,6 +1131,9 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
 
   if (IsFullLTO)
     FPM.addPass(InstCombinePass());
+
+  if (PTO.WFVVectorization)
+    FPM.addPass(PromotePass());
 }
 
 ModulePassManager
