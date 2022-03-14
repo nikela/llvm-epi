@@ -21,37 +21,6 @@
 // Helpers to define the VL patterns.
 //===----------------------------------------------------------------------===//
 
-def SDT_RISCVVLE_VL : SDTypeProfile<1, 3, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCVecEltisVT<2, i1>,
-                                           SDTCisSameNumEltsAs<0, 2>,
-                                           SDTCisVT<3, XLenVT>]>;
-def SDT_RISCVVSE_VL : SDTypeProfile<0, 4, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCVecEltisVT<2, i1>,
-                                           SDTCisSameNumEltsAs<0, 2>,
-                                           SDTCisVT<3, XLenVT>]>;
-
-def SDT_RISCVVLM_VL : SDTypeProfile<1, 2, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCisVT<2, XLenVT>]>;
-def SDT_RISCVVSM_VL : SDTypeProfile<0, 3, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCisVT<2, XLenVT>]>;
-
-def SDT_RISCVVLSE_VL : SDTypeProfile<1, 4, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCisInt<2>,
-                                           SDTCVecEltisVT<3, i1>,
-                                           SDTCisSameNumEltsAs<0, 3>,
-                                           SDTCisVT<4, XLenVT>]>;
-def SDT_RISCVVSSE_VL : SDTypeProfile<0, 5, [SDTCisVec<0>,
-                                           SDTCisPtrTy<1>,
-                                           SDTCisInt<2>,
-                                           SDTCVecEltisVT<3, i1>,
-                                           SDTCisSameNumEltsAs<0, 3>,
-                                           SDTCisVT<4, XLenVT>]>;
-
 def SDT_RISCVIntBinOp_VL : SDTypeProfile<1, 4, [SDTCisSameAs<0, 1>,
                                                 SDTCisSameAs<0, 2>,
                                                 SDTCisVec<0>, SDTCisInt<0>,
@@ -91,21 +60,6 @@ def riscv_vfmv_s_f_vl : SDNode<"RISCVISD::VFMV_S_F_VL",
                                                     SDTCisFP<0>,
                                                     SDTCisEltOfVec<2, 0>,
                                                     SDTCisVT<3, XLenVT>]>>;
-
-def riscv_vle_vl : SDNode<"RISCVISD::VLE_VL", SDT_RISCVVLE_VL,
-                          [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
-def riscv_vse_vl : SDNode<"RISCVISD::VSE_VL", SDT_RISCVVSE_VL,
-                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-
-def riscv_vlm_vl : SDNode<"RISCVISD::VLM_VL", SDT_RISCVVLM_VL,
-                          [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
-def riscv_vsm_vl : SDNode<"RISCVISD::VSM_VL", SDT_RISCVVSM_VL,
-                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-
-def riscv_vlse_vl : SDNode<"RISCVISD::VLSE_VL", SDT_RISCVVLSE_VL,
-                          [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
-def riscv_vsse_vl : SDNode<"RISCVISD::VSSE_VL", SDT_RISCVVSSE_VL,
-                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
 
 def riscv_add_vl   : SDNode<"RISCVISD::ADD_VL",   SDT_RISCVIntBinOp_VL, [SDNPCommutative]>;
 def riscv_sub_vl   : SDNode<"RISCVISD::SUB_VL",   SDT_RISCVIntBinOp_VL>;
@@ -1001,78 +955,6 @@ multiclass VPatWidenReductionVL_Ext_VL<SDNode vop, PatFrags extop, string instru
 
 let Predicates = [HasVInstructions] in {
 
-// 7.4. Vector Unit-Stride Instructions
-foreach vti = AllVectors in {
-  defvar load_instr = !cast<Instruction>("PseudoVLE"#vti.SEW#"_V_"#vti.LMul.MX);
-  defvar load_instr_masked = !cast<Instruction>("PseudoVLE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
-  defvar store_instr = !cast<Instruction>("PseudoVSE"#vti.SEW#"_V_"#vti.LMul.MX);
-  defvar store_instr_masked = !cast<Instruction>("PseudoVSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
-  // Load
-  def : Pat<(vti.Vector (riscv_vle_vl BaseAddr:$rs1, (vti.Mask true_mask), VLOpFrag)),
-            (load_instr BaseAddr:$rs1, GPR:$vl, vti.Log2SEW)>;
-  def : Pat<(vti.Vector (riscv_vle_vl BaseAddr:$rs1, (vti.Mask V0), VLOpFrag)),
-            (load_instr_masked (vti.Vector (IMPLICIT_DEF)), BaseAddr:$rs1,
-                               (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-
-  // Store
-  def : Pat<(riscv_vse_vl (vti.Vector vti.RegClass:$rs2), BaseAddr:$rs1,
-                          (vti.Mask true_mask), VLOpFrag),
-            (store_instr vti.RegClass:$rs2, BaseAddr:$rs1, GPR:$vl, vti.Log2SEW)>;
-  def : Pat<(riscv_vse_vl (vti.Vector vti.RegClass:$rs2), BaseAddr:$rs1,
-                          (vti.Mask V0), VLOpFrag),
-            (store_instr_masked vti.RegClass:$rs2, BaseAddr:$rs1, (vti.Mask V0),
-                                GPR:$vl, vti.Log2SEW)>;
-}
-
-foreach mti = AllMasks in {
-  defvar load_instr = !cast<Instruction>("PseudoVLM_V_"#mti.BX);
-  defvar store_instr = !cast<Instruction>("PseudoVSM_V_"#mti.BX);
-  // Load
-  def : Pat<(mti.Mask (riscv_vlm_vl BaseAddr:$rs1, VLOpFrag)),
-            (load_instr BaseAddr:$rs1, GPR:$vl, mti.Log2SEW)>;
-
-  // Store
-  def : Pat<(riscv_vsm_vl (mti.Mask VR:$rs2), BaseAddr:$rs1, VLOpFrag),
-            (store_instr VR:$rs2, BaseAddr:$rs1, GPR:$vl, mti.Log2SEW)>;
-}
-
-// Vector Strided Instructions
-foreach vti = AllVectors in {
-  defvar load_instr = !cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_"#vti.LMul.MX);
-  defvar load_instr_masked = !cast<Instruction>("PseudoVLSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
-  defvar store_instr = !cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_"#vti.LMul.MX);
-  defvar store_instr_masked = !cast<Instruction>("PseudoVSSE"#vti.SEW#"_V_"#vti.LMul.MX#"_MASK");
-
-  // Load
-  def : Pat<(vti.Vector (riscv_vlse_vl BaseAddr:$rs1,
-                                      GPR:$rs2,
-                                      (vti.Mask true_mask),
-                                      VLOpFrag)),
-            (load_instr BaseAddr:$rs1, GPR:$rs2, GPR:$vl, vti.Log2SEW)>;
-  def : Pat<(vti.Vector (riscv_vlse_vl BaseAddr:$rs1,
-                                      GPR:$rs2,
-                                      (vti.Mask V0),
-                                      VLOpFrag)),
-            (load_instr_masked (vti.Vector (IMPLICIT_DEF)), BaseAddr:$rs1, GPR:$rs2,
-                               (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-
-  // Store
-  def : Pat<(riscv_vsse_vl (vti.Vector vti.RegClass:$rs2),
-                          BaseAddr:$rs1,
-                          GPR:$rs3,
-                          (vti.Mask true_mask),
-                          VLOpFrag),
-            (store_instr vti.RegClass:$rs2, BaseAddr:$rs1,
-                         GPR:$rs3, GPR:$vl, vti.Log2SEW)>;
-  def : Pat<(riscv_vsse_vl (vti.Vector vti.RegClass:$rs2),
-                          BaseAddr:$rs1,
-                          GPR:$rs3,
-                          (vti.Mask V0),
-                          VLOpFrag),
-            (store_instr_masked vti.RegClass:$rs2, BaseAddr:$rs1, GPR:$rs3,
-                                (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
-}
-
 // 12.1. Vector Single-Width Integer Add and Subtract
 defm : VPatBinaryVL_VV_VX_VI<riscv_add_vl, "PseudoVADD">;
 defm : VPatBinaryVL_VV_VX<riscv_sub_vl, "PseudoVSUB">;
@@ -1555,32 +1437,32 @@ foreach vti = AllFloatVectors in {
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl vti.RegClass:$rs1, vti.RegClass:$rd,
                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       (vti.Mask V0),
                                       VLOpFrag)),
             (!cast<Instruction>("PseudoVFMSUB_VV_"# suffix #"_MASK")
                  vti.RegClass:$rd, vti.RegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl vti.RegClass:$rs1,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       vti.RegClass:$rd,
                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       (vti.Mask true_mask),
                                       VLOpFrag)),
             (!cast<Instruction>("PseudoVFNMADD_VV_"# suffix)
                  vti.RegClass:$rd, vti.RegClass:$rs1, vti.RegClass:$rs2,
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl vti.RegClass:$rs1,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       vti.RegClass:$rd,
                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       (vti.Mask V0),
                                       VLOpFrag)),
@@ -1589,7 +1471,7 @@ foreach vti = AllFloatVectors in {
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl vti.RegClass:$rs1,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       vti.RegClass:$rd, vti.RegClass:$rs2,
                                       (vti.Mask true_mask),
@@ -1598,7 +1480,7 @@ foreach vti = AllFloatVectors in {
                  vti.RegClass:$rd, vti.RegClass:$rs1, vti.RegClass:$rs2,
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl vti.RegClass:$rs1,
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                       vti.RegClass:$rd, vti.RegClass:$rs2,
                                       (vti.Mask V0),
@@ -1620,51 +1502,6 @@ foreach vti = AllFloatVectors in {
                                        vti.RegClass:$rd, vti.RegClass:$rs2,
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       vti.RegClass:$rd, vti.RegClass:$rs2,
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMADD_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       vti.RegClass:$rd, vti.RegClass:$rs2,
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-
-  // Fixed length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                       vti.RegClass:$rd,
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMSUB_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                       vti.RegClass:$rd,
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       vti.RegClass:$rd, vti.RegClass:$rs2,
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
             (!cast<Instruction>("PseudoVFMADD_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
@@ -1672,31 +1509,30 @@ foreach vti = AllFloatVectors in {
   def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        vti.RegClass:$rd,
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask true_mask),
                                        VLOpFrag)),
             (!cast<Instruction>("PseudoVFMSUB_V" # vti.ScalarSuffix # "_" # suffix)
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
+  def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        vti.RegClass:$rd,
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
+            (!cast<Instruction>("PseudoVFMSUB_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
-  // Fixed length vector splats
   def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask true_mask),
                                        VLOpFrag)),
@@ -1705,46 +1541,20 @@ foreach vti = AllFloatVectors in {
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
+            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
-  // Fixed length vector splats
   def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        vti.RegClass:$rs2,
                                        (vti.Mask true_mask),
@@ -1754,44 +1564,22 @@ foreach vti = AllFloatVectors in {
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl (SplatFPOp vti.ScalarRegClass:$rs1),
                                        (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        vti.RegClass:$rs2,
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       vti.RegClass:$rs2,
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                       (riscv_fneg_vl vti.RegClass:$rd,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       vti.RegClass:$rs2,
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
+            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
   // The splat might be negated.
-  // Fixed length vector splats
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                        vti.RegClass:$rd,
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask true_mask),
                                        VLOpFrag)),
@@ -1799,46 +1587,20 @@ foreach vti = AllFloatVectors in {
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                        vti.RegClass:$rd,
                                        (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
+                                                      (vti.Mask srcvalue),
                                                       VLOpFrag),
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
-                                                     VLOpFrag),
-                                       vti.RegClass:$rd,
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
-                                                     VLOpFrag),
-                                       vti.RegClass:$rd,
-                                       (riscv_fneg_vl vti.RegClass:$rs2,
-                                                      (vti.Mask true_mask),
-                                                      VLOpFrag),
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
+            (!cast<Instruction>("PseudoVFNMADD_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 
-  // Fixed length vector splats
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                        vti.RegClass:$rd, vti.RegClass:$rs2,
                                        (vti.Mask true_mask),
@@ -1847,31 +1609,12 @@ foreach vti = AllFloatVectors in {
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
   def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatFPOp vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
+                                                     (vti.Mask srcvalue),
                                                      VLOpFrag),
                                        vti.RegClass:$rd, vti.RegClass:$rs2,
                                        (vti.Mask V0),
                                        VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  // Scalable length vector splats
-  def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
-                                                     VLOpFrag),
-                                       vti.RegClass:$rd, vti.RegClass:$rs2,
-                                       (vti.Mask true_mask),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix)
-                 vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
-                 GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
-  def : Pat<(vti.Vector (riscv_fma_vl (riscv_fneg_vl (SplatPat vti.ScalarRegClass:$rs1),
-                                                     (vti.Mask true_mask),
-                                                     VLOpFrag),
-                                       vti.RegClass:$rd, vti.RegClass:$rs2,
-                                       (vti.Mask V0),
-                                       VLOpFrag)),
-            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix #"_MASK")
+            (!cast<Instruction>("PseudoVFNMSUB_V" # vti.ScalarSuffix # "_" # suffix # "_MASK")
                  vti.RegClass:$rd, vti.ScalarRegClass:$rs1, vti.RegClass:$rs2,
                  (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
 }

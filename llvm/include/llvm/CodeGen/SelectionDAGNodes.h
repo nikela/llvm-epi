@@ -2359,9 +2359,9 @@ public:
   }
 };
 
-/// This Base class is used to represent common code for VP strided and
-/// "normal" (=unit strided) Loads and Stores
-class VPBaseLoadStoreSDNode: public MemSDNode {
+/// This base class is used to represent VP_LOAD, VP_STORE,
+/// EXPERIMENTAL_VP_STRIDED_LOAD and EXPERIMENTAL_VP_STRIDED_STORE nodes
+class VPBaseLoadStoreSDNode : public MemSDNode {
 public:
   friend class SelectionDAG;
 
@@ -2378,15 +2378,20 @@ public:
   // VPStoreSDNode        (Chain, Data, Ptr,    Offset, Mask,   EVL)
   // VPStridedLoadSDNode  (Chain, Ptr,  Offset, Stride, Mask,   EVL)
   // VPLoadSDNode         (Chain, Ptr,  Offset, Mask,   EVL)
+  // Mask is a vector of i1 elements;
+  // the type of EVL is TLI.getVPExplicitVectorLengthTy().
   const SDValue &getOffset() const {
     return getOperand((getOpcode() == ISD::EXPERIMENTAL_VP_STRIDED_LOAD ||
-                       getOpcode() == ISD::VP_LOAD) ? 2 : 3);
+                       getOpcode() == ISD::VP_LOAD)
+                          ? 2
+                          : 3);
   }
   const SDValue &getBasePtr() const {
     return getOperand((getOpcode() == ISD::EXPERIMENTAL_VP_STRIDED_LOAD ||
-                       getOpcode() == ISD::VP_LOAD) ? 1 : 2);
+                       getOpcode() == ISD::VP_LOAD)
+                          ? 1
+                          : 2);
   }
-  // Mask is a vector of i1 elements
   const SDValue &getMask() const {
     switch (getOpcode()) {
     default:
@@ -2400,7 +2405,6 @@ public:
       return getOperand(5);
     }
   }
-  // EVL type is TLI.getVPExplicitVectorLengthTy()
   const SDValue &getVectorLength() const {
     switch (getOpcode()) {
     default:
@@ -2434,6 +2438,34 @@ public:
   }
 };
 
+/// This class is used to represent a VP_LOAD node
+class VPLoadSDNode : public VPBaseLoadStoreSDNode {
+public:
+  friend class SelectionDAG;
+
+  VPLoadSDNode(unsigned Order, const DebugLoc &dl, SDVTList VTs,
+               ISD::MemIndexedMode AM, ISD::LoadExtType ETy, bool isExpanding,
+               EVT MemVT, MachineMemOperand *MMO)
+      : VPBaseLoadStoreSDNode(ISD::VP_LOAD, Order, dl, VTs, AM, MemVT, MMO) {
+    LoadSDNodeBits.ExtTy = ETy;
+    LoadSDNodeBits.IsExpanding = isExpanding;
+  }
+
+  ISD::LoadExtType getExtensionType() const {
+    return static_cast<ISD::LoadExtType>(LoadSDNodeBits.ExtTy);
+  }
+
+  const SDValue &getBasePtr() const { return getOperand(1); }
+  const SDValue &getOffset() const { return getOperand(2); }
+  const SDValue &getMask() const { return getOperand(3); }
+  const SDValue &getVectorLength() const { return getOperand(4); }
+
+  static bool classof(const SDNode *N) {
+    return N->getOpcode() == ISD::VP_LOAD;
+  }
+  bool isExpandingLoad() const { return LoadSDNodeBits.IsExpanding; }
+};
+
 /// This class is used to represent an EXPERIMENTAL_VP_STRIDED_LOAD node.
 class VPStridedLoadSDNode : public VPBaseLoadStoreSDNode {
 public:
@@ -2442,8 +2474,8 @@ public:
   VPStridedLoadSDNode(unsigned Order, const DebugLoc &DL, SDVTList VTs,
                       ISD::MemIndexedMode AM, ISD::LoadExtType ETy,
                       bool IsExpanding, EVT MemVT, MachineMemOperand *MMO)
-      : VPBaseLoadStoreSDNode(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, Order, DL,
-                                 VTs, AM, MemVT, MMO) {
+      : VPBaseLoadStoreSDNode(ISD::EXPERIMENTAL_VP_STRIDED_LOAD, Order, DL, VTs,
+                              AM, MemVT, MMO) {
     LoadSDNodeBits.ExtTy = ETy;
     LoadSDNodeBits.IsExpanding = IsExpanding;
   }
@@ -2464,6 +2496,41 @@ public:
   bool isExpandingLoad() const { return LoadSDNodeBits.IsExpanding; }
 };
 
+/// This class is used to represent a VP_STORE node
+class VPStoreSDNode : public VPBaseLoadStoreSDNode {
+public:
+  friend class SelectionDAG;
+
+  VPStoreSDNode(unsigned Order, const DebugLoc &dl, SDVTList VTs,
+                ISD::MemIndexedMode AM, bool isTrunc, bool isCompressing,
+                EVT MemVT, MachineMemOperand *MMO)
+      : VPBaseLoadStoreSDNode(ISD::VP_STORE, Order, dl, VTs, AM, MemVT, MMO) {
+    StoreSDNodeBits.IsTruncating = isTrunc;
+    StoreSDNodeBits.IsCompressing = isCompressing;
+  }
+
+  /// Return true if this is a truncating store.
+  /// For integers this is the same as doing a TRUNCATE and storing the result.
+  /// For floats, it is the same as doing an FP_ROUND and storing the result.
+  bool isTruncatingStore() const { return StoreSDNodeBits.IsTruncating; }
+
+  /// Returns true if the op does a compression to the vector before storing.
+  /// The node contiguously stores the active elements (integers or floats)
+  /// in src (those with their respective bit set in writemask k) to unaligned
+  /// memory at base_addr.
+  bool isCompressingStore() const { return StoreSDNodeBits.IsCompressing; }
+
+  const SDValue &getValue() const { return getOperand(1); }
+  const SDValue &getBasePtr() const { return getOperand(2); }
+  const SDValue &getOffset() const { return getOperand(3); }
+  const SDValue &getMask() const { return getOperand(4); }
+  const SDValue &getVectorLength() const { return getOperand(5); }
+
+  static bool classof(const SDNode *N) {
+    return N->getOpcode() == ISD::VP_STORE;
+  }
+};
+
 /// This class is used to represent an EXPERIMENTAL_VP_STRIDED_STORE node.
 class VPStridedStoreSDNode : public VPBaseLoadStoreSDNode {
 public:
@@ -2473,7 +2540,7 @@ public:
                        ISD::MemIndexedMode AM, bool IsTrunc, bool IsCompressing,
                        EVT MemVT, MachineMemOperand *MMO)
       : VPBaseLoadStoreSDNode(ISD::EXPERIMENTAL_VP_STRIDED_STORE, Order, DL,
-                                 VTs, AM, MemVT, MMO) {
+                              VTs, AM, MemVT, MMO) {
     StoreSDNodeBits.IsTruncating = IsTrunc;
     StoreSDNodeBits.IsCompressing = IsCompressing;
   }
@@ -2498,69 +2565,6 @@ public:
 
   static bool classof(const SDNode *N) {
     return N->getOpcode() == ISD::EXPERIMENTAL_VP_STRIDED_STORE;
-  }
-};
-
-/// This class is used to represent a VP_LOAD node
-class VPLoadSDNode : public VPBaseLoadStoreSDNode {
-public:
-  friend class SelectionDAG;
-
-  VPLoadSDNode(unsigned Order, const DebugLoc &DL, SDVTList VTs,
-               ISD::MemIndexedMode AM, ISD::LoadExtType ETy, bool IsExpanding,
-               EVT MemVT, MachineMemOperand *MMO)
-      : VPBaseLoadStoreSDNode(ISD::VP_LOAD, Order, DL, VTs, AM, MemVT, MMO) {
-    LoadSDNodeBits.ExtTy = ETy;
-    LoadSDNodeBits.IsExpanding = IsExpanding;
-  }
-
-  ISD::LoadExtType getExtensionType() const {
-    return static_cast<ISD::LoadExtType>(LoadSDNodeBits.ExtTy);
-  }
-
-  const SDValue &getBasePtr() const { return getOperand(1); }
-  const SDValue &getOffset() const { return getOperand(2); }
-  const SDValue &getMask() const { return getOperand(3); }
-  const SDValue &getVectorLength() const { return getOperand(4); }
-
-  static bool classof(const SDNode *N) {
-    return N->getOpcode() == ISD::VP_LOAD;
-  }
-  bool isExpandingLoad() const { return LoadSDNodeBits.IsExpanding; }
-};
-
-/// This class is used to represent a VP_STORE node
-class VPStoreSDNode : public VPBaseLoadStoreSDNode {
-public:
-  friend class SelectionDAG;
-
-  VPStoreSDNode(unsigned Order, const DebugLoc &DL, SDVTList VTs,
-                ISD::MemIndexedMode AM, bool IsTrunc, bool IsCompressing,
-                EVT MemVT, MachineMemOperand *MMO)
-      : VPBaseLoadStoreSDNode(ISD::VP_STORE, Order, DL, VTs, AM, MemVT, MMO) {
-    StoreSDNodeBits.IsTruncating = IsTrunc;
-    StoreSDNodeBits.IsCompressing = IsCompressing;
-  }
-
-  /// Return true if this is a truncating store.
-  /// For integers this is the same as doing a TRUNCATE and storing the result.
-  /// For floats, it is the same as doing an FP_ROUND and storing the result.
-  bool isTruncatingStore() const { return StoreSDNodeBits.IsTruncating; }
-
-  /// Returns true if the op does a compression to the vector before storing.
-  /// The node contiguously stores the active elements (integers or floats)
-  /// in src (those with their respective bit set in writemask k) to unaligned
-  /// memory at base_addr.
-  bool isCompressingStore() const { return StoreSDNodeBits.IsCompressing; }
-
-  const SDValue &getValue() const { return getOperand(1); }
-  const SDValue &getBasePtr() const { return getOperand(2); }
-  const SDValue &getOffset() const { return getOperand(3); }
-  const SDValue &getMask() const { return getOperand(4); }
-  const SDValue &getVectorLength() const { return getOperand(5); }
-
-  static bool classof(const SDNode *N) {
-    return N->getOpcode() == ISD::VP_STORE;
   }
 };
 

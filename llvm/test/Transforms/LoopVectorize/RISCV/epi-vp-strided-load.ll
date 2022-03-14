@@ -55,7 +55,7 @@ define dso_local void @gather(i8* noalias nocapture %A, i8* noalias nocapture re
 ; STRIDED-NEXT:    [[TMP2:%.*]] = trunc i64 [[TMP1]] to i32
 ; STRIDED-NEXT:    [[TMP3:%.*]] = mul i64 [[INDEX]], 5
 ; STRIDED-NEXT:    [[TMP4:%.*]] = getelementptr i8, i8* [[B:%.*]], i64 [[TMP3]]
-; STRIDED-NEXT:    [[VP_STRIDED_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.p0i8.i64(i8* [[TMP4]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP2]])
+; STRIDED-NEXT:    [[VP_STRIDED_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.i64(i8* [[TMP4]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP2]])
 ; STRIDED-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
 ; STRIDED-NEXT:    [[TMP6:%.*]] = bitcast i8* [[TMP5]] to <vscale x 8 x i8>*
 ; STRIDED-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP6]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP2]])

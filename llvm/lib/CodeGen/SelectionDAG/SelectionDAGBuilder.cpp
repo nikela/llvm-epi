@@ -7601,28 +7601,21 @@ void SelectionDAGBuilder::visitVPIntToPtr(const VPIntrinsic &I) {
   setValue(&I, N);
 }
 
-void SelectionDAGBuilder::visitVPStridedLoad(const VPIntrinsic &VPIntrin, EVT VT,
-                                            SmallVector<SDValue, 7> &OpValues) {
+void SelectionDAGBuilder::visitVPStridedLoad(
+    const VPIntrinsic &VPIntrin, EVT VT, SmallVectorImpl<SDValue> &OpValues) {
   SDLoc DL = getCurSDLoc();
   Value *PtrOperand = VPIntrin.getArgOperand(0);
-  MaybeAlign Alignment = DAG.getEVTAlign(VT);
+  MaybeAlign Alignment = VPIntrin.getPointerAlignment();
+  if (!Alignment)
+    Alignment = DAG.getEVTAlign(VT.getScalarType());
   AAMDNodes AAInfo = VPIntrin.getAAMetadata();
   const MDNode *Ranges = VPIntrin.getMetadata(LLVMContext::MD_range);
-  MemoryLocation ML;
-  if (VT.isScalableVector())
-    ML = MemoryLocation::getAfter(PtrOperand);
-  else
-    ML = MemoryLocation(
-        PtrOperand,
-        LocationSize::precise(
-            DAG.getDataLayout().getTypeStoreSize(VPIntrin.getType())),
-        AAInfo);
-
+  MemoryLocation ML = MemoryLocation::getAfter(PtrOperand, AAInfo);
   bool AddToChain = !AA || !AA->pointsToConstantMemory(ML);
   SDValue InChain = AddToChain ? DAG.getRoot() : DAG.getEntryNode();
   MachineMemOperand *MMO = DAG.getMachineFunction().getMachineMemOperand(
       MachinePointerInfo(PtrOperand), MachineMemOperand::MOLoad,
-      VT.getStoreSize().getKnownMinSize(), *Alignment, AAInfo, Ranges);
+      MemoryLocation::UnknownSize, *Alignment, AAInfo, Ranges);
 
   SDValue LD = DAG.getStridedLoadVP(VT, DL, InChain, OpValues[0], OpValues[1],
                                     OpValues[2], OpValues[3], MMO,
@@ -7633,21 +7626,24 @@ void SelectionDAGBuilder::visitVPStridedLoad(const VPIntrinsic &VPIntrin, EVT VT
   setValue(&VPIntrin, LD);
 }
 
-void SelectionDAGBuilder::visitVPStridedStore(const VPIntrinsic &VPIntrin,
-                                              SmallVector<SDValue, 7> &OpValues) {
+void SelectionDAGBuilder::visitVPStridedStore(
+    const VPIntrinsic &VPIntrin, SmallVectorImpl<SDValue> &OpValues) {
   SDLoc DL = getCurSDLoc();
   Value *PtrOperand = VPIntrin.getArgOperand(1);
   EVT VT = OpValues[0].getValueType();
-  MaybeAlign Alignment = DAG.getEVTAlign(VT);
+  MaybeAlign Alignment = VPIntrin.getPointerAlignment();
+  if (!Alignment)
+    Alignment = DAG.getEVTAlign(VT.getScalarType());
   AAMDNodes AAInfo = VPIntrin.getAAMetadata();
-
   MachineMemOperand *MMO = DAG.getMachineFunction().getMachineMemOperand(
       MachinePointerInfo(PtrOperand), MachineMemOperand::MOStore,
-      VT.getStoreSize().getKnownMinSize(), *Alignment, AAInfo);
+      MemoryLocation::UnknownSize, *Alignment, AAInfo);
 
-  SDValue ST =
-      DAG.getStridedStoreVP(getMemoryRoot(), DL, OpValues[0], OpValues[1], OpValues[2],
-                     OpValues[3], OpValues[4], MMO, false /* IsCompressing */);
+  SDValue ST = DAG.getStridedStoreVP(
+      getMemoryRoot(), DL, OpValues[0], OpValues[1],
+      DAG.getUNDEF(OpValues[1].getValueType()), OpValues[2], OpValues[3],
+      OpValues[4], VT, MMO, ISD::UNINDEXED, /*IsTruncating*/ false,
+      /*IsCompressing*/ false);
 
   DAG.setRoot(ST);
   setValue(&VPIntrin, ST);
@@ -7701,18 +7697,18 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     visitVPLoadGather(VPIntrin, ValueVTs[0], OpValues,
                       Opcode == ISD::VP_GATHER);
     break;
+  case ISD::EXPERIMENTAL_VP_STRIDED_LOAD:
+    visitVPStridedLoad(VPIntrin, ValueVTs[0], OpValues);
+    break;
   case ISD::VP_STORE:
   case ISD::VP_SCATTER:
     visitVPStoreScatter(VPIntrin, OpValues, Opcode == ISD::VP_SCATTER);
     break;
-  case ISD::VP_SETCC:
-    visitCmpVP(VPIntrin);
-    break;
-  case ISD::EXPERIMENTAL_VP_STRIDED_LOAD:
-    visitVPStridedLoad(VPIntrin, ValueVTs[0], OpValues);
-    break;
   case ISD::EXPERIMENTAL_VP_STRIDED_STORE:
     visitVPStridedStore(VPIntrin, OpValues);
+    break;
+  case ISD::VP_SETCC:
+    visitCmpVP(VPIntrin);
     break;
   }
 }
