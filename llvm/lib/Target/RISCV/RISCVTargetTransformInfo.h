@@ -176,12 +176,6 @@ public:
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasVInstructions(); }
   Optional<unsigned> getMaxVScale() const;
-  InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                             Optional<FastMathFlags> FMF,
-                                             TTI::TargetCostKind CostKind);
-  InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                                         bool IsUnsigned,
-                                         TTI::TargetCostKind CostKind);
 
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const;
 
@@ -212,6 +206,14 @@ public:
                                          Align Alignment,
                                          TTI::TargetCostKind CostKind,
                                          const Instruction *I);
+
+  InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
+                                         bool IsUnsigned,
+                                         TTI::TargetCostKind CostKind);
+
+  InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
+                                             Optional<FastMathFlags> FMF,
+                                             TTI::TargetCostKind CostKind);
 
   bool isLegalMaskedLoadStore(Type *DataType, Align Alignment) {
     if (!ST->hasVInstructions())

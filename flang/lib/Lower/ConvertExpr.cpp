@@ -461,6 +461,27 @@ argumentHostAssocs(Fortran::lower::AbstractConverter &converter,
   return {};
 }
 
+/// \p argTy must be a tuple (pair) of boxproc and integral types. Convert the
+/// \p funcAddr argument to a boxproc value, with the host-association as
+/// required. Call the factory function to finish creating the tuple value.
+static mlir::Value
+createBoxProcCharTuple(Fortran::lower::AbstractConverter &converter,
+                       mlir::Type argTy, mlir::Value funcAddr,
+                       mlir::Value charLen) {
+  auto boxTy =
+      argTy.cast<mlir::TupleType>().getType(0).cast<fir::BoxProcType>();
+  mlir::Location loc = converter.getCurrentLocation();
+  auto &builder = converter.getFirOpBuilder();
+  auto boxProc = [&]() -> mlir::Value {
+    if (auto host = argumentHostAssocs(converter, funcAddr))
+      return builder.create<fir::EmboxProcOp>(
+          loc, boxTy, llvm::ArrayRef<mlir::Value>{funcAddr, host});
+    return builder.create<fir::EmboxProcOp>(loc, boxTy, funcAddr);
+  }();
+  return fir::factory::createCharacterProcedureTuple(builder, loc, argTy,
+                                                     boxProc, charLen);
+}
+
 namespace {
 
 /// Lowering of Fortran::evaluate::Expr<T> expressions
@@ -951,7 +972,14 @@ public:
 
   template <int KIND>
   ExtValue genval(const Fortran::evaluate::Concat<KIND> &op) {
-    TODO(getLoc(), "genval Concat<KIND>");
+    ExtValue lhs = genval(op.left());
+    ExtValue rhs = genval(op.right());
+    const fir::CharBoxValue *lhsChar = lhs.getCharBox();
+    const fir::CharBoxValue *rhsChar = rhs.getCharBox();
+    if (lhsChar && rhsChar)
+      return fir::factory::CharacterExprHelper{builder, getLoc()}
+          .createConcatenate(*lhsChar, *rhsChar);
+    TODO(getLoc(), "character array concatenate");
   }
 
   /// MIN and MAX operations
@@ -1749,6 +1777,12 @@ public:
   ExtValue genProcedureRef(const Fortran::evaluate::ProcedureRef &procRef,
                            llvm::Optional<mlir::Type> resultType) {
     ExtValue res = genRawProcedureRef(procRef, resultType);
+    // In most contexts, pointers and allocatable do not appear as allocatable
+    // or pointer variable on the caller side (see 8.5.3 note 1 for
+    // allocatables). The few context where this can happen must call
+    // genRawProcedureRef directly.
+    if (const auto *box = res.getBoxOf<fir::MutableBoxValue>())
+      return fir::factory::genMutableBoxRead(builder, getLoc(), *box);
     return res;
   }
 
@@ -3745,6 +3779,141 @@ public:
     };
   }
 
+  /// Lower a procedure reference to a user-defined elemental procedure.
+  CC genElementalUserDefinedProcRef(
+      const Fortran::evaluate::ProcedureRef &procRef,
+      llvm::Optional<mlir::Type> retTy) {
+    using PassBy = Fortran::lower::CallerInterface::PassEntityBy;
+
+    // 10.1.4 p5. Impure elemental procedures must be called in element order.
+    if (const Fortran::semantics::Symbol *procSym = procRef.proc().GetSymbol())
+      if (!Fortran::semantics::IsPureProcedure(*procSym))
+        setUnordered(false);
+
+    Fortran::lower::CallerInterface caller(procRef, converter);
+    llvm::SmallVector<CC> operands;
+    operands.reserve(caller.getPassedArguments().size());
+    mlir::Location loc = getLoc();
+    mlir::FunctionType callSiteType = caller.genFunctionType();
+    for (const Fortran::lower::CallInterface<
+             Fortran::lower::CallerInterface>::PassedEntity &arg :
+         caller.getPassedArguments()) {
+      // 15.8.3 p1. Elemental procedure with intent(out)/intent(inout)
+      // arguments must be called in element order.
+      if (arg.mayBeModifiedByCall())
+        setUnordered(false);
+      const auto *actual = arg.entity;
+      mlir::Type argTy = callSiteType.getInput(arg.firArgument);
+      if (!actual) {
+        // Optional dummy argument for which there is no actual argument.
+        auto absent = builder.create<fir::AbsentOp>(loc, argTy);
+        operands.emplace_back([=](IterSpace) { return absent; });
+        continue;
+      }
+      const auto *expr = actual->UnwrapExpr();
+      if (!expr)
+        TODO(loc, "assumed type actual argument lowering");
+
+      LLVM_DEBUG(expr->AsFortran(llvm::dbgs()
+                                 << "argument: " << arg.firArgument << " = [")
+                 << "]\n");
+      if (arg.isOptional() && Fortran::evaluate::MayBePassedAsAbsentOptional(
+                                  *expr, converter.getFoldingContext()))
+        TODO(loc,
+             "passing dynamically optional argument to elemental procedures");
+      switch (arg.passBy) {
+      case PassBy::Value: {
+        // True pass-by-value semantics.
+        PushSemantics(ConstituentSemantics::RefTransparent);
+        operands.emplace_back(genElementalArgument(*expr));
+      } break;
+      case PassBy::BaseAddressValueAttribute: {
+        // VALUE attribute or pass-by-reference to a copy semantics. (byval*)
+        if (isArray(*expr)) {
+          PushSemantics(ConstituentSemantics::ByValueArg);
+          operands.emplace_back(genElementalArgument(*expr));
+        } else {
+          // Store scalar value in a temp to fulfill VALUE attribute.
+          mlir::Value val = fir::getBase(asScalar(*expr));
+          mlir::Value temp = builder.createTemporary(
+              loc, val.getType(),
+              llvm::ArrayRef<mlir::NamedAttribute>{
+                  Fortran::lower::getAdaptToByRefAttr(builder)});
+          builder.create<fir::StoreOp>(loc, val, temp);
+          operands.emplace_back(
+              [=](IterSpace iters) -> ExtValue { return temp; });
+        }
+      } break;
+      case PassBy::BaseAddress: {
+        if (isArray(*expr)) {
+          PushSemantics(ConstituentSemantics::RefOpaque);
+          operands.emplace_back(genElementalArgument(*expr));
+        } else {
+          ExtValue exv = asScalarRef(*expr);
+          operands.emplace_back([=](IterSpace iters) { return exv; });
+        }
+      } break;
+      case PassBy::CharBoxValueAttribute: {
+        if (isArray(*expr)) {
+          PushSemantics(ConstituentSemantics::DataValue);
+          auto lambda = genElementalArgument(*expr);
+          operands.emplace_back([=](IterSpace iters) {
+            return fir::factory::CharacterExprHelper{builder, loc}
+                .createTempFrom(lambda(iters));
+          });
+        } else {
+          fir::factory::CharacterExprHelper helper(builder, loc);
+          fir::CharBoxValue argVal = helper.createTempFrom(asScalarRef(*expr));
+          operands.emplace_back(
+              [=](IterSpace iters) -> ExtValue { return argVal; });
+        }
+      } break;
+      case PassBy::BoxChar: {
+        PushSemantics(ConstituentSemantics::RefOpaque);
+        operands.emplace_back(genElementalArgument(*expr));
+      } break;
+      case PassBy::AddressAndLength:
+        // PassBy::AddressAndLength is only used for character results. Results
+        // are not handled here.
+        fir::emitFatalError(
+            loc, "unexpected PassBy::AddressAndLength in elemental call");
+        break;
+      case PassBy::CharProcTuple: {
+        ExtValue argRef = asScalarRef(*expr);
+        mlir::Value tuple = createBoxProcCharTuple(
+            converter, argTy, fir::getBase(argRef), fir::getLen(argRef));
+        operands.emplace_back(
+            [=](IterSpace iters) -> ExtValue { return tuple; });
+      } break;
+      case PassBy::Box:
+      case PassBy::MutableBox:
+        // See C15100 and C15101
+        fir::emitFatalError(loc, "cannot be POINTER, ALLOCATABLE");
+      }
+    }
+
+    if (caller.getIfIndirectCallSymbol())
+      fir::emitFatalError(loc, "cannot be indirect call");
+
+    // The lambda is mutable so that `caller` copy can be modified inside it.
+    return
+        [=, caller = std::move(caller)](IterSpace iters) mutable -> ExtValue {
+          for (const auto &[cc, argIface] :
+               llvm::zip(operands, caller.getPassedArguments())) {
+            auto exv = cc(iters);
+            auto arg = exv.match(
+                [&](const fir::CharBoxValue &cb) -> mlir::Value {
+                  return fir::factory::CharacterExprHelper{builder, loc}
+                      .createEmbox(cb);
+                },
+                [&](const auto &) { return fir::getBase(exv); });
+            caller.placeInput(argIface, arg);
+          }
+          return ScalarExprLowering{loc, converter, symMap, getElementCtx()}
+              .genCallOpAndResult(caller, callSiteType, retTy);
+        };
+  }
+
   /// Generate a procedure reference. This code is shared for both functions and
   /// subroutines, the difference being reflected by `retTy`.
   CC genProcRef(const Fortran::evaluate::ProcedureRef &procRef,
@@ -3767,7 +3936,9 @@ public:
       if (ScalarExprLowering::isStatementFunctionCall(procRef))
         fir::emitFatalError(loc, "statement function cannot be elemental");
 
-      TODO(loc, "elemental user defined proc ref");
+      // Elemental call.
+      // The procedure is called once per element of the array argument(s).
+      return genElementalUserDefinedProcRef(procRef, retTy);
     }
 
     // Transformational call.
@@ -3860,20 +4031,41 @@ public:
 
   template <int KIND>
   CC genarr(const Fortran::evaluate::ComplexComponent<KIND> &x) {
-    TODO(getLoc(), "");
+    TODO(getLoc(), "ComplexComponent<KIND>");
   }
 
   template <typename T>
   CC genarr(const Fortran::evaluate::Parentheses<T> &x) {
-    TODO(getLoc(), "");
+    mlir::Location loc = getLoc();
+    if (isReferentiallyOpaque()) {
+      // Context is a call argument in, for example, an elemental procedure
+      // call. TODO: all array arguments should use array_load, array_access,
+      // array_amend, and INTENT(OUT), INTENT(INOUT) arguments should have
+      // array_merge_store ops.
+      TODO(loc, "parentheses on argument in elemental call");
+    }
+    auto f = genarr(x.left());
+    return [=](IterSpace iters) -> ExtValue {
+      auto val = f(iters);
+      mlir::Value base = fir::getBase(val);
+      auto newBase =
+          builder.create<fir::NoReassocOp>(loc, base.getType(), base);
+      return fir::substBase(val, newBase);
+    };
   }
-
   template <int KIND>
   CC genarr(const Fortran::evaluate::Negate<Fortran::evaluate::Type<
                 Fortran::common::TypeCategory::Integer, KIND>> &x) {
-    TODO(getLoc(), "");
+    mlir::Location loc = getLoc();
+    auto f = genarr(x.left());
+    return [=](IterSpace iters) -> ExtValue {
+      mlir::Value val = fir::getBase(f(iters));
+      mlir::Type ty =
+          converter.genType(Fortran::common::TypeCategory::Integer, KIND);
+      mlir::Value zero = builder.createIntegerConstant(loc, ty, 0);
+      return builder.create<mlir::arith::SubIOp>(loc, zero, val);
+    };
   }
-
   template <int KIND>
   CC genarr(const Fortran::evaluate::Negate<Fortran::evaluate::Type<
                 Fortran::common::TypeCategory::Real, KIND>> &x) {
@@ -3886,7 +4078,11 @@ public:
   template <int KIND>
   CC genarr(const Fortran::evaluate::Negate<Fortran::evaluate::Type<
                 Fortran::common::TypeCategory::Complex, KIND>> &x) {
-    TODO(getLoc(), "");
+    mlir::Location loc = getLoc();
+    auto f = genarr(x.left());
+    return [=](IterSpace iters) -> ExtValue {
+      return builder.create<fir::NegcOp>(loc, fir::getBase(f(iters)));
+    };
   }
 
   //===--------------------------------------------------------------------===//
@@ -3929,7 +4125,15 @@ public:
   template <Fortran::common::TypeCategory TC, int KIND>
   CC genarr(
       const Fortran::evaluate::Power<Fortran::evaluate::Type<TC, KIND>> &x) {
-    TODO(getLoc(), "genarr Power<Fortran::evaluate::Type<TC, KIND>>");
+    mlir::Location loc = getLoc();
+    mlir::Type ty = converter.genType(TC, KIND);
+    auto lf = genarr(x.left());
+    auto rf = genarr(x.right());
+    return [=](IterSpace iters) -> ExtValue {
+      mlir::Value lhs = fir::getBase(lf(iters));
+      mlir::Value rhs = fir::getBase(rf(iters));
+      return Fortran::lower::genPow(builder, loc, ty, lhs, rhs);
+    };
   }
   template <Fortran::common::TypeCategory TC, int KIND>
   CC genarr(
@@ -4738,14 +4942,67 @@ public:
     TODO(getLoc(), "genarr StructureConstructor");
   }
 
-  template <int KIND>
-  CC genarr(const Fortran::evaluate::Not<KIND> &x) {
-    TODO(getLoc(), "genarr Not");
-  }
+  //===--------------------------------------------------------------------===//
+  // LOCICAL operators (.NOT., .AND., .EQV., etc.)
+  //===--------------------------------------------------------------------===//
 
   template <int KIND>
+  CC genarr(const Fortran::evaluate::Not<KIND> &x) {
+    mlir::Location loc = getLoc();
+    mlir::IntegerType i1Ty = builder.getI1Type();
+    auto lambda = genarr(x.left());
+    mlir::Value truth = builder.createBool(loc, true);
+    return [=](IterSpace iters) -> ExtValue {
+      mlir::Value logical = fir::getBase(lambda(iters));
+      mlir::Value val = builder.createConvert(loc, i1Ty, logical);
+      return builder.create<mlir::arith::XOrIOp>(loc, val, truth);
+    };
+  }
+  template <typename OP, typename A>
+  CC createBinaryBoolOp(const A &x) {
+    mlir::Location loc = getLoc();
+    mlir::IntegerType i1Ty = builder.getI1Type();
+    auto lf = genarr(x.left());
+    auto rf = genarr(x.right());
+    return [=](IterSpace iters) -> ExtValue {
+      mlir::Value left = fir::getBase(lf(iters));
+      mlir::Value right = fir::getBase(rf(iters));
+      mlir::Value lhs = builder.createConvert(loc, i1Ty, left);
+      mlir::Value rhs = builder.createConvert(loc, i1Ty, right);
+      return builder.create<OP>(loc, lhs, rhs);
+    };
+  }
+  template <typename OP, typename A>
+  CC createCompareBoolOp(mlir::arith::CmpIPredicate pred, const A &x) {
+    mlir::Location loc = getLoc();
+    mlir::IntegerType i1Ty = builder.getI1Type();
+    auto lf = genarr(x.left());
+    auto rf = genarr(x.right());
+    return [=](IterSpace iters) -> ExtValue {
+      mlir::Value left = fir::getBase(lf(iters));
+      mlir::Value right = fir::getBase(rf(iters));
+      mlir::Value lhs = builder.createConvert(loc, i1Ty, left);
+      mlir::Value rhs = builder.createConvert(loc, i1Ty, right);
+      return builder.create<OP>(loc, pred, lhs, rhs);
+    };
+  }
+  template <int KIND>
   CC genarr(const Fortran::evaluate::LogicalOperation<KIND> &x) {
-    TODO(getLoc(), "genarr LogicalOperation");
+    switch (x.logicalOperator) {
+    case Fortran::evaluate::LogicalOperator::And:
+      return createBinaryBoolOp<mlir::arith::AndIOp>(x);
+    case Fortran::evaluate::LogicalOperator::Or:
+      return createBinaryBoolOp<mlir::arith::OrIOp>(x);
+    case Fortran::evaluate::LogicalOperator::Eqv:
+      return createCompareBoolOp<mlir::arith::CmpIOp>(
+          mlir::arith::CmpIPredicate::eq, x);
+    case Fortran::evaluate::LogicalOperator::Neqv:
+      return createCompareBoolOp<mlir::arith::CmpIOp>(
+          mlir::arith::CmpIPredicate::ne, x);
+    case Fortran::evaluate::LogicalOperator::Not:
+      llvm_unreachable(".NOT. handled elsewhere");
+    }
+    llvm_unreachable("unhandled case");
   }
 
   //===--------------------------------------------------------------------===//

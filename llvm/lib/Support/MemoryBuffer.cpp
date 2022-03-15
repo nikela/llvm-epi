@@ -13,10 +13,9 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Config/config.h"
-#include "llvm/Support/AutoConvert.h"
+#include "llvm/Support/Errc.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Errc.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/Process.h"
@@ -31,6 +30,10 @@
 #include <unistd.h>
 #else
 #include <io.h>
+#endif
+
+#ifdef __MVS__
+#include "llvm/Support/AutoConvert.h"
 #endif
 using namespace llvm;
 

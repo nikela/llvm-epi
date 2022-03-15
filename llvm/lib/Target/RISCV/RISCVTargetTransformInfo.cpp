@@ -334,64 +334,6 @@ Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
   return BaseT::getMaxVScale();
 }
 
-InstructionCost
-RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *ValTy,
-                                         Optional<FastMathFlags> FMF,
-                                         TTI::TargetCostKind CostKind) {
-  if (!isa<ScalableVectorType>(ValTy))
-    return BaseT::getArithmeticReductionCost(Opcode, ValTy, FMF, CostKind);
-
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, ValTy);
-  InstructionCost LegalizationCost = 0;
-  if (LT.first > 1) {
-    Type *LegalVTy = EVT(LT.second).getTypeForEVT(ValTy->getContext());
-    LegalizationCost = getArithmeticInstrCost(Opcode, LegalVTy, CostKind);
-    LegalizationCost *= LT.first - 1;
-  }
-
-  // Add the final reduction cost for the legal horizontal reduction
-  switch (Opcode) {
-  case Instruction::And:
-  case Instruction::Or:
-  case Instruction::Xor:
-  case Instruction::ICmp:
-  case Instruction::FCmp:
-  case Instruction::FAdd:
-  case Instruction::Add:
-    return LegalizationCost + 2;
-  default:
-    return InstructionCost::getInvalid();
-  }
-}
-
-// Taken from AArch64.
-InstructionCost
-RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
-                                     bool IsUnsigned,
-                                     TTI::TargetCostKind CostKind) {
-  if (!isa<ScalableVectorType>(Ty))
-    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
-
-  assert((isa<ScalableVectorType>(Ty) && isa<ScalableVectorType>(CondTy)) &&
-         "Both vectors need to be scalable");
-
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
-  InstructionCost LegalizationCost = 0;
-  if (LT.first > 1) {
-    Type *LegalVTy = EVT(LT.second).getTypeForEVT(Ty->getContext());
-    unsigned CmpOpcode =
-        Ty->isFPOrFPVectorTy() ? Instruction::FCmp : Instruction::ICmp;
-    LegalizationCost =
-        getCmpSelInstrCost(CmpOpcode, LegalVTy, LegalVTy,
-                           CmpInst::BAD_ICMP_PREDICATE, CostKind) +
-        getCmpSelInstrCost(Instruction::Select, LegalVTy, LegalVTy,
-                           CmpInst::BAD_ICMP_PREDICATE, CostKind);
-    LegalizationCost *= LT.first - 1;
-  }
-
-  return LegalizationCost + /*Cost of horizontal reduction*/ 2;
-}
-
 TypeSize
 RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
   unsigned LMUL = PowerOf2Floor(
@@ -576,6 +518,108 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   }
 
   return BaseT::getIntrinsicInstrCost(ICA, CostKind);
+}
+
+InstructionCost
+RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
+                                     bool IsUnsigned,
+                                     TTI::TargetCostKind CostKind) {
+  if (isa<ScalableVectorType>(Ty)) {
+    assert((isa<ScalableVectorType>(Ty) && isa<ScalableVectorType>(CondTy)) &&
+           "Both vectors need to be scalable");
+
+    std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
+    InstructionCost LegalizationCost = 0;
+    if (LT.first > 1) {
+      Type *LegalVTy = EVT(LT.second).getTypeForEVT(Ty->getContext());
+      unsigned CmpOpcode =
+          Ty->isFPOrFPVectorTy() ? Instruction::FCmp : Instruction::ICmp;
+      LegalizationCost =
+          getCmpSelInstrCost(CmpOpcode, LegalVTy, LegalVTy,
+                             CmpInst::BAD_ICMP_PREDICATE, CostKind) +
+          getCmpSelInstrCost(Instruction::Select, LegalVTy, LegalVTy,
+                             CmpInst::BAD_ICMP_PREDICATE, CostKind);
+      LegalizationCost *= LT.first - 1;
+    }
+    return LegalizationCost + /*Cost of horizontal reduction*/ 2;
+  }
+
+  if (!isa<FixedVectorType>(Ty))
+    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
+
+  if (!ST->useRVVForFixedLengthVectors())
+    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
+
+  // Skip if scalar size of Ty is bigger than ELEN.
+  if (Ty->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
+
+  // IR Reduction is composed by two vmv and one rvv reduction instruction.
+  InstructionCost BaseCost = 2;
+  unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
+  return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
+}
+
+InstructionCost
+RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *VTy,
+                                         Optional<FastMathFlags> FMF,
+                                         TTI::TargetCostKind CostKind) {
+  if (isa<ScalableVectorType>(VTy)) {
+    std::pair<InstructionCost, MVT> LT =
+        TLI->getTypeLegalizationCost(DL, VTy);
+    InstructionCost LegalizationCost = 0;
+    if (LT.first > 1) {
+      Type *LegalVTy = EVT(LT.second).getTypeForEVT(VTy->getContext());
+      LegalizationCost = getArithmeticInstrCost(Opcode, LegalVTy, CostKind);
+      LegalizationCost *= LT.first - 1;
+    }
+
+    // Add the final reduction cost for the legal horizontal reduction
+    switch (Opcode) {
+    case Instruction::And:
+    case Instruction::Or:
+    case Instruction::Xor:
+    case Instruction::ICmp:
+    case Instruction::FCmp:
+    case Instruction::FAdd:
+    case Instruction::Add:
+      return LegalizationCost + 2;
+    default:
+      return InstructionCost::getInvalid();
+    }
+  }
+
+
+  if (!isa<FixedVectorType>(VTy))
+    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
+
+  // FIXME: Do not support i1 and/or reduction now.
+  if (VTy->getElementType()->isIntegerTy(1))
+    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
+
+  if (!ST->useRVVForFixedLengthVectors())
+    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
+
+  // Skip if scalar size of VTy is bigger than ELEN.
+  if (VTy->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
+
+  int ISD = TLI->InstructionOpcodeToISD(Opcode);
+  assert(ISD && "Invalid opcode");
+
+  if (ISD != ISD::ADD && ISD != ISD::OR && ISD != ISD::XOR && ISD != ISD::AND &&
+      ISD != ISD::FADD)
+    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
+
+  // IR Reduction is composed by two vmv and one rvv reduction instruction.
+  InstructionCost BaseCost = 2;
+  unsigned VL = cast<FixedVectorType>(VTy)->getNumElements();
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, VTy);
+
+  if (TTI::requiresOrderedReduction(FMF))
+    return (LT.first - 1) + BaseCost + VL;
+  return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
 }
 
 void RISCVTTIImpl::getUnrollingPreferences(Loop *L, ScalarEvolution &SE,
