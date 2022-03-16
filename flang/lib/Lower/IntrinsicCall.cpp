@@ -441,6 +441,8 @@ struct IntrinsicLibrary {
   template <mlir::arith::CmpIPredicate pred>
   fir::ExtendedValue genCharacterCompare(mlir::Type,
                                          llvm::ArrayRef<fir::ExtendedValue>);
+  void genCpuTime(llvm::ArrayRef<fir::ExtendedValue>);
+  void genDateAndTime(llvm::ArrayRef<fir::ExtendedValue>);
   template <Extremum, ExtremumBehavior>
   mlir::Value genExtremum(mlir::Type, llvm::ArrayRef<mlir::Value>);
   /// Lowering for the IAND intrinsic. The IAND intrinsic expects two arguments
@@ -460,6 +462,7 @@ struct IntrinsicLibrary {
   void genRandomSeed(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genSize(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genSum(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
+  void genSystemClock(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genUbound(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
 
   /// Define the different FIR generators that can be mapped to intrinsic to
@@ -574,6 +577,17 @@ static constexpr IntrinsicHandler handlers[]{
      {{{"pointer", asInquired}, {"target", asInquired}}},
      /*isElemental=*/false},
     {"char", &I::genChar},
+    {"cpu_time",
+     &I::genCpuTime,
+     {{{"time", asAddr}}},
+     /*isElemental=*/false},
+    {"date_and_time",
+     &I::genDateAndTime,
+     {{{"date", asAddr, handleDynamicOptional},
+       {"time", asAddr, handleDynamicOptional},
+       {"zone", asAddr, handleDynamicOptional},
+       {"values", asBox, handleDynamicOptional}}},
+     /*isElemental=*/false},
     {"dim", &I::genDim},
     {"dot_product",
      &I::genDotProduct,
@@ -638,6 +652,10 @@ static constexpr IntrinsicHandler handlers[]{
      {{{"array", asBox},
        {"dim", asValue},
        {"mask", asBox, handleDynamicOptional}}},
+     /*isElemental=*/false},
+    {"system_clock",
+     &I::genSystemClock,
+     {{{"count", asAddr}, {"count_rate", asAddr}, {"count_max", asAddr}}},
      /*isElemental=*/false},
     {"ubound",
      &I::genUbound,
@@ -1602,6 +1620,34 @@ IntrinsicLibrary::genDotProduct(mlir::Type resultType,
                     stmtCtx, args);
 }
 
+// CPU_TIME
+void IntrinsicLibrary::genCpuTime(llvm::ArrayRef<fir::ExtendedValue> args) {
+  assert(args.size() == 1);
+  const mlir::Value *arg = args[0].getUnboxed();
+  assert(arg && "nonscalar cpu_time argument");
+  mlir::Value res1 = Fortran::lower::genCpuTime(builder, loc);
+  mlir::Value res2 =
+      builder.createConvert(loc, fir::dyn_cast_ptrEleTy(arg->getType()), res1);
+  builder.create<fir::StoreOp>(loc, res2, *arg);
+}
+
+// DATE_AND_TIME
+void IntrinsicLibrary::genDateAndTime(llvm::ArrayRef<fir::ExtendedValue> args) {
+  assert(args.size() == 4 && "date_and_time has 4 args");
+  llvm::SmallVector<llvm::Optional<fir::CharBoxValue>> charArgs(3);
+  for (unsigned i = 0; i < 3; ++i)
+    if (const fir::CharBoxValue *charBox = args[i].getCharBox())
+      charArgs[i] = *charBox;
+
+  mlir::Value values = fir::getBase(args[3]);
+  if (!values)
+    values = builder.create<fir::AbsentOp>(
+        loc, fir::BoxType::get(builder.getNoneType()));
+
+  Fortran::lower::genDateAndTime(builder, loc, charArgs[0], charArgs[1],
+                                 charArgs[2], values);
+}
+
 // IAND
 mlir::Value IntrinsicLibrary::genIand(mlir::Type resultType,
                                       llvm::ArrayRef<mlir::Value> args) {
@@ -1832,6 +1878,13 @@ IntrinsicLibrary::genSum(mlir::Type resultType,
                          llvm::ArrayRef<fir::ExtendedValue> args) {
   return genProdOrSum(fir::runtime::genSum, fir::runtime::genSumDim, resultType,
                       builder, loc, stmtCtx, "unexpected result for Sum", args);
+}
+
+// SYSTEM_CLOCK
+void IntrinsicLibrary::genSystemClock(llvm::ArrayRef<fir::ExtendedValue> args) {
+  assert(args.size() == 3);
+  Fortran::lower::genSystemClock(builder, loc, fir::getBase(args[0]),
+                                 fir::getBase(args[1]), fir::getBase(args[2]));
 }
 
 // SIZE
