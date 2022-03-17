@@ -401,7 +401,34 @@ RISCVTTIImpl::getMaskedMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
     return BaseT::getMaskedMemoryOpCost(Opcode, Src, Alignment, AddressSpace,
                                         CostKind);
 
-  return getMemoryOpCost(Opcode, Src, Alignment, AddressSpace, CostKind);
+  auto LT = TLI->getTypeLegalizationCost(DL, Src);
+  if (!LT.first.isValid())
+    return InstructionCost::getInvalid();
+  return LT.first;
+}
+
+InstructionCost RISCVTTIImpl::getMemoryOpCost(unsigned Opcode, Type *Ty,
+                                              MaybeAlign Alignment,
+                                              unsigned AddressSpace,
+                                              TTI::TargetCostKind CostKind,
+                                              const Instruction *I) {
+  if (!isa<ScalableVectorType>(Ty))
+    return BaseT::getMemoryOpCost(Opcode, Ty, Alignment, AddressSpace,
+                                  CostKind);
+
+  // Taken from AArch64.
+  auto LT = TLI->getTypeLegalizationCost(DL, Ty);
+  if (!LT.first.isValid())
+    return InstructionCost::getInvalid();
+
+  // TODO: consider latency as well for TCK_SizeAndLatency.
+  if (CostKind == TTI::TCK_CodeSize || CostKind == TTI::TCK_SizeAndLatency)
+    return LT.first;
+
+  if (CostKind != TTI::TCK_RecipThroughput)
+    return 1;
+
+  return LT.first;
 }
 
 InstructionCost RISCVTTIImpl::getGatherScatterOpCost(

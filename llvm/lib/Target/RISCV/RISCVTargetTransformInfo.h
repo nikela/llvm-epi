@@ -181,6 +181,11 @@ public:
 
   InstructionCost getRegUsageForType(Type *Ty);
 
+  InstructionCost getMemoryOpCost(unsigned Opcode, Type *Ty,
+                                  MaybeAlign Alignment, unsigned AddressSpace,
+                                  TTI::TargetCostKind CostKind,
+                                  const Instruction *I = nullptr);
+
   InstructionCost getMaskedMemoryOpCost(unsigned Opcode, Type *Src,
                                         Align Alignment, unsigned AddressSpace,
                                         TTI::TargetCostKind CostKind);
