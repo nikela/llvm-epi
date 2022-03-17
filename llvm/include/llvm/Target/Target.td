@@ -281,10 +281,6 @@ class RegisterClass<string namespace, list<ValueType> regTypes, int alignment,
   // constrained classes first. The value has to be in the range [0,63].
   int AllocationPriority = 0;
 
-  // AllowsNoRegister - Specify that instructions may use NoRegister (0) instead
-  // of a physical register for an operand of this register class.
-  bit AllowsNoRegister = 0;
-
   // Generate register pressure set for this register class and any class
   // synthesized from it. Set to 0 to inhibit unneeded pressure sets.
   bit GeneratePressureSet = true;

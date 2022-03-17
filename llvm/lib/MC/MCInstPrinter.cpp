@@ -104,9 +104,7 @@ static bool matchAliasCondition(const MCInst &MI, const MCSubtargetInfo *STI,
     return Opnd.isReg() && Opnd.getReg() == MI.getOperand(C.Value).getReg();
   case AliasPatternCond::K_RegClass:
     // Operand must be a register in this class. Value is a register class id.
-    return Opnd.isReg() && (MRI.getRegClass(C.Value).contains(Opnd.getReg()) ||
-                            (MRI.getRegClass(C.Value).allowsNoRegister() &&
-                             Opnd.getReg() == 0));
+    return Opnd.isReg() && MRI.getRegClass(C.Value).contains(Opnd.getReg());
   case AliasPatternCond::K_Custom:
     // Operand must match some custom criteria.
     return M.ValidateMCOperand(Opnd, *STI, C.Value);

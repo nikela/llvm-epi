@@ -121,14 +121,15 @@ RegSizeInfo::RegSizeInfo(Record *R, const CodeGenHwModes &CGH) {
   SpillAlignment = R->getValueAsInt("SpillAlignment");
 }
 
-bool RegSizeInfo::operator<(const RegSizeInfo &I) const {
+bool RegSizeInfo::operator< (const RegSizeInfo &I) const {
   return std::tie(RegSize, SpillSize, SpillAlignment) <
          std::tie(I.RegSize, I.SpillSize, I.SpillAlignment);
 }
 
 bool RegSizeInfo::isSubClassOf(const RegSizeInfo &I) const {
-  return RegSize <= I.RegSize && SpillAlignment &&
-         I.SpillAlignment % SpillAlignment == 0 && SpillSize <= I.SpillSize;
+  return RegSize <= I.RegSize &&
+         SpillAlignment && I.SpillAlignment % SpillAlignment == 0 &&
+         SpillSize <= I.SpillSize;
 }
 
 void RegSizeInfo::writeToStream(raw_ostream &OS) const {
@@ -167,7 +168,7 @@ bool RegSizeInfoByHwMode::hasStricterSpillThan(const RegSizeInfoByHwMode &I)
   const RegSizeInfo &A0 = get(M0);
   const RegSizeInfo &B0 = I.get(M0);
   return std::tie(A0.SpillSize, A0.SpillAlignment) >
-             std::tie(B0.SpillSize, B0.SpillAlignment);
+         std::tie(B0.SpillSize, B0.SpillAlignment);
 }
 
 void RegSizeInfoByHwMode::writeToStream(raw_ostream &OS) const {
