@@ -533,7 +533,6 @@ defvar VMaskVTs = [vbool1_t, vbool2_t, vbool4_t, vbool8_t, vbool16_t,
 
 def VMV0 : RegisterClass<"RISCV", VMaskVTs, 64, (add V0)> {
   let Size = 64;
-  let AllowsNoRegister = 1;
 }
 
 let RegInfos = XLenRI in {

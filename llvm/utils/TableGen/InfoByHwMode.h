@@ -151,7 +151,7 @@ struct RegSizeInfo {
   RegSizeInfo(Record *R, const CodeGenHwModes &CGH);
   RegSizeInfo() = default;
   bool operator< (const RegSizeInfo &I) const;
-  bool operator==(const RegSizeInfo &I) const {
+  bool operator== (const RegSizeInfo &I) const {
     return std::tie(RegSize, SpillSize, SpillAlignment) ==
            std::tie(I.RegSize, I.SpillSize, I.SpillAlignment);
   }

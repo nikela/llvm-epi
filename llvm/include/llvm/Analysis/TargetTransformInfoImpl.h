@@ -25,8 +25,6 @@
 #include "llvm/Support/TypeSize.h"
 #include <utility>
 
-using namespace llvm::PatternMatch;
-
 namespace llvm {
 
 class Function;
@@ -986,6 +984,8 @@ public:
 
   InstructionCost getUserCost(const User *U, ArrayRef<const Value *> Operands,
                               TTI::TargetCostKind CostKind) {
+    using namespace llvm::PatternMatch;
+
     auto *TargetTTI = static_cast<T *>(this);
     // Handle non-intrinsic calls, invokes, and callbr.
     // FIXME: Unlikely to be true for anything but CodeSize.

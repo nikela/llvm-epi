@@ -361,14 +361,6 @@ enum NodeType : unsigned {
   STRICT_FCVT_W_RV64 = ISD::FIRST_TARGET_STRICTFP_OPCODE,
   STRICT_FCVT_WU_RV64,
 
-  // Memory opcodes start here.
-  VLE_VL = ISD::FIRST_TARGET_MEMORY_OPCODE,
-  VSE_VL,
-  VLM_VL,
-  VSM_VL,
-  VLSE_VL,
-  VSSE_VL,
-
   // WARNING: Do not add anything in the end unless you want the node to
   // have memop! In fact, starting from FIRST_TARGET_MEMORY_OPCODE all
   // opcodes will be thought as target memory ops!
@@ -377,6 +369,11 @@ enum NodeType : unsigned {
 
 
 using RISCVVTToLibCall = std::pair<EVT, RTLIB::Libcall>;
+
+namespace RISCV {
+// We use 64 bits as the known part in the scalable vector types.
+static constexpr unsigned RVVBitsPerBlock = 64;
+} // namespace RISCV
 
 class RISCVTargetLowering : public TargetLowering {
   const RISCVSubtarget &Subtarget;
@@ -598,6 +595,15 @@ public:
                              Optional<CallingConv::ID> CC) const override;
 
   static RISCVII::VLMUL getLMUL(MVT VT);
+  inline static unsigned computeVLMAX(unsigned VectorBits, unsigned EltSize,
+                                      unsigned MinSize) {
+    // Original equation:
+    //   VLMAX = (VectorBits / EltSize) * LMUL
+    //   where LMUL = MinSize / RISCV::RVVBitsPerBlock
+    // The following equations have been reordered to prevent loss of precision
+    // when calculating fractional LMUL.
+    return ((VectorBits / EltSize) * MinSize) / RISCV::RVVBitsPerBlock;
+  };
   static unsigned getRegClassIDForLMUL(RISCVII::VLMUL LMul);
   static unsigned getSubregIndexByMVT(MVT VT, unsigned Index);
   static unsigned getRegClassIDForVecVT(MVT VT);
@@ -725,10 +731,10 @@ private:
   SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
                              unsigned RISCVISDOpc) const;
   SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPLoad(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPStore(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPStridedLoadExperimental(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPStridedStoreExperimental(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPLoadMasks(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStoreMasks(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStridedLoad(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStridedStore(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,
                                             unsigned ExtendOpc) const;
   SDValue lowerGET_ROUNDING(SDValue Op, SelectionDAG &DAG) const;
@@ -767,12 +773,6 @@ private:
     return false;
   };
 };
-
-namespace RISCV {
-// We use 64 bits as the known part in the scalable vector types.
-static constexpr unsigned RVVBitsPerBlock = 64;
-} // namespace RISCV
-
 namespace RISCVVIntrinsicsTable {
 
 struct RISCVVIntrinsicInfo {

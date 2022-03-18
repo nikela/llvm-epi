@@ -136,7 +136,7 @@ unsigned RISCVVType::encodeVTYPE(RISCVII::VLMUL VLMUL, unsigned SEW,
                                  bool Nontemporal) {
   assert(isValidSEW(SEW) && "Invalid SEW");
   unsigned VLMULBits = static_cast<unsigned>(VLMUL);
-  unsigned VSEWBits = Log2_32(SEW) - 3;
+  unsigned VSEWBits = encodeSEW(SEW);
   unsigned VTypeI = (VSEWBits << 3) | (VLMULBits & 0x7);
   if (TailAgnostic)
     VTypeI |= RISCVVType::TA;

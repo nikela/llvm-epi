@@ -12,21 +12,18 @@
 //===----------------------------------------------------------------------===//
 
 #include "CodeGenRegisters.h"
-#include "CodeGenTarget.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/IntEqClasses.h"
+#include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/Support/Debug.h"
-#include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TableGen/Error.h"
 #include "llvm/TableGen/Record.h"
@@ -808,7 +805,6 @@ CodeGenRegisterClass::CodeGenRegisterClass(CodeGenRegBank &RegBank, Record *R)
   if (AllocationPriority < 0 || AllocationPriority > 63)
     PrintFatalError(R->getLoc(), "AllocationPriority out of range [0,63]");
   this->AllocationPriority = AllocationPriority;
-  AllowsNoRegister = R->getValueAsBit("AllowsNoRegister");
 
   BitsInit *TSF = R->getValueAsBitsInit("TSFlags");
   for (unsigned I = 0, E = TSF->getNumBits(); I != E; ++I) {
@@ -824,8 +820,7 @@ CodeGenRegisterClass::CodeGenRegisterClass(CodeGenRegBank &RegBank,
                                            StringRef Name, Key Props)
     : Members(*Props.Members), TheDef(nullptr), Name(std::string(Name)),
       TopoSigs(RegBank.getNumTopoSigs()), EnumValue(-1), RSI(Props.RSI),
-      CopyCost(0), Allocatable(true), AllocationPriority(0),
-      TSFlags(0), AllowsNoRegister(false) {
+      CopyCost(0), Allocatable(true), AllocationPriority(0), TSFlags(0) {
   Artificial = true;
   GeneratePressureSet = false;
   for (const auto R : Members) {
@@ -853,7 +848,6 @@ void CodeGenRegisterClass::inheritProperties(CodeGenRegBank &RegBank) {
   });
   AltOrderSelect = Super.AltOrderSelect;
   AllocationPriority = Super.AllocationPriority;
-  AllowsNoRegister = Super.AllowsNoRegister;
   TSFlags = Super.TSFlags;
   GeneratePressureSet |= Super.GeneratePressureSet;
 

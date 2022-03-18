@@ -216,7 +216,7 @@ writing, the following sync-ups are organized:
        `gcal <https://calendar.google.com/calendar/u/0?cid=ZDQyc3ZlajJmbjIzNG1jaTUybjFsdjA2dWNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ>`__
      - `Minutes/docs <https://docs.google.com/document/d/1GahxppHJ7o1O_fn1Mbidu1DHEg7V2aOr92LXCtNV1_o/edit?usp=sharing>`__
    * - Clang C and C++ Language Working Group
-     - Every 2 weeks on Wednesday
+     - 1st and 3rd Wednesday of the month
      - `gcal <https://calendar.google.com/calendar/u/0?cid=cW1lZGg0ZXNpMnIyZDN2aTVydGVrdWF1YzRAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ>`__
      - `Minutes/docs <https://docs.google.com/document/d/1x5-RbOC6-jnI_NcJ9Dp4pSmGhhNe7lUevuWUIB46TeM/edit?usp=sharing>`__
 
@@ -264,7 +264,12 @@ don't find anyone present, chances are they happen to be off that day.
       `gcal <https://calendar.google.com/calendar/embed?src=npgke5dug0uliud0qapptmps58%40group.calendar.google.com>`__
     - `GoogleMeet <https://meet.google.com/xok-iqne-gmi>`__
     - English, Norwegian (not fluently)
-
+  * - Johannes Doerfert (he/him)
+    - OpenMP, LLVM-IR, interprocedural optimizations, Attributor, workshops, research, ...
+    - Every 2 weeks, Wednesdays 10:30am (Chicago Time), for 1 hour.
+      `ics <https://outlook.office365.com/owa/calendar/5c93bae7d8fc48f5bd150f9efda8806f@anl.gov/4929bd0f955b4f9b82b7bc995cb3b1bf665030567582422766/S-1-8-2190330107-3188380388-3000953923-1819937831/reachcalendar.ics>`__
+    - `MS Teams <https://teams.microsoft.com/l/meetup-join/19%3ameeting_MTM2ZDNkNGUtZjg3My00ZDFjLTk5NjctYTIwMmI3MWM4MjFj%40thread.v2/0?context=%7b%22Tid%22%3a%220cfca185-25f7-49e3-8ae7-704d5326e285%22%2c%22Oid%22%3a%220cacfb51-1523-4455-a443-adca936d1af0%22%7d>`__
+    - English, German
 
 IRC
 ---

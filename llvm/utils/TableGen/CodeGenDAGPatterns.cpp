@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "CodeGenDAGPatterns.h"
+#include "CodeGenInstruction.h"
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/MapVector.h"
 #include "llvm/ADT/STLExtras.h"
@@ -591,7 +592,7 @@ bool TypeInfer::EnforceVectorEltTypeIs(TypeSetByHwMode &Vec,
 
     Changed |= berase_if(V, isScalar);  // Scalar = !vector
     Changed |= berase_if(E, isVector);  // Vector = !scalar
-    // assert(!V.empty() && !E.empty());
+    assert(!V.empty() && !E.empty());
 
     MachineValueTypeSet VT, ST;
     // Collect element types from the "vector" set.

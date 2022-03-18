@@ -8,5 +8,7 @@ define void @foo()
     %va = alloca %struct.__epi_1xi64x2, align 8
     %v01 = getelementptr inbounds %struct.__epi_1xi64x2, %struct.__epi_1xi64x2* %va, i32 0, i32 0
     %v02 = getelementptr inbounds %struct.__epi_1xi64x2, %struct.__epi_1xi64x2* %va, i32 0, i32 1
+    load <vscale x 1 x i64>, <vscale x 1 x i64>* %v01
+    load <vscale x 1 x i64>, <vscale x 1 x i64>* %v02
     ret void
 }

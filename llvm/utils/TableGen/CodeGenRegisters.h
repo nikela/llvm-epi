@@ -27,7 +27,6 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/MC/LaneBitmask.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/MachineValueType.h"
 #include "llvm/TableGen/Record.h"
 #include "llvm/TableGen/SetTheory.h"
 #include <cassert>
@@ -340,9 +339,6 @@ namespace llvm {
     bool CoveredBySubRegs;
     /// A register class is artificial if all its members are artificial.
     bool Artificial;
-    /// Whether instructions may use NoRegister (0) instead of a physical
-    /// register for an operand of this register class.
-    bool AllowsNoRegister;
     /// Generate register pressure set for this register class and any class
     /// synthesized from it.
     bool GeneratePressureSet;

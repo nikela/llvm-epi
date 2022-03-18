@@ -40,6 +40,7 @@ def uimm2 : Operand<GRLenVT> {
 def uimm2_plus1 : Operand<GRLenVT> {
   let ParserMatchClass = UImmAsmOperand<2, "plus1">;
   let EncoderMethod = "getImmOpValueSub1";
+  let DecoderMethod = "decodeUImmOperand<2, 1>";
 }
 
 def uimm3 : Operand<GRLenVT> {
@@ -64,34 +65,41 @@ def uimm15 : Operand<GRLenVT> {
 
 def simm12 : Operand<GRLenVT>, ImmLeaf<GRLenVT, [{return isInt<12>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<12>;
+  let DecoderMethod = "decodeSImmOperand<12>";
 }
 
 def simm14_lsl2 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<14, "lsl2">;
   let EncoderMethod = "getImmOpValueAsr2";
+  let DecoderMethod = "decodeSImmOperand<14, 2>";
 }
 
 def simm16 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<16>;
+  let DecoderMethod = "decodeSImmOperand<16>";
 }
 
 def simm16_lsl2 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<16, "lsl2">;
   let EncoderMethod = "getImmOpValueAsr2";
+  let DecoderMethod = "decodeSImmOperand<16, 2>";
 }
 
 def simm20 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<20>;
+  let DecoderMethod = "decodeSImmOperand<20>";
 }
 
 def simm21_lsl2 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<21, "lsl2">;
   let EncoderMethod = "getImmOpValueAsr2";
+  let DecoderMethod = "decodeSImmOperand<21, 2>";
 }
 
 def simm26_lsl2 : Operand<GRLenVT> {
   let ParserMatchClass = SImmAsmOperand<26, "lsl2">;
   let EncoderMethod = "getImmOpValueAsr2";
+  let DecoderMethod = "decodeSImmOperand<26, 2>";
 }
 
 //===----------------------------------------------------------------------===//
@@ -309,6 +317,7 @@ def RDTIMEH_W : RDTIME_2R<0b0000000000000000011001, "rdtimeh.w">;
 def CPUCFG : ALU_2R<0b0000000000000000011011, "cpucfg">;
 
 /// LA64 instructions
+
 let Predicates = [IsLA64] in {
 
 // Arithmetic Operation Instructions for 64-bits
@@ -486,12 +495,14 @@ def : PatGprGpr<or, OR>;
 def : PatGprGpr<xor, XOR>;
 
 /// LA32 patterns
+
 let Predicates = [IsLA32] in {
 def : PatGprGpr<add, ADD_W>;
 def : PatGprImm<add, ADDI_W, simm12>;
 } // Predicates = [IsLA32]
 
 /// LA64 patterns
+
 let Predicates = [IsLA64] in {
 def : Pat<(sext_inreg GPR:$rj, i32), (ADDI_W GPR:$rj, 0)>;
 

@@ -236,6 +236,24 @@ void ExecuteRegionOp::getCanonicalizationPatterns(RewritePatternSet &results,
   results.add<SingleBlockExecuteInliner, MultiBlockExecuteInliner>(context);
 }
 
+/// Given the region at `index`, or the parent operation if `index` is None,
+/// return the successor regions. These are the regions that may be selected
+/// during the flow of control. `operands` is a set of optional attributes that
+/// correspond to a constant value for each operand, or null if that operand is
+/// not a constant.
+void ExecuteRegionOp::getSuccessorRegions(
+    Optional<unsigned> index, ArrayRef<Attribute> operands,
+    SmallVectorImpl<RegionSuccessor> &regions) {
+  // If the predecessor is the ExecuteRegionOp, branch into the body.
+  if (!index.hasValue()) {
+    regions.push_back(RegionSuccessor(&getRegion()));
+    return;
+  }
+
+  // Otherwise, the region branches back to the parent operation.
+  regions.push_back(RegionSuccessor(getResults()));
+}
+
 //===----------------------------------------------------------------------===//
 // ConditionOp
 //===----------------------------------------------------------------------===//
@@ -282,6 +300,19 @@ LogicalResult ForOp::verify() {
     if (cst.value() <= 0)
       return emitOpError("constant step operand must be positive");
 
+  auto opNumResults = getNumResults();
+  if (opNumResults == 0)
+    return success();
+  // If ForOp defines values, check that the number and types of
+  // the defined values match ForOp initial iter operands and backedge
+  // basic block arguments.
+  if (getNumIterOperands() != opNumResults)
+    return emitOpError(
+        "mismatch in number of loop-carried values and defined values");
+  return success();
+}
+
+LogicalResult ForOp::verifyRegions() {
   // Check that the body defines as single block argument for the induction
   // variable.
   auto *body = getBody();
@@ -293,15 +324,11 @@ LogicalResult ForOp::verify() {
   auto opNumResults = getNumResults();
   if (opNumResults == 0)
     return success();
-  // If ForOp defines values, check that the number and types of
-  // the defined values match ForOp initial iter operands and backedge
-  // basic block arguments.
-  if (getNumIterOperands() != opNumResults)
-    return emitOpError(
-        "mismatch in number of loop-carried values and defined values");
+
   if (getNumRegionIterArgs() != opNumResults)
     return emitOpError(
         "mismatch in number of basic block args and defined values");
+
   auto iterOperands = getIterOperands();
   auto iterArgs = getRegionIterArgs();
   auto opResults = getResults();
@@ -686,8 +713,9 @@ struct ForOpIterArgsFolder : public OpRewritePattern<scf::ForOp> {
   }
 };
 
-/// Rewriting pattern that erases loops that are known not to iterate and
-/// replaces single-iteration loops with their bodies.
+/// Rewriting pattern that erases loops that are known not to iterate, replaces
+/// single-iteration loops with their bodies, and removes empty loops that
+/// iterate at least once and only return values defined outside of the loop.
 struct SimplifyTrivialLoops : public OpRewritePattern<ForOp> {
   using OpRewritePattern<ForOp>::OpRewritePattern;
 
@@ -729,7 +757,19 @@ struct SimplifyTrivialLoops : public OpRewritePattern<ForOp> {
       return success();
     }
 
-    return failure();
+    // Now we are left with loops that have more than 1 iterations.
+    Block &block = op.getRegion().front();
+    if (!llvm::hasSingleElement(block))
+      return failure();
+    // If the loop is empty, iterates at least once, and only returns values
+    // defined outside of the loop, remove it and replace it with yield values.
+    auto yieldOp = cast<scf::YieldOp>(block.getTerminator());
+    auto yieldOperands = yieldOp.getOperands();
+    if (llvm::any_of(yieldOperands,
+                     [&](Value v) { return !op.isDefinedOutsideOfLoop(v); }))
+      return failure();
+    rewriter.replaceOp(op, yieldOperands);
+    return success();
   }
 };
 
@@ -2130,7 +2170,7 @@ void ReduceOp::build(
                   body->getArgument(1));
 }
 
-LogicalResult ReduceOp::verify() {
+LogicalResult ReduceOp::verifyRegions() {
   // The region of a ReduceOp has two arguments of the same type as its operand.
   auto type = getOperand().getType();
   Block &block = getReductionOperator().front();
@@ -2333,7 +2373,7 @@ static TerminatorTy verifyAndGetTerminator(scf::WhileOp op, Region &region,
   return nullptr;
 }
 
-LogicalResult scf::WhileOp::verify() {
+LogicalResult scf::WhileOp::verifyRegions() {
   auto beforeTerminator = verifyAndGetTerminator<scf::ConditionOp>(
       *this, getBefore(),
       "expects the 'before' region to terminate with 'scf.condition'");

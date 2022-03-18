@@ -3357,7 +3357,7 @@ multiclass VPatNullaryV<string intrinsic, string instruction>
 multiclass VPatNullaryM<string intrinsic, string inst> {
   foreach mti = AllMasks in
     def : Pat<(mti.Mask (!cast<Intrinsic>(intrinsic)
-                        (XLenVT (VLOp (XLenVT (XLenVT GPR:$vl)))))),
+                        VLOpFrag)),
                         (!cast<Instruction>(inst#"_M_"#mti.BX)
                         GPR:$vl, mti.Log2SEW)>;
 }
@@ -5422,6 +5422,11 @@ foreach fvti = AllFloatVectors in {
              (fvti.Vector $rs1),
              (fvti.Scalar fvti.ScalarRegClass:$rs2),
              GPR:$vl, fvti.Log2SEW)>;
+
+  def : Pat<(fvti.Vector (int_riscv_vfmv_s_f (fvti.Vector fvti.RegClass:$rs1),
+                         (fvti.Scalar (fpimm0)), VLOpFrag)),
+            (!cast<Instruction>("PseudoVMV_S_X_" # fvti.LMul.MX)
+             (fvti.Vector $rs1), X0, GPR:$vl, fvti.Log2SEW)>;
 }
 } // Predicates = [HasVInstructionsAnyF]
 

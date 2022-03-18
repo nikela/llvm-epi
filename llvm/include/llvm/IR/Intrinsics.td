@@ -1412,20 +1412,18 @@ def int_vp_scatter: DefaultAttrsIntrinsic<[],
 // Experimental strided memory accesses.
 def int_experimental_vp_strided_store : DefaultAttrsIntrinsic<[],
                              [ llvm_anyvector_ty,
-                               LLVMAnyPointerType<LLVMMatchType<0>>,
+                               LLVMPointerToElt<0>,
                                llvm_anyint_ty, // Stride in bytes
                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                llvm_i32_ty],
-                             [ NoCapture<ArgIndex<1>>, IntrNoSync, IntrWriteMem,
-                               IntrArgMemOnly, IntrWillReturn ]>;
+                             [ NoCapture<ArgIndex<1>>, IntrNoSync, IntrWriteMem, IntrArgMemOnly, IntrWillReturn ]>;
 
 def int_experimental_vp_strided_load  : DefaultAttrsIntrinsic<[llvm_anyvector_ty],
-                             [ LLVMAnyPointerType<LLVMMatchType<0>>,
+                             [ LLVMPointerToElt<0>,
                                llvm_anyint_ty, // Stride in bytes
                                LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                llvm_i32_ty],
-                             [ NoCapture<ArgIndex<0>>, IntrNoSync, IntrReadMem,
-                               IntrWillReturn, IntrArgMemOnly ]>;
+                             [ NoCapture<ArgIndex<0>>, IntrNoSync, IntrReadMem, IntrWillReturn, IntrArgMemOnly ]>;
 
 // FIXME: TO BE REPLACED
 // The following Memory Intrinsics and Integer Comparison Intrinsic are copied

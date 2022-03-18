@@ -369,6 +369,8 @@ static LogicalResult verifyReductionVarList(Operation *op,
     return success();
   }
 
+  // TODO: The followings should be done in
+  // SymbolUserOpInterface::verifySymbolUses.
   DenseSet<Value> accumulators;
   for (auto args : llvm::zip(reductionVars, *reductions)) {
     Value accum = std::get<0>(args);
@@ -719,6 +721,10 @@ LogicalResult SectionsOp::verify() {
     return emitError(
         "expected equal sizes for allocate and allocator variables");
 
+  return verifyReductionVarList(*this, reductions(), reduction_vars());
+}
+
+LogicalResult SectionsOp::verifyRegions() {
   for (auto &inst : *region().begin()) {
     if (!(isa<SectionOp>(inst) || isa<TerminatorOp>(inst))) {
       return emitOpError()
@@ -726,7 +732,7 @@ LogicalResult SectionsOp::verify() {
     }
   }
 
-  return verifyReductionVarList(*this, reductions(), reduction_vars());
+  return success();
 }
 
 /// Parses an OpenMP Workshare Loop operation
@@ -833,6 +839,80 @@ void WsLoopOp::print(OpAsmPrinter &p) {
 }
 
 //===----------------------------------------------------------------------===//
+// SimdLoopOp
+//===----------------------------------------------------------------------===//
+/// Parses an OpenMP Simd construct [2.9.3.1]
+///
+/// simdloop ::= `omp.simdloop` loop-control clause-list
+/// loop-control ::= `(` ssa-id-list `)` `:` type `=`  loop-bounds
+/// loop-bounds := `(` ssa-id-list `)` to `(` ssa-id-list `)` steps
+/// steps := `step` `(`ssa-id-list`)`
+/// clause-list ::= clause clause-list | empty
+/// clause ::= TODO
+ParseResult SimdLoopOp::parse(OpAsmParser &parser, OperationState &result) {
+  // Parse an opening `(` followed by induction variables followed by `)`
+  SmallVector<OpAsmParser::OperandType> ivs;
+  if (parser.parseRegionArgumentList(ivs, /*requiredOperandCount=*/-1,
+                                     OpAsmParser::Delimiter::Paren))
+    return failure();
+  int numIVs = static_cast<int>(ivs.size());
+  Type loopVarType;
+  if (parser.parseColonType(loopVarType))
+    return failure();
+  // Parse loop bounds.
+  SmallVector<OpAsmParser::OperandType> lower;
+  if (parser.parseEqual() ||
+      parser.parseOperandList(lower, numIVs, OpAsmParser::Delimiter::Paren) ||
+      parser.resolveOperands(lower, loopVarType, result.operands))
+    return failure();
+  SmallVector<OpAsmParser::OperandType> upper;
+  if (parser.parseKeyword("to") ||
+      parser.parseOperandList(upper, numIVs, OpAsmParser::Delimiter::Paren) ||
+      parser.resolveOperands(upper, loopVarType, result.operands))
+    return failure();
+
+  // Parse step values.
+  SmallVector<OpAsmParser::OperandType> steps;
+  if (parser.parseKeyword("step") ||
+      parser.parseOperandList(steps, numIVs, OpAsmParser::Delimiter::Paren) ||
+      parser.resolveOperands(steps, loopVarType, result.operands))
+    return failure();
+
+  SmallVector<int> segments{numIVs, numIVs, numIVs};
+  // TODO: Add parseClauses() when we support clauses
+  result.addAttribute("operand_segment_sizes",
+                      parser.getBuilder().getI32VectorAttr(segments));
+
+  // Now parse the body.
+  Region *body = result.addRegion();
+  SmallVector<Type> ivTypes(numIVs, loopVarType);
+  SmallVector<OpAsmParser::OperandType> blockArgs(ivs);
+  if (parser.parseRegion(*body, blockArgs, ivTypes))
+    return failure();
+  return success();
+}
+
+void SimdLoopOp::print(OpAsmPrinter &p) {
+  auto args = getRegion().front().getArguments();
+  p << " (" << args << ") : " << args[0].getType() << " = (" << lowerBound()
+    << ") to (" << upperBound() << ") ";
+  p << "step (" << step() << ") ";
+
+  p.printRegion(region(), /*printEntryBlockArgs=*/false);
+}
+
+//===----------------------------------------------------------------------===//
+// Verifier for Simd construct [2.9.3.1]
+//===----------------------------------------------------------------------===//
+
+LogicalResult SimdLoopOp::verify() {
+  if (this->lowerBound().empty()) {
+    return emitOpError() << "empty lowerbound for simd loop operation";
+  }
+  return success();
+}
+
+//===----------------------------------------------------------------------===//
 // ReductionOp
 //===----------------------------------------------------------------------===//
 
@@ -851,7 +931,7 @@ static void printAtomicReductionRegion(OpAsmPrinter &printer,
   printer.printRegion(region);
 }
 
-LogicalResult ReductionDeclareOp::verify() {
+LogicalResult ReductionDeclareOp::verifyRegions() {
   if (initializerRegion().empty())
     return emitOpError() << "expects non-empty initializer region";
   Block &initializerEntryBlock = initializerRegion().front();
@@ -941,10 +1021,11 @@ LogicalResult CriticalDeclareOp::verify() {
   return verifySynchronizationHint(*this, hint_val());
 }
 
-LogicalResult CriticalOp::verify() {
+LogicalResult
+CriticalOp::verifySymbolUses(SymbolTableCollection &symbol_table) {
   if (nameAttr()) {
     SymbolRefAttr symbolRef = nameAttr();
-    auto decl = SymbolTable::lookupNearestSymbolFrom<CriticalDeclareOp>(
+    auto decl = symbol_table.lookupNearestSymbolFrom<CriticalDeclareOp>(
         *this, symbolRef);
     if (!decl) {
       return emitOpError() << "expected symbol reference " << symbolRef
@@ -1038,14 +1119,22 @@ LogicalResult AtomicUpdateOp::verify() {
     }
   }
 
-  if (region().getNumArguments() != 1)
-    return emitError("the region must accept exactly one argument");
-
   if (x().getType().cast<PointerLikeType>().getElementType() !=
       region().getArgument(0).getType()) {
     return emitError("the type of the operand must be a pointer type whose "
                      "element type is the same as that of the region argument");
   }
+
+  return success();
+}
+
+LogicalResult AtomicUpdateOp::verifyRegions() {
+  if (region().getNumArguments() != 1)
+    return emitError("the region must accept exactly one argument");
+
+  if (region().front().getOperations().size() < 2)
+    return emitError() << "the update region must have at least two operations "
+                          "(binop and terminator)";
 
   YieldOp yieldOp = *region().getOps<YieldOp>().begin();
 
@@ -1060,7 +1149,7 @@ LogicalResult AtomicUpdateOp::verify() {
 // Verifier for AtomicCaptureOp
 //===----------------------------------------------------------------------===//
 
-LogicalResult AtomicCaptureOp::verify() {
+LogicalResult AtomicCaptureOp::verifyRegions() {
   Block::OpListType &ops = region().front().getOperations();
   if (ops.size() != 3)
     return emitError()
