@@ -257,6 +257,10 @@ public:
     return Alignment >= DataSize && isPowerOf2_32(DataSize);
   }
 
+  bool isLegalBroadcastLoad(Type *ElementTy, unsigned NumElements) const {
+    return false;
+  }
+
   bool isLegalMaskedScatter(Type *DataType, Align Alignment) const {
     return false;
   }
@@ -512,7 +516,8 @@ public:
 
   InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Ty,
                                  ArrayRef<int> Mask, int Index,
-                                 VectorType *SubTp) const {
+                                 VectorType *SubTp,
+                                 ArrayRef<Value *> Args = None) const {
     return 1;
   }
 
