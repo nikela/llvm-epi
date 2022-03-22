@@ -2144,7 +2144,8 @@ foreach vti = AllIntegerVectors in {
   def : Pat<(vti.Vector (riscv_vid_vl (vti.Mask V0),
                                       VLOpFrag)),
             (!cast<Instruction>("PseudoVID_V_"#vti.LMul.MX#"_MASK")
-                (vti.Vector (IMPLICIT_DEF)), (vti.Mask V0), GPR:$vl, vti.Log2SEW)>;
+                (vti.Vector (IMPLICIT_DEF)), (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+
 
   def : Pat<(vti.Vector (riscv_slide1up_vl (vti.Vector undef),
                                            (vti.Vector vti.RegClass:$rs1),
