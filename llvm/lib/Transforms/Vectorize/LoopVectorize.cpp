@@ -151,6 +151,7 @@
 #include <functional>
 #include <iterator>
 #include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <tuple>
