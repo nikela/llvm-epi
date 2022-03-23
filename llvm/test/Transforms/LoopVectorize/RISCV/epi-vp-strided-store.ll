@@ -59,11 +59,11 @@ define dso_local void @scatter(i8* noalias nocapture %A, i8* noalias nocapture r
 ; STRIDED-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP4]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; STRIDED-NEXT:    [[TMP5:%.*]] = mul i64 [[INDEX]], 5
 ; STRIDED-NEXT:    [[TMP6:%.*]] = getelementptr i8, i8* [[A:%.*]], i64 [[TMP5]]
-; STRIDED-NEXT:    [[VP_STRIDED_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.i64(i8* [[TMP6]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; STRIDED-NEXT:    [[VP_STRIDED_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.p0i8.i64(i8* [[TMP6]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; STRIDED-NEXT:    [[VP_OP1:%.*]] = call <vscale x 8 x i8> @llvm.vp.add.nxv8i8(<vscale x 8 x i8> [[VP_STRIDED_LOAD]], <vscale x 8 x i8> [[VP_OP_LOAD]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; STRIDED-NEXT:    [[TMP7:%.*]] = mul i64 [[INDEX]], 5
 ; STRIDED-NEXT:    [[TMP8:%.*]] = getelementptr i8, i8* [[A]], i64 [[TMP7]]
-; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv8i8.i64(<vscale x 8 x i8> [[VP_OP1]], i8* [[TMP8]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv8i8.p0i8.i64(<vscale x 8 x i8> [[VP_OP1]], i8* [[TMP8]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; STRIDED-NEXT:    [[TMP9:%.*]] = and i64 [[TMP2]], 4294967295
 ; STRIDED-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
 ; STRIDED-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
