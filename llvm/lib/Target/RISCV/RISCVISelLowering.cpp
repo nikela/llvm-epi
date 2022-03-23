@@ -516,6 +516,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_FREM,
                                                   ISD::VP_FNEG,
                                                   ISD::VP_FMA,
+                                                  ISD::VP_FMULADD,
                                                   ISD::VP_FRINT,
                                                   ISD::VP_COS,
                                                   ISD::VP_EXP,
@@ -4486,6 +4487,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_FNEG:
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
   case ISD::VP_FMA:
+  case ISD::VP_FMULADD:
     return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
   case ISD::VP_SETCC:
     return lowerVPCmpOp(Op, DAG);

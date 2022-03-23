@@ -4533,6 +4533,8 @@ InnerLoopVectorizer::getVPIntrInstr(unsigned Opcode) {
     return {Intrinsic::vp_fneg, true};
   case Intrinsic::fma:
     return {Intrinsic::vp_fma, true};
+  case Intrinsic::fmuladd:
+    return {Intrinsic::vp_fmuladd, true};
   case Instruction::SExt:
     return {Intrinsic::vp_sext, false};
   case Instruction::ZExt:
