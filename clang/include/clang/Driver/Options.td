@@ -4180,6 +4180,8 @@ def _output_class_directory_EQ : Joined<["--"], "output-class-directory=">, Alia
 def _output_class_directory : Separate<["--"], "output-class-directory">, Alias<foutput_class_dir_EQ>;
 def _output_EQ : Joined<["--"], "output=">, Alias<o>;
 def _output : Separate<["--"], "output">, Alias<o>;
+def _overlay_platform_toolchain_EQ : Joined<["--"], "overlay-platform-toolchain=">;
+def _overlay_platform_toolchain : Separate<["--"], "overlay-platform-toolchain">, Alias<_overlay_platform_toolchain_EQ>;
 def _param : Separate<["--"], "param">, Group<CompileOnly_Group>;
 def _param_EQ : Joined<["--"], "param=">, Alias<_param>;
 def _precompile : Flag<["--"], "precompile">, Flags<[NoXarchOption]>,
@@ -6530,6 +6532,7 @@ def _SLASH_sdl_ : CLIgnoredFlag<"sdl-">;
 def _SLASH_utf8 : CLIgnoredFlag<"utf-8">,
   HelpText<"Set source and runtime encoding to UTF-8 (default)">;
 def _SLASH_w : CLIgnoredJoined<"w">;
+def _SLASH_Wv_ : CLIgnoredJoined<"Wv">;
 def _SLASH_Zc___cplusplus : CLIgnoredFlag<"Zc:__cplusplus">;
 def _SLASH_Zc_auto : CLIgnoredFlag<"Zc:auto">;
 def _SLASH_Zc_forScope : CLIgnoredFlag<"Zc:forScope">;
