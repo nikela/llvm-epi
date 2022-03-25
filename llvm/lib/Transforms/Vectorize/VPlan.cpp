@@ -584,6 +584,7 @@ bool VPRecipeBase::mayHaveSideEffects() const {
   case VPBranchOnMaskSC:
     return false;
   case VPWidenIntOrFpInductionSC:
+  case VPWidenPointerInductionSC:
   case VPWidenCanonicalIVSC:
   case VPWidenPHISC:
   case VPBlendSC:
@@ -1042,7 +1043,10 @@ void VPlan::execute(VPTransformState *State) {
       continue;
     }
 
-    if (isa<VPWidenIntOrFpInductionRecipe>(&R) || isa<VPWidenPHIRecipe>(&R))
+    // Skip phi-like recipes that generate their backedege values themselves.
+    // TODO: Model their backedge values explicitly.
+    if (isa<VPWidenIntOrFpInductionRecipe>(&R) || isa<VPWidenPHIRecipe>(&R) ||
+        isa<VPWidenPointerInductionRecipe>(&R))
       continue;
 
     auto *PhiR = cast<VPHeaderPHIRecipe>(&R);
@@ -1351,6 +1355,16 @@ void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
   } else
     O << " " << VPlanIngredient(IV);
 }
+
+void VPWidenPointerInductionRecipe::print(raw_ostream &O, const Twine &Indent,
+                                          VPSlotTracker &SlotTracker) const {
+  O << Indent << "EMIT ";
+  printAsOperand(O, SlotTracker);
+  O << " = WIDEN-POINTER-INDUCTION ";
+  getStartValue()->printAsOperand(O, SlotTracker);
+  O << ", " << *IndDesc.getStep();
+}
+
 #endif
 
 bool VPWidenIntOrFpInductionRecipe::isCanonical() const {
