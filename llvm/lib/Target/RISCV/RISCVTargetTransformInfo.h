@@ -150,10 +150,6 @@ public:
   InstructionCost getScalarizationOverhead(VectorType *InTy,
                                            const APInt &DemandedElts,
                                            bool Insert, bool Extract);
-  InstructionCost getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
-                                   TTI::CastContextHint CCH,
-                                   TTI::TargetCostKind CostKind,
-                                   const Instruction *I = nullptr);
   bool shouldMaximizeVectorBandwidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
@@ -204,13 +200,19 @@ public:
   InstructionCost getSpliceCost(VectorType *Tp, int Index);
   InstructionCost getShuffleCost(TTI::ShuffleKind Kind, VectorType *Tp,
                                  ArrayRef<int> Mask, int Index,
-                                 VectorType *SubTp);
+                                 VectorType *SubTp,
+                                 ArrayRef<Value *> Args = None);
 
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,
                                          Align Alignment,
                                          TTI::TargetCostKind CostKind,
                                          const Instruction *I);
+
+  InstructionCost getCastInstrCost(unsigned Opcode, Type *Dst, Type *Src,
+                                   TTI::CastContextHint CCH,
+                                   TTI::TargetCostKind CostKind,
+                                   const Instruction *I = nullptr);
 
   InstructionCost getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
                                          bool IsUnsigned,

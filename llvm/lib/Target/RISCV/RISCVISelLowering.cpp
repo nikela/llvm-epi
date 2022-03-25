@@ -516,6 +516,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_FREM,
                                                   ISD::VP_FNEG,
                                                   ISD::VP_FMA,
+                                                  ISD::VP_FMULADD,
                                                   ISD::VP_FRINT,
                                                   ISD::VP_COS,
                                                   ISD::VP_EXP,
@@ -2942,8 +2943,7 @@ static SDValue lowerBUILD_VECTOR(SDValue Op, SelectionDAG &DAG,
 static SDValue splatPartsI64WithVL(const SDLoc &DL, MVT VT, SDValue Passthru,
                                    SDValue Lo, SDValue Hi, SDValue VL,
                                    SelectionDAG &DAG) {
-  bool HasPassthru = Passthru && !Passthru.isUndef();
-  if (!HasPassthru && !Passthru)
+  if (!Passthru)
     Passthru = DAG.getUNDEF(VT);
   if (isa<ConstantSDNode>(Lo) && isa<ConstantSDNode>(Hi)) {
     int32_t LoC = cast<ConstantSDNode>(Lo)->getSExtValue();
@@ -4019,10 +4019,10 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
 
     bool IsInt2FP = SrcEltVT.isInteger();
     // Widening conversions
-    if (EltSize > SrcEltSize && (EltSize / SrcEltSize >= 4)) {
+    if (EltSize > (2 * SrcEltSize)) {
       if (IsInt2FP) {
         // Do a regular integer sign/zero extension then convert to float.
-        MVT IVecVT = MVT::getVectorVT(MVT::getIntegerVT(EltVT.getSizeInBits()),
+        MVT IVecVT = MVT::getVectorVT(MVT::getIntegerVT(EltSize),
                                       VT.getVectorElementCount());
         unsigned ExtOpcode = Op.getOpcode() == ISD::UINT_TO_FP
                                  ? ISD::ZERO_EXTEND
@@ -4040,7 +4040,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     }
 
     // Narrowing conversions
-    if (SrcEltSize > EltSize && (SrcEltSize / EltSize >= 4)) {
+    if (SrcEltSize > (2 * EltSize)) {
       if (IsInt2FP) {
         // One narrowing int_to_fp, then an fp_round.
         assert(EltVT == MVT::f16 && "Unexpected [US]_TO_FP lowering");
@@ -4051,9 +4051,8 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
       // FP2Int
       // One narrowing fp_to_int, then truncate the integer. If the float isn't
       // representable by the integer, the result is poison.
-      MVT IVecVT =
-          MVT::getVectorVT(MVT::getIntegerVT(SrcEltVT.getSizeInBits() / 2),
-                           VT.getVectorElementCount());
+      MVT IVecVT = MVT::getVectorVT(MVT::getIntegerVT(SrcEltSize / 2),
+                                    VT.getVectorElementCount());
       SDValue FP2Int = DAG.getNode(Op.getOpcode(), DL, IVecVT, Src);
       return DAG.getNode(ISD::TRUNCATE, DL, VT, FP2Int);
     }
@@ -4488,6 +4487,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_FNEG:
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
   case ISD::VP_FMA:
+  case ISD::VP_FMULADD:
     return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
   case ISD::VP_SETCC:
     return lowerVPCmpOp(Op, DAG);
@@ -5701,13 +5701,11 @@ static SDValue lowerVectorIntrinsicScalars(SDValue Op, SelectionDAG &DAG,
   assert(XLenVT == MVT::i32 && OpVT == MVT::i64 &&
          VT.getVectorElementType() == MVT::i64 && "Unexpected VTs!");
 
-  // If this is a sign-extended 32-bit constant, we can truncate it and rely
-  // on the instruction to sign-extend since SEW>XLEN.
-  if (auto *CVal = dyn_cast<ConstantSDNode>(ScalarOp)) {
-    if (isInt<32>(CVal->getSExtValue())) {
-      ScalarOp = DAG.getConstant(CVal->getSExtValue(), DL, MVT::i32);
-      return DAG.getNode(Op->getOpcode(), DL, Op->getVTList(), Operands);
-    }
+  // If this is a sign-extended 32-bit value, we can truncate it and rely on the
+  // instruction to sign-extend since SEW>XLEN.
+  if (DAG.ComputeNumSignBits(ScalarOp) > 32) {
+    ScalarOp = DAG.getNode(ISD::TRUNCATE, DL, MVT::i32, ScalarOp);
+    return DAG.getNode(Op->getOpcode(), DL, Op->getVTList(), Operands);
   }
 
   switch (IntNo) {
@@ -5829,8 +5827,6 @@ static SDValue lowerVectorIntrinsicScalars(SDValue Op, SelectionDAG &DAG,
   }
 
   // We need to convert the scalar to a splat vector.
-  // FIXME: Can we implicitly truncate the scalar if it is known to
-  // be sign extended?
   SDValue VL = getVLOperand(Op);
   assert(VL.getValueType() == XLenVT);
   ScalarOp = splatSplitI64WithVL(DL, VT, SDValue(), ScalarOp, VL, DAG);
@@ -5972,7 +5968,7 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
 
     // This is an i64 value that lives in two scalar registers. We have to
     // insert this in a convoluted way. First we build vXi64 splat containing
-    // the/ two values that we assemble using some bit math. Next we'll use
+    // the two values that we assemble using some bit math. Next we'll use
     // vid.v and vmseq to build a mask with bit 0 set. Then we'll use that mask
     // to merge element 0 from our splat into the source vector.
     // FIXME: This is probably not the best way to do this, but it is

@@ -57,12 +57,17 @@ protected:
            "i32)";
     Str << " declare <8 x float> @llvm.vp.fma.v8f32(<8 x float>, <8 x float>, "
            "<8 x float>, <8 x i1>, i32) ";
+    Str << " declare <8 x float> @llvm.vp.fmuladd.v8f32(<8 x float>, <8 x float>, "
+           "<8 x float>, <8 x i1>, i32) ";
 
     Str << " declare void @llvm.vp.store.v8i32.p0v8i32(<8 x i32>, <8 x i32>*, "
            "<8 x i1>, i32) ";
     Str << "declare void "
            "@llvm.experimental.vp.strided.store.v8i32.i32(<8 x i32>, "
            "i32*, i32, <8 x i1>, i32) ";
+    Str << "declare void "
+           "@llvm.experimental.vp.strided.store.v8i32.p1i32.i32(<8 x i32>, "
+           "i32 addrspace(1)*, i32, <8 x i1>, i32) ";
     Str << " declare void @llvm.vp.scatter.v8i32.v8p0i32(<8 x i32>, <8 x "
            "i32*>, <8 x i1>, i32) ";
     Str << " declare <8 x i32> @llvm.vp.load.v8i32.p0v8i32(<8 x i32>*, <8 x "
@@ -70,6 +75,9 @@ protected:
     Str << "declare <8 x i32> "
            "@llvm.experimental.vp.strided.load.v8i32.i32(i32*, i32, <8 "
            "x i1>, i32) ";
+    Str << "declare <8 x i32> "
+           "@llvm.experimental.vp.strided.load.v8i32.p1i32.i32(i32 "
+           "addrspace(1)*, i32, <8 x i1>, i32) ";
     Str << " declare <8 x i32> @llvm.vp.gather.v8i32.v8p0i32(<8 x i32*>, <8 x "
            "i1>, i32) ";
 

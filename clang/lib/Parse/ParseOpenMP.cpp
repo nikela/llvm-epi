@@ -150,6 +150,7 @@ static OpenMPDirectiveKindExWrapper parseOpenMPDirectiveKind(Parser &P) {
       {OMPD_for, OMPD_simd, OMPD_for_simd},
       {OMPD_parallel, OMPD_for, OMPD_parallel_for},
       {OMPD_parallel_for, OMPD_simd, OMPD_parallel_for_simd},
+      {OMPD_parallel, OMPD_loop, OMPD_parallel_loop},
       {OMPD_parallel, OMPD_sections, OMPD_parallel_sections},
       {OMPD_taskloop, OMPD_simd, OMPD_taskloop_simd},
       {OMPD_target, OMPD_parallel, OMPD_target_parallel},
@@ -166,6 +167,7 @@ static OpenMPDirectiveKindExWrapper parseOpenMPDirectiveKind(Parser &P) {
       {OMPD_teams, OMPD_loop, OMPD_teams_loop},
       {OMPD_target, OMPD_teams, OMPD_target_teams},
       {OMPD_target_teams, OMPD_distribute, OMPD_target_teams_distribute},
+      {OMPD_target_teams, OMPD_loop, OMPD_target_teams_loop},
       {OMPD_target_teams_distribute, OMPD_parallel,
        OMPD_target_teams_distribute_parallel},
       {OMPD_target_teams_distribute, OMPD_simd,
@@ -2023,7 +2025,7 @@ void Parser::ParseOMPEndDeclareTargetDirective(OpenMPDirectiveKind BeginDKind,
 ///         annot_pragma_openmp_end
 ///
 Parser::DeclGroupPtrTy Parser::ParseOpenMPDeclarativeDirectiveWithExtDecl(
-    AccessSpecifier &AS, ParsedAttributesWithRange &Attrs, bool Delayed,
+    AccessSpecifier &AS, ParsedAttributes &Attrs, bool Delayed,
     DeclSpec::TST TagType, Decl *Tag) {
   assert(Tok.isOneOf(tok::annot_pragma_openmp, tok::annot_attr_openmp) &&
          "Not an OpenMP directive!");
@@ -2401,6 +2403,8 @@ Parser::DeclGroupPtrTy Parser::ParseOpenMPDeclarativeDirectiveWithExtDecl(
   case OMPD_metadirective:
   case OMPD_loop:
   case OMPD_teams_loop:
+  case OMPD_target_teams_loop:
+  case OMPD_parallel_loop:
     Diag(Tok, diag::err_omp_unexpected_directive)
         << 1 << getOpenMPDirectiveName(DKind);
     break;
@@ -2757,6 +2761,8 @@ StmtResult Parser::ParseOpenMPDeclarativeOrExecutableDirective(
   case OMPD_target_parallel_for:
   case OMPD_loop:
   case OMPD_teams_loop:
+  case OMPD_target_teams_loop:
+  case OMPD_parallel_loop:
   case OMPD_taskloop:
   case OMPD_taskloop_simd:
   case OMPD_master_taskloop:
