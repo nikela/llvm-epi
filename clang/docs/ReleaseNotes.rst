@@ -93,13 +93,15 @@ Improvements to Clang's diagnostics
   extension definitions of an inline namespace and therefore points its note
   at the original definition. This fixes `Issue 50794 (PR51452)
   <https://github.com/llvm/llvm-project/issues/50794>`_.
+- ``-Wunused-but-set-variable`` now also warns if the variable is only used
+  by unary operators.
 
 Non-comprehensive list of changes in this release
+-------------------------------------------------
 - The builtin function __builtin_dump_struct would crash clang when the target 
   struct have bitfield. Now it fixed, and __builtin_dump_struct support dump
   the bitwidth of bitfields.
   This fixes `Issue 54462 <https://github.com/llvm/llvm-project/issues/54462>`_.
--------------------------------------------------
 
 New Compiler Flags
 ------------------
