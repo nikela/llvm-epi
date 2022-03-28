@@ -3872,7 +3872,8 @@ void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {
   // the currently empty PHI nodes. At this point every instruction in the
   // original loop is widened to a vector form so we can use them to construct
   // the incoming edges.
-  VPBasicBlock *Header = State.Plan->getEntry()->getEntryBasicBlock();
+  VPBasicBlock *Header =
+      State.Plan->getVectorLoopRegion()->getEntryBasicBlock();
   for (VPRecipeBase &R : Header->phis()) {
     if (auto *ReductionPhi = dyn_cast<VPReductionPHIRecipe>(&R))
       fixReduction(ReductionPhi, State);
@@ -8895,9 +8896,12 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
       return BlockMaskCache[BB] = BlockMask; // Loop incoming mask is all-one.
 
     // Introduce the early-exit compare IV <= BTC to form header block mask.
-    // This is used instead of IV < TC because TC may wrap, unlike BTC.
-    // Start by constructing the desired canonical IV.
-    VPBasicBlock *HeaderVPBB = Plan->getEntry()->getEntryBasicBlock();
+    // This is used instead of IV < TC because TC may wrap, unlike BTC. Start by
+    // constructing the desired canonical IV in the header block as its first
+    // non-phi instructions.
+    assert(CM.foldTailByMasking() && "must fold the tail");
+    VPBasicBlock *HeaderVPBB =
+        Plan->getVectorLoopRegion()->getEntryBasicBlock();
     auto NewInsertionPoint = HeaderVPBB->getFirstNonPhi();
     VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
 
@@ -9770,8 +9774,8 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   // After here, VPBB should not be used.
   VPBB = nullptr;
 
-  assert(isa<VPRegionBlock>(Plan->getEntry()) &&
-         !Plan->getEntry()->getEntryBasicBlock()->empty() &&
+  assert(isa<VPRegionBlock>(Plan->getVectorLoopRegion()) &&
+         !Plan->getVectorLoopRegion()->getEntryBasicBlock()->empty() &&
          "entry block must be set to a VPRegionBlock having a non-empty entry "
          "VPBasicBlock");
   // Ensure EVL is available.
@@ -9859,28 +9863,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
   // Introduce a recipe to combine the incoming and previous values of a
   // first-order recurrence.
-  for (VPRecipeBase &R : Plan->getEntry()->getEntryBasicBlock()->phis()) {
-    if (auto *RecurPhi = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R)) {
-      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
-      VPBasicBlock *InsertBlock = PrevRecipe->getParent();
-      auto *Region = GetReplicateRegion(PrevRecipe);
-      if (Region)
-        InsertBlock = cast<VPBasicBlock>(Region->getSingleSuccessor());
-      if (Region || PrevRecipe->isPhi())
-        Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
-      else
-        Builder.setInsertPoint(InsertBlock, std::next(PrevRecipe->getIterator()));
-
-      auto *RecurSplice = cast<VPInstruction>(
-          Builder.createNaryOp(VPInstruction::FirstOrderRecurrenceSplice,
-                               {RecurPhi, RecurPhi->getBackedgeValue()}));
-
-      RecurPhi->replaceAllUsesWith(RecurSplice);
-      // Set the first operand of RecurSplice to RecurPhi again, after replacing
-      // all users.
-      RecurSplice->setOperand(0, RecurPhi);
-    } else if (auto *RecurPhi =
-                   dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
+  for (VPRecipeBase &R :
+       Plan->getVectorLoopRegion()->getEntryBasicBlock()->phis()) {
+    if (auto *RecurPhi =
+            dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
       auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
           VPInstruction::PredicatedFirstOrderRecurrenceSplice,
           {RecurPhi, RecurPhi->getBackedgeValue(),
@@ -9899,7 +9885,31 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       // Also add the EVL phi that we will need when emitting the predicated
       // splice.
       RecurSplice->addOperand(RecurPhi->getEVLPhi());
+      continue;
     }
+
+    auto *RecurPhi = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R);
+    if (!RecurPhi)
+      continue;
+
+    VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
+    VPBasicBlock *InsertBlock = PrevRecipe->getParent();
+    auto *Region = GetReplicateRegion(PrevRecipe);
+    if (Region)
+      InsertBlock = cast<VPBasicBlock>(Region->getSingleSuccessor());
+    if (Region || PrevRecipe->isPhi())
+      Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
+    else
+      Builder.setInsertPoint(InsertBlock, std::next(PrevRecipe->getIterator()));
+
+    auto *RecurSplice = cast<VPInstruction>(
+        Builder.createNaryOp(VPInstruction::FirstOrderRecurrenceSplice,
+                             {RecurPhi, RecurPhi->getBackedgeValue()}));
+
+    RecurPhi->replaceAllUsesWith(RecurSplice);
+    // Set the first operand of RecurSplice to RecurPhi again, after replacing
+    // all users.
+    RecurSplice->setOperand(0, RecurPhi);
   }
 
   // Interleave memory: for each Interleave Group we marked earlier as relevant
@@ -10093,7 +10103,8 @@ void LoopVectorizationPlanner::adjustRecipesForReductions(
   // dedicated latch block.
   if (CM.foldTailByMasking()) {
     Builder.setInsertPoint(LatchVPBB, LatchVPBB->begin());
-    for (VPRecipeBase &R : Plan->getEntry()->getEntryBasicBlock()->phis()) {
+    for (VPRecipeBase &R :
+         Plan->getVectorLoopRegion()->getEntryBasicBlock()->phis()) {
       VPReductionPHIRecipe *PhiR = dyn_cast<VPReductionPHIRecipe>(&R);
       if (!PhiR || PhiR->isInLoop())
         continue;
@@ -11778,7 +11789,8 @@ bool LoopVectorizePass::processLoop(Loop *L) {
 
         // Ensure that the start values for any VPReductionPHIRecipes are
         // updated before vectorising the epilogue loop.
-        VPBasicBlock *Header = BestEpiPlan.getEntry()->getEntryBasicBlock();
+        VPBasicBlock *Header =
+            BestEpiPlan.getVectorLoopRegion()->getEntryBasicBlock();
         for (VPRecipeBase &R : Header->phis()) {
           if (auto *ReductionPhi = dyn_cast<VPReductionPHIRecipe>(&R)) {
             if (auto *Resume = MainILV.getReductionResumeValue(
