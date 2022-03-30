@@ -10,14 +10,14 @@ define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgtu.vx v8, v9, a0, v0.t
 ; CHECK-O0-NEXT:    vmv.v.v v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_gtu:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgtu.vx v0, v8, a0, v0.t
 ; CHECK-O2-NEXT:    ret
   %insert = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0
@@ -32,14 +32,14 @@ define <vscale x 1 x i1> @test_vp_icmp_gt(<vscale x 1 x i64> %a, i64 %b, <vscale
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
 ; CHECK-O0-NEXT:    # kill: def $x12 killed $x11
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgt.vx v8, v9, a0, v0.t
 ; CHECK-O0-NEXT:    vmv.v.v v0, v8
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_gt:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgt.vx v0, v8, a0, v0.t
 ; CHECK-O2-NEXT:    ret
   %insert = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0

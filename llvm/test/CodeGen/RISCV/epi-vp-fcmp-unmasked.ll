@@ -49,9 +49,11 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i3
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    # implicit-def: $v11
+; CHECK-O0-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmand.mm v11, v11, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
@@ -59,40 +61,45 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i3
 ; CHECK-O0-NEXT:    vmnand.mm v12, v0, v0
 ; CHECK-O0-NEXT:    vsm.v v12, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v11, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v11, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v11, v9, v10, v0.t
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
@@ -140,35 +147,42 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i3
 ; CHECK-O2-NEXT:    vmfeq.vv v11, v9, v9
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v12, v11
+; CHECK-O2-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v11, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmand.mm v11, v11, v0
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
 ; CHECK-O2-NEXT:    vsm.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v11, v0, v0
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v9, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v9, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v11, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
@@ -277,9 +291,11 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i3
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    # implicit-def: $v11
+; CHECK-O0-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmand.mm v11, v11, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
@@ -287,40 +303,45 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i3
 ; CHECK-O0-NEXT:    vmnand.mm v12, v0, v0
 ; CHECK-O0-NEXT:    vsm.v v12, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v11, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v11, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v11, v9, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v11
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v11, v9, v10, v0.t
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v11, v11, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v11, (a0)
@@ -368,35 +389,42 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i3
 ; CHECK-O2-NEXT:    vmfeq.vv v11, v9, v9
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v12, v11
+; CHECK-O2-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v11, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmand.mm v11, v11, v0
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
 ; CHECK-O2-NEXT:    vsm.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v11, v0, v0
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v9, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v9, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v12, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v8, v9, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v11, v12, v11
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v11, (a0)
@@ -505,9 +533,11 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    # implicit-def: $v9
+; CHECK-O0-NEXT:    vsetvli zero, zero, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v9, v10, v12, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmand.mm v9, v9, v0
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
@@ -515,40 +545,45 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O0-NEXT:    vmnand.mm v14, v0, v0
 ; CHECK-O0-NEXT:    vsm.v v14, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v9, v10, v12, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v9, v9, v14
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v12, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v9, v9, v14
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v9, v12, v10, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v9, v9, v14
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v10, v12, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v9, v9, v14
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v9, v10, v12, v0.t
+; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vmor.mm v9, v9, v14
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v9, (a0)
@@ -596,35 +631,42 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O2-NEXT:    vmfeq.vv v13, v10, v10
 ; CHECK-O2-NEXT:    vmfeq.vv v14, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v0, v14, v13
+; CHECK-O2-NEXT:    vsetvli zero, zero, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v13, v8, v10, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmand.mm v13, v13, v0
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v13, (a0)
 ; CHECK-O2-NEXT:    vsm.v v0, (a0)
 ; CHECK-O2-NEXT:    vmnand.mm v13, v0, v0
 ; CHECK-O2-NEXT:    vsm.v v13, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v14, v8, v10, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v14, v14, v13
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v14, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v14, v10, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v14, v14, v13
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v14, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v14, v10, v8, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v14, v14, v13
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v14, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v14, v8, v10, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v14, v14, v13
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v14, (a0)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v14, v8, v10, v0.t
+; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vmor.mm v13, v14, v13
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v13, (a0)

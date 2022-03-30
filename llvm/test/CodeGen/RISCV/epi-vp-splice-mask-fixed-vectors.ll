@@ -98,8 +98,10 @@ define <2 x i1> @test_vp_splice_v2i1_masked(<2 x i1> %va, <2 x i1> %vb, <2 x i1>
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v11
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsltu.vx v11, v11, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v12, 0
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v8, v12, 1, v0
@@ -114,6 +116,7 @@ define <2 x i1> @test_vp_splice_v2i1_masked(<2 x i1> %va, <2 x i1> %vb, <2 x i1>
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v11
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
@@ -212,8 +215,10 @@ define <4 x i1> @test_vp_splice_v4i1_masked(<4 x i1> %va, <4 x i1> %vb, <4 x i1>
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vid.v v11
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsltu.vx v11, v11, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v12, 0
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v8, v12, 1, v0
@@ -228,6 +233,7 @@ define <4 x i1> @test_vp_splice_v4i1_masked(<4 x i1> %va, <4 x i1> %vb, <4 x i1>
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v11
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
@@ -326,8 +332,10 @@ define <8 x i1> @test_vp_splice_v8i1_masked(<8 x i1> %va, <8 x i1> %vb, <8 x i1>
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m1, ta, mu
 ; CHECK-NEXT:    vid.v v11
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsltu.vx v11, v11, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v12, 0
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v8, v12, 1, v0
@@ -342,6 +350,7 @@ define <8 x i1> @test_vp_splice_v8i1_masked(<8 x i1> %va, <8 x i1> %vb, <8 x i1>
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v11
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
@@ -440,8 +449,10 @@ define <16 x i1> @test_vp_splice_v16i1_masked(<16 x i1> %va, <16 x i1> %vb, <16 
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, mu
 ; CHECK-NEXT:    vid.v v11
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsltu.vx v11, v11, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v12, 0
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vmerge.vim v8, v12, 1, v0
@@ -456,6 +467,7 @@ define <16 x i1> @test_vp_splice_v16i1_masked(<16 x i1> %va, <16 x i1> %vb, <16 
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, mu
 ; CHECK-NEXT:    vmv1r.v v0, v11
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0, v0.t
 ; CHECK-NEXT:    ret
