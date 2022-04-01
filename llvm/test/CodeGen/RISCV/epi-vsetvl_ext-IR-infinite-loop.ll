@@ -19,8 +19,8 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O0-NEXT:    j .LBB0_1
 ; CHECK-O0-NEXT:  .LBB0_1: # %for.body.lr.ph
 ; CHECK-O0-NEXT:    ld a1, 72(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    li a0, 25
-; CHECK-O0-NEXT:    slt a0, a0, a1
+; CHECK-O0-NEXT:    slti a0, a1, 26
+; CHECK-O0-NEXT:    xori a0, a0, 1
 ; CHECK-O0-NEXT:    slli a0, a0, 9
 ; CHECK-O0-NEXT:    sd a0, 32(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    li a2, 1024
@@ -76,8 +76,8 @@ define void @test_llvm_IR_infinite_loop(i64 %n, double* %a, double* %b, double* 
 ; CHECK-O2-NEXT:    li a5, 1024
 ; CHECK-O2-NEXT:    blt a4, a0, .LBB0_3
 ; CHECK-O2-NEXT:  # %bb.2: # %for.body.lr.ph
-; CHECK-O2-NEXT:    li a4, 25
-; CHECK-O2-NEXT:    slt a4, a4, a0
+; CHECK-O2-NEXT:    slti a4, a0, 26
+; CHECK-O2-NEXT:    xori a4, a4, 1
 ; CHECK-O2-NEXT:    slli a5, a4, 9
 ; CHECK-O2-NEXT:  .LBB0_3: # %for.body.lr.ph
 ; CHECK-O2-NEXT:    li a4, 0

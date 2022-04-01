@@ -114,6 +114,7 @@ public:
     VPVEVLPHISC,
     VPVWidenPHISC,
     VPVWidenIntOrFpInductionSC,
+    VPVWidenPointerInductionSC,
     VPVPredInstPHI,
     VPVReductionPHISC,
   };
@@ -360,6 +361,7 @@ public:
     VPEVLPHISC,
     VPWidenPHISC,
     VPWidenIntOrFpInductionSC,
+    VPWidenPointerInductionSC,
     VPPredInstPHISC,
     VPReductionPHISC,
     VPFirstPHISC = VPBlendSC,

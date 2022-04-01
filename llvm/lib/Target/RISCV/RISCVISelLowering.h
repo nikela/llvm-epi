@@ -399,6 +399,7 @@ public:
   bool isCheapToSpeculateCttz() const override;
   bool isCheapToSpeculateCtlz() const override;
   bool hasAndNotCompare(SDValue Y) const override;
+  bool hasBitTest(SDValue X, SDValue Y) const override;
   bool shouldSinkOperands(Instruction *I,
                           SmallVectorImpl<Use *> &Ops) const override;
   bool isFPImmLegal(const APFloat &Imm, EVT VT,
@@ -721,6 +722,8 @@ private:
   SDValue lowerVPOp(SDValue Op, SelectionDAG &DAG, unsigned RISCVISDOpc) const;
   SDValue lowerLogicVPOp(SDValue Op, SelectionDAG &DAG, unsigned MaskOpc,
                          unsigned VecOpc) const;
+  SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
+                             unsigned RISCVISDOpc) const;
   SDValue lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
                         unsigned RISCVISDOpc) const;
   SDValue lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const;
@@ -728,8 +731,6 @@ private:
   SDValue lowerVPExtMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPTruncToMaskOp(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
-                             unsigned RISCVISDOpc) const;
   SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPLoadMasks(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStoreMasks(SDValue Op, SelectionDAG &DAG) const;

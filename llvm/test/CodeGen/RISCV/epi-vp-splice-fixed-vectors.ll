@@ -79,7 +79,9 @@ define <2 x i64> @test_vp_splice_v2i64_masked(<2 x i64> %va, <2 x i64> %vb, <2 x
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t
@@ -160,7 +162,9 @@ define <4 x i32> @test_vp_splice_v4i32_masked(<4 x i32> %va, <4 x i32> %vb, <4 x
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t
@@ -241,7 +245,9 @@ define <8 x i16> @test_vp_splice_v8i16_masked(<8 x i16> %va, <8 x i16> %vb, <8 x
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t
@@ -322,7 +328,9 @@ define <16 x i8> @test_vp_splice_v16i8_masked(<16 x i8> %va, <16 x i8> %vb, <16 
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t
@@ -403,7 +411,9 @@ define <2 x double> @test_vp_splice_v2f64_masked(<2 x double> %va, <2 x double> 
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t
@@ -484,7 +494,9 @@ define <4 x float> @test_vp_splice_v4f32_masked(<4 x float> %va, <4 x float> %vb
 ; CHECK-NEXT:    addi a2, a0, -5
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vid.v v10
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vmsltu.vx v10, v10, a2, v0.t
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vslideup.vx v11, v9, a2, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v8, v8, 5, v0.t

@@ -25,28 +25,28 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v10, a1
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgtu.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsltu.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vv v8, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -63,19 +63,19 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgtu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsltu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsleu.vv v9, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v9, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsleu.vx v8, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a2)
@@ -123,28 +123,28 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v9, a2
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsltu.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgtu.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vv v8, v9, v10, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -161,19 +161,19 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsltu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgtu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsleu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsleu.vv v8, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a2)
@@ -221,28 +221,28 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v10, a1
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgt.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmslt.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vv v8, v10, v9, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vx v8, v9, a1, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -259,19 +259,19 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmslt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsle.vv v9, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v9, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsle.vx v8, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a2)
@@ -319,28 +319,28 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v9, a2
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmslt.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgt.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a3, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vx v8, v10, a2, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 32
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vv v8, v9, v10, v0.t
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -357,19 +357,19 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmslt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsle.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v10, (a2)
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsle.vv v8, v9, v8, v0.t
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a2)

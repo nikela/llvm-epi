@@ -584,6 +584,7 @@ bool VPRecipeBase::mayHaveSideEffects() const {
   case VPBranchOnMaskSC:
     return false;
   case VPWidenIntOrFpInductionSC:
+  case VPWidenPointerInductionSC:
   case VPWidenCanonicalIVSC:
   case VPWidenPHISC:
   case VPBlendSC:
@@ -1027,7 +1028,7 @@ void VPlan::execute(VPTransformState *State) {
 
   // Fix the latch value of canonical, reduction and first-order recurrences
   // phis in the vector loop.
-  VPBasicBlock *Header = Entry->getEntryBasicBlock();
+  VPBasicBlock *Header = getVectorLoopRegion()->getEntryBasicBlock();
   if (Header->empty()) {
     assert(EnableVPlanNativePath);
     Header = cast<VPBasicBlock>(Header->getSingleSuccessor());
@@ -1042,8 +1043,36 @@ void VPlan::execute(VPTransformState *State) {
       continue;
     }
 
-    if (isa<VPWidenIntOrFpInductionRecipe>(&R) || isa<VPWidenPHIRecipe>(&R))
+    // Skip phi-like recipes that generate their backedege values themselves.
+    if (isa<VPWidenPHIRecipe>(&R))
       continue;
+
+    if (isa<VPWidenPointerInductionRecipe>(&R) ||
+        isa<VPWidenIntOrFpInductionRecipe>(&R)) {
+      PHINode *Phi = nullptr;
+      if (isa<VPWidenIntOrFpInductionRecipe>(&R)) {
+        Phi = cast<PHINode>(State->get(R.getVPSingleValue(), 0));
+      } else {
+        auto *WidenPhi = cast<VPWidenPointerInductionRecipe>(&R);
+        // TODO: Split off the case that all users of a pointer phi are scalar
+        // from the VPWidenPointerInductionRecipe.
+        if (all_of(WidenPhi->users(), [WidenPhi](const VPUser *U) {
+              return cast<VPRecipeBase>(U)->usesScalars(WidenPhi);
+            }))
+          continue;
+
+        auto *GEP = cast<GetElementPtrInst>(State->get(WidenPhi, 0));
+        Phi = cast<PHINode>(GEP->getPointerOperand());
+      }
+
+      Phi->setIncomingBlock(1, VectorLatchBB);
+
+      // Move the last step to the end of the latch block. This ensures
+      // consistent placement of all induction updates.
+      Instruction *Inc = cast<Instruction>(Phi->getIncomingValue(1));
+      Inc->moveBefore(VectorLatchBB->getTerminator()->getPrevNode());
+      continue;
+    }
 
     auto *PhiR = cast<VPHeaderPHIRecipe>(&R);
     // For first-order recurrences and in-order reduction phis, only a single
@@ -1351,6 +1380,16 @@ void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
   } else
     O << " " << VPlanIngredient(IV);
 }
+
+void VPWidenPointerInductionRecipe::print(raw_ostream &O, const Twine &Indent,
+                                          VPSlotTracker &SlotTracker) const {
+  O << Indent << "EMIT ";
+  printAsOperand(O, SlotTracker);
+  O << " = WIDEN-POINTER-INDUCTION ";
+  getStartValue()->printAsOperand(O, SlotTracker);
+  O << ", " << *IndDesc.getStep();
+}
+
 #endif
 
 bool VPWidenIntOrFpInductionRecipe::isCanonical() const {
