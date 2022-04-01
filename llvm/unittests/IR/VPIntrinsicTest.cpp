@@ -97,9 +97,6 @@ protected:
     Str << " declare <8 x i32> @llvm.experimental.vp.splice.v8i32(<8 x "
            "i32>, <8 x i32>, i32, <8 x i1>, i32, i32) ";
 
-    Str << " declare <8 x i32> @llvm.vp.icmp.v8i32(<8 x i32>, <8 x i32>, i8, <8 x i1>, i32)";
-    Str << " declare <8 x float> @llvm.vp.fcmp.v8f32(<8 x float>, <8 x float>, i8, <8 x i1>, i32)";
-
     Str << " declare <8 x i32> @llvm.vp.sext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
     Str << " declare <8 x i32> @llvm.vp.zext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
 
@@ -125,6 +122,11 @@ protected:
     Str << " declare <8 x float> @llvm.vp.exp.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.pow.v8f32(<8 x float>, <8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.frint.v8f32(<8 x float>, <8 x i1>, i32) ";
+
+    Str << " declare <8 x i1> @llvm.vp.fcmp.v8f32"
+        << "(<8 x float>, <8 x float>, metadata, <8 x i1>, i32) ";
+    Str << " declare <8 x i1> @llvm.vp.icmp.v8i32"
+        << "(<8 x i32>, <8 x i32>, metadata, <8 x i1>, i32) ";
 
     return parseAssemblyString(Str.str(), Err, C);
   }
@@ -343,7 +345,7 @@ TEST_F(VPIntrinsicTest, VPIntrinsicDeclarationForParams) {
 }
 
 /// Check that the HANDLE_VP_TO_CONSTRAINEDFP maps to an existing intrinsic with
-/// the right amount of metadata args.
+/// the right amount of constrained-fp metadata args.
 TEST_F(VPIntrinsicTest, HandleToConstrainedFP) {
 #define VP_PROPERTY_CONSTRAINEDFP(HASROUND, HASEXCEPT, CFPID)                  \
   {                                                                            \
@@ -352,7 +354,8 @@ TEST_F(VPIntrinsicTest, HandleToConstrainedFP) {
     unsigned NumMetadataArgs = 0;                                              \
     for (auto TD : T)                                                          \
       NumMetadataArgs += (TD.Kind == Intrinsic::IITDescriptor::Metadata);      \
-    ASSERT_EQ(NumMetadataArgs, (unsigned)(HASROUND + HASEXCEPT));              \
+    bool IsCmp = Intrinsic::CFPID == Intrinsic::experimental_constrained_fcmp; \
+    ASSERT_EQ(NumMetadataArgs, (unsigned)(IsCmp + HASROUND + HASEXCEPT));      \
   }
 #include "llvm/IR/VPIntrinsics.def"
 }

@@ -22,7 +22,7 @@ define <vscale x 1 x i1> @test_vp_icmp_gtu(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O2-NEXT:    ret
   %insert = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0
   %splat = shufflevector <vscale x 1 x i64> %insert, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
-  %cmp = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 34, <vscale x 1 x i1> %m, i32 %evl)
+  %cmp = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ugt", <vscale x 1 x i1> %m, i32 %evl)
   ret <vscale x 1 x i1> %cmp
 }
 
@@ -44,9 +44,9 @@ define <vscale x 1 x i1> @test_vp_icmp_gt(<vscale x 1 x i64> %a, i64 %b, <vscale
 ; CHECK-O2-NEXT:    ret
   %insert = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0
   %splat = shufflevector <vscale x 1 x i64> %insert, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
-  %cmp = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 38, <vscale x 1 x i1> %m, i32 %evl)
+  %cmp = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sgt", <vscale x 1 x i1> %m, i32 %evl)
   ret <vscale x 1 x i1> %cmp
 }
 
 ; icmp
-declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64>, <vscale x 1 x i64>, i8 immarg, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64>, <vscale x 1 x i64>, metadata, <vscale x 1 x i1>, i32)

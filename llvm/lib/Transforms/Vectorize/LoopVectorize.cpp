@@ -4484,6 +4484,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     bool FCmp = (I.getOpcode() == Instruction::FCmp);
     auto *Cmp = cast<CmpInst>(&I);
     setDebugLocFromInst(Cmp, &Builder);
+    LLVMContext &LC = Builder.getContext();
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *A = State.get(User.getOperand(0), Part);
       Value *B = State.get(User.getOperand(1), Part);
@@ -4492,7 +4493,10 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
       VectorType *OpTy = cast<VectorType>(A->getType());
       Value *MaskArg = MaskValue(Part, OpTy->getElementCount());
       Value *EVLArg = State.get(EVL, Part);
-      Value *PredArg = Builder.getInt8(Cmp->getPredicate());
+      // Value *PredArg = Builder.getInt8(Cmp->getPredicate());
+      Value *PredArg = MetadataAsValue::get(
+          LC,
+          MDString::get(LC, CmpInst::getPredicateName(Cmp->getPredicate())));
 
       if (FCmp) {
         IRBuilder<>::FastMathFlagGuard FMFG(Builder);

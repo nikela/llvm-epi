@@ -29,7 +29,7 @@ define dso_local void @fu(double* noalias nocapture noundef writeonly %a, double
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[TMP6:%.*]] = bitcast i32* [[TMP2]] to <vscale x 2 x i32>*
 ; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* [[TMP6]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA4:![0-9]+]]
-; CHECK-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> zeroinitializer, i8 32, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> zeroinitializer, metadata !"eq", <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, double* [[B:%.*]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = xor <vscale x 2 x i1> [[VP_OP_ICMP]], shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP9:%.*]] = select <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i1> [[TMP8]], <vscale x 2 x i1> zeroinitializer
@@ -40,7 +40,7 @@ define dso_local void @fu(double* noalias nocapture noundef writeonly %a, double
 ; CHECK-NEXT:    [[TMP12:%.*]] = select <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i1> [[VP_OP_ICMP]], <vscale x 2 x i1> zeroinitializer
 ; CHECK-NEXT:    [[TMP13:%.*]] = bitcast i32** [[TMP11]] to <vscale x 2 x i32*>*
 ; CHECK-NEXT:    [[VP_OP_LOAD4:%.*]] = call <vscale x 2 x i32*> @llvm.vp.load.nxv2p0i32.p0nxv2p0i32(<vscale x 2 x i32*>* [[TMP13]], <vscale x 2 x i1> [[TMP12]], i32 [[TMP5]]), !tbaa [[TBAA10:![0-9]+]]
-; CHECK-NEXT:    [[VP_OP_ICMP5:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2p0i32(<vscale x 2 x i32*> [[VP_OP_LOAD4]], <vscale x 2 x i32*> zeroinitializer, i8 32, <vscale x 2 x i1> [[TMP12]], i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_OP_ICMP5:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2p0i32(<vscale x 2 x i32*> [[VP_OP_LOAD4]], <vscale x 2 x i32*> zeroinitializer, metadata !"eq", <vscale x 2 x i1> [[TMP12]], i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP14:%.*]] = xor <vscale x 2 x i1> [[VP_OP_ICMP5]], shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP15:%.*]] = select <vscale x 2 x i1> [[TMP12]], <vscale x 2 x i1> [[TMP14]], <vscale x 2 x i1> zeroinitializer
 ; CHECK-NEXT:    [[TMP16:%.*]] = bitcast double* [[TMP7]] to <vscale x 2 x double>*

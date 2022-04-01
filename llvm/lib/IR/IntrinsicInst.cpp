@@ -236,8 +236,26 @@ bool ConstrainedFPIntrinsic::isDefaultFPEnvironment() const {
   return true;
 }
 
-FCmpInst::Predicate ConstrainedFPCmpIntrinsic::getPredicate() const {
-  Metadata *MD = cast<MetadataAsValue>(getArgOperand(2))->getMetadata();
+static CmpInst::Predicate getIntPredicateFromMD(const Value *Op) {
+  Metadata *MD = cast<MetadataAsValue>(Op)->getMetadata();
+  if (!MD || !isa<MDString>(MD))
+    return CmpInst::BAD_ICMP_PREDICATE;
+  return StringSwitch<CmpInst::Predicate>(cast<MDString>(MD)->getString())
+      .Case("eq", CmpInst::ICMP_EQ)
+      .Case("ne", CmpInst::ICMP_NE)
+      .Case("ugt", CmpInst::ICMP_UGT)
+      .Case("uge", CmpInst::ICMP_UGE)
+      .Case("ult", CmpInst::ICMP_ULT)
+      .Case("ule", CmpInst::ICMP_ULE)
+      .Case("sgt", CmpInst::ICMP_SGT)
+      .Case("sge", CmpInst::ICMP_SGE)
+      .Case("slt", CmpInst::ICMP_SLT)
+      .Case("sle", CmpInst::ICMP_SLE)
+      .Default(CmpInst::BAD_ICMP_PREDICATE);
+}
+
+static FCmpInst::Predicate getFPPredicateFromMD(const Value *Op) {
+  Metadata *MD = cast<MetadataAsValue>(Op)->getMetadata();
   if (!MD || !isa<MDString>(MD))
     return FCmpInst::BAD_FCMP_PREDICATE;
   return StringSwitch<FCmpInst::Predicate>(cast<MDString>(MD)->getString())
@@ -256,6 +274,10 @@ FCmpInst::Predicate ConstrainedFPCmpIntrinsic::getPredicate() const {
       .Case("ule", FCmpInst::FCMP_ULE)
       .Case("une", FCmpInst::FCMP_UNE)
       .Default(FCmpInst::BAD_FCMP_PREDICATE);
+}
+
+FCmpInst::Predicate ConstrainedFPCmpIntrinsic::getPredicate() const {
+  return getFPPredicateFromMD(getArgOperand(2));
 }
 
 bool ConstrainedFPIntrinsic::isUnaryOp() const {
@@ -482,11 +504,6 @@ bool VPIntrinsic::canIgnoreVectorLengthParam() const {
   return false;
 }
 
-CmpInst::Predicate VPIntrinsic::getCmpPredicate() const {
-  return static_cast<CmpInst::Predicate>(
-      cast<ConstantInt>(getArgOperand(2))->getZExtValue());
-}
-
 Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
                                                Type *ReturnType,
                                                ArrayRef<Value *> Params) {
@@ -572,6 +589,37 @@ bool VPCastIntrinsic::isVPCast(Intrinsic::ID ID) {
 #include "llvm/IR/VPIntrinsics.def"
   }
   return false;
+}
+
+bool VPCmpIntrinsic::isVPCmp(Intrinsic::ID ID) {
+  switch (ID) {
+  default:
+    break;
+#define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
+#define VP_PROPERTY_CMP(CCPOS, ...) return true;
+#define END_REGISTER_VP_INTRINSIC(VPID) break;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+  return false;
+}
+
+CmpInst::Predicate VPCmpIntrinsic::getPredicate() const {
+  bool IsFP = true;
+  Optional<unsigned> CCArgIdx;
+  switch (getIntrinsicID()) {
+  default:
+    break;
+#define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
+#define VP_PROPERTY_CMP(CCPOS, ISFP)                                           \
+  CCArgIdx = CCPOS;                                                            \
+  IsFP = ISFP;                                                                 \
+  break;
+#define END_REGISTER_VP_INTRINSIC(VPID) break;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+  assert(CCArgIdx.hasValue() && "Unexpected vector-predicated comparison");
+  return IsFP ? getFPPredicateFromMD(getArgOperand(*CCArgIdx))
+              : getIntPredicateFromMD(getArgOperand(*CCArgIdx));
 }
 
 unsigned VPReductionIntrinsic::getVectorParamPos() const {

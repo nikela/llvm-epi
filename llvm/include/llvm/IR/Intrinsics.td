@@ -1445,29 +1445,6 @@ def int_experimental_vp_strided_load  : DefaultAttrsIntrinsic<[llvm_anyvector_ty
 // Note: rounding mode and exception control is planned to be integrated using
 // operand bundles. For now we assume the default environment for both.
 
-// Comparison
-// TODO add signalling fcmp
-// The last argument is the comparison predicate
-def int_vp_icmp : Intrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
-                            [ llvm_anyvector_ty,
-                              LLVMMatchType<0>,
-                              llvm_i8_ty,
-                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty ],
-                            [ IntrWillReturn, IntrNoSync, IntrNoMem,
-                              /*Mask<3>, VectorLength<4>,*/
-                              ImmArg<ArgIndex<2>> ]>;
-
-def int_vp_fcmp : Intrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
-                            [ llvm_anyvector_ty,
-                              LLVMMatchType<0>,
-                              llvm_i8_ty,
-                              LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
-                              llvm_i32_ty ],
-                            [ IntrWillReturn, IntrNoSync, IntrNoMem,
-                              /*Mask<3>, VectorLength<4>,*/
-                              ImmArg<ArgIndex<2>> ]>;
-
 // Cast
 let IntrProperties = [ IntrNoMem, IntrWillReturn/*, Mask<1>, VectorLength<2>*/ ] in {
 def int_vp_sext : Intrinsic<[ llvm_anyvector_ty ],
@@ -1669,6 +1646,23 @@ def int_vp_merge : DefaultAttrsIntrinsic<[ llvm_anyvector_ty ],
                                 LLVMMatchType<0>,
                                 LLVMMatchType<0>,
                                 llvm_i32_ty]>;
+
+// Comparisons.
+let IntrProperties = [IntrNoMem, IntrNoSync, IntrWillReturn] in {
+  def int_vp_icmp : DefaultAttrsIntrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
+                                [ llvm_anyvector_ty,
+                                  LLVMMatchType<0>,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty]>;
+
+  def int_vp_fcmp : DefaultAttrsIntrinsic<[ LLVMScalarOrSameVectorWidth<0, llvm_i1_ty> ],
+                                [ llvm_anyvector_ty,
+                                  LLVMMatchType<0>,
+                                  llvm_metadata_ty,
+                                  LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                  llvm_i32_ty]>;
+}
 
 // Reductions
 let IntrProperties = [IntrSpeculatable, IntrNoMem, IntrNoSync, IntrWillReturn] in {

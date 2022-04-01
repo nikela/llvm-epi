@@ -53,7 +53,7 @@ vector.body:                                      ; preds = %vector.body, %for.b
   %3 = bitcast double* %0 to <vscale x 1 x double>*
   %4 = trunc i64 %2 to i32
   %vp.op.load = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* %3, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
-  %vp.op.fcmp = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %vp.op.load, <vscale x 1 x double> shufflevector (<vscale x 1 x double> insertelement (<vscale x 1 x double> undef, double 3.000000e+00, i32 0), <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer), i8 4, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
+  %vp.op.fcmp = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %vp.op.load, <vscale x 1 x double> shufflevector (<vscale x 1 x double> insertelement (<vscale x 1 x double> undef, double 3.000000e+00, i32 0), <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer), metadata !"olt", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer), i32 %4)
   %5 = and <vscale x 1 x i1> %vp.op.fcmp, shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> undef, i1 true, i32 0), <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer)
   %6 = getelementptr inbounds double, double* %a, i64 %index
   %7 = bitcast double* %6 to <vscale x 1 x double>*
@@ -83,7 +83,7 @@ declare i64 @llvm.epi.vsetvl(i64, i64, i64) #1
 declare <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* nocapture, <vscale x 1 x i1>, i32) #2
 
 ; Function Attrs: nosync nounwind readnone willreturn
-declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, i8 immarg, <vscale x 1 x i1>, i32) #3
+declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, <vscale x 1 x i1>, i32) #3
 
 ; Function Attrs: nounwind readnone willreturn
 declare <vscale x 1 x double> @llvm.vp.fmul.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32) #4

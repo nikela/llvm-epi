@@ -7508,7 +7508,8 @@ void SelectionDAGBuilder::visitVPStoreScatter(const VPIntrinsic &VPIntrin,
 
 void SelectionDAGBuilder::visitCmpVP(const VPIntrinsic &I) {
   ISD::CondCode Condition;
-  CmpInst::Predicate Predicate = I.getCmpPredicate();
+  auto *VPCmp = cast<VPCmpIntrinsic>(&I);
+  CmpInst::Predicate Predicate = VPCmp->getPredicate();
   bool IsFP = I.getOperand(0)->getType()->isFPOrFPVectorTy();
   if (IsFP) {
     Condition = getFCmpCondCode(Predicate);
@@ -7647,6 +7648,9 @@ void SelectionDAGBuilder::visitVPStridedStore(
 void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     const VPIntrinsic &VPIntrin) {
   SDLoc DL = getCurSDLoc();
+  if (const auto *CmpI = dyn_cast<VPCmpIntrinsic>(&VPIntrin))
+    return visitCmpVP(*CmpI);
+
   switch (VPIntrin.getIntrinsicID()) {
   default:
     break;
@@ -7701,9 +7705,6 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     break;
   case ISD::EXPERIMENTAL_VP_STRIDED_STORE:
     visitVPStridedStore(VPIntrin, OpValues);
-    break;
-  case ISD::VP_SETCC:
-    visitCmpVP(VPIntrin);
     break;
   }
 }

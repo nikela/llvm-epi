@@ -86,19 +86,19 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x > splat(y) → vmsgtu.vx x, y
-  %ugt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 34, <vscale x 1 x i1> %m, i32 %n)
+  %ugt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ugt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmsltu.vx x, y
-  %ugt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 34, <vscale x 1 x i1> %m, i32 %n)
+  %ugt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ugt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsleu.vv)
-  %uge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 35, <vscale x 1 x i1> %m, i32 %n)
+  %uge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %uge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsleu.vx x, y
-  %uge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 35, <vscale x 1 x i1> %m, i32 %n)
+  %uge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %uge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -184,19 +184,19 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x < splat(y) → vmsltu.vx x, y
-  %ult.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 36, <vscale x 1 x i1> %m, i32 %n)
+  %ult.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ult.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) < x → x > splat(y) → vmsgtu.vx x, y
-  %ult.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 36, <vscale x 1 x i1> %m, i32 %n)
+  %ult.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ult.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsleu.vx x, y
-  %ule.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 37, <vscale x 1 x i1> %m, i32 %n)
+  %ule.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ule.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= y → y >= splat(y) → cannot be folded (vmsleu.vv)
-  %ule.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 37, <vscale x 1 x i1> %m, i32 %n)
+  %ule.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ule.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -282,19 +282,19 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x > splat(y) → vmsgt.vx x, y
-  %sgt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 38, <vscale x 1 x i1> %m, i32 %n)
+  %sgt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sgt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmslt.vx x, y
-  %sgt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 38, <vscale x 1 x i1> %m, i32 %n)
+  %sgt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sgt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsle.vv)
-  %sge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 39, <vscale x 1 x i1> %m, i32 %n)
+  %sge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsle.vx x, y
-  %sge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 39, <vscale x 1 x i1> %m, i32 %n)
+  %sge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -380,22 +380,22 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; y < splat(x) → vmslt.vx x, y
-  %slt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 40, <vscale x 1 x i1> %m, i32 %n)
+  %slt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %slt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(x) < y → y > splat(x) → cannot be folded (vmslt.vv)
-  %slt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 40, <vscale x 1 x i1> %m, i32 %n)
+  %slt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %slt.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsle.vx x, y
-  %sle.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 41, <vscale x 1 x i1> %m, i32 %n)
+  %sle.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sle.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= x → x >= splat(y) → cannot be folded (vmsle.vv)
-  %sle.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 41, <vscale x 1 x i1> %m, i32 %n)
+  %sle.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sle.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
 
-declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i8 %kind, <vscale x 1 x i1> %m, i32 %n)
+declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata, <vscale x 1 x i1> %m, i32 %n)
