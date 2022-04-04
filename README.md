@@ -62,6 +62,8 @@ Currently the policy for RVV is kind of hard-coded in the vectorizer and remains
 
 # Acknowledgements
 
-This work has been done as part of the European Processor Initiative project.
+This work has been done as part of the European Processor Initiative projects EPI-SGA1 and EPI-SGA2.
 
-The European Processor Initiative (EPI) (FPA: 800928) has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement EPI-SGA1: 826647
+The European Processor Initiative (EPI-SGA1) (FPA: 800928) has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement EPI-SGA1: 826647.
+
+The EPI-SGA2 project has received funding from the European High Performance Computing Joint Undertaking (JU) under Framework Partnership Agreement No 800928 and Specific Grant Agreement No 101036168 EPI-SGA2. The JU receives support from the European Union’s Horizon 2020 research and innovation programme and from Croatia, France, Germany, Greece, Italy, Netherlands, Portugal, Spain, Sweden, and Switzerland.
