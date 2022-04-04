@@ -243,34 +243,69 @@ END_REGISTER_VP(vp_fmuladd, VP_FMULADD)
 ///// Type Casts {
 // Specialized helper macro for type conversions.
 // <operation>(%x, %mask, %evl).
-#ifdef HELPER_REGISTER_CAST_VP
+#ifdef HELPER_REGISTER_FP_CAST_VP
 #error                                                                         \
-    "The internal helper macro HELPER_REGISTER_CAST_VP is already defined!"
+    "The internal helper macro HELPER_REGISTER_FP_CAST_VP is already defined!"
 #endif
-#define HELPER_REGISTER_CAST_VP(OPSUFFIX, VPSD, IROPC, HASROUND)                    \
+#define HELPER_REGISTER_FP_CAST_VP(OPSUFFIX, VPSD, IROPC, HASROUND)            \
   BEGIN_REGISTER_VP(vp_##OPSUFFIX, 1, 2, VPSD, -1)                             \
   VP_PROPERTY_FUNCTIONAL_OPC(IROPC)                                            \
-  VP_PROPERTY_CONSTRAINEDFP(HASROUND, 1, experimental_constrained_##OPSUFFIX)         \
-  VP_PROPERTY_CASTOP                                                         \
+  VP_PROPERTY_CONSTRAINEDFP(HASROUND, 1, experimental_constrained_##OPSUFFIX)  \
+  VP_PROPERTY_CASTOP                                                           \
   END_REGISTER_VP(vp_##OPSUFFIX, VPSD)
 
+// llvm.vp.fptoui(x,mask,vlen)
+HELPER_REGISTER_FP_CAST_VP(fptoui, VP_FPTOUI, FPToUI, 0)
+
 // llvm.vp.fptosi(x,mask,vlen)
-HELPER_REGISTER_CAST_VP(fptosi, VP_FPTOSI, FPToSI, 0)
+HELPER_REGISTER_FP_CAST_VP(fptosi, VP_FPTOSI, FPToSI, 0)
+
+// llvm.vp.uitofp(x,mask,vlen)
+HELPER_REGISTER_FP_CAST_VP(uitofp, VP_UITOFP, UIToFP, 1)
 
 // llvm.vp.sitofp(x,mask,vlen)
-HELPER_REGISTER_CAST_VP(sitofp, VP_SITOFP, SIToFP, 1)
+HELPER_REGISTER_FP_CAST_VP(sitofp, VP_SITOFP, SIToFP, 1)
 
-#undef HELPER_REGISTER_CAST_VP
+// llvm.vp.fptrunc(x,mask,vlen)
+HELPER_REGISTER_FP_CAST_VP(fptrunc, VP_FPTRUNC, FPTrunc, 1)
+
+// llvm.vp.fpext(x,mask,vlen)
+HELPER_REGISTER_FP_CAST_VP(fpext, VP_FPEXT, FPExt, 0)
+
+#undef HELPER_REGISTER_FP_CAST_VP
+
+// Specialized helper macro for integer type conversions.
+// <operation>(%x, %mask, %evl).
+#ifdef HELPER_REGISTER_INT_CAST_VP
+#error                                                                         \
+    "The internal helper macro HELPER_REGISTER_INT_CAST_VP is already defined!"
+#endif
+#define HELPER_REGISTER_INT_CAST_VP(OPSUFFIX, VPSD, IROPC)                     \
+  BEGIN_REGISTER_VP(vp_##OPSUFFIX, 1, 2, VPSD, -1)                             \
+  VP_PROPERTY_FUNCTIONAL_OPC(IROPC)                                            \
+  VP_PROPERTY_CASTOP                                                           \
+  END_REGISTER_VP(vp_##OPSUFFIX, VPSD)
+
+// llvm.vp.trunc(x,mask,vlen)
+HELPER_REGISTER_INT_CAST_VP(trunc, VP_TRUNC, Trunc)
+
+// llvm.vp.zext(x,mask,vlen)
+HELPER_REGISTER_INT_CAST_VP(zext, VP_ZEXT, ZExt)
+
+// llvm.vp.sext(x,mask,vlen)
+HELPER_REGISTER_INT_CAST_VP(sext, VP_SEXT, SExt)
+
+// llvm.vp.ptrtoint(x,mask,vlen)
+HELPER_REGISTER_INT_CAST_VP(ptrtoint, VP_PTRTOINT, PtrToInt)
+
+// llvm.vp.inttoptr(x,mask,vlen)
+HELPER_REGISTER_INT_CAST_VP(inttoptr, VP_INTTOPTR, IntToPtr)
+
+#undef HELPER_REGISTER_INT_CAST_VP
 
 ///// } Type Casts
 
 ///// Comparisons {
-// llvm.vp.icmp(x,y,cc,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_icmp, 3, 4)
-VP_PROPERTY_FUNCTIONAL_OPC(ICmp)
-VP_PROPERTY_CMP(2, false)
-END_REGISTER_VP_INTRINSIC(vp_icmp)
-
 // llvm.vp.fcmp(x,y,cc,mask,vlen)
 // Upsteam -> BEGIN_REGISTER_VP(vp_fcmp, 3, 4, VP_FCMP, -1)
 BEGIN_REGISTER_VP_INTRINSIC(vp_fcmp, 3, 4)
@@ -279,6 +314,14 @@ VP_PROPERTY_CMP(2, true)
 VP_PROPERTY_CONSTRAINEDFP(0, 1, experimental_constrained_fcmp)
 END_REGISTER_VP_INTRINSIC(vp_fcmp)
 // Upstream -> END_REGISTER_VP(vp_fcmp, VP_FCMP)
+
+// llvm.vp.icmp(x,y,cc,mask,vlen)
+// Upstream -> BEGIN_REGISTER_VP(vp_icmp, 3, 4, VP_ICMP, -1)
+BEGIN_REGISTER_VP_INTRINSIC(vp_icmp, 3, 4)
+VP_PROPERTY_FUNCTIONAL_OPC(ICmp)
+VP_PROPERTY_CMP(2, false)
+END_REGISTER_VP_INTRINSIC(vp_icmp)
+// Upstream -> END_REGISTER_VP(vp_icmp, VP_ICMP)
 
 // VP_SETCC (ISel only)
 BEGIN_REGISTER_VP_SDNODE(VP_SETCC, -1, vp_setcc, 3, 4)
@@ -452,73 +495,6 @@ BEGIN_REGISTER_VP(experimental_vp_reverse, 1, 2,
                   EXPERIMENTAL_VP_REVERSE, -1)
 END_REGISTER_VP(experimental_vp_reverse, EXPERIMENTAL_VP_REVERSE)
 ///// } Shuffles
-
-///// Extensions {
-// llvm.vp.sext(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_sext, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_SEXT, -1 ,vp_sext, 1, 2)
-END_REGISTER_VP_SDNODE(VP_SEXT)
-VP_PROPERTY_FUNCTIONAL_OPC(SExt)
-END_REGISTER_VP_INTRINSIC(vp_sext)
-
-// llvm.vp.zext(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_zext, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_ZEXT, -1 ,vp_zext, 1, 2)
-END_REGISTER_VP_SDNODE(VP_ZEXT)
-VP_PROPERTY_FUNCTIONAL_OPC(ZExt)
-END_REGISTER_VP_INTRINSIC(vp_zext)
-
-// llvm.vp.fpext(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_fpext, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_FPEXT, -1, vp_fpext, 1, 2)
-END_REGISTER_VP_SDNODE(VP_FPEXT)
-VP_PROPERTY_FUNCTIONAL_OPC(FPExt)
-END_REGISTER_VP_INTRINSIC(vp_fpext)
-///// } Extensions
-
-///// Truncations {
-// llvm.vp.trunc(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_trunc, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_TRUNC, -1, vp_trunc, 1, 2)
-END_REGISTER_VP_SDNODE(VP_TRUNC)
-VP_PROPERTY_FUNCTIONAL_OPC(Trunc)
-END_REGISTER_VP_INTRINSIC(vp_trunc)
-
-// llvm.vp.fptrunc(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_fptrunc, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_FPTRUNC, -1, vp_fptrunc, 1, 2)
-END_REGISTER_VP_SDNODE(VP_FPTRUNC)
-VP_PROPERTY_FUNCTIONAL_OPC(FPTrunc)
-END_REGISTER_VP_INTRINSIC(vp_fptrunc)
-///// } Truncations
-
-///// Integer-Pointer Conversions {
-// llvm.vp.ptrtoint(ptr,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_ptrtoint, 1, 2)
-VP_PROPERTY_FUNCTIONAL_OPC(PtrToInt)
-END_REGISTER_VP_INTRINSIC(vp_ptrtoint)
-
-// llvm.vp.inttoptr(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_inttoptr, 1, 2)
-VP_PROPERTY_FUNCTIONAL_OPC(IntToPtr)
-END_REGISTER_VP_INTRINSIC(vp_inttoptr)
-///// } Integer-Pointer Conversions
-
-///// Floating-point/Integer Conversions {
-// llvm.vp.uitofp(x,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_uitofp, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_UITOFP, -1, vp_uitofp, 1, 2)
-END_REGISTER_VP_SDNODE(VP_UITOFP)
-VP_PROPERTY_FUNCTIONAL_OPC(UIToFP)
-END_REGISTER_VP_INTRINSIC(vp_uitofp)
-
-// llvm.vp.fptoui(f,mask,vlen)
-BEGIN_REGISTER_VP_INTRINSIC(vp_fptoui, 1, 2)
-BEGIN_REGISTER_VP_SDNODE(VP_FPTOUI, -1, vp_fptoui, 1, 2)
-END_REGISTER_VP_SDNODE(VP_FPTOUI)
-VP_PROPERTY_FUNCTIONAL_OPC(FPToUI)
-END_REGISTER_VP_INTRINSIC(vp_fptoui)
-///// } Floating-point/Integer Conversions
 
 ///// libm functions {
 

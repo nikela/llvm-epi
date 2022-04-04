@@ -236,24 +236,6 @@ bool ConstrainedFPIntrinsic::isDefaultFPEnvironment() const {
   return true;
 }
 
-static CmpInst::Predicate getIntPredicateFromMD(const Value *Op) {
-  Metadata *MD = cast<MetadataAsValue>(Op)->getMetadata();
-  if (!MD || !isa<MDString>(MD))
-    return CmpInst::BAD_ICMP_PREDICATE;
-  return StringSwitch<CmpInst::Predicate>(cast<MDString>(MD)->getString())
-      .Case("eq", CmpInst::ICMP_EQ)
-      .Case("ne", CmpInst::ICMP_NE)
-      .Case("ugt", CmpInst::ICMP_UGT)
-      .Case("uge", CmpInst::ICMP_UGE)
-      .Case("ult", CmpInst::ICMP_ULT)
-      .Case("ule", CmpInst::ICMP_ULE)
-      .Case("sgt", CmpInst::ICMP_SGT)
-      .Case("sge", CmpInst::ICMP_SGE)
-      .Case("slt", CmpInst::ICMP_SLT)
-      .Case("sle", CmpInst::ICMP_SLE)
-      .Default(CmpInst::BAD_ICMP_PREDICATE);
-}
-
 static FCmpInst::Predicate getFPPredicateFromMD(const Value *Op) {
   Metadata *MD = cast<MetadataAsValue>(Op)->getMetadata();
   if (!MD || !isa<MDString>(MD))
@@ -519,17 +501,17 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
     VPFunc = Intrinsic::getDeclaration(M, VPID, OverloadTy);
     break;
   }
+  case Intrinsic::vp_trunc:
   case Intrinsic::vp_sext:
   case Intrinsic::vp_zext:
-  case Intrinsic::vp_fpext:
-  case Intrinsic::vp_trunc:
-  case Intrinsic::vp_fptrunc:
-  case Intrinsic::vp_ptrtoint:
-  case Intrinsic::vp_inttoptr:
-  case Intrinsic::vp_uitofp:
   case Intrinsic::vp_fptoui:
   case Intrinsic::vp_fptosi:
+  case Intrinsic::vp_uitofp:
   case Intrinsic::vp_sitofp:
+  case Intrinsic::vp_fptrunc:
+  case Intrinsic::vp_fpext:
+  case Intrinsic::vp_ptrtoint:
+  case Intrinsic::vp_inttoptr:
     VPFunc =
         Intrinsic::getDeclaration(M, VPID, {ReturnType, Params[0]->getType()});
     break;
@@ -601,6 +583,24 @@ bool VPCmpIntrinsic::isVPCmp(Intrinsic::ID ID) {
 #include "llvm/IR/VPIntrinsics.def"
   }
   return false;
+}
+
+static ICmpInst::Predicate getIntPredicateFromMD(const Value *Op) {
+  Metadata *MD = cast<MetadataAsValue>(Op)->getMetadata();
+  if (!MD || !isa<MDString>(MD))
+    return ICmpInst::BAD_ICMP_PREDICATE;
+  return StringSwitch<ICmpInst::Predicate>(cast<MDString>(MD)->getString())
+      .Case("eq", ICmpInst::ICMP_EQ)
+      .Case("ne", ICmpInst::ICMP_NE)
+      .Case("ugt", ICmpInst::ICMP_UGT)
+      .Case("uge", ICmpInst::ICMP_UGE)
+      .Case("ult", ICmpInst::ICMP_ULT)
+      .Case("ule", ICmpInst::ICMP_ULE)
+      .Case("sgt", ICmpInst::ICMP_SGT)
+      .Case("sge", ICmpInst::ICMP_SGE)
+      .Case("slt", ICmpInst::ICMP_SLT)
+      .Case("sle", ICmpInst::ICMP_SLE)
+      .Default(ICmpInst::BAD_ICMP_PREDICATE);
 }
 
 CmpInst::Predicate VPCmpIntrinsic::getPredicate() const {

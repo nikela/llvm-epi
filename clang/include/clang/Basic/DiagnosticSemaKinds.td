@@ -2721,9 +2721,9 @@ def ext_constexpr_static_var : ExtWarn<
   "definition of a %select{static|thread_local}1 variable "
   "in a constexpr %select{function|constructor}0 "
   "is a C++2b extension">, InGroup<CXX2b>;
-def warn_cxx20_compat_constexpr_static_var : Warning<
-  "definition of a %select{static|thread_local}1 variable "
-  "in a constexpr %select{function|constructor}0 "
+def warn_cxx20_compat_constexpr_var : Warning<
+  "definition of a %select{static variable|thread_local variable|variable "
+  "of non-literal type}1 in a constexpr %select{function|constructor}0 "
   "is incompatible with C++ standards before C++2b">,
   InGroup<CXXPre2bCompat>, DefaultIgnore;
 def err_constexpr_local_var_non_literal_type : Error<
@@ -11596,6 +11596,7 @@ def err_hlsl_attr_unsupported_in_stage : Error<"attribute %0 is unsupported in %
 
 def err_hlsl_numthreads_argument_oor : Error<"argument '%select{X|Y|Z}0' to numthreads attribute cannot exceed %1">;
 def err_hlsl_numthreads_invalid : Error<"total number of threads cannot exceed %0">;
+def err_hlsl_attribute_param_mismatch : Error<"%0 attribute parameters do not match the previous declaration">;
 
 } // end of sema component.
 

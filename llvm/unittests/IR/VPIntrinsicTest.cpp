@@ -93,40 +93,44 @@ protected:
            "i32>, i32)";
     Str << " declare <8 x i32> @llvm.vp.select.v8i32(<8 x i1>, <8 x i32>, <8 x "
            "i32>, i32)";
-
     Str << " declare <8 x i32> @llvm.experimental.vp.splice.v8i32(<8 x "
            "i32>, <8 x i32>, i32, <8 x i1>, i32, i32) ";
 
-    Str << " declare <8 x i32> @llvm.vp.sext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
-    Str << " declare <8 x i32> @llvm.vp.zext.v8i32.v8i16(<8 x i16>, <8 x i1>, i32) ";
-
-    Str << " declare <4 x double> @llvm.vp.fpext.v4f64.v4f32(<4 x float>, <4 x i1>, i32) ";
-
-    Str << " declare <8 x i32> @llvm.vp.trunc.v8i32.v8i64(<8 x i64>, <8 x i1>, i32) ";
-    Str << " declare <8 x float> @llvm.vp.fptrunc.v8f32.v8f64(<8 x double>, <8 x i1>, i32) ";
-
-    Str << " declare <8 x i32> @llvm.vp.ptrtoint.v8i32.v8p0i32(<8 x i32*>, <8 x i1>, i32) ";
-    Str << " declare <8 x i32*> @llvm.vp.inttoptr.v8p0i32.v8i32(<8 x i32>, <8 x i1>, i32) ";
-
-    Str << " declare <8 x float> @llvm.vp.uitofp.v8f32.v8i32(<8 x i32>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32> @llvm.vp.fptoui.v8i32"
+        << ".v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x i32> @llvm.vp.fptosi.v8i32"
         << ".v8f32(<8 x float>, <8 x i1>, i32) ";
+    Str << " declare <8 x float> @llvm.vp.uitofp.v8f32"
+        << ".v8i32(<8 x i32>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.sitofp.v8f32"
         << ".v8i32(<8 x i32>, <8 x i1>, i32) ";
-    Str << " declare <8 x i32> @llvm.vp.fptoui.v8i32.v8f32(<8 x float>, <8 x i1>, i32) ";
+    Str << " declare <8 x float> @llvm.vp.fptrunc.v8f32"
+        << ".v8f64(<8 x double>, <8 x i1>, i32) ";
+    Str << " declare <8 x double> @llvm.vp.fpext.v8f64"
+        << ".v8f32(<8 x float>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32> @llvm.vp.trunc.v8i32"
+        << ".v8i64(<8 x i64>, <8 x i1>, i32) ";
+    Str << " declare <8 x i64> @llvm.vp.zext.v8i64"
+        << ".v8i32(<8 x i32>, <8 x i1>, i32) ";
+    Str << " declare <8 x i64> @llvm.vp.sext.v8i64"
+        << ".v8i32(<8 x i32>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32> @llvm.vp.ptrtoint.v8i32"
+        << ".v8p0i32(<8 x i32*>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32*> @llvm.vp.inttoptr.v8p0i32"
+        << ".v8i32(<8 x i32>, <8 x i1>, i32) ";
 
+    Str << " declare <8 x i1> @llvm.vp.fcmp.v8f32"
+        << "(<8 x float>, <8 x float>, metadata, <8 x i1>, i32) ";
+    Str << " declare <8 x i1> @llvm.vp.icmp.v8i16"
+        << "(<8 x i16>, <8 x i16>, metadata, <8 x i1>, i32) ";
+
+    // EPI only
     Str << " declare <8 x i32> @llvm.experimental.vp.reverse.v8i32(<8 x i32>, <8 x i1>, i32) ";
-
     Str << " declare <8 x float> @llvm.vp.cos.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.sin.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.exp.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.pow.v8f32(<8 x float>, <8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.frint.v8f32(<8 x float>, <8 x i1>, i32) ";
-
-    Str << " declare <8 x i1> @llvm.vp.fcmp.v8f32"
-        << "(<8 x float>, <8 x float>, metadata, <8 x i1>, i32) ";
-    Str << " declare <8 x i1> @llvm.vp.icmp.v8i32"
-        << "(<8 x i32>, <8 x i32>, metadata, <8 x i1>, i32) ";
 
     return parseAssemblyString(Str.str(), Err, C);
   }
