@@ -703,21 +703,21 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    mv t6, a3
 ; CHECK-NEXT:    addw a3, s7, s0
 ; CHECK-NEXT:    xor a4, a3, s6
-; CHECK-NEXT:    srliw a0, a4, 16
+; CHECK-NEXT:    srliw a5, a4, 16
 ; CHECK-NEXT:    slliw a4, a4, 16
-; CHECK-NEXT:    or a0, a0, a4
-; CHECK-NEXT:    addw a4, a0, t0
-; CHECK-NEXT:    xor s0, s0, a4
-; CHECK-NEXT:    srliw a5, s0, 20
+; CHECK-NEXT:    or a4, a4, a5
+; CHECK-NEXT:    addw a5, a4, t0
+; CHECK-NEXT:    xor s0, s0, a5
+; CHECK-NEXT:    srliw a0, s0, 20
 ; CHECK-NEXT:    slliw s0, s0, 12
-; CHECK-NEXT:    or a5, a5, s0
-; CHECK-NEXT:    addw s7, a5, a3
-; CHECK-NEXT:    xor a0, s7, a0
-; CHECK-NEXT:    srliw s0, a0, 24
-; CHECK-NEXT:    slliw a0, a0, 8
-; CHECK-NEXT:    or s6, a0, s0
-; CHECK-NEXT:    addw t0, s6, a4
-; CHECK-NEXT:    xor a0, t0, a5
+; CHECK-NEXT:    or a0, a0, s0
+; CHECK-NEXT:    addw s7, a0, a3
+; CHECK-NEXT:    xor a4, s7, a4
+; CHECK-NEXT:    srliw s0, a4, 24
+; CHECK-NEXT:    slliw a4, a4, 8
+; CHECK-NEXT:    or s6, a4, s0
+; CHECK-NEXT:    addw t0, s6, a5
+; CHECK-NEXT:    xor a0, t0, a0
 ; CHECK-NEXT:    srliw a5, a0, 25
 ; CHECK-NEXT:    slliw a0, a0, 7
 ; CHECK-NEXT:    or ra, a0, a5
@@ -916,12 +916,12 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addw a3, a3, s2
 ; CHECK-NEXT:    sw a3, 164(sp)
 ; CHECK-NEXT:    srli a3, t6, 8
-; CHECK-NEXT:    srli a5, t6, 16
-; CHECK-NEXT:    srli a4, t6, 24
+; CHECK-NEXT:    srli a4, t6, 16
+; CHECK-NEXT:    srli a5, t6, 24
 ; CHECK-NEXT:    sb t6, 40(sp)
 ; CHECK-NEXT:    sb a3, 41(sp)
-; CHECK-NEXT:    sb a5, 42(sp)
-; CHECK-NEXT:    sb a4, 43(sp)
+; CHECK-NEXT:    sb a4, 42(sp)
+; CHECK-NEXT:    sb a5, 43(sp)
 ; CHECK-NEXT:    srli a3, s1, 8
 ; CHECK-NEXT:    srli a4, s1, 16
 ; CHECK-NEXT:    srli a5, s1, 24
@@ -949,7 +949,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addiw a3, s3, 1
 ; CHECK-NEXT:    sw a3, 48(a0)
 ; CHECK-NEXT:    ld a6, 32(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    bgeu a3, s3, .LBB0_14
+; CHECK-NEXT:    bnez a3, .LBB0_14
 ; CHECK-NEXT:  # %bb.13: # %if.then217
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    addiw a3, a7, 1
