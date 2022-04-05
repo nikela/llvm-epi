@@ -3178,8 +3178,8 @@ void InnerLoopVectorizer::createVectorLoopSkeleton(StringRef Prefix) {
   BrInst->setDebugLoc(ScalarLatchTerm->getDebugLoc());
   ReplaceInstWithInst(LoopMiddleBlock->getTerminator(), BrInst);
 
-  SplitBlock(LoopVectorPreHeader, LoopVectorPreHeader->getTerminator(), DT,
-             nullptr, nullptr, Twine(Prefix) + "vector.body");
+  SplitBlock(LoopVectorPreHeader, LoopVectorPreHeader->getTerminator(), DT, LI,
+             nullptr, Twine(Prefix) + "vector.body");
 
   // Update dominator for loop exit.
   if (!Cost->requiresScalarEpilogue(VF))
@@ -5470,8 +5470,10 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     }
   }
 
+  TargetTransformInfo::RegisterKind RegKind =
+      TargetTransformInfo::RGK_ScalableVector;
   ElementCount MaxVF = FeasibleMaxVFLowerBound;
-  if (TTI.shouldMaximizeVectorBandwidth() ||
+  if (TTI.shouldMaximizeVectorBandwidth(RegKind) ||
       (MaximizeBandwidth && isScalarEpilogueAllowed())) {
     // Collect all viable vectorization factors larger than the default MaxVF
     // (i.e. FeasibleMaxVFUpperBound).
@@ -5832,9 +5834,12 @@ ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
     return ElementCount::getFixed(ClampedConstTripCount);
   }
 
+  TargetTransformInfo::RegisterKind RegKind =
+      ComputeScalableMaxVF ? TargetTransformInfo::RGK_ScalableVector
+                           : TargetTransformInfo::RGK_FixedWidthVector;
   ElementCount MaxVF = MaxVectorElementCount;
   if (MaximizeBandwidth || (MaximizeBandwidth.getNumOccurrences() == 0 &&
-                            TTI.shouldMaximizeVectorBandwidth())) {
+                            TTI.shouldMaximizeVectorBandwidth(RegKind))) {
     auto MaxVectorElementCountMaxBW = ElementCount::get(
         PowerOf2Floor(WidestRegister.getKnownMinSize() / SmallestType),
         ComputeScalableMaxVF);
