@@ -784,7 +784,7 @@ void CodeGenModule::Release() {
                               LangOpts.OpenMP);
 
   // Emit OpenCL specific module metadata: OpenCL/SPIR version.
-  if (LangOpts.OpenCL) {
+  if (LangOpts.OpenCL || (LangOpts.CUDAIsDevice && getTriple().isSPIRV())) {
     EmitOpenCLMetadata();
     // Emit SPIR version.
     if (getTriple().isSPIR()) {
@@ -3453,6 +3453,10 @@ void CodeGenModule::EmitTargetClonesResolver(GlobalDecl GD) {
 
     Options.emplace_back(cast<llvm::Function>(Func), Architecture, Feature);
   }
+
+  if (supportsCOMDAT())
+    ResolverFunc->setComdat(
+        getModule().getOrInsertComdat(ResolverFunc->getName()));
 
   const TargetInfo &TI = getTarget();
   std::stable_sort(
