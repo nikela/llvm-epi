@@ -575,9 +575,9 @@ private:
                           SmallVectorImpl<SDValue> &OpValues);
   void visitVPStridedStore(const VPIntrinsic &VPIntrin,
                            SmallVectorImpl<SDValue> &OpValues);
-  void visitCmpVP(const VPIntrinsic &I);
   void visitVPPtrToInt(const VPIntrinsic &I);
   void visitVPIntToPtr(const VPIntrinsic &I);
+  void visitVPCmp(const VPCmpIntrinsic &VPIntrin);
   void visitVectorPredicationIntrinsic(const VPIntrinsic &VPIntrin);
 
   void visitVAStart(const CallInst &I);

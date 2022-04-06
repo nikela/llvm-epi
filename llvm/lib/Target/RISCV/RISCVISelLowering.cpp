@@ -484,15 +484,20 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
     static const unsigned IntegerVPOps[] = {
-        ISD::VP_ADD,         ISD::VP_SUB,         ISD::VP_MUL,
-        ISD::VP_SDIV,        ISD::VP_UDIV,        ISD::VP_SREM,
-        ISD::VP_UREM,        ISD::VP_AND,         ISD::VP_OR,
-        ISD::VP_XOR,         ISD::VP_ASHR,        ISD::VP_LSHR,
-        ISD::VP_SHL,         ISD::VP_REDUCE_ADD,  ISD::VP_REDUCE_MUL,
-        ISD::VP_REDUCE_AND,  ISD::VP_REDUCE_OR,   ISD::VP_REDUCE_XOR,
-        ISD::VP_REDUCE_SMAX, ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX,
-        ISD::VP_REDUCE_UMIN, ISD::VP_MERGE,       ISD::VP_SELECT,
-        ISD::VP_FPTOSI,      ISD::VP_FPTOUI,      ISD::EXPERIMENTAL_VP_REVERSE};
+        ISD::VP_ADD,         ISD::VP_SUB,
+        ISD::VP_MUL,         ISD::VP_SDIV,
+        ISD::VP_UDIV,        ISD::VP_SREM,
+        ISD::VP_UREM,        ISD::VP_AND,
+        ISD::VP_OR,          ISD::VP_XOR,
+        ISD::VP_ASHR,        ISD::VP_LSHR,
+        ISD::VP_SHL,         ISD::VP_REDUCE_ADD,
+        ISD::VP_REDUCE_MUL,  ISD::VP_REDUCE_AND,
+        ISD::VP_REDUCE_OR,   ISD::VP_REDUCE_XOR,
+        ISD::VP_REDUCE_SMAX, ISD::VP_REDUCE_SMIN,
+        ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN,
+        ISD::VP_MERGE,       ISD::VP_SELECT,
+        ISD::VP_SETCC,       ISD::VP_FPTOSI,
+        ISD::VP_FPTOUI,      ISD::EXPERIMENTAL_VP_REVERSE};
 
     static const unsigned FloatingPointVPOps[] = {ISD::VP_FADD,
                                                   ISD::VP_FSUB,
@@ -919,6 +924,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
           setOperationAction(ISD::VP_FPTOSI, VT, Custom);
           setOperationAction(ISD::VP_FPTOUI, VT, Custom);
+          setOperationAction(ISD::VP_SETCC, VT, Custom);
 
           setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
           setOperationAction(ISD::EXPERIMENTAL_VP_REVERSE, VT, Custom);
@@ -4461,7 +4467,9 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_UITOFP:
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::UINT_TO_FP_VL);
   case ISD::VP_SETCC:
-    return lowerVPCmpOp(Op, DAG);
+    if (SDValue V = lowerVPFPCmpOp(Op, DAG))
+      return V;
+    return lowerVPOp(Op, DAG, RISCVISD::SETCC_VL);
   case ISD::EXPERIMENTAL_VP_SPLICE:
     return lowerVPSpliceExperimental(Op, DAG);
   case ISD::EXPERIMENTAL_VP_REVERSE:
@@ -7607,14 +7615,28 @@ SDValue RISCVTargetLowering::lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
   return convertFromScalableVector(VT, VPOp, DAG, Subtarget);
 }
 
-// Lower a VP_SETCC ISD node to:
-// * a splat of 0 if the CondCode is SETFALSE or SETFALSE2;
-// * a splat of 1 if the CondCode is SETTRUE or SETTRUE2;
-// * the corresponding RISCVISD::SETCC_VL node, if the CondCode is one of
-//   SETOEQ, SETOGT, SETOGE, SETOLT, SETOLE, SETUNE or the operands are of
-//   Integer type;
-// * a sequence of input SDNodes otherwise.
-SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
+SDValue RISCVTargetLowering::lowerVPFPCmpOp(SDValue Op,
+                                            SelectionDAG &DAG) const {
+  if (!Op.getOperand(0).getSimpleValueType().isFloatingPoint())
+    return SDValue();
+
+  ISD::CondCode CC = cast<CondCodeSDNode>(Op.getOperand(2))->get();
+  // Only handle the complicated FP cases here for now. The rest
+  // are in patterns already.
+  switch (CC) {
+  default:
+    return SDValue();
+  case ISD::SETONE:
+  case ISD::SETO:
+  case ISD::SETUO:
+  case ISD::SETUEQ:
+  case ISD::SETUGT:
+  case ISD::SETUGE:
+  case ISD::SETULT:
+  case ISD::SETULE:
+    break;
+  }
+
   SDLoc DL(Op);
   MVT VT = Op.getSimpleValueType();
 
@@ -7636,52 +7658,6 @@ SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
     Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
   }
 
-  ISD::CondCode CC = cast<CondCodeSDNode>(Ops[2])->get();
-  switch (CC) {
-  default:
-    llvm_unreachable("Unhandled VP_SETCC CondCode");
-  case ISD::SETFALSE:
-  case ISD::SETFALSE2:
-    return DAG.getSplatVector(VT, DL,
-                              DAG.getConstant(0, DL, Subtarget.getXLenVT()));
-  case ISD::SETTRUE:
-  case ISD::SETTRUE2:
-    return DAG.getSplatVector(VT, DL,
-                              DAG.getConstant(1, DL, Subtarget.getXLenVT()));
-  case ISD::SETUGT:
-  case ISD::SETUGE:
-  case ISD::SETULT:
-  case ISD::SETULE:
-    if (Ops[0].getSimpleValueType().isFloatingPoint())
-      break;
-    LLVM_FALLTHROUGH;
-  case ISD::SETOEQ:
-  case ISD::SETOGT:
-  case ISD::SETOGE:
-  case ISD::SETOLT:
-  case ISD::SETOLE:
-  case ISD::SETUNE:
-  case ISD::SETEQ:
-  case ISD::SETGT:
-  case ISD::SETGE:
-  case ISD::SETLT:
-  case ISD::SETLE:
-  case ISD::SETNE: {
-    unsigned RISCVISDOpc = RISCVISD::SETCC_VL;
-    if (!VT.isFixedLengthVector())
-      return DAG.getNode(RISCVISDOpc, DL, VT, Ops);
-
-    MVT ContainerVT = getContainerForFixedLengthVector(VT);
-    SDValue VPOp = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
-    return convertFromScalableVector(VT, VPOp, DAG, Subtarget);
-  }
-  case ISD::SETONE:
-  case ISD::SETO:
-  case ISD::SETUO:
-  case ISD::SETUEQ:
-    break;
-  }
-
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector())
     ContainerVT = getContainerForFixedLengthVector(VT);
@@ -7701,10 +7677,10 @@ SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
   SDValue SetCC;
   switch (CC) {
   default:
-    llvm_unreachable("Invalid FCMP CondCode for custom lowering");
+    llvm_unreachable("Unexpected CC here");
   case ISD::SETONE: {
     SDValue SetUNE = DAG.getNode(RISCVISD::SETCC_VL, DL, ContainerVT, Op1, Op2,
-                                   DAG.getCondCode(ISD::SETUNE), NanAnd, EVL);
+                                 DAG.getCondCode(ISD::SETUNE), NanAnd, EVL);
     SDValue Result =
         DAG.getNode(RISCVISD::VMAND_VL, DL, ContainerVT, SetUNE, NanAnd, EVL);
     if (!VT.isFixedLengthVector())
@@ -7744,7 +7720,7 @@ SDValue RISCVTargetLowering::lowerVPCmpOp(SDValue Op, SelectionDAG &DAG) const {
   }
 
   SDValue Result = DAG.getNode(RISCVISD::VMOR_VL, DL, ContainerVT, SetCC,
-                     DAG.getNOT(DL, NanAnd, ContainerVT), EVL);
+                               DAG.getNOT(DL, NanAnd, ContainerVT), EVL);
 
   if (!VT.isFixedLengthVector())
     return Result;

@@ -7371,7 +7371,12 @@ void SelectionDAGBuilder::visitConstrainedFPIntrinsic(
 
 static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   Optional<unsigned> ResOPC;
-  switch (VPIntrin.getIntrinsicID()) {
+  auto IID = VPIntrin.getIntrinsicID();
+  // vp.fcmp and vp.icmp are handled specially
+  if (IID == Intrinsic::vp_fcmp || IID == Intrinsic::vp_icmp)
+    return ISD::VP_SETCC;
+
+  switch (IID) {
 #define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
 #define BEGIN_REGISTER_VP_SDNODE(VPSD, ...) ResOPC = ISD::VPSD;
 #define END_REGISTER_VP_INTRINSIC(VPID) break;
@@ -7514,32 +7519,6 @@ void SelectionDAGBuilder::visitVPStoreScatter(const VPIntrinsic &VPIntrin,
   setValue(&VPIntrin, ST);
 }
 
-void SelectionDAGBuilder::visitCmpVP(const VPIntrinsic &I) {
-  ISD::CondCode Condition;
-  auto *VPCmp = cast<VPCmpIntrinsic>(&I);
-  CmpInst::Predicate Predicate = VPCmp->getPredicate();
-  bool IsFP = I.getOperand(0)->getType()->isFPOrFPVectorTy();
-  if (IsFP) {
-    Condition = getFCmpCondCode(Predicate);
-    auto *FPMO = dyn_cast<FPMathOperator>(&I);
-    if ((FPMO && FPMO->hasNoNaNs()) || TM.Options.NoNaNsFPMath)
-      Condition = getFCmpCodeWithoutNaN(Condition);
-
-  } else {
-    Condition = getICmpCondCode(Predicate);
-  }
-
-  EVT DestVT = DAG.getTargetLoweringInfo().getValueType(DAG.getDataLayout(),
-                                                        I.getType());
-  SDValue Op1 = getValue(I.getOperand(0));
-  SDValue Op2 = getValue(I.getOperand(1));
-  // #2 is the condition code
-  SDValue MaskOp = getValue(I.getOperand(3));
-  SDValue LenOp = getValue(I.getOperand(4));
-  setValue(&I, DAG.getVPSetCC(getCurSDLoc(), DestVT, Op1, Op2, Condition,
-                              MaskOp, LenOp));
-}
-
 // VP version of visitPtrToInt()
 void SelectionDAGBuilder::visitVPPtrToInt(const VPIntrinsic &I) {
   // What to do depends on the size of the integer and the size of the pointer.
@@ -7653,11 +7632,43 @@ void SelectionDAGBuilder::visitVPStridedStore(
   setValue(&VPIntrin, ST);
 }
 
+void SelectionDAGBuilder::visitVPCmp(const VPCmpIntrinsic &VPIntrin) {
+  const TargetLowering &TLI = DAG.getTargetLoweringInfo();
+  SDLoc DL = getCurSDLoc();
+
+  ISD::CondCode Condition;
+  CmpInst::Predicate CondCode = VPIntrin.getPredicate();
+  bool IsFP = VPIntrin.getOperand(0)->getType()->isFPOrFPVectorTy();
+  if (IsFP) {
+    // FIXME: Regular fcmps are FPMathOperators which may have fast-math (nnan)
+    // flags, but calls that don't return floating-point types can't be
+    // FPMathOperators, like vp.fcmp. This affects constrained fcmp too.
+    Condition = getFCmpCondCode(CondCode);
+    if (TM.Options.NoNaNsFPMath)
+      Condition = getFCmpCodeWithoutNaN(Condition);
+  } else {
+    Condition = getICmpCondCode(CondCode);
+  }
+
+  SDValue Op1 = getValue(VPIntrin.getOperand(0));
+  SDValue Op2 = getValue(VPIntrin.getOperand(1));
+  // #2 is the condition code
+  SDValue MaskOp = getValue(VPIntrin.getOperand(3));
+  SDValue EVL = getValue(VPIntrin.getOperand(4));
+  MVT EVLParamVT = TLI.getVPExplicitVectorLengthTy();
+  assert(EVLParamVT.isScalarInteger() && EVLParamVT.bitsGE(MVT::i32) &&
+         "Unexpected target EVL type");
+  EVL = DAG.getNode(ISD::ZERO_EXTEND, DL, EVLParamVT, EVL);
+
+  EVT DestVT = DAG.getTargetLoweringInfo().getValueType(DAG.getDataLayout(),
+                                                        VPIntrin.getType());
+  setValue(&VPIntrin,
+           DAG.getSetCCVP(DL, DestVT, Op1, Op2, Condition, MaskOp, EVL));
+}
+
 void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     const VPIntrinsic &VPIntrin) {
   SDLoc DL = getCurSDLoc();
-  if (const auto *CmpI = dyn_cast<VPCmpIntrinsic>(&VPIntrin))
-    return visitCmpVP(*CmpI);
 
   switch (VPIntrin.getIntrinsicID()) {
   default:
@@ -7672,13 +7683,17 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
 
   unsigned Opcode = getISDForVPIntrinsic(VPIntrin);
 
+  auto IID = VPIntrin.getIntrinsicID();
+
+  if (const auto *CmpI = dyn_cast<VPCmpIntrinsic>(&VPIntrin))
+    return visitVPCmp(*CmpI);
+
   SmallVector<EVT, 4> ValueVTs;
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   ComputeValueVTs(TLI, DAG.getDataLayout(), VPIntrin.getType(), ValueVTs);
   SDVTList VTs = DAG.getVTList(ValueVTs);
 
-  auto EVLParamPos =
-      VPIntrinsic::getVectorLengthParamPos(VPIntrin.getIntrinsicID());
+  auto EVLParamPos = VPIntrinsic::getVectorLengthParamPos(IID);
 
   MVT EVLParamVT = TLI.getVPExplicitVectorLengthTy();
   assert(EVLParamVT.isScalarInteger() && EVLParamVT.bitsGE(MVT::i32) &&

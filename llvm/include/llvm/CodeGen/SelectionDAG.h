@@ -1079,14 +1079,12 @@ public:
     return getNode(ISD::SETCC, DL, VT, LHS, RHS, getCondCode(Cond));
   }
 
-  /// Helper function to make it easier to build VP_SetCC's if you just have an
+  /// Helper function to make it easier to build VP_SETCCs if you just have an
   /// ISD::CondCode instead of an SDValue.
-  SDValue getVPSetCC(const SDLoc &DL, EVT VT, SDValue LHS, SDValue RHS,
+  SDValue getSetCCVP(const SDLoc &DL, EVT VT, SDValue LHS, SDValue RHS,
                      ISD::CondCode Cond, SDValue Mask, SDValue EVL) {
-    assert(LHS.getValueType().isVector() == RHS.getValueType().isVector() &&
-           "Cannot compare scalars to vectors");
-    assert(LHS.getValueType().isVector() == VT.isVector() &&
-           "Cannot compare scalars to vectors");
+    assert(LHS.getValueType().isVector() && RHS.getValueType().isVector() &&
+           "Cannot compare scalars");
     assert(Cond != ISD::SETCC_INVALID &&
            "Cannot create a setCC of an invalid node.");
     return getNode(ISD::VP_SETCC, DL, VT, LHS, RHS, getCondCode(Cond), Mask,

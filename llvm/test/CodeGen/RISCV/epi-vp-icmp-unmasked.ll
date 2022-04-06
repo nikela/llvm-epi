@@ -9,10 +9,12 @@
 define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmseq.vv v10, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
@@ -57,10 +59,10 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 %n) 
 ;
 ; CHECK-O2-LABEL: test_vp_icmp:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmseq.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
@@ -143,10 +145,12 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 %n) 
 define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_2:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-O0-NEXT:    vmseq.vv v10, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
@@ -191,10 +195,10 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 %n
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_2:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-O2-NEXT:    vmseq.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
@@ -277,12 +281,14 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 %n
 define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_icmp_3:
 ; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    vmv2r.v v12, v10
 ; CHECK-O0-NEXT:    vmv2r.v v10, v8
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
 ; CHECK-O0-NEXT:    vmseq.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
@@ -327,10 +333,10 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 %n
 ;
 ; CHECK-O2-LABEL: test_vp_icmp_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
 ; CHECK-O2-NEXT:    vmseq.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
