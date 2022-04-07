@@ -497,7 +497,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN,
         ISD::VP_MERGE,       ISD::VP_SELECT,
         ISD::VP_SETCC,       ISD::VP_FPTOSI,
-        ISD::VP_FPTOUI,      ISD::EXPERIMENTAL_VP_REVERSE};
+        ISD::VP_FPTOUI,      ISD::EXPERIMENTAL_VP_REVERSE,
+        ISD::VP_SEXT,        ISD::VP_ZEXT};
 
     static const unsigned FloatingPointVPOps[] = {ISD::VP_FADD,
                                                   ISD::VP_FSUB,
@@ -4458,6 +4459,13 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_FMA:
   case ISD::VP_FMULADD:
     return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
+  case ISD::VP_SEXT:
+  case ISD::VP_ZEXT:
+    if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
+      return lowerVPExtMaskOp(Op, DAG);
+    return lowerVPOp(Op, DAG,
+                     Op.getOpcode() == ISD::VP_SEXT ? RISCVISD::VSEXT_VL
+                                                    : RISCVISD::VZEXT_VL);
   case ISD::VP_FPTOSI:
     return lowerVPFPIntConvOp(Op, DAG, RISCVISD::FP_TO_SINT_VL);
   case ISD::VP_FPTOUI:
@@ -4478,22 +4486,6 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPStridedLoad(Op, DAG);
   case ISD::EXPERIMENTAL_VP_STRIDED_STORE:
     return lowerVPStridedStore(Op, DAG);
-  case ISD::VP_SEXT: {
-    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
-    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
-    assert(DstSize > SrcSize);
-    if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPExtMaskOp(Op, DAG);
-    return lowerVPOp(Op, DAG, RISCVISD::VSEXT_VL);
-  }
-  case ISD::VP_ZEXT: {
-    uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
-    uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
-    assert(DstSize > SrcSize);
-    if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
-      return lowerVPExtMaskOp(Op, DAG);
-    return lowerVPOp(Op, DAG, RISCVISD::VZEXT_VL);
-  }
   case ISD::VP_FPEXT: {
     uint64_t DstSize = Op.getValueType().getScalarSizeInBits();
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
@@ -7413,6 +7405,39 @@ SDValue RISCVTargetLowering::lowerVPOp(SDValue Op, SelectionDAG &DAG,
   return convertFromScalableVector(VT, VPOp, DAG, Subtarget);
 }
 
+SDValue RISCVTargetLowering::lowerVPExtMaskOp(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+
+  SDValue Src = Op.getOperand(0);
+  // NOTE: Mask is dropped.
+  SDValue VL = Op.getOperand(2);
+
+  MVT ContainerVT = VT;
+  if (VT.isFixedLengthVector()) {
+    ContainerVT = getContainerForFixedLengthVector(VT);
+    MVT SrcVT = MVT::getVectorVT(MVT::i1, ContainerVT.getVectorElementCount());
+    Src = convertToScalableVector(SrcVT, Src, DAG, Subtarget);
+  }
+
+  MVT XLenVT = Subtarget.getXLenVT();
+  SDValue Zero = DAG.getConstant(0, DL, XLenVT);
+  SDValue ZeroSplat = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                                  DAG.getUNDEF(ContainerVT), Zero, VL);
+
+  SDValue SplatValue =
+      DAG.getConstant(Op.getOpcode() == ISD::VP_ZEXT ? 1 : -1, DL, XLenVT);
+  SDValue Splat = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
+                              DAG.getUNDEF(ContainerVT), SplatValue, VL);
+
+  SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, Src,
+                               Splat, ZeroSplat, VL);
+  if (!VT.isFixedLengthVector())
+    return Result;
+  return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
 // Lower Floating-Point/Integer Type-Convert VP SDNodes
 SDValue RISCVTargetLowering::lowerVPFPIntConvOp(SDValue Op, SelectionDAG &DAG,
                                                 unsigned RISCVISDOpc) const {
@@ -7841,50 +7866,6 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
                          DAG.getCondCode(ISD::SETNE), Ops[3], Ops[5]);
   }
 
-  if (!VT.isFixedLengthVector())
-    return Result;
-  return convertFromScalableVector(VT, Result, DAG, Subtarget);
-}
-
-// Lower VP_*EXT nodes when the starting operand is a mask
-SDValue RISCVTargetLowering::lowerVPExtMaskOp(SDValue Op,
-                                              SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  MVT VT = Op.getSimpleValueType();
-  const MVT XLenVT = Subtarget.getXLenVT();
-
-  // Ops indexes: 0->Op1, 1->Mask, 2->EVL
-  SmallVector<SDValue, 3> Ops;
-  for (const auto &OpIdx : enumerate(Op->ops())) {
-    SDValue V = OpIdx.value();
-    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
-    // Pass through operands which aren't fixed-length vectors.
-    if (!V.getValueType().isFixedLengthVector()) {
-      Ops.push_back(V);
-      continue;
-    }
-    // "cast" fixed length vector to a scalable vector.
-    MVT OpVT = V.getSimpleValueType();
-    MVT ContainerVT = getContainerForFixedLengthVector(OpVT);
-    assert(useRVVForFixedLengthVectorVT(OpVT) &&
-           "Only fixed length vectors are supported!");
-    Ops.push_back(convertToScalableVector(ContainerVT, V, DAG, Subtarget));
-  }
-
-  MVT ContainerVT = VT;
-  if (VT.isFixedLengthVector())
-    ContainerVT = getContainerForFixedLengthVector(VT);
-
-  SDValue Zero = DAG.getConstant(0, DL, XLenVT);
-  SDValue ZeroSplat = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
-                                  DAG.getUNDEF(ContainerVT), Zero, Ops[2]);
-
-  SDValue SplatValue = DAG.getConstant(Op.getOpcode() == ISD::VP_ZEXT ? 1 : -1,
-                                       DL, XLenVT);
-  SDValue Splat = DAG.getSplatVector(ContainerVT, DL, SplatValue);
-
-  SDValue Result = DAG.getNode(RISCVISD::VSELECT_VL, DL, ContainerVT, Ops[0],
-                               Splat, ZeroSplat, Ops[2]);
   if (!VT.isFixedLengthVector())
     return Result;
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
