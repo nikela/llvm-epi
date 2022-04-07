@@ -6,179 +6,25 @@
 
 @scratch = global i8 0, align 16
 
-define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 %n) nounwind {
-; CHECK-O0-LABEL: test_vp_fcmp:
+define void @test_vp_fcmp.oeq(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.oeq:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -16
-; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    slli a1, a1, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v10, v9, v8
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v10, v9, v8
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v11, v9, v9
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v8
-; CHECK-O0-NEXT:    vmand.mm v0, v10, v11
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmfne.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmand.mm v10, v10, v0
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsm.v v0, (a0)
-; CHECK-O0-NEXT:    vmnand.mm v11, v0, v0
-; CHECK-O0-NEXT:    vsm.v v11, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v10, v9, v8, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v10, v9, v8, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
-; CHECK-O2-LABEL: test_vp_fcmp:
+; CHECK-O2-LABEL: test_vp_fcmp.oeq:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v10, v9, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v10, v9, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v10, v9, v9
-; CHECK-O2-NEXT:    vmfeq.vv v11, v8, v8
-; CHECK-O2-NEXT:    vmand.mm v0, v11, v10
-; CHECK-O2-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmfne.vv v10, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmand.mm v10, v10, v0
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsm.v v0, (a1)
-; CHECK-O2-NEXT:    vmnand.mm v10, v0, v0
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmfeq.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v11, v9, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v11, v9, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v10, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -190,41 +36,477 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i3
   %oeq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"oeq", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %oeq, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.ogt(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ogt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ogt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %ogt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ogt", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ogt, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.oge(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.oge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.oge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %oge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"oge", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %oge, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.olt(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.olt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.olt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %olt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"olt", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %olt, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.ole(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ole:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ole:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %ole = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ole", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ole, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.one(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.one:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v10, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.one:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %one = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"one", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %one, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.ord(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ord:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfeq.vv v9, v9, v9
+; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v8
+; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ord:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfeq.vv v9, v9, v9
+; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v8
+; CHECK-O2-NEXT:    vmand.mm v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %ord = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ord", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ord, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.uno(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.uno:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v9, v9, v9
+; CHECK-O0-NEXT:    vmfne.vv v8, v8, v8
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.uno:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v9, v9, v9
+; CHECK-O2-NEXT:    vmfne.vv v8, v8, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %uno = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"uno", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %uno, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.ueq(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ueq:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v10, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
+; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ueq:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnor.mm v8, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %ueq = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ueq", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ueq, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.ugt(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ugt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ugt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %ugt = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ugt", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ugt, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.uge(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.uge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.uge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %uge = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"uge", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %uge, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.ult(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ult:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ult:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %ult = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ult", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ult, <vscale x 1 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp.ule(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.ule:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.ule:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
   %ule = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"ule", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %ule, <vscale x 1 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp.une(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp.une:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp.une:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
+
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %une = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b, metadata !"une", <vscale x 1 x i1> %allones, i32 %n)
   store <vscale x 1 x i1> %une, <vscale x 1 x i1>* %store_addr
@@ -232,179 +514,25 @@ define void @test_vp_fcmp(<vscale x 1 x double> %a, <vscale x 1 x double> %b, i3
   ret void
 }
 
-define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 %n) nounwind {
-; CHECK-O0-LABEL: test_vp_fcmp_2:
+define void @test_vp_fcmp_2.oeq(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.oeq:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -16
-; CHECK-O0-NEXT:    csrr a1, vlenb
-; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    slli a1, a1, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v10, v9, v8
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v10, v9, v8
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v10, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v11, v9, v9
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v8
-; CHECK-O0-NEXT:    vmand.mm v0, v10, v11
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmfne.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmand.mm v10, v10, v0
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsm.v v0, (a0)
-; CHECK-O0-NEXT:    vmnand.mm v11, v0, v0
-; CHECK-O0-NEXT:    vsm.v v11, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmfeq.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v10, v9, v8, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v10, v9, v8, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v10, v8, v9, v0.t
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v10, v10, v11
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v10, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    csrr a0, vlenb
-; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
-; CHECK-O2-LABEL: test_vp_fcmp_2:
+; CHECK-O2-LABEL: test_vp_fcmp_2.oeq:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v10, v9, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v10, v9, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v10, v8, v9
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v10, v9, v9
-; CHECK-O2-NEXT:    vmfeq.vv v11, v8, v8
-; CHECK-O2-NEXT:    vmand.mm v0, v11, v10
-; CHECK-O2-NEXT:    vsetvli zero, zero, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmfne.vv v10, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmand.mm v10, v10, v0
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsm.v v0, (a1)
-; CHECK-O2-NEXT:    vmnand.mm v10, v0, v0
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmfeq.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v11, v9, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v11, v9, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v11, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v11, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v11, v8, v9, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v10, v11, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v10, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -415,146 +543,156 @@ define void @test_vp_fcmp_2(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i3
 
   %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"oeq", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oeq, <vscale x 2 x i1>* %store_addr
-
-  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ogt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ogt, <vscale x 2 x i1>* %store_addr
-
-  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"oge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %oge, <vscale x 2 x i1>* %store_addr
-
-  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"olt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %olt, <vscale x 2 x i1>* %store_addr
-
-  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ole", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ole, <vscale x 2 x i1>* %store_addr
-
-  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"one", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %one, <vscale x 2 x i1>* %store_addr
-
-  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ord", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ord, <vscale x 2 x i1>* %store_addr
-
-  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"uno", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %uno, <vscale x 2 x i1>* %store_addr
-
-  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ueq", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ueq, <vscale x 2 x i1>* %store_addr
-
-  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ugt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
-
-  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"uge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
-
-  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ult", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
-
-  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ule", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
-
-  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"une", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %une, <vscale x 2 x i1>* %store_addr
-
   ret void
 }
 
-define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 %n) nounwind {
-; CHECK-O0-LABEL: test_vp_fcmp_3:
+define void @test_vp_fcmp_2.ogt(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ogt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ogt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ogt", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ogt, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.oge(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.oge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.oge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"oge", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %oge, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.olt(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.olt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.olt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"olt", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %olt, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ole(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ole:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ole:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ole", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ole, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.one(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.one:
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    vmv2r.v v12, v10
-; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v10, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    slli a1, a1, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v8, v12, v10
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v8, v12, v10
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfeq.vv v9, v12, v12
-; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v10
-; CHECK-O0-NEXT:    vmand.mm v0, v8, v9
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, zero, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmfne.vv v8, v10, v12, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmand.mm v8, v8, v0
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsm.v v0, (a0)
-; CHECK-O0-NEXT:    vmnand.mm v9, v0, v0
-; CHECK-O0-NEXT:    vsm.v v9, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v12, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v8, v12, v10, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v8, v12, v10, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 16
-; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
-; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12, v0.t
-; CHECK-O0-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O0-NEXT:    vsm.v v8, (a0)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
-; CHECK-O0-NEXT:    vmfne.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
@@ -562,77 +700,336 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
-; CHECK-O2-LABEL: test_vp_fcmp_3:
+; CHECK-O2-LABEL: test_vp_fcmp_2.one:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"one", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %one, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ord(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ord:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfeq.vv v9, v9, v9
+; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v8
+; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ord:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfeq.vv v9, v9, v9
+; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v8
+; CHECK-O2-NEXT:    vmand.mm v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ord", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ord, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.uno(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.uno:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v9, v9, v9
+; CHECK-O0-NEXT:    vmfne.vv v8, v8, v8
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.uno:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v9, v9, v9
+; CHECK-O2-NEXT:    vmfne.vv v8, v8, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"uno", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %uno, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ueq(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ueq:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    addi sp, sp, -16
+; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    sub sp, sp, a1
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    vmv1r.v v10, v8
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
+; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    add sp, sp, a0
+; CHECK-O0-NEXT:    addi sp, sp, 16
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ueq:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnor.mm v8, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ueq", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ueq, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ugt(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ugt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ugt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ugt", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.uge(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.uge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.uge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"uge", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ult(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ult:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ult:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ult", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.ule(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.ule:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.ule:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"ule", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
+  ret void
+}
+
+define void @test_vp_fcmp_2.une(<vscale x 2 x float> %a, <vscale x 2 x float> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_2.une:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_2.une:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
+  %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b, metadata !"une", <vscale x 2 x i1> %allones, i32 %n)
+  store <vscale x 2 x i1> %une, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.oeq(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.oeq:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.oeq:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v12, v10, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v12, v10, v8
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfle.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfeq.vv v12, v10, v10
-; CHECK-O2-NEXT:    vmfeq.vv v13, v8, v8
-; CHECK-O2-NEXT:    vmand.mm v0, v13, v12
-; CHECK-O2-NEXT:    vsetvli zero, zero, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmfne.vv v12, v8, v10, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmand.mm v12, v12, v0
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsm.v v0, (a1)
-; CHECK-O2-NEXT:    vmnand.mm v12, v0, v0
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmfeq.vv v13, v8, v10, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v13, v13, v12
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v13, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v13, v10, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v13, v13, v12
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v13, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v13, v10, v8, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v13, v13, v12
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v13, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmflt.vv v13, v8, v10, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v13, v13, v12
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v13, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
-; CHECK-O2-NEXT:    vmfle.vv v13, v8, v10, v0.t
-; CHECK-O2-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vmor.mm v12, v13, v12
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
-; CHECK-O2-NEXT:    vsm.v v12, (a1)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
-; CHECK-O2-NEXT:    vmfne.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
@@ -644,41 +1041,476 @@ define void @test_vp_fcmp_3(<vscale x 2 x double> %a, <vscale x 2 x double> %b, 
   %oeq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"oeq", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oeq, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.ogt(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ogt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ogt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v10, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v12, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %ogt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ogt", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ogt, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.oge(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.oge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.oge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v12, v10, v8
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v12, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %oge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"oge", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %oge, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.olt(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.olt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.olt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v12, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %olt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"olt", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %olt, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.ole(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ole:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ole:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v12, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v12, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
 
   %ole = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ole", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ole, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.one(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.one:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v12, v10
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.one:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
+; CHECK-O2-NEXT:    vmflt.vv v13, v10, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v13, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %one = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"one", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %one, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.ord(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ord:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfeq.vv v9, v12, v12
+; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v10
+; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ord:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfeq.vv v12, v10, v10
+; CHECK-O2-NEXT:    vmfeq.vv v10, v8, v8
+; CHECK-O2-NEXT:    vmand.mm v8, v10, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %ord = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ord", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ord, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.uno(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.uno:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v9, v12, v12
+; CHECK-O0-NEXT:    vmfne.vv v8, v10, v10
+; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.uno:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v12, v10, v10
+; CHECK-O2-NEXT:    vmfne.vv v10, v8, v8
+; CHECK-O2-NEXT:    vmor.mm v8, v10, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %uno = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"uno", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uno, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.ueq(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ueq:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v9, v12, v10
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ueq:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
+; CHECK-O2-NEXT:    vmflt.vv v13, v10, v8
+; CHECK-O2-NEXT:    vmnor.mm v8, v13, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %ueq = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ueq", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ueq, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.ugt(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ugt:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ugt:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v12, v8, v10
+; CHECK-O2-NEXT:    vmnand.mm v8, v12, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %ugt = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ugt", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.uge(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.uge:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.uge:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
+; CHECK-O2-NEXT:    vmnand.mm v8, v12, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %uge = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"uge", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.ult(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ult:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ult:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfle.vv v12, v10, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v12, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %ult = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ult", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
 
+  ret void
+}
+
+define void @test_vp_fcmp_3.ule(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.ule:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
+; CHECK-O0-NEXT:    vmnand.mm v8, v8, v8
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.ule:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmflt.vv v12, v10, v8
+; CHECK-O2-NEXT:    vmnand.mm v8, v12, v12
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v8, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
+
   %ule = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"ule", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
+
+  ret void
+}
+
+define void @test_vp_fcmp_3.une(<vscale x 2 x double> %a, <vscale x 2 x double> %b, i32 zeroext %n) nounwind {
+; CHECK-O0-LABEL: test_vp_fcmp_3.une:
+; CHECK-O0:       # %bb.0:
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    vmv2r.v v12, v10
+; CHECK-O0-NEXT:    vmv2r.v v10, v8
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
+; CHECK-O0-NEXT:    lui a0, %hi(scratch)
+; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vmfne.vv v8, v10, v12
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsm.v v8, (a0)
+; CHECK-O0-NEXT:    ret
+;
+; CHECK-O2-LABEL: test_vp_fcmp_3.une:
+; CHECK-O2:       # %bb.0:
+; CHECK-O2-NEXT:    lui a1, %hi(scratch)
+; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vmfne.vv v12, v8, v10
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsm.v v12, (a1)
+; CHECK-O2-NEXT:    ret
+  %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
+
+  %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %une = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b, metadata !"une", <vscale x 2 x i1> %allones, i32 %n)
   store <vscale x 2 x i1> %une, <vscale x 2 x i1>* %store_addr
