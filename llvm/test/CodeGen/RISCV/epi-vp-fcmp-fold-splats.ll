@@ -12,13 +12,15 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfgt.vf v8, v9, fa0, v0.t
@@ -52,10 +54,10 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ;
 ; CHECK-O2-LABEL: test_vp_fold_greater_splats:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfgt.vf v9, v8, fa0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
@@ -79,19 +81,19 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
   %splat = shufflevector <vscale x 1 x double> %head, <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer
 
   ; ; x > splat(y) → vmfgt.vf x, y
-  %ogt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, i8 2, <vscale x 1 x i1> %m, i32 %n)
+  %ogt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"ogt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ogt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmflt.vf x, y
-  %ogt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, i8 2, <vscale x 1 x i1> %m, i32 %n)
+  %ogt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"ogt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ogt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → vmfge.vf x, y
-  %oge.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, i8 3, <vscale x 1 x i1> %m, i32 %n)
+  %oge.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"oge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %oge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmfle.vf x, y
-  %oge.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, i8 3, <vscale x 1 x i1> %m, i32 %n)
+  %oge.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"oge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %oge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -103,13 +105,15 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a1
-; CHECK-O0-NEXT:    addi a1, sp, 16
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    mv a1, a0
+; CHECK-O0-NEXT:    addi a0, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a0) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    lui a2, %hi(.LCPI1_0)
 ; CHECK-O0-NEXT:    fld ft0, %lo(.LCPI1_0)(a2)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -145,12 +149,12 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ;
 ; CHECK-O2-LABEL: test_vp_fold_lower_splats:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a0, a0, 32
-; CHECK-O2-NEXT:    srli a0, a0, 32
-; CHECK-O2-NEXT:    lui a1, %hi(.LCPI1_0)
-; CHECK-O2-NEXT:    fld ft0, %lo(.LCPI1_0)(a1)
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
+; CHECK-O2-NEXT:    lui a2, %hi(.LCPI1_0)
+; CHECK-O2-NEXT:    fld ft0, %lo(.LCPI1_0)(a2)
+; CHECK-O2-NEXT:    slli a0, a0, 32
+; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vf v9, v8, ft0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
@@ -174,23 +178,23 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
   %splat = shufflevector <vscale x 1 x double> %head, <vscale x 1 x double> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x < splat(y) → vmflt.vf x, y
-  %olt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, i8 4, <vscale x 1 x i1> %m, i32 %n)
+  %olt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"olt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %olt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) < x → x > splat(y) → vmfgt.vf x, y
-  %olt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, i8 4, <vscale x 1 x i1> %m, i32 %n)
+  %olt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"olt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %olt.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmfle.vf x, y
-  %ole.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, i8 5, <vscale x 1 x i1> %m, i32 %n)
+  %ole.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"ole", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ole.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= x → x >= splat(y) → vmfge.vf x, y
-  %ole.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, i8 5, <vscale x 1 x i1> %m, i32 %n)
+  %ole.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"ole", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ole.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
 
-declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, i8 immarg, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, metadata, <vscale x 1 x i1>, i32)
 

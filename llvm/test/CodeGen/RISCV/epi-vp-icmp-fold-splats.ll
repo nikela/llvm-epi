@@ -9,39 +9,39 @@
 define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fold_unsigned_greater:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -32
+; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a2
-; CHECK-O0-NEXT:    sd a1, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, sp, 32
+; CHECK-O0-NEXT:    mv a2, a1
+; CHECK-O0-NEXT:    addi a1, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
-; CHECK-O0-NEXT:    slli a2, a0, 32
-; CHECK-O0-NEXT:    srli a2, a2, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v10, a1
+; CHECK-O0-NEXT:    slli a2, a2, 32
+; CHECK-O0-NEXT:    srli a2, a2, 32
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgtu.vx v8, v9, a1, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsltu.vx v8, v9, a1, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vv v8, v10, v9, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -52,17 +52,17 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 32
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fold_unsigned_greater:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a1, a1, 32
-; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    lui a2, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
+; CHECK-O2-NEXT:    slli a1, a1, 32
+; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgtu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
@@ -86,19 +86,19 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x > splat(y) → vmsgtu.vx x, y
-  %ugt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 34, <vscale x 1 x i1> %m, i32 %n)
+  %ugt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ugt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmsltu.vx x, y
-  %ugt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 34, <vscale x 1 x i1> %m, i32 %n)
+  %ugt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ugt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsleu.vv)
-  %uge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 35, <vscale x 1 x i1> %m, i32 %n)
+  %uge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %uge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsleu.vx x, y
-  %uge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 35, <vscale x 1 x i1> %m, i32 %n)
+  %uge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %uge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -107,39 +107,38 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fold_unsigned_lower:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -32
+; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a2
-; CHECK-O0-NEXT:    sd a1, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, sp, 32
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    addi a2, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    mv a2, a0
-; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vmv1r.v v10, v8
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v9, a2
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsltu.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgtu.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsleu.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 32
+; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -150,17 +149,17 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 32
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fold_unsigned_lower:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a1, a1, 32
-; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    lui a2, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
+; CHECK-O2-NEXT:    slli a1, a1, 32
+; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsltu.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
@@ -184,19 +183,19 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x < splat(y) → vmsltu.vx x, y
-  %ult.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 36, <vscale x 1 x i1> %m, i32 %n)
+  %ult.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ult.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) < x → x > splat(y) → vmsgtu.vx x, y
-  %ult.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 36, <vscale x 1 x i1> %m, i32 %n)
+  %ult.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ult.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsleu.vx x, y
-  %ule.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 37, <vscale x 1 x i1> %m, i32 %n)
+  %ule.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ule.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= y → y >= splat(y) → cannot be folded (vmsleu.vv)
-  %ule.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 37, <vscale x 1 x i1> %m, i32 %n)
+  %ule.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %ule.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -205,39 +204,39 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fold_signed_greater:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -32
+; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a2
-; CHECK-O0-NEXT:    sd a1, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, sp, 32
+; CHECK-O0-NEXT:    mv a2, a1
+; CHECK-O0-NEXT:    addi a1, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vmv1r.v v9, v8
-; CHECK-O0-NEXT:    slli a2, a0, 32
-; CHECK-O0-NEXT:    srli a2, a2, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x12
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v10, a1
+; CHECK-O0-NEXT:    slli a2, a2, 32
+; CHECK-O0-NEXT:    srli a2, a2, 32
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgt.vx v8, v9, a1, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmslt.vx v8, v9, a1, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vv v8, v10, v9, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -248,17 +247,17 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 32
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fold_signed_greater:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a1, a1, 32
-; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    lui a2, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
+; CHECK-O2-NEXT:    slli a1, a1, 32
+; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmsgt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
@@ -282,19 +281,19 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; x > splat(y) → vmsgt.vx x, y
-  %sgt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 38, <vscale x 1 x i1> %m, i32 %n)
+  %sgt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sgt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmslt.vx x, y
-  %sgt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 38, <vscale x 1 x i1> %m, i32 %n)
+  %sgt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sgt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsle.vv)
-  %sge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 39, <vscale x 1 x i1> %m, i32 %n)
+  %sge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsle.vx x, y
-  %sge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 39, <vscale x 1 x i1> %m, i32 %n)
+  %sge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
@@ -303,39 +302,38 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
 ; CHECK-O0-LABEL: test_vp_fold_signed_lower:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    addi sp, sp, -32
+; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
 ; CHECK-O0-NEXT:    sub sp, sp, a2
-; CHECK-O0-NEXT:    sd a1, 24(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    addi a1, sp, 32
-; CHECK-O0-NEXT:    vs1r.v v0, (a1) # Unknown-size Folded Spill
+; CHECK-O0-NEXT:    addi a2, sp, 16
+; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
 ; CHECK-O0-NEXT:    mv a2, a0
-; CHECK-O0-NEXT:    ld a0, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    vmv1r.v v10, v8
-; CHECK-O0-NEXT:    slli a1, a0, 32
-; CHECK-O0-NEXT:    srli a1, a1, 32
+; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vmv.v.x v9, a2
+; CHECK-O0-NEXT:    slli a1, a1, 32
+; CHECK-O0-NEXT:    srli a1, a1, 32
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmslt.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsgt.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a3, sp, 32
+; CHECK-O0-NEXT:    addi a3, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a3) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmsle.vx v8, v10, a2, v0.t
-; CHECK-O0-NEXT:    addi a2, sp, 32
+; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
@@ -346,17 +344,17 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    add sp, sp, a0
-; CHECK-O0-NEXT:    addi sp, sp, 32
+; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_fold_signed_lower:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    slli a1, a1, 32
-; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    lui a2, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a2, a2, %lo(scratch)
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vmv.v.x v9, a0
+; CHECK-O2-NEXT:    slli a1, a1, 32
+; CHECK-O2-NEXT:    srli a1, a1, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmslt.vx v10, v8, a0, v0.t
 ; CHECK-O2-NEXT:    vsetvli a3, zero, e8, mf8, ta, mu
@@ -380,22 +378,22 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
   %splat = shufflevector <vscale x 1 x i64> %head, <vscale x 1 x i64> undef, <vscale x 1 x i32> zeroinitializer
 
   ; y < splat(x) → vmslt.vx x, y
-  %slt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 40, <vscale x 1 x i1> %m, i32 %n)
+  %slt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %slt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(x) < y → y > splat(x) → cannot be folded (vmslt.vv)
-  %slt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 40, <vscale x 1 x i1> %m, i32 %n)
+  %slt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %slt.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsle.vx x, y
-  %sle.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, i8 41, <vscale x 1 x i1> %m, i32 %n)
+  %sle.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sle.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= x → x >= splat(y) → cannot be folded (vmsle.vv)
-  %sle.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, i8 41, <vscale x 1 x i1> %m, i32 %n)
+  %sle.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
   store <vscale x 1 x i1> %sle.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
 
-declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i8 %kind, <vscale x 1 x i1> %m, i32 %n)
+declare <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata, <vscale x 1 x i1> %m, i32 %n)

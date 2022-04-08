@@ -198,7 +198,9 @@ InstructionCost RISCVTTIImpl::getScalarizationOverhead(
   return *MinCost.getValue();
 }
 
-bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(
+    TargetTransformInfo::RegisterKind K) const {
+  assert(K != TargetTransformInfo::RGK_Scalar);
   return ST->hasVInstructions();
 }
 

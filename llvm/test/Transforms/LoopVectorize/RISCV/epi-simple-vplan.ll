@@ -17,7 +17,7 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT: Live-in vp<%2> = backedge-taken count
 ; CHECK-EMPTY:
 ; CHECK-NEXT: <x1> vector loop: {
-; CHECK-NEXT:   for.body:
+; CHECK-NEXT:   vector.body:
 ; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
 ; CHECK-NEXT:     vp<%5>    = SCALAR-STEPS vp<%4>, ir<0>, ir<1>
 ; CHECK-NEXT:     EMIT vp<%6> = WIDEN-CANONICAL-INDUCTION vp<%4>
