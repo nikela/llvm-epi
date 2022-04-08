@@ -499,8 +499,8 @@ multiclass VPatIntegerSetCCVL_VV<VTypeInfo vti, string instruction_name,
 
 // Inherits from VPatIntegerSetCCVL_VV and adds a pattern with operands swapped.
 multiclass VPatIntegerSetCCVL_VV_Swappable<VTypeInfo vti, string instruction_name,
-                                           CondCode cc, CondCode invcc> :
-  VPatIntegerSetCCVL_VV<vti, instruction_name, cc> {
+                                           CondCode cc, CondCode invcc>
+    : VPatIntegerSetCCVL_VV<vti, instruction_name, cc> {
   def : Pat<(vti.Mask (riscv_setcc_vl (vti.Vector vti.RegClass:$rs2),
                                       vti.RegClass:$rs1, invcc,
                                       (vti.Mask V0),
@@ -537,6 +537,8 @@ multiclass VPatIntegerSetCCVL_VI_Swappable<VTypeInfo vti, string instruction_nam
             (instruction_masked (vti.Mask (IMPLICIT_DEF)), vti.RegClass:$rs1,
                                 XLenVT:$rs2, (vti.Mask V0), GPR:$vl,
                                 vti.Log2SEW)>;
+
+  // FIXME: Can do some canonicalization to remove these patterns.
   def : Pat<(vti.Mask (riscv_setcc_vl (SplatPat_simm5 simm5:$rs2),
                                       (vti.Vector vti.RegClass:$rs1), invcc,
                                       (vti.Mask V0),
@@ -546,11 +548,22 @@ multiclass VPatIntegerSetCCVL_VI_Swappable<VTypeInfo vti, string instruction_nam
                                 vti.Log2SEW)>;
 }
 
-multiclass VPatIntegerSetCCVL_VIPlus1<VTypeInfo vti, string instruction_name,
-                                      CondCode cc, ComplexPattern splatpat_kind> {
+multiclass VPatIntegerSetCCVL_VIPlus1_Swappable<VTypeInfo vti,
+                                                string instruction_name,
+                                                CondCode cc, CondCode invcc,
+                                                ComplexPattern splatpat_kind> {
   defvar instruction_masked = !cast<Instruction>(instruction_name#"_VI_"#vti.LMul.MX#"_MASK");
   def : Pat<(vti.Mask (riscv_setcc_vl (vti.Vector vti.RegClass:$rs1),
                                       (splatpat_kind simm5:$rs2), cc,
+                                      (vti.Mask V0),
+                                      VLOpFrag)),
+            (instruction_masked (vti.Mask (IMPLICIT_DEF)), vti.RegClass:$rs1,
+                                (DecImm simm5:$rs2), (vti.Mask V0), GPR:$vl,
+                                vti.Log2SEW)>;
+
+  // FIXME: Can do some canonicalization to remove these patterns.
+  def : Pat<(vti.Mask (riscv_setcc_vl (splatpat_kind simm5:$rs2),
+                                      (vti.Vector vti.RegClass:$rs1), invcc,
                                       (vti.Mask V0),
                                       VLOpFrag)),
             (instruction_masked (vti.Mask (IMPLICIT_DEF)), vti.RegClass:$rs1,
@@ -1064,13 +1077,13 @@ foreach vti = AllIntegerVectors in {
   defm : VPatIntegerSetCCVL_VI_Swappable<vti, "PseudoVMSGT",  SETGT,  SETLT>;
   defm : VPatIntegerSetCCVL_VI_Swappable<vti, "PseudoVMSGTU", SETUGT, SETULT>;
 
-  defm : VPatIntegerSetCCVL_VIPlus1<vti, "PseudoVMSLE",  SETLT,
+  defm : VPatIntegerSetCCVL_VIPlus1_Swappable<vti, "PseudoVMSLE",  SETLT, SETGT,
                                     SplatPat_simm5_plus1_nonzero>;
-  defm : VPatIntegerSetCCVL_VIPlus1<vti, "PseudoVMSLEU", SETULT,
+  defm : VPatIntegerSetCCVL_VIPlus1_Swappable<vti, "PseudoVMSLEU", SETULT, SETUGT,
                                     SplatPat_simm5_plus1_nonzero>;
-  defm : VPatIntegerSetCCVL_VIPlus1<vti, "PseudoVMSGT",  SETGE,
+  defm : VPatIntegerSetCCVL_VIPlus1_Swappable<vti, "PseudoVMSGT",  SETGE, SETLE,
                                     SplatPat_simm5_plus1>;
-  defm : VPatIntegerSetCCVL_VIPlus1<vti, "PseudoVMSGTU", SETUGE,
+  defm : VPatIntegerSetCCVL_VIPlus1_Swappable<vti, "PseudoVMSGTU", SETUGE, SETULE,
                                     SplatPat_simm5_plus1_nonzero>;
 } // foreach vti = AllIntegerVectors
 
