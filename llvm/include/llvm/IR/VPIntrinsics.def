@@ -534,6 +534,18 @@ END_REGISTER_VP(vp_pow, VP_POW)
 BEGIN_REGISTER_VP(vp_frint, 1, 2, VP_FRINT, -1)
 END_REGISTER_VP(vp_frint, VP_FRINT)
 
+// llvm.vp.log(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_log, 1, 2, VP_LOG, -1)
+END_REGISTER_VP(vp_log, VP_LOG)
+
+// llvm.vp.log2(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_log2, 1, 2, VP_LOG2, -1)
+END_REGISTER_VP(vp_log2, VP_LOG2)
+
+// llvm.vp.log10(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_log10, 1, 2, VP_LOG10, -1)
+END_REGISTER_VP(vp_log10, VP_LOG10)
+
 ///// } libm functions
 
 #undef BEGIN_REGISTER_VP

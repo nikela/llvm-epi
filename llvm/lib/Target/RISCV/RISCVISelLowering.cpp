@@ -511,6 +511,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                                                   ISD::VP_FRINT,
                                                   ISD::VP_COS,
                                                   ISD::VP_EXP,
+                                                  ISD::VP_LOG,
+                                                  ISD::VP_LOG2,
+                                                  ISD::VP_LOG10,
                                                   ISD::VP_POW,
                                                   ISD::VP_SIN,
                                                   ISD::VP_REDUCE_FADD,
@@ -1181,8 +1184,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FCOS, VT, Custom);
       setOperationAction(ISD::FREM, VT, Custom);
       setOperationAction(ISD::FPOW, VT, Custom);
-
       setOperationAction(ISD::FRINT, VT, Custom);
+      setOperationAction(ISD::FLOG, VT, Custom);
+      setOperationAction(ISD::FLOG2, VT, Custom);
+      setOperationAction(ISD::FLOG10, VT, Custom);
 
       setOperationAction(ISD::VECTOR_SPLICE, VT, Custom);
     }
@@ -1337,6 +1342,66 @@ void RISCVTargetLowering::registerVecLibCalls() {
                    {RTLIB::FRINT_NXV4F32_MASKED, "__epi_frint_nxv4f32_m"},
                    {RTLIB::FRINT_NXV8F32_MASKED, "__epi_frint_nxv8f32_m"},
                    {RTLIB::FRINT_NXV16F32_MASKED, "__epi_frint_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::FLOG_NXV1F64, "__epi_flog_nxv1f64"},
+                   {RTLIB::FLOG_NXV2F64, "__epi_flog_nxv2f64"},
+                   {RTLIB::FLOG_NXV4F64, "__epi_flog_nxv4f64"},
+                   {RTLIB::FLOG_NXV8F64, "__epi_flog_nxv8f64"},
+                   {RTLIB::FLOG_NXV1F32, "__epi_flog_nxv1f32"},
+                   {RTLIB::FLOG_NXV2F32, "__epi_flog_nxv2f32"},
+                   {RTLIB::FLOG_NXV4F32, "__epi_flog_nxv4f32"},
+                   {RTLIB::FLOG_NXV8F32, "__epi_flog_nxv8f32"},
+                   {RTLIB::FLOG_NXV16F32, "__epi_flog_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::FLOG_NXV1F64_MASKED, "__epi_flog_nxv1f64_m"},
+                   {RTLIB::FLOG_NXV2F64_MASKED, "__epi_flog_nxv2f64_m"},
+                   {RTLIB::FLOG_NXV4F64_MASKED, "__epi_flog_nxv4f64_m"},
+                   {RTLIB::FLOG_NXV8F64_MASKED, "__epi_flog_nxv8f64_m"},
+                   {RTLIB::FLOG_NXV1F32_MASKED, "__epi_flog_nxv1f32_m"},
+                   {RTLIB::FLOG_NXV2F32_MASKED, "__epi_flog_nxv2f32_m"},
+                   {RTLIB::FLOG_NXV4F32_MASKED, "__epi_flog_nxv4f32_m"},
+                   {RTLIB::FLOG_NXV8F32_MASKED, "__epi_flog_nxv8f32_m"},
+                   {RTLIB::FLOG_NXV16F32_MASKED, "__epi_flog_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::FLOG2_NXV1F64, "__epi_flog2_nxv1f64"},
+                   {RTLIB::FLOG2_NXV2F64, "__epi_flog2_nxv2f64"},
+                   {RTLIB::FLOG2_NXV4F64, "__epi_flog2_nxv4f64"},
+                   {RTLIB::FLOG2_NXV8F64, "__epi_flog2_nxv8f64"},
+                   {RTLIB::FLOG2_NXV1F32, "__epi_flog2_nxv1f32"},
+                   {RTLIB::FLOG2_NXV2F32, "__epi_flog2_nxv2f32"},
+                   {RTLIB::FLOG2_NXV4F32, "__epi_flog2_nxv4f32"},
+                   {RTLIB::FLOG2_NXV8F32, "__epi_flog2_nxv8f32"},
+                   {RTLIB::FLOG2_NXV16F32, "__epi_flog2_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::FLOG2_NXV1F64_MASKED, "__epi_flog2_nxv1f64_m"},
+                   {RTLIB::FLOG2_NXV2F64_MASKED, "__epi_flog2_nxv2f64_m"},
+                   {RTLIB::FLOG2_NXV4F64_MASKED, "__epi_flog2_nxv4f64_m"},
+                   {RTLIB::FLOG2_NXV8F64_MASKED, "__epi_flog2_nxv8f64_m"},
+                   {RTLIB::FLOG2_NXV1F32_MASKED, "__epi_flog2_nxv1f32_m"},
+                   {RTLIB::FLOG2_NXV2F32_MASKED, "__epi_flog2_nxv2f32_m"},
+                   {RTLIB::FLOG2_NXV4F32_MASKED, "__epi_flog2_nxv4f32_m"},
+                   {RTLIB::FLOG2_NXV8F32_MASKED, "__epi_flog2_nxv8f32_m"},
+                   {RTLIB::FLOG2_NXV16F32_MASKED, "__epi_flog2_nxv16f32_m"}});
+
+  RegisterLibCall({{RTLIB::FLOG10_NXV1F64, "__epi_flog10_nxv1f64"},
+                   {RTLIB::FLOG10_NXV2F64, "__epi_flog10_nxv2f64"},
+                   {RTLIB::FLOG10_NXV4F64, "__epi_flog10_nxv4f64"},
+                   {RTLIB::FLOG10_NXV8F64, "__epi_flog10_nxv8f64"},
+                   {RTLIB::FLOG10_NXV1F32, "__epi_flog10_nxv1f32"},
+                   {RTLIB::FLOG10_NXV2F32, "__epi_flog10_nxv2f32"},
+                   {RTLIB::FLOG10_NXV4F32, "__epi_flog10_nxv4f32"},
+                   {RTLIB::FLOG10_NXV8F32, "__epi_flog10_nxv8f32"},
+                   {RTLIB::FLOG10_NXV16F32, "__epi_flog10_nxv16f32"}});
+
+  RegisterLibCall({{RTLIB::FLOG10_NXV1F64_MASKED, "__epi_flog10_nxv1f64_m"},
+                   {RTLIB::FLOG10_NXV2F64_MASKED, "__epi_flog10_nxv2f64_m"},
+                   {RTLIB::FLOG10_NXV4F64_MASKED, "__epi_flog10_nxv4f64_m"},
+                   {RTLIB::FLOG10_NXV8F64_MASKED, "__epi_flog10_nxv8f64_m"},
+                   {RTLIB::FLOG10_NXV1F32_MASKED, "__epi_flog10_nxv1f32_m"},
+                   {RTLIB::FLOG10_NXV2F32_MASKED, "__epi_flog10_nxv2f32_m"},
+                   {RTLIB::FLOG10_NXV4F32_MASKED, "__epi_flog10_nxv4f32_m"},
+                   {RTLIB::FLOG10_NXV8F32_MASKED, "__epi_flog10_nxv8f32_m"},
+                   {RTLIB::FLOG10_NXV16F32_MASKED, "__epi_flog10_nxv16f32_m"}});
 
   RegisterLibCall(
       {{RTLIB::VP_REDUCE_FMUL_NXV1F64, "__epi_vp_reduce_fmul_nxv1f64"},
@@ -3723,6 +3788,51 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                            /*NeedsMask*/ false);
   }
+  case ISD::FLOG: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG_NXV1F64},
+        {MVT::nxv2f64, RTLIB::FLOG_NXV2F64},
+        {MVT::nxv4f64, RTLIB::FLOG_NXV4F64},
+        {MVT::nxv8f64, RTLIB::FLOG_NXV8F64},
+        {MVT::nxv1f32, RTLIB::FLOG_NXV1F32},
+        {MVT::nxv2f32, RTLIB::FLOG_NXV2F32},
+        {MVT::nxv4f32, RTLIB::FLOG_NXV4F32},
+        {MVT::nxv8f32, RTLIB::FLOG_NXV8F32},
+        {MVT::nxv16f32, RTLIB::FLOG_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ false);
+  }
+  case ISD::FLOG2: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG2_NXV1F64},
+        {MVT::nxv2f64, RTLIB::FLOG2_NXV2F64},
+        {MVT::nxv4f64, RTLIB::FLOG2_NXV4F64},
+        {MVT::nxv8f64, RTLIB::FLOG2_NXV8F64},
+        {MVT::nxv1f32, RTLIB::FLOG2_NXV1F32},
+        {MVT::nxv2f32, RTLIB::FLOG2_NXV2F32},
+        {MVT::nxv4f32, RTLIB::FLOG2_NXV4F32},
+        {MVT::nxv8f32, RTLIB::FLOG2_NXV8F32},
+        {MVT::nxv16f32, RTLIB::FLOG2_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ false);
+  }
+  case ISD::FLOG10: {
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG10_NXV1F64},
+        {MVT::nxv2f64, RTLIB::FLOG10_NXV2F64},
+        {MVT::nxv4f64, RTLIB::FLOG10_NXV4F64},
+        {MVT::nxv8f64, RTLIB::FLOG10_NXV8F64},
+        {MVT::nxv1f32, RTLIB::FLOG10_NXV1F32},
+        {MVT::nxv2f32, RTLIB::FLOG10_NXV2F32},
+        {MVT::nxv4f32, RTLIB::FLOG10_NXV4F32},
+        {MVT::nxv8f32, RTLIB::FLOG10_NXV8F32},
+        {MVT::nxv16f32, RTLIB::FLOG10_NXV16F32},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ false);
+  }
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
     MVT VT = Op.getSimpleValueType();
@@ -4656,6 +4766,99 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
         {MVT::nxv4f32, RTLIB::FRINT_NXV4F32_MASKED},
         {MVT::nxv8f32, RTLIB::FRINT_NXV8F32_MASKED},
         {MVT::nxv16f32, RTLIB::FRINT_NXV16F32_MASKED},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ true);
+  }
+  case ISD::VP_LOG: {
+    if (!NeedsMask(Op)) {
+      RISCVVTToLibCall VTToLC[] = {
+          {MVT::nxv1f64, RTLIB::FLOG_NXV1F64},
+          {MVT::nxv2f64, RTLIB::FLOG_NXV2F64},
+          {MVT::nxv4f64, RTLIB::FLOG_NXV4F64},
+          {MVT::nxv8f64, RTLIB::FLOG_NXV8F64},
+          {MVT::nxv1f32, RTLIB::FLOG_NXV1F32},
+          {MVT::nxv2f32, RTLIB::FLOG_NXV2F32},
+          {MVT::nxv4f32, RTLIB::FLOG_NXV4F32},
+          {MVT::nxv8f32, RTLIB::FLOG_NXV8F32},
+          {MVT::nxv16f32, RTLIB::FLOG_NXV16F32},
+      };
+      return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                             /*NeedsMask*/ false);
+    }
+
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::FLOG_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::FLOG_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::FLOG_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::FLOG_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::FLOG_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::FLOG_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::FLOG_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::FLOG_NXV16F32_MASKED},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ true);
+  }
+  case ISD::VP_LOG2: {
+    if (!NeedsMask(Op)) {
+      RISCVVTToLibCall VTToLC[] = {
+          {MVT::nxv1f64, RTLIB::FLOG2_NXV1F64},
+          {MVT::nxv2f64, RTLIB::FLOG2_NXV2F64},
+          {MVT::nxv4f64, RTLIB::FLOG2_NXV4F64},
+          {MVT::nxv8f64, RTLIB::FLOG2_NXV8F64},
+          {MVT::nxv1f32, RTLIB::FLOG2_NXV1F32},
+          {MVT::nxv2f32, RTLIB::FLOG2_NXV2F32},
+          {MVT::nxv4f32, RTLIB::FLOG2_NXV4F32},
+          {MVT::nxv8f32, RTLIB::FLOG2_NXV8F32},
+          {MVT::nxv16f32, RTLIB::FLOG2_NXV16F32},
+      };
+      return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                             /*NeedsMask*/ false);
+    }
+
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG2_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::FLOG2_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::FLOG2_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::FLOG2_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::FLOG2_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::FLOG2_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::FLOG2_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::FLOG2_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::FLOG2_NXV16F32_MASKED},
+    };
+    return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                           /*NeedsMask*/ true);
+  }
+  case ISD::VP_LOG10: {
+    if (!NeedsMask(Op)) {
+      RISCVVTToLibCall VTToLC[] = {
+          {MVT::nxv1f64, RTLIB::FLOG10_NXV1F64},
+          {MVT::nxv2f64, RTLIB::FLOG10_NXV2F64},
+          {MVT::nxv4f64, RTLIB::FLOG10_NXV4F64},
+          {MVT::nxv8f64, RTLIB::FLOG10_NXV8F64},
+          {MVT::nxv1f32, RTLIB::FLOG10_NXV1F32},
+          {MVT::nxv2f32, RTLIB::FLOG10_NXV2F32},
+          {MVT::nxv4f32, RTLIB::FLOG10_NXV4F32},
+          {MVT::nxv8f32, RTLIB::FLOG10_NXV8F32},
+          {MVT::nxv16f32, RTLIB::FLOG10_NXV16F32},
+      };
+      return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
+                             /*NeedsMask*/ false);
+    }
+
+    RISCVVTToLibCall VTToLC[] = {
+        {MVT::nxv1f64, RTLIB::FLOG10_NXV1F64_MASKED},
+        {MVT::nxv2f64, RTLIB::FLOG10_NXV2F64_MASKED},
+        {MVT::nxv4f64, RTLIB::FLOG10_NXV4F64_MASKED},
+        {MVT::nxv8f64, RTLIB::FLOG10_NXV8F64_MASKED},
+        {MVT::nxv1f32, RTLIB::FLOG10_NXV1F32_MASKED},
+        {MVT::nxv2f32, RTLIB::FLOG10_NXV2F32_MASKED},
+        {MVT::nxv4f32, RTLIB::FLOG10_NXV4F32_MASKED},
+        {MVT::nxv8f32, RTLIB::FLOG10_NXV8F32_MASKED},
+        {MVT::nxv16f32, RTLIB::FLOG10_NXV16F32_MASKED},
     };
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                            /*NeedsMask*/ true);
