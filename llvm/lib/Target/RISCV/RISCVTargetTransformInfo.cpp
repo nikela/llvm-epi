@@ -468,8 +468,8 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
       return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
 
     // Skip if element size of Dst or Src is bigger than ELEN.
-    if (Src->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors() ||
-        Dst->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+    if (Src->getScalarSizeInBits() > ST->getELEN() ||
+        Dst->getScalarSizeInBits() > ST->getELEN())
       return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
 
     int ISD = TLI->InstructionOpcodeToISD(Opcode);
@@ -617,7 +617,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
-  if (Ty->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+  if (Ty->getScalarSizeInBits() > ST->getELEN())
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
@@ -668,7 +668,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *VTy,
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
   // Skip if scalar size of VTy is bigger than ELEN.
-  if (VTy->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+  if (VTy->getScalarSizeInBits() > ST->getELEN())
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
   int ISD = TLI->InstructionOpcodeToISD(Opcode);
