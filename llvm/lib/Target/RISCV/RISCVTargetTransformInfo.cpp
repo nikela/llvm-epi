@@ -513,15 +513,7 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   case Intrinsic::experimental_stepvector: {
     InstructionCost Cost = 1; // Cost of the `index' instruction
     auto LT = TLI->getTypeLegalizationCost(DL, RetTy);
-    // Legalisation of illegal vectors involves an `index' instruction plus
-    // (LT.first - 1) vector adds.
-    if (LT.first > 1) {
-      Type *LegalVTy = EVT(LT.second).getTypeForEVT(RetTy->getContext());
-      InstructionCost AddCost =
-          getArithmeticInstrCost(Instruction::Add, LegalVTy, CostKind);
-      Cost += AddCost * (LT.first - 1);
-    }
-    return Cost;
+    return Cost + (LT.first - 1);
   }
   case Intrinsic::nearbyint: {
     if (isa<ScalableVectorType>(RetTy))

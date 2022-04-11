@@ -16,6 +16,9 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-EMPTY:
 ; CHECK-NEXT: Live-in vp<%2> = backedge-taken count
 ; CHECK-EMPTY:
+; CHECK-NEXT: vector.ph:
+; CHECK-NEXT: Successor(s): vector loop
+; CHECK-EMPTY:
 ; CHECK-NEXT: <x1> vector loop: {
 ; CHECK-NEXT:   vector.body:
 ; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
@@ -36,6 +39,7 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT: }
 ; CHECK-NEXT: No successors
 ; CHECK-NEXT: }
+
 
 ; Function Attrs: nofree norecurse nounwind
 define dso_local void @simple_add(i32 signext %N, i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {

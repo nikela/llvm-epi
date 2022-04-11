@@ -7371,28 +7371,12 @@ void SelectionDAGBuilder::visitConstrainedFPIntrinsic(
 
 static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   Optional<unsigned> ResOPC;
-  auto IID = VPIntrin.getIntrinsicID();
-  // vp.fcmp and vp.icmp are handled specially
-  if (IID == Intrinsic::vp_fcmp || IID == Intrinsic::vp_icmp)
-    return ISD::VP_SETCC;
-
-  switch (IID) {
-#define BEGIN_REGISTER_VP_INTRINSIC(VPID, ...) case Intrinsic::VPID:
-#define BEGIN_REGISTER_VP_SDNODE(VPSD, ...) ResOPC = ISD::VPSD;
-#define END_REGISTER_VP_INTRINSIC(VPID) break;
+  switch (VPIntrin.getIntrinsicID()) {
+#define HELPER_MAP_VPID_TO_VPSD(VPID, VPSD)                                    \
+  case Intrinsic::VPID:                                                        \
+    ResOPC = ISD::VPSD;                                                        \
+    break;
 #include "llvm/IR/VPIntrinsics.def"
-  }
-
-  if (!ResOPC.hasValue()) {
-    switch (VPIntrin.getIntrinsicID()) {
-    case Intrinsic::vp_icmp:
-    case Intrinsic::vp_fcmp:
-      ResOPC = ISD::VP_SETCC;
-      break;
-    default:
-      llvm_unreachable(
-          "Inconsistency: no SDNode available for this VPIntrinsic!");
-    }
   }
 
   if (*ResOPC == ISD::VP_REDUCE_SEQ_FADD ||

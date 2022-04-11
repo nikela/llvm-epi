@@ -313,6 +313,7 @@ protected:
   friend class ASTReader;
   friend class CXXClassMemberWrapper;
   friend class LinkageComputer;
+  friend class RecordDecl;
   template<typename decl_type> friend class Redeclarable;
 
   /// Access - Used by C++ decls for the access specifier.
@@ -1544,10 +1545,13 @@ class DeclContext {
     /// States if this record has EPI vectors as fields.
     // FIXME: This is not super elegant but does the job.
     bool HasEPIVectorFields : 1;
+
+    /// Indicates whether this struct has had its field layout randomized.
+    uint64_t IsRandomized : 1;
   };
 
   /// Number of non-inherited bits in RecordDeclBitfields.
-  enum { NumRecordDeclBits = 15 };
+  enum { NumRecordDeclBits = 16 };
 
   /// Stores the bits used by OMPDeclareReductionDecl.
   /// If modified NumOMPDeclareReductionDeclBits and the accessor
