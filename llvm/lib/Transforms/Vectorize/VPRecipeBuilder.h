@@ -115,8 +115,14 @@ class VPRecipeBuilder {
   /// Handle call instructions. If \p CI can be widened for \p Range.Start,
   /// return a new VPWidenCallRecipe. Range.End may be decreased to ensure same
   /// decision from \p Range.Start to \p Range.End.
-  VPWidenCallRecipe *tryToWidenCall(CallInst *CI, ArrayRef<VPValue *> Operands,
-                                    VFRange &Range) const;
+  VPRecipeBase *tryToWidenCallCommon(CallInst *CI, ArrayRef<VPValue *> Operands,
+                                     VFRange &Range, VPlanPtr &Plan,
+                                     bool Predicated);
+  VPRecipeBase *tryToWidenCall(CallInst *CI, ArrayRef<VPValue *> Operands,
+                               VFRange &Range, VPlanPtr &Plan);
+  VPRecipeBase *tryToPredicatedWidenCall(CallInst *CI,
+                                         ArrayRef<VPValue *> Operands,
+                                         VFRange &Range, VPlanPtr &Plan);
 
   /// Check if \p I has an opcode that can be widened and return a VPWidenRecipe
   /// if it can. The function should only be called if the cost-model indicates

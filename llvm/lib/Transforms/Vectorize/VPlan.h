@@ -807,6 +807,7 @@ inline bool VPUser::classof(const VPDef *Def) {
          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenCallSC ||
+         Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenCallSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenSelectSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenGEPSC ||
          Def->getVPDefID() == VPRecipeBase::VPBlendSC ||
@@ -1054,6 +1055,45 @@ public:
 
   /// Produce a widened version of the call instruction.
   void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+};
+
+/// A recipe for predicate widening Call instructions.
+class VPPredicatedWidenCallRecipe : public VPRecipeBase, public VPValue {
+
+public:
+  template <typename IterT>
+  VPPredicatedWidenCallRecipe(CallInst &I, iterator_range<IterT> CallArguments,
+                              VPValue *Mask, VPValue *EVL)
+      : VPRecipeBase(VPRecipeBase::VPPredicatedWidenCallSC, CallArguments),
+        VPValue(VPValue::VPVPredicatedWidenCallSC, &I, this) {
+    addOperand(Mask);
+    addOperand(EVL);
+  }
+
+  ~VPPredicatedWidenCallRecipe() override = default;
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPPredicatedWidenCallSC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVPredicatedWidenCallSC;
+  }
+
+  /// Produce a widened version of the call instruction.
+  void execute(VPTransformState &State) override;
+
+  /// Return the mask used by this recipe.
+  VPValue *getMask() const { return getOperand(getNumOperands() - 2); }
+
+  /// Return the explicit vector length used by this recipe.
+  VPValue *getEVL() const { return getOperand(getNumOperands() - 1); }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.

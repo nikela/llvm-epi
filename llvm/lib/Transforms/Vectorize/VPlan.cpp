@@ -1338,6 +1338,23 @@ void VPWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
   O << ")";
 }
 
+void VPPredicatedWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
+                                        VPSlotTracker &SlotTracker) const {
+  O << Indent << "PREDICATED-WIDEN-CALL ";
+
+  auto *CI = cast<CallInst>(getUnderlyingInstr());
+  if (CI->getType()->isVoidTy())
+    O << "void ";
+  else {
+    printAsOperand(O, SlotTracker);
+    O << " = ";
+  }
+
+  O << "call @" << CI->getCalledFunction()->getName() << "(";
+  printOperands(O, SlotTracker);
+  O << ")";
+}
+
 void VPWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
                                 VPSlotTracker &SlotTracker) const {
   O << Indent << "WIDEN-SELECT ";

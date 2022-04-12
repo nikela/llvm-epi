@@ -141,6 +141,21 @@ Intrinsic::ID llvm::getVectorIntrinsicIDForCall(const CallInst *CI,
   return Intrinsic::not_intrinsic;
 }
 
+Intrinsic::ID
+llvm::getVPVectorIntrinsicIDForCall(const CallInst *CI,
+                                    const TargetLibraryInfo *TLI) {
+  Intrinsic::ID ID = getIntrinsicForCallSite(*CI, TLI);
+
+  switch (ID) {
+  default:
+    return Intrinsic::not_intrinsic;
+#define MAP_LLVM_NONVP_TO_VP(X, Y)                                             \
+  case Intrinsic::X:                                                           \
+    return Intrinsic::vp_##Y;
+#include "llvm/IR/VPIntrinsics.def"
+  }
+}
+
 /// Find the operand of the GEP that should be checked for consecutive
 /// stores. This ignores trailing indices that have no effect on the final
 /// pointer.

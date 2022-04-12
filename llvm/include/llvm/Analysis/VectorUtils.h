@@ -327,6 +327,12 @@ bool hasVectorInstrinsicOverloadedScalarOpd(Intrinsic::ID ID,
 Intrinsic::ID getVectorIntrinsicIDForCall(const CallInst *CI,
                                           const TargetLibraryInfo *TLI);
 
+/// Returns VPred intrinsic ID for call.
+/// For the input call instruction it finds mapping intrinsic and returns
+/// its intrinsic ID, in case it does not found it return not_intrinsic.
+Intrinsic::ID getVPVectorIntrinsicIDForCall(const CallInst *CI,
+                                            const TargetLibraryInfo *TLI);
+
 /// Find the operand of the GEP that should be checked for consecutive
 /// stores. This ignores trailing indices that have no effect on the final
 /// pointer.
