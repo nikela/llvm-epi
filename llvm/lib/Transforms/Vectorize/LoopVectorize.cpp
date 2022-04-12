@@ -11176,13 +11176,9 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     if (CreateGatherScatter) {
       if (EVLPart) {
         bool EmittedStridedAccess = false;
-        auto *VectorGep = cast<GetElementPtrInst>(State.get(getAddr(), Part));
-        // FIXME: We must be doing something wrong here because opaque pointers
-        // seem to go against our interests here.
-        auto *PtrTy = VectorGep->getResultElementType()->getPointerTo();
+        auto *VectorGep = State.get(getAddr(), Part);
+        auto *PtrTy = DataTy->getElementType()->getPointerTo();
         ElementCount NumElts = State.VF;
-        auto *DataTy =
-            VectorType::get(VectorGep->getResultElementType(), NumElts);
         auto *PtrsTy = VectorType::get(PtrTy, NumElts);
         Value *BlockInMaskPart = isMaskRequired
                                      ? MaskValue(Part, NumElts)
