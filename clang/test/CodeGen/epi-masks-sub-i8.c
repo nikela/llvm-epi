@@ -6,8 +6,8 @@
 // CHECK-NEXT:  entry:
 // CHECK-NEXT:    [[A:%.*]] = alloca <vscale x 16 x i1>, align 1
 // CHECK-NEXT:    [[B:%.*]] = alloca <vscale x 32 x i1>, align 1
-// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 16 x i1>, <vscale x 16 x i1>* [[A]], align 1
-// CHECK-NEXT:    [[TMP1:%.*]] = load <vscale x 32 x i1>, <vscale x 32 x i1>* [[B]], align 1
+// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 16 x i1>, ptr [[A]], align 1
+// CHECK-NEXT:    [[TMP1:%.*]] = load <vscale x 32 x i1>, ptr [[B]], align 1
 // CHECK-NEXT:    ret void
 //
 void foo(void)

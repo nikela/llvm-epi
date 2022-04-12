@@ -5,8 +5,8 @@
 // CHECK-LABEL: @foo(
 // CHECK-NEXT:  entry:
 // CHECK-NEXT:    [[A:%.*]] = alloca <vscale x 1 x double>, align 8
-// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[A]], align 8
-// CHECK-NEXT:    store <vscale x 1 x double> [[TMP0]], <vscale x 1 x double>* [[A]], align 8
+// CHECK-NEXT:    [[TMP0:%.*]] = load <vscale x 1 x double>, ptr [[A]], align 8
+// CHECK-NEXT:    store <vscale x 1 x double> [[TMP0]], ptr [[A]], align 8
 // CHECK-NEXT:    ret void
 //
 void foo(void) {
