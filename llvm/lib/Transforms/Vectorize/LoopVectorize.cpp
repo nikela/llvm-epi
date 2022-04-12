@@ -11176,11 +11176,14 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     if (CreateGatherScatter) {
       if (EVLPart) {
         bool EmittedStridedAccess = false;
-        Value *VectorGep = State.get(getAddr(), Part);
-        auto *PtrsTy = cast<VectorType>(VectorGep->getType());
-        auto *PtrTy = cast<PointerType>(PtrsTy->getElementType());
-        ElementCount NumElts = PtrsTy->getElementCount();
-        Type *DataTy = VectorType::get(PtrTy->getPointerElementType(), NumElts);
+        auto *VectorGep = cast<GetElementPtrInst>(State.get(getAddr(), Part));
+        // FIXME: We must be doing something wrong here because opaque pointers
+        // seem to go against our interests here.
+        auto *PtrTy = VectorGep->getResultElementType()->getPointerTo();
+        ElementCount NumElts = State.VF;
+        auto *DataTy =
+            VectorType::get(VectorGep->getResultElementType(), NumElts);
+        auto *PtrsTy = VectorType::get(PtrTy, NumElts);
         Value *BlockInMaskPart = isMaskRequired
                                      ? MaskValue(Part, NumElts)
                                      : Builder.getTrueVector(NumElts);
@@ -11211,7 +11214,6 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                      << "Not consecutive stride load for " << *getAddr() << "\n");
         }
         if (!EmittedStridedAccess) {
-          Type *DataTy = VectorType::get(PtrTy->getPointerElementType(), NumElts);
           Value *Operands[] = {VectorGep, BlockInMaskPart, EVLPart};
           NewLI =
               Builder.CreateIntrinsic(Intrinsic::vp_gather, {DataTy, PtrsTy},
@@ -11233,10 +11235,9 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
       if (EVLPart) {
         Function *VPIntr = Intrinsic::getDeclaration(
             VectorPH->getModule(), Intrinsic::vp_load,
-            {VecPtr->getType()->getPointerElementType(), VecPtr->getType()});
+            {DataTy, VecPtr->getType()});
 
-        VectorType *VecTy =
-            cast<VectorType>(VecPtr->getType()->getPointerElementType());
+        VectorType *VecTy = cast<VectorType>(DataTy);
         Value *BlockInMaskPart =
             isMaskRequired ? MaskValue(Part, VecTy->getElementCount())
                            : Builder.getTrueVector(VecTy->getElementCount());

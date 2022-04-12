@@ -1549,24 +1549,24 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
   case Intrinsic::epi_vload:
   case Intrinsic::epi_vload_strided:
   case Intrinsic::epi_vload_indexed: {
-    PointerType *PtrTy = cast<PointerType>(I.getArgOperand(0)->getType());
+    Type *DataTy = I.getType();
     Info.opc = ISD::INTRINSIC_W_CHAIN;
-    Info.memVT = MVT::getVT(PtrTy->getPointerElementType());
+    Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(0);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(PtrTy->getPointerElementType()));
+    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
     Info.flags = MachineMemOperand::MOLoad;
     return true;
   }
   case Intrinsic::epi_vload_mask:
   case Intrinsic::epi_vload_strided_mask:
   case Intrinsic::epi_vload_indexed_mask: {
-    PointerType *PtrTy = cast<PointerType>(I.getArgOperand(1)->getType());
+    Type *DataTy = I.getType();
     Info.opc = ISD::INTRINSIC_W_CHAIN;
-    Info.memVT = MVT::getVT(PtrTy->getPointerElementType());
+    Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(PtrTy->getPointerElementType()));
+    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
     Info.flags = MachineMemOperand::MOLoad;
     return true;
   }
@@ -1576,12 +1576,12 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
   case Intrinsic::epi_vstore_mask:
   case Intrinsic::epi_vstore_strided_mask:
   case Intrinsic::epi_vstore_indexed_mask: {
-    PointerType *PtrTy = cast<PointerType>(I.getArgOperand(1)->getType());
+    Type *DataTy = I.getFunctionType()->getParamType(0);
     Info.opc = ISD::INTRINSIC_VOID;
-    Info.memVT = MVT::getVT(PtrTy->getPointerElementType());
+    Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(PtrTy->getPointerElementType()));
+    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
     Info.flags = MachineMemOperand::MOStore;
     return true;
   }
