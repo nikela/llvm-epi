@@ -546,6 +546,10 @@ END_REGISTER_VP(vp_log2, VP_LOG2)
 BEGIN_REGISTER_VP(vp_log10, 1, 2, VP_LOG10, -1)
 END_REGISTER_VP(vp_log10, VP_LOG10)
 
+// llvm.vp.sqrt(f,mask,vlen)
+BEGIN_REGISTER_VP(vp_sqrt, 1, 2, VP_SQRT, -1)
+END_REGISTER_VP(vp_sqrt, VP_SQRT)
+
 // Do not add vp_ to the VP name
 #ifndef MAP_LLVM_NONVP_TO_VP
 #define MAP_LLVM_NONVP_TO_VP(NONVP, VP)
@@ -563,6 +567,7 @@ MAP_LLVM_NONVP_TO_VP(rint, frint)
 MAP_LLVM_NONVP(log)
 MAP_LLVM_NONVP(log2)
 MAP_LLVM_NONVP(log10)
+MAP_LLVM_NONVP(sqrt)
 
 ///// } libm functions
 

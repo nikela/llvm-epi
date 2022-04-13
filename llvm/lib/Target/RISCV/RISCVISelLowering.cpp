@@ -524,6 +524,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_FMUL,
         ISD::VP_REDUCE_SEQ_FMUL,
         ISD::VP_SIN,
+        ISD::VP_SQRT,
     };
     // clang-format on
 
@@ -4521,6 +4522,9 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     uint64_t SrcSize = Op.getOperand(0).getValueType().getScalarSizeInBits();
     assert(DstSize > SrcSize);
     return lowerVPOp(Op, DAG, RISCVISD::FP_EXTEND_VL);
+  }
+  case ISD::VP_SQRT: {
+    return lowerVPOp(Op, DAG, RISCVISD::FSQRT_VL);
   }
   case ISD::VP_COS: {
     if (!NeedsMask(Op)) {

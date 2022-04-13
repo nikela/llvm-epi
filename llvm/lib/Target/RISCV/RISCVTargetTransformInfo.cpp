@@ -572,7 +572,8 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(vp_frint)                                                       \
   VP_INTRINSIC(vp_log)                                                         \
   VP_INTRINSIC(vp_log2)                                                        \
-  VP_INTRINSIC(vp_log10)
+  VP_INTRINSIC(vp_log10)                                                       \
+  VP_INTRINSIC(vp_sqrt)
 #define VP_INTRINSIC(name) case Intrinsic::name:
   VP_INTRINSIC_LIST
 #undef VP_INTRINSIC

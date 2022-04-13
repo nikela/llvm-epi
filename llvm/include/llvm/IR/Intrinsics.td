@@ -1754,6 +1754,10 @@ def int_vp_log10 : DefaultAttrsIntrinsic<[llvm_anyfloat_ty],
                                        [LLVMMatchType<0>,
                                         LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
                                         llvm_i32_ty]>;
+def int_vp_sqrt : DefaultAttrsIntrinsic<[llvm_anyfloat_ty],
+                                        [LLVMMatchType<0>,
+                                         LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                                         llvm_i32_ty]>;
 
 //===-------------------------- Masked Intrinsics -------------------------===//
 //
