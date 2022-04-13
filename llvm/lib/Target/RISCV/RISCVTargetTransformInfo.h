@@ -150,7 +150,7 @@ public:
   InstructionCost getScalarizationOverhead(VectorType *InTy,
                                            const APInt &DemandedElts,
                                            bool Insert, bool Extract);
-  bool shouldMaximizeVectorBandwidth(TargetTransformInfo::RegisterKind K) const;
+  bool shouldMaximizeVectorBandwidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
                                   unsigned VFKnownMin, unsigned ElementTypeSize,
