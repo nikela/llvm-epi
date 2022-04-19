@@ -66,6 +66,10 @@ set(files
   __algorithm/pop_heap.h
   __algorithm/prev_permutation.h
   __algorithm/push_heap.h
+  __algorithm/ranges_copy.h
+  __algorithm/ranges_copy_backward.h
+  __algorithm/ranges_copy_if.h
+  __algorithm/ranges_copy_n.h
   __algorithm/ranges_count.h
   __algorithm/ranges_count_if.h
   __algorithm/ranges_find.h
@@ -75,6 +79,8 @@ set(files
   __algorithm/ranges_max_element.h
   __algorithm/ranges_min.h
   __algorithm/ranges_min_element.h
+  __algorithm/ranges_minmax.h
+  __algorithm/ranges_minmax_element.h
   __algorithm/ranges_mismatch.h
   __algorithm/ranges_swap_ranges.h
   __algorithm/ranges_transform.h

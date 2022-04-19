@@ -4700,9 +4700,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     if (JA.getType() == types::TY_LLVM_BC)
       CmdArgs.push_back("-emit-llvm-uselists");
 
-    if (IsUsingLTO && !Args.hasArg(options::OPT_fopenmp_new_driver)) {
+    if (IsUsingLTO) {
       // Only AMDGPU supports device-side LTO.
-      if (IsDeviceOffloadAction && !Triple.isAMDGPU()) {
+      if (IsDeviceOffloadAction &&
+          Args.hasArg(options::OPT_fno_openmp_new_driver) &&
+          !Triple.isAMDGPU()) {
         D.Diag(diag::err_drv_unsupported_opt_for_target)
             << Args.getLastArg(options::OPT_foffload_lto,
                                options::OPT_foffload_lto_EQ)
@@ -5582,11 +5584,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   Args.AddLastArg(CmdArgs, options::OPT_fclang_abi_compat_EQ);
 
-  // Add runtime flag for PS4 when PGO, coverage, or sanitizers are enabled.
-  if (RawTriple.isPS4() &&
+  // Add runtime flag for PS4/PS5 when PGO, coverage, or sanitizers are enabled.
+  if (RawTriple.isPS() &&
       !Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs)) {
-    PS4cpu::addProfileRTArgs(TC, Args, CmdArgs);
-    PS4cpu::addSanitizerArgs(TC, Args, CmdArgs);
+    PScpu::addProfileRTArgs(TC, Args, CmdArgs);
+    PScpu::addSanitizerArgs(TC, Args, CmdArgs);
   }
 
   // Pass options for controlling the default header search paths.
@@ -6981,13 +6983,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       const ArgList &TCArgs = C.getArgsForToolChain(TC, "", Action::OFK_OpenMP);
       StringRef File =
           C.getArgs().MakeArgString(TC->getInputFilename(*InputFile));
-      StringRef InputName = Clang::getBaseInputStem(Args, Inputs);
 
-      CmdArgs.push_back(Args.MakeArgString(
-          "-fembed-offload-object=" + File + "," +
-          Action::GetOffloadKindName(Action::OFK_OpenMP) + "." +
-          TC->getTripleString() + "." +
-          TCArgs.getLastArgValue(options::OPT_march_EQ) + "." + InputName));
+      CmdArgs.push_back(
+          Args.MakeArgString("-fembed-offload-object=" + File + "," +
+                             Action::GetOffloadKindName(Action::OFK_OpenMP) +
+                             "," + TC->getTripleString() + "," +
+                             TCArgs.getLastArgValue(options::OPT_march_EQ)));
     }
   }
 

@@ -1771,11 +1771,13 @@ AArch64LoadStoreOpt::findMatchingInsn(MachineBasicBlock::iterator I,
 
 static MachineBasicBlock::iterator
 maybeMoveCFI(MachineInstr &MI, MachineBasicBlock::iterator MaybeCFI) {
-  if (MaybeCFI->getOpcode() != TargetOpcode::CFI_INSTRUCTION ||
+  auto End = MI.getParent()->end();
+  if (MaybeCFI == End ||
+      MaybeCFI->getOpcode() != TargetOpcode::CFI_INSTRUCTION ||
       !(MI.getFlag(MachineInstr::FrameSetup) ||
         MI.getFlag(MachineInstr::FrameDestroy)) ||
       getLdStBaseOp(MI).getReg() != AArch64::SP)
-    return MI.getParent()->end();
+    return End;
 
   const MachineFunction &MF = *MI.getParent()->getParent();
   unsigned CFIIndex = MaybeCFI->getOperand(0).getCFIIndex();
@@ -1785,7 +1787,7 @@ maybeMoveCFI(MachineInstr &MI, MachineBasicBlock::iterator MaybeCFI) {
   case MCCFIInstruction::OpDefCfaOffset:
     return MaybeCFI;
   default:
-    return MI.getParent()->end();
+    return End;
   }
 }
 
