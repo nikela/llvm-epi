@@ -1130,7 +1130,8 @@ AliasResult BasicAAResult::aliasGEP(
     // NoAlias.
     auto IsPointerToStruct = [](Type *Ty) {
       return isa<PointerType>(Ty) && !cast<PointerType>(Ty)->isOpaque() &&
-             isa<StructType>(cast<PointerType>(Ty)->getPointerElementType());
+             isa<StructType>(
+                 cast<PointerType>(Ty)->getNonOpaquePointerElementType());
     };
     auto GEPIndexesScalableVectorField = [](const GEPOperator *GEP) {
       if (!GEP->isInBounds() || GEP->getNumIndices() != 2 ||

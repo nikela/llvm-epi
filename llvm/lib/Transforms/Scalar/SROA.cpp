@@ -705,10 +705,10 @@ private:
     // Don't consider casts between scalable types and other things.
     if (!cast<PointerType>(BC.getSrcTy())->isOpaquePointerTy() &&
         !cast<PointerType>(BC.getDestTy())->isOpaquePointerTy() &&
-        (isa<ScalableVectorType>(
-             cast<PointerType>(BC.getSrcTy())->getPointerElementType()) !=
-         isa<ScalableVectorType>(
-             cast<PointerType>(BC.getDestTy())->getPointerElementType())))
+        (isa<ScalableVectorType>(cast<PointerType>(BC.getSrcTy())
+                                     ->getNonOpaquePointerElementType()) !=
+         isa<ScalableVectorType>(cast<PointerType>(BC.getDestTy())
+                                     ->getNonOpaquePointerElementType())))
       return PI.setAborted(&BC);
 
     return Base::visitBitCastInst(BC);
