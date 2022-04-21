@@ -37,9 +37,11 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT:     EMIT branch-on-count  vp<%16> vp<%1>
 ; CHECK-NEXT:   No successors
 ; CHECK-NEXT: }
+; CHECK-NEXT: Successor(s): middle.block
+; CHECK-EMPTY:
+; CHECK-NEXT: middle.block:
 ; CHECK-NEXT: No successors
 ; CHECK-NEXT: }
-
 
 ; Function Attrs: nofree norecurse nounwind
 define dso_local void @simple_add(i32 signext %N, i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {
