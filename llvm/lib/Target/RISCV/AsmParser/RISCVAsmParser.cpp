@@ -1777,7 +1777,7 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
     // The VTypeIElements layout is:
     // SEW comma LMUL comma TA comma MA [comma NT]
     //  0    1    2     3    4   5    6  7     8
-    StringRef Name = VTypeIElements[0].getIdentifier();
+    StringRef Name = VTypeIElements[0].getString();
     if (!Name.consume_front("e"))
       goto MatchFail;
     unsigned Sew;
@@ -1786,7 +1786,7 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
     if (!RISCVVType::isValidSEW(Sew))
       goto MatchFail;
 
-    Name = VTypeIElements[2].getIdentifier();
+    Name = VTypeIElements[2].getString();
     if (!Name.consume_front("m"))
       goto MatchFail;
     // "m" or "mf"
@@ -1798,7 +1798,7 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
       goto MatchFail;
 
     // ta or tu
-    Name = VTypeIElements[4].getIdentifier();
+    Name = VTypeIElements[4].getString();
     bool TailAgnostic;
     if (Name == "ta")
       TailAgnostic = true;
@@ -1808,7 +1808,7 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
       goto MatchFail;
 
     // ma or mu
-    Name = VTypeIElements[6].getIdentifier();
+    Name = VTypeIElements[6].getString();
     bool MaskAgnostic;
     if (Name == "ma")
       MaskAgnostic = true;
@@ -1820,7 +1820,7 @@ OperandMatchResultTy RISCVAsmParser::parseVTypeI(OperandVector &Operands) {
     // Optional ",nt"
     bool Nontemporal = false;
     if (VTypeIElements.size() == 9) {
-      Name = VTypeIElements[8].getIdentifier();
+      Name = VTypeIElements[8].getString();
       if (Name == "nt") {
         Nontemporal = true;
       } else
