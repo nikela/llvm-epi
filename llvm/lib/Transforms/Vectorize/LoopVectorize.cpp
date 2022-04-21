@@ -9026,9 +9026,8 @@ VPValue *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
   if (EVL)
     return EVL;
 
-  VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
   VPValue *TC = Plan->getOrCreateTripCount();
-  auto *EVLRecipe = new VPWidenEVLRecipe(IV, TC);
+  auto *EVLRecipe = new VPWidenEVLRecipe(TC);
   Builder.getInsertBlock()->insert(EVLRecipe, Builder.getInsertPoint());
   EVL = EVLRecipe->getEVL();
   return EVL;

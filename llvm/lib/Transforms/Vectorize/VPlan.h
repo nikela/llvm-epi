@@ -2198,8 +2198,8 @@ public:
 class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
 
 public:
-  VPWidenEVLRecipe(VPValue *IV, VPValue *TC)
-      : VPRecipeBase(VPRecipeBase::VPWidenEVLSC, {IV, TC}),
+  VPWidenEVLRecipe(VPValue *TC)
+      : VPRecipeBase(VPRecipeBase::VPWidenEVLSC, {TC}),
         VPValue(VPValue::VPVWidenEVLSC, nullptr, this) {}
   ~VPWidenEVLRecipe() override = default;
 
@@ -2207,11 +2207,8 @@ public:
   const VPValue *getEVL() const { return this; }
   VPValue *getEVL() { return this; }
 
-  /// Return VPValue representing Induction Variable.
-  VPValue *getIV() const { return getOperand(0); }
-
   /// Return VPValue representing trip count.
-  VPValue *getTripCount() const { return getOperand(1); }
+  VPValue *getTripCount() const { return getOperand(0); }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPDef *D) {
