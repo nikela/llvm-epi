@@ -198,9 +198,7 @@ InstructionCost RISCVTTIImpl::getScalarizationOverhead(
   return *MinCost.getValue();
 }
 
-bool RISCVTTIImpl::shouldMaximizeVectorBandwidth(
-    TargetTransformInfo::RegisterKind K) const {
-  assert(K != TargetTransformInfo::RGK_Scalar);
+bool RISCVTTIImpl::shouldMaximizeVectorBandwidth() const {
   return ST->hasVInstructions();
 }
 
@@ -468,8 +466,8 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
       return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
 
     // Skip if element size of Dst or Src is bigger than ELEN.
-    if (Src->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors() ||
-        Dst->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+    if (Src->getScalarSizeInBits() > ST->getELEN() ||
+        Dst->getScalarSizeInBits() > ST->getELEN())
       return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
 
     int ISD = TLI->InstructionOpcodeToISD(Opcode);
@@ -513,15 +511,7 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   case Intrinsic::experimental_stepvector: {
     InstructionCost Cost = 1; // Cost of the `index' instruction
     auto LT = TLI->getTypeLegalizationCost(DL, RetTy);
-    // Legalisation of illegal vectors involves an `index' instruction plus
-    // (LT.first - 1) vector adds.
-    if (LT.first > 1) {
-      Type *LegalVTy = EVT(LT.second).getTypeForEVT(RetTy->getContext());
-      InstructionCost AddCost =
-          getArithmeticInstrCost(Instruction::Add, LegalVTy, CostKind);
-      Cost += AddCost * (LT.first - 1);
-    }
-    return Cost;
+    return Cost + (LT.first - 1);
   }
   case Intrinsic::nearbyint: {
     if (isa<ScalableVectorType>(RetTy))
@@ -579,7 +569,11 @@ RISCVTTIImpl::getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
   VP_INTRINSIC(vp_sin)                                                         \
   VP_INTRINSIC(vp_exp)                                                         \
   VP_INTRINSIC(vp_pow)                                                         \
-  VP_INTRINSIC(vp_frint)
+  VP_INTRINSIC(vp_frint)                                                       \
+  VP_INTRINSIC(vp_log)                                                         \
+  VP_INTRINSIC(vp_log2)                                                        \
+  VP_INTRINSIC(vp_log10)                                                       \
+  VP_INTRINSIC(vp_sqrt)
 #define VP_INTRINSIC(name) case Intrinsic::name:
   VP_INTRINSIC_LIST
 #undef VP_INTRINSIC
@@ -622,7 +616,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
-  if (Ty->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+  if (Ty->getScalarSizeInBits() > ST->getELEN())
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
@@ -673,7 +667,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *VTy,
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
   // Skip if scalar size of VTy is bigger than ELEN.
-  if (VTy->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+  if (VTy->getScalarSizeInBits() > ST->getELEN())
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
   int ISD = TLI->InstructionOpcodeToISD(Opcode);

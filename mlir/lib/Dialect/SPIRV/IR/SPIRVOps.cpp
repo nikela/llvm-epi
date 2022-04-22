@@ -1515,21 +1515,20 @@ LogicalResult spirv::BitcastOp::verify() {
 // spv.BranchOp
 //===----------------------------------------------------------------------===//
 
-Optional<MutableOperandRange>
-spirv::BranchOp::getMutableSuccessorOperands(unsigned index) {
+SuccessorOperands spirv::BranchOp::getSuccessorOperands(unsigned index) {
   assert(index == 0 && "invalid successor index");
-  return targetOperandsMutable();
+  return SuccessorOperands(0, targetOperandsMutable());
 }
 
 //===----------------------------------------------------------------------===//
 // spv.BranchConditionalOp
 //===----------------------------------------------------------------------===//
 
-Optional<MutableOperandRange>
-spirv::BranchConditionalOp::getMutableSuccessorOperands(unsigned index) {
+SuccessorOperands
+spirv::BranchConditionalOp::getSuccessorOperands(unsigned index) {
   assert(index < 2 && "invalid successor index");
-  return index == kTrueIndex ? trueTargetOperandsMutable()
-                             : falseTargetOperandsMutable();
+  return SuccessorOperands(index == kTrueIndex ? trueTargetOperandsMutable()
+                                               : falseTargetOperandsMutable());
 }
 
 ParseResult spirv::BranchConditionalOp::parse(OpAsmParser &parser,
@@ -2199,7 +2198,6 @@ ParseResult spirv::FuncOp::parse(OpAsmParser &parser, OperationState &state) {
   SmallVector<NamedAttrList> resultAttrs;
   SmallVector<Type> argTypes;
   SmallVector<Type> resultTypes;
-  SmallVector<Location> argLocations;
   auto &builder = parser.getBuilder();
 
   // Parse the name as a symbol.
@@ -2212,7 +2210,7 @@ ParseResult spirv::FuncOp::parse(OpAsmParser &parser, OperationState &state) {
   bool isVariadic = false;
   if (function_interface_impl::parseFunctionSignature(
           parser, /*allowVariadic=*/false, entryArgs, argTypes, argAttrs,
-          argLocations, isVariadic, resultTypes, resultAttrs))
+          isVariadic, resultTypes, resultAttrs))
     return failure();
 
   auto fnType = builder.getFunctionType(argTypes, resultTypes);

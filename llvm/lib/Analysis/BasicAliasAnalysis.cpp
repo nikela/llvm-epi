@@ -232,7 +232,7 @@ bool EarliestEscapeInfo::isNotCapturedBeforeOrAt(const Value *Object,
   if (Iter.second) {
     Instruction *EarliestCapture = FindEarliestCapture(
         Object, *const_cast<Function *>(I->getFunction()),
-        /*ReturnCaptures=*/false, /*StoreCaptures=*/true, DT);
+        /*ReturnCaptures=*/false, /*StoreCaptures=*/true, DT, EphValues);
     if (EarliestCapture) {
       auto Ins = Inst2Obj.insert({EarliestCapture, {}});
       Ins.first->second.push_back(Object);
@@ -1130,7 +1130,8 @@ AliasResult BasicAAResult::aliasGEP(
     // NoAlias.
     auto IsPointerToStruct = [](Type *Ty) {
       return isa<PointerType>(Ty) && !cast<PointerType>(Ty)->isOpaque() &&
-             isa<StructType>(cast<PointerType>(Ty)->getPointerElementType());
+             isa<StructType>(
+                 cast<PointerType>(Ty)->getNonOpaquePointerElementType());
     };
     auto GEPIndexesScalableVectorField = [](const GEPOperator *GEP) {
       if (!GEP->isInBounds() || GEP->getNumIndices() != 2 ||

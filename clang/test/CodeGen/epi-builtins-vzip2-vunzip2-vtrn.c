@@ -4,17 +4,13 @@
 
 // CHECK-O2-LABEL: @vzip2i64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[IN_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i64* [[IN_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vzip2.nxv1i64(<vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i64* [[OUT_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP5]], <vscale x 1 x i64>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i64* [[OUT_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP6]], <vscale x 1 x i64>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vzip2.nxv1i64(<vscale x 1 x i64> [[TMP0]], <vscale x 1 x i64> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vzip2i64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) {
@@ -29,17 +25,13 @@ void vzip2i64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) {
 
 // CHECK-O2-LABEL: @vunzip2i64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[IN_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i64* [[IN_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vunzip2.nxv1i64(<vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i64* [[OUT_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP5]], <vscale x 1 x i64>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i64* [[OUT_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP6]], <vscale x 1 x i64>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vunzip2.nxv1i64(<vscale x 1 x i64> [[TMP0]], <vscale x 1 x i64> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vunzip2i64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) {
@@ -54,17 +46,13 @@ void vunzip2i64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) 
 
 // CHECK-O2-LABEL: @vtrni64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i64* [[IN_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i64* [[IN_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(<vscale x 1 x i64>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vtrn.nxv1i64(<vscale x 1 x i64> [[TMP1]], <vscale x 1 x i64> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i64* [[OUT_A0:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP5]], <vscale x 1 x i64>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i64* [[OUT_A1:%.*]] to <vscale x 1 x i64>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP6]], <vscale x 1 x i64>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x i64> @llvm.epi.vload.nxv1i64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x i64>, <vscale x 1 x i64> } @llvm.epi.vtrn.nxv1i64(<vscale x 1 x i64> [[TMP0]], <vscale x 1 x i64> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x i64>, <vscale x 1 x i64> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1i64(<vscale x 1 x i64> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vtrni64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) {
@@ -79,17 +67,13 @@ void vtrni64(long *in_a0, long *in_a1, long *out_a0, long *out_a1, long gvl) {
 
 // CHECK-O2-LABEL: @vzip2i32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[IN_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i32* [[IN_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vzip2.nxv2i32(<vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i32* [[OUT_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP5]], <vscale x 2 x i32>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i32* [[OUT_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP6]], <vscale x 2 x i32>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vzip2.nxv2i32(<vscale x 2 x i32> [[TMP0]], <vscale x 2 x i32> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vzip2i32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
@@ -104,17 +88,13 @@ void vzip2i32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
 
 // CHECK-O2-LABEL: @vunzip2i32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[IN_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i32* [[IN_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vunzip2.nxv2i32(<vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i32* [[OUT_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP5]], <vscale x 2 x i32>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i32* [[OUT_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP6]], <vscale x 2 x i32>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vunzip2.nxv2i32(<vscale x 2 x i32> [[TMP0]], <vscale x 2 x i32> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vunzip2i32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
@@ -129,17 +109,13 @@ void vunzip2i32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
 
 // CHECK-O2-LABEL: @vtrni32(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast i32* [[IN_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast i32* [[IN_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(<vscale x 2 x i32>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vtrn.nxv2i32(<vscale x 2 x i32> [[TMP1]], <vscale x 2 x i32> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast i32* [[OUT_A0:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP5]], <vscale x 2 x i32>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast i32* [[OUT_A1:%.*]] to <vscale x 2 x i32>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP6]], <vscale x 2 x i32>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 2 x i32> @llvm.epi.vload.nxv2i32(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 2 x i32>, <vscale x 2 x i32> } @llvm.epi.vtrn.nxv2i32(<vscale x 2 x i32> [[TMP0]], <vscale x 2 x i32> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 2 x i32>, <vscale x 2 x i32> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv2i32(<vscale x 2 x i32> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vtrni32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
@@ -154,17 +130,13 @@ void vtrni32(int *in_a0, int *in_a1, int *out_a0, int *out_a1, long gvl) {
 
 // CHECK-O2-LABEL: @vzip2f64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[IN_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast double* [[IN_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vzip2.nxv1f64(<vscale x 1 x double> [[TMP1]], <vscale x 1 x double> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast double* [[OUT_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP5]], <vscale x 1 x double>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast double* [[OUT_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP6]], <vscale x 1 x double>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vzip2.nxv1f64(<vscale x 1 x double> [[TMP0]], <vscale x 1 x double> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vzip2f64(double *in_a0, double *in_a1, double *out_a0, double *out_a1, long gvl) {
@@ -179,17 +151,13 @@ void vzip2f64(double *in_a0, double *in_a1, double *out_a0, double *out_a1, long
 
 // CHECK-O2-LABEL: @vunzip2f64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[IN_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast double* [[IN_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vunzip2.nxv1f64(<vscale x 1 x double> [[TMP1]], <vscale x 1 x double> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast double* [[OUT_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP5]], <vscale x 1 x double>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast double* [[OUT_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP6]], <vscale x 1 x double>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vunzip2.nxv1f64(<vscale x 1 x double> [[TMP0]], <vscale x 1 x double> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vunzip2f64(double *in_a0, double *in_a1, double *out_a0, double *out_a1, long gvl) {
@@ -204,17 +172,13 @@ void vunzip2f64(double *in_a0, double *in_a1, double *out_a0, double *out_a1, lo
 
 // CHECK-O2-LABEL: @vtrnf64(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = bitcast double* [[IN_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP0]], i64 [[GVL:%.*]])
-// CHECK-O2-NEXT:    [[TMP2:%.*]] = bitcast double* [[IN_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    [[TMP3:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(<vscale x 1 x double>* [[TMP2]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP4:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vtrn.nxv1f64(<vscale x 1 x double> [[TMP1]], <vscale x 1 x double> [[TMP3]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP5:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 0
-// CHECK-O2-NEXT:    [[TMP6:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP4]], 1
-// CHECK-O2-NEXT:    [[TMP7:%.*]] = bitcast double* [[OUT_A0:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP5]], <vscale x 1 x double>* [[TMP7]], i64 [[GVL]])
-// CHECK-O2-NEXT:    [[TMP8:%.*]] = bitcast double* [[OUT_A1:%.*]] to <vscale x 1 x double>*
-// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP6]], <vscale x 1 x double>* [[TMP8]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A0:%.*]], i64 [[GVL:%.*]])
+// CHECK-O2-NEXT:    [[TMP1:%.*]] = tail call <vscale x 1 x double> @llvm.epi.vload.nxv1f64(ptr [[IN_A1:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP2:%.*]] = tail call { <vscale x 1 x double>, <vscale x 1 x double> } @llvm.epi.vtrn.nxv1f64(<vscale x 1 x double> [[TMP0]], <vscale x 1 x double> [[TMP1]], i64 [[GVL]])
+// CHECK-O2-NEXT:    [[TMP3:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 0
+// CHECK-O2-NEXT:    [[TMP4:%.*]] = extractvalue { <vscale x 1 x double>, <vscale x 1 x double> } [[TMP2]], 1
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP3]], ptr [[OUT_A0:%.*]], i64 [[GVL]])
+// CHECK-O2-NEXT:    tail call void @llvm.epi.vstore.nxv1f64(<vscale x 1 x double> [[TMP4]], ptr [[OUT_A1:%.*]], i64 [[GVL]])
 // CHECK-O2-NEXT:    ret void
 //
 void vtrnf64(double *in_a0, double *in_a1, double *out_a0, double *out_a1, long gvl) {

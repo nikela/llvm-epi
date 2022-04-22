@@ -631,33 +631,6 @@ void insertModuleCtor(Module &M) {
       });
 }
 
-/// A legacy function pass for msan instrumentation.
-///
-/// Instruments functions to detect uninitialized reads.
-struct MemorySanitizerLegacyPass : public FunctionPass {
-  // Pass identification, replacement for typeid.
-  static char ID;
-
-  MemorySanitizerLegacyPass(MemorySanitizerOptions Options = {})
-      : FunctionPass(ID), Options(Options) {
-    initializeMemorySanitizerLegacyPassPass(*PassRegistry::getPassRegistry());
-  }
-  StringRef getPassName() const override { return "MemorySanitizerLegacyPass"; }
-
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-  }
-
-  bool runOnFunction(Function &F) override {
-    return MSan->sanitizeFunction(
-        F, getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F));
-  }
-  bool doInitialization(Module &M) override;
-
-  Optional<MemorySanitizer> MSan;
-  MemorySanitizerOptions Options;
-};
-
 template <class T> T getOptOrDefault(const cl::opt<T> &Opt, T Default) {
   return (Opt.getNumOccurrences() > 0) ? Opt : Default;
 }
@@ -700,21 +673,6 @@ void MemorySanitizerPass::printPipeline(
     OS << "eager-checks;";
   OS << "track-origins=" << Options.TrackOrigins;
   OS << ">";
-}
-
-char MemorySanitizerLegacyPass::ID = 0;
-
-INITIALIZE_PASS_BEGIN(MemorySanitizerLegacyPass, "msan",
-                      "MemorySanitizer: detects uninitialized reads.", false,
-                      false)
-INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)
-INITIALIZE_PASS_END(MemorySanitizerLegacyPass, "msan",
-                    "MemorySanitizer: detects uninitialized reads.", false,
-                    false)
-
-FunctionPass *
-llvm::createMemorySanitizerLegacyPassPass(MemorySanitizerOptions Options) {
-  return new MemorySanitizerLegacyPass(Options);
 }
 
 /// Create a non-const global initialized with the given string.
@@ -1012,13 +970,6 @@ void MemorySanitizer::initializeModule(Module &M) {
                                   IRB.getInt32(Recover), "__msan_keep_going");
       });
 }
-}
-
-bool MemorySanitizerLegacyPass::doInitialization(Module &M) {
-  if (!Options.Kernel)
-    insertModuleCtor(M);
-  MSan.emplace(M, Options);
-  return true;
 }
 
 namespace {
@@ -1691,9 +1642,9 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
     }
     if (Argument *A = dyn_cast<Argument>(V)) {
       // For arguments we compute the shadow on demand and store it in the map.
-      Value **ShadowPtr = &ShadowMap[V];
-      if (*ShadowPtr)
-        return *ShadowPtr;
+      Value *&ShadowPtr = ShadowMap[V];
+      if (ShadowPtr)
+        return ShadowPtr;
       Function *F = A->getParent();
       IRBuilder<> EntryIRB(FnPrologueEnd);
       unsigned ArgOffset = 0;
@@ -1750,12 +1701,12 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
 
           if (!PropagateShadow || Overflow || FArg.hasByValAttr() ||
               (MS.EagerChecks && FArg.hasAttribute(Attribute::NoUndef))) {
-            *ShadowPtr = getCleanShadow(V);
+            ShadowPtr = getCleanShadow(V);
             setOrigin(A, getCleanOrigin());
           } else {
             // Shadow over TLS
             Value *Base = getShadowPtrForArgument(&FArg, EntryIRB, ArgOffset);
-            *ShadowPtr = EntryIRB.CreateAlignedLoad(getShadowTy(&FArg), Base,
+            ShadowPtr = EntryIRB.CreateAlignedLoad(getShadowTy(&FArg), Base,
                                                     kShadowTLSAlignment);
             if (MS.TrackOrigins) {
               Value *OriginPtr =
@@ -1764,14 +1715,14 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
             }
           }
           LLVM_DEBUG(dbgs()
-                     << "  ARG:    " << FArg << " ==> " << **ShadowPtr << "\n");
+                     << "  ARG:    " << FArg << " ==> " << *ShadowPtr << "\n");
           break;
         }
 
         ArgOffset += alignTo(Size, kShadowTLSAlignment);
       }
-      assert(*ShadowPtr && "Could not find shadow for an argument");
-      return *ShadowPtr;
+      assert(ShadowPtr && "Could not find shadow for an argument");
+      return ShadowPtr;
     }
     // For everything else the shadow is zero.
     return getCleanShadow(V);
@@ -2570,6 +2521,7 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
   ///
   /// Similar situation exists for memcpy and memset.
   void visitMemMoveInst(MemMoveInst &I) {
+    getShadow(I.getArgOperand(1)); // Ensure shadow initialized
     IRBuilder<> IRB(&I);
     IRB.CreateCall(
         MS.MemmoveFn,
@@ -2584,6 +2536,7 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
   // FIXME: consider doing manual inline for small constant sizes and proper
   // alignment.
   void visitMemCpyInst(MemCpyInst &I) {
+    getShadow(I.getArgOperand(1)); // Ensure shadow initialized
     IRBuilder<> IRB(&I);
     IRB.CreateCall(
         MS.MemcpyFn,

@@ -77,6 +77,24 @@ vsetvli a2, a0, e8,m1
 vsetvli a2, a0, e8,m1,ta
 # CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
 
+vsetvli zero, zero, 1, m1, ta, mu
+# CHECK-ERROR: error: invalid operand for instruction
+
+vsetvli zero, zero, e32, 2, ta, mu
+# CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
+
+vsetvli zero, zero, e32, m1, 3, mu
+# CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
+
+vsetvli zero, zero, e32, m1, ta, 4
+# CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
+
+vsetvli zero, zero, "e32", m1, ta, mu
+# CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
+
+vsetvli zero, zero, e32, "m1", ta, mu
+# CHECK-ERROR: operand must be e[8|16|32|64|128|256|512|1024],m[1|2|4|8|f2|f4|f8],[ta|tu],[ma|mu]
+
 vadd.vv v1, v3, v2, v4.t
 # CHECK-ERROR: operand must be v0.t
 

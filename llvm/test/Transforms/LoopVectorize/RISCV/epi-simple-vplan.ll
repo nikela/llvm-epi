@@ -16,6 +16,9 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-EMPTY:
 ; CHECK-NEXT: Live-in vp<%2> = backedge-taken count
 ; CHECK-EMPTY:
+; CHECK-NEXT: vector.ph:
+; CHECK-NEXT: Successor(s): vector loop
+; CHECK-EMPTY:
 ; CHECK-NEXT: <x1> vector loop: {
 ; CHECK-NEXT:   vector.body:
 ; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
@@ -34,6 +37,9 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT:     EMIT branch-on-count  vp<%16> vp<%1>
 ; CHECK-NEXT:   No successors
 ; CHECK-NEXT: }
+; CHECK-NEXT: Successor(s): middle.block
+; CHECK-EMPTY:
+; CHECK-NEXT: middle.block:
 ; CHECK-NEXT: No successors
 ; CHECK-NEXT: }
 

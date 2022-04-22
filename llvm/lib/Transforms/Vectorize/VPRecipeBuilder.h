@@ -93,17 +93,17 @@ class VPRecipeBuilder {
   /// validate if a memory instructions can be widened.
   bool validateWidenMemory(Instruction *I, VFRange &Range) const;
 
-  /// Check if an induction recipe should be constructed for \I. If so build and
-  /// return it. If not, return null.
+  /// Check if an induction recipe should be constructed for \p Phi. If so build
+  /// and return it. If not, return null.
   VPRecipeBase *tryToOptimizeInductionPHI(PHINode *Phi,
                                           ArrayRef<VPValue *> Operands,
-                                          VFRange &Range) const;
+                                          VPlan &Plan, VFRange &Range);
 
   /// Optimize the special case where the operand of \p I is a constant integer
   /// induction variable.
   VPWidenIntOrFpInductionRecipe *
   tryToOptimizeInductionTruncate(TruncInst *I, ArrayRef<VPValue *> Operands,
-                                 VFRange &Range, VPlan &Plan) const;
+                                 VFRange &Range, VPlan &Plan);
 
   /// Handle non-loop phi nodes. Return a VPValue, if all incoming values match
   /// or a new VPBlendRecipe otherwise. Currently all such phi nodes are turned
@@ -115,8 +115,14 @@ class VPRecipeBuilder {
   /// Handle call instructions. If \p CI can be widened for \p Range.Start,
   /// return a new VPWidenCallRecipe. Range.End may be decreased to ensure same
   /// decision from \p Range.Start to \p Range.End.
-  VPWidenCallRecipe *tryToWidenCall(CallInst *CI, ArrayRef<VPValue *> Operands,
-                                    VFRange &Range) const;
+  VPRecipeBase *tryToWidenCallCommon(CallInst *CI, ArrayRef<VPValue *> Operands,
+                                     VFRange &Range, VPlanPtr &Plan,
+                                     bool Predicated);
+  VPRecipeBase *tryToWidenCall(CallInst *CI, ArrayRef<VPValue *> Operands,
+                               VFRange &Range, VPlanPtr &Plan);
+  VPRecipeBase *tryToPredicatedWidenCall(CallInst *CI,
+                                         ArrayRef<VPValue *> Operands,
+                                         VFRange &Range, VPlanPtr &Plan);
 
   /// Check if \p I has an opcode that can be widened and return a VPWidenRecipe
   /// if it can. The function should only be called if the cost-model indicates

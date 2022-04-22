@@ -150,7 +150,7 @@ public:
   InstructionCost getScalarizationOverhead(VectorType *InTy,
                                            const APInt &DemandedElts,
                                            bool Insert, bool Extract);
-  bool shouldMaximizeVectorBandwidth(TargetTransformInfo::RegisterKind K) const;
+  bool shouldMaximizeVectorBandwidth() const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
                                   unsigned VFKnownMin, unsigned ElementTypeSize,
@@ -203,6 +203,9 @@ public:
                                  VectorType *SubTp,
                                  ArrayRef<Value *> Args = None);
 
+  InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
+                                        TTI::TargetCostKind CostKind);
+
   InstructionCost getGatherScatterOpCost(unsigned Opcode, Type *DataTy,
                                          const Value *Ptr, bool VariableMask,
                                          Align Alignment,
@@ -233,7 +236,7 @@ public:
     // Don't allow elements larger than the ELEN.
     // FIXME: How to limit for scalable vectors?
     if (isa<FixedVectorType>(DataType) &&
-        DataType->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+        DataType->getScalarSizeInBits() > ST->getELEN())
       return false;
 
     if (Alignment <
@@ -261,7 +264,7 @@ public:
     // Don't allow elements larger than the ELEN.
     // FIXME: How to limit for scalable vectors?
     if (isa<FixedVectorType>(DataType) &&
-        DataType->getScalarSizeInBits() > ST->getMaxELENForFixedLengthVectors())
+        DataType->getScalarSizeInBits() > ST->getELEN())
       return false;
 
     if (Alignment <
@@ -277,9 +280,6 @@ public:
   bool isLegalMaskedScatter(Type *DataType, Align Alignment) {
     return isLegalMaskedGatherScatter(DataType, Alignment);
   }
-
-  InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
-                                        TTI::TargetCostKind CostKind);
 
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
