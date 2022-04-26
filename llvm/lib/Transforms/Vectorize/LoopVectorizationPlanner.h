@@ -141,6 +141,10 @@ public:
     return createInstruction(VPInstruction::Not, {Operand}, DL);
   }
 
+  VPValue *createVPNot(VPValue *Operand, VPValue *EVL, DebugLoc DL) {
+    return createInstruction(VPInstruction::VPNot, {Operand, EVL}, DL);
+  }
+
   VPValue *createAnd(VPValue *LHS, VPValue *RHS, DebugLoc DL) {
     return createInstruction(Instruction::BinaryOps::And, {LHS, RHS}, DL);
   }
@@ -149,9 +153,19 @@ public:
     return createInstruction(Instruction::BinaryOps::Or, {LHS, RHS}, DL);
   }
 
+  VPValue *createVPOr(VPValue *LHS, VPValue *RHS, VPValue *EVL, DebugLoc DL) {
+    return createInstruction(VPInstruction::VPOr, {LHS, RHS, EVL}, DL);
+  }
+
   VPValue *createSelect(VPValue *Cond, VPValue *TrueVal, VPValue *FalseVal,
                         DebugLoc DL) {
     return createNaryOp(Instruction::Select, {Cond, TrueVal, FalseVal}, DL);
+  }
+
+  VPValue *createVPSelect(VPValue *Cond, VPValue *TrueVal, VPValue *FalseVal,
+                          VPValue *EVL, DebugLoc DL) {
+    return createNaryOp(VPInstruction::VPSelect, {Cond, TrueVal, FalseVal, EVL},
+                        DL);
   }
 
   //===--------------------------------------------------------------------===//

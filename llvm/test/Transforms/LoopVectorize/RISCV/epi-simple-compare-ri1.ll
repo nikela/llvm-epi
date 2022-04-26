@@ -31,14 +31,14 @@ define dso_local void @foo(i32 signext %N, i32* noalias nocapture %c, i32* noali
 ; CHECK-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 8 x i1> @llvm.vp.icmp.nxv8i32(<vscale x 8 x i32> [[VP_OP_LOAD]], <vscale x 8 x i32> [[VP_OP_LOAD3]], metadata !"slt", <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 8 x i32> @llvm.vp.add.nxv8i32(<vscale x 8 x i32> [[VP_OP_LOAD3]], <vscale x 8 x i32> [[VP_OP_LOAD]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK-NEXT:    [[VP_OP4:%.*]] = call <vscale x 8 x i32> @llvm.vp.mul.nxv8i32(<vscale x 8 x i32> [[VP_OP_LOAD3]], <vscale x 8 x i32> [[VP_OP_LOAD]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
-; CHECK-NEXT:    [[TMP7:%.*]] = select <vscale x 8 x i1> [[VP_OP_ICMP]], <vscale x 8 x i32> [[VP_OP]], <vscale x 8 x i32> [[VP_OP4]]
-; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i32, i32* [[C:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i32* [[TMP8]] to <vscale x 8 x i32>*
-; CHECK-NEXT:    call void @llvm.vp.store.nxv8i32.p0nxv8i32(<vscale x 8 x i32> [[TMP7]], <vscale x 8 x i32>* [[TMP9]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
-; CHECK-NEXT:    [[TMP10:%.*]] = and i64 [[TMP2]], 4294967295
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP10]]
-; CHECK-NEXT:    [[TMP11:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[TMP11]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK-NEXT:    [[VP_SELECT:%.*]] = call <vscale x 8 x i32> @llvm.vp.select.nxv8i32(<vscale x 8 x i1> [[VP_OP_ICMP]], <vscale x 8 x i32> [[VP_OP]], <vscale x 8 x i32> [[VP_OP4]], i32 [[TMP3]])
+; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds i32, i32* [[C:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    [[TMP8:%.*]] = bitcast i32* [[TMP7]] to <vscale x 8 x i32>*
+; CHECK-NEXT:    call void @llvm.vp.store.nxv8i32.p0nxv8i32(<vscale x 8 x i32> [[VP_SELECT]], <vscale x 8 x i32>* [[TMP8]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK-NEXT:    [[TMP9:%.*]] = and i64 [[TMP2]], 4294967295
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
+; CHECK-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-NEXT:    br i1 [[TMP10]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
 ;
@@ -63,14 +63,14 @@ define dso_local void @foo(i32 signext %N, i32* noalias nocapture %c, i32* noali
 ; CHECK1-NEXT:    [[VP_OP_ICMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> [[VP_OP_LOAD3]], metadata !"slt", <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK1-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD3]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP3]])
 ; CHECK1-NEXT:    [[VP_OP4:%.*]] = call <vscale x 2 x i32> @llvm.vp.mul.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD3]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP3]])
-; CHECK1-NEXT:    [[TMP7:%.*]] = select <vscale x 2 x i1> [[VP_OP_ICMP]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VP_OP4]]
-; CHECK1-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i32, i32* [[C:%.*]], i64 [[INDEX]]
-; CHECK1-NEXT:    [[TMP9:%.*]] = bitcast i32* [[TMP8]] to <vscale x 2 x i32>*
-; CHECK1-NEXT:    call void @llvm.vp.store.nxv2i32.p0nxv2i32(<vscale x 2 x i32> [[TMP7]], <vscale x 2 x i32>* [[TMP9]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP3]])
-; CHECK1-NEXT:    [[TMP10:%.*]] = and i64 [[TMP2]], 4294967295
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP10]]
-; CHECK1-NEXT:    [[TMP11:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK1-NEXT:    br i1 [[TMP11]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK1-NEXT:    [[VP_SELECT:%.*]] = call <vscale x 2 x i32> @llvm.vp.select.nxv2i32(<vscale x 2 x i1> [[VP_OP_ICMP]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VP_OP4]], i32 [[TMP3]])
+; CHECK1-NEXT:    [[TMP7:%.*]] = getelementptr inbounds i32, i32* [[C:%.*]], i64 [[INDEX]]
+; CHECK1-NEXT:    [[TMP8:%.*]] = bitcast i32* [[TMP7]] to <vscale x 2 x i32>*
+; CHECK1-NEXT:    call void @llvm.vp.store.nxv2i32.p0nxv2i32(<vscale x 2 x i32> [[VP_SELECT]], <vscale x 2 x i32>* [[TMP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP3]])
+; CHECK1-NEXT:    [[TMP9:%.*]] = and i64 [[TMP2]], 4294967295
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
+; CHECK1-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK1-NEXT:    br i1 [[TMP10]], label [[FOR_END]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK1:       for.end:
 ; CHECK1-NEXT:    ret void
 ;

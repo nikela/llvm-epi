@@ -142,7 +142,8 @@ bool VPlanVerifier::verifyPlanIsValid(const VPlan &Plan) {
       RecipeI++;
 
     while (RecipeI != End) {
-      if (RecipeI->isPhi() && !isa<VPBlendRecipe>(&*RecipeI)) {
+      if (RecipeI->isPhi() && !isa<VPBlendRecipe>(&*RecipeI) &&
+          !isa<VPPredicatedBlendRecipe>(&*RecipeI)) {
         errs() << "Found phi-like recipe after non-phi recipe";
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
