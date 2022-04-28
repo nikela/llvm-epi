@@ -1036,6 +1036,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
     // of the current iteration.
     FPM.addPass(LoopLoadEliminationPass());
   }
+
   // Cleanup after the loop optimization passes.
   FPM.addPass(InstCombinePass());
 
@@ -1132,8 +1133,12 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
   if (IsFullLTO)
     FPM.addPass(InstCombinePass());
 
-  if (PTO.WFVVectorization)
+  // We need to do a bunch of cleanups for WFV Vectorization.
+  if (PTO.WFVVectorization) {
+    FPM.addPass(SROAPass());
+    FPM.addPass(EarlyCSEPass());
     FPM.addPass(PromotePass());
+  }
 }
 
 ModulePassManager

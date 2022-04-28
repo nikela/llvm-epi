@@ -8,16 +8,21 @@
 
 #include "RISCVTargetTransformInfo.h"
 #include "MCTargetDesc/RISCVMatInt.h"
+#include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/IntrinsicsEPI.h"
+#include "llvm/IR/PatternMatch.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/InstructionCost.h"
 #include "llvm/Support/MathExtras.h"
+#include "llvm/Transforms/InstCombine/InstCombiner.h"
 #include <algorithm>
 #include <cmath>
 using namespace llvm;
+using namespace llvm::PatternMatch;
 
 #define DEBUG_TYPE "riscvtti"
 
@@ -783,4 +788,52 @@ unsigned RISCVTTIImpl::getRegUsageForType(Type *Ty) {
   }
 
   return BaseT::getRegUsageForType(Ty);
+}
+
+Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II) {
+  assert(II.getIntrinsicID() == Intrinsic::epi_vsetvl && "This is not an epi_vsetvl!");
+
+  Value *RVL = nullptr;
+  if (!match(II.getArgOperand(0), m_ZExt(m_Value(RVL))))
+    RVL = II.getArgOperand(0);
+
+  auto &AC = IC.getAssumptionCache();
+  for (auto &Assumption : AC.assumptionsFor(RVL)) {
+    if (!Assumption)
+      continue;
+
+    if (auto *Assume = dyn_cast<AssumeInst>(Assumption)) {
+      Value *VLMax;
+      CmpInst::Predicate Pred;
+      if (!match(Assume->getArgOperand(0), m_c_ICmp(Pred, m_Specific(RVL), m_Value(VLMax))))
+        continue;
+
+      if (Pred != CmpInst::ICMP_UGE && Pred != CmpInst::ICMP_ULE)
+        continue;
+
+      BinaryOperator *BinOp;
+      if (!match(VLMax, m_BinOp(BinOp))) {
+        if (dyn_cast<IntrinsicInst>(VLMax)->getIntrinsicID() != Intrinsic::vscale)
+          continue;
+      } else if (dyn_cast<IntrinsicInst>(BinOp->getOperand(0))->getIntrinsicID() != Intrinsic::vscale)
+        continue;
+
+      return IC.replaceInstUsesWith(II, II.getArgOperand(0));
+    }
+  }
+
+  return None;
+}
+
+Optional<Instruction *>
+RISCVTTIImpl::instCombineIntrinsic(InstCombiner &IC, IntrinsicInst &II) const {
+  Intrinsic::ID IID = II.getIntrinsicID();
+  switch (IID) {
+  default:
+    break;
+  case Intrinsic::epi_vsetvl:
+    return instCombineEPIVSetVL(IC, II);
+  }
+
+  return None;
 }

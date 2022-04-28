@@ -651,7 +651,7 @@ protected:
 
   /// Emit a bypass check to see if the vector trip count is zero, including if
   /// it overflows.
-  void emitIterationCountCheck(BasicBlock *Bypass);
+  void emitIterationCountCheck(BasicBlock *Bypass, bool ForbiddenEpilogue);
 
   /// Emit a bypass check to see if all of the SCEV assumptions we've
   /// had to make are correct. Returns the block containing the checks or
@@ -3032,7 +3032,8 @@ Value *InnerLoopVectorizer::createBitOrPointerCast(Value *V, VectorType *DstVTy,
   return Builder.CreateBitOrPointerCast(CastVal, DstVTy);
 }
 
-void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass) {
+void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass,
+                                                  bool ForbiddenEpilogue) {
   Value *Count = getOrCreateTripCount(LoopVectorPreHeader);
   // Reuse existing vector loop preheader for TC checks.
   // Note that new preheader block is generated for vector loop.
@@ -3053,7 +3054,7 @@ void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass) {
   Value *Step = createStepForVF(Builder, CountTy, VF, UF);
   if (!Cost->foldTailByMasking())
     CheckMinIters = Builder.CreateICmp(P, Count, Step, "min.iters.check");
-  else if (VF.isScalable()) {
+  else if (VF.isScalable() && !ForbiddenEpilogue) {
     // vscale is not necessarily a power-of-2, which means we cannot guarantee
     // an overflow to zero when updating induction variables and so an
     // additional overflow check is required before entering the vector loop.
@@ -3376,7 +3377,9 @@ InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // backedge-taken count is uint##_max: adding one to it will overflow leading
   // to an incorrect trip count of zero. In this (rare) case we will also jump
   // to the scalar loop.
-  emitIterationCountCheck(LoopScalarPreHeader);
+  bool ForbiddenEpilogue =
+      findOptionMDForLoopID(OrigLoopID, "llvm.loop.epilogue.forbid");
+  emitIterationCountCheck(LoopScalarPreHeader, ForbiddenEpilogue);
 
   // Generate the code to check any assumptions that we've made for SCEV
   // expressions.
@@ -8529,6 +8532,15 @@ void LoopVectorizationPlanner::executePlan(ElementCount BestVF, unsigned BestUF,
     LoopVectorizeHints Hints(L, true, *ORE);
     Hints.setAlreadyVectorized();
   }
+  // If `llvm.loop.single.iteration` exists, change latch branch condition to
+  // always jump to exit
+  if (findOptionMDForLoop(L, "llvm.loop.single.iteration")) {
+    VPBasicBlock *ExitBB = BestVPlan.getVectorLoopRegion()->getExitBasicBlock();
+    BasicBlock *Latch = State.CFG.VPBB2IRBB[ExitBB];
+    if (auto *Branch = dyn_cast<BranchInst>(Latch->getTerminator()))
+      Branch->setCondition(ILV.Builder.getTrue());
+  }
+
   // Disable runtime unrolling when vectorizing the epilogue loop.
   if (CanonicalIVStartValue)
     AddRuntimeUnrollDisableMetaData(L);

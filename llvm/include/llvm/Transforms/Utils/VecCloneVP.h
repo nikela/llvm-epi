@@ -44,7 +44,8 @@ public:
   PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
   // Glue for old PM
-  bool runImpl(Module &M, Function &F, const VFInfo &Variant);
+  bool runImpl(Module &M, Function &F, const VFInfo &Variant,
+               std::function<AssumptionCache &(Function &F)> GetAC);
 
 private:
   /// \brief Returns a floating point or integer constant depending on Ty.
@@ -59,7 +60,7 @@ private:
   /// element and for linear parameters the stride will be added.
   void updateParameterUsers(Function *Clone, const VFInfo &Variant,
                             BasicBlock &EntryBlock, PHINode *Phi,
-                            const DataLayout &DL);
+                            const DataLayout &DL, Value *Mask, Value *VL);
 
   /// \brief Performs a translation of a -> &a[i] for widened alloca
   /// instructions within the loop body of a simd function.
@@ -72,13 +73,7 @@ private:
   void widenAllocaInstructions(Function *Clone,
                                DenseMap<AllocaInst *, Instruction *> &AllocaMap,
                                BasicBlock &EntryBlock, const VFInfo &Variant,
-                               const DataLayout &DL);
-
-  /// \brief Generate a loop around the function body.
-  PHINode *generateLoopForFunctionBody(Function *Clone, BasicBlock *EntryBlock,
-                                       BasicBlock *LoopBlock,
-                                       BasicBlock *LoopExitBlock,
-                                       BasicBlock *ReturnBlock, VFShape Shape);
+                               const DataLayout &DL, Value *Mask, Value *VL);
 
   /// \brief Remove any incompatible parameter attributes as a result of
   /// widening vector parameters.
@@ -91,8 +86,8 @@ private:
   /// \brief Inserts the if/else split and mask condition for masked SIMD
   /// functions.
   void insertSplitForMaskedVariant(Function *Clone, BasicBlock *LoopBlock,
-                                   BasicBlock *LoopExitBlock, Instruction *Mask,
-                                   PHINode *Phi);
+                                   BasicBlock *LoopExitBlock,
+                                   AllocaInst *MaskAlloca, PHINode *Phi);
 
   /// \brief Adds metadata to the conditional branch of the simd loop latch to
   /// prevent loop unrolling and to force vectorization at VF.

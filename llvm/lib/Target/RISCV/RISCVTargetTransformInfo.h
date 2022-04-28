@@ -407,6 +407,9 @@ public:
     }
     llvm_unreachable("unknown register class");
   }
+
+  Optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
+                                               IntrinsicInst &II) const;
 };
 
 } // end namespace llvm
