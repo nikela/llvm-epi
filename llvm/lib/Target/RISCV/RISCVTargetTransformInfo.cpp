@@ -329,7 +329,7 @@ InstructionCost RISCVTTIImpl::getSpliceCost(VectorType *Tp, int Index) {
 InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
                                              VectorType *Tp, ArrayRef<int> Mask,
                                              int Index, VectorType *SubTp,
-                                             ArrayRef<Value *> Args) {
+                                             ArrayRef<const Value *> Args) {
   if (isa<ScalableVectorType>(Tp) &&
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
     switch (Kind) {

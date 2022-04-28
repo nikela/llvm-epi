@@ -1312,6 +1312,7 @@ static Value *canonicalizeClampLike(SelectInst &Sel0, ICmpInst &Cmp0,
                    ICmpInst::Predicate::ICMP_NE,
                    APInt::getAllOnes(C0->getType()->getScalarSizeInBits()))))
       return nullptr; // Can't do, have all-ones element[s].
+    Pred0 = ICmpInst::getFlippedStrictnessPredicate(Pred0);
     C0 = InstCombiner::AddOne(C0);
     break;
   default:
@@ -1377,15 +1378,22 @@ static Value *canonicalizeClampLike(SelectInst &Sel0, ICmpInst &Cmp0,
   case ICmpInst::Predicate::ICMP_SGE:
     // Also non-canonical, but here we don't need to change C2,
     // so we don't have any restrictions on C2, so we can just handle it.
+    Pred1 = ICmpInst::Predicate::ICMP_SLT;
     std::swap(ReplacementLow, ReplacementHigh);
     break;
   default:
     return nullptr; // Unknown predicate.
   }
+  assert(Pred1 == ICmpInst::Predicate::ICMP_SLT &&
+         "Unexpected predicate type.");
 
   // The thresholds of this clamp-like pattern.
   auto *ThresholdLowIncl = ConstantExpr::getNeg(C1);
   auto *ThresholdHighExcl = ConstantExpr::getSub(C0, C1);
+
+  assert((Pred0 == ICmpInst::Predicate::ICMP_ULT ||
+          Pred0 == ICmpInst::Predicate::ICMP_UGE) &&
+         "Unexpected predicate type.");
   if (Pred0 == ICmpInst::Predicate::ICMP_UGE)
     std::swap(ThresholdLowIncl, ThresholdHighExcl);
 
@@ -2561,6 +2569,75 @@ static Instruction *foldSelectWithFCmpToFabs(SelectInst &SI,
   return nullptr;
 }
 
+// Match the following IR pattern:
+//   %x.lowbits = and i8 %x, %lowbitmask
+//   %x.lowbits.are.zero = icmp eq i8 %x.lowbits, 0
+//   %x.biased = add i8 %x, %bias
+//   %x.biased.highbits = and i8 %x.biased, %highbitmask
+//   %x.roundedup = select i1 %x.lowbits.are.zero, i8 %x, i8 %x.biased.highbits
+// Define:
+//   %alignment = add i8 %lowbitmask, 1
+// Iff 1. an %alignment is a power-of-two (aka, %lowbitmask is a low bit mask)
+// and 2. %bias is equal to either %lowbitmask or %alignment,
+// and 3. %highbitmask is equal to ~%lowbitmask (aka, to -%alignment)
+// then this pattern can be transformed into:
+//   %x.offset = add i8 %x, %lowbitmask
+//   %x.roundedup = and i8 %x.offset, %highbitmask
+static Value *
+foldRoundUpIntegerWithPow2Alignment(SelectInst &SI,
+                                    InstCombiner::BuilderTy &Builder) {
+  Value *Cond = SI.getCondition();
+  Value *X = SI.getTrueValue();
+  Value *XBiasedHighBits = SI.getFalseValue();
+
+  ICmpInst::Predicate Pred;
+  Value *XLowBits;
+  if (!match(Cond, m_ICmp(Pred, m_Value(XLowBits), m_ZeroInt())) ||
+      !ICmpInst::isEquality(Pred))
+    return nullptr;
+
+  if (Pred == ICmpInst::Predicate::ICMP_NE)
+    std::swap(X, XBiasedHighBits);
+
+  // FIXME: we could support non non-splats here.
+
+  const APInt *LowBitMaskCst;
+  if (!match(XLowBits, m_And(m_Specific(X), m_APIntAllowUndef(LowBitMaskCst))))
+    return nullptr;
+
+  const APInt *BiasCst, *HighBitMaskCst;
+  if (!match(XBiasedHighBits,
+             m_And(m_Add(m_Specific(X), m_APIntAllowUndef(BiasCst)),
+                   m_APIntAllowUndef(HighBitMaskCst))))
+    return nullptr;
+
+  if (!LowBitMaskCst->isMask())
+    return nullptr;
+
+  APInt InvertedLowBitMaskCst = ~*LowBitMaskCst;
+  if (InvertedLowBitMaskCst != *HighBitMaskCst)
+    return nullptr;
+
+  APInt AlignmentCst = *LowBitMaskCst + 1;
+
+  if (*BiasCst != AlignmentCst && *BiasCst != *LowBitMaskCst)
+    return nullptr;
+
+  if (!XBiasedHighBits->hasOneUse()) {
+    if (*BiasCst == *LowBitMaskCst)
+      return XBiasedHighBits;
+    return nullptr;
+  }
+
+  // FIXME: could we preserve undef's here?
+  Type *Ty = X->getType();
+  Value *XOffset = Builder.CreateAdd(X, ConstantInt::get(Ty, *LowBitMaskCst),
+                                     X->getName() + ".biased");
+  Value *R = Builder.CreateAnd(XOffset, ConstantInt::get(Ty, *HighBitMaskCst));
+  R->takeName(&SI);
+  return R;
+}
+
 Instruction *InstCombinerImpl::visitSelectInst(SelectInst &SI) {
   Value *CondVal = SI.getCondition();
   Value *TrueVal = SI.getTrueValue();
@@ -3105,6 +3182,9 @@ Instruction *InstCombinerImpl::visitSelectInst(SelectInst &SI) {
 
   if (Value *Fr = foldSelectWithFrozenICmp(SI, Builder))
     return replaceInstUsesWith(SI, Fr);
+
+  if (Value *V = foldRoundUpIntegerWithPow2Alignment(SI, Builder))
+    return replaceInstUsesWith(SI, V);
 
   // select(mask, mload(,,mask,0), 0) -> mload(,,mask,0)
   // Load inst is intentionally not checked for hasOneUse()
