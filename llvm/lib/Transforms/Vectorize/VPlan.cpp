@@ -721,6 +721,29 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     State.set(this, V, Part);
     break;
   }
+  case VPInstruction::VPNot: {
+    Value *A = State.get(getOperand(0), Part);
+    Value *EVL = State.get(getOperand(1), Part);
+    Value *AllOnes = Builder.getTrueVector(
+        cast<VectorType>(A->getType())->getElementCount());
+    Value *V = Builder.CreateIntrinsic(
+        Intrinsic::vp_xor, {A->getType()},
+        {A, AllOnes, AllOnes, EVL}, nullptr, "vp.mask.not");
+    State.set(this, V, Part);
+    break;
+  }
+  case VPInstruction::VPOr: {
+    Value *A = State.get(getOperand(0), Part);
+    Value *B = State.get(getOperand(1), Part);
+    Value *EVL = State.get(getOperand(2), Part);
+    Value *AllOnes = Builder.getTrueVector(
+        cast<VectorType>(A->getType())->getElementCount());
+    Value *V = Builder.CreateIntrinsic(
+        Intrinsic::vp_or, {A->getType()},
+        {A, B, AllOnes, EVL}, nullptr, "vp.mask.or");
+    State.set(this, V, Part);
+    return;
+  }
   case VPInstruction::ICmpULE: {
     Value *IV = State.get(getOperand(0), Part);
     Value *TC = State.get(getOperand(1), Part);
@@ -734,6 +757,30 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     Value *Op2 = State.get(getOperand(2), Part);
     Value *V = Builder.CreateSelect(Cond, Op1, Op2);
     State.set(this, V, Part);
+    break;
+  }
+  case VPInstruction::VPSelect: {
+    Value *Cond = State.get(getOperand(0), Part);
+    Value *Op1 = State.get(getOperand(1), Part);
+    Value *Op2 = State.get(getOperand(2), Part);
+    Value *EVL = State.get(getOperand(3), Part);
+
+    Constant *COp2 = dyn_cast<Constant>(Op2);
+    if (COp2 && Op1->getType()->isIntOrIntVectorTy(1) && COp2->isZeroValue()) {
+      // Special case that happens very often.
+      // FIXME: Remember to teach VPBuilder to do this for us.
+      Value *AllOnes = Builder.getTrueVector(
+          cast<VectorType>(Op1->getType())->getElementCount());
+      Value *V = Builder.CreateIntrinsic(Intrinsic::vp_and, {Op1->getType()},
+                                         {Cond, Op1, AllOnes, EVL}, nullptr,
+                                         "vp.mask.select");
+      State.set(this, V, Part);
+    } else {
+      Value *V = Builder.CreateIntrinsic(Intrinsic::vp_select, {Op1->getType()},
+                                         {Cond, Op1, Op2, EVL}, nullptr,
+                                         "vp.mask.select");
+      State.set(this, V, Part);
+    }
     break;
   }
   case VPInstruction::ActiveLaneMask: {
@@ -908,6 +955,15 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
     break;
   case VPInstruction::BranchOnCount:
     O << "branch-on-count ";
+    break;
+  case VPInstruction::VPSelect:
+    O << "vp-select";
+    break;
+  case VPInstruction::VPOr:
+    O << "vp-or";
+    break;
+  case VPInstruction::VPNot:
+    O << "vp-not";
     break;
   default:
     O << Instruction::getOpcodeName(getOpcode());
@@ -1374,6 +1430,21 @@ void VPWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
   O << (InvariantCond ? " (condition is loop invariant)" : "");
 }
 
+void VPPredicatedWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
+                                          VPSlotTracker &SlotTracker) const {
+  O << Indent << "PREDICATED-WIDEN-SELECT ";
+  printAsOperand(O, SlotTracker);
+  O << " = select ";
+  getOperand(0)->printAsOperand(O, SlotTracker);
+  O << ", ";
+  getOperand(1)->printAsOperand(O, SlotTracker);
+  O << ", ";
+  getOperand(2)->printAsOperand(O, SlotTracker);
+  O << ", ";
+  getOperand(3)->printAsOperand(O, SlotTracker);
+  O << (InvariantCond ? " (condition is loop invariant)" : "");
+}
+
 void VPWidenRecipe::print(raw_ostream &O, const Twine &Indent,
                           VPSlotTracker &SlotTracker) const {
   O << Indent << "WIDEN ";
@@ -1499,6 +1570,28 @@ void VPBlendRecipe::print(raw_ostream &O, const Twine &Indent,
       getMask(I)->printAsOperand(O, SlotTracker);
     }
   }
+}
+
+void VPPredicatedBlendRecipe::print(raw_ostream &O, const Twine &Indent,
+                          VPSlotTracker &SlotTracker) const {
+  O << Indent << "PREDICATED-BLEND ";
+  Phi->printAsOperand(O, false);
+  O << " =";
+  if (getNumIncomingValues() == 1) {
+    // Not a User of any mask: not really blending, this is a
+    // single-predecessor phi.
+    O << " ";
+    getIncomingValue(0)->printAsOperand(O, SlotTracker);
+  } else {
+    for (unsigned I = 0, E = getNumIncomingValues(); I < E; ++I) {
+      O << " ";
+      getIncomingValue(I)->printAsOperand(O, SlotTracker);
+      O << "/";
+      getMask(I)->printAsOperand(O, SlotTracker);
+    }
+  }
+  O << " ";
+  getEVL()->printAsOperand(O, SlotTracker);
 }
 
 void VPReductionRecipe::print(raw_ostream &O, const Twine &Indent,

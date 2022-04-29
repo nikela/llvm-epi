@@ -4474,18 +4474,17 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
                                     {A, B, PredArg, MaskArg, EVLArg}, nullptr,
                                     "vp.op.icmp");
       }
-      // The result of vp_icmp or vp_fcmp may contain lanes that are undef due
-      // to the mask. We don't need undef boolean values.
-      // Convert undef lanes to false by inserting a vp_select.
-      // FIXME: For now we create a whole-register select to ensure correctness
-      // for other whole-register instructions that use the compare as input
-      // arg. See issue at
-      // repo.hca.bsc.es/gitlab/EPI/System-Software/llvm-mono/-/issues/124
-      // Value *V = Builder.CreateIntrinsic(
-      //    Intrinsic::vp_select, {cast<VectorType>(C->getType())},
-      //    {MaskArg, C, AllFalse, EVLArg}, nullptr, "vp.op.select");
-      Value *AllFalse = Builder.getFalseVector(OpTy->getElementCount());
-      Value *V = Builder.CreateSelect(MaskArg, C, AllFalse);
+      Value *V;
+      // FIXME: Teach VPredIRBuilder to do this for us.
+      Constant *K = dyn_cast<Constant>(MaskArg);
+      if (K && K->isAllOnesValue()) {
+        V = C;
+      } else {
+        Value *AllFalse = Builder.getFalseVector(OpTy->getElementCount());
+        V = Builder.CreateIntrinsic(
+            Intrinsic::vp_select, {cast<VectorType>(C->getType())},
+            {MaskArg, C, AllFalse, EVLArg}, nullptr, "vp.op.select");
+      }
 
       State.set(Def, V, Part);
       addMetadata(V, &I);
@@ -4633,11 +4632,11 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
       // Some intrinsics have a scalar argument - don't replace it with a
       // vector.
       Value *Arg;
-      if (!UseVectorIntrinsic || !hasVectorInstrinsicScalarOpd(ID, I.index()))
+      if (!UseVectorIntrinsic || !hasVectorIntrinsicScalarOpd(ID, I.index()))
         Arg = State.get(I.value(), Part);
       else {
         Arg = State.get(I.value(), VPIteration(0, 0));
-        if (hasVectorInstrinsicOverloadedScalarOpd(ID, I.index()))
+        if (hasVectorIntrinsicOverloadedScalarOpd(ID, I.index()))
           TysForDecl.push_back(Arg->getType());
       }
       Args.push_back(Arg);
@@ -4708,11 +4707,11 @@ void InnerLoopVectorizer::predicatedWidenCallInstruction(
       // Some intrinsics have a scalar argument - don't replace it with a
       // vector.
       Value *Arg;
-      if (!UseVectorIntrinsic || !hasVectorInstrinsicScalarOpd(ID, I.index()))
+      if (!UseVectorIntrinsic || !hasVectorIntrinsicScalarOpd(ID, I.index()))
         Arg = State.get(I.value(), Part);
       else {
         Arg = State.get(I.value(), VPIteration(0, 0));
-        if (hasVectorInstrinsicOverloadedScalarOpd(ID, I.index()))
+        if (hasVectorIntrinsicOverloadedScalarOpd(ID, I.index()))
           TysForDecl.push_back(Arg->getType());
       }
       Args.push_back(Arg);
@@ -8936,8 +8935,14 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   VPValue *EdgeMask = Plan->getOrAddVPValue(BI->getCondition());
   assert(EdgeMask && "No Edge Mask found for condition");
 
-  if (BI->getSuccessor(0) != Dst)
-    EdgeMask = Builder.createNot(EdgeMask, BI->getDebugLoc());
+  if (BI->getSuccessor(0) != Dst) {
+    if (preferPredicatedWiden()) {
+      EdgeMask = Builder.createVPNot(EdgeMask, getOrCreateEVL(Plan),
+                                     BI->getDebugLoc());
+    } else {
+      EdgeMask = Builder.createNot(EdgeMask, BI->getDebugLoc());
+    }
+  }
 
   if (SrcMask) { // Otherwise block in-mask is all-one, no need to AND.
     // The condition is 'SrcMask && EdgeMask', which is equivalent to
@@ -8946,8 +8951,13 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
     // EdgeMask is poison. Using 'and' here introduces undefined behavior.
     VPValue *False = Plan->getOrAddVPValue(
         ConstantInt::getFalse(BI->getCondition()->getType()));
-    EdgeMask =
-        Builder.createSelect(SrcMask, EdgeMask, False, BI->getDebugLoc());
+    if (preferPredicatedWiden()) {
+      EdgeMask = Builder.createVPSelect(
+          SrcMask, EdgeMask, False, getOrCreateEVL(Plan), BI->getDebugLoc());
+    } else {
+      EdgeMask =
+          Builder.createSelect(SrcMask, EdgeMask, False, BI->getDebugLoc());
+    }
   }
 
   return EdgeMaskCache[Edge] = EdgeMask;
@@ -9016,7 +9026,12 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
       continue;
     }
 
-    BlockMask = Builder.createOr(BlockMask, EdgeMask, {});
+    if (preferPredicatedWiden()) {
+      BlockMask =
+          Builder.createVPOr(BlockMask, EdgeMask, getOrCreateEVL(Plan), {});
+    } else {
+      BlockMask = Builder.createOr(BlockMask, EdgeMask, {});
+    }
   }
 
   return BlockMaskCache[BB] = BlockMask;
@@ -9026,9 +9041,8 @@ VPValue *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
   if (EVL)
     return EVL;
 
-  VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
   VPValue *TC = Plan->getOrCreateTripCount();
-  auto *EVLRecipe = new VPWidenEVLRecipe(IV, TC);
+  auto *EVLRecipe = new VPWidenEVLRecipe(TC);
   Builder.getInsertBlock()->insert(EVLRecipe, Builder.getInsertPoint());
   EVL = EVLRecipe->getEVL();
   return EVL;
@@ -9258,7 +9272,12 @@ VPRecipeOrVPValueTy VPRecipeBuilder::tryToBlend(PHINode *Phi,
     if (EdgeMask)
       OperandsWithMask.push_back(EdgeMask);
   }
-  return toVPRecipeResult(new VPBlendRecipe(Phi, OperandsWithMask));
+  if (preferPredicatedWiden()) {
+    return toVPRecipeResult(new VPPredicatedBlendRecipe(Phi, OperandsWithMask,
+                                                        getOrCreateEVL(Plan)));
+  } else {
+    return toVPRecipeResult(new VPBlendRecipe(Phi, OperandsWithMask));
+  }
 }
 
 VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
@@ -9639,8 +9658,14 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
   if (auto *SI = dyn_cast<SelectInst>(Instr)) {
     bool InvariantCond =
         PSE.getSE()->isLoopInvariant(PSE.getSCEV(SI->getOperand(0)), OrigLoop);
-    return toVPRecipeResult(new VPWidenSelectRecipe(
-        *SI, make_range(Operands.begin(), Operands.end()), InvariantCond));
+    if (preferPredicatedWiden()) {
+      return toVPRecipeResult(new VPPredicatedWidenSelectRecipe(
+          *SI, make_range(Operands.begin(), Operands.end()),
+          getOrCreateEVL(Plan), InvariantCond));
+    } else {
+      return toVPRecipeResult(new VPWidenSelectRecipe(
+          *SI, make_range(Operands.begin(), Operands.end()), InvariantCond));
+    }
   }
 
   // BitCast does not need to be predicated
@@ -9828,7 +9853,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
     Builder.setInsertPoint(VPBB);
 
     // Introduce each ingredient into VPlan.
-    // TODO: Model and preserve debug instrinsics in VPlan.
+    // TODO: Model and preserve debug intrinsics in VPlan.
     for (Instruction &I : BB->instructionsWithoutDebug()) {
       Instruction *Instr = &I;
 
@@ -10334,6 +10359,30 @@ void VPWidenSelectRecipe::execute(VPTransformState &State) {
     Value *Op0 = State.get(getOperand(1), Part);
     Value *Op1 = State.get(getOperand(2), Part);
     Value *Sel = State.Builder.CreateSelect(Cond, Op0, Op1);
+    State.set(this, Sel, Part);
+    State.ILV->addMetadata(Sel, &I);
+  }
+}
+
+void VPPredicatedWidenSelectRecipe::execute(VPTransformState &State) {
+  auto &I = *cast<SelectInst>(getUnderlyingInstr());
+  State.ILV->setDebugLocFromInst(&I);
+
+  // The condition can be loop invariant  but still defined inside the
+  // loop. This means that we can't just use the original 'cond' value.
+  // We have to take the 'vectorized' value and pick the first lane.
+  // Instcombine will make this a no-op.
+  auto *InvarCond =
+      InvariantCond ? State.get(getOperand(0), VPIteration(0, 0)) : nullptr;
+
+  for (unsigned Part = 0; Part < State.UF; ++Part) {
+    Value *Cond = InvarCond ? InvarCond : State.get(getOperand(0), Part);
+    Value *Op1 = State.get(getOperand(1), Part);
+    Value *Op2 = State.get(getOperand(2), Part);
+    Value *EVL = State.get(getOperand(3), Part);
+    Value *Sel = State.Builder.CreateIntrinsic(
+        Intrinsic::vp_select, {Op1->getType()}, {Cond, Op1, Op2, EVL}, nullptr,
+        "vp.select");
     State.set(this, Sel, Part);
     State.ILV->addMetadata(Sel, &I);
   }
@@ -10910,6 +10959,47 @@ void VPBlendRecipe::execute(VPTransformState &State) {
         Value *Cond = State.get(getMask(In), Part);
         Entry[Part] =
             State.Builder.CreateSelect(Cond, In0, Entry[Part], "predphi");
+      }
+    }
+  }
+  for (unsigned Part = 0; Part < State.UF; ++Part)
+    State.set(this, Entry[Part], Part);
+}
+
+void VPPredicatedBlendRecipe::execute(VPTransformState &State) {
+  State.ILV->setDebugLocFromInst(Phi, &State.Builder);
+  // We know that all PHIs in non-header blocks are converted into
+  // selects, so we don't have to worry about the insertion order and we
+  // can just use the builder.
+  // At this point we generate the predication tree. There may be
+  // duplications since this is a simple recursive scan, but future
+  // optimizations will clean it up.
+
+  unsigned NumIncoming = getNumIncomingValues();
+
+  // Generate a sequence of selects of the form:
+  // SELECT(Mask3, In3,
+  //        SELECT(Mask2, In2,
+  //               SELECT(Mask1, In1,
+  //                      In0)))
+  // Note that Mask0 is never used: lanes for which no path reaches this phi and
+  // are essentially undef are taken from In0.
+  InnerLoopVectorizer::VectorParts Entry(State.UF);
+  for (unsigned In = 0; In < NumIncoming; ++In) {
+    for (unsigned Part = 0; Part < State.UF; ++Part) {
+      // We might have single edge PHIs (blocks) - use an identity
+      // 'select' for the first PHI operand.
+      Value *In0 = State.get(getIncomingValue(In), Part);
+      if (In == 0)
+        Entry[Part] = In0; // Initialize with the first incoming value.
+      else {
+        // Select between the current value and the previous incoming edge
+        // based on the incoming mask.
+        Value *Cond = State.get(getMask(In), Part);
+        Value *EVL = State.get(getEVL(), Part);
+        Entry[Part] = State.Builder.CreateIntrinsic(
+            Intrinsic::vp_select, {In0->getType()},
+            {Cond, In0, Entry[Part], EVL}, nullptr, "vp.predphi");
       }
     }
   }

@@ -809,8 +809,10 @@ inline bool VPUser::classof(const VPDef *Def) {
          Def->getVPDefID() == VPRecipeBase::VPWidenCallSC ||
          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenCallSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenSelectSC ||
+         Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSelectSC ||
          Def->getVPDefID() == VPRecipeBase::VPWidenGEPSC ||
          Def->getVPDefID() == VPRecipeBase::VPBlendSC ||
+         Def->getVPDefID() == VPRecipeBase::VPPredicatedBlendSC ||
          Def->getVPDefID() == VPRecipeBase::VPInterleaveSC ||
          Def->getVPDefID() == VPRecipeBase::VPReplicateSC ||
          Def->getVPDefID() == VPRecipeBase::VPReductionSC ||
@@ -843,6 +845,12 @@ public:
     CanonicalIVIncrement,
     CanonicalIVIncrementNUW,
     BranchOnCount,
+    // Vector predication combining masks.
+    // Some of them are missing because are not currently needed by
+    // LoopVectorizer though they will be used by VPPlanPredicator.
+    VPNot,
+    VPOr,
+    VPSelect,
   };
 
 private:
@@ -1125,6 +1133,45 @@ public:
 
   /// Produce a widened version of the select instruction.
   void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+};
+
+/// A recipe for predicate widening select instructions.
+class VPPredicatedWidenSelectRecipe : public VPRecipeBase, public VPValue {
+
+  /// Is the condition of the select loop invariant?
+  bool InvariantCond;
+
+public:
+  template <typename IterT>
+  VPPredicatedWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands,
+                                VPValue *EVL, bool InvariantCond)
+      : VPRecipeBase(VPRecipeBase::VPWidenSelectSC, Operands),
+        VPValue(VPValue::VPVPredicatedWidenSelectSC, &I, this),
+        InvariantCond(InvariantCond) {
+    addOperand(EVL);
+  }
+
+  ~VPPredicatedWidenSelectRecipe() override = default;
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPPredicatedWidenSelectSC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVPredicatedWidenSelectSC;
+  }
+
+  /// Produce a widened version of the select instruction.
+  void execute(VPTransformState &State) override;
+
+  /// Return the explicit vector length used by this recipe.
+  VPValue *getEVL() const { return getOperand(getNumOperands() - 1); }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
@@ -1597,6 +1644,67 @@ public:
 
   /// Return mask number \p Idx.
   VPValue *getMask(unsigned Idx) const { return getOperand(Idx * 2 + 1); }
+
+  /// Generate the phi/select nodes.
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+
+  /// Returns true if the recipe only uses the first lane of operand \p Op.
+  bool onlyFirstLaneUsed(const VPValue *Op) const override {
+    assert(is_contained(operands(), Op) &&
+           "Op must be an operand of the recipe");
+    // Recursing through Blend recipes only, must terminate at header phi's the
+    // latest.
+    return all_of(users(), [this](VPUser *U) {
+      return cast<VPRecipeBase>(U)->onlyFirstLaneUsed(this);
+    });
+  }
+};
+
+/// A recipe for vectorizing a phi-node as a sequence of mask-based select
+/// instructions.
+class VPPredicatedBlendRecipe : public VPRecipeBase, public VPValue {
+  PHINode *Phi;
+
+public:
+  /// The blend operation is a User of the incoming values and of their
+  /// respective masks, ordered [I0, M0, I1, M1, ...]. Note that a single value
+  /// might be incoming with a full mask for which there is no VPValue.
+  VPPredicatedBlendRecipe(PHINode *Phi, ArrayRef<VPValue *> Operands,
+                          VPValue *EVL)
+      : VPRecipeBase(VPPredicatedBlendSC, Operands),
+        VPValue(VPValue::VPVPredicatedBlendSC, Phi, this), Phi(Phi) {
+    assert(Operands.size() > 0 &&
+           ((Operands.size() == 1) || (Operands.size() % 2 == 0)) &&
+           "Expected either a single incoming value or a positive even number "
+           "of operands");
+    addOperand(EVL);
+  }
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPRecipeBase::VPPredicatedBlendSC;
+  }
+
+  /// Return the number of incoming values, taking into account that a single
+  /// incoming value has no mask.
+  unsigned getNumIncomingValues() const { return getNumOperands() / 2; }
+
+  /// Return incoming value number \p Idx.
+  VPValue *getIncomingValue(unsigned Idx) const { return getOperand(Idx * 2); }
+
+  /// Return mask number \p Idx.
+  VPValue *getMask(unsigned Idx) const { return getOperand(Idx * 2 + 1); }
+
+  /// Return EVL.
+  VPValue *getEVL() const {
+    return getOperand(getNumOperands() - 1);
+  }
 
   /// Generate the phi/select nodes.
   void execute(VPTransformState &State) override;
@@ -2198,8 +2306,8 @@ public:
 class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
 
 public:
-  VPWidenEVLRecipe(VPValue *IV, VPValue *TC)
-      : VPRecipeBase(VPRecipeBase::VPWidenEVLSC, {IV, TC}),
+  VPWidenEVLRecipe(VPValue *TC)
+      : VPRecipeBase(VPRecipeBase::VPWidenEVLSC, {TC}),
         VPValue(VPValue::VPVWidenEVLSC, nullptr, this) {}
   ~VPWidenEVLRecipe() override = default;
 
@@ -2207,11 +2315,8 @@ public:
   const VPValue *getEVL() const { return this; }
   VPValue *getEVL() { return this; }
 
-  /// Return VPValue representing Induction Variable.
-  VPValue *getIV() const { return getOperand(0); }
-
   /// Return VPValue representing trip count.
-  VPValue *getTripCount() const { return getOperand(1); }
+  VPValue *getTripCount() const { return getOperand(0); }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPDef *D) {

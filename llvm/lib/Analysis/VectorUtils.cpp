@@ -40,7 +40,7 @@ static cl::opt<unsigned> MaxInterleaveGroupFactor(
 /// Return true if all of the intrinsic's arguments and return type are scalars
 /// for the scalar form of the intrinsic, and vectors for the vector form of the
 /// intrinsic (except operands that are marked as always being scalar by
-/// hasVectorInstrinsicScalarOpd).
+/// hasVectorIntrinsicScalarOpd).
 bool llvm::isTriviallyVectorizable(Intrinsic::ID ID) {
   switch (ID) {
   case Intrinsic::abs:   // Begin integer bit-manipulation.
@@ -96,8 +96,8 @@ bool llvm::isTriviallyVectorizable(Intrinsic::ID ID) {
 }
 
 /// Identifies if the vector form of the intrinsic has a scalar operand.
-bool llvm::hasVectorInstrinsicScalarOpd(Intrinsic::ID ID,
-                                        unsigned ScalarOpdIdx) {
+bool llvm::hasVectorIntrinsicScalarOpd(Intrinsic::ID ID,
+                                       unsigned ScalarOpdIdx) {
   switch (ID) {
   case Intrinsic::abs:
   case Intrinsic::ctlz:
@@ -114,8 +114,8 @@ bool llvm::hasVectorInstrinsicScalarOpd(Intrinsic::ID ID,
   }
 }
 
-bool llvm::hasVectorInstrinsicOverloadedScalarOpd(Intrinsic::ID ID,
-                                                  unsigned ScalarOpdIdx) {
+bool llvm::hasVectorIntrinsicOverloadedScalarOpd(Intrinsic::ID ID,
+                                                 unsigned ScalarOpdIdx) {
   switch (ID) {
   case Intrinsic::powi:
     return (ScalarOpdIdx == 1);
@@ -514,7 +514,7 @@ bool llvm::widenShuffleMaskElts(int Scale, ArrayRef<int> Mask,
 void llvm::processShuffleMasks(
     ArrayRef<int> Mask, unsigned NumOfSrcRegs, unsigned NumOfDestRegs,
     unsigned NumOfUsedRegs, function_ref<void()> NoInputAction,
-    function_ref<void(ArrayRef<int>, unsigned)> SingleInputAction,
+    function_ref<void(ArrayRef<int>, unsigned, unsigned)> SingleInputAction,
     function_ref<void(ArrayRef<int>, unsigned, unsigned)> ManyInputsAction) {
   SmallVector<SmallVector<SmallVector<int>>> Res(NumOfDestRegs);
   // Try to perform better estimation of the permutation.
@@ -558,7 +558,7 @@ void llvm::processShuffleMasks(
       auto *It =
           find_if(Dest, [](ArrayRef<int> Mask) { return !Mask.empty(); });
       unsigned SrcReg = std::distance(Dest.begin(), It);
-      SingleInputAction(*It, SrcReg);
+      SingleInputAction(*It, SrcReg, I);
       break;
     }
     default: {
