@@ -71,7 +71,7 @@ define <vscale x 1 x i1> @test_vp_logical_xor(<vscale x 1 x i1> %a0, i32 %n) nou
 ; CHECK-O0-NEXT:    slli a0, a0, 32
 ; CHECK-O0-NEXT:    srli a0, a0, 32
 ; CHECK-O0-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
-; CHECK-O0-NEXT:    vmnand.mm v0, v0, v0
+; CHECK-O0-NEXT:    vmnot.m v0, v0
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: test_vp_logical_xor:
@@ -79,7 +79,7 @@ define <vscale x 1 x i1> @test_vp_logical_xor(<vscale x 1 x i1> %a0, i32 %n) nou
 ; CHECK-O2-NEXT:    slli a0, a0, 32
 ; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
-; CHECK-O2-NEXT:    vmnand.mm v0, v0, v0
+; CHECK-O2-NEXT:    vmnot.m v0, v0
 ; CHECK-O2-NEXT:    ret
   %head.1 = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head.1, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
