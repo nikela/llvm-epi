@@ -547,7 +547,7 @@ TEST(DxcModeTest, ValidatorVersionValidation) {
     if (A)
       EXPECT_STREQ(A->getValue(), "1.1");
   }
-  EXPECT_EQ(Diags.getNumErrors(), 0);
+  EXPECT_EQ(Diags.getNumErrors(), 0u);
 
   // Invalid tests.
   Args = TheDriver.ParseArgStrings({"-validator-version", "0.1"}, false,
@@ -558,7 +558,7 @@ TEST(DxcModeTest, ValidatorVersionValidation) {
     DAL->append(A);
 
   TranslatedArgs = TC.TranslateArgs(*DAL, "0", Action::OffloadKind::OFK_None);
-  EXPECT_EQ(Diags.getNumErrors(), 1);
+  EXPECT_EQ(Diags.getNumErrors(), 1u);
   EXPECT_STREQ(DiagConsumer->Errors.back().c_str(),
                "invalid validator version : 0.1\nIf validator major version is "
                "0, minor version must also be 0.");
@@ -573,7 +573,7 @@ TEST(DxcModeTest, ValidatorVersionValidation) {
     DAL->append(A);
 
   TranslatedArgs = TC.TranslateArgs(*DAL, "0", Action::OffloadKind::OFK_None);
-  EXPECT_EQ(Diags.getNumErrors(), 2);
+  EXPECT_EQ(Diags.getNumErrors(), 2u);
   EXPECT_STREQ(DiagConsumer->Errors.back().c_str(),
                "invalid validator version : 1\nFormat of validator version is "
                "\"<major>.<minor>\" (ex:\"1.4\").");
@@ -588,7 +588,7 @@ TEST(DxcModeTest, ValidatorVersionValidation) {
     DAL->append(A);
 
   TranslatedArgs = TC.TranslateArgs(*DAL, "0", Action::OffloadKind::OFK_None);
-  EXPECT_EQ(Diags.getNumErrors(), 3);
+  EXPECT_EQ(Diags.getNumErrors(), 3u);
   EXPECT_STREQ(
       DiagConsumer->Errors.back().c_str(),
       "invalid validator version : -Tlib_6_7\nFormat of validator version is "
@@ -604,7 +604,7 @@ TEST(DxcModeTest, ValidatorVersionValidation) {
     DAL->append(A);
 
   TranslatedArgs = TC.TranslateArgs(*DAL, "0", Action::OffloadKind::OFK_None);
-  EXPECT_EQ(Diags.getNumErrors(), 4);
+  EXPECT_EQ(Diags.getNumErrors(), 4u);
   EXPECT_STREQ(
       DiagConsumer->Errors.back().c_str(),
       "invalid validator version : foo\nFormat of validator version is "
