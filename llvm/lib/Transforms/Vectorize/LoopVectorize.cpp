@@ -4006,8 +4006,9 @@ void InnerLoopVectorizer::fixReduction(VPReductionPHIRecipe *PhiR,
         if (isa<SelectInst>(U)) {
           assert(!Sel && "Reduction exit feeding two selects");
           Sel = U;
-        } else
-          assert(isa<PHINode>(U) && "Reduction exit must feed Phi's or select");
+        } else {
+          // assert(isa<PHINode>(U) && "Reduction exit must feed Phi's or select");
+        }
       }
       assert(Sel && "Reduction exit feeds no select");
       State.reset(LoopExitInstDef, Sel, Part);
@@ -10407,11 +10408,20 @@ void VPPredicatedWidenSelectRecipe::execute(VPTransformState &State) {
 
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     Value *Cond = InvarCond ? InvarCond : State.get(getOperand(0), Part);
-    Value *Op1 = State.get(getOperand(1), Part);
-    Value *Op2 = State.get(getOperand(2), Part);
+    Value *Op0 = State.get(getOperand(1), Part);
+    Value *Op1 = State.get(getOperand(2), Part);
+
+    // FIXME: This is not ideal.
+    if (!isa<VectorType>(Cond->getType())) {
+      Value *Sel = State.Builder.CreateSelect(Cond, Op0, Op1);
+      State.set(this, Sel, Part);
+      State.ILV->addMetadata(Sel, &I);
+      continue;
+    }
+
     Value *EVL = State.get(getOperand(3), Part);
     Value *Sel = State.Builder.CreateIntrinsic(
-        Intrinsic::vp_select, {Op1->getType()}, {Cond, Op1, Op2, EVL}, nullptr,
+        Intrinsic::vp_select, {Op1->getType()}, {Cond, Op0, Op1, EVL}, nullptr,
         "vp.select");
     State.set(this, Sel, Part);
     State.ILV->addMetadata(Sel, &I);

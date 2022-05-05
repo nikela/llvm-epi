@@ -765,6 +765,15 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     Value *Cond = State.get(getOperand(0), Part);
     Value *Op1 = State.get(getOperand(1), Part);
     Value *Op2 = State.get(getOperand(2), Part);
+
+    // This is a bit hacky but LLVM's select has two versions
+    // and the "whole value" case doesn't concern us much here.
+    if (!isa<VectorType>(Cond->getType())) {
+      Value *V = Builder.CreateSelect(Cond, Op1, Op2);
+      State.set(this, V, Part);
+      break;
+    }
+
     Value *EVL = State.get(getOperand(3), Part);
 
     Constant *COp2 = dyn_cast<Constant>(Op2);
