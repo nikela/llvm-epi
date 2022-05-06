@@ -766,12 +766,8 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     Value *Op1 = State.get(getOperand(1), Part);
     Value *Op2 = State.get(getOperand(2), Part);
 
-    // This is a bit hacky but LLVM's select has two versions
-    // and the "whole value" case doesn't concern us much here.
     if (!isa<VectorType>(Cond->getType())) {
-      Value *V = Builder.CreateSelect(Cond, Op1, Op2);
-      State.set(this, V, Part);
-      break;
+      Cond = State.Builder.CreateVectorSplat(State.VF, Cond, "splat.cond");
     }
 
     Value *EVL = State.get(getOperand(3), Part);

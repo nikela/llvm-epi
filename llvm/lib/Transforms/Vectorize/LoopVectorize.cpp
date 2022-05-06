@@ -10411,12 +10411,8 @@ void VPPredicatedWidenSelectRecipe::execute(VPTransformState &State) {
     Value *Op0 = State.get(getOperand(1), Part);
     Value *Op1 = State.get(getOperand(2), Part);
 
-    // FIXME: This is not ideal.
     if (!isa<VectorType>(Cond->getType())) {
-      Value *Sel = State.Builder.CreateSelect(Cond, Op0, Op1);
-      State.set(this, Sel, Part);
-      State.ILV->addMetadata(Sel, &I);
-      continue;
+      Cond = State.Builder.CreateVectorSplat(State.VF, Cond, "splat.cond");
     }
 
     Value *EVL = State.get(getOperand(3), Part);
