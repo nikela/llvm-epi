@@ -39,23 +39,19 @@ define <vscale x 1 x i64> @n1fv6_1() nounwind {
 ; CHECK-LABEL: n1fv6_1:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    li a0, 2
-; CHECK-NEXT:    li a1, 64
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vmv.v.x v8, a1
-; CHECK-NEXT:    addi a0, sp, 16
-; CHECK-NEXT:    vs1r.v v8, (a0)
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    addi a1, sp, 16
-; CHECK-NEXT:    add a2, a1, a0
-; CHECK-NEXT:    vs1r.v v8, (a2)
-; CHECK-NEXT:    slli a2, a0, 1
-; CHECK-NEXT:    add a3, a1, a2
+; CHECK-NEXT:    addi a0, sp, 40
+; CHECK-NEXT:    addi a1, sp, 32
+; CHECK-NEXT:    addi a2, sp, 24
+; CHECK-NEXT:    li a3, 2
+; CHECK-NEXT:    li a4, 64
+; CHECK-NEXT:    vsetvli zero, a3, e64, m1, ta, mu
+; CHECK-NEXT:    vmv.v.x v8, a4
+; CHECK-NEXT:    addi a3, sp, 16
 ; CHECK-NEXT:    vs1r.v v8, (a3)
-; CHECK-NEXT:    add a0, a0, a2
-; CHECK-NEXT:    add a0, a0, a1
+; CHECK-NEXT:    vs1r.v v8, (a2)
+; CHECK-NEXT:    vs1r.v v8, (a1)
 ; CHECK-NEXT:    vs1r.v v8, (a0)
-; CHECK-NEXT:    vl1re64.v v8, (a3)
+; CHECK-NEXT:    vl1re64.v v8, (a1)
 ; CHECK-NEXT:    addi sp, sp, 48
 ; CHECK-NEXT:    ret
 entry:

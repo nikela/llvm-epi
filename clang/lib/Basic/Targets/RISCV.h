@@ -100,6 +100,10 @@ public:
   void adjust(DiagnosticsEngine &Diags, LangOptions &Opts) override;
 
   bool hasBitIntType() const override { return true; }
+
+  bool useFP16ConversionIntrinsics() const override {
+    return false;
+  }
 };
 class LLVM_LIBRARY_VISIBILITY RISCV32TargetInfo : public RISCVTargetInfo {
 public:

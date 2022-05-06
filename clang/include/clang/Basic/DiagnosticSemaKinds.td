@@ -4341,8 +4341,9 @@ def err_void_param_qualified : Error<
   "'void' as parameter must not have type qualifiers">;
 def err_ident_list_in_fn_declaration : Error<
   "a parameter list without types is only allowed in a function definition">;
-def ext_param_not_declared : Extension<
-  "parameter %0 was not declared, defaulting to type 'int'">;
+def ext_param_not_declared : ExtWarn<
+  "parameter %0 was not declared, defaults to 'int'; ISO C99 and later do not "
+  "support implicit int">, InGroup<ImplicitInt>, DefaultError;
 def err_param_default_argument : Error<
   "C does not support default arguments">;
 def err_param_default_argument_redefinition : Error<
@@ -9997,15 +9998,13 @@ def warn_receiver_forward_class : Warning<
   "receiver %0 is a forward class and corresponding @interface may not exist">,
   InGroup<ForwardClassReceiver>;
 def note_method_sent_forward_class : Note<"method %0 is used for the forward class">;
-def ext_missing_declspec : ExtWarn<
-  "declaration specifier missing, defaulting to 'int'">;
 def ext_missing_type_specifier : ExtWarn<
-  "type specifier missing, defaults to 'int'">,
-  InGroup<ImplicitInt>;
+  "type specifier missing, defaults to 'int'; ISO C99 and later do not support "
+  "implicit int">, InGroup<ImplicitInt>, DefaultError;
+def err_missing_type_specifier : Error<
+  "a type specifier is required for all declarations">;
 def err_decimal_unsupported : Error<
   "GNU decimal type extension not supported">;
-def err_missing_type_specifier : Error<
-  "C++ requires a type specifier for all declarations">;
 def err_objc_array_of_interfaces : Error<
   "array of interface %0 is invalid (probably should be an array of pointers)">;
 def ext_c99_array_usage : Extension<
@@ -10198,8 +10197,6 @@ def err_opencl_scalar_type_rank_greater_than_vector_type : Error<
     "element. (%0 and %1)">;
 def err_bad_kernel_param_type : Error<
   "%0 cannot be used as the type of a kernel parameter">;
-def err_opencl_implicit_function_decl : Error<
-  "implicit declaration of function %0 is invalid in OpenCL">;
 def err_record_with_pointers_kernel_param : Error<
   "%select{struct|union}0 kernel parameters may not contain pointers">;
 def note_within_field_of_type : Note<
