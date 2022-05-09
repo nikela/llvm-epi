@@ -30,7 +30,7 @@ declare void @llvm.epi.vstore.v1f64(
 define void @merge_mask(i64 %vl, double* %c, double* %a, double* %b) nounwind {
 ; CHECK-O0-LABEL: merge_mask:
 ; CHECK-O0:       # %bb.0: # %entry
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (a2)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -43,7 +43,7 @@ define void @merge_mask(i64 %vl, double* %c, double* %a, double* %b) nounwind {
 ;
 ; CHECK-O2-LABEL: merge_mask:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v8, (a2)
 ; CHECK-O2-NEXT:    vle64.v v9, (a3)
 ; CHECK-O2-NEXT:    vmflt.vv v0, v8, v9

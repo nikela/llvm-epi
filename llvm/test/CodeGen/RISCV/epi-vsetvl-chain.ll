@@ -40,7 +40,7 @@ define void @test_vsetvl_chain(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -61,7 +61,7 @@ define void @test_vsetvl_chain(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -105,7 +105,7 @@ define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -120,7 +120,7 @@ define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -161,7 +161,7 @@ define void @test_vsetvl_chain_2(<vscale x 1 x double>* %v, i64 %avl) nounwind
 define void @test_vsetvl_chain_3(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-LABEL: test_vsetvl_chain_3:
 ; CHECK-O0:       # %bb.0:
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -173,7 +173,7 @@ define void @test_vsetvl_chain_3(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ;
 ; CHECK-O2-LABEL: test_vsetvl_chain_3:
 ; CHECK-O2:       # %bb.0:
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
@@ -226,7 +226,7 @@ define void @test_vsetvl_chain_4(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m2, ta, mu
 ; CHECK-O0-NEXT:    vsetvli a1, a1, e32, m1, ta, mu
-; CHECK-O0-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
@@ -253,7 +253,7 @@ define void @test_vsetvl_chain_4(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m2, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e32, m1, ta, mu
-; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)

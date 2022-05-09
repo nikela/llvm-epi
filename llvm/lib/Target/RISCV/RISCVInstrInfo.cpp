@@ -1253,6 +1253,11 @@ enum MachineOutlinerConstructionID {
   MachineOutlinerDefault
 };
 
+bool RISCVInstrInfo::shouldOutlineFromFunctionByDefault(
+    MachineFunction &MF) const {
+  return MF.getFunction().hasMinSize();
+}
+
 outliner::OutlinedFunction RISCVInstrInfo::getOutliningCandidateInfo(
     std::vector<outliner::Candidate> &RepeatedSequenceLocs) const {
 
@@ -1873,14 +1878,7 @@ Register RISCVInstrInfo::getVLENFactoredAmount(MachineFunction &MF,
         .setMIFlag(Flag);
   } else {
     Register N = MRI.createVirtualRegister(&RISCV::GPRRegClass);
-    if (!isInt<12>(NumOfVReg))
-      movImm(MBB, II, DL, N, NumOfVReg);
-    else {
-      BuildMI(MBB, II, DL, get(RISCV::ADDI), N)
-          .addReg(RISCV::X0)
-          .addImm(NumOfVReg)
-          .setMIFlag(Flag);
-    }
+    movImm(MBB, II, DL, N, NumOfVReg, Flag);
     if (!STI.hasStdExtM())
       MF.getFunction().getContext().diagnose(DiagnosticInfoUnsupported{
           MF.getFunction(),

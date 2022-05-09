@@ -37,6 +37,10 @@ static cl::opt<bool> DisableInsertVSETVLPHIOpt(
     "riscv-disable-insert-vsetvl-phi-opt", cl::init(false), cl::Hidden,
     cl::desc("Disable looking through phis when inserting vsetvlis."));
 
+static cl::opt<bool> UseStrictAsserts(
+    "riscv-insert-vsetvl-strict-asserts", cl::init(false), cl::Hidden,
+    cl::desc("Enable strict assertion checking for the dataflow algorithm"));
+
 namespace {
 
 using MBBNumber = int;
@@ -550,6 +554,10 @@ private:
   bool needVSETVLIPHI(const VSETVLIInfo &Require, const MachineBasicBlock &MBB);
   void insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                      const VSETVLIInfo &Info, const VSETVLIInfo &PrevInfo);
+  void insertVSETVLI(MachineBasicBlock &MBB,
+                     MachineBasicBlock::iterator InsertPt, DebugLoc DL,
+                     const VSETVLIInfo &Info, const VSETVLIInfo &PrevInfo);
+
   const ExtraOperand &getExtraOperand(const MachineInstr *MI);
   void copyExtraOperand(const MachineInstr *From, const MachineInstr *To);
   void copyExtraOperand(const ExtraOperand EO, const MachineInstr *To);
@@ -560,6 +568,7 @@ private:
   void computeExtraOperand(const MachineBasicBlock &MBB);
   void emitPHIsForExtras(MachineBasicBlock &MBB);
   void forwardPropagateAVL(MachineBasicBlock &MBB);
+
   bool computeVLVTYPEChanges(const MachineBasicBlock &MBB);
   void computeIncomingVLVTYPE(const MachineBasicBlock &MBB);
   void emitVSETVLIs(MachineBasicBlock &MBB);
@@ -828,8 +837,15 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
                                        const VSETVLIInfo &Info,
                                        const VSETVLIInfo &PrevInfo) {
   DebugLoc DL = MI.getDebugLoc();
+  insertVSETVLI(MBB, MachineBasicBlock::iterator(&MI), DL, Info, PrevInfo);
+}
+
+void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB,
+                     MachineBasicBlock::iterator InsertPt, DebugLoc DL,
+                     const VSETVLIInfo &Info, const VSETVLIInfo &PrevInfo) {
   unsigned InfoVTYPE = Info.encodeVTYPE();
 
+  MachineInstr &MI = *InsertPt;
   Register ExtraReg = RISCV::NoRegister;
   if (getExtraOperand(&MI).isFromPHI())
     llvm_unreachable(
@@ -865,7 +881,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   // VLMAX.
   if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
       Info.hasSameAVL(PrevInfo) && Info.hasSameVLMAX(PrevInfo)) {
-    BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
+    BuildMI(MBB, InsertPt, DL, TII->get(RISCV::PseudoVSETVLIX0))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addReg(RISCV::X0, RegState::Kill)
         .addImm(InfoVTYPE)
@@ -874,7 +890,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
   }
 
   if (Info.hasAVLImm()) {
-    BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETIVLI))
+    BuildMI(MBB, InsertPt, DL, TII->get(RISCV::PseudoVSETIVLI))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addImm(Info.getAVLImm())
         .addImm(InfoVTYPE);
@@ -887,7 +903,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     // the previous vl to become invalid.
     if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
         Info.hasSameVLMAX(PrevInfo)) {
-      BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETVLIX0))
+      BuildMI(MBB, InsertPt, DL, TII->get(RISCV::PseudoVSETVLIX0))
           .addReg(RISCV::X0, RegState::Define | RegState::Dead)
           .addReg(RISCV::X0, RegState::Kill)
           .addImm(InfoVTYPE)
@@ -895,7 +911,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
       return;
     }
     // Otherwise use an AVL of 0 to avoid depending on previous vl.
-    BuildMI(MBB, MI, DL, TII->get(RISCV::PseudoVSETIVLI))
+    BuildMI(MBB, InsertPt, DL, TII->get(RISCV::PseudoVSETIVLI))
         .addReg(RISCV::X0, RegState::Define | RegState::Dead)
         .addImm(0)
         .addImm(InfoVTYPE);
@@ -914,7 +930,7 @@ void RISCVInsertVSETVLI::insertVSETVLI(MachineBasicBlock &MBB, MachineInstr &MI,
     DestReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
     Opcode = RISCV::PseudoVSETVLIX0;
   }
-  BuildMI(MBB, MI, DL, TII->get(Opcode))
+  BuildMI(MBB, InsertPt, DL, TII->get(Opcode))
       .addReg(DestReg, RegState::Define | RegState::Dead)
       .addReg(AVLReg)
       .addImm(InfoVTYPE);
@@ -1583,7 +1599,13 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   if (!InInfo.isValid())
     return;
 
+  // If no change, no need to rerun block
+  if (InInfo == BBInfo.Pred)
+    return;
+
   BBInfo.Pred = InInfo;
+  LLVM_DEBUG(dbgs() << "Entry state of " << printMBBReference(MBB)
+                    << " changed to " << BBInfo.Pred << "\n");
 
   // Update PredExtra acoordingly to what we have in AllPredsExtras
   switch(EOs.size()) {
@@ -1614,6 +1636,8 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   if (!(BBInfo.Exit == TmpStatus)) {
     BBInfo.Exit = TmpStatus;
     UpdatedVSETVLIInfo = true;
+    LLVM_DEBUG(dbgs() << "Exit state of " << printMBBReference(MBB)
+                      << " changed to " << BBInfo.Exit << "\n");
   }
 
   // If the new exit values match the old exit values,
@@ -1867,7 +1891,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
 
     // If we reach the end of the block and our current info doesn't match the
     // expected info, insert a vsetvli to correct.
-    if (MI.isTerminator()) {
+    if (!UseStrictAsserts && MI.isTerminator()) {
       const VSETVLIInfo &ExitInfo = BlockInfo[MBB.getNumber()].Exit;
       if (CurInfo.isValid() && ExitInfo.isValid() && !ExitInfo.isUnknown() &&
           CurInfo != ExitInfo) {
@@ -1876,6 +1900,18 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       }
     }
   }
+
+  if (UseStrictAsserts && CurInfo.isValid()) {
+    const auto &Info = BlockInfo[MBB.getNumber()];
+    if (CurInfo != Info.Exit) {
+      LLVM_DEBUG(dbgs() << "in block " << printMBBReference(MBB) << "\n");
+      LLVM_DEBUG(dbgs() << "  begin        state: " << Info.Pred << "\n");
+      LLVM_DEBUG(dbgs() << "  expected end state: " << Info.Exit << "\n");
+      LLVM_DEBUG(dbgs() << "  actual   end state: " << CurInfo << "\n");
+    }
+    assert(CurInfo == Info.Exit &&
+           "InsertVSETVLI dataflow invariant violated");
+  }
 }
 
 bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
@@ -1883,6 +1919,8 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
   const RISCVSubtarget &ST = MF.getSubtarget<RISCVSubtarget>();
   if (!ST.hasVInstructions())
     return false;
+
+  LLVM_DEBUG(dbgs() << "Entering InsertVSETVLI for " << MF.getName() << "\n");
 
   TII = ST.getInstrInfo();
   MRI = &MF.getRegInfo();
@@ -1908,26 +1946,45 @@ bool RISCVInsertVSETVLI::runOnMachineFunction(MachineFunction &MF) {
     HaveVectorOp |= computeVLVTYPEChanges(MBB);
 
   // If we didn't find any instructions that need VSETVLI, we're done.
-  if (HaveVectorOp) {
-    // Phase 2 - determine the exit VL/VTYPE from each block. We add all
-    // blocks to the list here, but will also add any that need to be revisited
-    // during Phase 2 processing.
-    for (const MachineBasicBlock &MBB : MF) {
-      WorkList.push(&MBB);
-      BlockInfo[MBB.getNumber()].InQueue = true;
-    }
-    while (!WorkList.empty()) {
-      const MachineBasicBlock &MBB = *WorkList.front();
-      WorkList.pop();
-      computeIncomingVLVTYPE(MBB);
-    }
+  if (!HaveVectorOp) {
+    BlockInfo.clear();
+    return false;
+  }
 
-    // Phase 3 - add any vsetvli instructions needed in the block. Use the
-    // Phase 2 information to avoid adding vsetvlis before the first vector
-    // instruction in the block if the VL/VTYPE is satisfied by its
-    // predecessors.
-    for (MachineBasicBlock &MBB : MF)
-      emitVSETVLIs(MBB);
+  // Phase 2 - determine the exit VL/VTYPE from each block. We add all
+  // blocks to the list here, but will also add any that need to be revisited
+  // during Phase 2 processing.
+  for (const MachineBasicBlock &MBB : MF) {
+    WorkList.push(&MBB);
+    BlockInfo[MBB.getNumber()].InQueue = true;
+  }
+  while (!WorkList.empty()) {
+    const MachineBasicBlock &MBB = *WorkList.front();
+    WorkList.pop();
+    computeIncomingVLVTYPE(MBB);
+  }
+
+  // Phase 3 - add any vsetvli instructions needed in the block. Use the
+  // Phase 2 information to avoid adding vsetvlis before the first vector
+  // instruction in the block if the VL/VTYPE is satisfied by its
+  // predecessors.
+  for (MachineBasicBlock &MBB : MF)
+    emitVSETVLIs(MBB);
+
+  // Once we're fully done rewriting all the instructions, do a final pass
+  // through to check for VSETVLIs which write to an unused destination.
+  // For the non X0, X0 variant, we can replace the destination register
+  // with X0 to reduce register pressure.  This is really a generic
+  // optimization which can be applied to any dead def (TODO: generalize).
+  for (MachineBasicBlock &MBB : MF) {
+    for (MachineInstr &MI : MBB) {
+      if (MI.getOpcode() == RISCV::PseudoVSETVLI ||
+          MI.getOpcode() == RISCV::PseudoVSETIVLI) {
+        Register VRegDef = MI.getOperand(0).getReg();
+        if (VRegDef != RISCV::X0 && MRI->use_nodbg_empty(VRegDef))
+          MI.getOperand(0).setReg(RISCV::X0);
+      }
+    }
   }
 
   BlockInfo.clear();
