@@ -568,6 +568,8 @@ MAP_LLVM_NONVP(log)
 MAP_LLVM_NONVP(log2)
 MAP_LLVM_NONVP(log10)
 MAP_LLVM_NONVP(sqrt)
+MAP_LLVM_NONVP(fma)
+MAP_LLVM_NONVP(fmuladd)
 
 ///// } libm functions
 
