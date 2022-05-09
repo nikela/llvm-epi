@@ -33,8 +33,8 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/Scalar.h"
-
 using namespace llvm;
 
 static cl::opt<bool>
@@ -87,6 +87,7 @@ RISCVTargetMachine::RISCVTargetMachine(const Target &T, const Triple &TT,
 
   // RISC-V supports the MachineOutliner.
   setMachineOutliner(true);
+  setSupportsDefaultOutlining(true);
 }
 
 const RISCVSubtarget *
@@ -148,6 +149,7 @@ public:
   }
 
   void addIRPasses() override;
+  bool addPreISel() override;
   bool addInstSelector() override;
   bool addIRTranslator() override;
   bool addLegalizeMachineIR() override;
@@ -185,6 +187,16 @@ void RISCVPassConfig::addIRPasses() {
   addPass(createRISCVGatherScatterLoweringPass());
 
   TargetPassConfig::addIRPasses();
+}
+
+bool RISCVPassConfig::addPreISel() {
+  if (TM->getOptLevel() != CodeGenOpt::None) {
+    // Add a barrier before instruction selection so that we will not get
+    // deleted block address after enabling default outlining. See D99707 for
+    // more details.
+    addPass(createBarrierNoopPass());
+  }
+  return false;
 }
 
 bool RISCVPassConfig::addInstSelector() {

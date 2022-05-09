@@ -769,6 +769,8 @@ static bool isObjectSizeLessThanOrEq(Value *V, uint64_t MaxSize,
       if (!CS)
         return false;
 
+      if (DL.getTypeAllocSize(AI->getAllocatedType()).isScalable())
+        return false;
       uint64_t TypeSize = DL.getTypeAllocSize(AI->getAllocatedType());
       // Make sure that, even if the multiplication below would wrap as an
       // uint64_t, we still do the right thing.

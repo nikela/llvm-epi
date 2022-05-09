@@ -612,6 +612,10 @@ public:
       return *symbol;
     } else {
       if (!CheckPossibleBadForwardRef(*symbol)) {
+        if (name.empty() && symbol->name().empty()) {
+          // report the error elsewhere
+          return *symbol;
+        }
         SayAlreadyDeclared(name, *symbol);
       }
       // replace the old symbol with a new one with correct details
@@ -6562,9 +6566,10 @@ void DeclarationVisitor::Initialization(const parser::Name &name,
               // work better.
               ultimate.set(Symbol::Flag::InDataStmt);
             },
-            [&](const std::list<Indirection<parser::DataStmtValue>> &) {
+            [&](const std::list<Indirection<parser::DataStmtValue>> &values) {
               // Handled later in data-to-inits conversion
               ultimate.set(Symbol::Flag::InDataStmt);
+              Walk(values);
             },
         },
         init.u);
