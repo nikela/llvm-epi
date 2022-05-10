@@ -1470,9 +1470,9 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
       }
 
       if (Propagate) {
-        if (MI.getOpcode() == RISCV::PseudoVSETIVLI)
+        if (MI.getOpcode() == RISCV::PseudoVSETIVLI && Use.isImm())
           Use.setImm(VI.getAVLImm());
-        else
+        else if (Use.isReg() && VI.hasAVLReg())
           Use.setReg(VI.getAVLReg());
 
         // Also propagate the Extra operand info
