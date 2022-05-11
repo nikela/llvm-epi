@@ -285,6 +285,7 @@ bool TypePrinter::canPrefixQualifiers(const Type *T,
       // address_space attribute.
       const auto *AttrTy = cast<AttributedType>(UnderlyingType);
       CanPrefixQualifiers = AttrTy->getAttrKind() == attr::AddressSpace;
+      break;
     }
   }
 
