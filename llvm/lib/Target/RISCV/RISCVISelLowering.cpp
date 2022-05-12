@@ -10977,7 +10977,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   }
   case ISD::EXPERIMENTAL_VP_REVERSE: {
     SDValue Load = N->getOperand(0);
-    if (Load.getOpcode() == ISD::VP_LOAD) {
+    if (N->hasOneUse() && Load.getOpcode() == ISD::VP_LOAD) {
       SDLoc DL(N);
       MVT XLenVT = Subtarget.getXLenVT();
       auto *VPLoad = cast<VPLoadSDNode>(Load);
@@ -10985,6 +10985,18 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       if (VT.getVectorElementType() == MVT::i1) {
         // We do not have a strided_load version for masks
         break;
+      }
+      SDValue Mask = VPLoad->getMask();
+      if (!isOneOrOneSplat(Mask)) {
+        // This requires reversing the mask, so do the optimisation only if
+        // it is trivially reversed already.
+        if (Mask->getOpcode() == ISD::EXPERIMENTAL_VP_REVERSE &&
+            Mask->getOperand(2) == VPLoad->getVectorLength() &&
+            isOneOrOneSplat(Mask->getOperand(1))) {
+          Mask = Mask->getOperand(0);
+        } else {
+          break;
+        }
       }
       uint64_t ElementSizeInBytes =
           VT.getVectorElementType().getFixedSizeInBits() / 8;
@@ -11002,7 +11014,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                                  LastElementOffset);
 
       return DAG.getStridedLoadVP(VT, DL, VPLoad->getChain(), Base, Stride,
-                                  VPLoad->getMask(), VPLoad->getVectorLength(),
+                                  Mask, VPLoad->getVectorLength(),
                                   VPLoad->getMemOperand(), VPLoad->isExpandingLoad());
     }
 
@@ -11010,7 +11022,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   }
   case ISD::VP_STORE: {
     SDValue Val = N->getOperand(1);
-    if (Val.getOpcode() == ISD::EXPERIMENTAL_VP_REVERSE) {
+    if (Val->hasOneUse() && Val.getOpcode() == ISD::EXPERIMENTAL_VP_REVERSE) {
       SDLoc DL(N);
       MVT XLenVT = Subtarget.getXLenVT();
       SDValue OrigVal = Val.getOperand(0);
@@ -11018,13 +11030,25 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
         // We do not have a strided_store version for masks
         break;
       }
+      auto *VPStore = cast<VPStoreSDNode>(N);
+      SDValue Mask = VPStore->getMask();
+      if (!isOneOrOneSplat(Mask)) {
+        // This requires reversing the mask, so do the optimisation only if
+        // it is trivially reversed already.
+        if (Mask->getOpcode() == ISD::EXPERIMENTAL_VP_REVERSE &&
+            Mask->getOperand(2) == VPStore->getVectorLength() &&
+            isOneOrOneSplat(Mask->getOperand(1))) {
+          Mask = Mask->getOperand(0);
+        } else {
+          break;
+        }
+      }
       uint64_t ElementSizeInBytes =
           OrigVal.getSimpleValueType().getVectorElementType().getFixedSizeInBits() /
           8;
       int8_t StrideValue = 0 - ElementSizeInBytes;
       SDValue Stride = DAG.getConstant(StrideValue, DL, XLenVT);
 
-      auto *VPStore = cast<VPStoreSDNode>(N);
       // Base = baseptr + (vl-1)*size_of_element_in_bytes
       SDValue VLMinus1 =
           DAG.getNode(ISD::SUB, DL, XLenVT, VPStore->getVectorLength(),
@@ -11037,7 +11061,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
 
       return DAG.getStridedStoreVP(
           VPStore->getChain(), DL, OrigVal, Base, VPStore->getOffset(), Stride,
-          VPStore->getMask(), VPStore->getVectorLength(),
+          Mask, VPStore->getVectorLength(),
           VPStore->getMemoryVT(), VPStore->getMemOperand(),
           VPStore->getAddressingMode(), VPStore->isTruncatingStore(),
           VPStore->isCompressingStore());
