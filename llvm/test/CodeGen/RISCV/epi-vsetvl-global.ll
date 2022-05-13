@@ -27,7 +27,7 @@ declare float @llvm.epi.vfmv.f.s.f32.nxv2f32(<vscale x 2 x float>)
 define <vscale x 1 x double> @test1(i64 %avl, i8 zeroext %cond, <vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: test1:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    beqz a1, .LBB0_2
 ; CHECK-NEXT:  # %bb.1: # %if.then
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
@@ -58,7 +58,7 @@ if.end:                                           ; preds = %if.else, %if.then
 define <vscale x 1 x double> @test2(i64 %avl, i8 zeroext %cond, <vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: test2:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    beqz a1, .LBB1_2
 ; CHECK-NEXT:  # %bb.1: # %if.then
 ; CHECK-NEXT:    vfadd.vv v9, v8, v9
@@ -131,7 +131,7 @@ define <vscale x 1 x double> @test4(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI3_0)(a1)
 ; CHECK-NEXT:    lui a1, %hi(.LCPI3_1)
 ; CHECK-NEXT:    fld ft1, %lo(.LCPI3_1)(a1)
-; CHECK-NEXT:    vsetvli a1, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v10, ft0
 ; CHECK-NEXT:    vfadd.vf v10, v10, ft1
 ; CHECK-NEXT:    lui a1, %hi(scratch)
@@ -143,14 +143,14 @@ define <vscale x 1 x double> @test4(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI3_2)(a1)
 ; CHECK-NEXT:    lui a1, %hi(.LCPI3_3)
 ; CHECK-NEXT:    flw ft1, %lo(.LCPI3_3)(a1)
-; CHECK-NEXT:    vsetvli a1, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v10, ft0
 ; CHECK-NEXT:    vfadd.vf v10, v10, ft1
 ; CHECK-NEXT:    lui a1, %hi(scratch)
 ; CHECK-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-NEXT:    vse32.v v10, (a1)
 ; CHECK-NEXT:  .LBB3_3: # %if.end
-; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v8, v8, v9
 ; CHECK-NEXT:    ret
 entry:
@@ -185,7 +185,7 @@ define <vscale x 1 x double> @test5(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-LABEL: test5:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    andi a2, a1, 1
-; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    bnez a2, .LBB4_3
 ; CHECK-NEXT:  # %bb.1: # %if.else
 ; CHECK-NEXT:    vfsub.vv v9, v8, v9
@@ -239,7 +239,7 @@ define <vscale x 1 x double> @test6(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-LABEL: test6:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    andi a2, a1, 1
-; CHECK-NEXT:    vsetvli a3, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    bnez a2, .LBB5_3
 ; CHECK-NEXT:  # %bb.1: # %if.else
 ; CHECK-NEXT:    vfsub.vv v8, v8, v9
@@ -250,7 +250,7 @@ define <vscale x 1 x double> @test6(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI5_0)(a1)
 ; CHECK-NEXT:    lui a1, %hi(.LCPI5_1)
 ; CHECK-NEXT:    fld ft1, %lo(.LCPI5_1)(a1)
-; CHECK-NEXT:    vsetvli a1, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v9, ft0
 ; CHECK-NEXT:    vfadd.vf v9, v9, ft1
 ; CHECK-NEXT:    lui a1, %hi(scratch)
@@ -266,7 +266,7 @@ define <vscale x 1 x double> @test6(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI5_2)(a1)
 ; CHECK-NEXT:    lui a1, %hi(.LCPI5_3)
 ; CHECK-NEXT:    flw ft1, %lo(.LCPI5_3)(a1)
-; CHECK-NEXT:    vsetvli a1, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmv.v.f v9, ft0
 ; CHECK-NEXT:    vfadd.vf v9, v9, ft1
 ; CHECK-NEXT:    lui a1, %hi(scratch)
@@ -381,7 +381,7 @@ define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double>
 ; CHECK-LABEL: test8:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
-; CHECK-NEXT:    vsetvli a1, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-NEXT:    lui a1, %hi(.LCPI7_0)
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI7_0)(a1)
@@ -401,7 +401,7 @@ define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double>
 ; CHECK-NEXT:    # in Loop: Header=BB7_2 Depth=1
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    vsetvli a2, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v10, (a1)
 ; CHECK-NEXT:    vfmv.f.s fa0, v10
 ; CHECK-NEXT:    j .LBB7_1

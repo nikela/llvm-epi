@@ -108,7 +108,8 @@ namespace {
     KEYOPENCLCXX  = 0x400000,
     KEYMSCOMPAT   = 0x800000,
     KEYSYCL       = 0x1000000,
-    KEYEPI        = 0x2000000,
+    KEYCUDA       = 0x2000000,
+    KEYEPI        = 0x4000000,
     KEYALLCXX = KEYCXX | KEYCXX11 | KEYCXX20,
     KEYALL = (0x1ffffff & ~KEYNOMS18 &
               ~KEYNOOPENCL) // KEYNOMS18 and KEYNOOPENCL are used to exclude.
@@ -159,6 +160,8 @@ static KeywordStatus getKeywordStatus(const LangOptions &LangOpts,
   if (LangOpts.CPlusPlus && !LangOpts.CPlusPlus20 && (Flags & CHAR8SUPPORT))
     return KS_Future;
   if (LangOpts.isSYCL() && (Flags & KEYSYCL))
+    return KS_Enabled;
+  if (LangOpts.CUDA && (Flags & KEYCUDA))
     return KS_Enabled;
   return KS_Disabled;
 }

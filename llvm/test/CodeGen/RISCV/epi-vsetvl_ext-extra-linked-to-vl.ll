@@ -52,7 +52,7 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O0-NEXT:    add t0, t0, a5
 ; CHECK-O0-NEXT:    # implicit-def: $v9
 ; CHECK-O0-NEXT:    vle64.v v9, (t0)
-; CHECK-O0-NEXT:    vsetvli t0, a4, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    add a7, a7, a5
 ; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    vle64.v v10, (a7)
@@ -89,7 +89,7 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O2-NEXT:    slli t0, a5, 3
 ; CHECK-O2-NEXT:    add t1, a1, t0
 ; CHECK-O2-NEXT:    vle64.v v8, (t1)
-; CHECK-O2-NEXT:    vsetvli t1, a6, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a6, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    add t1, a2, t0
 ; CHECK-O2-NEXT:    vle64.v v9, (t1)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
@@ -204,7 +204,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O0-NEXT:    ori t2, a4, 88
 ; CHECK-O0-NEXT:    vsetvl t1, a0, t2
 ; CHECK-O0-NEXT:    vle64.v v9, (t0)
-; CHECK-O0-NEXT:    vsetvli a7, a7, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a7, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    add a6, a6, a5
 ; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    vle64.v v10, (a6)
@@ -241,7 +241,7 @@ define void @test_extra_from_gvl_from_phi(i64 %n, double* %a, double* %b, double
 ; CHECK-O2-NEXT:    ori t4, a7, 88
 ; CHECK-O2-NEXT:    vsetvl t3, a6, t4
 ; CHECK-O2-NEXT:    vle64.v v8, (t2)
-; CHECK-O2-NEXT:    vsetvli t0, t0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, t0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    add t0, a2, t1
 ; CHECK-O2-NEXT:    vle64.v v9, (t0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
@@ -380,7 +380,7 @@ define void @test_extra_from_gvl_from_phi_from_temp_register(i64 %n, double* %a,
 ; CHECK-O0-NEXT:    ori t2, a4, 88
 ; CHECK-O0-NEXT:    vsetvl t1, a0, t2
 ; CHECK-O0-NEXT:    vle64.v v9, (t0)
-; CHECK-O0-NEXT:    vsetvli a7, a7, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a7, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    add a6, a6, a5
 ; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    vle64.v v10, (a6)
@@ -417,7 +417,7 @@ define void @test_extra_from_gvl_from_phi_from_temp_register(i64 %n, double* %a,
 ; CHECK-O2-NEXT:    ori t4, a7, 88
 ; CHECK-O2-NEXT:    vsetvl t3, a6, t4
 ; CHECK-O2-NEXT:    vle64.v v8, (t2)
-; CHECK-O2-NEXT:    vsetvli t0, t0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, t0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    add t0, a2, t1
 ; CHECK-O2-NEXT:    vle64.v v9, (t0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9

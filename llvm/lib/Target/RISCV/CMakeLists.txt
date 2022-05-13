@@ -49,6 +49,7 @@ add_llvm_target(RISCVCodeGen
   Analysis
   AsmPrinter
   Core
+  IPO
   CodeGen
   MC
   RISCVDesc
