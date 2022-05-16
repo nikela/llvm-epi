@@ -69,8 +69,8 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    [[N_VEC4:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF3]]
 ; CHECK-NEXT:    br label [[VEC_EPILOG_VECTOR_BODY:%.*]]
 ; CHECK:       vec.epilog.vector.body:
-; CHECK-NEXT:    [[INDEX6:%.*]] = phi i64 [ [[VEC_EPILOG_RESUME_VAL]], [[VEC_EPILOG_PH]] ], [ [[INDEX_NEXT9:%.*]], [[VEC_EPILOG_VECTOR_BODY]] ]
-; CHECK-NEXT:    [[TMP24:%.*]] = add i64 [[INDEX6]], 0
+; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = phi i64 [ [[VEC_EPILOG_RESUME_VAL]], [[VEC_EPILOG_PH]] ], [ [[INDEX_NEXT9:%.*]], [[VEC_EPILOG_VECTOR_BODY]] ]
+; CHECK-NEXT:    [[TMP24:%.*]] = add i64 [[OFFSET_IDX]], 0
 ; CHECK-NEXT:    [[TMP25:%.*]] = getelementptr inbounds float, float* [[DX]], i64 [[TMP24]]
 ; CHECK-NEXT:    [[TMP26:%.*]] = getelementptr inbounds float, float* [[TMP25]], i32 0
 ; CHECK-NEXT:    [[TMP27:%.*]] = bitcast float* [[TMP26]] to <vscale x 8 x float>*
@@ -86,7 +86,7 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    store <vscale x 8 x float> [[TMP31]], <vscale x 8 x float>* [[TMP34]], align 4, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[TMP35:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP36:%.*]] = mul i64 [[TMP35]], 8
-; CHECK-NEXT:    [[INDEX_NEXT9]] = add nuw i64 [[INDEX6]], [[TMP36]]
+; CHECK-NEXT:    [[INDEX_NEXT9]] = add nuw i64 [[OFFSET_IDX]], [[TMP36]]
 ; CHECK-NEXT:    [[TMP37:%.*]] = icmp eq i64 [[INDEX_NEXT9]], [[N_VEC4]]
 ; CHECK-NEXT:    br i1 [[TMP37]], label [[VEC_EPILOG_MIDDLE_BLOCK:%.*]], label [[VEC_EPILOG_VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; CHECK:       vec.epilog.middle.block:

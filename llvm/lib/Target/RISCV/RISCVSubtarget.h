@@ -253,6 +253,8 @@ public:
   unsigned getMinRVVVectorSizeInBits() const;
   unsigned getMaxLMULForFixedLengthVectors() const;
   bool useRVVForFixedLengthVectors() const;
+
+  bool enableSubRegLiveness() const override;
 };
 } // End llvm namespace
 

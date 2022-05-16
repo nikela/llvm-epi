@@ -73,6 +73,9 @@ set(opencl_files
 
 set(ppc_files
   altivec.h
+  )
+
+set(ppc_htm_files
   htmintrin.h
   htmxlintrin.h
   )
@@ -212,6 +215,7 @@ set(files
   ${mips_msa_files}
   ${opencl_files}
   ${ppc_files}
+  ${ppc_htm_files}
   ${systemz_files}
   ${ve_files}
   ${x86_files}
@@ -395,6 +399,7 @@ add_dependencies("clang-resource-headers"
                  "hip-resource-headers"
                  "mips-resource-headers"
                  "ppc-resource-headers"
+                 "ppc-htm-resource-headers"
                  "riscv-resource-headers"
                  "epi-resource-headers"
                  "systemz-resource-headers"
@@ -418,6 +423,7 @@ add_header_target("hexagon-resource-headers" "${hexagon_files}")
 add_header_target("hip-resource-headers" "${hip_files}")
 add_header_target("mips-resource-headers" "${mips_msa_files}")
 add_header_target("ppc-resource-headers" "${ppc_files};${ppc_wrapper_files}")
+add_header_target("ppc-htm-resource-headers" "${ppc_htm_files}")
 add_header_target("riscv-resource-headers" "${riscv_generated_files}")
 add_header_target("epi-resource-headers" "${epi_generated_files}")
 add_header_target("systemz-resource-headers" "${systemz_files}")
@@ -518,10 +524,16 @@ install(
   COMPONENT ppc-resource-headers)
 
 install(
-  FILES ${ppc_files} ${utility_files}
+  FILES ${ppc_files}
   DESTINATION ${header_install_dir}
   EXCLUDE_FROM_ALL
   COMPONENT ppc-resource-headers)
+
+install(
+  FILES ${ppc_htm_files}
+  DESTINATION ${header_install_dir}
+  EXCLUDE_FROM_ALL
+  COMPONENT ppc-htm-resource-headers)
 
 install(
   FILES ${riscv_generated_files}
@@ -616,6 +628,9 @@ if (NOT LLVM_ENABLE_IDE)
   add_llvm_install_targets(install-ppc-resource-headers
                            DEPENDS ppc-resource-headers
                            COMPONENT ppc-resource-headers)
+  add_llvm_install_targets(install-ppc-htm-resource-headers
+                           DEPENDS ppc-htm-resource-headers
+                           COMPONENT ppc-htm-resource-headers)
   add_llvm_install_targets(install-riscv-resource-headers
                            DEPENDS riscv-resource-headers
                            COMPONENT riscv-resource-headers)

@@ -308,8 +308,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(NT, MVT::f16, Legal);
     setOperationAction(ISD::STRICT_FP_ROUND, MVT::f16, Legal);
     setOperationAction(ISD::STRICT_FP_EXTEND, MVT::f32, Legal);
-    for (auto CC : FPCCToExpand)
-      setCondCodeAction(CC, MVT::f16, Expand);
+    setCondCodeAction(FPCCToExpand, MVT::f16, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f16, Expand);
     setOperationAction(ISD::SELECT, MVT::f16, Custom);
     setOperationAction(ISD::BR_CC, MVT::f16, Expand);
@@ -332,8 +331,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   if (Subtarget.hasStdExtF()) {
     for (auto NT : FPLegalNodeTypes)
       setOperationAction(NT, MVT::f32, Legal);
-    for (auto CC : FPCCToExpand)
-      setCondCodeAction(CC, MVT::f32, Expand);
+    setCondCodeAction(FPCCToExpand, MVT::f32, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f32, Expand);
     setOperationAction(ISD::SELECT, MVT::f32, Custom);
     setOperationAction(ISD::BR_CC, MVT::f32, Expand);
@@ -351,8 +349,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(NT, MVT::f64, Legal);
     setOperationAction(ISD::STRICT_FP_ROUND, MVT::f32, Legal);
     setOperationAction(ISD::STRICT_FP_EXTEND, MVT::f64, Legal);
-    for (auto CC : FPCCToExpand)
-      setCondCodeAction(CC, MVT::f64, Expand);
+    setCondCodeAction(FPCCToExpand, MVT::f64, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::f64, Expand);
     setOperationAction(ISD::SELECT, MVT::f64, Custom);
     setOperationAction(ISD::BR_CC, MVT::f64, Expand);
@@ -434,12 +431,11 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_REDUCE_OR,   ISD::VP_REDUCE_XOR,  ISD::VP_REDUCE_SMAX,
         ISD::VP_REDUCE_SMIN, ISD::VP_REDUCE_UMAX, ISD::VP_REDUCE_UMIN,
         ISD::VP_MERGE,       ISD::VP_SELECT,      ISD::VP_FPTOSI,
-        ISD::VP_FPTOUI,      ISD::VP_SETCC,       ISD::VP_SEXT,
-        ISD::VP_ZEXT,        ISD::VP_TRUNC,
+        ISD::VP_FPTOUI,      ISD::VP_SETCC,       ISD::VP_SIGN_EXTEND,
+        ISD::VP_ZERO_EXTEND, ISD::VP_TRUNCATE,
         // EPI
         ISD::EXPERIMENTAL_VP_REVERSE,
-        ISD::VP_REDUCE_MUL,
-    };
+        ISD::VP_REDUCE_MUL};
 
     static const unsigned FloatingPointVPOps[] = {
         ISD::VP_FADD,        ISD::VP_FSUB,
@@ -531,7 +527,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       }
 
       setOperationAction(
-          {ISD::VP_FPTOSI, ISD::VP_FPTOUI, ISD::VP_TRUNC, ISD::VP_SETCC}, VT,
+          {ISD::VP_FPTOSI, ISD::VP_FPTOUI, ISD::VP_TRUNCATE, ISD::VP_SETCC}, VT,
           Custom);
 
       setOperationAction(ISD::VP_LOAD, VT, Custom);
@@ -606,8 +602,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                           ISD::VECREDUCE_UMAX, ISD::VECREDUCE_UMIN},
                          VT, Custom);
 
-      for (unsigned VPOpc : IntegerVPOps)
-        setOperationAction(VPOpc, VT, Custom);
+      setOperationAction(IntegerVPOps, VT, Custom);
 
       setOperationAction({ISD::LOAD, ISD::STORE}, VT, Custom);
 
@@ -642,10 +637,10 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
 
       // Extensions
-      setOperationAction(ISD::VP_SEXT, VT, Custom);
-      setOperationAction(ISD::VP_ZEXT, VT, Custom);
+      setOperationAction(ISD::VP_SIGN_EXTEND, VT, Custom);
+      setOperationAction(ISD::VP_ZERO_EXTEND, VT, Custom);
 
-      setOperationAction(ISD::VP_TRUNC, VT, Custom);
+      setOperationAction(ISD::VP_TRUNCATE, VT, Custom);
 
       // Lower CTLZ_ZERO_UNDEF and CTTZ_ZERO_UNDEF if we have a floating point
       // type that can represent the value exactly.
@@ -686,8 +681,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                          Custom);
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
       // Expand various condition codes (explained above).
-      for (auto CC : VFPCCToExpand)
-        setCondCodeAction(CC, VT, Expand);
+      setCondCodeAction(VFPCCToExpand, VT, Expand);
 
       setOperationAction({ISD::FMINNUM, ISD::FMAXNUM}, VT, Legal);
 
@@ -720,9 +714,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       setOperationAction({ISD::VECTOR_REVERSE, ISD::VECTOR_SPLICE}, VT, Custom);
 
-      for (unsigned VPOpc : FloatingPointVPOps)
-        setOperationAction(VPOpc, VT, Custom);
-
+      setOperationAction(FloatingPointVPOps, VT, Custom);
       setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
     };
 
@@ -809,7 +801,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                              VT, Custom);
 
           setOperationAction(
-              {ISD::VP_FPTOSI, ISD::VP_FPTOUI, ISD::VP_SETCC, ISD::VP_TRUNC},
+              {ISD::VP_FPTOSI, ISD::VP_FPTOUI, ISD::VP_SETCC, ISD::VP_TRUNCATE},
               VT, Custom);
 
           setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
@@ -869,16 +861,15 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                             ISD::VECREDUCE_UMIN},
                            VT, Custom);
 
-        for (unsigned VPOpc : IntegerVPOps)
-          setOperationAction(VPOpc, VT, Custom);
+        setOperationAction(IntegerVPOps, VT, Custom);
 
         setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
 
         // Extensions
-        setOperationAction(ISD::VP_SEXT, VT, Custom);
-        setOperationAction(ISD::VP_ZEXT, VT, Custom);
+        setOperationAction(ISD::VP_SIGN_EXTEND, VT, Custom);
+        setOperationAction(ISD::VP_ZERO_EXTEND, VT, Custom);
 
-        setOperationAction(ISD::VP_TRUNC, VT, Custom);
+        setOperationAction(ISD::VP_TRUNCATE, VT, Custom);
 
         // Lower CTLZ_ZERO_UNDEF and CTTZ_ZERO_UNDEF if we have a floating point
         // type that can represent the value exactly.
@@ -947,9 +938,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
                             ISD::VECREDUCE_FMIN, ISD::VECREDUCE_FMAX},
                            VT, Custom);
 
-        for (unsigned VPOpc : FloatingPointVPOps)
-          setOperationAction(VPOpc, VT, Custom);
-
+        setOperationAction(FloatingPointVPOps, VT, Custom);
         setOperationAction(ISD::EXPERIMENTAL_VP_SPLICE, VT, Custom);
       }
 
@@ -1577,6 +1566,30 @@ bool RISCVTargetLowering::hasBitTest(SDValue X, SDValue Y) const {
   // We can use ANDI+SEQZ/SNEZ as a bit test. Y contains the bit position.
   auto *C = dyn_cast<ConstantSDNode>(Y);
   return C && C->getAPIntValue().ule(10);
+}
+
+bool RISCVTargetLowering::
+    shouldProduceAndByConstByHoistingConstFromShiftsLHSOfAnd(
+        SDValue X, ConstantSDNode *XC, ConstantSDNode *CC, SDValue Y,
+        unsigned OldShiftOpcode, unsigned NewShiftOpcode,
+        SelectionDAG &DAG) const {
+  // One interesting pattern that we'd want to form is 'bit extract':
+  //   ((1 >> Y) & 1) ==/!= 0
+  // But we also need to be careful not to try to reverse that fold.
+
+  // Is this '((1 >> Y) & 1)'?
+  if (XC && OldShiftOpcode == ISD::SRL && XC->isOne())
+    return false; // Keep the 'bit extract' pattern.
+
+  // Will this be '((1 >> Y) & 1)' after the transform?
+  if (NewShiftOpcode == ISD::SRL && CC->isOne())
+    return true; // Do form the 'bit extract' pattern.
+
+  // If 'X' is a constant, and we transform, then we will immediately
+  // try to undo the fold, thus causing endless combine loop.
+  // So only do the transform if X is not a constant. This matches the default
+  // implementation of this function.
+  return !XC;
 }
 
 /// Check if sinking \p I's operands to I's basic block is profitable, because
@@ -3775,26 +3788,24 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     static_assert(RISCV::RVVBitsPerBlock == 64, "Unexpected bits per block!");
     if (Subtarget.getMinVLen() < RISCV::RVVBitsPerBlock)
       report_fatal_error("Support for VLEN==32 is incomplete.");
-    if (isa<ConstantSDNode>(Op.getOperand(0))) {
-      // We assume VLENB is a multiple of 8. We manually choose the best shift
-      // here because SimplifyDemandedBits isn't always able to simplify it.
-      uint64_t Val = Op.getConstantOperandVal(0);
-      if (isPowerOf2_64(Val)) {
-        uint64_t Log2 = Log2_64(Val);
-        if (Log2 < 3)
-          return DAG.getNode(ISD::SRL, DL, VT, VLENB,
-                             DAG.getConstant(3 - Log2, DL, VT));
-        if (Log2 > 3)
-          return DAG.getNode(ISD::SHL, DL, VT, VLENB,
-                             DAG.getConstant(Log2 - 3, DL, VT));
-        return VLENB;
-      }
-      // If the multiplier is a multiple of 8, scale it down to avoid needing
-      // to shift the VLENB value.
-      if ((Val % 8) == 0)
-        return DAG.getNode(ISD::MUL, DL, VT, VLENB,
-                           DAG.getConstant(Val / 8, DL, VT));
+    // We assume VLENB is a multiple of 8. We manually choose the best shift
+    // here because SimplifyDemandedBits isn't always able to simplify it.
+    uint64_t Val = Op.getConstantOperandVal(0);
+    if (isPowerOf2_64(Val)) {
+      uint64_t Log2 = Log2_64(Val);
+      if (Log2 < 3)
+        return DAG.getNode(ISD::SRL, DL, VT, VLENB,
+                           DAG.getConstant(3 - Log2, DL, VT));
+      if (Log2 > 3)
+        return DAG.getNode(ISD::SHL, DL, VT, VLENB,
+                           DAG.getConstant(Log2 - 3, DL, VT));
+      return VLENB;
     }
+    // If the multiplier is a multiple of 8, scale it down to avoid needing
+    // to shift the VLENB value.
+    if ((Val % 8) == 0)
+      return DAG.getNode(ISD::MUL, DL, VT, VLENB,
+                         DAG.getConstant(Val / 8, DL, VT));
 
     SDValue VScale = DAG.getNode(ISD::SRL, DL, VT, VLENB,
                                  DAG.getConstant(3, DL, VT));
@@ -4311,14 +4322,15 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::VP_FMA:
   case ISD::VP_FMULADD:
     return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
-  case ISD::VP_SEXT:
-  case ISD::VP_ZEXT:
+  case ISD::VP_SIGN_EXTEND:
+  case ISD::VP_ZERO_EXTEND:
     if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
       return lowerVPExtMaskOp(Op, DAG);
     return lowerVPOp(Op, DAG,
-                     Op.getOpcode() == ISD::VP_SEXT ? RISCVISD::VSEXT_VL
-                                                    : RISCVISD::VZEXT_VL);
-  case ISD::VP_TRUNC:
+                     Op.getOpcode() == ISD::VP_SIGN_EXTEND
+                         ? RISCVISD::VSEXT_VL
+                         : RISCVISD::VZEXT_VL);
+  case ISD::VP_TRUNCATE:
     return lowerVectorTruncLike(Op, DAG);
   case ISD::VP_FP_EXTEND:
   case ISD::VP_FP_ROUND:
@@ -5310,7 +5322,7 @@ SDValue RISCVTargetLowering::lowerFixedLengthVectorExtendToRVV(
 //   (vXi1 = trunc vXiN vec) -> (vXi1 = setcc (and vec, 1), 0, ne)
 SDValue RISCVTargetLowering::lowerVectorMaskTruncLike(SDValue Op,
                                                       SelectionDAG &DAG) const {
-  bool IsVPTrunc = Op.getOpcode() == ISD::VP_TRUNC;
+  bool IsVPTrunc = Op.getOpcode() == ISD::VP_TRUNCATE;
   SDLoc DL(Op);
   EVT MaskVT = Op.getValueType();
   // Only expect to custom-lower truncations to mask types
@@ -5361,7 +5373,7 @@ SDValue RISCVTargetLowering::lowerVectorMaskTruncLike(SDValue Op,
 
 SDValue RISCVTargetLowering::lowerVectorTruncLike(SDValue Op,
                                                   SelectionDAG &DAG) const {
-  bool IsVPTrunc = Op.getOpcode() == ISD::VP_TRUNC;
+  bool IsVPTrunc = Op.getOpcode() == ISD::VP_TRUNCATE;
   SDLoc DL(Op);
 
   MVT VT = Op.getSimpleValueType();
@@ -6210,9 +6222,12 @@ SDValue RISCVTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
     SmallVector<EVT, 9> ContainerVTs(NF, ContainerVT);
     ContainerVTs.push_back(MVT::Other);
     SDVTList VTs = DAG.getVTList(ContainerVTs);
+    SmallVector<SDValue, 12> Ops = {Load->getChain(), IntID};
+    Ops.insert(Ops.end(), NF, DAG.getUNDEF(ContainerVT));
+    Ops.push_back(Op.getOperand(2));
+    Ops.push_back(VL);
     SDValue Result =
-        DAG.getMemIntrinsicNode(ISD::INTRINSIC_W_CHAIN, DL, VTs,
-                                {Load->getChain(), IntID, Op.getOperand(2), VL},
+        DAG.getMemIntrinsicNode(ISD::INTRINSIC_W_CHAIN, DL, VTs, Ops,
                                 Load->getMemoryVT(), Load->getMemOperand());
     SmallVector<SDValue, 9> Results;
     for (unsigned int RetIdx = 0; RetIdx < NF; RetIdx++)
@@ -7116,7 +7131,7 @@ RISCVTargetLowering::lowerFixedLengthVectorLoadToRVV(SDValue Op,
                               Load->getMemoryVT(), Load->getMemOperand());
 
   SDValue Result = convertFromScalableVector(VT, NewLoad, DAG, Subtarget);
-  return DAG.getMergeValues({Result, Load->getChain()}, DL);
+  return DAG.getMergeValues({Result, NewLoad.getValue(1)}, DL);
 }
 
 SDValue
@@ -7497,8 +7512,8 @@ SDValue RISCVTargetLowering::lowerVPExtMaskOp(SDValue Op,
   SDValue ZeroSplat = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
                                   DAG.getUNDEF(ContainerVT), Zero, VL);
 
-  SDValue SplatValue =
-      DAG.getConstant(Op.getOpcode() == ISD::VP_ZEXT ? 1 : -1, DL, XLenVT);
+  SDValue SplatValue = DAG.getConstant(
+      Op.getOpcode() == ISD::VP_ZERO_EXTEND ? 1 : -1, DL, XLenVT);
   SDValue Splat = DAG.getNode(RISCVISD::VMV_V_X_VL, DL, ContainerVT,
                               DAG.getUNDEF(ContainerVT), SplatValue, VL);
 
@@ -7909,7 +7924,7 @@ SDValue RISCVTargetLowering::lowerVPSpliceExperimental(SDValue Op,
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
 }
 
-// Lower VP_TRUNC nodes
+// Lower VP_TRUNCATE nodes
 SDValue RISCVTargetLowering::lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
   MVT VT = Op.getSimpleValueType();
@@ -7957,7 +7972,7 @@ SDValue RISCVTargetLowering::lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
 }
 
-// Lower VP_TRUNC nodes when the destination operand is a mask
+// Lower VP_TRUNCATE nodes when the destination operand is a mask
 SDValue RISCVTargetLowering::lowerVPTruncToMaskOp(SDValue Op,
                                                   SelectionDAG &DAG) const {
   SDLoc DL(Op);
@@ -9989,9 +10004,30 @@ static SDValue performSUBCombine(SDNode *N, SelectionDAG &DAG) {
   return combineSelectAndUse(N, N1, N0, DAG, /*AllOnes*/ false);
 }
 
-static SDValue performANDCombine(SDNode *N, SelectionDAG &DAG) {
+static SDValue performANDCombine(SDNode *N, SelectionDAG &DAG,
+                                 const RISCVSubtarget &Subtarget) {
+  SDValue N0 = N->getOperand(0);
+  // Pre-promote (i32 (and (srl X, Y), 1)) on RV64 with Zbs without zero
+  // extending X. This is safe since we only need the LSB after the shift and
+  // shift amounts larger than 31 would produce poison. If we wait until
+  // type legalization, we'll create RISCVISD::SRLW and we can't recover it
+  // to use a BEXT instruction.
+  if (Subtarget.is64Bit() && Subtarget.hasStdExtZbs() &&
+      N->getValueType(0) == MVT::i32 && isOneConstant(N->getOperand(1)) &&
+      N0.getOpcode() == ISD::SRL && !isa<ConstantSDNode>(N0.getOperand(1)) &&
+      N0.hasOneUse()) {
+    SDLoc DL(N);
+    SDValue Op0 = DAG.getNode(ISD::ANY_EXTEND, DL, MVT::i64, N0.getOperand(0));
+    SDValue Op1 = DAG.getNode(ISD::ZERO_EXTEND, DL, MVT::i64, N0.getOperand(1));
+    SDValue Srl = DAG.getNode(ISD::SRL, DL, MVT::i64, Op0, Op1);
+    SDValue And = DAG.getNode(ISD::AND, DL, MVT::i64, Srl,
+                              DAG.getConstant(1, DL, MVT::i64));
+    return DAG.getNode(ISD::TRUNCATE, DL, MVT::i32, And);
+  }
+
   if (SDValue V = combineBinOpToReduce(N, DAG))
     return V;
+
   // fold (and (select lhs, rhs, cc, -1, y), x) ->
   //      (select lhs, rhs, cc, x, (and x, y))
   return combineSelectAndUseCommutative(N, DAG, /*AllOnes*/ true);
@@ -10637,7 +10673,7 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   case ISD::SUB:
     return performSUBCombine(N, DAG);
   case ISD::AND:
-    return performANDCombine(N, DAG);
+    return performANDCombine(N, DAG, Subtarget);
   case ISD::OR:
     return performORCombine(N, DAG, Subtarget);
   case ISD::XOR:

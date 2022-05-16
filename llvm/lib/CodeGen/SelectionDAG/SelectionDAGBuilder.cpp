@@ -7560,9 +7560,9 @@ void SelectionDAGBuilder::visitVPPtrToInt(const VPIntrinsic &I) {
 
   auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
     if (VT.bitsGT(V.getValueType()))
-      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_ZERO_EXTEND, DL, VT, V, Mask, EVL);
     if (VT.bitsLT(V.getValueType()))
-      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_TRUNCATE, DL, VT, V, Mask, EVL);
     return V;
   };
 
@@ -7592,9 +7592,9 @@ void SelectionDAGBuilder::visitVPIntToPtr(const VPIntrinsic &I) {
 
   auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
     if (VT.bitsGT(V.getValueType()))
-      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_ZERO_EXTEND, DL, VT, V, Mask, EVL);
     if (VT.bitsLT(V.getValueType()))
-      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_TRUNCATE, DL, VT, V, Mask, EVL);
     return V;
   };
 

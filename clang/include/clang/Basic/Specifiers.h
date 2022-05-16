@@ -1,4 +1,4 @@
-//===--- Specifiers.h - Declaration and Type Specifiers ---------*- C++ -*-===//
+    //===--- Specifiers.h - Declaration and Type Specifiers ---------*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -285,6 +285,7 @@ namespace clang {
     CC_PreserveMost, // __attribute__((preserve_most))
     CC_PreserveAll,  // __attribute__((preserve_all))
     CC_AArch64VectorCall, // __attribute__((aarch64_vector_pcs))
+    CC_AArch64SVEPCS, // __attribute__((aarch64_sve_pcs))
     CC_EPIVectorCall, // __attribute__((epi_vectorcall))
   };
 
