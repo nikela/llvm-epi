@@ -718,15 +718,15 @@ def MV : Flag<["-"], "MV">, Group<M_Group>, Flags<[CC1Option]>,
     MarshallingInfoFlag<DependencyOutputOpts<"OutputFormat">, "DependencyOutputFormat::Make">,
     Normalizer<"makeFlagToValueNormalizer(DependencyOutputFormat::NMake)">;
 def Mach : Flag<["-"], "Mach">, Group<Link_Group>;
-def O0 : Flag<["-"], "O0">, Group<O_Group>, Flags<[CC1Option, HelpHidden]>;
-def O4 : Flag<["-"], "O4">, Group<O_Group>, Flags<[CC1Option, HelpHidden]>;
+def O0 : Flag<["-"], "O0">, Group<O_Group>, Flags<[CC1Option, FC1Option, HelpHidden]>;
+def O4 : Flag<["-"], "O4">, Group<O_Group>, Flags<[CC1Option, FC1Option, HelpHidden]>;
 def ObjCXX : Flag<["-"], "ObjC++">, Flags<[NoXarchOption]>,
   HelpText<"Treat source input files as Objective-C++ inputs">;
 def ObjC : Flag<["-"], "ObjC">, Flags<[NoXarchOption]>,
   HelpText<"Treat source input files as Objective-C inputs">;
-def O : Joined<["-"], "O">, Group<O_Group>, Flags<[CC1Option]>;
-def O_flag : Flag<["-"], "O">, Flags<[CC1Option]>, Alias<O>, AliasArgs<["1"]>;
-def Ofast : Joined<["-"], "Ofast">, Group<O_Group>, Flags<[CC1Option]>;
+def O : Joined<["-"], "O">, Group<O_Group>, Flags<[CC1Option, FC1Option]>;
+def O_flag : Flag<["-"], "O">, Flags<[CC1Option, FC1Option]>, Alias<O>, AliasArgs<["1"]>;
+def Ofast : Joined<["-"], "Ofast">, Group<O_Group>, Flags<[CC1Option, FC1Option]>;
 def P : Flag<["-"], "P">, Flags<[CC1Option,FlangOption,FC1Option]>, Group<Preprocessor_Group>,
   HelpText<"Disable linemarker output in -E mode">,
   MarshallingInfoNegativeFlag<PreprocessorOutputOpts<"ShowLineMarkers">>;
@@ -2821,9 +2821,9 @@ def ftrap_function_EQ : Joined<["-"], "ftrap-function=">, Group<f_Group>, Flags<
   HelpText<"Issue call to specified function rather than a trap instruction">,
   MarshallingInfoString<CodeGenOpts<"TrapFuncName">>;
 def funroll_loops : Flag<["-"], "funroll-loops">, Group<f_Group>,
-  HelpText<"Turn on loop unroller">, Flags<[CC1Option]>;
+  HelpText<"Turn on loop unroller">, Flags<[CC1Option, FC1Option]>;
 def fno_unroll_loops : Flag<["-"], "fno-unroll-loops">, Group<f_Group>,
-  HelpText<"Turn off loop unroller">, Flags<[CC1Option]>;
+  HelpText<"Turn off loop unroller">, Flags<[CC1Option, FC1Option]>;
 defm reroll_loops : BoolFOption<"reroll-loops",
   CodeGenOpts<"RerollLoops">, DefaultFalse,
   PosFlag<SetTrue, [CC1Option], "Turn on loop reroller">, NegFlag<SetFalse>>;
@@ -3387,10 +3387,10 @@ def msave_restore : Flag<["-"], "msave-restore">, Group<m_riscv_Features_Group>,
   HelpText<"Enable using library calls for save and restore">;
 def mno_save_restore : Flag<["-"], "mno-save-restore">, Group<m_riscv_Features_Group>,
   HelpText<"Disable using library calls for save and restore">;
-def mepi : Flag<["-"], "mepi">, Flags<[CC1Option]>,
+def mepi : Flag<["-"], "mepi">, Flags<[CC1Option, FC1Option]>,
   HelpText<"Enable EPI extensions">;
 def mno_prefer_predicate_over_epilog : Flag<["-"], "mno-prefer-predicate-over-epilog">,
-  Flags<[CC1Option]>,
+  Flags<[CC1Option, FC1Option]>,
   HelpText<"Indicate that an epilogue is desired and shouldn't be replaced by predication">;
 def mcmodel_EQ_medlow : Flag<["-"], "mcmodel=medlow">, Group<m_riscv_Features_Group>,
   Flags<[CC1Option]>, Alias<mcmodel_EQ>, AliasArgs<["small"]>,
@@ -4875,9 +4875,11 @@ def target_cpu : Separate<["-"], "target-cpu">,
 def tune_cpu : Separate<["-"], "tune-cpu">,
   HelpText<"Tune for a specific cpu type">,
   MarshallingInfoString<TargetOpts<"TuneCPU">>;
+let Flags = [CC1Option, CC1AsOption, NoDriverOption, FC1Option] in {
 def target_feature : Separate<["-"], "target-feature">,
   HelpText<"Target specific attributes">,
   MarshallingInfoStringVector<TargetOpts<"FeaturesAsWritten">>;
+}
 def target_abi : Separate<["-"], "target-abi">,
   HelpText<"Target a particular ABI type">,
   MarshallingInfoString<TargetOpts<"ABI">>;
@@ -5153,11 +5155,13 @@ def msave_temp_labels : Flag<["-"], "msave-temp-labels">,
            "Note this may change .s semantics and shouldn't generally be used "
            "on compiler-generated code.">,
   MarshallingInfoFlag<CodeGenOpts<"SaveTempLabels">>;
+let Flags = [CC1Option, CC1AsOption, FC1Option, NoDriverOption] in {
 def mrelocation_model : Separate<["-"], "mrelocation-model">,
   HelpText<"The relocation model to use">, Values<"static,pic,ropi,rwpi,ropi-rwpi,dynamic-no-pic">,
   NormalizedValuesScope<"llvm::Reloc">,
   NormalizedValues<["Static", "PIC_", "ROPI", "RWPI", "ROPI_RWPI", "DynamicNoPIC"]>,
   MarshallingInfoEnum<CodeGenOpts<"RelocationModel">, "PIC_">;
+}
 def fno_math_builtin : Flag<["-"], "fno-math-builtin">,
   HelpText<"Disable implicit builtin knowledge of math functions">,
   MarshallingInfoFlag<LangOpts<"NoMathBuiltin">>;
@@ -5288,12 +5292,14 @@ def mlink_builtin_bitcode : Separate<["-"], "mlink-builtin-bitcode">,
            "before performing optimizations.">;
 def mlink_cuda_bitcode : Separate<["-"], "mlink-cuda-bitcode">,
   Alias<mlink_builtin_bitcode>;
+let Flags = [CC1Option, FC1Option] in {
 def vectorize_loops : Flag<["-"], "vectorize-loops">,
   HelpText<"Run the Loop vectorization passes">,
   MarshallingInfoFlag<CodeGenOpts<"VectorizeLoop">>;
 def vectorize_slp : Flag<["-"], "vectorize-slp">,
   HelpText<"Run the SLP vectorization passes">,
   MarshallingInfoFlag<CodeGenOpts<"VectorizeSLP">>;
+}
 def dependent_lib : Joined<["--"], "dependent-lib=">,
   HelpText<"Add dependent library">,
   MarshallingInfoStringVector<CodeGenOpts<"DependentLibraries">>;
@@ -5882,12 +5888,14 @@ def fencode_extended_block_signature : Flag<["-"], "fencode-extended-block-signa
 def function_alignment : Separate<["-"], "function-alignment">,
     HelpText<"default alignment for functions">,
     MarshallingInfoInt<LangOpts<"FunctionAlignment">>;
+let Flags = [CC1Option, FC1Option, NoDriverOption] in {
 def pic_level : Separate<["-"], "pic-level">,
   HelpText<"Value for __PIC__">,
   MarshallingInfoInt<LangOpts<"PICLevel">>;
 def pic_is_pie : Flag<["-"], "pic-is-pie">,
   HelpText<"File is for a position independent executable">,
   MarshallingInfoFlag<LangOpts<"PIE">>;
+}
 def fhalf_no_semantic_interposition : Flag<["-"], "fhalf-no-semantic-interposition">,
   HelpText<"Like -fno-semantic-interposition but don't use local aliases">,
   MarshallingInfoFlag<LangOpts<"HalfNoSemanticInterposition">>;

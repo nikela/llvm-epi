@@ -32,6 +32,7 @@
 #include "mlir/Target/LLVMIR/ModuleTranslation.h"
 #include "clang/Basic/DiagnosticFrontend.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Bitcode/BitcodeWriterPass.h"
@@ -39,6 +40,7 @@
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/StandardInstrumentations.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Target/TargetMachine.h"
@@ -438,6 +440,7 @@ void CodeGenAction::GenerateLLVMIR() {
   assert(mlirModule && "The MLIR module has not been generated yet.");
 
   CompilerInstance &ci = this->instance();
+  CompilerInvocation &invoc = ci.invocation();
 
   fir::support::loadDialects(*mlirCtx);
   fir::support::registerLLVMTranslation(*mlirCtx);
@@ -470,6 +473,41 @@ void CodeGenAction::GenerateLLVMIR() {
     ci.diagnostics().Report(diagID);
     return;
   }
+
+  if (uint32_t PLevel = invoc.PICLevel) {
+    assert(PLevel < 3 && "Invalid PIC Level");
+    llvmModule->setPICLevel(static_cast<llvm::PICLevel::Level>(PLevel));
+    if (invoc.PIE)
+      llvmModule->setPIELevel(static_cast<llvm::PIELevel::Level>(PLevel));
+  }
+
+  // -- Heinous code starts here.
+  llvm::Triple currentTriple(llvmModule->getTargetTriple());
+  bool IsRISCV64Linux =
+      currentTriple.getArch() == llvm::Triple::ArchType::riscv64 &&
+      currentTriple.getOS() == llvm::Triple::OSType::Linux;
+  if (IsRISCV64Linux) {
+    llvm::LLVMContext &Ctx = llvmModule->getContext();
+    llvmModule->addModuleFlag(
+        llvm::Module::Error, "target-abi", llvm::MDString::get(Ctx, "lp64d"));
+  }
+  // -- Heinous code ends here.
+}
+
+static void computeTargetOpts(
+    llvm::Module &llvmModule, llvm::TargetOptions &TargetOpts) {
+  // OK. This is terrible but I can't tell exactly what are the plans here.
+  // So let's try to do something that is entirely to be thrown-away.
+  // "This is not a place of honour" and all that.
+  // -- Heinous code starts here.
+  llvm::Triple currentTriple(llvmModule.getTargetTriple());
+  bool IsRISCV64Linux =
+      currentTriple.getArch() == llvm::Triple::ArchType::riscv64 &&
+      currentTriple.getOS() == llvm::Triple::OSType::Linux;
+  if (IsRISCV64Linux) {
+    TargetOpts.MCOptions.ABIName = "lp64d";
+  }
+  // -- Heinous code ends here.
 }
 
 void CodeGenAction::SetUpTargetMachine() {
@@ -481,6 +519,9 @@ void CodeGenAction::SetUpTargetMachine() {
     ci.diagnostics().Report(clang::diag::warn_fe_override_module) << theTriple;
     llvmModule->setTargetTriple(theTriple);
   }
+
+  llvm::TargetOptions TargetOpts;
+  computeTargetOpts(*llvmModule, TargetOpts);
 
   // Create `Target`
   std::string error;
@@ -494,6 +535,101 @@ void CodeGenAction::SetUpTargetMachine() {
                                           llvm::TargetOptions(), llvm::None));
   assert(TM && "Failed to create TargetMachine");
   llvmModule->setDataLayout(TM->createDataLayout());
+}
+
+static llvm::OptimizationLevel mapToLevel(unsigned optLevel) {
+  switch (optLevel) {
+  default:
+    llvm_unreachable("Invalid optimization level!");
+  case 0:
+    return llvm::OptimizationLevel::O0;
+  case 1:
+    return llvm::OptimizationLevel::O1;
+  case 2:
+    // FIXME - Add support for -Os / -Oz
+    // switch (Opts.OptimizeSize) {
+    // default:
+    //   llvm_unreachable("Invalid optimization level for size!");
+    // case 0:
+    return llvm::OptimizationLevel::O2;
+    // case 1:
+    //   return llvm::OptimizationLevel::Os;
+    // case 2:
+    //   return llvm::OptimizationLevel::Oz;
+    // }
+  case 3:
+    return llvm::OptimizationLevel::O3;
+  }
+}
+
+static void runOptimizationPipeline(
+    llvm::Module &llvmModule, CompilerInstance &ci,
+    llvm::TargetMachine &TM,
+    llvm::TargetLibraryInfoImpl& TLII) {
+  // Create an LLVM opt pipeline. For now use a vanilla one.
+  // Taken from clang's BackendUtil.cpp.
+  // We use the new pass manager.
+  auto &invoc = ci.invocation();
+  llvm::PipelineTuningOptions PTO;
+  PTO.SLPVectorization = invoc.vectorizeSLP;
+  PTO.LoopVectorization = invoc.vectorizeLoop;
+  PTO.LoopUnrolling = invoc.unrollLoops;
+  // For historical reasons, loop interleaving is set to mirror setting for loop
+  // unrolling.
+  PTO.LoopInterleaving = invoc.unrollLoops;
+
+  llvm::Optional<llvm::PGOOptions> PGOOpt;
+
+  llvm::LoopAnalysisManager LAM;
+  llvm::FunctionAnalysisManager FAM;
+  llvm::CGSCCAnalysisManager CGAM;
+  llvm::ModuleAnalysisManager MAM;
+
+  constexpr bool DebugPassStructure = false;
+  constexpr bool DebugPassManager = false;
+
+  llvm::PassInstrumentationCallbacks PIC;
+  llvm::PrintPassOptions PrintPassOpts;
+  PrintPassOpts.Indent = DebugPassStructure;
+  PrintPassOpts.SkipAnalyses = DebugPassStructure;
+  llvm::StandardInstrumentations SI(DebugPassManager || DebugPassStructure,
+      /*VerifyEach*/ false, PrintPassOpts);
+  SI.registerCallbacks(PIC, &FAM);
+  llvm::PassBuilder PB(&TM, PTO, PGOOpt, &PIC);
+
+  llvm::OptimizationLevel optLevel = mapToLevel(invoc.optLevel());
+  llvm::ModulePassManager MPM;
+
+  // Register the AA manager first so that our version is the one used.
+  FAM.registerPass([&] { return PB.buildDefaultAAPipeline(); });
+
+  // Register the target library analysis directly and give it a customized
+  // preset TLI.
+  FAM.registerPass([&] { return llvm::TargetLibraryAnalysis(TLII); });
+
+  PB.registerModuleAnalyses(MAM);
+  PB.registerCGSCCAnalyses(CGAM);
+  PB.registerFunctionAnalyses(FAM);
+  PB.registerLoopAnalyses(LAM);
+  PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+
+  if (optLevel != llvm::OptimizationLevel::O0) {
+    MPM = PB.buildPerModuleDefaultPipeline(optLevel);
+  } else {
+    MPM = PB.buildO0DefaultPipeline(optLevel);
+  }
+  MPM.run(llvmModule, MAM);
+}
+
+
+void CodeGenAction::OptimizeLLVMIR() {
+  CompilerInstance &ci = this->instance();
+
+  // Run the optimization pipeline
+  llvm::Triple triple(llvmModule->getTargetTriple());
+  std::unique_ptr<llvm::TargetLibraryInfoImpl> TLII =
+      std::make_unique<llvm::TargetLibraryInfoImpl>(triple);
+  runOptimizationPipeline(*llvmModule, ci, *TM, *TLII);
 }
 
 static std::unique_ptr<llvm::raw_pwrite_stream>
@@ -621,13 +757,15 @@ void CodeGenAction::ExecuteAction() {
   if (!llvmModule)
     GenerateLLVMIR();
 
+  SetUpTargetMachine();
+  OptimizeLLVMIR();
+
   if (action == BackendActionTy::Backend_EmitLL) {
     llvmModule->print(ci.IsOutputStreamNull() ? *os : ci.GetOutputStream(),
                       /*AssemblyAnnotationWriter=*/nullptr);
     return;
   }
 
-  SetUpTargetMachine();
   if (action == BackendActionTy::Backend_EmitBC) {
     GenerateLLVMBCImpl(*TM, *llvmModule, *os);
     return;

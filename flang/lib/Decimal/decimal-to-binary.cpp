@@ -461,16 +461,20 @@ ConversionToBinaryResult<PREC> ConvertToBinary(
   return BigRadixFloatingPointNumber<PREC>{rounding}.ConvertToBinary(p, end);
 }
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template ConversionToBinaryResult<8> ConvertToBinary<8>(
     const char *&, enum FortranRounding, const char *end);
 template ConversionToBinaryResult<11> ConvertToBinary<11>(
     const char *&, enum FortranRounding, const char *end);
+#endif
 template ConversionToBinaryResult<24> ConvertToBinary<24>(
     const char *&, enum FortranRounding, const char *end);
 template ConversionToBinaryResult<53> ConvertToBinary<53>(
     const char *&, enum FortranRounding, const char *end);
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template ConversionToBinaryResult<64> ConvertToBinary<64>(
     const char *&, enum FortranRounding, const char *end);
+#endif
 template ConversionToBinaryResult<113> ConvertToBinary<113>(
     const char *&, enum FortranRounding, const char *end);
 
@@ -489,6 +493,7 @@ enum ConversionResultFlags ConvertDecimalToDouble(
       reinterpret_cast<const void *>(&result.binary), sizeof *d);
   return result.flags;
 }
+#ifdef LONG_DOUBLE
 enum ConversionResultFlags ConvertDecimalToLongDouble(
     const char **p, long double *ld, enum FortranRounding rounding) {
   auto result{Fortran::decimal::ConvertToBinary<64>(*p, rounding)};
@@ -496,5 +501,6 @@ enum ConversionResultFlags ConvertDecimalToLongDouble(
       reinterpret_cast<const void *>(&result.binary), sizeof *ld);
   return result.flags;
 }
+#endif
 }
 } // namespace Fortran::decimal

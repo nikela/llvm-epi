@@ -31,32 +31,6 @@ subroutine abs_testi16(a, b)
   b = abs(a)
 end subroutine
 
-! CHECK-LABEL: func @_QPabs_testh(
-! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<f16>{{.*}}, %[[VAL_1:.*]]: !fir.ref<f16>{{.*}}) {
-subroutine abs_testh(a, b)
-! CHECK: %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<f16>
-! CHECK: %[[VAL_2_1:.*]] = fir.convert %[[VAL_2]] : (f16) -> f32
-! CHECK: %[[VAL_3:.*]] = fir.call @llvm.fabs.f32(%[[VAL_2_1]]) : (f32) -> f32
-! CHECK: %[[VAL_3_1:.*]] = fir.convert %[[VAL_3]] : (f32) -> f16
-! CHECK: fir.store %[[VAL_3_1]] to %[[VAL_1]] : !fir.ref<f16>
-! CHECK: return
-  real(kind=2) :: a, b
-  b = abs(a)
-end subroutine
-
-! CHECK-LABEL: func @_QPabs_testb(
-! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<bf16>{{.*}}, %[[VAL_1:.*]]: !fir.ref<bf16>{{.*}}) {
-subroutine abs_testb(a, b)
-! CHECK: %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<bf16>
-! CHECK: %[[VAL_2_1:.*]] = fir.convert %[[VAL_2]] : (bf16) -> f32
-! CHECK: %[[VAL_3:.*]] = fir.call @llvm.fabs.f32(%[[VAL_2_1]]) : (f32) -> f32
-! CHECK: %[[VAL_3_1:.*]] = fir.convert %[[VAL_3]] : (f32) -> bf16
-! CHECK: fir.store %[[VAL_3_1]] to %[[VAL_1]] : !fir.ref<bf16>
-! CHECK: return
-  real(kind=3) :: a, b
-  b = abs(a)
-end subroutine
-
 ! CHECK-LABEL: func @_QPabs_testr(
 ! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<f32>{{.*}}, %[[VAL_1:.*]]: !fir.ref<f32>{{.*}}) {
 subroutine abs_testr(a, b)

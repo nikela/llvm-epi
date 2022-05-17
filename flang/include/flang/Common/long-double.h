@@ -12,12 +12,16 @@
 #ifndef FORTRAN_COMMON_LONG_DOUBLE_H
 #define FORTRAN_COMMON_LONG_DOUBLE_H
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+
 #ifdef _MSC_VER /* no long double */
 #undef LONG_DOUBLE
 #elif __x86_64__ /* x87 extended precision */
 #define LONG_DOUBLE 80
 #else
 #define LONG_DOUBLE 128
+#endif
+
 #endif
 
 #endif /* FORTRAN_COMMON_LONG_DOUBLE_H */

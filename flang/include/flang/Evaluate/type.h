@@ -66,7 +66,14 @@ static constexpr bool IsValidKindOfIntrinsicType(
     return kind == 1 || kind == 2 || kind == 4 || kind == 8 || kind == 16;
   case TypeCategory::Real:
   case TypeCategory::Complex:
-    return kind == 2 || kind == 3 || kind == 4 || kind == 8 || kind == 10 ||
+    return
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+      kind == 2 || kind == 3 ||
+#endif
+      kind == 4 || kind == 8 ||
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+      kind == 10 ||
+#endif
         kind == 16;
   case TypeCategory::Character:
     return kind == 1 || kind == 2 || kind == 4;
@@ -332,7 +339,19 @@ using CategoryTypesHelper =
     common::CombineTuples<CategoryKindTuple<CATEGORY, KINDS>...>;
 
 template <TypeCategory CATEGORY>
-using CategoryTypes = CategoryTypesHelper<CATEGORY, 1, 2, 3, 4, 8, 10, 16, 32>;
+using CategoryTypes = CategoryTypesHelper<CATEGORY, 1, 2,
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+    3,
+#endif
+    4, 8,
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+    10,
+#endif
+    16
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+    , 32
+#endif
+    >;
 
 using IntegerTypes = CategoryTypes<TypeCategory::Integer>;
 using RealTypes = CategoryTypes<TypeCategory::Real>;
@@ -455,8 +474,13 @@ int SelectedRealKind(
 // For generating "[extern] template class", &c. boilerplate
 #define EXPAND_FOR_EACH_INTEGER_KIND(M, P, S) \
   M(P, S, 1) M(P, S, 2) M(P, S, 4) M(P, S, 8) M(P, S, 16)
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #define EXPAND_FOR_EACH_REAL_KIND(M, P, S) \
   M(P, S, 2) M(P, S, 3) M(P, S, 4) M(P, S, 8) M(P, S, 10) M(P, S, 16)
+#else
+#define EXPAND_FOR_EACH_REAL_KIND(M, P, S) \
+  M(P, S, 4) M(P, S, 8) M(P, S, 16)
+#endif
 #define EXPAND_FOR_EACH_COMPLEX_KIND(M, P, S) EXPAND_FOR_EACH_REAL_KIND(M, P, S)
 #define EXPAND_FOR_EACH_CHARACTER_KIND(M, P, S) M(P, S, 1) M(P, S, 2) M(P, S, 4)
 #define EXPAND_FOR_EACH_LOGICAL_KIND(M, P, S) \

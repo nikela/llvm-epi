@@ -397,11 +397,20 @@ static void addFortranRuntimeLibraryPath(const ToolChain &TC,
   CmdArgs.push_back(Args.MakeArgString("-L" + DefaultLibPath));
 }
 
-static void addFortranLinkerFlags(ArgStringList &CmdArgs) {
+static void addFortranLinkerFlags(ArgStringList &CmdArgs,
+                                  const llvm::Triple &Triple) {
   CmdArgs.push_back("-lFortran_main");
   CmdArgs.push_back("-lFortranRuntime");
   CmdArgs.push_back("-lFortranDecimal");
   CmdArgs.push_back("-lm");
+
+  CmdArgs.push_back("-lpgmath");
+
+  if (!Triple.isOSDarwin())
+    CmdArgs.push_back("-lrt");
+
+  // Always link Fortran executables with pthreads.
+  CmdArgs.push_back("-lpthread");
 }
 
 void tools::gnutools::Linker::ConstructJob(Compilation &C, const JobAction &JA,
@@ -615,13 +624,9 @@ void tools::gnutools::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   // to generate executables. As Fortran runtime depends on the C runtime,
   // these dependencies need to be listed before the C runtime below (i.e.
   // AddRuntTimeLibs).
-  //
-  // NOTE: Generating executables by Flang is considered an "experimental"
-  // feature and hence this is guarded with a command line option.
-  // TODO: Make this work unconditionally once Flang is mature enough.
-  if (D.IsFlangMode() && Args.hasArg(options::OPT_flang_experimental_exec)) {
+  if (D.IsFlangMode()) {
     addFortranRuntimeLibraryPath(ToolChain, Args, CmdArgs);
-    addFortranLinkerFlags(CmdArgs);
+    addFortranLinkerFlags(CmdArgs, Triple);
   }
 
   if (!Args.hasArg(options::OPT_nostdlib, options::OPT_r)) {

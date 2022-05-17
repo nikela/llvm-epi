@@ -28,20 +28,6 @@ subroutine nearest_test1(x, s)
   ! CHECK: fir.store %[[tmp]] to %[[res]] : !fir.ref<f64>
   end subroutine nearest_test2
   
-  ! CHECK-LABEL: nearest_test3
-  subroutine nearest_test3(x, s)
-    real(kind=10) :: x, s, res
-  ! CHECK: %[[res:.*]] = fir.alloca f80 {bindc_name = "res", uniq_name = "_QFnearest_test3Eres"}
-  ! CHECK: %[[x:.*]] = fir.load %arg0 : !fir.ref<f80>
-  ! CHECK: %[[s:.*]] = fir.load %arg1 : !fir.ref<f80>
-  ! CHECK: %[[zero:.*]] = arith.constant 0.000000e+00 : f80
-  ! CHECK: %[[cmp:.*]] = arith.cmpf ogt, %[[s]], %[[zero]] : f80
-  ! CHECK: %[[pos:.*]] = arith.select %[[cmp]], %true, %false : i1
-    res = nearest(x, s)
-  ! CHECK: %[[tmp:.*]] = fir.call @_FortranANearest10(%[[x]], %[[pos]]) : (f80, i1) -> f80
-  ! CHECK: fir.store %[[tmp]] to %[[res]] : !fir.ref<f80>
-  end subroutine nearest_test3
-  
   ! CHECK-LABEL: nearest_test4
   subroutine nearest_test4(x, s)
     real(kind=16) :: x, s, res

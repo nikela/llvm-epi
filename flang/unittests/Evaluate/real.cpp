@@ -511,11 +511,15 @@ void subsetTests(int pass, Rounding rounding, std::uint32_t opds) {
 }
 
 void roundTest(int rm, Rounding rounding, std::uint32_t opds) {
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   basicTests<Real2>(rm, rounding);
   basicTests<Real3>(rm, rounding);
+#endif
   basicTests<Real4>(rm, rounding);
   basicTests<Real8>(rm, rounding);
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   basicTests<Real10>(rm, rounding);
+#endif
   basicTests<Real16>(rm, rounding);
   ScopedHostFloatingPointEnvironment::SetRounding(rounding);
   subsetTests<std::uint32_t, float, Real4>(rm, rounding, opds);

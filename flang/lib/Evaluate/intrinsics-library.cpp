@@ -324,6 +324,7 @@ template <> struct HostRuntimeLibrary<double, LibraryVersion::LibmExtensions> {
   static_assert(map.Verify(), "map must be sorted");
 };
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #if !defined(__PPC__) || defined(__LONG_DOUBLE_IEEE128__)
 // TODO: use HostTypeExists instead?
 template <>
@@ -342,6 +343,7 @@ struct HostRuntimeLibrary<long double, LibraryVersion::LibmExtensions> {
   static_assert(map.Verify(), "map must be sorted");
 };
 #endif // !defined(__PPC__) || defined(__LONG_DOUBLE_IEEE128__)
+#endif // FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #endif
 
 /// Define pgmath description

@@ -382,6 +382,9 @@ public:
   /// Generate code testing \p addr is a null address.
   mlir::Value genIsNull(mlir::Location loc, mlir::Value addr);
 
+  /// Generate code testing \p arg is a NaN.
+  mlir::Value genIsNaN(mlir::Location loc, mlir::Value arg);
+
   /// Compute the extent of (lb:ub:step) as max((ub-lb+step)/step, 0). See
   /// Fortran 2018 9.5.3.3.2 section for more details.
   mlir::Value genExtentFromTriplet(mlir::Location loc, mlir::Value lb,

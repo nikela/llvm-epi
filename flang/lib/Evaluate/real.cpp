@@ -756,10 +756,14 @@ template <typename W, int P> Real<W, P> Real<W, P>::SPACING() const {
   }
 }
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Real<Integer<16>, 11>;
 template class Real<Integer<16>, 8>;
+#endif
 template class Real<Integer<32>, 24>;
 template class Real<Integer<64>, 53>;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Real<Integer<80>, 64>;
+#endif
 template class Real<Integer<128>, 113>;
 } // namespace Fortran::evaluate::value

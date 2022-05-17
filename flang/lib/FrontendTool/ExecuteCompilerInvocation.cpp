@@ -148,6 +148,19 @@ bool ExecuteCompilerInvocation(CompilerInstance *flang) {
     llvm::cl::ParseCommandLineOptions(numArgs + 1, args.get());
   }
 
+  // Honor -mllvm.
+  // Taken from clang.
+  if (!flang->frontendOpts().LLVMArgs.empty()) {
+    unsigned NumArgs = flang->frontendOpts().LLVMArgs.size();
+    auto Args = std::make_unique<const char *[]>(NumArgs + 2);
+    Args[0] = "flang (LLVM option parsing)";
+    for (unsigned i = 0; i != NumArgs; ++i) {
+      Args[i + 1] = flang->frontendOpts().LLVMArgs[i].c_str();
+    }
+    Args[NumArgs + 1] = nullptr;
+    llvm::cl::ParseCommandLineOptions(NumArgs + 1, Args.get());
+  }
+
   // If there were errors in processing arguments, don't do anything else.
   if (flang->diagnostics().hasErrorOccurred()) {
     return false;

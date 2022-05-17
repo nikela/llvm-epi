@@ -20,18 +20,22 @@ namespace Fortran::common {
 // Total representation size in bits for each type
 static constexpr int BitsForBinaryPrecision(int binaryPrecision) {
   switch (binaryPrecision) {
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 8: // IEEE single (truncated): 1+8+7 with implicit bit
     return 16;
   case 11: // IEEE half precision: 1+5+10 with implicit bit
     return 16;
+#endif
   case 24: // IEEE single precision: 1+8+23 with implicit bit
     return 32;
   case 53: // IEEE double precision: 1+11+52 with implicit bit
     return 64;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 64: // x87 extended precision: 1+15+64, no implicit bit
     return 80;
   case 106: // "double-double": 2*(1+11+52 with implicit bit)
     return 128;
+#endif
   case 113: // IEEE quad precision: 1+15+112 with implicit bit
     return 128;
   default:

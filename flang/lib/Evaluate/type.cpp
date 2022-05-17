@@ -129,11 +129,13 @@ std::optional<Expr<SubscriptInteger>> DynamicType::GetCharLength() const {
 
 static constexpr std::size_t RealKindBytes(int kind) {
   switch (kind) {
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 3: // non-IEEE 16-bit format (truncated 32-bit)
     return 2;
   case 10: // 80387 80-bit extended precision
   case 12: // possible variant spelling
     return 16;
+#endif
   default:
     return kind;
   }

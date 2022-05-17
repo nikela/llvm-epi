@@ -15,6 +15,8 @@
 
 #include "flang/Lower/IntrinsicCall.h"
 #include "flang/Common/static-multimap-view.h"
+#include "flang/Lower/BuiltinModules.h"
+#include "flang/Lower/ConvertType.h"
 #include "flang/Lower/Mangler.h"
 #include "flang/Lower/Runtime.h"
 #include "flang/Lower/StatementContext.h"
@@ -440,6 +442,9 @@ struct IntrinsicLibrary {
   getRuntimeCallGenerator(llvm::StringRef name,
                           mlir::FunctionType soughtFuncType);
 
+  mlir::Value genIEEEIsNaN(mlir::Type, llvm::ArrayRef<mlir::Value>);
+  void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
+
   /// Lowering for the ABS intrinsic. The ABS intrinsic expects one argument in
   /// the llvm::ArrayRef. The ABS intrinsic is lowered into MLIR/FIR operation
   /// if the argument is an integer, into llvm intrinsics if the argument is
@@ -529,6 +534,8 @@ struct IntrinsicLibrary {
   mlir::Value genSetExponent(mlir::Type resultType,
                              llvm::ArrayRef<mlir::Value> args);
   mlir::Value genSign(mlir::Type, llvm::ArrayRef<mlir::Value>);
+  mlir::Value genSelectedIntKind(mlir::Type, llvm::ArrayRef<mlir::Value>);
+  mlir::Value genSelectedRealKind(mlir::Type, llvm::ArrayRef<mlir::Value>);
   fir::ExtendedValue genSize(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   mlir::Value genSpacing(mlir::Type resultType,
                          llvm::ArrayRef<mlir::Value> args);
@@ -658,6 +665,11 @@ static constexpr bool handleDynamicOptional = true;
 /// argument must not be lowered by value. In which case, the lowering rules
 /// should be provided for all the intrinsic arguments for completeness.
 static constexpr IntrinsicHandler handlers[]{
+    {"__builtin_c_f_pointer",
+     &I::genCFPointer,
+     {{{"cptr", asAddr}, {"fptr", asInquired}, {"shape", asAddr}}},
+     /*isElemental=*/false},
+    {"__builtin_ieee_is_nan", &I::genIEEEIsNaN},
     {"abs", &I::genAbs},
     {"achar", &I::genChar},
     {"adjustl",
@@ -880,6 +892,16 @@ static constexpr IntrinsicHandler handlers[]{
        {"back", asValue, handleDynamicOptional},
        {"kind", asValue}}},
      /*isElemental=*/true},
+    {"selected_int_kind",
+     &I::genSelectedIntKind,
+     {{{"r", asValue}}},
+     /*isElemental=*/false},
+    {"selected_real_kind",
+     &I::genSelectedRealKind,
+     {{{"p", asValue, handleDynamicOptional},
+       {"r", asValue, handleDynamicOptional},
+       {"radix", asValue, handleDynamicOptional}}},
+     /*isElemental*/ false},
     {"set_exponent", &I::genSetExponent},
     {"sign", &I::genSign},
     {"size",
@@ -1813,6 +1835,82 @@ mlir::Value IntrinsicLibrary::genConversion(mlir::Type resultType,
   // There can be an optional kind in second argument.
   assert(args.size() >= 1);
   return builder.convertWithSemantics(loc, resultType, args[0]);
+}
+
+mlir::Value IntrinsicLibrary::genIEEEIsNaN(mlir::Type resultType,
+                                           llvm::ArrayRef<mlir::Value> args) {
+  assert(args.size() == 1);
+  mlir::Value arg = args[0];
+  mlir::Type type = arg.getType();
+  assert(fir::isa_real(type));
+  return builder.createConvert(loc, resultType, builder.genIsNaN(loc, arg));
+}
+
+static fir::ShapeOp genShapeOp(mlir::Location loc, fir::FirOpBuilder &builder,
+                               llvm::ArrayRef<mlir::Value> shape) {
+  mlir::IndexType idxTy = builder.getIndexType();
+  llvm::SmallVector<mlir::Value> idxShape;
+  for (auto s : shape)
+    idxShape.push_back(builder.createConvert(loc, idxTy, s));
+  auto shapeTy = fir::ShapeType::get(builder.getContext(), idxShape.size());
+  return builder.create<fir::ShapeOp>(loc, shapeTy, idxShape);
+}
+
+void IntrinsicLibrary::genCFPointer(llvm::ArrayRef<fir::ExtendedValue> args) {
+  fir::ExtendedValue cptr = args[0];
+  fir::ExtendedValue fptr = args[1];
+  bool absentShape = isStaticallyAbsent(args[2]);
+
+  llvm::StringRef addrFieldName = Fortran::lower::builtin::cptrFieldName;
+  mlir::Value cptrValue = fir::getBase(cptr);
+  mlir::Value fptrValue = fir::getBase(fptr);
+  fir::RecordType recTy = cptrValue.getType()
+                              .cast<fir::ReferenceType>()
+                              .getEleTy()
+                              .cast<fir::RecordType>();
+  mlir::Type componentTy = recTy.getType(addrFieldName);
+  mlir::Type fieldTy = fir::FieldType::get(componentTy.getContext());
+  mlir::Value addrFieldIndex = builder.create<fir::FieldIndexOp>(
+      loc, fieldTy, addrFieldName, recTy,
+      /*typeParams=*/mlir::ValueRange{} /* TODO */);
+  mlir::Value addrFieldAddr = builder.create<fir::CoordinateOp>(
+      loc, builder.getRefType(componentTy), cptrValue, addrFieldIndex);
+  mlir::Value addrFieldValue = builder.create<fir::LoadOp>(loc, addrFieldAddr);
+  mlir::Type fptrBoxTy = fir::unwrapRefType(fptrValue.getType());
+  mlir::Type boxElemTy = fptrBoxTy.cast<fir::BoxType>().getEleTy();
+  mlir::Value castValue = builder.createConvert(loc, boxElemTy, addrFieldValue);
+
+  if (absentShape) {
+    mlir::Value emboxed =
+        builder.create<fir::EmboxOp>(loc, fptrBoxTy, castValue);
+    builder.create<fir::StoreOp>(loc, emboxed, fptrValue);
+    fptr.match(
+        [&](const fir::MutableBoxValue &mutableBox) {
+          fir::factory::syncMutableBoxFromIRBox(builder, loc, mutableBox);
+        },
+        [&](const auto &) {});
+  } else {
+    fir::ExtendedValue shape = args[2];
+    mlir::Value shapeValue = fir::getBase(shape);
+
+    mlir::Type shapeElemTy =
+        fir::unwrapSequenceType(fir::unwrapRefType(shapeValue.getType()));
+    llvm::SmallVector<mlir::Value> shapeValues;
+    auto rank = fptr.rank();
+    assert(rank > 0 && "Unexpected rank");
+    for (decltype(rank) dim = 0; dim < rank; ++dim) {
+      mlir::Value idxConst = builder.createIntegerConstant(
+          loc, builder.getDefaultIntegerType(), dim);
+      mlir::Value elementAddr = builder.create<fir::CoordinateOp>(
+          loc, builder.getRefType(shapeElemTy), shapeValue, idxConst);
+      mlir::Value elementValue = builder.create<fir::LoadOp>(loc, elementAddr);
+      shapeValues.push_back(elementValue);
+    }
+    mlir::Value newShape = genShapeOp(loc, builder, shapeValues);
+    mlir::Value emboxed =
+        builder.create<fir::EmboxOp>(loc, fptrBoxTy, castValue, newShape);
+    builder.create<fir::StoreOp>(loc, emboxed, fptrValue);
+  }
 }
 
 // ABS
@@ -3269,6 +3367,42 @@ mlir::Value IntrinsicLibrary::genSetExponent(mlir::Type resultType,
                                    fir::getBase(args[1])));
 }
 
+// SELECTED_INT_KIND
+mlir::Value
+IntrinsicLibrary::genSelectedIntKind(mlir::Type resultType,
+                                     llvm::ArrayRef<mlir::Value> args) {
+  assert(args.size() == 1);
+  assert(resultType == builder.getDefaultIntegerType() &&
+         "result type is not default integer kind type");
+
+  return fir::runtime::genSelectedIntKind(builder, loc, fir::getBase(args[0]));
+}
+
+// SELECTED_REAL_KIND
+mlir::Value
+IntrinsicLibrary::genSelectedRealKind(mlir::Type resultType,
+                                      llvm::ArrayRef<mlir::Value> args) {
+  assert(args.size() == 3);
+  assert(resultType == builder.getDefaultIntegerType() &&
+         "result type is not default integer kind type");
+
+  mlir::Value p = isStaticallyAbsent(args[0])
+                      ? builder.createIntegerConstant(
+                            loc, builder.getDefaultIntegerType(), 0)
+                      : fir::getBase(args[0]);
+  mlir::Value r = isStaticallyAbsent(args[1])
+                      ? builder.createIntegerConstant(
+                            loc, builder.getDefaultIntegerType(), 0)
+                      : fir::getBase(args[1]);
+  // A radix of zero means it doesn't matter.
+  mlir::Value radix = isStaticallyAbsent(args[2])
+                          ? builder.createIntegerConstant(
+                                loc, builder.getDefaultIntegerType(), 2)
+                          : fir::getBase(args[2]);
+
+  return fir::runtime::genSelectedRealKind(builder, loc, p, r, radix);
+}
+
 // SIGN
 mlir::Value IntrinsicLibrary::genSign(mlir::Type resultType,
                                       llvm::ArrayRef<mlir::Value> args) {
@@ -3636,16 +3770,14 @@ static mlir::Value createExtremumCompare(mlir::Location loc,
       // a number.
       auto leftIsResult =
           builder.create<mlir::arith::CmpFOp>(loc, orderedCmp, left, right);
-      auto rightIsNan = builder.create<mlir::arith::CmpFOp>(
-          loc, mlir::arith::CmpFPredicate::UNE, right, right);
+      auto rightIsNan = builder.genIsNaN(loc, right);
       result =
           builder.create<mlir::arith::OrIOp>(loc, leftIsResult, rightIsNan);
     } else if constexpr (behavior == ExtremumBehavior::IeeeMinMaximum) {
       // Always return NaNs if one the input is NaNs
       auto leftIsResult =
           builder.create<mlir::arith::CmpFOp>(loc, orderedCmp, left, right);
-      auto leftIsNan = builder.create<mlir::arith::CmpFOp>(
-          loc, mlir::arith::CmpFPredicate::UNE, left, left);
+      auto leftIsNan = builder.genIsNaN(loc, left);
       result = builder.create<mlir::arith::OrIOp>(loc, leftIsResult, leftIsNan);
     } else if constexpr (behavior == ExtremumBehavior::MinMaxss) {
       // If the left is a NaN, return the right whatever it is.

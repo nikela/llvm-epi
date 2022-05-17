@@ -315,21 +315,25 @@ ConversionToDecimalResult ConvertToDecimal(char *buffer, std::size_t size,
   }
 }
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template ConversionToDecimalResult ConvertToDecimal<8>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<8>);
 template ConversionToDecimalResult ConvertToDecimal<11>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<11>);
+#endif
 template ConversionToDecimalResult ConvertToDecimal<24>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<24>);
 template ConversionToDecimalResult ConvertToDecimal<53>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<53>);
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template ConversionToDecimalResult ConvertToDecimal<64>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<64>);
+#endif
 template ConversionToDecimalResult ConvertToDecimal<113>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<113>);

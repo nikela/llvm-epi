@@ -235,6 +235,12 @@ struct FrontendOptions {
   };
   GetDefinitionVals getDefVals;
 
+  /// Target features as spelled by the driver.
+  std::vector<std::string> FeaturesAsWritten;
+
+  /// LLVM options.
+  std::vector<std::string> LLVMArgs;
+
   /// The input files and their types.
   std::vector<FrontendInputFile> inputs;
 

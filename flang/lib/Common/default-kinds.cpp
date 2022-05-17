@@ -12,7 +12,7 @@
 namespace Fortran::common {
 
 IntrinsicTypeDefaultKinds::IntrinsicTypeDefaultKinds() {
-#if __x86_64__
+#if __x86_64__ && defined(FLANG_ENABLE_UNUSUAL_REAL_KINDS)
   quadPrecisionKind_ = 10;
 #endif
 }

@@ -17,6 +17,7 @@
 #include "clang/Basic/DiagnosticOptions.h"
 #include "clang/Driver/DriverDiagnostic.h"
 #include "clang/Driver/Options.h"
+#include "clang/Driver/OptionUtils.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/ADT/Triple.h"
@@ -271,6 +272,14 @@ static bool ParseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
           << a->getAsString(args) << a->getValue();
   }
 
+  // Keep all the -target-feature so we can honor them later.
+  opts.FeaturesAsWritten =
+      args.getAllArgValues(clang::driver::options::OPT_target_feature);
+
+  // Keep -mllvm options so we can honor them later.
+  opts.LLVMArgs =
+      args.getAllArgValues(clang::driver::options::OPT_mllvm);
+
   // Collect the input files and save them in our instance of FrontendOptions.
   std::vector<std::string> inputs =
       args.getAllArgValues(clang::driver::options::OPT_INPUT);
@@ -470,6 +479,82 @@ static bool parseSemaArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
   return diags.getNumErrors() == numErrorsBefore;
 }
 
+// Shamelessly copied from clang.
+static unsigned getOptimizationLevel(
+    llvm::opt::ArgList &Args, clang::DiagnosticsEngine &Diags) {
+  unsigned defaultOp = llvm::CodeGenOpt::None;
+
+  if (llvm::opt::Arg *A =
+          Args.getLastArg(clang::driver::options::OPT_O_Group)) {
+    if (A->getOption().matches(clang::driver::options::OPT_O0))
+      return llvm::CodeGenOpt::None;
+
+    if (A->getOption().matches(clang::driver::options::OPT_Ofast))
+      return llvm::CodeGenOpt::Aggressive;
+
+    assert(A->getOption().matches(clang::driver::options::OPT_O));
+
+    llvm::StringRef S(A->getValue());
+    if (S == "s" || S == "z")
+      return llvm::CodeGenOpt::Default;
+
+    if (S == "g")
+      return llvm::CodeGenOpt::Less;
+
+    return clang::getLastArgIntValue(
+        Args, clang::driver::options::OPT_O, defaultOp, Diags);
+  }
+
+  return defaultOp;
+}
+
+static bool parseCodegenArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
+    clang::DiagnosticsEngine &diags) {
+  unsigned numErrorsBefore = diags.getNumErrors();
+
+  unsigned optLevel = getOptimizationLevel(args, diags);
+
+  unsigned maxOptLevel = 3;
+  if (optLevel > maxOptLevel) {
+    // If the optimization level is not supported, fall back on the default
+    // optimization
+    diags.Report(clang::diag::warn_drv_optimization_value)
+        << args.getLastArg(clang::driver::options::OPT_O)->getAsString(args)
+        << "-O" << maxOptLevel;
+    optLevel = maxOptLevel;
+  }
+  res.setOptLevel(optLevel);
+
+  res.vectorizeLoop = args.hasArg(clang::driver::options::OPT_vectorize_loops);
+  res.vectorizeSLP = args.hasArg(clang::driver::options::OPT_vectorize_slp);
+  res.unrollLoops = args.hasFlag(clang::driver::options::OPT_funroll_loops,
+      clang::driver::options::OPT_fno_unroll_loops, (optLevel > 1));
+
+  return diags.getNumErrors() == numErrorsBefore;
+}
+
+static bool parseCodeShapeArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
+    clang::DiagnosticsEngine &diags) {
+  unsigned numErrorsBefore = diags.getNumErrors();
+
+  res.PICLevel =
+      getLastArgIntValue(args, clang::driver::options::OPT_pic_level, 0, diags);
+  res.PIE = args.hasArg(clang::driver::options::OPT_pic_is_pie);
+  llvm::StringRef RM =
+      args.getLastArgValue(clang::driver::options::OPT_mrelocation_model, "");
+  res.RM = llvm::StringSwitch<llvm::Reloc::Model>(RM)
+               .Case("static", llvm::Reloc::Static)
+               .Case("pic", llvm::Reloc::PIC_)
+               .Case("ropi", llvm::Reloc::ROPI)
+               .Case("rwpi", llvm::Reloc::RWPI)
+               .Case("ropi-rwpi", llvm::Reloc::ROPI_RWPI)
+               .Case("dynamic-no-pic", llvm::Reloc::DynamicNoPIC)
+               // This is the default in clang::CodegenOptions.
+               .Default(llvm::Reloc::PIC_);
+
+  return diags.getNumErrors() == numErrorsBefore;
+}
+
 /// Parses all diagnostics related arguments and populates the variables
 /// options accordingly. Returns false if new errors are generated.
 static bool parseDiagArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
@@ -602,6 +687,8 @@ bool CompilerInvocation::CreateFromArgs(CompilerInvocation &res,
   ParseTargetArgs(res.targetOpts(), args);
   parsePreprocessorArgs(res.preprocessorOpts(), args);
   success &= parseSemaArgs(res, args, diags);
+  success &= parseCodegenArgs(res, args, diags);
+  success &= parseCodeShapeArgs(res, args, diags);
   success &= parseDialectArgs(res, args, diags);
   success &= parseDiagArgs(res, args, diags);
   res.frontendOpts_.llvmArgs =

@@ -6943,12 +6943,14 @@ bool ResolveNamesVisitor::Pre(const parser::SpecificationPart &x) {
   ClearExplicitIntrinsicUses();
   Walk(importStmts);
   Walk(implicitPart);
+
   for (const auto &decl : decls) {
     if (const auto *spec{
             std::get_if<parser::SpecificationConstruct>(&decl.u)}) {
       PreSpecificationConstruct(*spec);
     }
   }
+
   Walk(decls);
   FinishSpecificationPart(decls);
   return false;

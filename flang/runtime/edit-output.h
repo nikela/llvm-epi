@@ -130,11 +130,15 @@ extern template bool EditIntegerOutput<8>(
 extern template bool EditIntegerOutput<16>(
     IoStatementState &, const DataEdit &, common::int128_t);
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 extern template class RealOutputEditing<2>;
 extern template class RealOutputEditing<3>;
+#endif
 extern template class RealOutputEditing<4>;
 extern template class RealOutputEditing<8>;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 extern template class RealOutputEditing<10>;
+#endif
 // TODO: double/double
 extern template class RealOutputEditing<16>;
 

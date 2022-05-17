@@ -9,6 +9,7 @@
 ! RUN:     -flarge-sizes \
 ! RUN:     -mllvm -print-before-all\
 ! RUN:     -P \
+! RUN:     -O2 \
 ! RUN:   | FileCheck %s
 
 ! CHECK: "-P"
@@ -17,4 +18,5 @@
 ! CHECK: "-fdefault-integer-8"
 ! CHECK: "-fdefault-real-8"
 ! CHECK: "-flarge-sizes"
-! CHECK:  "-mllvm" "-print-before-all"
+! CHECK: "-O2"
+! CHECK: "-mllvm" "-print-before-all"

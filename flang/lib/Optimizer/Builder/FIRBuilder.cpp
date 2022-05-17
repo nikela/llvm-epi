@@ -521,6 +521,12 @@ mlir::Value fir::FirOpBuilder::genIsNull(mlir::Location loc, mlir::Value addr) {
                                   mlir::arith::CmpIPredicate::eq);
 }
 
+mlir::Value fir::FirOpBuilder::genIsNaN(mlir::Location loc, mlir::Value arg) {
+  assert(isa_real(arg.getType()));
+  return create<mlir::arith::CmpFOp>(
+             loc, mlir::arith::CmpFPredicate::UNE, arg, arg);
+}
+
 mlir::Value fir::FirOpBuilder::genExtentFromTriplet(mlir::Location loc,
                                                     mlir::Value lb,
                                                     mlir::Value ub,

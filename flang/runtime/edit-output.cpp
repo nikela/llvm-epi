@@ -667,11 +667,15 @@ template bool EditIntegerOutput<8>(
 template bool EditIntegerOutput<16>(
     IoStatementState &, const DataEdit &, common::int128_t);
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class RealOutputEditing<2>;
 template class RealOutputEditing<3>;
+#endif
 template class RealOutputEditing<4>;
 template class RealOutputEditing<8>;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class RealOutputEditing<10>;
+#endif
 // TODO: double/double
 template class RealOutputEditing<16>;
 

@@ -237,6 +237,37 @@ struct TargetPPC64le : public GenericTarget<TargetPPC64le> {
 };
 } // namespace
 
+//===----------------------------------------------------------------------===//
+// RISCV64 linux target specifics.
+//===----------------------------------------------------------------------===//
+
+namespace {
+struct TargetRISCV64 : public GenericTarget<TargetRISCV64> {
+  using GenericTarget::GenericTarget;
+
+  static constexpr int defaultWidth = 64;
+
+  CodeGenSpecifics::Marshalling
+  complexArgumentType(mlir::Type eleTy) const override {
+    CodeGenSpecifics::Marshalling marshal;
+    // two distinct element type arguments (re, im)
+    marshal.emplace_back(eleTy, AT{});
+    marshal.emplace_back(eleTy, AT{});
+    return marshal;
+  }
+
+  CodeGenSpecifics::Marshalling
+  complexReturnType(mlir::Type eleTy) const override {
+    CodeGenSpecifics::Marshalling marshal;
+    // Use a type that will be translated into LLVM as:
+    // { t, t }   struct of 2 element type
+    mlir::TypeRange range = {eleTy, eleTy};
+    marshal.emplace_back(mlir::TupleType::get(eleTy.getContext(), range), AT{});
+    return marshal;
+  }
+};
+} // namespace
+
 // Instantiate the overloaded target instance based on the triple value.
 // TODO: Add other targets to this file as needed.
 std::unique_ptr<fir::CodeGenSpecifics>
@@ -284,6 +315,15 @@ fir::CodeGenSpecifics::get(mlir::MLIRContext *ctx, llvm::Triple &&trp,
       break;
     case llvm::Triple::OSType::Linux:
       return std::make_unique<TargetPPC64le>(ctx, std::move(trp),
+                                             std::move(kindMap));
+    }
+    break;
+  case llvm::Triple::ArchType::riscv64:
+    switch (trp.getOS()) {
+    default:
+      break;
+    case llvm::Triple::OSType::Linux:
+      return std::make_unique<TargetRISCV64>(ctx, std::move(trp),
                                              std::move(kindMap));
     }
     break;

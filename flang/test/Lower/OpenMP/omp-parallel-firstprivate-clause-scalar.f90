@@ -132,55 +132,43 @@ subroutine firstprivate_logical(arg1, arg2, arg3, arg4, arg5)
 
 end subroutine
 
-!FIRDialect-DAG: func @_QPfirstprivate_real(%[[ARG1:.*]]: !fir.ref<f32>{{.*}}, %[[ARG2:.*]]: !fir.ref<f16>{{.*}}, %[[ARG3:.*]]: !fir.ref<f32>{{.*}}, %[[ARG4:.*]]: !fir.ref<f64>{{.*}}, %[[ARG5:.*]]: !fir.ref<f80>{{.*}}, %[[ARG6:.*]]: !fir.ref<f128>{{.*}}) {
+!FIRDialect-DAG: func @_QPfirstprivate_real(%[[ARG1:.*]]: !fir.ref<f32>{{.*}},  %[[ARG3:.*]]: !fir.ref<f32>{{.*}}, %[[ARG4:.*]]: !fir.ref<f64>{{.*}}, %[[ARG6:.*]]: !fir.ref<f128>{{.*}}) {
 !FIRDialect-DAG:   omp.parallel {
 !FIRDialect-DAG:     %[[ARG1_PVT:.*]] = fir.alloca f32 {bindc_name = "arg1", pinned, uniq_name = "_QFfirstprivate_realEarg1"}
 !FIRDialect-DAG:     %[[ARG1_VAL:.*]] = fir.load %[[ARG1]] : !fir.ref<f32>
 !FIRDialect-DAG:     fir.store %[[ARG1_VAL]] to %[[ARG1_PVT]] : !fir.ref<f32>
-!FIRDialect-DAG:     %[[ARG2_PVT:.*]] = fir.alloca f16 {bindc_name = "arg2", pinned, uniq_name = "_QFfirstprivate_realEarg2"}
-!FIRDialect-DAG:     %[[ARG2_VAL:.*]] = fir.load %[[ARG2]] : !fir.ref<f16>
-!FIRDialect-DAG:     fir.store %[[ARG2_VAL]] to %[[ARG2_PVT]] : !fir.ref<f16>
 !FIRDialect-DAG:     %[[ARG3_PVT:.*]] = fir.alloca f32 {bindc_name = "arg3", pinned, uniq_name = "_QFfirstprivate_realEarg3"}
 !FIRDialect-DAG:     %[[ARG3_VAL:.*]] = fir.load %[[ARG3]] : !fir.ref<f32>
 !FIRDialect-DAG:     fir.store %[[ARG3_VAL]] to %[[ARG3_PVT]] : !fir.ref<f32>
 !FIRDialect-DAG:     %[[ARG4_PVT:.*]] = fir.alloca f64 {bindc_name = "arg4", pinned, uniq_name = "_QFfirstprivate_realEarg4"}
 !FIRDialect-DAG:     %[[ARG4_VAL:.*]] = fir.load %[[ARG4]] : !fir.ref<f64>
 !FIRDialect-DAG:     fir.store %[[ARG4_VAL]] to %[[ARG4_PVT]] : !fir.ref<f64>
-!FIRDialect-DAG:     %[[ARG5_PVT:.*]] = fir.alloca f80 {bindc_name = "arg5", pinned, uniq_name = "_QFfirstprivate_realEarg5"}
-!FIRDialect-DAG:     %[[ARG5_VAL:.*]] = fir.load %[[ARG5]] : !fir.ref<f80>
-!FIRDialect-DAG:     fir.store %[[ARG5_VAL]] to %[[ARG5_PVT]] : !fir.ref<f80>
 !FIRDialect-DAG:     %[[ARG6_PVT:.*]] = fir.alloca f128 {bindc_name = "arg6", pinned, uniq_name = "_QFfirstprivate_realEarg6"}
 !FIRDialect-DAG:     %[[ARG6_VAL:.*]] = fir.load %[[ARG6]] : !fir.ref<f128>
 !FIRDialect-DAG:     fir.store %[[ARG6_VAL]] to %[[ARG6_PVT]] : !fir.ref<f128>
 !FIRDialect-DAG:     %[[LIST_IO:.*]] = fir.call @_FortranAioBeginExternalListOutput
 !FIRDialect-DAG:     %[[ARG1_PVT_VAL:.*]] = fir.load %[[ARG1_PVT]] : !fir.ref<f32>
 !FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputReal32(%[[LIST_IO]], %[[ARG1_PVT_VAL]]) : (!fir.ref<i8>, f32) -> i1
-!FIRDialect-DAG:     %[[ARG2_PVT_VAL:.*]] = fir.embox %[[ARG2_PVT]] : (!fir.ref<f16>) -> !fir.box<f16>
-!FIRDialect-DAG:     %[[ARG2_PVT_CVT:.*]] = fir.convert %[[ARG2_PVT_VAL]] : (!fir.box<f16>) -> !fir.box<none>
-!FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputDescriptor(%[[LIST_IO]], %[[ARG2_PVT_CVT]]) : (!fir.ref<i8>, !fir.box<none>) -> i1
 !FIRDialect-DAG:     %[[ARG3_PVT_VAL:.*]] = fir.load %[[ARG3_PVT]] : !fir.ref<f32>
 !FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputReal32(%[[LIST_IO]], %[[ARG3_PVT_VAL]]) : (!fir.ref<i8>, f32) -> i1
 !FIRDialect-DAG:     %[[ARG4_PVT_VAL:.*]] = fir.load %[[ARG4_PVT]] : !fir.ref<f64>
 !FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputReal64(%[[LIST_IO]], %[[ARG4_PVT_VAL]]) : (!fir.ref<i8>, f64) -> i1
-!FIRDialect-DAG:     %[[ARG5_PVT_VAL:.*]] = fir.embox %[[ARG5_PVT]] : (!fir.ref<f80>) -> !fir.box<f80>
-!FIRDialect-DAG:     %[[ARG5_PVT_CVT:.*]] = fir.convert %[[ARG5_PVT_VAL]] : (!fir.box<f80>) -> !fir.box<none>
-!FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputDescriptor(%[[LIST_IO]], %[[ARG5_PVT_CVT]]) : (!fir.ref<i8>, !fir.box<none>) -> i1
 !FIRDialect-DAG:     %[[ARG6_PVT_VAL:.*]] = fir.embox %[[ARG6_PVT]] : (!fir.ref<f128>) -> !fir.box<f128>
 !FIRDialect-DAG:     %[[ARG6_PVT_CVT:.*]] = fir.convert %[[ARG6_PVT_VAL]] : (!fir.box<f128>) -> !fir.box<none>
 !FIRDialect-DAG:     %{{.*}} = fir.call @_FortranAioOutputDescriptor(%[[LIST_IO]], %[[ARG6_PVT_CVT]]) : (!fir.ref<i8>, !fir.box<none>) -> i1
 !FIRDialect-DAG:     omp.terminator
 !FIRDialect-DAG:   }
 
-subroutine firstprivate_real(arg1, arg2, arg3, arg4, arg5, arg6)
+subroutine firstprivate_real(arg1, arg3, arg4, arg6)
         real :: arg1
-        real(kind=2) :: arg2
+        ! real(kind=2) :: arg2
         real(kind=4) :: arg3
         real(kind=8) :: arg4
-        real(kind=10) :: arg5
+        ! real(kind=10) :: arg5
         real(kind=16) :: arg6
 
-!$OMP PARALLEL FIRSTPRIVATE(arg1, arg2, arg3, arg4, arg5, arg6)
-        print *, arg1, arg2, arg3, arg4, arg5, arg6
+!$OMP PARALLEL FIRSTPRIVATE(arg1, arg3, arg4, arg6)
+        print *, arg1, arg3, arg4, arg6
 !$OMP END PARALLEL
 
 end subroutine

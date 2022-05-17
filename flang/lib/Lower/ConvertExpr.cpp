@@ -1349,18 +1349,23 @@ public:
       return genBoolConstant(value.IsTrue());
     } else if constexpr (TC == Fortran::common::TypeCategory::Real) {
       std::string str = value.DumpHexadecimal();
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
       if constexpr (KIND == 2) {
         llvm::APFloat floatVal{llvm::APFloatBase::IEEEhalf(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       } else if constexpr (KIND == 3) {
         llvm::APFloat floatVal{llvm::APFloatBase::BFloat(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-      } else if constexpr (KIND == 4) {
+      } else
+#endif
+        if constexpr (KIND == 4) {
         llvm::APFloat floatVal{llvm::APFloatBase::IEEEsingle(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
       } else if constexpr (KIND == 10) {
         llvm::APFloat floatVal{llvm::APFloatBase::x87DoubleExtended(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
+#endif
       } else if constexpr (KIND == 16) {
         llvm::APFloat floatVal{llvm::APFloatBase::IEEEquad(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
@@ -2932,6 +2937,12 @@ public:
 
       if (arg.passBy == PassBy::Value) {
         ExtValue argVal = genval(*expr);
+        if (fir::unwrapRefType(fir::getBase(argVal).getType())
+                .isa<fir::RecordType>()) {
+          // genval will not refuse to create values of record type but for
+          // BIND(C) we need such a value, so force it here.
+          argVal = builder.create<fir::LoadOp>(loc, fir::getBase(argVal));
+        }
         if (!fir::isUnboxedValue(argVal))
           fir::emitFatalError(
               loc, "internal error: passing non trivial value by value");
@@ -2998,12 +3009,13 @@ public:
             temp = fir::getBase(copy);
           }
         } else {
-          mlir::Value val = fir::getBase(genval(*expr));
+          ExtValue exv = genval(*expr);
+          mlir::Value val = fir::getBase(exv);
           temp = builder.createTemporary(
-              loc, val.getType(),
+              loc, fir::unwrapRefType(val.getType()),
               llvm::ArrayRef<mlir::NamedAttribute>{
                   Fortran::lower::getAdaptToByRefAttr(builder)});
-          builder.create<fir::StoreOp>(loc, val, temp);
+          fir::factory::genScalarAssignment(builder, loc, temp, exv);
         }
         caller.placeInput(arg, temp);
         continue;

@@ -14,7 +14,9 @@ template class Integer<8>;
 template class Integer<16>;
 template class Integer<32>;
 template class Integer<64>;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Integer<80>;
+#endif
 template class Integer<128>;
 
 // Sanity checks against misconfiguration bugs

@@ -10,6 +10,7 @@ subroutine s(var)
   real :: realvar4 = 4.0D6_8
   real :: realvar5 = 4.0Q6_16
   real :: realvar6 = 4.0E6_8
+  !ERROR: Unsupported REAL(KIND=10)
   real :: realvar7 = 4.0E6_10
   real :: realvar8 = 4.0E6_16
   !ERROR: Unsupported REAL(KIND=32)
@@ -21,6 +22,7 @@ subroutine s(var)
   double precision :: doublevar4 = 4.0D6_8
   double precision :: doublevar5 = 4.0Q6_16
   double precision :: doublevar6 = 4.0E6_8
+  !ERROR: Unsupported REAL(KIND=10)
   double precision :: doublevar7 = 4.0E6_10
   double precision :: doublevar8 = 4.0E6_16
   !ERROR: Unsupported REAL(KIND=32)

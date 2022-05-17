@@ -212,6 +212,9 @@ protected:
   /// in CodeGenAction::llvmModule.
   void GenerateLLVMIR();
 
+  /// Runs a default optimization pipeline.
+  void OptimizeLLVMIR();
+
   BackendActionTy action;
 
   std::unique_ptr<llvm::TargetMachine> TM;

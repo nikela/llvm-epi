@@ -11,10 +11,10 @@ real*4 function spacing_test(x)
 end function
 
 ! CHECK-LABEL: func @_QPspacing_test2(
-! CHECK-SAME: %[[x:[^:]+]]: !fir.ref<f80>{{.*}}) -> f80
-real*10 function spacing_test2(x)
-  real*10 :: x
+! CHECK-SAME: %[[x:[^:]+]]: !fir.ref<f128>{{.*}}) -> f128
+real*16 function spacing_test2(x)
+  real*16 :: x
   spacing_test2 = spacing(x)
-! CHECK: %[[a1:.*]] = fir.load %[[x]] : !fir.ref<f80>
-! CHECK: %{{.*}} = fir.call @_FortranASpacing10(%[[a1]]) : (f80) -> f80
+! CHECK: %[[a1:.*]] = fir.load %[[x]] : !fir.ref<f128>
+! CHECK: %{{.*}} = fir.call @_FortranASpacing16(%[[a1]]) : (f128) -> f128
 end function

@@ -97,10 +97,14 @@ llvm::raw_ostream &Complex<R>::AsFortran(llvm::raw_ostream &o, int kind) const {
   return o << ')';
 }
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Complex<Real<Integer<16>, 11>>;
 template class Complex<Real<Integer<16>, 8>>;
+#endif
 template class Complex<Real<Integer<32>, 24>>;
 template class Complex<Real<Integer<64>, 53>>;
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Complex<Real<Integer<80>, 64>>;
+#endif
 template class Complex<Real<Integer<128>, 113>>;
 } // namespace Fortran::evaluate::value

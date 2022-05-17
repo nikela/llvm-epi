@@ -40,13 +40,18 @@ module __Fortran_ieee_exceptions
     private
   end type ieee_status_type
 
-  private :: ieee_support_flag_2, ieee_support_flag_3, &
-      ieee_support_flag_4, ieee_support_flag_8, ieee_support_flag_10, &
+  ! private :: ieee_support_flag_2, ieee_support_flag_3, &
+  !     ieee_support_flag_4, ieee_support_flag_8, ieee_support_flag_10, &
+  !     ieee_support_flag_16
+  private :: ieee_support_flag_4, ieee_support_flag_8, &
       ieee_support_flag_16
   interface ieee_support_flag
+    ! module procedure :: ieee_support_flag, &
+    !   ieee_support_flag_2, ieee_support_flag_3, &
+    !   ieee_support_flag_4, ieee_support_flag_8, ieee_support_flag_10, &
+    !   ieee_support_flag_16
     module procedure :: ieee_support_flag, &
-      ieee_support_flag_2, ieee_support_flag_3, &
-      ieee_support_flag_4, ieee_support_flag_8, ieee_support_flag_10, &
+      ieee_support_flag_4, ieee_support_flag_8, &
       ieee_support_flag_16
   end interface
 
@@ -91,16 +96,16 @@ module __Fortran_ieee_exceptions
     type(ieee_flag_type), intent(in) :: flag
     ieee_support_flag = .true.
   end function
-  pure logical function ieee_support_flag_2(flag, x)
-    type(ieee_flag_type), intent(in) :: flag
-    real(kind=2), intent(in) :: x(..)
-    ieee_support_flag_2 = .true.
-  end function
-  pure logical function ieee_support_flag_3(flag, x)
-    type(ieee_flag_type), intent(in) :: flag
-    real(kind=3), intent(in) :: x(..)
-    ieee_support_flag_3 = .true.
-  end function
+  ! pure logical function ieee_support_flag_2(flag, x)
+  !   type(ieee_flag_type), intent(in) :: flag
+  !   real(kind=2), intent(in) :: x(..)
+  !   ieee_support_flag_2 = .true.
+  ! end function
+  ! pure logical function ieee_support_flag_3(flag, x)
+  !   type(ieee_flag_type), intent(in) :: flag
+  !   real(kind=3), intent(in) :: x(..)
+  !   ieee_support_flag_3 = .true.
+  ! end function
   pure logical function ieee_support_flag_4(flag, x)
     type(ieee_flag_type), intent(in) :: flag
     real(kind=4), intent(in) :: x(..)
@@ -111,11 +116,11 @@ module __Fortran_ieee_exceptions
     real(kind=8), intent(in) :: x(..)
     ieee_support_flag_8 = .true.
   end function
-  pure logical function ieee_support_flag_10(flag, x)
-    type(ieee_flag_type), intent(in) :: flag
-    real(kind=10), intent(in) :: x(..)
-    ieee_support_flag_10 = .true.
-  end function
+  ! pure logical function ieee_support_flag_10(flag, x)
+  !   type(ieee_flag_type), intent(in) :: flag
+  !   real(kind=10), intent(in) :: x(..)
+  !   ieee_support_flag_10 = .true.
+  ! end function
   pure logical function ieee_support_flag_16(flag, x)
     type(ieee_flag_type), intent(in) :: flag
     real(kind=16), intent(in) :: x(..)

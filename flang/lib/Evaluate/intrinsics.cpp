@@ -795,7 +795,7 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
             {"back", AnyLogical, Rank::elemental, Optionality::optional},
             DefaultingKIND},
         KINDInt},
-    {"__builtin_ieee_is_nan", {{"a", AnyFloating}}, DefaultLogical},
+    {"__builtin_ieee_is_nan", {{"x", AnyFloating}}, DefaultLogical},
     {"__builtin_ieee_is_negative", {{"a", AnyFloating}}, DefaultLogical},
     {"__builtin_ieee_is_normal", {{"a", AnyFloating}}, DefaultLogical},
     {"__builtin_ieee_next_after", {{"x", SameReal}, {"y", AnyReal}}, SameReal},
@@ -1982,14 +1982,23 @@ bool IntrinsicProcTable::Implementation::IsIntrinsic(
 
 IntrinsicClass IntrinsicProcTable::Implementation::GetIntrinsicClass(
     const std::string &name) const {
+  std::string genericName{name};
+  // TODO: If this is a specific intrinsic name, compute its generic intrinsic
+  // and then lookup a generic name. We have to do this because specific
+  // intrinsics are not correctly storing the intrinsic class (which defaults to
+  // elemental).
   auto specificIntrinsic{specificFuncs_.find(name)};
   if (specificIntrinsic != specificFuncs_.end()) {
-    return specificIntrinsic->second->intrinsicClass;
+    if (specificIntrinsic->second->generic) {
+      genericName = std::string(specificIntrinsic->second->generic);
+    }
   }
-  auto genericIntrinsic{genericFuncs_.find(name)};
+  // Use the generic name which might not be the same as spelled.
+  auto genericIntrinsic{genericFuncs_.find(genericName)};
   if (genericIntrinsic != genericFuncs_.end()) {
     return genericIntrinsic->second->intrinsicClass;
   }
+  // Use the spelled name.
   auto subrIntrinsic{subroutines_.find(name)};
   if (subrIntrinsic != subroutines_.end()) {
     return subrIntrinsic->second->intrinsicClass;

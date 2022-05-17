@@ -735,11 +735,15 @@ bool EditCharacterInput(
   return true;
 }
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template bool EditRealInput<2>(IoStatementState &, const DataEdit &, void *);
 template bool EditRealInput<3>(IoStatementState &, const DataEdit &, void *);
+#endif
 template bool EditRealInput<4>(IoStatementState &, const DataEdit &, void *);
 template bool EditRealInput<8>(IoStatementState &, const DataEdit &, void *);
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template bool EditRealInput<10>(IoStatementState &, const DataEdit &, void *);
+#endif
 // TODO: double/double
 template bool EditRealInput<16>(IoStatementState &, const DataEdit &, void *);
 

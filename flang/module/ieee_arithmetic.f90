@@ -82,38 +82,58 @@ module ieee_arithmetic
   private :: class_eq, class_ne, round_eq, round_ne
 
   ! See Fortran 2018, 17.10 & 17.11
-  generic :: ieee_class => ieee_class_a2, ieee_class_a3, ieee_class_a4, ieee_class_a8, ieee_class_a10, ieee_class_a16
-  private :: ieee_class_a2, ieee_class_a3, ieee_class_a4, ieee_class_a8, ieee_class_a10, ieee_class_a16
+  ! generic :: ieee_class => ieee_class_a2, ieee_class_a3, ieee_class_a4, ieee_class_a8, ieee_class_a10, ieee_class_a16
+  ! private :: ieee_class_a2, ieee_class_a3, ieee_class_a4, ieee_class_a8, ieee_class_a10, ieee_class_a16
+  generic :: ieee_class => ieee_class_a4, ieee_class_a8, ieee_class_a16
+  private :: ieee_class_a4, ieee_class_a8, ieee_class_a16
 
-  generic :: ieee_copy_sign => ieee_copy_sign_a2, ieee_copy_sign_a3, ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a10, ieee_copy_sign_a16
-  private :: ieee_copy_sign_a2, ieee_copy_sign_a3, ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a10, ieee_copy_sign_a16
+  ! generic :: ieee_copy_sign => ieee_copy_sign_a2, ieee_copy_sign_a3, ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a10, ieee_copy_sign_a16
+  ! private :: ieee_copy_sign_a2, ieee_copy_sign_a3, ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a10, ieee_copy_sign_a16
+  generic :: ieee_copy_sign => ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a16
+  private :: ieee_copy_sign_a4, ieee_copy_sign_a8, ieee_copy_sign_a16
 
-  generic :: ieee_is_finite => ieee_is_finite_a2, ieee_is_finite_a3, ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a10, ieee_is_finite_a16
-  private :: ieee_is_finite_a2, ieee_is_finite_a3, ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a10, ieee_is_finite_a16
+  ! generic :: ieee_is_finite => ieee_is_finite_a2, ieee_is_finite_a3, ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a10, ieee_is_finite_a16
+  ! private :: ieee_is_finite_a2, ieee_is_finite_a3, ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a10, ieee_is_finite_a16
+  generic :: ieee_is_finite => ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a16
+  private :: ieee_is_finite_a4, ieee_is_finite_a8, ieee_is_finite_a16
 
+  ! generic :: ieee_rem => &
+  !   ieee_rem_a2_a2, ieee_rem_a2_a3, ieee_rem_a2_a4, ieee_rem_a2_a8, ieee_rem_a2_a10, ieee_rem_a2_a16, &
+  !   ieee_rem_a3_a2, ieee_rem_a3_a3, ieee_rem_a3_a4, ieee_rem_a3_a8, ieee_rem_a3_a10, ieee_rem_a3_a16, &
+  !   ieee_rem_a4_a2, ieee_rem_a4_a3, ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a10, ieee_rem_a4_a16, &
+  !   ieee_rem_a8_a2, ieee_rem_a8_a3, ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a10, ieee_rem_a8_a16, &
+  !   ieee_rem_a10_a2, ieee_rem_a10_a3, ieee_rem_a10_a4, ieee_rem_a10_a8, ieee_rem_a10_a10, ieee_rem_a10_a16, &
+  !   ieee_rem_a16_a2, ieee_rem_a16_a3, ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a10, ieee_rem_a16_a16
+  ! private :: &
+  !   ieee_rem_a2_a2, ieee_rem_a2_a3, ieee_rem_a2_a4, ieee_rem_a2_a8, ieee_rem_a2_a10, ieee_rem_a2_a16, &
+  !   ieee_rem_a3_a2, ieee_rem_a3_a3, ieee_rem_a3_a4, ieee_rem_a3_a8, ieee_rem_a3_a10, ieee_rem_a3_a16, &
+  !   ieee_rem_a4_a2, ieee_rem_a4_a3, ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a10, ieee_rem_a4_a16, &
+  !   ieee_rem_a8_a2, ieee_rem_a8_a3, ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a10, ieee_rem_a8_a16, &
+  !   ieee_rem_a10_a2, ieee_rem_a10_a3, ieee_rem_a10_a4, ieee_rem_a10_a8, ieee_rem_a10_a10, ieee_rem_a10_a16, &
+  !   ieee_rem_a16_a2, ieee_rem_a16_a3, ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a10, ieee_rem_a16_a16
   generic :: ieee_rem => &
-    ieee_rem_a2_a2, ieee_rem_a2_a3, ieee_rem_a2_a4, ieee_rem_a2_a8, ieee_rem_a2_a10, ieee_rem_a2_a16, &
-    ieee_rem_a3_a2, ieee_rem_a3_a3, ieee_rem_a3_a4, ieee_rem_a3_a8, ieee_rem_a3_a10, ieee_rem_a3_a16, &
-    ieee_rem_a4_a2, ieee_rem_a4_a3, ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a10, ieee_rem_a4_a16, &
-    ieee_rem_a8_a2, ieee_rem_a8_a3, ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a10, ieee_rem_a8_a16, &
-    ieee_rem_a10_a2, ieee_rem_a10_a3, ieee_rem_a10_a4, ieee_rem_a10_a8, ieee_rem_a10_a10, ieee_rem_a10_a16, &
-    ieee_rem_a16_a2, ieee_rem_a16_a3, ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a10, ieee_rem_a16_a16
+    ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a16, &
+    ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a16, &
+    ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a16
   private :: &
-    ieee_rem_a2_a2, ieee_rem_a2_a3, ieee_rem_a2_a4, ieee_rem_a2_a8, ieee_rem_a2_a10, ieee_rem_a2_a16, &
-    ieee_rem_a3_a2, ieee_rem_a3_a3, ieee_rem_a3_a4, ieee_rem_a3_a8, ieee_rem_a3_a10, ieee_rem_a3_a16, &
-    ieee_rem_a4_a2, ieee_rem_a4_a3, ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a10, ieee_rem_a4_a16, &
-    ieee_rem_a8_a2, ieee_rem_a8_a3, ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a10, ieee_rem_a8_a16, &
-    ieee_rem_a10_a2, ieee_rem_a10_a3, ieee_rem_a10_a4, ieee_rem_a10_a8, ieee_rem_a10_a10, ieee_rem_a10_a16, &
-    ieee_rem_a16_a2, ieee_rem_a16_a3, ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a10, ieee_rem_a16_a16
+    ieee_rem_a4_a4, ieee_rem_a4_a8, ieee_rem_a4_a16, &
+    ieee_rem_a8_a4, ieee_rem_a8_a8, ieee_rem_a8_a16, &
+    ieee_rem_a16_a4, ieee_rem_a16_a8, ieee_rem_a16_a16
 
+  ! generic :: ieee_support_rounding => ieee_support_rounding_, &
+  !   ieee_support_rounding_2, ieee_support_rounding_3, &
+  !   ieee_support_rounding_4, ieee_support_rounding_8, &
+  !   ieee_support_rounding_10, ieee_support_rounding_16
+  ! private :: ieee_support_rounding_, &
+  !   ieee_support_rounding_2, ieee_support_rounding_3, &
+  !   ieee_support_rounding_4, ieee_support_rounding_8, &
+  !   ieee_support_rounding_10, ieee_support_rounding_16
   generic :: ieee_support_rounding => ieee_support_rounding_, &
-    ieee_support_rounding_2, ieee_support_rounding_3, &
     ieee_support_rounding_4, ieee_support_rounding_8, &
-    ieee_support_rounding_10, ieee_support_rounding_16
+    ieee_support_rounding_16
   private :: ieee_support_rounding_, &
-    ieee_support_rounding_2, ieee_support_rounding_3, &
     ieee_support_rounding_4, ieee_support_rounding_8, &
-    ieee_support_rounding_10, ieee_support_rounding_16
+    ieee_support_rounding_16
 
   ! TODO: more interfaces (_fma, &c.)
 
@@ -198,11 +218,11 @@ module ieee_arithmetic
     quiet = btest(raw, significand - 1); \
     ieee_class_a##RKIND = classify(exponent, maxExpo, negative, nzSignificand, quiet); \
   end function ieee_class_a##RKIND
-  _CLASSIFY(2,2,16,11,1)
-  _CLASSIFY(3,2,16,8,1)
+  ! _CLASSIFY(2,2,16,11,1)
+  ! _CLASSIFY(3,2,16,8,1)
   _CLASSIFY(4,4,32,24,1)
   _CLASSIFY(8,8,64,53,1)
-  _CLASSIFY(10,16,80,64,0)
+  ! _CLASSIFY(10,16,80,64,0)
   _CLASSIFY(16,16,128,112,1)
 #undef _CLASSIFY
 
@@ -216,11 +236,11 @@ module ieee_arithmetic
     xbits = ior(ibclr(xbits, BITS-1), iand(ybits, shiftl(1_##IKIND, BITS-1))); \
     ieee_copy_sign_a##RKIND = transfer(xbits, x); \
   end function ieee_copy_sign_a##RKIND
-  _COPYSIGN(2,2,16)
-  _COPYSIGN(3,2,16)
+  ! _COPYSIGN(2,2,16)
+  ! _COPYSIGN(3,2,16)
   _COPYSIGN(4,4,32)
   _COPYSIGN(8,8,64)
-  _COPYSIGN(10,16,80)
+  ! _COPYSIGN(10,16,80)
   _COPYSIGN(16,16,128)
 #undef _COPYSIGN
 
@@ -234,11 +254,11 @@ module ieee_arithmetic
      .or. classification == ieee_negative_denormal .or. classification == ieee_positive_denormal \
      .or. classification == ieee_negative_normal .or. classification == ieee_positive_normal; \
   end function
-  _IS_FINITE(2)
-  _IS_FINITE(3)
+  ! _IS_FINITE(2)
+  ! _IS_FINITE(3)
   _IS_FINITE(4)
   _IS_FINITE(8)
-  _IS_FINITE(10)
+  ! _IS_FINITE(10)
   _IS_FINITE(16)
 #undef _IS_FINITE
 
@@ -251,11 +271,11 @@ module ieee_arithmetic
     res = classification == ieee_negative_zero .or. classification == ieee_negative_denormal \
      .or. classification == ieee_negative_normal .or. classification == ieee_negative_inf; \
   end function
-  _IS_NEGATIVE(2)
-  _IS_NEGATIVE(3)
+  ! _IS_NEGATIVE(2)
+  ! _IS_NEGATIVE(3)
   _IS_NEGATIVE(4)
   _IS_NEGATIVE(8)
-  _IS_NEGATIVE(10)
+  ! _IS_NEGATIVE(10)
   _IS_NEGATIVE(16)
 #undef _IS_NEGATIVE
 
@@ -268,11 +288,11 @@ module ieee_arithmetic
     res = classification == ieee_negative_normal .or. classification == ieee_positive_normal \
       .or. classification == ieee_negative_zero .or. classification == ieee_positive_zero; \
   end function
-  _IS_NORMAL(2)
-  _IS_NORMAL(3)
+  ! _IS_NORMAL(2)
+  ! _IS_NORMAL(3)
   _IS_NORMAL(4)
   _IS_NORMAL(8)
-  _IS_NORMAL(10)
+  ! _IS_NORMAL(10)
   _IS_NORMAL(16)
 #undef _IS_NORMAL
 
@@ -286,41 +306,41 @@ module ieee_arithmetic
     tmp = anint(real(x, kind=rkind) / y); \
     res = x - y * tmp; \
   end function
-  _REM(2,2)
-  _REM(2,3)
-  _REM(2,4)
-  _REM(2,8)
-  _REM(2,10)
-  _REM(2,16)
-  _REM(3,2)
-  _REM(3,3)
-  _REM(3,4)
-  _REM(3,8)
-  _REM(3,10)
-  _REM(3,16)
-  _REM(4,2)
-  _REM(4,3)
+  ! _REM(2,2)
+  ! _REM(2,3)
+  ! _REM(2,4)
+  ! _REM(2,8)
+  ! _REM(2,10)
+  ! _REM(2,16)
+  ! _REM(3,2)
+  ! _REM(3,3)
+  ! _REM(3,4)
+  ! _REM(3,8)
+  ! _REM(3,10)
+  ! _REM(3,16)
+  ! _REM(4,2)
+  ! _REM(4,3)
   _REM(4,4)
   _REM(4,8)
-  _REM(4,10)
+  ! _REM(4,10)
   _REM(4,16)
-  _REM(8,2)
-  _REM(8,3)
+  ! _REM(8,2)
+  ! _REM(8,3)
   _REM(8,4)
   _REM(8,8)
-  _REM(8,10)
+  ! _REM(8,10)
   _REM(8,16)
-  _REM(10,2)
-  _REM(10,3)
-  _REM(10,4)
-  _REM(10,8)
-  _REM(10,10)
-  _REM(10,16)
-  _REM(16,2)
-  _REM(16,3)
+  ! _REM(10,2)
+  ! _REM(10,3)
+  ! _REM(10,4)
+  ! _REM(10,8)
+  ! _REM(10,10)
+  ! _REM(10,16)
+  ! _REM(16,2)
+  ! _REM(16,3)
   _REM(16,4)
   _REM(16,8)
-  _REM(16,10)
+  ! _REM(16,10)
   _REM(16,16)
 #undef _REM
 
@@ -328,16 +348,16 @@ module ieee_arithmetic
     type(ieee_round_type), intent(in) :: round_type
     ieee_support_rounding_ = .true.
   end function
-  pure logical function ieee_support_rounding_2(round_type,x)
-    type(ieee_round_type), intent(in) :: round_type
-    real(kind=2), intent(in) :: x
-    ieee_support_rounding_2 = .true.
-  end function
-  pure logical function ieee_support_rounding_3(round_type,x)
-    type(ieee_round_type), intent(in) :: round_type
-    real(kind=3), intent(in) :: x
-    ieee_support_rounding_3 = .true.
-  end function
+  ! pure logical function ieee_support_rounding_2(round_type,x)
+  !   type(ieee_round_type), intent(in) :: round_type
+  !   real(kind=2), intent(in) :: x
+  !   ieee_support_rounding_2 = .true.
+  ! end function
+  ! pure logical function ieee_support_rounding_3(round_type,x)
+  !   type(ieee_round_type), intent(in) :: round_type
+  !   real(kind=3), intent(in) :: x
+  !   ieee_support_rounding_3 = .true.
+  ! end function
   pure logical function ieee_support_rounding_4(round_type,x)
     type(ieee_round_type), intent(in) :: round_type
     real(kind=4), intent(in) :: x
@@ -348,11 +368,11 @@ module ieee_arithmetic
     real(kind=8), intent(in) :: x
     ieee_support_rounding_8 = .true.
   end function
-  pure logical function ieee_support_rounding_10(round_type,x)
-    type(ieee_round_type), intent(in) :: round_type
-    real(kind=10), intent(in) :: x
-    ieee_support_rounding_10 = .true.
-  end function
+  ! pure logical function ieee_support_rounding_10(round_type,x)
+  !   type(ieee_round_type), intent(in) :: round_type
+  !   real(kind=10), intent(in) :: x
+  !   ieee_support_rounding_10 = .true.
+  ! end function
   pure logical function ieee_support_rounding_16(round_type,x)
     type(ieee_round_type), intent(in) :: round_type
     real(kind=16), intent(in) :: x

@@ -418,11 +418,15 @@ private:
   Word word_{}; // an Integer<>
 };
 
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 extern template class Real<Integer<16>, 11>; // IEEE half format
 extern template class Real<Integer<16>, 8>; // the "other" half format
+#endif
 extern template class Real<Integer<32>, 24>; // IEEE single
 extern template class Real<Integer<64>, 53>; // IEEE double
+#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 extern template class Real<Integer<80>, 64>; // 80387 extended precision
+#endif
 extern template class Real<Integer<128>, 113>; // IEEE quad
 // N.B. No "double-double" support.
 } // namespace Fortran::evaluate::value

@@ -16,6 +16,7 @@
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/DiagnosticOptions.h"
 #include "llvm/Option/ArgList.h"
+#include "llvm/Support/CodeGen.h"
 #include <memory>
 
 namespace Fortran::frontend {
@@ -112,6 +113,16 @@ class CompilerInvocation : public CompilerInvocationBase {
       },
   };
 
+  // FIXME: Move these to a CodeGenOpts
+  unsigned optLevel_ = llvm::CodeGenOpt::None;
+public:
+  bool vectorizeSLP = false;
+  bool vectorizeLoop = false;
+  bool unrollLoops = false;
+  uint32_t PICLevel = 0;
+  bool PIE = false;
+  llvm::Reloc::Model RM = llvm::Reloc::PIC_;
+
 public:
   CompilerInvocation() = default;
 
@@ -123,6 +134,9 @@ public:
 
   TargetOptions &targetOpts() { return targetOpts_; }
   const TargetOptions &targetOpts() const { return targetOpts_; }
+
+  unsigned optLevel() { return optLevel_; }
+  void setOptLevel(unsigned optLevel) { optLevel_ = optLevel; }
 
   Fortran::semantics::SemanticsContext &semanticsContext() {
     return *semanticsContext_;
