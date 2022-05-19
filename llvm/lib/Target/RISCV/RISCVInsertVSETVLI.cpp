@@ -98,7 +98,39 @@ public:
   bool operator!=(const ExtraOperand &Other) const {
     return !(*this == Other);
   }
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Support for debugging, callable in GDB: V->dump()
+  LLVM_DUMP_METHOD void dump() const {
+    print(dbgs());
+    dbgs() << "\n";
+  }
+
+  /// Implement operator<<.
+  void print(raw_ostream &OS) const {
+    OS << "{";
+    if (isUndefined())
+      OS << "Undefined";
+    else if (isZero())
+      OS << "Zero";
+    else if (isNontemporal())
+      OS << "Nontemporal";
+    else if (isFromPHI())
+      OS << "FromPHI";
+    else if (isReg())
+      OS << "Register: " << getRegister();
+    OS << "}";
+  }
+#endif
 };
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+LLVM_ATTRIBUTE_USED
+inline raw_ostream &operator<<(raw_ostream &OS, const ExtraOperand &EO) {
+  EO.print(OS);
+  return OS;
+}
+#endif
 
 class VSETVLIInfo {
   union {
@@ -1830,9 +1862,9 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
       if (!CurInfo.isValid()) {
         // We haven't found any vector instructions or VL/VTYPE changes yet,
         // use the predecessor information.
-        assert(BlockInfo[MBB.getNumber()].Pred.isValid() &&
+        assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (needVSETVLI(NewInfo, BlockInfo[MBB.getNumber()].Pred)) {
+        if (!HasSameExtraOperand || needVSETVLI(NewInfo, BBInfo.Pred)) {
           // If this is the first implicit state change, and the state change
           // requested can be proven to produce the same register contents, we
           // can skip emitting the actual state change and continue as if we
@@ -1840,8 +1872,8 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
           // wouldn't be used and VL/VTYPE registers are correct.  Note that
           // we *do* need to model the state as if it changed as while the
           // register contents are unchanged, the abstract model can change.
-          if (needVSETVLIPHI(NewInfo, MBB))
-            insertVSETVLI(MBB, MI, NewInfo, BlockInfo[MBB.getNumber()].Pred);
+          if (!HasSameExtraOperand || needVSETVLIPHI(NewInfo, MBB))
+            insertVSETVLI(MBB, MI, NewInfo, BBInfo.Pred);
           CurInfo = NewInfo;
         }
       } else {
@@ -1852,8 +1884,9 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // NOTE: We can't use predecessor information for the store. We must
         // treat it the same as the first phase so that we produce the correct
         // vl/vtype for succesor blocks.
-        if (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-            needVSETVLI(NewInfo, CurInfo)) {
+        if (!HasSameExtraOperand ||
+            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
+             needVSETVLI(NewInfo, CurInfo))) {
           // If the previous VL/VTYPE is set by VSETVLI and do not use, Merge it
           // with current VL/VTYPE.
           bool NeedInsertVSETVLI = true;
@@ -1892,12 +1925,14 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
   // If we reach the end of the block and our current info doesn't match the
   // expected info, insert a vsetvli to correct.
   if (!UseStrictAsserts) {
-    const VSETVLIInfo &ExitInfo = BlockInfo[MBB.getNumber()].Exit;
+    const VSETVLIInfo &ExitInfo = BBInfo.Exit;
+    ExtraOperand PrevEO = PrevMI ? getExtraOperand(PrevMI) : BBInfo.PredExtra;
     if (CurInfo.isValid() && ExitInfo.isValid() && !ExitInfo.isUnknown() &&
-        CurInfo != ExitInfo) {
+        (CurInfo != ExitInfo || PrevEO != BBInfo.ExitExtra)) {
       // Note there's an implicit assumption here that terminators never use
       // or modify VL or VTYPE.  Also, fallthrough will return end().
-      auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
+      // auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
+      auto InsertPt = MBB.getLastNonDebugInstr();
       insertVSETVLI(MBB, InsertPt, MBB.findDebugLoc(InsertPt), ExitInfo, CurInfo);
       CurInfo = ExitInfo;
     }
@@ -1913,22 +1948,41 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
     }
     assert(CurInfo == Info.Exit &&
            "InsertVSETVLI dataflow invariant violated");
+
+    // EPI only
+    ExtraOperand PrevEO = PrevMI ? getExtraOperand(PrevMI) : Info.PredExtra;
+    if (PrevEO != Info.ExitExtra) {
+      LLVM_DEBUG(dbgs() << "in block " << printMBBReference(MBB) << "\n");
+      LLVM_DEBUG(dbgs() << "  begin        state ExtraOperand: " << Info.PredExtra << "\n");
+      LLVM_DEBUG(dbgs() << "  expected end state ExtraOperand: " << Info.ExitExtra << "\n");
+      LLVM_DEBUG(dbgs() << "  actual   end state ExtraOperand: " << PrevEO << "\n");
+    }
   }
 }
 
+// TODO: ExtraOperand?
 void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
   VSETVLIInfo CurInfo = VSETVLIInfo::getUnknown();
+  ExtraOperand CurEO;
   for (MachineInstr &MI : MBB) {
     // If this is an explicit VSETVLI or VSETIVLI, update our state.
     if (isVectorConfigInstr(MI)) {
       CurInfo = getInfoForVSETVLI(MI);
+      CurEO = getExtraOperand(&MI);
       continue;
     }
 
     const uint64_t TSFlags = MI.getDesc().TSFlags;
     if (isScalarMoveInstr(MI)) {
-      assert(RISCVII::hasSEWOp(TSFlags) && RISCVII::hasVLOp(TSFlags));
-      const VSETVLIInfo NewInfo = computeInfoForInstr(MI, TSFlags, MRI);
+      VSETVLIInfo NewInfo = VSETVLIInfo::getUnknown();
+      if (RISCVII::hasSEWOp(TSFlags) && RISCVII::hasVLOp(TSFlags))
+        NewInfo = computeInfoForInstr(MI, TSFlags, MRI);
+      else if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
+                   RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode()))
+        NewInfo = computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
+                                         EPI->VLMul, EPI->getMaskOpIndex(), MRI);
+      else
+        llvm_unreachable("Scalar move instructions must be either EPI or RVV.");
 
       // For vmv.s.x and vfmv.s.f, there are only two behaviors, VL = 0 and
       // VL > 0. We can discard the user requested AVL and just use the last
@@ -1947,35 +2001,56 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
         else
           VLOp.ChangeToRegister(CurInfo.getAVLReg(), /*IsDef*/ false);
         CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
+
+        // Also propagate the Extra operand info
+        ExtraOperand NewEO = getExtraOperand(&MI);
+        if (NewEO.isUndefined())
+          copyExtraOperand(CurEO, &MI);
+        else
+          CurEO = NewEO;
+
         continue;
       }
     }
+
+    auto UseCurrentAVL = [&](VSETVLIInfo &CurInfo, const VSETVLIInfo &Require,
+                             unsigned int VLArgPos) -> bool {
+      if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
+          Require.getAVLReg().isVirtual()) {
+        if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
+          if (isVectorConfigInstr(*DefMI)) {
+            VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
+            if (DefInfo.hasSameAVL(CurInfo) && DefInfo.hasSameVLMAX(CurInfo)) {
+              MachineOperand &VLOp = MI.getOperand(VLArgPos);
+              if (CurInfo.hasAVLImm())
+                VLOp.ChangeToImmediate(CurInfo.getAVLImm());
+              else {
+                MRI->clearKillFlags(CurInfo.getAVLReg());
+                VLOp.ChangeToRegister(CurInfo.getAVLReg(), /*IsDef*/ false);
+              }
+
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    };
 
     if (RISCVII::hasSEWOp(TSFlags)) {
       if (RISCVII::hasVLOp(TSFlags)) {
         const auto Require = computeInfoForInstr(MI, TSFlags, MRI);
         // If the AVL is the result of a previous vsetvli which has the
         // same AVL and VLMAX as our current state, we can reuse the AVL
-        // from the current state for the new one.  This allows us to
+        // from the current state for the new one. This allows us to
         // generate 'vsetvli x0, x0, vtype" or possible skip the transition
         // entirely.
-        if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
-            Require.getAVLReg().isVirtual()) {
-          if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
-            if (isVectorConfigInstr(*DefMI)) {
-              VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
-              if (DefInfo.hasSameAVL(CurInfo) &&
-                  DefInfo.hasSameVLMAX(CurInfo)) {
-                MachineOperand &VLOp = MI.getOperand(getVLOpNum(MI));
-                if (CurInfo.hasAVLImm())
-                  VLOp.ChangeToImmediate(CurInfo.getAVLImm());
-                else
-                  VLOp.ChangeToRegister(CurInfo.getAVLReg(), /*IsDef*/ false);
-                CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
-                continue;
-              }
-            }
-          }
+        if (UseCurrentAVL(CurInfo, Require, getVLOpNum(MI))) {
+          // MI has changed here so this is not the same as the call to
+          // computeInfoForInstr that comes later.
+          CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
+          continue;
         }
       }
       CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
@@ -1985,35 +2060,21 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
     if (const RISCVEPIPseudosTable::EPIPseudoInfo *EPI =
             RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode())) {
       int VLIndex = EPI->getVLIndex();
-
       if (VLIndex >= 0) {
         const auto Require =
             computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
                                    EPI->VLMul, EPI->getMaskOpIndex(), MRI);
         // If the AVL is the result of a previous vsetvli which has the
         // same AVL and VLMAX as our current state, we can reuse the AVL
-        // from the current state for the new one.  This allows us to
+        // from the current state for the new one. This allows us to
         // generate 'vsetvli x0, x0, vtype" or possible skip the transition
         // entirely.
-        if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
-            Require.getAVLReg().isVirtual()) {
-          if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
-            if (isVectorConfigInstr(*DefMI)) {
-              VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
-              if (DefInfo.hasSameAVL(CurInfo) &&
-                  DefInfo.hasSameVLMAX(CurInfo)) {
-                MachineOperand &VLOp = MI.getOperand(getVLOpNum(MI));
-                if (CurInfo.hasAVLImm())
-                  VLOp.ChangeToImmediate(CurInfo.getAVLImm());
-                else
-                  VLOp.ChangeToRegister(CurInfo.getAVLReg(), /*IsDef*/ false);
-                CurInfo = computeInfoForEPIInstr(MI, EPI->getVLIndex(),
-                                                 EPI->getSEWIndex(), EPI->VLMul,
-                                                 EPI->getMaskOpIndex(), MRI);
-                continue;
-              }
-            }
-          }
+        if (UseCurrentAVL(CurInfo, Require, VLIndex)) {
+          // MI has changed here so this is not the same as the call to
+          // computeInfoForInstr that comes later.
+          CurInfo = computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
+                                           EPI->VLMul, EPI->getMaskOpIndex(), MRI);
+          continue;
         }
       }
       CurInfo =
