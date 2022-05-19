@@ -3,11 +3,8 @@
 @SERIALIZED_LIT_PARAMS@
 
 #
-# Configuration file for running the libunwind tests against the shared library.
-#
-# This file is a lot simpler than the ones for libc++ and libc++abi because
-# while libunwind is written in C++, it doesn't use the C++ Standard Library
-# so we don't need to set that up to run the tests correctly.
+# Configuration file for running the libunwind tests against a libc++ shared library
+# into which the unwinder was merged.
 #
 
 import os, site
@@ -50,7 +47,7 @@ config.substitutions.append(('%{compile_flags}',
     '-nostdinc++ -I {}/include {}'.format('@LIBUNWIND_SOURCE_DIR@', ' '.join(compile_flags))
 ))
 config.substitutions.append(('%{link_flags}',
-    '-L {0} -Wl,-rpath,{0} -lunwind -ldl {1}'.format('@LIBUNWIND_LIBRARY_DIR@', ' '.join(link_flags))
+    '-L {0} -Wl,-rpath,{0} -lc++ -ldl {1}'.format('@LIBUNWIND_LIBRARY_DIR@', ' '.join(link_flags))
 ))
 config.substitutions.append(('%{exec}',
     '%{executor} --execdir %T -- ' if '@LIBUNWIND_EXECUTOR@' else ''
