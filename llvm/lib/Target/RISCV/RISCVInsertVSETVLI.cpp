@@ -1655,14 +1655,20 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
                       << " changed to " << BBInfo.Exit << "\n");
   }
 
-  // If the new exit values match the old exit values,
-  // we don't need to revisit any blocks.
-  if (UpdatedExtraOperand || UpdatedVSETVLIInfo) {
-    // Add the successors to the work list so we can propagate the
-    // changed exit status.
-    for (MachineBasicBlock *S : MBB.successors())
-      if (!BlockInfo[S->getNumber()].InQueue)
-        WorkList.push(S);
+  // Add the successors to the work list so we can propagate the
+  // changed exit status.
+  for (MachineBasicBlock *S : MBB.successors()) {
+    // If the new exit values match the old exit values, we don't need to
+    // revisit any blocks. However, we unconditionally queue the successors
+    // that are still invalid on their entry because they must be visited, no
+    // matter what we concluded for this basic block.
+    if (!BlockInfo[S->getNumber()].InQueue &&
+        (!BlockInfo[S->getNumber()].Pred.isValid() || UpdatedVSETVLIInfo ||
+         UpdatedExtraOperand)) {
+      WorkList.push(S);
+      BlockInfo[S->getNumber()].InQueue = true;
+      LLVM_DEBUG(dbgs() << "Requeuing " << printMBBReference(MBB) << "\n");
+    }
   }
 }
 
