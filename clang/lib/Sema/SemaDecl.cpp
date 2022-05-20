@@ -9646,15 +9646,11 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
     }
 
     if (isFriend) {
-      // In MSVC mode for older versions of the standard, friend function
-      // declarations behave as declarations
-      bool PerformFriendInjection =
-          getLangOpts().MSVCCompat && !getLangOpts().CPlusPlus20;
       if (FunctionTemplate) {
-        FunctionTemplate->setObjectOfFriendDecl(PerformFriendInjection);
+        FunctionTemplate->setObjectOfFriendDecl();
         FunctionTemplate->setAccess(AS_public);
       }
-      NewFD->setObjectOfFriendDecl(PerformFriendInjection);
+      NewFD->setObjectOfFriendDecl();
       NewFD->setAccess(AS_public);
     }
 
@@ -10232,10 +10228,13 @@ Sema::ActOnFunctionDeclarator(Scope *S, Declarator &D, DeclContext *DC,
   // marking the function.
   AddCFAuditedAttribute(NewFD);
 
-  // If this is a function definition, check if we have to apply optnone due to
-  // a pragma.
-  if(D.isFunctionDefinition())
+  // If this is a function definition, check if we have to apply any
+  // attributes (i.e. optnone and no_builtin) due to a pragma.
+  if (D.isFunctionDefinition()) {
     AddRangeBasedOptnone(NewFD);
+    AddImplicitMSFunctionNoBuiltinAttr(NewFD);
+    AddSectionMSAllocText(NewFD);
+  }
 
   // If this is the first declaration of an extern C variable, update
   // the map of such variables.
@@ -11406,6 +11405,15 @@ bool Sema::CheckFunctionDeclaration(Scope *S, FunctionDecl *NewFD,
 
       if (Method->isStatic())
         checkThisInStaticMemberFunctionType(Method);
+    }
+
+    // C++20: dcl.decl.general p4:
+    // The optional requires-clause ([temp.pre]) in an init-declarator or
+    // member-declarator shall be present only if the declarator declares a
+    // templated function ([dcl.fct]).
+    if (Expr *TRC = NewFD->getTrailingRequiresClause()) {
+      if (!NewFD->isTemplated() && !NewFD->isTemplateInstantiation())
+        Diag(TRC->getBeginLoc(), diag::err_constrained_non_templated_function);
     }
 
     if (CXXConversionDecl *Conversion = dyn_cast<CXXConversionDecl>(NewFD))
@@ -18734,7 +18742,7 @@ bool Sema::IsValueInFlagEnum(const EnumDecl *ED, const llvm::APInt &Val,
       const auto &EVal = E->getInitVal();
       // Only single-bit enumerators introduce new flag values.
       if (EVal.isPowerOf2())
-        FlagBits = FlagBits.zextOrSelf(EVal.getBitWidth()) | EVal;
+        FlagBits = FlagBits.zext(EVal.getBitWidth()) | EVal;
     }
   }
 

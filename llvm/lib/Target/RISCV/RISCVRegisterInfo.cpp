@@ -104,6 +104,7 @@ BitVector RISCVRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   markSuperRegs(Reserved, RISCV::VTYPE);
   markSuperRegs(Reserved, RISCV::VXSAT);
   markSuperRegs(Reserved, RISCV::VXRM);
+  markSuperRegs(Reserved, RISCV::VLENB); // vlenb (constant)
 
   // Floating point environment registers.
   markSuperRegs(Reserved, RISCV::FRM);
@@ -119,7 +120,7 @@ bool RISCVRegisterInfo::isAsmClobberable(const MachineFunction &MF,
 }
 
 bool RISCVRegisterInfo::isConstantPhysReg(MCRegister PhysReg) const {
-  return PhysReg == RISCV::X0;
+  return PhysReg == RISCV::X0 || PhysReg == RISCV::VLENB;
 }
 
 const uint32_t *RISCVRegisterInfo::getNoPreservedMask() const {

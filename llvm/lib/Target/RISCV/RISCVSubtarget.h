@@ -91,6 +91,7 @@ private:
   bool IsRV32E = false;
   bool EnableLinkerRelax = false;
   bool EnableRVCHintInstrs = true;
+  bool EnableDefaultUnroll = true;
   bool EnableSaveRestore = false;
   unsigned XLen = 32;
   unsigned ZvlLen = 0;
@@ -181,6 +182,7 @@ public:
   bool isRV32E() const { return IsRV32E; }
   bool enableLinkerRelax() const { return EnableLinkerRelax; }
   bool enableRVCHintInstrs() const { return EnableRVCHintInstrs; }
+  bool enableDefaultUnroll() const { return EnableDefaultUnroll; }
   bool enableSaveRestore() const { return EnableSaveRestore; }
   MVT getXLenVT() const { return XLenVT; }
   unsigned getXLen() const { return XLen; }
@@ -253,6 +255,8 @@ public:
   unsigned getMinRVVVectorSizeInBits() const;
   unsigned getMaxLMULForFixedLengthVectors() const;
   bool useRVVForFixedLengthVectors() const;
+
+  bool enableSubRegLiveness() const override;
 };
 } // End llvm namespace
 
