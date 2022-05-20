@@ -1917,8 +1917,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         (CurInfo != ExitInfo || PrevEO != BBInfo.ExitExtra)) {
       // Note there's an implicit assumption here that terminators never use
       // or modify VL or VTYPE.  Also, fallthrough will return end().
-      // auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
-      auto InsertPt = MBB.getLastNonDebugInstr();
+      auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
       insertVSETVLI(MBB, InsertPt, MBB.findDebugLoc(InsertPt), ExitInfo, CurInfo);
       CurInfo = ExitInfo;
     }
