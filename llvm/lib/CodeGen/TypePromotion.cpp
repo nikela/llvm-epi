@@ -484,12 +484,12 @@ void IRPromoter::PromoteTree() {
         continue;
 
       if (auto *Const = dyn_cast<ConstantInt>(Op)) {
-        Constant *NewConst = SafeWrap.contains(I)
+        Constant *NewConst = (SafeWrap.contains(I) && i == 1)
                                  ? ConstantExpr::getSExt(Const, ExtTy)
                                  : ConstantExpr::getZExt(Const, ExtTy);
         I->setOperand(i, NewConst);
       } else if (isa<UndefValue>(Op))
-        I->setOperand(i, UndefValue::get(ExtTy));
+        I->setOperand(i, ConstantInt::get(ExtTy, 0));
     }
 
     // Mutate the result type, unless this is an icmp or switch.
@@ -548,6 +548,11 @@ void IRPromoter::TruncateSinks() {
       }
       continue;
     }
+
+    // Don't insert a trunc for a zext which can still legally promote.
+    if (auto ZExt = dyn_cast<ZExtInst>(I))
+      if (ZExt->getType()->getScalarSizeInBits() > PromotedWidth)
+        continue;
 
     // Now handle the others.
     for (unsigned i = 0; i < I->getNumOperands(); ++i) {

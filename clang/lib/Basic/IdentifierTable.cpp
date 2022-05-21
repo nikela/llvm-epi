@@ -110,9 +110,10 @@ namespace {
     KEYSYCL       = 0x1000000,
     KEYCUDA       = 0x2000000,
     KEYEPI        = 0x4000000,
+    KEYMAX        = KEYEPI, // The maximum key
     KEYALLCXX = KEYCXX | KEYCXX11 | KEYCXX20,
-    KEYALL = (0x1ffffff & ~KEYNOMS18 &
-              ~KEYNOOPENCL) // KEYNOMS18 and KEYNOOPENCL are used to exclude.
+    KEYALL = (KEYMAX | (KEYMAX-1)) & ~KEYNOMS18 &
+             ~KEYNOOPENCL // KEYNOMS18 and KEYNOOPENCL are used to exclude.
   };
 
   /// How a keyword is treated in the selected standard.

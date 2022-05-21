@@ -45,13 +45,13 @@ define void @test_vsetvl_vtype(<vscale x 1 x double>* %v, i64 %avl) nounwind
 ; CHECK-O2-LABEL: test_vsetvl_vtype:
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    vsetvli a2, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
-; CHECK-O2-NEXT:    vle64.v v8, (a0)
-; CHECK-O2-NEXT:    srli a0, a2, 1
+; CHECK-O2-NEXT:    srli a2, a2, 1
 ; CHECK-O2-NEXT:    #APP
 ; CHECK-O2-NEXT:    rdvtype t0
-; CHECK-O2-NEXT:    vsetvl zero, a0, t0
+; CHECK-O2-NEXT:    vsetvl zero, a2, t0
 ; CHECK-O2-NEXT:    #NO_APP
+; CHECK-O2-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vle64.v v8, (a0)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a0, a0, %lo(scratch)

@@ -5324,11 +5324,8 @@ bool CodeGenPrepare::optimizeMemoryInst(Instruction *MemoryInst, Value *Addr,
           // SDAG consecutive load/store merging.
           if (ResultPtr->getType() != I8PtrTy)
             ResultPtr = Builder.CreatePointerCast(ResultPtr, I8PtrTy);
-          ResultPtr =
-              AddrMode.InBounds
-                  ? Builder.CreateInBoundsGEP(I8Ty, ResultPtr, ResultIndex,
-                                              "sunkaddr")
-                  : Builder.CreateGEP(I8Ty, ResultPtr, ResultIndex, "sunkaddr");
+          ResultPtr = Builder.CreateGEP(I8Ty, ResultPtr, ResultIndex,
+                                        "sunkaddr", AddrMode.InBounds);
         }
 
         ResultIndex = V;
@@ -5339,11 +5336,8 @@ bool CodeGenPrepare::optimizeMemoryInst(Instruction *MemoryInst, Value *Addr,
       } else {
         if (ResultPtr->getType() != I8PtrTy)
           ResultPtr = Builder.CreatePointerCast(ResultPtr, I8PtrTy);
-        SunkAddr =
-            AddrMode.InBounds
-                ? Builder.CreateInBoundsGEP(I8Ty, ResultPtr, ResultIndex,
-                                            "sunkaddr")
-                : Builder.CreateGEP(I8Ty, ResultPtr, ResultIndex, "sunkaddr");
+        SunkAddr = Builder.CreateGEP(I8Ty, ResultPtr, ResultIndex, "sunkaddr",
+                                     AddrMode.InBounds);
       }
 
       if (SunkAddr->getType() != Addr->getType())
@@ -7021,7 +7015,7 @@ bool CodeGenPrepare::optimizeSwitchType(SwitchInst *SI) {
   ExtInst->setDebugLoc(SI->getDebugLoc());
   SI->setCondition(ExtInst);
   for (auto Case : SI->cases()) {
-    APInt NarrowConst = Case.getCaseValue()->getValue();
+    const APInt &NarrowConst = Case.getCaseValue()->getValue();
     APInt WideConst = (ExtType == Instruction::ZExt) ?
                       NarrowConst.zext(RegWidth) : NarrowConst.sext(RegWidth);
     Case.setValue(ConstantInt::get(Context, WideConst));
@@ -7037,9 +7031,13 @@ bool CodeGenPrepare::optimizeSwitchPhiConstants(SwitchInst *SI) {
   // change the code to:
   //   switch(x) { case 42: phi(x, ...) }
 
+  Value *Condition = SI->getCondition();
+  // Avoid endless loop in degenerate case.
+  if (isa<ConstantInt>(*Condition))
+    return false;
+
   bool Changed = false;
   BasicBlock *SwitchBB = SI->getParent();
-  Value *Condition = SI->getCondition();
   Type *ConditionType = Condition->getType();
 
   for (const SwitchInst::CaseHandle &Case : SI->cases()) {
@@ -7050,12 +7048,29 @@ bool CodeGenPrepare::optimizeSwitchPhiConstants(SwitchInst *SI) {
     bool CheckedForSinglePred = false;
     for (PHINode &PHI : CaseBB->phis()) {
       Type *PHIType = PHI.getType();
-      if (PHIType == ConditionType) {
+      // If ZExt is free then we can also catch patterns like this:
+      //   switch((i32)x) { case 42: phi((i64)42, ...); }
+      // and replace `(i64)42` with `zext i32 %x to i64`.
+      bool TryZExt =
+          PHIType->isIntegerTy() &&
+          PHIType->getIntegerBitWidth() > ConditionType->getIntegerBitWidth() &&
+          TLI->isZExtFree(ConditionType, PHIType);
+      if (PHIType == ConditionType || TryZExt) {
         // Set to true to skip this case because of multiple preds.
         bool SkipCase = false;
+        Value *Replacement = nullptr;
         for (unsigned I = 0, E = PHI.getNumIncomingValues(); I != E; I++) {
-          if (PHI.getIncomingValue(I) != CaseValue ||
-              PHI.getIncomingBlock(I) != SwitchBB)
+          Value *PHIValue = PHI.getIncomingValue(I);
+          if (PHIValue != CaseValue) {
+            if (!TryZExt)
+              continue;
+            ConstantInt *PHIValueInt = dyn_cast<ConstantInt>(PHIValue);
+            if (!PHIValueInt ||
+                PHIValueInt->getValue() !=
+                    CaseValue->getValue().zext(PHIType->getIntegerBitWidth()))
+              continue;
+          }
+          if (PHI.getIncomingBlock(I) != SwitchBB)
             continue;
           // We cannot optimize if there are multiple case labels jumping to
           // this block.  This check may get expensive when there are many
@@ -7068,7 +7083,15 @@ bool CodeGenPrepare::optimizeSwitchPhiConstants(SwitchInst *SI) {
             }
           }
 
-          PHI.setIncomingValue(I, Condition);
+          if (Replacement == nullptr) {
+            if (PHIValue == CaseValue) {
+              Replacement = Condition;
+            } else {
+              IRBuilder<> Builder(SI);
+              Replacement = Builder.CreateZExt(Condition, PHIType);
+            }
+          }
+          PHI.setIncomingValue(I, Replacement);
           Changed = true;
         }
         if (SkipCase)

@@ -665,7 +665,7 @@ protected:
 
   /// Emit a bypass check to see if the vector trip count is zero, including if
   /// it overflows.
-  void emitMinimumIterationCountCheck(BasicBlock *Bypass);
+  void emitIterationCountCheck(BasicBlock *Bypass);
 
   /// Emit a bypass check to see if all of the SCEV assumptions we've
   /// had to make are correct. Returns the block containing the checks or
@@ -940,8 +940,7 @@ protected:
   /// Emits an iteration count bypass check once for the main loop (when \p
   /// ForEpilogue is false) and once for the epilogue loop (when \p
   /// ForEpilogue is true).
-  BasicBlock *emitMinimumIterationCountCheck(BasicBlock *Bypass,
-                                             bool ForEpilogue);
+  BasicBlock *emitIterationCountCheck(BasicBlock *Bypass, bool ForEpilogue);
   void printDebugTracesAtStart() override;
   void printDebugTracesAtEnd() override;
 };
@@ -2041,7 +2040,7 @@ public:
   /// there is no vector code generation, the check blocks are removed
   /// completely.
   void Create(Loop *L, const LoopAccessInfo &LAI,
-              const SCEVPredicate &Pred) {
+              const SCEVPredicate &UnionPred, ElementCount VF, unsigned IC) {
 
     BasicBlock *LoopHeader = L->getHeader();
     BasicBlock *Preheader = L->getLoopPreheader();
@@ -2050,12 +2049,12 @@ public:
     // ensure the blocks are properly added to LoopInfo & DominatorTree. Those
     // may be used by SCEVExpander. The blocks will be un-linked from their
     // predecessors and removed from LI & DT at the end of the function.
-    if (!Pred.isAlwaysTrue()) {
+    if (!UnionPred.isAlwaysTrue()) {
       SCEVCheckBlock = SplitBlock(Preheader, Preheader->getTerminator(), DT, LI,
                                   nullptr, "vector.scevcheck");
 
       SCEVCheckCond = SCEVExp.expandCodeForPredicate(
-          &Pred, SCEVCheckBlock->getTerminator());
+          &UnionPred, SCEVCheckBlock->getTerminator());
     }
 
     const auto &RtPtrChecking = *LAI.getRuntimePointerChecking();
@@ -2064,9 +2063,19 @@ public:
       MemCheckBlock = SplitBlock(Pred, Pred->getTerminator(), DT, LI, nullptr,
                                  "vector.memcheck");
 
-      MemRuntimeCheckCond =
-          addRuntimeChecks(MemCheckBlock->getTerminator(), L,
-                           RtPtrChecking.getChecks(), MemCheckExp);
+      auto DiffChecks = RtPtrChecking.getDiffChecks();
+      if (DiffChecks) {
+        MemRuntimeCheckCond = addDiffRuntimeChecks(
+            MemCheckBlock->getTerminator(), L, *DiffChecks, MemCheckExp,
+            [VF](IRBuilderBase &B, unsigned Bits) {
+              return getRuntimeVF(B, B.getIntNTy(Bits), VF);
+            },
+            IC);
+      } else {
+        MemRuntimeCheckCond =
+            addRuntimeChecks(MemCheckBlock->getTerminator(), L,
+                             RtPtrChecking.getChecks(), MemCheckExp);
+      }
       assert(MemRuntimeCheckCond &&
              "no RT checks generated although RtPtrChecking "
              "claimed checks are required");
@@ -2143,7 +2152,11 @@ public:
                              BasicBlock *LoopExitBlock) {
     if (!SCEVCheckCond)
       return nullptr;
-    if (auto *C = dyn_cast<ConstantInt>(SCEVCheckCond))
+
+    Value *Cond = SCEVCheckCond;
+    // Mark the check as used, to prevent it from being removed during cleanup.
+    SCEVCheckCond = nullptr;
+    if (auto *C = dyn_cast<ConstantInt>(Cond))
       if (C->isZero())
         return nullptr;
 
@@ -2162,11 +2175,8 @@ public:
     DT->addNewBlock(SCEVCheckBlock, Pred);
     DT->changeImmediateDominator(LoopVectorPreHeader, SCEVCheckBlock);
 
-    ReplaceInstWithInst(
-        SCEVCheckBlock->getTerminator(),
-        BranchInst::Create(Bypass, LoopVectorPreHeader, SCEVCheckCond));
-    // Mark the check as used, to prevent it from being removed during cleanup.
-    SCEVCheckCond = nullptr;
+    ReplaceInstWithInst(SCEVCheckBlock->getTerminator(),
+                        BranchInst::Create(Bypass, LoopVectorPreHeader, Cond));
     return SCEVCheckBlock;
   }
 
@@ -2971,6 +2981,8 @@ InnerLoopVectorizer::getOrCreateVectorTripCount(BasicBlock *InsertBlock) {
   // overflows: the vector induction variable will eventually wrap to zero given
   // that it starts at zero and its Step is a power of two; the loop will then
   // exit, with the last early-exit vector comparison also producing all-true.
+  // For scalable vectors the VF is not guaranteed to be a power of 2, but this
+  // is accounted for in emitIterationCountCheck that adds an overflow check.
   if (Cost->foldTailByMasking()) {
     // TODO: Fix for scalable vectors.
     assert(isPowerOf2_32(VF.getKnownMinValue() * UF) &&
@@ -3034,7 +3046,7 @@ Value *InnerLoopVectorizer::createBitOrPointerCast(Value *V, VectorType *DstVTy,
   return Builder.CreateBitOrPointerCast(CastVal, DstVTy);
 }
 
-void InnerLoopVectorizer::emitMinimumIterationCountCheck(BasicBlock *Bypass) {
+void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass) {
   Value *Count = getOrCreateTripCount(LoopVectorPreHeader);
   // Reuse existing vector loop preheader for TC checks.
   // Note that new preheader block is generated for vector loop.
@@ -3050,10 +3062,23 @@ void InnerLoopVectorizer::emitMinimumIterationCountCheck(BasicBlock *Bypass) {
                                             : ICmpInst::ICMP_ULT;
 
   // If tail is to be folded, vector loop takes care of all iterations.
+  Type *CountTy = Count->getType();
   Value *CheckMinIters = Builder.getFalse();
-  if (!Cost->foldTailByMasking()) {
-    Value *Step = createStepForVF(Builder, Count->getType(), VF, UF);
+  Value *Step = createStepForVF(Builder, CountTy, VF, UF);
+  if (!Cost->foldTailByMasking())
     CheckMinIters = Builder.CreateICmp(P, Count, Step, "min.iters.check");
+  else if (VF.isScalable()) {
+    // vscale is not necessarily a power-of-2, which means we cannot guarantee
+    // an overflow to zero when updating induction variables and so an
+    // additional overflow check is required before entering the vector loop.
+
+    // Get the maximum unsigned value for the type.
+    Value *MaxUIntTripCount =
+        ConstantInt::get(CountTy, cast<IntegerType>(CountTy)->getMask());
+    Value *LHS = Builder.CreateSub(MaxUIntTripCount, Count);
+
+    // Don't execute the vector loop if (UMax - n) < (VF * UF).
+    CheckMinIters = Builder.CreateICmp(ICmpInst::ICMP_ULT, LHS, Step);
   }
 
   // Create new preheader for vector loop.
@@ -3140,13 +3165,17 @@ BasicBlock *InnerLoopVectorizer::emitMemRuntimeChecks(BasicBlock *Bypass) {
 
   AddedSafetyChecks = true;
 
-  // We currently don't use LoopVersioning for the actual loop cloning but we
-  // still use it to add the noalias metadata.
-  LVer = std::make_unique<LoopVersioning>(
-      *Legal->getLAI(),
-      Legal->getLAI()->getRuntimePointerChecking()->getChecks(), OrigLoop, LI,
-      DT, PSE.getSE());
-  LVer->prepareNoAliasMetadata();
+  // Only use noalias metadata when using memory checks guaranteeing no overlap
+  // across all iterations.
+  if (!Legal->getLAI()->getRuntimePointerChecking()->getDiffChecks()) {
+    //  We currently don't use LoopVersioning for the actual loop cloning but we
+    //  still use it to add the noalias metadata.
+    LVer = std::make_unique<LoopVersioning>(
+        *Legal->getLAI(),
+        Legal->getLAI()->getRuntimePointerChecking()->getChecks(), OrigLoop, LI,
+        DT, PSE.getSE());
+    LVer->prepareNoAliasMetadata();
+  }
   return MemCheckBlock;
 }
 
@@ -3361,7 +3390,7 @@ InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // backedge-taken count is uint##_max: adding one to it will overflow leading
   // to an incorrect trip count of zero. In this (rare) case we will also jump
   // to the scalar loop.
-  emitMinimumIterationCountCheck(LoopScalarPreHeader);
+  emitIterationCountCheck(LoopScalarPreHeader);
 
   // Generate the code to check any assumptions that we've made for SCEV
   // expressions.
@@ -5831,15 +5860,6 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
       return MaxFactors;
     }
   }
-
-  // For scalable vectors don't use tail folding for low trip counts or
-  // optimizing for code size. We only permit this if the user has explicitly
-  // requested it.
-  if (ScalarEpilogueStatus != CM_ScalarEpilogueNotNeededUsePredicate &&
-      ScalarEpilogueStatus != CM_ScalarEpilogueNotAllowedUsePredicate &&
-      MaxFactors.ScalableVF.isVector() &&
-      !Hints->isFixedVectorizationDisabled())
-    MaxFactors.ScalableVF = ElementCount::getScalable(0);
 
   // If we don't know the precise trip count, or if the trip count that we
   // found modulo the vectorization factor is not zero, try to fold the tail
@@ -8640,7 +8660,7 @@ EpilogueVectorizerMainLoop::createEpilogueVectorizedLoopSkeleton() {
   // Generate the code to check the minimum iteration count of the vector
   // epilogue (see below).
   EPI.EpilogueIterationCountCheck =
-      emitMinimumIterationCountCheck(LoopScalarPreHeader, true);
+      emitIterationCountCheck(LoopScalarPreHeader, true);
   EPI.EpilogueIterationCountCheck->setName("iter.check");
 
   // Generate the code to check any assumptions that we've made for SCEV
@@ -8659,7 +8679,7 @@ EpilogueVectorizerMainLoop::createEpilogueVectorizedLoopSkeleton() {
   // trip count. Note: the branch will get updated later on when we vectorize
   // the epilogue.
   EPI.MainLoopIterationCountCheck =
-      emitMinimumIterationCountCheck(LoopScalarPreHeader, false);
+      emitIterationCountCheck(LoopScalarPreHeader, false);
 
   // Generate the induction variable.
   EPI.VectorTripCount = getOrCreateVectorTripCount(LoopVectorPreHeader);
@@ -8690,8 +8710,8 @@ void EpilogueVectorizerMainLoop::printDebugTracesAtEnd() {
 }
 
 BasicBlock *
-EpilogueVectorizerMainLoop::emitMinimumIterationCountCheck(BasicBlock *Bypass,
-                                                           bool ForEpilogue) {
+EpilogueVectorizerMainLoop::emitIterationCountCheck(BasicBlock *Bypass,
+                                                    bool ForEpilogue) {
   assert(Bypass && "Expected valid bypass basic block.");
   ElementCount VFactor = ForEpilogue ? EPI.EpilogueVF : VF;
   unsigned UFactor = ForEpilogue ? EPI.EpilogueUF : UF;
@@ -9425,6 +9445,7 @@ bool VPRecipeBuilder::validateWiden(Instruction *I) const {
     case Instruction::URem:
     case Instruction::Xor:
     case Instruction::ZExt:
+    case Instruction::Freeze:
       return true;
     }
     return false;
@@ -9678,8 +9699,9 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
     }
   }
 
-  // BitCast does not need to be predicated
-  if (preferPredicatedWiden() && Instr->getOpcode() != Instruction::BitCast)
+  // BitCast or Freeze do not need to be predicated
+  if (preferPredicatedWiden() && Instr->getOpcode() != Instruction::BitCast &&
+      Instr->getOpcode() != Instruction::Freeze)
     return toVPRecipeResult(tryToPredicatedWiden(Instr, Operands, Plan));
 
   return toVPRecipeResult(tryToWiden(Instr, Operands));
@@ -10468,6 +10490,17 @@ void VPWidenRecipe::execute(VPTransformState &State) {
 
     break;
   }
+  case Instruction::Freeze: {
+    State.ILV->setDebugLocFromInst(&I);
+
+    for (unsigned Part = 0; Part < State.UF; ++Part) {
+      Value *Op = State.get(getOperand(0), Part);
+
+      Value *Freeze = Builder.CreateFreeze(Op);
+      State.set(this, Freeze, Part);
+    }
+    break;
+  }
   case Instruction::ICmp:
   case Instruction::FCmp: {
     // Widen compares. Generate vector compares.
@@ -10662,11 +10695,8 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
 
       // Create the new GEP. Note that this GEP may be a scalar if VF == 1,
       // but it should be a vector, otherwise.
-      auto *NewGEP = IsInBounds
-                         ? State.Builder.CreateInBoundsGEP(
-                               GEP->getSourceElementType(), Ptr, Indices)
-                         : State.Builder.CreateGEP(GEP->getSourceElementType(),
-                                                   Ptr, Indices);
+      auto *NewGEP = State.Builder.CreateGEP(GEP->getSourceElementType(), Ptr,
+                                             Indices, "", IsInBounds);
       assert((State.VF.isScalar() || NewGEP->getType()->isVectorTy()) &&
              "NewGEP is not a pointer vector");
       State.set(this, NewGEP, Part);
@@ -10794,9 +10824,8 @@ void VPWidenPointerInductionRecipe::execute(VPTransformState &State) {
   auto *IVR = getParent()->getPlan()->getCanonicalIV();
   PHINode *CanonicalIV = cast<PHINode>(State.get(IVR, 0));
 
-  if (all_of(users(), [this](const VPUser *U) {
-        return cast<VPRecipeBase>(U)->usesScalars(this);
-      })) {
+  if (all_of(users(),
+             [this](const VPUser *U) { return U->usesScalars(this); })) {
     // This is the normalized GEP that starts counting at zero.
     Value *PtrInd = State.Builder.CreateSExtOrTrunc(
         CanonicalIV, IndDesc.getStep()->getType());
@@ -12002,7 +12031,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     GeneratedRTChecks Checks(*PSE.getSE(), DT, LI,
                              F->getParent()->getDataLayout());
     if (!VF.Width.isScalar() || IC > 1)
-      Checks.Create(L, *LVL.getLAI(), PSE.getPredicate());
+      Checks.Create(L, *LVL.getLAI(), PSE.getPredicate(), VF.Width, IC);
 
     using namespace ore;
     if (!VectorizeLoop) {
@@ -12054,13 +12083,12 @@ bool LoopVectorizePass::processLoop(Loop *L) {
                                                  Checks);
 
         VPlan &BestEpiPlan = LVP.getBestPlanFor(EPI.EpilogueVF);
-        BestEpiPlan.getVectorLoopRegion()->getEntryBasicBlock()->setName(
-            "vec.epilog.vector.body");
+        VPRegionBlock *VectorLoop = BestEpiPlan.getVectorLoopRegion();
+        VPBasicBlock *Header = VectorLoop->getEntryBasicBlock();
+        Header->setName("vec.epilog.vector.body");
 
         // Ensure that the start values for any VPReductionPHIRecipes are
         // updated before vectorising the epilogue loop.
-        VPBasicBlock *Header =
-            BestEpiPlan.getVectorLoopRegion()->getEntryBasicBlock();
         for (VPRecipeBase &R : Header->phis()) {
           if (auto *ReductionPhi = dyn_cast<VPReductionPHIRecipe>(&R)) {
             if (auto *Resume = MainILV.getReductionResumeValue(

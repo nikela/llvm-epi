@@ -4488,7 +4488,7 @@ void SelectionDAGBuilder::visitMaskedScatter(const CallInst &I) {
   if (!UniformBase) {
     Base = DAG.getConstant(0, sdl, TLI.getPointerTy(DAG.getDataLayout()));
     Index = getValue(Ptr);
-    IndexType = ISD::SIGNED_UNSCALED;
+    IndexType = ISD::SIGNED_SCALED;
     Scale = DAG.getTargetConstant(1, sdl, TLI.getPointerTy(DAG.getDataLayout()));
   }
 
@@ -4596,7 +4596,7 @@ void SelectionDAGBuilder::visitMaskedGather(const CallInst &I) {
   if (!UniformBase) {
     Base = DAG.getConstant(0, sdl, TLI.getPointerTy(DAG.getDataLayout()));
     Index = getValue(Ptr);
-    IndexType = ISD::SIGNED_UNSCALED;
+    IndexType = ISD::SIGNED_SCALED;
     Scale = DAG.getTargetConstant(1, sdl, TLI.getPointerTy(DAG.getDataLayout()));
   }
 
@@ -7462,7 +7462,7 @@ void SelectionDAGBuilder::visitVPLoadGather(const VPIntrinsic &VPIntrin, EVT VT,
     if (!UniformBase) {
       Base = DAG.getConstant(0, DL, TLI.getPointerTy(DAG.getDataLayout()));
       Index = getValue(PtrOperand);
-      IndexType = ISD::SIGNED_UNSCALED;
+      IndexType = ISD::SIGNED_SCALED;
       Scale =
           DAG.getTargetConstant(1, DL, TLI.getPointerTy(DAG.getDataLayout()));
     }
@@ -7519,7 +7519,7 @@ void SelectionDAGBuilder::visitVPStoreScatter(const VPIntrinsic &VPIntrin,
     if (!UniformBase) {
       Base = DAG.getConstant(0, DL, TLI.getPointerTy(DAG.getDataLayout()));
       Index = getValue(PtrOperand);
-      IndexType = ISD::SIGNED_UNSCALED;
+      IndexType = ISD::SIGNED_SCALED;
       Scale =
           DAG.getTargetConstant(1, DL, TLI.getPointerTy(DAG.getDataLayout()));
     }
@@ -7560,9 +7560,9 @@ void SelectionDAGBuilder::visitVPPtrToInt(const VPIntrinsic &I) {
 
   auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
     if (VT.bitsGT(V.getValueType()))
-      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_ZERO_EXTEND, DL, VT, V, Mask, EVL);
     if (VT.bitsLT(V.getValueType()))
-      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_TRUNCATE, DL, VT, V, Mask, EVL);
     return V;
   };
 
@@ -7592,9 +7592,9 @@ void SelectionDAGBuilder::visitVPIntToPtr(const VPIntrinsic &I) {
 
   auto GetVPZExtOrVPTrunc = [&](SDValue V, EVT VT) -> SDValue {
     if (VT.bitsGT(V.getValueType()))
-      return DAG.getNode(ISD::VP_ZEXT, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_ZERO_EXTEND, DL, VT, V, Mask, EVL);
     if (VT.bitsLT(V.getValueType()))
-      return DAG.getNode(ISD::VP_TRUNC, DL, VT, V, Mask, EVL);
+      return DAG.getNode(ISD::VP_TRUNCATE, DL, VT, V, Mask, EVL);
     return V;
   };
 
@@ -7729,7 +7729,10 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
 
   switch (Opcode) {
   default: {
-    SDValue Result = DAG.getNode(Opcode, DL, VTs, OpValues);
+    SDNodeFlags SDFlags;
+    if (auto *FPMO = dyn_cast<FPMathOperator>(&VPIntrin))
+      SDFlags.copyFMF(*FPMO);
+    SDValue Result = DAG.getNode(Opcode, DL, VTs, OpValues, SDFlags);
     setValue(&VPIntrin, Result);
     break;
   }

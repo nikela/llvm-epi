@@ -149,6 +149,9 @@ Bug Fixes
   because there is no way to fully qualify the enumerator name, so this
   "extension" was unintentional and useless. This fixes
   `Issue 42372 <https://github.com/llvm/llvm-project/issues/42372>`_.
+- Clang shouldn't lookup allocation function in global scope for coroutines
+  in case it found the allocation function name in the promise_type body.
+  This fixes Issue `Issue 54881 <https://github.com/llvm/llvm-project/issues/54881>`_.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -214,6 +217,24 @@ Improvements to Clang's diagnostics
   the ``-Wunreachable-code`` flag) which is enabled by default and warns the
   user about ``_Generic`` selection associations which are unreachable because
   the type specified is an array type or a qualified type.
+- Added the ``-Wgnu-line-marker`` diagnostic flag (grouped under the ``-Wgnu``
+  flag) which is a portability warning about use of GNU linemarker preprocessor
+  directives. Fixes `Issue 55067 <https://github.com/llvm/llvm-project/issues/55067>`_.
+- Using ``#elifdef`` and ``#elifndef`` that are incompatible with C/C++
+  standards before C2x/C++2b are now warned via ``-pedantic``. Additionally,
+  on such language mode, ``-Wpre-c2x-compat`` and ``-Wpre-c++2b-compat``
+  diagnostic flags report a compatibility issue.
+  Fixes `Issue 55306 <https://github.com/llvm/llvm-project/issues/55306>`_.
+- Clang now checks for stack resource exhaustion when recursively parsing
+  declarators in order to give a diagnostic before we run out of stack space.
+  This fixes `Issue 51642 <https://github.com/llvm/llvm-project/issues/51642>`_.
+- Unknown preprocessor directives in a skipped conditional block are now given
+  a typo correction suggestion if the given directive is sufficiently similar
+  to another preprocessor conditional directive. For example, if ``#esle``
+  appears in a skipped block, we will warn about the unknown directive and
+  suggest ``#else`` as an alternative. ``#elifdef`` and ``#elifndef`` are only
+  suggested when in C2x or C++2b mode. Fixes
+  `Issue 51598 <https://github.com/llvm/llvm-project/issues/51598>`_.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -244,6 +265,11 @@ New Compiler Flags
   the parameter list were ``void``. There is no ``-fknr-functions`` or
   ``-fno-no-knr-functions`` flag; this feature cannot be disabled in language
   modes where it is required, such as C++ or C2x.
+- A new ARM pass to workaround Cortex-A57 Erratum 1742098 and Cortex-A72 Erratum
+  1655431 can be enabled using ``-mfix-cortex-a57-aes-1742098`` or
+  ``-mfix-cortex-a72-aes-1655431``. The pass is enabled when using either of
+  these cpus with ``-mcpu=`` and can be disabled using
+  ``-mno-fix-cortex-a57-aes-1742098`` or ``-mno-fix-cortex-a72-aes-1655431``.
 
 Deprecated Compiler Flags
 -------------------------
@@ -260,6 +286,12 @@ Removed Compiler Flags
 
 New Pragmas in Clang
 --------------------
+- Added support for MSVC's ``#pragma function``, which tells the compiler to
+  generate calls to functions listed in the pragma instead of using the
+  builtins.
+- Added support for MSVC's ``#pragma alloc_text``. The pragma names the code
+  section functions are placed in. The pragma only applies to functions with
+  C linkage.
 
 - ...
 
@@ -295,6 +327,17 @@ Windows Support
   JustMyCode feature. Note, you may need to manually add ``/JMC`` as additional
   compile options in the Visual Studio since it currently assumes clang-cl does not support ``/JMC``.
 
+AIX Support
+-----------
+
+- The driver no longer adds ``-mignore-xcoff-visibility`` by default for AIX
+  targets when no other visibility command-line options are in effect, as
+  ignoring hidden visibility can silently have undesirable side effects (e.g
+  when libraries depend on visibility to hide non-ABI facing entities). The
+  ``-mignore-xcoff-visibility`` option can be manually specified on the
+  command-line to recover the previous behavior if desired.
+
+
 C Language Changes in Clang
 ---------------------------
 
@@ -325,6 +368,10 @@ C++ Language Changes in Clang
   template parameter, to conform to the Itanium C++ ABI and be compatible with
   GCC. This breaks binary compatibility with code compiled with earlier versions
   of clang; use the ``-fclang-abi-compat=14`` option to get the old mangling.
+- Preprocessor character literals with a ``u8`` prefix are now correctly treated as
+  unsigned character literals. This fixes `Issue 54886 <https://github.com/llvm/llvm-project/issues/54886>`_.
+- Stopped allowing constraints on non-template functions to be compliant with
+  dcl.decl.general p4.
 
 C++20 Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -411,7 +458,10 @@ Build System Changes
 AST Matchers
 ------------
 
-- Expanded ``isInline`` narrowing matcher to support c++17 inline variables.
+- Expanded ``isInline`` narrowing matcher to support C++17 inline variables.
+
+- Added ``forEachTemplateArgument`` matcher which creates a match every
+  time a ``templateArgument`` matches the matcher supplied to it.
 
 clang-format
 ------------
@@ -434,6 +484,13 @@ libclang
 
 Static Analyzer
 ---------------
+- `New CTU implementation
+  <https://discourse.llvm.org/t/rfc-much-faster-cross-translation-unit-ctu-analysis-implementation/61728>`_
+  that keeps the slow-down around 2x compared to the single-TU analysis, even
+  in case of complex C++ projects. Still, it finds the majority of the "old"
+  CTU findings. Besides, not more than ~3% of the bug reports are lost compared
+  to single-TU analysis, the lost reports are highly likely to be false
+  positives.
 
 - Added a new checker ``alpha.unix.cstring.UninitializedRead`` this will check for uninitialized reads
   from common memory copy/manipulation functions such as ``memcpy``, ``mempcpy``, ``memmove``, ``memcmp``, `
