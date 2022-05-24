@@ -1917,8 +1917,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         (CurInfo != ExitInfo || PrevEO != BBInfo.ExitExtra)) {
       // Note there's an implicit assumption here that terminators never use
       // or modify VL or VTYPE.  Also, fallthrough will return end().
-      // auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
-      auto InsertPt = MBB.getLastNonDebugInstr();
+      auto InsertPt = MBB.getFirstTerminator().getInstrIterator();
       insertVSETVLI(MBB, InsertPt, MBB.findDebugLoc(InsertPt), ExitInfo, CurInfo);
       CurInfo = ExitInfo;
     }
@@ -1946,10 +1945,16 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
   }
 }
 
-// TODO: ExtraOperand?
 void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
   VSETVLIInfo CurInfo = VSETVLIInfo::getUnknown();
   ExtraOperand CurEO;
+  auto UpdateExtraOperand = [&](MachineInstr &MI) {
+    ExtraOperand NewEO = getExtraOperand(&MI);
+    if (NewEO.isUndefined())
+      copyExtraOperand(CurEO, &MI);
+    else
+      CurEO = NewEO;
+  };
   for (MachineInstr &MI : MBB) {
     // If this is an explicit VSETVLI or VSETIVLI, update our state.
     if (isVectorConfigInstr(MI)) {
@@ -1989,11 +1994,7 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
         CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
 
         // Also propagate the Extra operand info
-        ExtraOperand NewEO = getExtraOperand(&MI);
-        if (NewEO.isUndefined())
-          copyExtraOperand(CurEO, &MI);
-        else
-          CurEO = NewEO;
+        UpdateExtraOperand(MI);
 
         continue;
       }
@@ -2036,6 +2037,8 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
           // MI has changed here so this is not the same as the call to
           // computeInfoForInstr that comes later.
           CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
+          // Also propagate the Extra operand info
+          UpdateExtraOperand(MI);
           continue;
         }
 
@@ -2056,6 +2059,9 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
                 else
                   VLOp.ChangeToRegister(DefInfo.getAVLReg(), /*IsDef*/ false);
                 CurInfo = computeInfoForInstr(MI, TSFlags, MRI);
+
+                // Also propagate the Extra operand info
+                UpdateExtraOperand(MI);
                 continue;
               }
             }
@@ -2083,7 +2089,37 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
           // computeInfoForInstr that comes later.
           CurInfo = computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
                                            EPI->VLMul, EPI->getMaskOpIndex(), MRI);
+          // Also propagate the Extra operand info
+          UpdateExtraOperand(MI);
           continue;
+        }
+
+        // If AVL is defined by a vsetvli with the same vtype, we can
+        // replace the AVL operand with the AVL of the defining vsetvli.
+        // We avoid general register AVLs to avoid extending live ranges
+        // without being sure we can kill the original source reg entirely.
+        // TODO: We can ignore policy bits here, we only need VL to be the same.
+        if (Require.hasAVLReg() && Require.getAVLReg().isVirtual()) {
+          if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
+            if (isVectorConfigInstr(*DefMI)) {
+              VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
+              if (DefInfo.hasSameVTYPE(Require) &&
+                  (DefInfo.hasAVLImm() || DefInfo.getAVLReg() == RISCV::X0)) {
+                MachineOperand &VLOp = MI.getOperand(VLIndex);
+                if (DefInfo.hasAVLImm())
+                  VLOp.ChangeToImmediate(DefInfo.getAVLImm());
+                else
+                  VLOp.ChangeToRegister(DefInfo.getAVLReg(), /*IsDef*/ false);
+                CurInfo =
+                    computeInfoForEPIInstr(MI, EPI->getVLIndex(), EPI->getSEWIndex(),
+                                           EPI->VLMul, EPI->getMaskOpIndex(), MRI);
+
+                // Also propagate the Extra operand info
+                UpdateExtraOperand(MI);
+                continue;
+              }
+            }
+          }
         }
       }
       CurInfo =
