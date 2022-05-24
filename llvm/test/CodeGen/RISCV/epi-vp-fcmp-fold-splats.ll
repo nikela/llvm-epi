@@ -11,6 +11,7 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    addi a0, sp, 16
@@ -48,6 +49,7 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -104,6 +106,7 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    addi a0, sp, 16
@@ -143,6 +146,7 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret

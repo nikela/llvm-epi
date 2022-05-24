@@ -11,6 +11,7 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    addi a0, sp, 16
@@ -91,6 +92,7 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, <vscale 
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -182,6 +184,7 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscal
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    addi a0, sp, 16
@@ -262,6 +265,7 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, <vscal
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -353,6 +357,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a1, vlenb
+; CHECK-O0-NEXT:    slli a1, a1, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a1
 ; CHECK-O0-NEXT:    mv a1, a0
 ; CHECK-O0-NEXT:    addi a0, sp, 16
@@ -433,6 +438,7 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, <vscal
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret

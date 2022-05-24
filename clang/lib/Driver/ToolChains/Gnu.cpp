@@ -382,37 +382,6 @@ void tools::gnutools::StaticLibTool::ConstructJob(
                                          Exec, CmdArgs, Inputs, Output));
 }
 
-static void addFortranRuntimeLibraryPath(const ToolChain &TC,
-                                         const ArgList &Args,
-                                         ArgStringList &CmdArgs) {
-  // Default to the <driver-path>/../lib directory. This works fine on the
-  // platforms that we have tested so far. We will probably have to re-fine
-  // this in the future. In particular:
-  //    * on some platforms, we may need to use lib64 instead of lib
-  //    * this logic should also work on other similar platforms too, so we
-  //    should move it to one of Gnu's parent tool{chain} classes
-  SmallString<256> DefaultLibPath =
-      llvm::sys::path::parent_path(TC.getDriver().Dir);
-  llvm::sys::path::append(DefaultLibPath, "lib");
-  CmdArgs.push_back(Args.MakeArgString("-L" + DefaultLibPath));
-}
-
-static void addFortranLinkerFlags(ArgStringList &CmdArgs,
-                                  const llvm::Triple &Triple) {
-  CmdArgs.push_back("-lFortran_main");
-  CmdArgs.push_back("-lFortranRuntime");
-  CmdArgs.push_back("-lFortranDecimal");
-  CmdArgs.push_back("-lm");
-
-  CmdArgs.push_back("-lpgmath");
-
-  if (!Triple.isOSDarwin())
-    CmdArgs.push_back("-lrt");
-
-  // Always link Fortran executables with pthreads.
-  CmdArgs.push_back("-lpthread");
-}
-
 void tools::gnutools::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                            const InputInfo &Output,
                                            const InputInfoList &Inputs,
@@ -626,7 +595,7 @@ void tools::gnutools::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   // AddRuntTimeLibs).
   if (D.IsFlangMode()) {
     addFortranRuntimeLibraryPath(ToolChain, Args, CmdArgs);
-    addFortranLinkerFlags(CmdArgs, Triple);
+    addFortranRuntimeLibs(CmdArgs, Triple);
   }
 
   if (!Args.hasArg(options::OPT_nostdlib, options::OPT_r)) {

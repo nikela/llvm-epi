@@ -11,6 +11,7 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
+; CHECK-O0-NEXT:    slli a2, a2, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a2
 ; CHECK-O0-NEXT:    mv a2, a1
 ; CHECK-O0-NEXT:    addi a1, sp, 16
@@ -51,6 +52,7 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -109,6 +111,7 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
+; CHECK-O0-NEXT:    slli a2, a2, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a2
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
@@ -148,6 +151,7 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -206,6 +210,7 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
+; CHECK-O0-NEXT:    slli a2, a2, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a2
 ; CHECK-O0-NEXT:    mv a2, a1
 ; CHECK-O0-NEXT:    addi a1, sp, 16
@@ -246,6 +251,7 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -304,6 +310,7 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a2, vlenb
+; CHECK-O0-NEXT:    slli a2, a2, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a2
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vs1r.v v0, (a2) # Unknown-size Folded Spill
@@ -343,6 +350,7 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 ; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret

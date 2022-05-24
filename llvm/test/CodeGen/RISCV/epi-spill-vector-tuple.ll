@@ -7,8 +7,8 @@
 define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb, i64 %gvl) nounwind {
 ; SPILL-O0-LABEL: bar:
 ; SPILL-O0:       # %bb.0: # %entry
-; SPILL-O0-NEXT:    addi sp, sp, -48
-; SPILL-O0-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
+; SPILL-O0-NEXT:    addi sp, sp, -64
+; SPILL-O0-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
 ; SPILL-O0-NEXT:    csrr a3, vlenb
 ; SPILL-O0-NEXT:    slli a3, a3, 1
 ; SPILL-O0-NEXT:    sub sp, sp, a3
@@ -24,19 +24,19 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    vmv1r.v v10, v9
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    add a0, sp, a0
-; SPILL-O0-NEXT:    addi a0, a0, 40
+; SPILL-O0-NEXT:    addi a0, a0, 48
 ; SPILL-O0-NEXT:    vs1r.v v10, (a0) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    # kill: def $v8 killed $v8 killed $v8_v9
-; SPILL-O0-NEXT:    addi a0, sp, 40
+; SPILL-O0-NEXT:    addi a0, sp, 48
 ; SPILL-O0-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
 ; SPILL-O0-NEXT:    call foo
 ; SPILL-O0-NEXT:    ld a2, 24(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    addi a0, sp, 40
+; SPILL-O0-NEXT:    addi a0, sp, 48
 ; SPILL-O0-NEXT:    vl1r.v v9, (a0) # Unknown-size Folded Reload
 ; SPILL-O0-NEXT:    ld a0, 32(sp) # 8-byte Folded Reload
 ; SPILL-O0-NEXT:    csrr a1, vlenb
 ; SPILL-O0-NEXT:    add a1, sp, a1
-; SPILL-O0-NEXT:    addi a1, a1, 40
+; SPILL-O0-NEXT:    addi a1, a1, 48
 ; SPILL-O0-NEXT:    vl1r.v v8, (a1) # Unknown-size Folded Reload
 ; SPILL-O0-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
 ; SPILL-O0-NEXT:    vse64.v v9, (a0)
@@ -44,16 +44,16 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O0-NEXT:    csrr a0, vlenb
 ; SPILL-O0-NEXT:    slli a0, a0, 1
 ; SPILL-O0-NEXT:    add sp, sp, a0
-; SPILL-O0-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; SPILL-O0-NEXT:    addi sp, sp, 48
+; SPILL-O0-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
+; SPILL-O0-NEXT:    addi sp, sp, 64
 ; SPILL-O0-NEXT:    ret
 ;
 ; SPILL-O2-LABEL: bar:
 ; SPILL-O2:       # %bb.0: # %entry
-; SPILL-O2-NEXT:    addi sp, sp, -48
-; SPILL-O2-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
-; SPILL-O2-NEXT:    sd s0, 32(sp) # 8-byte Folded Spill
-; SPILL-O2-NEXT:    sd s1, 24(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    addi sp, sp, -64
+; SPILL-O2-NEXT:    sd ra, 56(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    sd s0, 48(sp) # 8-byte Folded Spill
+; SPILL-O2-NEXT:    sd s1, 40(sp) # 8-byte Folded Spill
 ; SPILL-O2-NEXT:    csrr a3, vlenb
 ; SPILL-O2-NEXT:    slli a3, a3, 1
 ; SPILL-O2-NEXT:    sub sp, sp, a3
@@ -63,14 +63,14 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    vle64.v v8, (a0)
 ; SPILL-O2-NEXT:    vle64.v v9, (a1)
 ; SPILL-O2-NEXT:    vzip2.vv v8, v8, v9
-; SPILL-O2-NEXT:    addi a0, sp, 24
+; SPILL-O2-NEXT:    addi a0, sp, 32
 ; SPILL-O2-NEXT:    csrr a1, vlenb
 ; SPILL-O2-NEXT:    vs1r.v v8, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    add a0, a0, a1
 ; SPILL-O2-NEXT:    vs1r.v v9, (a0) # Unknown-size Folded Spill
 ; SPILL-O2-NEXT:    call foo
 ; SPILL-O2-NEXT:    vsetvli zero, s0, e64, m1, ta, mu
-; SPILL-O2-NEXT:    addi a0, sp, 24
+; SPILL-O2-NEXT:    addi a0, sp, 32
 ; SPILL-O2-NEXT:    csrr a1, vlenb
 ; SPILL-O2-NEXT:    vl1r.v v8, (a0) # Unknown-size Folded Reload
 ; SPILL-O2-NEXT:    add a0, a0, a1
@@ -80,10 +80,10 @@ define dso_local void @bar(double* nocapture %pa, double* nocapture readonly %pb
 ; SPILL-O2-NEXT:    csrr a0, vlenb
 ; SPILL-O2-NEXT:    slli a0, a0, 1
 ; SPILL-O2-NEXT:    add sp, sp, a0
-; SPILL-O2-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; SPILL-O2-NEXT:    ld s0, 32(sp) # 8-byte Folded Reload
-; SPILL-O2-NEXT:    ld s1, 24(sp) # 8-byte Folded Reload
-; SPILL-O2-NEXT:    addi sp, sp, 48
+; SPILL-O2-NEXT:    ld ra, 56(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s0, 48(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    ld s1, 40(sp) # 8-byte Folded Reload
+; SPILL-O2-NEXT:    addi sp, sp, 64
 ; SPILL-O2-NEXT:    ret
 entry:
   %0 = bitcast double* %pa to <vscale x 1 x double>*
