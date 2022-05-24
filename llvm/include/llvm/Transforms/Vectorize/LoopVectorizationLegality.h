@@ -230,7 +230,6 @@ public:
 
   void addRuntimePointerChecks(unsigned Num) { NumRuntimePointerChecks = Num; }
 
-
   Instruction *getExactFPInst() { return ExactFPMathInst; }
 
   unsigned getNumRuntimePointerChecks() const {

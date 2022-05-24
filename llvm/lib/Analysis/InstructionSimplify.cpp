@@ -5295,8 +5295,8 @@ static Value *SimplifyFMAFMul(Value *Op0, Value *Op1, FastMathFlags FMF,
   // 2. Ignore non-zero negative numbers because sqrt would produce NAN.
   // 3. Ignore -0.0 because sqrt(-0.0) == -0.0, but -0.0 * -0.0 == 0.0.
   Value *X;
-  if (Op0 == Op1 && match(Op0, m_Intrinsic<Intrinsic::sqrt>(m_Value(X))) &&
-      FMF.allowReassoc() && FMF.noNaNs() && FMF.noSignedZeros())
+  if (Op0 == Op1 && match(Op0, m_Sqrt(m_Value(X))) && FMF.allowReassoc() &&
+      FMF.noNaNs() && FMF.noSignedZeros())
     return X;
 
   return nullptr;
@@ -6172,7 +6172,6 @@ static Value *simplifyIntrinsic(CallBase *Call, const SimplifyQuery &Q) {
                             FPI->getFastMathFlags(), Q,
                             FPI->getExceptionBehavior().getValue(),
                             FPI->getRoundingMode().getValue());
-    break;
   }
   case Intrinsic::experimental_constrained_fsub: {
     auto *FPI = cast<ConstrainedFPIntrinsic>(Call);
@@ -6180,7 +6179,6 @@ static Value *simplifyIntrinsic(CallBase *Call, const SimplifyQuery &Q) {
                             FPI->getFastMathFlags(), Q,
                             FPI->getExceptionBehavior().getValue(),
                             FPI->getRoundingMode().getValue());
-    break;
   }
   case Intrinsic::experimental_constrained_fmul: {
     auto *FPI = cast<ConstrainedFPIntrinsic>(Call);
@@ -6188,7 +6186,6 @@ static Value *simplifyIntrinsic(CallBase *Call, const SimplifyQuery &Q) {
                             FPI->getFastMathFlags(), Q,
                             FPI->getExceptionBehavior().getValue(),
                             FPI->getRoundingMode().getValue());
-    break;
   }
   case Intrinsic::experimental_constrained_fdiv: {
     auto *FPI = cast<ConstrainedFPIntrinsic>(Call);
@@ -6196,7 +6193,6 @@ static Value *simplifyIntrinsic(CallBase *Call, const SimplifyQuery &Q) {
                             FPI->getFastMathFlags(), Q,
                             FPI->getExceptionBehavior().getValue(),
                             FPI->getRoundingMode().getValue());
-    break;
   }
   case Intrinsic::experimental_constrained_frem: {
     auto *FPI = cast<ConstrainedFPIntrinsic>(Call);
@@ -6204,7 +6200,6 @@ static Value *simplifyIntrinsic(CallBase *Call, const SimplifyQuery &Q) {
                             FPI->getFastMathFlags(), Q,
                             FPI->getExceptionBehavior().getValue(),
                             FPI->getRoundingMode().getValue());
-    break;
   }
   default:
     return nullptr;
