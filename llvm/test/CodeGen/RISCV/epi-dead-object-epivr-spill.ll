@@ -13,8 +13,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    sd s3, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    sd s4, 16(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
-; CHECK-NEXT:    slli a3, a1, 2
-; CHECK-NEXT:    add a1, a3, a1
+; CHECK-NEXT:    li a3, 6
+; CHECK-NEXT:    mul a1, a1, a3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv s0, a5
 ; CHECK-NEXT:    mv s2, a4

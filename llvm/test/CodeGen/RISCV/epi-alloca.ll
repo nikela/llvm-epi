@@ -6,8 +6,10 @@ define void @lmul1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 1 x i64>
