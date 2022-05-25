@@ -734,7 +734,7 @@ evaluate::StructureConstructor RuntimeTableBuilder::DescribeComponent(
             evaluate::Extremum<evaluate::SubscriptInteger>>(*len)}) {
       if (clamped->ordering == evaluate::Ordering::Greater &&
           clamped->left() == evaluate::Expr<evaluate::SubscriptInteger>{0}) {
-        len = clamped->right();
+        len = common::Clone(clamped->right());
       }
     }
     AddValue(values, componentSchema_, "characterlen"s,
