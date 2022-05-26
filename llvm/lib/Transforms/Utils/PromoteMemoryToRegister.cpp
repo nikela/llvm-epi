@@ -42,6 +42,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/User.h"
+#include "llvm/IR/VectorBuilder.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Transforms/Utils/Local.h"
 #include "llvm/Transforms/Utils/PromoteMemToReg.h"
@@ -108,8 +109,8 @@ bool llvm::isAllocaPromotable(const AllocaInst *AI) {
           if (const auto *FirstVPII = dyn_cast<VPIntrinsic>(FirstMemUser)) {
             if (FirstVPII->isVPLoad() || FirstVPII->isVPStore()) {
               const auto *VPII = cast<VPIntrinsic>(II);
-              if (FirstVPII->getMaskParam() == VPII->getMaskParam() &&
-                  FirstVPII->getVectorLengthParam() == VPII->getVectorLengthParam())
+              if (FirstVPII->getVectorLengthParam() ==
+                  VPII->getVectorLengthParam())
                 continue;
             }
           }
@@ -337,7 +338,7 @@ private:
 } // end anonymous namespace
 
 /// Given a LoadInst LI this adds assume(LI != null) after it.
-static void addAssumeNonNull(AssumptionCache *AC, LoadInst *LI) {
+static void addAssumeNonNull(AssumptionCache *AC, Instruction *LI) {
   Function *AssumeIntrinsic =
       Intrinsic::getDeclaration(LI->getModule(), Intrinsic::assume);
   ICmpInst *LoadNotNull = new ICmpInst(ICmpInst::ICMP_NE, LI,
@@ -446,11 +447,8 @@ static bool rewriteSingleStoreAlloca(AllocaInst *AI, AllocaInfo &Info,
     // that information when we erase this Load. So we preserve
     // it with an assume.
     if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-        !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT)) {
-      // FIXME:
-      if (LoadInst *LI = dyn_cast<LoadInst>(I))
-        addAssumeNonNull(AC, LI);
-    }
+        !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
+      addAssumeNonNull(AC, I);
 
     I->replaceAllUsesWith(ReplVal);
     I->eraseFromParent();
@@ -466,10 +464,7 @@ static bool rewriteSingleStoreAlloca(AllocaInst *AI, AllocaInfo &Info,
   for (DbgVariableIntrinsic *DII : Info.DbgUsers) {
     if (DII->isAddressOfVariable()) {
       DIBuilder DIB(*AI->getModule(), /*AllowUnresolved*/ false);
-      // FIXME!
-      if (StoreInst *SI = dyn_cast<StoreInst>(Info.OnlyStore)) {
-        ConvertDebugDeclareToDebugValue(DII, SI, DIB);
-      }
+      ConvertDebugDeclareToDebugValue(DII, OnlyStore, DIB);
       DII->eraseFromParent();
     } else if (DII->getExpression()->startsWithDeref()) {
       DII->eraseFromParent();
@@ -513,15 +508,68 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
   using StoresByIndexTy = SmallVector<std::pair<unsigned, Instruction *>, 64>;
   StoresByIndexTy StoresByIndex;
 
+  bool IsVP = false;
   for (User *U : AI->users()) {
     if (auto *I = dyn_cast<Instruction>(U))
-      if (isa<StoreInst>(I) || I->isVPStore())
+      if (isa<StoreInst>(I) || I->isVPStore()) {
+        // If the alloca is promotable, then all uses must be either VP or not.
+        IsVP = I->isVPStore();
         StoresByIndex.push_back(std::make_pair(LBI.getInstructionIndex(I), I));
+      }
   }
 
   // Sort the stores by their index, making it efficient to do a lookup with a
   // binary search.
   llvm::sort(StoresByIndex, less_first());
+
+  // Change memory data parameter of each store instruction (except the first
+  // one) with a merge between the previoulsy stored value and the new one.
+  if (!StoresByIndex.empty() && IsVP) {
+    auto *StoresByIndexIt = StoresByIndex.begin();
+    auto *PreviousVPStore = cast<VPIntrinsic>(StoresByIndexIt->second);
+    Value *VPMask = PreviousVPStore->getMaskParam();
+    bool AlwaysUseSameMask = true;
+    StoresByIndexIt++; // Skip first store
+    while (StoresByIndexIt != StoresByIndex.end()) {
+      auto *OldVPStore = cast<VPIntrinsic>(StoresByIndexIt->second);
+      if (AlwaysUseSameMask) {
+        if (OldVPStore->getMaskParam() == VPMask) {
+          // Update pointers.
+          PreviousVPStore = OldVPStore;
+          StoresByIndexIt++;
+          continue;
+        }
+
+        AlwaysUseSameMask = false;
+      }
+      IRBuilder<> Builder(OldVPStore);
+      auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
+      VPBuilder.setMask(OldVPStore->getMaskParam());
+      VPBuilder.setEVL(OldVPStore->getVectorLengthParam());
+
+      // First merge the two store values.
+      Value *Cond = OldVPStore->getMaskParam();
+      Value *True = OldVPStore->getMemoryDataParam();
+      Value *False = PreviousVPStore->getMemoryDataParam();
+      auto *VPSelect = VPBuilder.createVectorInstruction(
+          Instruction::Select, True->getType(), {Cond, True, False});
+
+      // Then create the new store.
+      Value *StoreAddress = OldVPStore->getMemoryPointerParam();
+      auto *NewVPStore = cast<Instruction>(VPBuilder.createVectorInstruction(
+          Instruction::Store, nullptr, {VPSelect, StoreAddress}));
+
+      // Finally, replace the old store with the new one.
+      OldVPStore->eraseFromParent();
+      LBI.deleteValue(OldVPStore);
+      StoresByIndexIt->first = LBI.getInstructionIndex(NewVPStore);
+      StoresByIndexIt->second = NewVPStore;
+
+      // Update pointers.
+      PreviousVPStore = cast<VPIntrinsic>(NewVPStore);
+      StoresByIndexIt++;
+    }
+  }
 
   // Walk all of the loads from this alloca, replacing them with the nearest
   // store above them, if any.
@@ -551,11 +599,8 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
       // information when we erase it. So we preserve it with an assume.
       Value *ReplVal = std::prev(It)->second->getOperand(0);
       if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-          !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT)) {
-        // FIXME?
-        if (LoadInst *LI = dyn_cast<LoadInst>(I))
-          addAssumeNonNull(AC, LI);
-      }
+          !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
+        addAssumeNonNull(AC, I);
 
       // If the replacement value is the load, this must occur in unreachable
       // code.
@@ -577,9 +622,7 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
     for (DbgVariableIntrinsic *DII : Info.DbgUsers) {
       if (DII->isAddressOfVariable()) {
         DIBuilder DIB(*AI->getModule(), /*AllowUnresolved*/ false);
-        // FIXME?
-        if (StoreInst *SI = dyn_cast<StoreInst>(I))
-          ConvertDebugDeclareToDebugValue(DII, SI, DIB);
+        ConvertDebugDeclareToDebugValue(DII, I, DIB);
       }
     }
     I->eraseFromParent();
@@ -944,6 +987,10 @@ void PromoteMem2Reg::RenamePass(BasicBlock *BB, BasicBlock *Pred,
                                 RenamePassData::ValVector &IncomingVals,
                                 RenamePassData::LocationVector &IncomingLocs,
                                 std::vector<RenamePassData> &Worklist) {
+  // Used to keep track of wheter the mask used by a vp.store is the same
+  // used by all the previous vp.stores.
+  DenseMap<unsigned, std::pair<bool, Value *>> VPStoreMasks;
+
 NextIteration:
   // If we are inserting any phi nodes into this BB, they will already be in the
   // block.
@@ -1015,11 +1062,8 @@ NextIteration:
       // that information when we erase this Load. So we preserve
       // it with an assume.
       if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-          !isKnownNonZero(V, SQ.DL, 0, AC, I, &DT)) {
-        // FIXME?
-        if (LoadInst *LI = dyn_cast<LoadInst>(I))
-          addAssumeNonNull(AC, LI);
-      }
+          !isKnownNonZero(V, SQ.DL, 0, AC, I, &DT))
+        addAssumeNonNull(AC, I);
 
       // Anything using the load now uses the current value.
       I->replaceAllUsesWith(V);
@@ -1037,15 +1081,49 @@ NextIteration:
 
       // what value were we writing?
       unsigned AllocaNo = ai->second;
-      IncomingVals[AllocaNo] = I->getOperand(0);
+      if (!VPStoreMasks.count(AllocaNo))
+        VPStoreMasks[AllocaNo] = std::make_pair(true, nullptr);
+
+      bool AlwaysStoreWithSameMask;
+      Value *ReferenceMask;
+      std::tie(AlwaysStoreWithSameMask, ReferenceMask) = VPStoreMasks[AllocaNo];
+      if (AlwaysStoreWithSameMask && I->isVPStore()) {
+        auto *VPStore = cast<VPIntrinsic>(I);
+        auto *VPMask = VPStore->getMaskParam();
+        if (!ReferenceMask)
+          // This is the first vp.store for this alloca
+          VPStoreMasks[AllocaNo] = std::make_pair(true, VPMask);
+        else
+          AlwaysStoreWithSameMask = VPMask == ReferenceMask;
+
+        if (!AlwaysStoreWithSameMask)
+          VPStoreMasks[AllocaNo] = std::make_pair(false, nullptr);
+      }
+
+      if (I->isVPStore() && !AlwaysStoreWithSameMask &&
+          !isa<UndefValue>(IncomingVals[AllocaNo])) {
+        IRBuilder<> Builder(I);
+        auto *VPStore = cast<VPIntrinsic>(I);
+        auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
+        VPBuilder.setMask(VPStore->getMaskParam());
+        VPBuilder.setEVL(VPStore->getVectorLengthParam());
+
+        // Create the vp.select and store it in IncomingVals.
+        Value *Cond = VPStore->getMaskParam();
+        Value *True = VPStore->getMemoryDataParam();
+        Value *False = IncomingVals[AllocaNo];
+        auto *VPSelect = VPBuilder.createVectorInstruction(
+            Instruction::Select, True->getType(), {Cond, True, False});
+
+        IncomingVals[AllocaNo] = VPSelect;
+      } else
+        IncomingVals[AllocaNo] = I->getOperand(0);
 
       // Record debuginfo for the store before removing it.
       IncomingLocs[AllocaNo] = I->getDebugLoc();
       for (DbgVariableIntrinsic *DII : AllocaDbgUsers[ai->second])
         if (DII->isAddressOfVariable())
-          // FIXME?
-          if (StoreInst *SI = dyn_cast<StoreInst>(I))
-            ConvertDebugDeclareToDebugValue(DII, SI, DIB);
+          ConvertDebugDeclareToDebugValue(DII, I, DIB);
       BB->getInstList().erase(I);
     }
   }
