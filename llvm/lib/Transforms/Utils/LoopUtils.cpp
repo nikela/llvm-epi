@@ -1101,7 +1101,8 @@ Value *llvm::createOrderedReduction(IRBuilderBase &B,
   return B.CreateFAddReduce(Start, Src);
 }
 
-void llvm::propagateIRFlags(Value *I, ArrayRef<Value *> VL, Value *OpValue) {
+void llvm::propagateIRFlags(Value *I, ArrayRef<Value *> VL, Value *OpValue,
+                            bool IncludeWrapFlags) {
   auto *VecOp = dyn_cast<Instruction>(I);
   if (!VecOp)
     return;
@@ -1110,7 +1111,7 @@ void llvm::propagateIRFlags(Value *I, ArrayRef<Value *> VL, Value *OpValue) {
   if (!Intersection)
     return;
   const unsigned Opcode = Intersection->getOpcode();
-  VecOp->copyIRFlags(Intersection);
+  VecOp->copyIRFlags(Intersection, IncludeWrapFlags);
   for (auto *V : VL) {
     auto *Instr = dyn_cast<Instruction>(V);
     if (!Instr)

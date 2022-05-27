@@ -11,6 +11,7 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a3, vlenb
+; CHECK-O0-NEXT:    slli a3, a3, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a3
 ; CHECK-O0-NEXT:    mv a3, a2
 ; CHECK-O0-NEXT:    addi a2, sp, 16
@@ -120,6 +121,7 @@ define void @test_vp_int(<vscale x 1 x i64>* %a0, <vscale x 1 x i64>* %a1, <vsca
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vse64.v v8, (a0), v0.t
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret
@@ -317,6 +319,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0:       # %bb.0:
 ; CHECK-O0-NEXT:    addi sp, sp, -16
 ; CHECK-O0-NEXT:    csrr a3, vlenb
+; CHECK-O0-NEXT:    slli a3, a3, 1
 ; CHECK-O0-NEXT:    sub sp, sp, a3
 ; CHECK-O0-NEXT:    mv a3, a2
 ; CHECK-O0-NEXT:    addi a2, sp, 16
@@ -426,6 +429,7 @@ define void @test_vp_int_3(<vscale x 2 x i64>* %a0, <vscale x 2 x i64>* %a1, <vs
 ; CHECK-O0-NEXT:    vl1r.v v0, (a1) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vse64.v v8, (a0), v0.t
 ; CHECK-O0-NEXT:    csrr a0, vlenb
+; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add sp, sp, a0
 ; CHECK-O0-NEXT:    addi sp, sp, 16
 ; CHECK-O0-NEXT:    ret

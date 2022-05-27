@@ -5011,6 +5011,9 @@ static void handleCallConvAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   case ParsedAttr::AT_AArch64SVEPcs:
     D->addAttr(::new (S.Context) AArch64SVEPcsAttr(S.Context, AL));
     return;
+  case ParsedAttr::AT_AMDGPUKernelCall:
+    D->addAttr(::new (S.Context) AMDGPUKernelCallAttr(S.Context, AL));
+    return;
   case ParsedAttr::AT_IntelOclBicc:
     D->addAttr(::new (S.Context) IntelOclBiccAttr(S.Context, AL));
     return;
@@ -5173,6 +5176,9 @@ bool Sema::CheckCallingConvAttr(const ParsedAttr &Attrs, CallingConv &CC,
     break;
   case ParsedAttr::AT_AArch64SVEPcs:
     CC = CC_AArch64SVEPCS;
+    break;
+  case ParsedAttr::AT_AMDGPUKernelCall:
+    CC = CC_AMDGPUKernelCall;
     break;
   case ParsedAttr::AT_RegCall:
     CC = CC_X86RegCall;
@@ -8793,6 +8799,7 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
     handleCallConvAttr(S, D, AL);
     break;
   case ParsedAttr::AT_AArch64SVEPcs:
+  case ParsedAttr::AT_AMDGPUKernelCall:
     handleCallConvAttr(S, D, AL);
     break;
   case ParsedAttr::AT_Suppress:

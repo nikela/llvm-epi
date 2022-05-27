@@ -1038,6 +1038,7 @@ void DAGTypeLegalizer::SplitVectorResult(SDNode *N, unsigned ResNo) {
   case ISD::FTRUNC:
   case ISD::SINT_TO_FP:
   case ISD::TRUNCATE:
+  case ISD::VP_TRUNCATE:
   case ISD::UINT_TO_FP:
   case ISD::FCANONICALIZE:
     SplitVecRes_UnaryOp(N, Lo, Hi);
@@ -2665,6 +2666,7 @@ bool DAGTypeLegalizer::SplitVectorOperand(SDNode *N, unsigned OpNo) {
   case ISD::INSERT_SUBVECTOR:  Res = SplitVecOp_INSERT_SUBVECTOR(N, OpNo); break;
   case ISD::EXTRACT_VECTOR_ELT:Res = SplitVecOp_EXTRACT_VECTOR_ELT(N); break;
   case ISD::CONCAT_VECTORS:    Res = SplitVecOp_CONCAT_VECTORS(N); break;
+  case ISD::VP_TRUNCATE:
   case ISD::TRUNCATE:
     Res = SplitVecOp_TruncateHelper(N);
     break;
@@ -2908,6 +2910,14 @@ SDValue DAGTypeLegalizer::SplitVecOp_UnaryOp(SDNode *N) {
     // Legalize the chain result - switch anything that used the old chain to
     // use the new one.
     ReplaceValueWith(SDValue(N, 1), Ch);
+  } else if (N->getNumOperands() == 3) {
+    assert(N->isVPOpcode() && "Expected VP opcode");
+    SDValue MaskLo, MaskHi, EVLLo, EVLHi;
+    std::tie(MaskLo, MaskHi) = SplitMask(N->getOperand(1));
+    std::tie(EVLLo, EVLHi) =
+        DAG.SplitEVL(N->getOperand(2), N->getValueType(0), dl);
+    Lo = DAG.getNode(N->getOpcode(), dl, OutVT, Lo, MaskLo, EVLLo);
+    Hi = DAG.getNode(N->getOpcode(), dl, OutVT, Hi, MaskHi, EVLHi);
   } else {
     Lo = DAG.getNode(N->getOpcode(), dl, OutVT, Lo);
     Hi = DAG.getNode(N->getOpcode(), dl, OutVT, Hi);
@@ -3581,6 +3591,22 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
     return;
 
   SDValue Res = SDValue();
+
+  auto unrollExpandedOp = [&]() {
+    // We're going to widen this vector op to a legal type by padding with undef
+    // elements. If the wide vector op is eventually going to be expanded to
+    // scalar libcalls, then unroll into scalar ops now to avoid unnecessary
+    // libcalls on the undef elements.
+    EVT VT = N->getValueType(0);
+    EVT WideVecVT = TLI.getTypeToTransformTo(*DAG.getContext(), VT);
+    if (!TLI.isOperationLegalOrCustom(N->getOpcode(), WideVecVT) &&
+        TLI.isOperationExpand(N->getOpcode(), VT.getScalarType())) {
+      Res = DAG.UnrollVectorOp(N, WideVecVT.getVectorNumElements());
+      return true;
+    }
+    return false;
+  };
+
   switch (N->getOpcode()) {
   default:
 #ifndef NDEBUG
@@ -3600,6 +3626,7 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
   case ISD::EXTRACT_SUBVECTOR: Res = WidenVecRes_EXTRACT_SUBVECTOR(N); break;
   case ISD::INSERT_VECTOR_ELT: Res = WidenVecRes_INSERT_VECTOR_ELT(N); break;
   case ISD::LOAD:              Res = WidenVecRes_LOAD(N); break;
+  case ISD::STEP_VECTOR:
   case ISD::SPLAT_VECTOR:
   case ISD::SCALAR_TO_VECTOR:
     Res = WidenVecRes_ScalarOp(N);
@@ -3679,12 +3706,19 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
     Res = WidenVecRes_Binary(N);
     break;
 
+  case ISD::FPOW:
+  case ISD::FREM:
+    if (unrollExpandedOp())
+      break;
+    // If the target has custom/legal support for the scalar FP intrinsic ops
+    // (they are probably not destined to become libcalls), then widen those
+    // like any other binary ops.
+    LLVM_FALLTHROUGH;
+
   case ISD::FADD:
   case ISD::FMUL:
-  case ISD::FPOW:
   case ISD::FSUB:
   case ISD::FDIV:
-  case ISD::FREM:
   case ISD::SDIV:
   case ISD::UDIV:
   case ISD::SREM:
@@ -3741,6 +3775,7 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
   case ISD::FP_TO_UINT:
   case ISD::SIGN_EXTEND:
   case ISD::SINT_TO_FP:
+  case ISD::VP_TRUNCATE:
   case ISD::TRUNCATE:
   case ISD::UINT_TO_FP:
   case ISD::ZERO_EXTEND:
@@ -3767,23 +3802,13 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
   case ISD::FROUNDEVEN:
   case ISD::FSIN:
   case ISD::FSQRT:
-  case ISD::FTRUNC: {
-    // We're going to widen this vector op to a legal type by padding with undef
-    // elements. If the wide vector op is eventually going to be expanded to
-    // scalar libcalls, then unroll into scalar ops now to avoid unnecessary
-    // libcalls on the undef elements.
-    EVT VT = N->getValueType(0);
-    EVT WideVecVT = TLI.getTypeToTransformTo(*DAG.getContext(), VT);
-    if (!TLI.isOperationLegalOrCustom(N->getOpcode(), WideVecVT) &&
-        TLI.isOperationExpand(N->getOpcode(), VT.getScalarType())) {
-      Res = DAG.UnrollVectorOp(N, WideVecVT.getVectorNumElements());
+  case ISD::FTRUNC:
+    if (unrollExpandedOp())
       break;
-    }
-  }
-  // If the target has custom/legal support for the scalar FP intrinsic ops
-  // (they are probably not destined to become libcalls), then widen those like
-  // any other unary ops.
-  LLVM_FALLTHROUGH;
+    // If the target has custom/legal support for the scalar FP intrinsic ops
+    // (they are probably not destined to become libcalls), then widen those
+    // like any other unary ops.
+    LLVM_FALLTHROUGH;
 
   case ISD::ABS:
   case ISD::BITREVERSE:
@@ -4222,6 +4247,12 @@ SDValue DAGTypeLegalizer::WidenVecRes_Convert(SDNode *N) {
     if (InVTEC == WidenEC) {
       if (N->getNumOperands() == 1)
         return DAG.getNode(Opcode, DL, WidenVT, InOp);
+      if (N->getNumOperands() == 3) {
+        assert(N->isVPOpcode() && "Expected VP opcode");
+        SDValue Mask =
+            GetWidenedMask(N->getOperand(1), WidenVT.getVectorElementCount());
+        return DAG.getNode(Opcode, DL, WidenVT, InOp, Mask, N->getOperand(2));
+      }
       return DAG.getNode(Opcode, DL, WidenVT, InOp, N->getOperand(1), Flags);
     }
     if (WidenVT.getSizeInBits() == InVT.getSizeInBits()) {
@@ -5947,11 +5978,11 @@ SDValue DAGTypeLegalizer::WidenVecOp_VP_SCATTER(SDNode *N, unsigned OpNo) {
     Mask = GetWidenedMask(Mask, WideEC);
     WideMemVT = EVT::getVectorVT(*DAG.getContext(),
                                  VPSC->getMemoryVT().getScalarType(), WideEC);
-  } else if (OpNo == 4) {
+  } else if (OpNo == 3) {
     // Just widen the index. It's allowed to have extra elements.
     Index = GetWidenedVector(Index);
   } else
-    llvm_unreachable("Can't widen this operand of mscatter");
+    llvm_unreachable("Can't widen this operand of VP_SCATTER");
 
   SDValue Ops[] = {
       VPSC->getChain(),       DataOp, VPSC->getBasePtr(), Index, Scale, Mask,

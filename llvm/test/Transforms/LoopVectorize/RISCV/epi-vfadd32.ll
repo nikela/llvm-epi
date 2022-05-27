@@ -91,7 +91,7 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    br i1 [[TMP37]], label [[VEC_EPILOG_MIDDLE_BLOCK:%.*]], label [[VEC_EPILOG_VECTOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; CHECK:       vec.epilog.middle.block:
 ; CHECK-NEXT:    [[CMP_N5:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC4]]
-; CHECK-NEXT:    br i1 [[CMP_N5]], label [[FOR_END_LOOPEXIT_LOOPEXIT:%.*]], label [[VEC_EPILOG_SCALAR_PH]]
+; CHECK-NEXT:    br i1 [[CMP_N5]], label [[FOR_END_LOOPEXIT]], label [[VEC_EPILOG_SCALAR_PH]]
 ; CHECK:       vec.epilog.scalar.ph:
 ; CHECK-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC4]], [[VEC_EPILOG_MIDDLE_BLOCK]] ], [ [[N_VEC]], [[VEC_EPILOG_ITER_CHECK]] ], [ 0, [[ITER_CHECK]] ]
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
@@ -106,9 +106,7 @@ define dso_local void @vfadd32(float* noalias nocapture %dz, float* noalias noca
 ; CHECK-NEXT:    store float [[ADD]], float* [[ARRAYIDX4]], align 4, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP10:![0-9]+]]
-; CHECK:       for.end.loopexit.loopexit:
-; CHECK-NEXT:    br label [[FOR_END_LOOPEXIT]]
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP10:![0-9]+]]
 ; CHECK:       for.end.loopexit:
 ; CHECK-NEXT:    br label [[FOR_END]]
 ; CHECK:       for.end:

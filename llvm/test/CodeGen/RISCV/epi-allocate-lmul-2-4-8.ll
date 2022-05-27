@@ -6,8 +6,10 @@ define void @lmul1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v = alloca <vscale x 1 x i64>
@@ -60,12 +62,10 @@ define void @lmul1_and_2() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1_and_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
@@ -94,12 +94,12 @@ define void @lmul1_and_4() nounwind optnone noinline {
 ; CHECK-LABEL: lmul1_and_4:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>
@@ -111,12 +111,10 @@ define void @lmul2_and_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul2_and_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 2 x i64>
@@ -128,12 +126,12 @@ define void @lmul4_and_1() nounwind optnone noinline {
 ; CHECK-LABEL: lmul4_and_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 4 x i64>
@@ -202,14 +200,12 @@ define void @gpr_and_lmul1_and_2() nounwind optnone noinline {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    li a0, 3
 ; CHECK-NEXT:    sd a0, 8(sp)
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 2
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -225,14 +221,14 @@ define void @gpr_and_lmul1_and_4() nounwind optnone noinline {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi sp, sp, -16
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    li a0, 3
 ; CHECK-NEXT:    sd a0, 8(sp)
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 2
-; CHECK-NEXT:    add a0, a1, a0
+; CHECK-NEXT:    li a1, 6
+; CHECK-NEXT:    mul a0, a0, a1
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    addi sp, sp, 16
 ; CHECK-NEXT:    ret
@@ -247,12 +243,10 @@ define void @lmul_1_2_4_8() nounwind optnone noinline {
 ; CHECK-LABEL: lmul_1_2_4_8:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 4
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 4
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 4
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    slli a0, a0, 4
 ; CHECK-NEXT:    add sp, sp, a0
 ; CHECK-NEXT:    ret
   %v1 = alloca <vscale x 1 x i64>

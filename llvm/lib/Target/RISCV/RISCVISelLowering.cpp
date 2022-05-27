@@ -5458,10 +5458,6 @@ RISCVTargetLowering::lowerVectorFPExtendOrRoundLike(SDValue Op,
 
   bool IsDirectConv = IsDirectExtend || IsDirectTrunc;
 
-  // For FP_ROUND/FP_EXTEND of scalable vectors, leave it to the pattern.
-  if (!VT.isFixedLengthVector() && !IsVP && IsDirectConv)
-    return Op;
-
   // Prepare any fixed-length vector operands.
   MVT ContainerVT = VT;
   SDValue Mask, VL;
@@ -7482,11 +7478,11 @@ SDValue RISCVTargetLowering::lowerVPOp(SDValue Op, SelectionDAG &DAG,
   }
 
   if (!VT.isFixedLengthVector())
-    return DAG.getNode(RISCVISDOpc, DL, VT, Ops);
+    return DAG.getNode(RISCVISDOpc, DL, VT, Ops, Op->getFlags());
 
   MVT ContainerVT = getContainerForFixedLengthVector(VT);
 
-  SDValue VPOp = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops);
+  SDValue VPOp = DAG.getNode(RISCVISDOpc, DL, ContainerVT, Ops, Op->getFlags());
 
   return convertFromScalableVector(VT, VPOp, DAG, Subtarget);
 }
@@ -14064,7 +14060,8 @@ Value *RISCVTargetLowering::emitMaskedAtomicCmpXchgIntrinsic(
   return Result;
 }
 
-bool RISCVTargetLowering::shouldRemoveExtendFromGSIndex(EVT VT) const {
+bool RISCVTargetLowering::shouldRemoveExtendFromGSIndex(EVT IndexVT,
+                                                        EVT DataVT) const {
   return false;
 }
 
