@@ -1791,7 +1791,8 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         CurInfo = BlockInfo[MBB.getNumber()].Pred;
         assert(CurInfo.isValid() && "Expected a valid predecessor state.");
-        if (needVSETVLI(NewInfo, CurInfo)) {
+        if (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
+            needVSETVLI(NewInfo, CurInfo)) {
           // If this is the first implicit state change, and the state change
           // requested can be proven to produce the same register contents, we
           // can skip emitting the actual state change and continue as if we
@@ -1848,7 +1849,10 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
-        if (!HasSameExtraOperand || needVSETVLI(NewInfo, BBInfo.Pred)) {
+        CurInfo = BlockInfo[MBB.getNumber()].Pred;
+        if (!HasSameExtraOperand ||
+            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
+             needVSETVLI(NewInfo, CurInfo))) {
           // If this is the first implicit state change, and the state change
           // requested can be proven to produce the same register contents, we
           // can skip emitting the actual state change and continue as if we
