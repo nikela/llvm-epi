@@ -1697,6 +1697,15 @@ bool RISCVTargetLowering::shouldSinkOperands(
   return true;
 }
 
+bool RISCVTargetLowering::isOffsetFoldingLegal(
+    const GlobalAddressSDNode *GA) const {
+  // In order to maximise the opportunity for common subexpression elimination,
+  // keep a separate ADD node for the global address offset instead of folding
+  // it in the global address node. Later peephole optimisations may choose to
+  // fold it back in when profitable.
+  return false;
+}
+
 bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
                                        bool ForCodeSize) const {
   // FIXME: Change to Zfhmin once f16 becomes a legal type with Zfhmin.
@@ -2601,7 +2610,7 @@ static SDValue lowerBUILD_VECTOR(SDValue Op, SelectionDAG &DAG,
         // our vector and clear our accumulated data.
         if (I != 0 && I % NumViaIntegerBits == 0) {
           if (NumViaIntegerBits <= 32)
-            Bits = SignExtend64(Bits, 32);
+            Bits = SignExtend64<32>(Bits);
           SDValue Elt = DAG.getConstant(Bits, DL, XLenVT);
           Vec = DAG.getNode(ISD::INSERT_VECTOR_ELT, DL, IntegerViaVecVT, Vec,
                             Elt, DAG.getConstant(IntegerEltIdx, DL, XLenVT));
@@ -2617,7 +2626,7 @@ static SDValue lowerBUILD_VECTOR(SDValue Op, SelectionDAG &DAG,
       // Insert the (remaining) scalar value into position in our integer
       // vector type.
       if (NumViaIntegerBits <= 32)
-        Bits = SignExtend64(Bits, 32);
+        Bits = SignExtend64<32>(Bits);
       SDValue Elt = DAG.getConstant(Bits, DL, XLenVT);
       Vec = DAG.getNode(ISD::INSERT_VECTOR_ELT, DL, IntegerViaVecVT, Vec, Elt,
                         DAG.getConstant(IntegerEltIdx, DL, XLenVT));
@@ -2765,7 +2774,7 @@ static SDValue lowerBUILD_VECTOR(SDValue Op, SelectionDAG &DAG,
     // On RV64, sign-extend from 32 to 64 bits where possible in order to
     // achieve better constant materializion.
     if (Subtarget.is64Bit() && ViaIntVT == MVT::i32)
-      SplatValue = SignExtend64(SplatValue, 32);
+      SplatValue = SignExtend64<32>(SplatValue);
 
     // Since we can't introduce illegal i64 types at this stage, we can only
     // perform an i64 splat on RV32 if it is its own sign-extended value. That
@@ -4693,23 +4702,12 @@ template SDValue RISCVTargetLowering::getAddr<JumpTableSDNode>(
 SDValue RISCVTargetLowering::lowerGlobalAddress(SDValue Op,
                                                 SelectionDAG &DAG) const {
   SDLoc DL(Op);
-  EVT Ty = Op.getValueType();
   GlobalAddressSDNode *N = cast<GlobalAddressSDNode>(Op);
-  int64_t Offset = N->getOffset();
-  MVT XLenVT = Subtarget.getXLenVT();
+  assert(N->getOffset() == 0 && "unexpected offset in global node");
 
   const GlobalValue *GV = N->getGlobal();
   bool IsLocal = getTargetMachine().shouldAssumeDSOLocal(*GV->getParent(), GV);
-  SDValue Addr = getAddr(N, DAG, IsLocal);
-
-  // In order to maximise the opportunity for common subexpression elimination,
-  // emit a separate ADD node for the global address offset instead of folding
-  // it in the global address node. Later peephole optimisations may choose to
-  // fold it back in when profitable.
-  if (Offset != 0)
-    return DAG.getNode(ISD::ADD, DL, Ty, Addr,
-                       DAG.getConstant(Offset, DL, XLenVT));
-  return Addr;
+  return getAddr(N, DAG, IsLocal);
 }
 
 SDValue RISCVTargetLowering::lowerBlockAddress(SDValue Op,
@@ -4816,10 +4814,8 @@ SDValue RISCVTargetLowering::getDynamicTLSAddr(GlobalAddressSDNode *N,
 SDValue RISCVTargetLowering::lowerGlobalTLSAddress(SDValue Op,
                                                    SelectionDAG &DAG) const {
   SDLoc DL(Op);
-  EVT Ty = Op.getValueType();
   GlobalAddressSDNode *N = cast<GlobalAddressSDNode>(Op);
-  int64_t Offset = N->getOffset();
-  MVT XLenVT = Subtarget.getXLenVT();
+  assert(N->getOffset() == 0 && "unexpected offset in global node");
 
   TLSModel::Model Model = getTargetMachine().getTLSModel(N->getGlobal());
 
@@ -4841,13 +4837,6 @@ SDValue RISCVTargetLowering::lowerGlobalTLSAddress(SDValue Op,
     break;
   }
 
-  // In order to maximise the opportunity for common subexpression elimination,
-  // emit a separate ADD node for the global address offset instead of folding
-  // it in the global address node. Later peephole optimisations may choose to
-  // fold it back in when profitable.
-  if (Offset != 0)
-    return DAG.getNode(ISD::ADD, DL, Ty, Addr,
-                       DAG.getConstant(Offset, DL, XLenVT));
   return Addr;
 }
 
@@ -8361,17 +8350,9 @@ SDValue RISCVTargetLowering::lowerMaskedGather(SDValue Op,
 
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector()) {
-    // We need to use the larger of the result and index type to determine the
-    // scalable type to use so we don't increase LMUL for any operand/result.
-    if (VT.bitsGE(IndexVT)) {
-      ContainerVT = getContainerForFixedLengthVector(VT);
-      IndexVT = MVT::getVectorVT(IndexVT.getVectorElementType(),
-                                 ContainerVT.getVectorElementCount());
-    } else {
-      IndexVT = getContainerForFixedLengthVector(IndexVT);
-      ContainerVT = MVT::getVectorVT(ContainerVT.getVectorElementType(),
-                                     IndexVT.getVectorElementCount());
-    }
+    ContainerVT = getContainerForFixedLengthVector(VT);
+    IndexVT = MVT::getVectorVT(IndexVT.getVectorElementType(),
+                               ContainerVT.getVectorElementCount());
 
     Index = convertToScalableVector(IndexVT, Index, DAG, Subtarget);
 
@@ -8471,17 +8452,9 @@ SDValue RISCVTargetLowering::lowerMaskedScatter(SDValue Op,
 
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector()) {
-    // We need to use the larger of the value and index type to determine the
-    // scalable type to use so we don't increase LMUL for any operand/result.
-    if (VT.bitsGE(IndexVT)) {
-      ContainerVT = getContainerForFixedLengthVector(VT);
-      IndexVT = MVT::getVectorVT(IndexVT.getVectorElementType(),
-                                 ContainerVT.getVectorElementCount());
-    } else {
-      IndexVT = getContainerForFixedLengthVector(IndexVT);
-      ContainerVT = MVT::getVectorVT(VT.getVectorElementType(),
-                                     IndexVT.getVectorElementCount());
-    }
+    ContainerVT = getContainerForFixedLengthVector(VT);
+    IndexVT = MVT::getVectorVT(IndexVT.getVectorElementType(),
+                               ContainerVT.getVectorElementCount());
 
     Index = convertToScalableVector(IndexVT, Index, DAG, Subtarget);
     Val = convertToScalableVector(ContainerVT, Val, DAG, Subtarget);
@@ -14211,9 +14184,13 @@ bool RISCVTargetLowering::isMulAddWithConstProfitable(SDValue AddNode,
 bool RISCVTargetLowering::allowsMisalignedMemoryAccesses(
     EVT VT, unsigned AddrSpace, Align Alignment, MachineMemOperand::Flags Flags,
     bool *Fast) const {
-  if (!VT.isVector())
-    return false;
+  if (!VT.isVector()) {
+    if (Fast)
+      *Fast = false;
+    return Subtarget.enableUnalignedScalarMem();
+  }
 
+  // All vector implementations must support element alignment
   EVT ElemVT = VT.getVectorElementType();
   if (Alignment >= ElemVT.getStoreSize()) {
     if (Fast)
