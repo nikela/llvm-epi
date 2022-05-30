@@ -174,6 +174,7 @@ public:
   Value *pushFreezeToPreventPoisonFromPropagating(FreezeInst &FI);
   bool freezeOtherUses(FreezeInst &FI);
   Instruction *visitFreeze(FreezeInst &I);
+  Instruction *visitVPSelect(IntrinsicInst *II);
 
   /// Specify what to return for unhandled instructions.
   Instruction *visitInstruction(Instruction &I) { return nullptr; }
