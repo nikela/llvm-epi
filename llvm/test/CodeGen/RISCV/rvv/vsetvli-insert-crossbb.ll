@@ -507,8 +507,8 @@ define <vscale x 2 x i32> @test_vsetvli_x0_x0(<vscale x 2 x i32>* %x, <vscale x 
 ; CHECK-NEXT:    andi a0, a3, 1
 ; CHECK-NEXT:    beqz a0, .LBB9_2
 ; CHECK-NEXT:  # %bb.1: # %if
-; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
 ; CHECK-NEXT:    vle16.v v10, (a1)
+; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
 ; CHECK-NEXT:    vwcvt.x.x.v v8, v10
 ; CHECK-NEXT:  .LBB9_2: # %if.end
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
@@ -546,8 +546,8 @@ define <vscale x 2 x i32> @test_vsetvli_x0_x0_2(<vscale x 2 x i32>* %x, <vscale 
 ; CHECK-NEXT:    andi a0, a4, 1
 ; CHECK-NEXT:    beqz a0, .LBB10_2
 ; CHECK-NEXT:  # %bb.1: # %if
-; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
 ; CHECK-NEXT:    vle16.v v10, (a1)
+; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
 ; CHECK-NEXT:    vwadd.wv v9, v9, v10
 ; CHECK-NEXT:  .LBB10_2: # %if.end
 ; CHECK-NEXT:    andi a0, a5, 1
@@ -749,7 +749,6 @@ define void @vector_init_vsetvli_fv2(i64 %N, double* %c) {
 ; CHECK-LABEL: vector_init_vsetvli_fv2:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    li a2, 0
-; CHECK-NEXT:    vsetivli zero, 4, e64, m1, ta, mu
 ; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:  .LBB15_1: # %for.body
@@ -814,14 +813,13 @@ for.end:                                          ; preds = %for.body
 ; Demonstrates a case where mutation in phase3 is problematic.  We mutate the
 ; vsetvli without considering that it changes the compatibility result of the
 ; vadd in the second block.
-; FIXME: This currently crashes with strict asserts enabled.
 define <vscale x 4 x i32> @cross_block_mutate(<vscale x 4 x i32> %a, <vscale x 4 x i32> %b,
 ; CHECK-LABEL: cross_block_mutate:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetivli a0, 6, e32, m2, tu, mu
 ; CHECK-NEXT:    vmv.s.x v8, a0
-; CHECK-NEXT:    vadd.vv v8, v8, v10, v0.t
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m2, tu, mu
+; CHECK-NEXT:    vadd.vv v8, v8, v10, v0.t
 ; CHECK-NEXT:    ret
                                          <vscale x 4 x i1> %mask) {
 entry:

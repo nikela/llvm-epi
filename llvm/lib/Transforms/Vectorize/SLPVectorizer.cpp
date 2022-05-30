@@ -3858,7 +3858,7 @@ void BoUpSLP::reorderBottomToTop(bool IgnoreReorder) {
   while (!OrderedEntries.empty()) {
     // 1. Filter out only reordered nodes.
     // 2. If the entry has multiple uses - skip it and jump to the next node.
-    MapVector<TreeEntry *, SmallVector<std::pair<unsigned, TreeEntry *>>> Users;
+    DenseMap<TreeEntry *, SmallVector<std::pair<unsigned, TreeEntry *>>> Users;
     SmallVector<TreeEntry *> Filtered;
     for (TreeEntry *TE : OrderedEntries) {
       if (!(TE->State == TreeEntry::Vectorize ||
@@ -3886,7 +3886,13 @@ void BoUpSLP::reorderBottomToTop(bool IgnoreReorder) {
     // Erase filtered entries.
     for_each(Filtered,
              [&OrderedEntries](TreeEntry *TE) { OrderedEntries.remove(TE); });
-    for (auto &Data : Users) {
+    SmallVector<
+        std::pair<TreeEntry *, SmallVector<std::pair<unsigned, TreeEntry *>>>>
+        UsersVec(Users.begin(), Users.end());
+    sort(UsersVec, [](const auto &Data1, const auto &Data2) {
+      return Data1.first->Idx > Data2.first->Idx;
+    });
+    for (auto &Data : UsersVec) {
       // Check that operands are used only in the User node.
       SmallVector<TreeEntry *> GatherOps;
       if (!canReorderOperands(Data.first, Data.second, NonVectorized,
@@ -4352,8 +4358,9 @@ static LoadsState canVectorizeLoads(ArrayRef<Value *> VL, const Value *VL0,
     for (Value *V : VL)
       CommonAlignment =
           commonAlignment(CommonAlignment, cast<LoadInst>(V)->getAlign());
-    if (TTI.isLegalMaskedGather(FixedVectorType::get(ScalarTy, VL.size()),
-                                CommonAlignment))
+    auto *VecTy = FixedVectorType::get(ScalarTy, VL.size());
+    if (TTI.isLegalMaskedGather(VecTy, CommonAlignment) &&
+        !TTI.forceScalarizeMaskedGather(VecTy, CommonAlignment))
       return LoadsState::ScatterVectorize;
   }
 
@@ -10327,7 +10334,7 @@ class HorizontalReduction {
   }
 
   /// Creates reduction operation with the current opcode with the IR flags
-  /// from \p ReductionOps.
+  /// from \p ReductionOps, dropping nuw/nsw flags.
   static Value *createOp(IRBuilder<> &Builder, RecurKind RdxKind, Value *LHS,
                          Value *RHS, const Twine &Name,
                          const ReductionOpsListType &ReductionOps) {
@@ -10341,26 +10348,14 @@ class HorizontalReduction {
     Value *Op = createOp(Builder, RdxKind, LHS, RHS, Name, UseSelect);
     if (RecurrenceDescriptor::isIntMinMaxRecurrenceKind(RdxKind)) {
       if (auto *Sel = dyn_cast<SelectInst>(Op)) {
-        propagateIRFlags(Sel->getCondition(), ReductionOps[0]);
-        propagateIRFlags(Op, ReductionOps[1]);
+        propagateIRFlags(Sel->getCondition(), ReductionOps[0], nullptr,
+                         /*IncludeWrapFlags=*/false);
+        propagateIRFlags(Op, ReductionOps[1], nullptr,
+                         /*IncludeWrapFlags=*/false);
         return Op;
       }
     }
-    propagateIRFlags(Op, ReductionOps[0]);
-    return Op;
-  }
-
-  /// Creates reduction operation with the current opcode with the IR flags
-  /// from \p I.
-  static Value *createOp(IRBuilder<> &Builder, RecurKind RdxKind, Value *LHS,
-                         Value *RHS, const Twine &Name, Value *I) {
-    auto *SelI = dyn_cast<SelectInst>(I);
-    Value *Op = createOp(Builder, RdxKind, LHS, RHS, Name, SelI != nullptr);
-    if (SelI && RecurrenceDescriptor::isIntMinMaxRecurrenceKind(RdxKind)) {
-      if (auto *Sel = dyn_cast<SelectInst>(Op))
-        propagateIRFlags(Sel->getCondition(), SelI->getCondition());
-    }
-    propagateIRFlags(Op, I);
+    propagateIRFlags(Op, ReductionOps[0], nullptr, /*IncludeWrapFlags=*/false);
     return Op;
   }
 
@@ -11031,10 +11026,6 @@ public:
             for (unsigned I = 0, E = (Sz / 2) * 2; I < E; I += 2) {
               Instruction *RedOp = InstVals[I + 1].first;
               Builder.SetCurrentDebugLocation(RedOp->getDebugLoc());
-              ReductionOpsListType Ops;
-              if (auto *Sel = dyn_cast<SelectInst>(RedOp))
-                Ops.emplace_back().push_back(Sel->getCondition());
-              Ops.emplace_back().push_back(RedOp);
               Value *RdxVal1 = InstVals[I].second;
               Value *StableRdxVal1 = RdxVal1;
               auto It1 = TrackedVals.find(RdxVal1);
@@ -11046,7 +11037,7 @@ public:
               if (It2 != TrackedVals.end())
                 StableRdxVal2 = It2->second;
               Value *ExtraRed = createOp(Builder, RdxKind, StableRdxVal1,
-                                         StableRdxVal2, "op.rdx", Ops);
+                                         StableRdxVal2, "op.rdx", ReductionOps);
               ExtraReds[I / 2] = std::make_pair(InstVals[I].first, ExtraRed);
             }
             if (Sz % 2 == 1)
@@ -11081,17 +11072,13 @@ public:
       if (ExtraReductions.size() == 1) {
         Instruction *RedOp = ExtraReductions.back().first;
         Builder.SetCurrentDebugLocation(RedOp->getDebugLoc());
-        ReductionOpsListType Ops;
-        if (auto *Sel = dyn_cast<SelectInst>(RedOp))
-          Ops.emplace_back().push_back(Sel->getCondition());
-        Ops.emplace_back().push_back(RedOp);
         Value *RdxVal = ExtraReductions.back().second;
         Value *StableRdxVal = RdxVal;
         auto It = TrackedVals.find(RdxVal);
         if (It != TrackedVals.end())
           StableRdxVal = It->second;
         VectorizedTree = createOp(Builder, RdxKind, VectorizedTree,
-                                  StableRdxVal, "op.rdx", Ops);
+                                  StableRdxVal, "op.rdx", ReductionOps);
       }
 
       ReductionRoot->replaceAllUsesWith(VectorizedTree);

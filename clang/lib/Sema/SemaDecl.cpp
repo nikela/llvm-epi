@@ -13213,7 +13213,6 @@ void Sema::ActOnUninitializedDecl(Decl *RealDecl) {
     if (Type->isReferenceType()) {
       Diag(Var->getLocation(), diag::err_reference_var_requires_init)
           << Var << SourceRange(Var->getLocation(), Var->getLocation());
-      Var->setInvalidDecl();
       return;
     }
 
