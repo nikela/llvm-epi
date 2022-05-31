@@ -221,7 +221,7 @@ bool RISCVPassConfig::addPreISel() {
 }
 
 bool RISCVPassConfig::addInstSelector() {
-  addPass(createRISCVISelDag(getRISCVTargetMachine()));
+  addPass(createRISCVISelDag(getRISCVTargetMachine(), getOptLevel()));
 
   return false;
 }

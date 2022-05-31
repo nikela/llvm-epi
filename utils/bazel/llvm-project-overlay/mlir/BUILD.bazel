@@ -2050,6 +2050,7 @@ cc_library(
         ":TensorDialect",
         ":Transforms",
         ":VectorOps",
+        ":mlir_c_runner_utils",
         "//llvm:Support",
     ],
 )
@@ -3215,8 +3216,10 @@ cc_library(
     ),
     includes = ["include"],
     deps = [
+        ":IR",
         ":MlirLspServerSupportLib",
         ":PDLLAST",
+        ":PDLLCodeGen",
         ":PDLLODS",
         ":PDLLParser",
         ":Support",
@@ -7380,6 +7383,7 @@ cc_library(
         ":Parser",
         ":SideEffectInterfaces",
         ":TransformDialect",
+        ":TransformUtils",
         "//llvm:Support",
     ],
 )
