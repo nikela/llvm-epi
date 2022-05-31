@@ -2534,6 +2534,9 @@ static SDValue matchSplatAsGather(SDValue SplatVal, MVT VT, const SDLoc &DL,
   // The index must be a legal type.
   if (Idx.getValueType() != Subtarget.getXLenVT())
     return SDValue();
+  // Masks cannot be splatted easily.
+  if (VT.getVectorElementType() == MVT::i1)
+    return SDValue();
 
   MVT ContainerVT = VT;
   if (VT.isFixedLengthVector()) {
