@@ -2129,8 +2129,8 @@ void RISCVInsertVSETVLI::doLocalPrepass(MachineBasicBlock &MBB) {
 static bool hasFixedResult(const VSETVLIInfo &Info, const RISCVSubtarget &ST) {
   if (!Info.hasAVLImm())
     // VLMAX is always the same value.
-    // TODO: Could extend to other registers by looking at the associated
-    // vreg def placement.
+    // TODO: Could extend to other registers by looking at the associated vreg
+    // def placement.
     return RISCV::X0 == Info.getAVLReg();
 
   unsigned AVL = Info.getAVLImm();
@@ -2173,12 +2173,12 @@ void RISCVInsertVSETVLI::doPRE(MachineBasicBlock &MBB) {
     }
   }
 
-  // unreachable, single pred, or full redundancy.  Note that FRE
-  // is handled by phase 3.
+  // Unreachable, single pred, or full redundancy. Note that FRE is handled by
+  // phase 3.
   if (!UnavailablePred || !AvailableInfo.isValid())
     return;
 
-  // critical edge - TODO: consider splitting?
+  // Critical edge - TODO: consider splitting?
   if (UnavailablePred->succ_size() != 1)
     return;
 
