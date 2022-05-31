@@ -36,6 +36,8 @@ define <vscale x 8 x i1> @foo(<vscale x 8 x i1> %a) nounwind {
 ; CHECK-NEXT:    vsetvli a0, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vsm.v v0, (a0)
+; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    vlm.v v0, (a0)
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 1
 ; CHECK-NEXT:    add sp, sp, a0
