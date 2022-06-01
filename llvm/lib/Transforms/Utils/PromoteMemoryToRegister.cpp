@@ -63,8 +63,8 @@ STATISTIC(NumPHIInsert,     "Number of PHI nodes inserted");
 
 bool llvm::isAllocaPromotable(const AllocaInst *AI) {
   // Check that all memory users are consistent: either they are only regular
-  // loads/stores or only VP loads/stores. In the latter case, both the Mask
-  // and the VL operands must be the same across all uses.
+  // loads/stores or only VP loads/stores. In the latter case, the VL operand
+  // must be the same across all uses.
   const Instruction *FirstMemUser = nullptr;
 
   // Only allow direct and non-volatile loads and stores...
@@ -79,7 +79,7 @@ bool llvm::isAllocaPromotable(const AllocaInst *AI) {
         FirstMemUser = LI;
         continue;
       }
-      
+
       if (!isa<LoadInst>(FirstMemUser) && !isa<StoreInst>(FirstMemUser))
         return false;
     } else if (const StoreInst *SI = dyn_cast<StoreInst>(U)) {
@@ -95,7 +95,7 @@ bool llvm::isAllocaPromotable(const AllocaInst *AI) {
         FirstMemUser = SI;
         continue;
       }
-      
+
       if (!isa<LoadInst>(FirstMemUser) && !isa<StoreInst>(FirstMemUser))
         return false;
     } else if (const IntrinsicInst *II = dyn_cast<IntrinsicInst>(U)) {
@@ -987,7 +987,7 @@ void PromoteMem2Reg::RenamePass(BasicBlock *BB, BasicBlock *Pred,
                                 RenamePassData::ValVector &IncomingVals,
                                 RenamePassData::LocationVector &IncomingLocs,
                                 std::vector<RenamePassData> &Worklist) {
-  // Used to keep track of wheter the mask used by a vp.store is the same
+  // Used to keep track of whether the mask used by a vp.store is the same
   // used by all the previous vp.stores.
   DenseMap<unsigned, std::pair<bool, Value *>> VPStoreMasks;
 

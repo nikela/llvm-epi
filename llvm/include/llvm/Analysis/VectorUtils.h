@@ -168,7 +168,7 @@ static constexpr char const *_LLVM_Scalarize_ = "_LLVM_Scalarize_";
 /// respective IR declarations.
 /// \param RequireDeclaration Set this to false if you only want to parse the
 /// MangledName regardless of the existence of the Vector function. Note that
-/// for some scalable cases this has not work (as specified in the description
+/// for some scalable cases this does not work (as specified in the description
 /// of \a M)
 Optional<VFInfo> tryDemangleForVFABI(StringRef MangledName, const Module &M,
                                      bool RequireDeclaration = true);

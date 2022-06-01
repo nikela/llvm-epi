@@ -8535,7 +8535,8 @@ void LoopVectorizationPlanner::executePlan(ElementCount BestVF, unsigned BestUF,
   // If `llvm.loop.single.iteration` exists, change latch branch condition to
   // always jump to exit
   if (findOptionMDForLoop(L, "llvm.loop.single.iteration")) {
-    VPBasicBlock *ExitBB = BestVPlan.getVectorLoopRegion()->getExitBasicBlock();
+    VPBasicBlock *ExitBB =
+        BestVPlan.getVectorLoopRegion()->getExitingBasicBlock();
     BasicBlock *Latch = State.CFG.VPBB2IRBB[ExitBB];
     if (auto *Branch = dyn_cast<BranchInst>(Latch->getTerminator()))
       Branch->setCondition(ILV.Builder.getTrue());

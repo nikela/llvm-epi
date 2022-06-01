@@ -1459,9 +1459,8 @@ void llvm::ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
   auto *DIVar = DII->getVariable();
   assert(DIVar && "Missing variable");
   auto *DIExpr = DII->getExpression();
-  // NOTE: both StoreInst and VPStore have the data operand as first argument.
+  assert(isa<StoreInst>(I) || I->isVPStore());
   Value *DV = I->getOperand(0);
-
   DebugLoc NewLoc = getDebugValueLoc(DII, I);
 
   if (!valueCoversEntireFragment(DV->getType(), DII)) {

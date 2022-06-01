@@ -733,19 +733,17 @@ bool Instruction::isLaunderOrStripInvariantGroup() const {
 }
 
 bool Instruction::isVPLoad() const {
-  auto *II = dyn_cast<IntrinsicInst>(this);
-  if (!II)
-    return false;
-  Intrinsic::ID ID = II->getIntrinsicID();
-  return ID == Intrinsic::vp_load;
+  if (auto *II = dyn_cast<IntrinsicInst>(this))
+    return II->getIntrinsicID() == Intrinsic::vp_load;
+
+  return false;
 }
 
 bool Instruction::isVPStore() const {
-  auto *II = dyn_cast<IntrinsicInst>(this);
-  if (!II)
-    return false;
-  Intrinsic::ID ID = II->getIntrinsicID();
-  return ID == Intrinsic::vp_store;
+  if (auto *II = dyn_cast<IntrinsicInst>(this))
+    return II->getIntrinsicID() == Intrinsic::vp_store;
+
+  return false;
 }
 
 bool Instruction::isDebugOrPseudoInst() const {

@@ -1142,7 +1142,7 @@ Instruction *InstCombinerImpl::visitVPSelect(IntrinsicInst *II) {
   if (TrueVal == FalseVal)
     return replaceInstUsesWith(*II, TrueVal);
 
-  // No need for a select when the cond is a allzeros or allones vector.
+  // No need for a select when the cond is an allzeros or allones vector.
   if (match(CondVal, m_One()))
     return replaceInstUsesWith(*II, TrueVal);
   if (match(CondVal, m_Zero()))

@@ -216,7 +216,6 @@ Constant *VecCloneVPPass::getConstantValue(Type *Ty, LLVMContext &Context,
   return ConstVal;
 }
 
-// FIXME
 static bool isMasked(const VFShape &Shape) {
   return std::find_if(Shape.Parameters.begin(), Shape.Parameters.end(),
                       [](const VFParameter &P) {
@@ -307,6 +306,7 @@ Function *VecCloneVPPass::cloneFunction(Module &M, Function &F,
   auto AM = AttributeFuncs::typeIncompatible(ReturnType);
   Clone->removeRetAttrs(AM);
 
+  // Add zeroext attribute to VL operand.
   if (hasVL(V.Shape))
     Clone->addParamAttr(Clone->arg_size() - 1, Attribute::ZExt);
 
@@ -349,6 +349,7 @@ void VecCloneVPPass::removeIncompatibleAttributes(Function *Clone) {
 }
 
 void VecCloneVPPass::insertSplitForMaskedVariant(Function *Clone,
+                                                 const DataLayout &DL,
                                                  BasicBlock *LoopBlock,
                                                  BasicBlock *LoopExitBlock,
                                                  AllocaInst *MaskAlloca,
@@ -357,12 +358,20 @@ void VecCloneVPPass::insertSplitForMaskedVariant(Function *Clone,
       LoopBlock->splitBasicBlock(LoopBlock->getFirstNonPHI(), "simd.loop.then");
 
   IRBuilder<> Builder(LoopBlock->getTerminator());
-  auto *MaskElementType =
+  auto *MaskElemType =
       cast<VectorType>(MaskAlloca->getAllocatedType())->getElementType();
+  Value *MaskPtr = MaskAlloca;
+  if (!MaskAlloca->getType()->isOpaquePointerTy()) {
+    PointerType *MaskElemTypePtr =
+        PointerType::get(MaskElemType, MaskAlloca->getType()->getAddressSpace());
+    MaskPtr = Builder.CreateBitOrPointerCast(MaskAlloca, MaskElemTypePtr,
+                                             MaskAlloca->getName() + ".cast");
+  }
   auto *MaskGEP =
-      Builder.CreateGEP(MaskElementType, MaskAlloca, Phi, "mask.gep");
-  auto *MaskLoad = Builder.CreateLoad(MaskElementType, MaskGEP, "mask.parm");
-  Constant *Zero = ConstantInt::get(MaskElementType, 0);
+      Builder.CreateGEP(MaskElemType, MaskPtr, Phi, MaskPtr->getName() + ".gep");
+  auto *MaskLoad = Builder.CreateAlignedLoad(
+      MaskElemType, MaskGEP, DL.getPrefTypeAlign(MaskElemType), "mask.parm");
+  Constant *Zero = ConstantInt::get(MaskElemType, 0);
   auto *MaskValue = Builder.CreateICmpNE(MaskLoad, Zero, "mask.value");
   Builder.CreateCondBr(MaskValue, LoopThenBlock, LoopExitBlock);
   LoopBlock->getTerminator()->eraseFromParent();
@@ -430,7 +439,7 @@ void VecCloneVPPass::addLoopMetadata(BasicBlock *Latch, ElementCount VF) {
   // will ever happen; this way later passes will remove the loop.
   MDs.push_back(MDNode::get(
       Context, MDString::get(Context, "llvm.loop.single.iteration")));
-  // Do not allow the scalar epilogue
+  // Do not allow the scalar epilogue.
   MDs.push_back(MDNode::get(
       Context, MDString::get(Context, "llvm.loop.epilogue.forbid")));
 
@@ -469,53 +478,47 @@ void VecCloneVPPass::widenAllocaInstructions(
       // stored to an array, using the loop index as the "lane". Nothing else
       // needs to be done for optimized parameters. Later, this map will be
       // used to update all alloca users.
-      StoreInst *StoreUser = dyn_cast<StoreInst>(U);
-      LoadInst *LoadUser = dyn_cast<LoadInst>(U);
-      AllocaInst *Alloca = nullptr;
+      if (StoreInst *StoreUser = dyn_cast<StoreInst>(U)) {
+        if (AllocaInst *Alloca =
+                dyn_cast<AllocaInst>(StoreUser->getPointerOperand())) {
+          AllocaMapIt = AllocaMap.find(Alloca);
+          if (AllocaMapIt == AllocaMap.end()) {
+            IRBuilder<> Builder(EntryBlock.getTerminator());
 
-      if (LoadUser)
-        Alloca = dyn_cast<AllocaInst>(LoadUser->getPointerOperand());
+            if (VectorType *VecArgType = dyn_cast<VectorType>(ArgTy)) {
+              AllocaInst *VecAlloca = Builder.CreateAlloca(
+                  VecArgType, DL.getAllocaAddrSpace(), nullptr,
+                  "vec." + ArgName);
 
-      if (StoreUser)
-        Alloca = dyn_cast<AllocaInst>(StoreUser->getPointerOperand());
+              if (VL) {
+                auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
+                if (Mask)
+                  VPBuilder.setMask(Mask);
+                else {
+                  auto *AllOnes = ConstantInt::getAllOnesValue(
+                      VectorType::get(Builder.getInt1Ty(), VecArgType));
+                  VPBuilder.setMask(AllOnes);
+                }
+                VPBuilder.setEVL(VL);
+                VPBuilder.createVectorInstruction(Instruction::Store, nullptr,
+                                                  {&Arg, VecAlloca});
+              } else
+                Builder.CreateAlignedStore(
+                    &Arg, VecAlloca, DL.getPrefTypeAlign(VecArgType), false);
 
-      if (StoreUser && Alloca) {
-        AllocaMapIt = AllocaMap.find(Alloca);
-        if (AllocaMapIt == AllocaMap.end()) {
-          IRBuilder<> Builder(EntryBlock.getTerminator());
-
-          if (VectorType *VecArgType = dyn_cast<VectorType>(ArgTy)) {
-            AllocaInst *VecAlloca = Builder.CreateAlloca(
-                VecArgType, DL.getAllocaAddrSpace(), nullptr, "vec." + ArgName);
-
-            if (VL) {
-              auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
-              if (Mask)
-                VPBuilder.setMask(Mask);
-              else {
-                auto *AllOnes = ConstantInt::getAllOnesValue(
-                    VectorType::get(Builder.getInt1Ty(), VecArgType));
-                VPBuilder.setMask(AllOnes);
-              }
-              VPBuilder.setEVL(VL);
-              VPBuilder.createVectorInstruction(Instruction::Store, nullptr,
-                                                {&Arg, VecAlloca});
-            } else
-              Builder.CreateAlignedStore(&Arg, VecAlloca,
-                                         DL.getABITypeAlign(VecArgType), false);
-
-            AllocaMap[Alloca] = VecAlloca;
-            StoresToRemove.push_back(StoreUser);
-          } else {
-            llvm_unreachable(
-                "ArgTy is not a VectorType: this shouldn't happen");
-            // FIXME - This won't fly at all.
-            // ArrayType *ArrType =
-            //     ArrayType::get(ArgTy, Variant.Shape.VF.getKnownMinValue());
-            // AllocaInst *ArrAlloca =
-            //     new AllocaInst(ArrType, DL.getAllocaAddrSpace(),
-            //                    "arr." + ArgName, EntryBlock.getTerminator());
-            // AllocaMap[Alloca] = ArrAlloca;
+              AllocaMap[Alloca] = VecAlloca;
+              StoresToRemove.push_back(StoreUser);
+            } else {
+              llvm_unreachable(
+                  "ArgTy is not a VectorType: this shouldn't happen");
+              // FIXME - This won't fly at all.
+              // ArrayType *ArrType =
+              //     ArrayType::get(ArgTy, Variant.Shape.VF.getKnownMinValue());
+              // AllocaInst *ArrAlloca =
+              //     new AllocaInst(ArrType, DL.getAllocaAddrSpace(),
+              //                    "arr." + ArgName, EntryBlock.getTerminator());
+              // AllocaMap[Alloca] = ArrAlloca;
+            }
           }
         }
       }
@@ -532,12 +535,12 @@ void VecCloneVPPass::updateAllocaUsers(
     Function *Clone, PHINode *Phi,
     DenseMap<AllocaInst *, Instruction *> &AllocaMap) {
 
-  SmallVector<User *, 10> AllocaUsers;
+  SmallVector<Use *, 10> AllocaUses;
   for (auto Pair : AllocaMap) {
     AllocaInst *OldAlloca = Pair.first;
-    for (auto *U : OldAlloca->users()) {
-      if (isa<Instruction>(U))
-        AllocaUsers.push_back(U);
+    for (auto &U : OldAlloca->uses()) {
+      if (isa<Instruction>(U.getUser()))
+        AllocaUses.push_back(&U);
     }
   }
 
@@ -545,11 +548,21 @@ void VecCloneVPPass::updateAllocaUsers(
   // involves inserting a gep just before each use of the alloca. The only
   // exception is for vector stores to an alloca. These are moved to the
   // entry block of the function just after the widened alloca.
-  for (auto *U : AllocaUsers) {
-    IRBuilder<> Builder(cast<Instruction>(U));
-    unsigned NumOps = U->getNumOperands();
-    for (unsigned K = 0; K < NumOps; K++) {
-      if (AllocaInst *OldAlloca = dyn_cast<AllocaInst>(U->getOperand(K))) {
+  for (auto *Use : AllocaUses) {
+    User *User = Use->getUser();
+    // If the User is a PHI node, we can't insert new instructions
+    // before it; walk back to the predecessor BB from which the
+    // operand comes, so that the value can be loaded there already.
+    Instruction *InsertPoint = nullptr;
+    if (auto *PHIInst = dyn_cast<PHINode>(User)) {
+      BasicBlock *OriginBB = PHIInst->getIncomingBlock(*Use);
+      InsertPoint = OriginBB->getTerminator();
+    } else {
+      InsertPoint = cast<Instruction>(User);
+    }
+    IRBuilder<> Builder(InsertPoint);
+    for (unsigned K = 0; K < User->getNumOperands(); K++) {
+      if (AllocaInst *OldAlloca = dyn_cast<AllocaInst>(User->getOperand(K))) {
         if (AllocaInst *NewAlloca =
                 dyn_cast<AllocaInst>(AllocaMap[OldAlloca])) {
           // If this is an alloca for a linear/uniform parameter, then insert
@@ -560,10 +573,10 @@ void VecCloneVPPass::updateAllocaUsers(
               ConstantInt::get(Type::getInt32Ty(Clone->getContext()), 0);
           GepIndices.push_back(Idx0);
           GepIndices.push_back(Phi);
-          Type *SeqTy = NewAlloca->getAllocatedType();
-          auto *AllocaGep = Builder.CreateGEP(SeqTy, NewAlloca, GepIndices,
+          auto *AllocaGep = Builder.CreateGEP(NewAlloca->getAllocatedType(),
+                                              NewAlloca, GepIndices,
                                               NewAlloca->getName() + ".gep");
-          U->setOperand(K, AllocaGep);
+          User->setOperand(K, AllocaGep);
         } else if (BitCastInst *NewAllocaCast =
                        dyn_cast<BitCastInst>(AllocaMap[OldAlloca])) {
           SmallVector<Value *, 2> GepIndices;
@@ -571,7 +584,7 @@ void VecCloneVPPass::updateAllocaUsers(
           auto *AllocaCastGep =
               Builder.CreateGEP(OldAlloca->getAllocatedType(), NewAllocaCast,
                                 GepIndices, NewAllocaCast->getName() + ".gep");
-          U->setOperand(K, AllocaCastGep);
+          User->setOperand(K, AllocaCastGep);
         } else {
           llvm_unreachable(
               "Expected array alloca for linear/uniform parameters or a "
@@ -595,21 +608,29 @@ void VecCloneVPPass::updateParameterUsers(Function *Clone,
   DenseMap<Argument *, Instruction *>::iterator VecParmCastsIt;
 
   for (auto &Arg : Clone->args()) {
-    SmallVector<User *, 4> ArgUsers;
-    for (auto *U : Arg.users()) {
+    SmallVector<Use *, 4> ArgUses;
+    for (auto &U : Arg.uses()) {
       // Only update parameter users in the loop.
-      if (Instruction *Inst = dyn_cast<Instruction>(U))
+      if (Instruction *Inst = dyn_cast<Instruction>(U.getUser()))
         if (Inst->getParent() != &EntryBlock)
-          ArgUsers.push_back(U);
+          ArgUses.push_back(&U);
     }
 
     Type *ArgTy = Arg.getType();
     unsigned ArgNo = Arg.getArgNo();
     StringRef ArgName = Arg.getName();
     VectorType *VecArgType = dyn_cast<VectorType>(ArgTy);
-    for (unsigned J = 0; J < ArgUsers.size(); J++) {
-      User *U = ArgUsers[J];
-      IRBuilder<> Builder(cast<Instruction>(U));
+    for (unsigned J = 0; J < ArgUses.size(); J++) {
+      Use *Use = ArgUses[J];
+      User *User = Use->getUser();
+      Instruction *InsertPoint = nullptr;
+      if (auto *PHIInst = dyn_cast<PHINode>(User)) {
+        BasicBlock *OriginBB = PHIInst->getIncomingBlock(*Use);
+        InsertPoint = OriginBB->getTerminator();
+      } else {
+        InsertPoint = cast<Instruction>(User);
+      }
+      IRBuilder<> Builder(InsertPoint);
       if (ParmKinds[ArgNo].ParamKind == VFParamKind::Vector) {
         VecParmCastsIt = VecParmCasts.find(&Arg);
         if (VecParmCastsIt == VecParmCasts.end()) {
@@ -631,61 +652,61 @@ void VecCloneVPPass::updateParameterUsers(Function *Clone,
                                               {&Arg, VecAlloca});
           } else
             Builder.CreateAlignedStore(&Arg, VecAlloca,
-                                       DL.getABITypeAlign(VecArgType), false);
+                                       DL.getPrefTypeAlign(VecArgType), false);
 
-          PointerType *ElemTypePtr =
-              PointerType::get(VecArgType->getElementType(),
-                               VecAlloca->getType()->getAddressSpace());
-          auto *VecAllocaCast = cast<Instruction>(Builder.CreateBitCast(
-              VecAlloca, ElemTypePtr, VecAlloca->getName() + ".cast"));
-          VecParmCasts[&Arg] = VecAllocaCast;
-
-          Builder.SetInsertPoint(cast<Instruction>(U));
+          VecParmCasts[&Arg] = VecAlloca;
+          if (!VecAlloca->getType()->isOpaquePointerTy()) {
+            PointerType *ElemTypePtr =
+                PointerType::get(VecArgType->getElementType(),
+                                 VecAlloca->getType()->getAddressSpace());
+            Value *VecAllocaCast = Builder.CreateBitOrPointerCast(
+                VecAlloca, ElemTypePtr, VecAlloca->getName() + ".cast");
+            VecParmCasts[&Arg] = cast<Instruction>(VecAllocaCast);
+          }
+          Builder.SetInsertPoint(InsertPoint);
         }
 
         auto *VecAllocaCastGep =
             Builder.CreateGEP(VecArgType->getElementType(), VecParmCasts[&Arg],
                               Phi, VecParmCasts[&Arg]->getName() + ".gep");
 
-        Value *ArgElemLoad = Builder.CreateAlignedLoad(
-            VecArgType->getElementType(), VecAllocaCastGep,
-            DL.getABITypeAlign(VecArgType), false, "vec." + ArgName + ".elem");
+        Value *ArgElemLoad =
+            Builder.CreateAlignedLoad(VecArgType->getElementType(), VecAllocaCastGep,
+                                      DL.getPrefTypeAlign(VecArgType->getElementType()),
+                                      false, "vec." + ArgName + ".elem");
 
-        unsigned NumOps = U->getNumOperands();
-        for (unsigned Op = 0; Op < NumOps; Op++) {
-          if (U->getOperand(Op) == &Arg)
-            U->setOperand(Op, ArgElemLoad);
-        }
+        User->setOperand(Use->getOperandNo(), ArgElemLoad);
       } else if (ParmKinds[ArgNo].ParamKind == VFParamKind::OMP_Linear) {
+        llvm_unreachable("There should not be a not-vector parameter, for now.");
         // FIXME: There is a plethora of linear stuff that will probably need
         // different ways of handling it.
-        int Stride = ParmKinds[ArgNo].LinearStepOrPos;
-        Constant *StrideConst =
-            ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
-        auto *Mul = Builder.CreateMul(StrideConst, Phi, "stride.mul");
+        // int Stride = ParmKinds[ArgNo].LinearStepOrPos;
+        // Constant *StrideConst =
+        //     ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
+        // auto *Mul = Builder.CreateMul(StrideConst, Phi, "stride.mul");
 
-        Value *UserOp = nullptr;
-        if (PointerType *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
-          if (ParmPtrType->isOpaque())
-            llvm::report_fatal_error(
-                "Can't retrieve missing type info from the pointer itself.");
+        // Value *UserOp = nullptr;
+        // if (PointerType *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
+        //   if (ParmPtrType->isOpaque())
+        //     llvm::report_fatal_error(
+        //         "Can't retrieve missing type info from the pointer itself.");
 
-          UserOp =
-              Builder.CreateGEP(ParmPtrType->getNonOpaquePointerElementType(),
-                                &Arg, Mul, ArgName + ".gep");
-        } else {
-          if (Mul->getType() != ArgTy)
-            Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
-                                              Mul->getName() + ".cast");
+        //   UserOp =
+        //       Builder.CreateGEP(ParmPtrType->getNonOpaquePointerElementType(),
+        //                         &Arg, Mul, ArgName + ".gep");
+        // } else {
+        //   if (Mul->getType() != ArgTy)
+        //     Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
+        //                                       Mul->getName() + ".cast");
 
-          UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
-        }
+        //   UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
+        // }
 
-        unsigned NumOps = U->getNumOperands();
-        for (unsigned Op = 0; Op < NumOps; Op++) {
-          if (U->getOperand(Op) == &Arg)
-            U->setOperand(Op, UserOp);
-        }
+        // unsigned NumOps = U->getNumOperands();
+        // for (unsigned Op = 0; Op < NumOps; Op++) {
+        //   if (U->getOperand(Op) == &Arg)
+        //     U->setOperand(Op, UserOp);
+        // }
       }
     }
   }
@@ -774,7 +795,7 @@ bool VecCloneVPPass::runImpl(
       VPBuilder.createVectorInstruction(Instruction::Store, nullptr,
                                         {ZExt, MaskAlloca});
     } else
-      Builder.CreateAlignedStore(ZExt, MaskAlloca, DL.getABITypeAlign(DestType),
+      Builder.CreateAlignedStore(ZExt, MaskAlloca, DL.getPrefTypeAlign(DestType),
                                  false);
   }
 
@@ -791,15 +812,6 @@ bool VecCloneVPPass::runImpl(
     Alloca->moveBefore(EntryBlock.getTerminator());
 
   widenAllocaInstructions(Clone, AllocaMap, EntryBlock, Variant, DL, Mask, VL);
-
-  // Create a vector alloca for the return. The return type of the clone
-  // has already been widened, so the type can be used directly.
-  AllocaInst *VecRetAlloca = nullptr;
-  Type *VecRetTy = Clone->getReturnType();
-  Builder.SetInsertPoint(EntryBlock.getTerminator());
-  if (!VecRetTy->isVoidTy())
-    VecRetAlloca = Builder.CreateAlloca(VecRetTy, DL.getAllocaAddrSpace(),
-                                        nullptr, "vec.ret");
 
   // Find the basic block containing the return. We need to know where
   // to replace the return instruction with a store to the return vector
@@ -834,20 +846,47 @@ bool VecCloneVPPass::runImpl(
   PHINode *Phi =
       Builder.CreatePHI(Type::getInt32Ty(Clone->getContext()), 2, "index");
 
+  updateAllocaUsers(Clone, Phi, AllocaMap);
+  updateParameterUsers(Clone, Variant, EntryBlock, Phi, DL, Mask, VL);
+
+  // Remove old allocas
+  for (auto Pair : AllocaMap) {
+    AllocaInst *OldAlloca = Pair.first;
+    OldAlloca->eraseFromParent();
+  }
+
+  // Create a vector alloca for the return. The return type of the clone
+  // has already been widened, so the type can be used directly.
+  AllocaInst *VecRetAlloca = nullptr;
+  Type *VecRetTy = Clone->getReturnType();
+  Builder.SetInsertPoint(EntryBlock.getTerminator());
+  if (!VecRetTy->isVoidTy())
+    VecRetAlloca = Builder.CreateAlloca(VecRetTy, DL.getAllocaAddrSpace(),
+                                        nullptr, "vec.ret");
+
   // Store to the return vector the previously returned value.
   Builder.SetInsertPoint(OldReturnBlock->getTerminator());
   Value *StoreVal = RetInst->getOperand(0);
   Type *StoreValTy = StoreVal->getType();
   if (!StoreValTy->isVoidTy()) {
-    auto *RetAllocaGep = Builder.CreateGEP(StoreValTy, VecRetAlloca, Phi,
-                                           VecRetAlloca->getName() + ".gep");
+    Value *MemPtr = VecRetAlloca;
+    if (!VecRetAlloca->getType()->isOpaquePointerTy()) {
+      // Cast it to a pointer to the type of the old return instruction.
+      PointerType *StoreValPtrTy =
+          PointerType::get(StoreValTy, DL.getAllocaAddrSpace());
+      MemPtr = Builder.CreateBitOrPointerCast(VecRetAlloca, StoreValPtrTy,
+                                              VecRetAlloca->getName() + ".cast");
+    }
+    auto *RetAllocaGep = Builder.CreateGEP(StoreValTy, MemPtr, Phi,
+                                           MemPtr->getName() + ".gep");
     Builder.CreateAlignedStore(StoreVal, RetAllocaGep,
-                               DL.getABITypeAlign(StoreValTy), false);
+                               DL.getPrefTypeAlign(StoreValTy),
+                               false);
   }
 
   if (MaskAlloca)
-    insertSplitForMaskedVariant(Clone, LoopBlock, LoopExitBlock, MaskAlloca,
-                                Phi);
+    insertSplitForMaskedVariant(Clone, DL, LoopBlock, LoopExitBlock,
+                                MaskAlloca, Phi);
 
   // Check VL value, then either jump to the loop entry point or to the new
   // return block.
@@ -905,22 +944,15 @@ bool VecCloneVPPass::runImpl(
       VecReturn = VPBuilder.createVectorInstruction(Instruction::Load, VecRetTy,
                                                     {VecRetAlloca}, "vec.ret");
     } else
-      VecReturn = Builder.CreateLoad(VecRetTy, VecRetAlloca, "vec.ret");
+      VecReturn = Builder.CreateAlignedLoad(VecRetTy, VecRetAlloca,
+                                            DL.getPrefTypeAlign(VecRetTy),
+                                            "vec.ret");
   }
   Builder.CreateRet(VecReturn);
   RetInst->eraseFromParent();
 
   LLVM_DEBUG(dbgs() << "[VecCloneVP] After Loop Insertion\n");
   LLVM_DEBUG(Clone->dump());
-
-  updateAllocaUsers(Clone, Phi, AllocaMap);
-  updateParameterUsers(Clone, Variant, EntryBlock, Phi, DL, Mask, VL);
-
-  // Remove old allocas
-  for (auto Pair : AllocaMap) {
-    AllocaInst *OldAlloca = Pair.first;
-    OldAlloca->eraseFromParent();
-  }
 
   // Prevent unrolling from kicking in before loop vectorization and force
   // vectorization of the loop to the VF of the simd function.

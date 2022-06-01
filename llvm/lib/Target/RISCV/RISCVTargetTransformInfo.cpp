@@ -793,6 +793,9 @@ unsigned RISCVTTIImpl::getRegUsageForType(Type *Ty) {
 Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II) {
   assert(II.getIntrinsicID() == Intrinsic::epi_vsetvl && "This is not an epi_vsetvl!");
 
+  // The rvl argument may be the result of a zeroext op;
+  // in that case, we retrieve the value being extended,
+  // otherwise we just use the value we find in that position.
   Value *RVL = nullptr;
   if (!match(II.getArgOperand(0), m_ZExt(m_Value(RVL))))
     RVL = II.getArgOperand(0);
@@ -803,14 +806,18 @@ Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II
       continue;
 
     if (auto *Assume = dyn_cast<AssumeInst>(Assumption)) {
+      // The assumption on the rvl is an icmp intrinsic (either ule or uge)
+      // that compares VL with VLMax.
       Value *VLMax;
       CmpInst::Predicate Pred;
       if (!match(Assume->getArgOperand(0), m_c_ICmp(Pred, m_Specific(RVL), m_Value(VLMax))))
         continue;
-
       if (Pred != CmpInst::ICMP_UGE && Pred != CmpInst::ICMP_ULE)
         continue;
 
+      // VLMax = <vscale x k>, so it could either be the direct result of a
+      // @llvm.vscale() call or the result of a binary operation between
+      // vscale and the VF value k.
       BinaryOperator *BinOp;
       if (!match(VLMax, m_BinOp(BinOp))) {
         if (dyn_cast<IntrinsicInst>(VLMax)->getIntrinsicID() != Intrinsic::vscale)

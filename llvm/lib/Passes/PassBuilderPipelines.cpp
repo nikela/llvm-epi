@@ -1135,8 +1135,6 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
 
   // We need to do a bunch of cleanups for WFV Vectorization.
   if (PTO.WFVVectorization) {
-    FPM.addPass(SROAPass());
-    FPM.addPass(EarlyCSEPass());
     FPM.addPass(PromotePass());
   }
 }

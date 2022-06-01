@@ -85,7 +85,9 @@ private:
 
   /// \brief Inserts the if/else split and mask condition for masked SIMD
   /// functions.
-  void insertSplitForMaskedVariant(Function *Clone, BasicBlock *LoopBlock,
+  void insertSplitForMaskedVariant(Function *Clone,
+                                   const DataLayout &DL,
+                                   BasicBlock *LoopBlock,
                                    BasicBlock *LoopExitBlock,
                                    AllocaInst *MaskAlloca, PHINode *Phi);
 
