@@ -929,6 +929,7 @@ body:             |
   ; CHECK-NEXT: {{  $}}
   ; CHECK-NEXT:   [[PHI:%[0-9]+]]:gpr = PHI [[COPY3]], %bb.0, %11, %bb.3
   ; CHECK-NEXT:   [[ADD:%[0-9]+]]:gpr = ADD [[COPY2]], [[PHI]]
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLIX0 killed $x0, 88 /* e64, m1, ta, mu */, implicit-def $vl, implicit-def $vtype, implicit $vl
   ; CHECK-NEXT:   [[PseudoVADD_VX_M1_:%[0-9]+]]:vr = PseudoVADD_VX_M1 [[PseudoVID_V_M1_]], killed [[ADD]], -1, 6 /* e64 */, implicit $vl, implicit $vtype
   ; CHECK-NEXT:   [[PseudoVMSLTU_VX_M1_:%[0-9]+]]:vr = PseudoVMSLTU_VX_M1 [[PseudoVADD_VX_M1_]], [[COPY1]], -1, 6 /* e64 */, implicit $vl, implicit $vtype
   ; CHECK-NEXT:   [[PseudoVCPOP_M_B1_:%[0-9]+]]:gpr = PseudoVCPOP_M_B1 [[PseudoVMSLTU_VX_M1_]], -1, 0 /* e8 */, implicit $vl, implicit $vtype

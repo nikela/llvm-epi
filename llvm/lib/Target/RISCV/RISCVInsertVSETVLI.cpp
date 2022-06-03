@@ -1600,9 +1600,6 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
       BBInfo.Change = VSETVLIInfo::getUnknown();
   }
 
-  // Initial exit state is whatever change we found in the block.
-  BBInfo.Exit = BBInfo.Change;
-
   // The exit ExtraOperand value is the last !Undefined found in the MBB, if any
   BBInfo.ExitExtra = LastEO;
 
@@ -1682,12 +1679,9 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   // changed exit status.
   for (MachineBasicBlock *S : MBB.successors()) {
     // If the new exit values match the old exit values, we don't need to
-    // revisit any blocks. However, we unconditionally queue the successors
-    // that are still invalid on their entry because they must be visited, no
-    // matter what we concluded for this basic block.
+    // revisit any blocks.
     if (!BlockInfo[S->getNumber()].InQueue &&
-        (!BlockInfo[S->getNumber()].Pred.isValid() || UpdatedVSETVLIInfo ||
-         UpdatedExtraOperand)) {
+        (UpdatedVSETVLIInfo || UpdatedExtraOperand)) {
       WorkList.push(S);
       BlockInfo[S->getNumber()].InQueue = true;
       LLVM_DEBUG(dbgs() << "Requeuing " << printMBBReference(MBB) << "\n");
