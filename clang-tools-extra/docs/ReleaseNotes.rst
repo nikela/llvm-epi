@@ -136,6 +136,10 @@ New checks
   Future libc++ will remove the extension (`D120996
   <https://reviews.llvm.org/D120996>`).
 
+- New :doc:`misc-homoglyph <clang-tidy/checks/misc-homoglyph>` check.
+
+  Detects confusable unicode identifiers.
+
 New check aliases
 ^^^^^^^^^^^^^^^^^
 
@@ -210,7 +214,7 @@ Changes in existing checks
   template has an unnecessary value paramter. Removed the fix for a template.
 
 - Fixed a bug in :doc:`bugprone-use-after-move
-  <clang-tidy/checks/bugprone-use-after-move> where a move in a lambda capture
+  <clang-tidy/checks/bugprone-use-after-move>` where a move in a lambda capture
   was treated as if it happened within the body of the lambda, not within the
   function that defines the lambda.
 
@@ -235,7 +239,7 @@ The improvements are...
 Improvements to pp-trace
 ------------------------
 
-The improvements are...
+- Added `HashLoc` information to `InclusionDirective` callback output.
 
 Clang-tidy Visual Studio plugin
 -------------------------------
