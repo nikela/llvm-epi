@@ -562,8 +562,6 @@ public:
   StringRef getPassName() const override { return RISCV_INSERT_VSETVLI_NAME; }
 
 private:
-  bool needVSETVLI(const VSETVLIInfo &Require,
-                   const VSETVLIInfo &CurInfo) const;
   bool needVSETVLI(const MachineInstr &MI, const VSETVLIInfo &Require,
                    const VSETVLIInfo &CurInfo) const;
   bool needVSETVLIPHI(const VSETVLIInfo &Require,
@@ -995,30 +993,6 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
   }
 
   return NewInfo;
-}
-
-bool RISCVInsertVSETVLI::needVSETVLI(const VSETVLIInfo &Require,
-                                     const VSETVLIInfo &CurInfo) const {
-  if (CurInfo.isCompatible(Require))
-    return false;
-
-  // We didn't find a compatible value. If our AVL is a virtual register,
-  // it might be defined by a VSET(I)VLI(EXT). If it has the same VTYPE
-  // and the last VL/VTYPE we observed is the same, we don't need a
-  // VSETVLI here.
-  if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
-      Require.getAVLReg().isVirtual() && !CurInfo.hasSEWLMULRatioOnly() &&
-      CurInfo.hasCompatibleVTYPE(Require)) {
-    if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
-      if (isVectorConfigInstr(*DefMI)) {
-        VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
-        if (DefInfo.hasSameAVL(CurInfo) && DefInfo.hasSameVLMAX(CurInfo))
-          return false;
-      }
-    }
-  }
-
-  return true;
 }
 
 bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
@@ -1531,8 +1505,25 @@ void RISCVInsertVSETVLI::forwardPropagateAVL(MachineBasicBlock &MBB) {
 
 bool RISCVInsertVSETVLI::needVSETVLI(const MachineInstr &MI, const VSETVLIInfo &Require,
                                      const VSETVLIInfo &CurInfo) const {
-  if (!needVSETVLI(Require, CurInfo))
+  if (CurInfo.isCompatible(Require))
     return false;
+
+  // We didn't find a compatible value. If our AVL is a virtual register,
+  // it might be defined by a VSET(I)VLI(EXT). If it has the same VTYPE
+  // and the last VL/VTYPE we observed is the same, we don't need a
+  // VSETVLI here.
+  if (!CurInfo.isUnknown() && Require.hasAVLReg() &&
+      Require.getAVLReg().isVirtual() && !CurInfo.hasSEWLMULRatioOnly() &&
+      CurInfo.hasCompatibleVTYPE(Require)) {
+    if (MachineInstr *DefMI = MRI->getVRegDef(Require.getAVLReg())) {
+      if (isVectorConfigInstr(*DefMI)) {
+        VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
+        if (DefInfo.hasSameAVL(CurInfo) && DefInfo.hasSameVLMAX(CurInfo))
+          return false;
+      }
+    }
+  }
+
   // If this is a unit-stride or strided load/store, we may be able to use the
   // EMUL=(EEW/SEW)*LMUL relationship to avoid changing VTYPE.
   return !canSkipVSETVLIForLoadStore(MI, Require, CurInfo);
@@ -1597,9 +1588,8 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         // NOTE: We only do this if the vtype we're comparing against was
         // created in this block. We need the first and third phase to treat
         // the store the same way.
-        if (needVSETVLI(NewInfo, BBInfo.Change)) {
+        if (needVSETVLI(MI, NewInfo, BBInfo.Change))
           BBInfo.Change = NewInfo;
-        }
       }
     }
 
@@ -1609,9 +1599,6 @@ bool RISCVInsertVSETVLI::computeVLVTYPEChanges(const MachineBasicBlock &MBB) {
         MI.modifiesRegister(RISCV::VTYPE))
       BBInfo.Change = VSETVLIInfo::getUnknown();
   }
-
-  // Initial exit state is whatever change we found in the block.
-  BBInfo.Exit = BBInfo.Change;
 
   // The exit ExtraOperand value is the last !Undefined found in the MBB, if any
   BBInfo.ExitExtra = LastEO;
@@ -1692,12 +1679,9 @@ void RISCVInsertVSETVLI::computeIncomingVLVTYPE(const MachineBasicBlock &MBB) {
   // changed exit status.
   for (MachineBasicBlock *S : MBB.successors()) {
     // If the new exit values match the old exit values, we don't need to
-    // revisit any blocks. However, we unconditionally queue the successors
-    // that are still invalid on their entry because they must be visited, no
-    // matter what we concluded for this basic block.
+    // revisit any blocks.
     if (!BlockInfo[S->getNumber()].InQueue &&
-        (!BlockInfo[S->getNumber()].Pred.isValid() || UpdatedVSETVLIInfo ||
-         UpdatedExtraOperand)) {
+        (UpdatedVSETVLIInfo || UpdatedExtraOperand)) {
       WorkList.push(S);
       BlockInfo[S->getNumber()].InQueue = true;
       LLVM_DEBUG(dbgs() << "Requeuing " << printMBBReference(MBB) << "\n");
@@ -1803,8 +1787,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // use the predecessor information.
         CurInfo = BlockInfo[MBB.getNumber()].Pred;
         assert(CurInfo.isValid() && "Expected a valid predecessor state.");
-        if (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-            needVSETVLI(NewInfo, CurInfo)) {
+        if (needVSETVLI(MI, NewInfo, CurInfo)) {
           // If this is the first implicit state change, and the state change
           // requested can be proven to produce the same register contents, we
           // can skip emitting the actual state change and continue as if we
@@ -1859,9 +1842,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         assert(BBInfo.Pred.isValid() &&
                "Expected a valid predecessor state.");
         CurInfo = BlockInfo[MBB.getNumber()].Pred;
-        if (!HasSameExtraOperand ||
-            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-             needVSETVLI(NewInfo, CurInfo))) {
+        if (!HasSameExtraOperand || needVSETVLI(MI, NewInfo, CurInfo)) {
           // If this is the first implicit state change, and the state change
           // requested can be proven to produce the same register contents, we
           // can skip emitting the actual state change and continue as if we
@@ -1881,9 +1862,7 @@ void RISCVInsertVSETVLI::emitVSETVLIs(MachineBasicBlock &MBB) {
         // NOTE: We can't use predecessor information for the store. We must
         // treat it the same as the first phase so that we produce the correct
         // vl/vtype for succesor blocks.
-        if (!HasSameExtraOperand ||
-            (!canSkipVSETVLIForLoadStore(MI, NewInfo, CurInfo) &&
-             needVSETVLI(NewInfo, CurInfo))) {
+        if (!HasSameExtraOperand || needVSETVLI(MI, NewInfo, CurInfo)) {
           insertVSETVLI(MBB, MI, NewInfo, CurInfo);
           CurInfo = NewInfo;
         }
