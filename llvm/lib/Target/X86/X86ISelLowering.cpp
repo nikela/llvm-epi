@@ -31800,16 +31800,12 @@ SDValue X86TargetLowering::LowerGC_TRANSITION(SDValue Op,
   // require special handling for these nodes), lower them as literal NOOPs for
   // the time being.
   SmallVector<SDValue, 2> Ops;
-
   Ops.push_back(Op.getOperand(0));
   if (Op->getGluedNode())
     Ops.push_back(Op->getOperand(Op->getNumOperands() - 1));
 
-  SDLoc OpDL(Op);
   SDVTList VTs = DAG.getVTList(MVT::Other, MVT::Glue);
-  SDValue NOOP(DAG.getMachineNode(X86::NOOP, SDLoc(Op), VTs, Ops), 0);
-
-  return NOOP;
+  return SDValue(DAG.getMachineNode(X86::NOOP, SDLoc(Op), VTs, Ops), 0);
 }
 
 // Custom split CVTPS2PH with wide types.
@@ -47791,8 +47787,8 @@ static SDValue combineOrCmpEqZeroToCtlzSrl(SDNode *N, SelectionDAG &DAG,
 }
 
 static SDValue foldMaskedMergeImpl(SDValue And0_L, SDValue And0_R,
-                                   SDValue And1_L, SDValue And1_R, SDLoc DL,
-                                   SelectionDAG &DAG) {
+                                   SDValue And1_L, SDValue And1_R,
+                                   const SDLoc &DL, SelectionDAG &DAG) {
   if (!isBitwiseNot(And0_L, true) || !And0_L->hasOneUse())
     return SDValue();
   SDValue NotOp = And0_L->getOperand(0);
