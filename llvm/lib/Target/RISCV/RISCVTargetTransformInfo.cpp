@@ -357,10 +357,6 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
     }
   }
 
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Tp);
-  if (Kind == TTI::SK_Broadcast && isa<ScalableVectorType>(Tp))
-    return LT.first * 1;
-
   return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
 }
 

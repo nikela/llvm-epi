@@ -1636,10 +1636,10 @@ multiclass epi_pat_load_store<ValueType type,
              GPR:$rs1,
              (mask_type zero_reg),
              VLMax, eew)>;
-  def : Pat<(type (load AddrFI:$rs1)),
+  def : Pat<(type (load GPR:$rs1)),
             (!cast<Instruction>(load_instr_name # "_" # MInfo.MX)
              (type (IMPLICIT_DEF)),
-             AddrFI:$rs1,
+             GPR:$rs1,
              (mask_type zero_reg),
              VLMax, eew)>;
 
@@ -1650,9 +1650,9 @@ multiclass epi_pat_load_store<ValueType type,
              reg_class:$rs2, GPR:$rs1,
              (mask_type zero_reg),
              VLMax, eew)>;
-  def : Pat<(store type:$rs2, AddrFI:$rs1),
+  def : Pat<(store type:$rs2, GPR:$rs1),
             (!cast<Instruction>(store_instr_name # "_" # MInfo.MX)
-             reg_class:$rs2, AddrFI:$rs1,
+             reg_class:$rs2, GPR:$rs1,
              (mask_type zero_reg),
              VLMax, eew)>;
 }
