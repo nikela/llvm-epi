@@ -157,8 +157,9 @@ define <8 x i1> @fp2si_v8f32_v8i1(<8 x float> %x) {
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; LMULMAX1-NEXT:    vmv.v.i v9, 0
 ; LMULMAX1-NEXT:    vmerge.vim v9, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v8, v9, 4
+; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v8, 0
 ; LMULMAX1-NEXT:    ret
   %z = fptosi <8 x float> %x to <8 x i1>
@@ -190,8 +191,9 @@ define <8 x i1> @fp2ui_v8f32_v8i1(<8 x float> %x) {
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; LMULMAX1-NEXT:    vmv.v.i v9, 0
 ; LMULMAX1-NEXT:    vmerge.vim v9, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v8, v9, 4
+; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v8, 0
 ; LMULMAX1-NEXT:    ret
   %z = fptoui <8 x float> %x to <8 x i1>
@@ -241,11 +243,11 @@ define void @fp2si_v8f32_v8i64(<8 x float>* %x, <8 x i64>* %y) {
 ; LMULMAX1-NEXT:    addi a2, a0, 16
 ; LMULMAX1-NEXT:    vle32.v v8, (a2)
 ; LMULMAX1-NEXT:    vle32.v v9, (a0)
-; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; LMULMAX1-NEXT:    vslidedown.vi v10, v8, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfwcvt.rtz.x.f.v v11, v10
-; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; LMULMAX1-NEXT:    vslidedown.vi v10, v9, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfwcvt.rtz.x.f.v v12, v10
@@ -280,11 +282,11 @@ define void @fp2ui_v8f32_v8i64(<8 x float>* %x, <8 x i64>* %y) {
 ; LMULMAX1-NEXT:    addi a2, a0, 16
 ; LMULMAX1-NEXT:    vle32.v v8, (a2)
 ; LMULMAX1-NEXT:    vle32.v v9, (a0)
-; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; LMULMAX1-NEXT:    vslidedown.vi v10, v8, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfwcvt.rtz.xu.f.v v11, v10
-; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; LMULMAX1-NEXT:    vslidedown.vi v10, v9, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfwcvt.rtz.xu.f.v v12, v10
@@ -458,7 +460,7 @@ define void @fp2si_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v11, v12
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v11, v11
-; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v11, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfncvt.rtz.x.f.w v11, v9
@@ -466,7 +468,7 @@ define void @fp2si_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v9, v11
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v9, v9
-; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v9, 4
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfncvt.rtz.x.f.w v9, v8
@@ -474,7 +476,7 @@ define void @fp2si_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v8, v9
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v8, v8
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v8, 6
 ; LMULMAX1-NEXT:    vse8.v v10, (a1)
 ; LMULMAX1-NEXT:    ret
@@ -520,7 +522,7 @@ define void @fp2ui_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v11, v12
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v11, v11
-; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v11, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfncvt.rtz.xu.f.w v11, v9
@@ -528,7 +530,7 @@ define void @fp2ui_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v9, v11
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v9, v9
-; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v9, 4
 ; LMULMAX1-NEXT:    vsetivli zero, 2, e32, mf2, ta, mu
 ; LMULMAX1-NEXT:    vfncvt.rtz.xu.f.w v9, v8
@@ -536,7 +538,7 @@ define void @fp2ui_v8f64_v8i8(<8 x double>* %x, <8 x i8>* %y) {
 ; LMULMAX1-NEXT:    vncvt.x.x.w v8, v9
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vncvt.x.x.w v8, v8
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v10, v8, 6
 ; LMULMAX1-NEXT:    vse8.v v10, (a1)
 ; LMULMAX1-NEXT:    ret
@@ -571,7 +573,7 @@ define <8 x i1> @fp2si_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmv.v.i v9, 0
 ; LMULMAX1-NEXT:    vmerge.vim v13, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v12, v13, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v12, 0
@@ -582,7 +584,7 @@ define <8 x i1> @fp2si_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vmsne.vi v0, v10, 0
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmerge.vim v10, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v12, v10, 4
 ; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v12, 0
@@ -593,8 +595,9 @@ define <8 x i1> @fp2si_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vmsne.vi v0, v10, 0
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmerge.vim v9, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v8, v9, 6
+; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v8, 0
 ; LMULMAX1-NEXT:    ret
   %z = fptosi <8 x double> %x to <8 x i1>
@@ -626,7 +629,7 @@ define <8 x i1> @fp2ui_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmv.v.i v9, 0
 ; LMULMAX1-NEXT:    vmerge.vim v13, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v12, v13, 2
 ; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v12, 0
@@ -637,7 +640,7 @@ define <8 x i1> @fp2ui_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vmsne.vi v0, v10, 0
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmerge.vim v10, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 6, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v12, v10, 4
 ; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v12, 0
@@ -648,8 +651,9 @@ define <8 x i1> @fp2ui_v8f64_v8i1(<8 x double> %x) {
 ; LMULMAX1-NEXT:    vmsne.vi v0, v10, 0
 ; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmerge.vim v9, v9, 1, v0
-; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; LMULMAX1-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; LMULMAX1-NEXT:    vslideup.vi v8, v9, 6
+; LMULMAX1-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; LMULMAX1-NEXT:    vmsne.vi v0, v8, 0
 ; LMULMAX1-NEXT:    ret
   %z = fptoui <8 x double> %x to <8 x i1>

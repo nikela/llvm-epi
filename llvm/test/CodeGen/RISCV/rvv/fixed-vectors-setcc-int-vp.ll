@@ -1348,7 +1348,7 @@ define <64 x i1> @icmp_eq_vv_v64i32(<64 x i32> %va, <64 x i32> %vb, <64 x i1> %m
 ; CHECK-NEXT:    addi a4, a0, 128
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; CHECK-NEXT:    vle32.v v24, (a4)
-; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; CHECK-NEXT:    addi a4, a2, -32
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 4
 ; CHECK-NEXT:    bltu a2, a4, .LBB99_2
@@ -1368,7 +1368,7 @@ define <64 x i1> @icmp_eq_vv_v64i32(<64 x i32> %va, <64 x i32> %vb, <64 x i1> %m
 ; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vl8re8.v v24, (a0) # Unknown-size Folded Reload
 ; CHECK-NEXT:    vmseq.vv v16, v24, v8, v0.t
-; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslideup.vi v16, v2, 4
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    csrr a0, vlenb
@@ -1385,7 +1385,7 @@ define <64 x i1> @icmp_eq_vx_v64i32(<64 x i32> %va, i32 %b, <64 x i1> %m, i32 ze
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vmv1r.v v24, v0
 ; CHECK-NEXT:    li a2, 0
-; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; CHECK-NEXT:    addi a3, a1, -32
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 4
 ; CHECK-NEXT:    bltu a1, a3, .LBB100_2
@@ -1402,7 +1402,7 @@ define <64 x i1> @icmp_eq_vx_v64i32(<64 x i32> %va, i32 %b, <64 x i1> %m, i32 ze
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m8, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v24
 ; CHECK-NEXT:    vmseq.vx v16, v8, a0, v0.t
-; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslideup.vi v16, v25, 4
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    ret
@@ -1417,7 +1417,7 @@ define <64 x i1> @icmp_eq_vx_swap_v64i32(<64 x i32> %va, i32 %b, <64 x i1> %m, i
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vmv1r.v v24, v0
 ; CHECK-NEXT:    li a2, 0
-; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; CHECK-NEXT:    addi a3, a1, -32
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 4
 ; CHECK-NEXT:    bltu a1, a3, .LBB101_2
@@ -1434,7 +1434,7 @@ define <64 x i1> @icmp_eq_vx_swap_v64i32(<64 x i32> %va, i32 %b, <64 x i1> %m, i
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m8, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v24
 ; CHECK-NEXT:    vmseq.vx v16, v8, a0, v0.t
-; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslideup.vi v16, v25, 4
 ; CHECK-NEXT:    vmv1r.v v0, v16
 ; CHECK-NEXT:    ret

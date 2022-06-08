@@ -554,7 +554,7 @@ define i16 @vwreduce_add_v128i16(<128 x i8>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m8, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    li a0, 64
-; CHECK-NEXT:    vsetvli zero, a0, e8, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m4, ta, mu
 ; CHECK-NEXT:    vwadd.vv v24, v8, v16
@@ -577,7 +577,7 @@ define i16 @vwreduce_uadd_v128i16(<128 x i8>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m8, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    li a0, 64
-; CHECK-NEXT:    vsetvli zero, a0, e8, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
 ; CHECK-NEXT:    vsetvli zero, a0, e8, m4, ta, mu
 ; CHECK-NEXT:    vwaddu.vv v24, v8, v16
@@ -931,7 +931,7 @@ define i32 @vwreduce_add_v64i32(<64 x i16>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m8, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
 ; CHECK-NEXT:    li a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e16, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m4, ta, mu
 ; CHECK-NEXT:    vwadd.vv v24, v8, v16
@@ -954,7 +954,7 @@ define i32 @vwreduce_uadd_v64i32(<64 x i16>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m8, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
 ; CHECK-NEXT:    li a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e16, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
 ; CHECK-NEXT:    vsetvli zero, a0, e16, m4, ta, mu
 ; CHECK-NEXT:    vwaddu.vv v24, v8, v16
@@ -1477,7 +1477,7 @@ define i64 @vwreduce_add_v32i64(<32 x i32>* %x) {
 ; RV32-NEXT:    li a1, 32
 ; RV32-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; RV32-NEXT:    vle32.v v8, (a0)
-; RV32-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 16
 ; RV32-NEXT:    vsetivli zero, 16, e32, m4, ta, mu
 ; RV32-NEXT:    vwadd.vv v24, v8, v16
@@ -1496,7 +1496,7 @@ define i64 @vwreduce_add_v32i64(<32 x i32>* %x) {
 ; RV64-NEXT:    li a1, 32
 ; RV64-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; RV64-NEXT:    vle32.v v8, (a0)
-; RV64-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV64-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 16
 ; RV64-NEXT:    vsetivli zero, 16, e32, m4, ta, mu
 ; RV64-NEXT:    vwadd.vv v24, v8, v16
@@ -1518,7 +1518,7 @@ define i64 @vwreduce_uadd_v32i64(<32 x i32>* %x) {
 ; RV32-NEXT:    li a1, 32
 ; RV32-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; RV32-NEXT:    vle32.v v8, (a0)
-; RV32-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 16
 ; RV32-NEXT:    vsetivli zero, 16, e32, m4, ta, mu
 ; RV32-NEXT:    vwaddu.vv v24, v8, v16
@@ -1537,7 +1537,7 @@ define i64 @vwreduce_uadd_v32i64(<32 x i32>* %x) {
 ; RV64-NEXT:    li a1, 32
 ; RV64-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; RV64-NEXT:    vle32.v v8, (a0)
-; RV64-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV64-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 16
 ; RV64-NEXT:    vsetivli zero, 16, e32, m4, ta, mu
 ; RV64-NEXT:    vwaddu.vv v24, v8, v16
@@ -1615,7 +1615,7 @@ define i64 @vwreduce_add_v64i64(<64 x i32>* %x) {
 ; RV32-NEXT:    addi a0, sp, 16
 ; RV32-NEXT:    vs8r.v v8, (a0) # Unknown-size Folded Spill
 ; RV32-NEXT:    vle32.v v16, (a1)
-; RV32-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v24, v8, 16
 ; RV32-NEXT:    csrr a0, vlenb
 ; RV32-NEXT:    li a1, 24
@@ -1683,7 +1683,7 @@ define i64 @vwreduce_add_v64i64(<64 x i32>* %x) {
 ; RV64-NEXT:    addi a0, sp, 16
 ; RV64-NEXT:    vs8r.v v8, (a0) # Unknown-size Folded Spill
 ; RV64-NEXT:    vle32.v v16, (a1)
-; RV64-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV64-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v24, v8, 16
 ; RV64-NEXT:    csrr a0, vlenb
 ; RV64-NEXT:    li a1, 24
@@ -1754,7 +1754,7 @@ define i64 @vwreduce_uadd_v64i64(<64 x i32>* %x) {
 ; RV32-NEXT:    addi a0, sp, 16
 ; RV32-NEXT:    vs8r.v v8, (a0) # Unknown-size Folded Spill
 ; RV32-NEXT:    vle32.v v16, (a1)
-; RV32-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v24, v8, 16
 ; RV32-NEXT:    csrr a0, vlenb
 ; RV32-NEXT:    li a1, 24
@@ -1822,7 +1822,7 @@ define i64 @vwreduce_uadd_v64i64(<64 x i32>* %x) {
 ; RV64-NEXT:    addi a0, sp, 16
 ; RV64-NEXT:    vs8r.v v8, (a0) # Unknown-size Folded Spill
 ; RV64-NEXT:    vle32.v v16, (a1)
-; RV64-NEXT:    vsetivli zero, 16, e32, m8, ta, mu
+; RV64-NEXT:    vsetivli zero, 16, e32, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v24, v8, 16
 ; RV64-NEXT:    csrr a0, vlenb
 ; RV64-NEXT:    li a1, 24
@@ -6824,7 +6824,9 @@ define i8 @vreduce_mul_v4i8(<4 x i8>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 4, e8, mf4, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -6842,9 +6844,13 @@ define i8 @vreduce_mul_v8i8(<8 x i8>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 8, e8, mf2, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -6862,11 +6868,17 @@ define i8 @vreduce_mul_v16i8(<16 x i8>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 16, e8, m1, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -6885,13 +6897,21 @@ define i8 @vreduce_mul_v32i8(<32 x i8>* %x) {
 ; CHECK-NEXT:    li a1, 32
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m2, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
 ; CHECK-NEXT:    vrgather.vi v10, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
@@ -6911,15 +6931,25 @@ define i8 @vreduce_mul_v64i8(<64 x i8>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m4, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    li a0, 32
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v12, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
 ; CHECK-NEXT:    vrgather.vi v12, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
@@ -6939,18 +6969,30 @@ define i8 @vreduce_mul_v128i8(<128 x i8>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m8, ta, mu
 ; CHECK-NEXT:    vle8.v v8, (a0)
 ; CHECK-NEXT:    li a0, 64
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    li a0, 32
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -6973,18 +7015,30 @@ define i8 @vreduce_mul_v256i8(<256 x i8>* %x) {
 ; CHECK-NEXT:    vle8.v v16, (a0)
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    li a0, 64
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    li a0, 32
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -7032,7 +7086,9 @@ define i16 @vreduce_mul_v4i16(<4 x i16>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 4, e16, mf2, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -7050,9 +7106,13 @@ define i16 @vreduce_mul_v8i16(<8 x i16>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 8, e16, m1, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -7070,11 +7130,17 @@ define i16 @vreduce_mul_v16i16(<16 x i16>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 16, e16, m2, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
 ; CHECK-NEXT:    vrgather.vi v10, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
@@ -7093,13 +7159,21 @@ define i16 @vreduce_mul_v32i16(<32 x i16>* %x) {
 ; CHECK-NEXT:    li a1, 32
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m4, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
 ; CHECK-NEXT:    vrgather.vi v12, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
@@ -7119,15 +7193,25 @@ define i16 @vreduce_mul_v64i16(<64 x i16>* %x) {
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m8, ta, mu
 ; CHECK-NEXT:    vle16.v v8, (a0)
 ; CHECK-NEXT:    li a0, 32
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -7150,15 +7234,25 @@ define i16 @vreduce_mul_v128i16(<128 x i16>* %x) {
 ; CHECK-NEXT:    vle16.v v16, (a0)
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    li a0, 32
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v16, v8, a0
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e16, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -7206,7 +7300,9 @@ define i32 @vreduce_mul_v4i32(<4 x i32>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v9, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
 ; CHECK-NEXT:    vrgather.vi v9, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v9
@@ -7224,9 +7320,13 @@ define i32 @vreduce_mul_v8i32(<8 x i32>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 8, e32, m2, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e32, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e32, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
+; CHECK-NEXT:    vsetvli zero, zero, e32, m2, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v10, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e32, m2, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
 ; CHECK-NEXT:    vrgather.vi v10, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v10
@@ -7244,11 +7344,17 @@ define i32 @vreduce_mul_v16i32(<16 x i32>* %x) {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 16, e32, m4, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v12, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e32, m4, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
 ; CHECK-NEXT:    vrgather.vi v12, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v12
@@ -7267,13 +7373,21 @@ define i32 @vreduce_mul_v32i32(<32 x i32>* %x) {
 ; CHECK-NEXT:    li a1, 32
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m8, ta, mu
 ; CHECK-NEXT:    vle32.v v8, (a0)
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -7295,13 +7409,21 @@ define i32 @vreduce_mul_v64i32(<64 x i32>* %x) {
 ; CHECK-NEXT:    addi a0, a0, 128
 ; CHECK-NEXT:    vle32.v v16, (a0)
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 8
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 4
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, tu, mu
 ; CHECK-NEXT:    vslidedown.vi v16, v8, 2
+; CHECK-NEXT:    vsetvli zero, zero, e32, m8, ta, mu
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
 ; CHECK-NEXT:    vrgather.vi v16, v8, 1
 ; CHECK-NEXT:    vmul.vv v8, v8, v16
@@ -7373,7 +7495,9 @@ define i64 @vreduce_mul_v4i64(<4 x i64>* %x) {
 ; RV32:       # %bb.0:
 ; RV32-NEXT:    vsetivli zero, 4, e64, m2, ta, mu
 ; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    vsetvli zero, zero, e64, m2, tu, mu
 ; RV32-NEXT:    vslidedown.vi v10, v8, 2
+; RV32-NEXT:    vsetvli zero, zero, e64, m2, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v10
 ; RV32-NEXT:    vrgather.vi v10, v8, 1
 ; RV32-NEXT:    vmul.vv v8, v8, v10
@@ -7388,7 +7512,9 @@ define i64 @vreduce_mul_v4i64(<4 x i64>* %x) {
 ; RV64:       # %bb.0:
 ; RV64-NEXT:    vsetivli zero, 4, e64, m2, ta, mu
 ; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    vsetvli zero, zero, e64, m2, tu, mu
 ; RV64-NEXT:    vslidedown.vi v10, v8, 2
+; RV64-NEXT:    vsetvli zero, zero, e64, m2, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v10
 ; RV64-NEXT:    vrgather.vi v10, v8, 1
 ; RV64-NEXT:    vmul.vv v8, v8, v10
@@ -7406,9 +7532,13 @@ define i64 @vreduce_mul_v8i64(<8 x i64>* %x) {
 ; RV32:       # %bb.0:
 ; RV32-NEXT:    vsetivli zero, 8, e64, m4, ta, mu
 ; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    vsetvli zero, zero, e64, m4, tu, mu
 ; RV32-NEXT:    vslidedown.vi v12, v8, 4
+; RV32-NEXT:    vsetvli zero, zero, e64, m4, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v12
+; RV32-NEXT:    vsetvli zero, zero, e64, m4, tu, mu
 ; RV32-NEXT:    vslidedown.vi v12, v8, 2
+; RV32-NEXT:    vsetvli zero, zero, e64, m4, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v12
 ; RV32-NEXT:    vrgather.vi v12, v8, 1
 ; RV32-NEXT:    vmul.vv v8, v8, v12
@@ -7423,9 +7553,13 @@ define i64 @vreduce_mul_v8i64(<8 x i64>* %x) {
 ; RV64:       # %bb.0:
 ; RV64-NEXT:    vsetivli zero, 8, e64, m4, ta, mu
 ; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    vsetvli zero, zero, e64, m4, tu, mu
 ; RV64-NEXT:    vslidedown.vi v12, v8, 4
+; RV64-NEXT:    vsetvli zero, zero, e64, m4, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v12
+; RV64-NEXT:    vsetvli zero, zero, e64, m4, tu, mu
 ; RV64-NEXT:    vslidedown.vi v12, v8, 2
+; RV64-NEXT:    vsetvli zero, zero, e64, m4, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v12
 ; RV64-NEXT:    vrgather.vi v12, v8, 1
 ; RV64-NEXT:    vmul.vv v8, v8, v12
@@ -7443,11 +7577,17 @@ define i64 @vreduce_mul_v16i64(<16 x i64>* %x) {
 ; RV32:       # %bb.0:
 ; RV32-NEXT:    vsetivli zero, 16, e64, m8, ta, mu
 ; RV32-NEXT:    vle64.v v8, (a0)
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 8
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 4
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 2
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
 ; RV32-NEXT:    vrgather.vi v16, v8, 1
 ; RV32-NEXT:    vmul.vv v8, v8, v16
@@ -7462,11 +7602,17 @@ define i64 @vreduce_mul_v16i64(<16 x i64>* %x) {
 ; RV64:       # %bb.0:
 ; RV64-NEXT:    vsetivli zero, 16, e64, m8, ta, mu
 ; RV64-NEXT:    vle64.v v8, (a0)
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 8
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 4
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 2
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
 ; RV64-NEXT:    vrgather.vi v16, v8, 1
 ; RV64-NEXT:    vmul.vv v8, v8, v16
@@ -7487,17 +7633,23 @@ define i64 @vreduce_mul_v32i64(<32 x i64>* %x) {
 ; RV32-NEXT:    addi a0, a0, 128
 ; RV32-NEXT:    vle64.v v16, (a0)
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 8
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 4
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 2
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
 ; RV32-NEXT:    vrgather.vi v16, v8, 1
 ; RV32-NEXT:    vmul.vv v8, v8, v16
 ; RV32-NEXT:    vsetivli zero, 0, e32, m8, ta, mu
 ; RV32-NEXT:    vmv.x.s a0, v8
-; RV32-NEXT:    vsetivli zero, 1, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 1, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v8, v8, 1
 ; RV32-NEXT:    vmv.x.s a1, v8
 ; RV32-NEXT:    ret
@@ -7509,11 +7661,17 @@ define i64 @vreduce_mul_v32i64(<32 x i64>* %x) {
 ; RV64-NEXT:    addi a0, a0, 128
 ; RV64-NEXT:    vle64.v v16, (a0)
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 8
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 4
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 2
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
 ; RV64-NEXT:    vrgather.vi v16, v8, 1
 ; RV64-NEXT:    vmul.vv v8, v8, v16
@@ -7540,17 +7698,23 @@ define i64 @vreduce_mul_v64i64(<64 x i64>* %x) nounwind {
 ; RV32-NEXT:    vmul.vv v16, v24, v16
 ; RV32-NEXT:    vmul.vv v8, v8, v0
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 8
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 4
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v16, v8, 2
+; RV32-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vmul.vv v8, v8, v16
 ; RV32-NEXT:    vrgather.vi v16, v8, 1
 ; RV32-NEXT:    vmul.vv v8, v8, v16
 ; RV32-NEXT:    vsetivli zero, 0, e32, m8, ta, mu
 ; RV32-NEXT:    vmv.x.s a0, v8
-; RV32-NEXT:    vsetivli zero, 1, e32, m8, ta, mu
+; RV32-NEXT:    vsetivli zero, 1, e32, m8, tu, mu
 ; RV32-NEXT:    vslidedown.vi v8, v8, 1
 ; RV32-NEXT:    vmv.x.s a1, v8
 ; RV32-NEXT:    ret
@@ -7568,11 +7732,17 @@ define i64 @vreduce_mul_v64i64(<64 x i64>* %x) nounwind {
 ; RV64-NEXT:    vmul.vv v16, v24, v16
 ; RV64-NEXT:    vmul.vv v8, v8, v0
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 8
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 4
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, tu, mu
 ; RV64-NEXT:    vslidedown.vi v16, v8, 2
+; RV64-NEXT:    vsetvli zero, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vmul.vv v8, v8, v16
 ; RV64-NEXT:    vrgather.vi v16, v8, 1
 ; RV64-NEXT:    vmul.vv v8, v8, v16
