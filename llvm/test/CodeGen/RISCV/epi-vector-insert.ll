@@ -8,7 +8,7 @@ define <vscale x 1 x i64> @insert_nxv1i64(<vscale x 1 x i64> %merge, i64 %e, i64
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vmv.s.x v9, a0
 ; CHECK-NEXT:    addi a0, a1, 1
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v9, a1
 ; CHECK-NEXT:    ret
 {
@@ -22,7 +22,7 @@ define <vscale x 2 x i32> @insert_nxv2i32(<vscale x 2 x i32> %merge, i32 %e, i64
 ; CHECK-NEXT:    vsetvli a2, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv.s.x v9, a0
 ; CHECK-NEXT:    addi a0, a1, 1
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v9, a1
 ; CHECK-NEXT:    ret
 {
@@ -36,7 +36,7 @@ define <vscale x 2 x i64> @insert_nxv2i64(<vscale x 2 x i64> %merge, i64 %e, i64
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vmv.s.x v10, a0
 ; CHECK-NEXT:    addi a0, a1, 1
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v10, a1
 ; CHECK-NEXT:    ret
 {
@@ -50,7 +50,7 @@ define <vscale x 1 x double> @insert_nxv1f64(<vscale x 1 x double> %merge, doubl
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmv.s.f v9, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
 {
@@ -64,7 +64,7 @@ define <vscale x 2 x float> @insert_nxv2f32(<vscale x 2 x float> %merge, float %
 ; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmv.s.f v9, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
-; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e32, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v9, a0
 ; CHECK-NEXT:    ret
 {
@@ -78,7 +78,7 @@ define <vscale x 2 x double> @insert_nxv2f64(<vscale x 2 x double> %merge, doubl
 ; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
 ; CHECK-NEXT:    vfmv.s.f v10, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
-; CHECK-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m2, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
 {
@@ -92,7 +92,7 @@ define <vscale x 4 x float> @insert_nxv4f32(<vscale x 4 x float> %merge, float %
 ; CHECK-NEXT:    vsetvli a1, zero, e32, m2, ta, mu
 ; CHECK-NEXT:    vfmv.s.f v10, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
-; CHECK-NEXT:    vsetvli zero, a1, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e32, m2, tu, mu
 ; CHECK-NEXT:    vslideup.vx v8, v10, a0
 ; CHECK-NEXT:    ret
 {

@@ -155,7 +155,7 @@ define <vscale x 32 x i32> @vsext_nxv32i8_nxv32i32(<vscale x 32 x i8> %a, <vscal
 ; CHECK-NEXT:    li a2, 0
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    srli a4, a1, 2
-; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    sub a3, a0, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a4

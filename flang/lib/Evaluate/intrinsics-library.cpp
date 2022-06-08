@@ -16,6 +16,7 @@
 #include "host.h"
 #include "flang/Common/static-multimap-view.h"
 #include "flang/Evaluate/expression.h"
+#include <cfloat>
 #include <cmath>
 #include <complex>
 #include <functional>
@@ -325,8 +326,7 @@ template <> struct HostRuntimeLibrary<double, LibraryVersion::LibmExtensions> {
 };
 
 #ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
-#if !defined(__PPC__) || defined(__LONG_DOUBLE_IEEE128__)
-// TODO: use HostTypeExists instead?
+#if LDBL_MANT_DIG == 80 || LDBL_MANT_DIG == 113
 template <>
 struct HostRuntimeLibrary<long double, LibraryVersion::LibmExtensions> {
   using F = FuncPointer<long double, long double>;
@@ -342,7 +342,7 @@ struct HostRuntimeLibrary<long double, LibraryVersion::LibmExtensions> {
   static constexpr HostRuntimeMap map{table};
   static_assert(map.Verify(), "map must be sorted");
 };
-#endif // !defined(__PPC__) || defined(__LONG_DOUBLE_IEEE128__)
+#endif // LDBL_MANT_DIG == 80 || LDBL_MANT_DIG == 113
 #endif // FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #endif
 

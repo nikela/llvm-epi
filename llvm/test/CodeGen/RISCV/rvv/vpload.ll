@@ -457,7 +457,7 @@ define <vscale x 16 x double> @vpload_nxv16f64(<vscale x 16 x double>* %ptr, <vs
 ; CHECK-NEXT:    li a3, 0
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    srli a5, a2, 3
-; CHECK-NEXT:    vsetvli a4, zero, e8, mf4, ta, mu
+; CHECK-NEXT:    vsetvli a4, zero, e8, mf4, tu, mu
 ; CHECK-NEXT:    sub a4, a1, a2
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a5
 ; CHECK-NEXT:    bltu a1, a4, .LBB37_2
@@ -510,7 +510,7 @@ define <vscale x 16 x double> @vpload_nxv17f64(<vscale x 17 x double>* %ptr, <vs
 ; CHECK-NEXT:  .LBB38_4:
 ; CHECK-NEXT:    li a7, 0
 ; CHECK-NEXT:    srli t0, a3, 3
-; CHECK-NEXT:    vsetvli t1, zero, e8, mf4, ta, mu
+; CHECK-NEXT:    vsetvli t1, zero, e8, mf4, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v0, v8, t0
 ; CHECK-NEXT:    slli t0, a3, 3
 ; CHECK-NEXT:    add t0, a0, t0
@@ -523,7 +523,7 @@ define <vscale x 16 x double> @vpload_nxv17f64(<vscale x 17 x double>* %ptr, <vs
 ; CHECK-NEXT:  # %bb.5:
 ; CHECK-NEXT:    mv a7, t0
 ; CHECK-NEXT:  .LBB38_6:
-; CHECK-NEXT:    vsetvli a2, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    vslidedown.vx v0, v8, a6
 ; CHECK-NEXT:    add a2, a0, a5
 ; CHECK-NEXT:    bltu a7, a3, .LBB38_8

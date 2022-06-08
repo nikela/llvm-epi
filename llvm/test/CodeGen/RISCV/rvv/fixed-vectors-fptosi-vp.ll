@@ -318,7 +318,7 @@ define <32 x i64> @vfptosi_v32i64_v32f64(<32 x double> %va, <32 x i1> %m, i32 ze
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vmv1r.v v24, v0
 ; CHECK-NEXT:    li a1, 0
-; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
+; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
 ; CHECK-NEXT:    addi a2, a0, -16
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 2
 ; CHECK-NEXT:    bltu a0, a2, .LBB25_2
