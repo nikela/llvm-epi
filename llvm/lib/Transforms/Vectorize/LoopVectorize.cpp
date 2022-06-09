@@ -1701,11 +1701,6 @@ public:
     Scalars.clear();
   }
 
-  /// Determines if this scalable UserVF factors must be ignored because it
-  /// cannot be mapped to the LMUL values we currently support.
-  /// FIXME: EPI specific.
-  bool isValidScalableUserVF(ElementCount UserVF);
-
 private:
   unsigned NumPredStores = 0;
 
@@ -5397,20 +5392,6 @@ LoopVectorizationCostModel::getMaxLegalScalableVF(unsigned MaxSafeElements) {
   return MaxScalableVF;
 }
 
-bool LoopVectorizationCostModel::isValidScalableUserVF(ElementCount UserVF) {
-  unsigned SmallestType, WidestType;
-  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-
-  if (UserVF.isScalable() && UserVF.isNonZero()) {
-    unsigned LMULVal =
-        (WidestType * UserVF.getKnownMinValue()) / TTI.getMaxElementWidth();
-    if (LMULVal == 0 || LMULVal > 8)
-      return false;
-  }
-
-  return true;
-}
-
 FixedScalableVFPair
 LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     unsigned ConstTripCount, ElementCount UserVF, bool FoldTailByMasking) {
@@ -5422,7 +5403,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
                               !ForceTargetSupportsScalableVectors;
   if (IgnoreScalableUserVF) {
     LLVM_DEBUG(
-        dbgs() << "LV: Ignoring UserVF=" << UserVF
+        dbgs() << "LV: Ignoring VF=" << UserVF
                << " because target does not support scalable vectors.\n");
     ORE->emit([&]() {
       return OptimizationRemarkAnalysis(DEBUG_TYPE, "IgnoreScalableUserVF",
@@ -5433,42 +5414,17 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     });
   }
 
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    if (!canVectorizeReductions(UserVF)) {
-      LLVM_DEBUG(dbgs() << "LV: Ignoring UserVF=" << UserVF
-                        << " because it cannot vectorize reductions\n");
-      IgnoreScalableUserVF = true;
-    }
-  }
-
-  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
-  unsigned SmallestType, WidestType;
-  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
-
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
-      !isValidScalableUserVF(UserVF)) {
-    LLVM_DEBUG(
-        dbgs()
-        << "LV: Ignoring UserVF=" << UserVF
-        << " because it cannot be mapped to a valid non-fractional LMUL\n");
-    IgnoreScalableUserVF = true;
-  }
-
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    if (!Legal->isSafeForAnyVectorWidth()) {
-      LLVM_DEBUG(dbgs() << "LV: Ignoring UserVF=" << UserVF
-                        << " because it is not safe for any vector width\n");
-    }
-    IgnoreScalableUserVF = true;
-  }
-
   // Beyond this point two scenarios are handled. If UserVF isn't specified
   // then a suitable VF is chosen. If UserVF is specified and there are
   // dependencies, check if it's legal. However, if a UserVF is specified and
   // there are no dependencies, then there's nothing to do.
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    LLVM_DEBUG(dbgs() << "LV: Using UserVF=" << UserVF
-                      << " because it is feasible\n");
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
+      !canVectorizeReductions(UserVF)) {
+    IgnoreScalableUserVF = true;
+  }
+
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
+      Legal->isSafeForAnyVectorWidth()) {
     return UserVF;
   }
 
@@ -5481,8 +5437,12 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
         "found in this loop.",
         "ScalableVFUnfeasible", ORE, TheLoop);
     return FixedScalableVFPair::getNone();
+    ;
   }
 
+  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
+  unsigned SmallestType, WidestType;
+  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
   unsigned WidestRegister =
       TTI.getRegisterBitWidth(TargetTransformInfo::RGK_ScalableVector)
           .getKnownMinValue();
@@ -8422,9 +8382,7 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
 
   ElementCount MaxUserVF =
       UserVF.isScalable() ? MaxFactors.ScalableVF : MaxFactors.FixedVF;
-  bool UserVFIsLegal = ElementCount::isKnownLE(UserVF, MaxUserVF)
-    /* FIXME - EPI specific */
-    && CM.isValidScalableUserVF(UserVF);
+  bool UserVFIsLegal = ElementCount::isKnownLE(UserVF, MaxUserVF);
   if (!UserVF.isZero() && UserVFIsLegal) {
     assert(isPowerOf2_32(UserVF.getKnownMinValue()) &&
            "VF needs to be a power of two");
@@ -10624,14 +10582,19 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
   std::tie(SmallestType, WidestType) = Cost->getSmallestAndWidestTypes();
   const std::map<unsigned, unsigned> SEWArgMap = {
       {8, 0}, {16, 1}, {32, 2}, {64, 3}};
-  const std::map<unsigned, unsigned> LMULArgMap = {
-      {1, 0}, {2, 1}, {4, 2}, {8, 3}};
+  const std::map<int, unsigned> LMULArgMap = {
+      {1, 0}, {2, 1}, {4, 2}, {8, 3},
+      // Fractional LMUL (-x means LMUL=1/x)
+      {-8, 5}, {-4, 6}, {-2, 7}};
   assert(SEWArgMap.find(WidestType) != SEWArgMap.end() &&
          SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
          "Cannot set vector length: Unsupported type");
   SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  unsigned LMULVal =
+  int LMULVal =
       (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
+  // This might be fractional.
+  if (LMULVal == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
+    LMULVal = -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
   LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
