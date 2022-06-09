@@ -781,6 +781,9 @@ static void InitializePredefinedMacros(const TargetInfo &TI,
     Builder.defineMacro("__epi_m2", "1");
     Builder.defineMacro("__epi_m4", "2");
     Builder.defineMacro("__epi_m8", "3");
+    Builder.defineMacro("__epi_mf8", "5");
+    Builder.defineMacro("__epi_mf4", "6");
+    Builder.defineMacro("__epi_mf2", "7");
 
     // NonTemporal flag
     Builder.defineMacro("__epi_nt", "0x200UL");
