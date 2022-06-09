@@ -10588,6 +10588,12 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
   SEW = SEW ? SEW : SEWArgMap.at(WidestType);
   unsigned LMULVal =
       (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
+  // Clamp values of LMUL to valid values.
+  // FIXME - Ideally we should be able to use fractional LMUL.
+  if (!LMULVal)
+    LMULVal = 1;
+  if (LMULVal > 8)
+    LMULVal = 8;
   LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
