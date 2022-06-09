@@ -5403,7 +5403,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
                               !ForceTargetSupportsScalableVectors;
   if (IgnoreScalableUserVF) {
     LLVM_DEBUG(
-        dbgs() << "LV: Ignoring VF=" << UserVF
+        dbgs() << "LV: Ignoring UserVF=" << UserVF
                << " because target does not support scalable vectors.\n");
     ORE->emit([&]() {
       return OptimizationRemarkAnalysis(DEBUG_TYPE, "IgnoreScalableUserVF",
@@ -5414,16 +5414,48 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     });
   }
 
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
+    if (!canVectorizeReductions(UserVF)) {
+      LLVM_DEBUG(dbgs() << "LV: Ignoring UserVF=" << UserVF
+                        << " because it cannot vectorize reductions\n");
+      IgnoreScalableUserVF = true;
+    }
+  }
+
+
+  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
+  unsigned SmallestType, WidestType;
+  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
+
+  // FIXME - This should be isolated because this is EPI specific.
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
+    unsigned LMULVal =
+        (WidestType * UserVF.getKnownMinValue()) / TTI.getMaxElementWidth();
+    if (LMULVal == 0 || LMULVal > 8) {
+      LLVM_DEBUG(
+          dbgs()
+          << "LV: Ignoring UserVF=" << UserVF
+          << " because it cannot be mapped to a valid non-fractional LMUL\n");
+      IgnoreScalableUserVF = true;
+    }
+  }
+
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
+    if (!Legal->isSafeForAnyVectorWidth()) {
+      LLVM_DEBUG(dbgs() << "LV: Ignoring UserVF=" << UserVF
+                        << " because it is not safe for any vector width\n");
+    }
+    IgnoreScalableUserVF = true;
+  }
+
   // Beyond this point two scenarios are handled. If UserVF isn't specified
   // then a suitable VF is chosen. If UserVF is specified and there are
   // dependencies, check if it's legal. However, if a UserVF is specified and
   // there are no dependencies, then there's nothing to do.
   if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    if (!canVectorizeReductions(UserVF))
-      return computeFeasibleMaxVF(ConstTripCount, UserVF, FoldTailByMasking);
-
-    if (Legal->isSafeForAnyVectorWidth())
-      return UserVF;
+    LLVM_DEBUG(dbgs() << "LV: Using UserVF=" << UserVF
+                      << " because it is feasible\n");
+    return UserVF;
   }
 
   if (Hints->isFixedVectorizationDisabled() &&
@@ -5435,12 +5467,8 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
         "found in this loop.",
         "ScalableVFUnfeasible", ORE, TheLoop);
     return FixedScalableVFPair::getNone();
-    ;
   }
 
-  MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
-  unsigned SmallestType, WidestType;
-  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
   unsigned WidestRegister =
       TTI.getRegisterBitWidth(TargetTransformInfo::RGK_ScalableVector)
           .getKnownMinValue();
