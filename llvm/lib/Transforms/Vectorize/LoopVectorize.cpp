@@ -1701,6 +1701,11 @@ public:
     Scalars.clear();
   }
 
+  /// Determines if this scalable UserVF factors must be ignored because it
+  /// cannot be mapped to the LMUL values we currently support.
+  /// FIXME: EPI specific.
+  bool isValidScalableUserVF(ElementCount UserVF);
+
 private:
   unsigned NumPredStores = 0;
 
@@ -5392,6 +5397,20 @@ LoopVectorizationCostModel::getMaxLegalScalableVF(unsigned MaxSafeElements) {
   return MaxScalableVF;
 }
 
+bool LoopVectorizationCostModel::isValidScalableUserVF(ElementCount UserVF) {
+  unsigned SmallestType, WidestType;
+  std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
+
+  if (UserVF.isScalable() && UserVF.isNonZero()) {
+    unsigned LMULVal =
+        (WidestType * UserVF.getKnownMinValue()) / TTI.getMaxElementWidth();
+    if (LMULVal == 0 || LMULVal > 8)
+      return false;
+  }
+
+  return true;
+}
+
 FixedScalableVFPair
 LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     unsigned ConstTripCount, ElementCount UserVF, bool FoldTailByMasking) {
@@ -5422,22 +5441,17 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
     }
   }
 
-
   MinBWs = computeMinimumValueSizes(TheLoop->getBlocks(), *DB, &TTI);
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = getSmallestAndWidestTypes();
 
-  // FIXME - This should be isolated because this is EPI specific.
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    unsigned LMULVal =
-        (WidestType * UserVF.getKnownMinValue()) / TTI.getMaxElementWidth();
-    if (LMULVal == 0 || LMULVal > 8) {
-      LLVM_DEBUG(
-          dbgs()
-          << "LV: Ignoring UserVF=" << UserVF
-          << " because it cannot be mapped to a valid non-fractional LMUL\n");
-      IgnoreScalableUserVF = true;
-    }
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
+      !isValidScalableUserVF(UserVF)) {
+    LLVM_DEBUG(
+        dbgs()
+        << "LV: Ignoring UserVF=" << UserVF
+        << " because it cannot be mapped to a valid non-fractional LMUL\n");
+    IgnoreScalableUserVF = true;
   }
 
   if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
@@ -8408,7 +8422,9 @@ LoopVectorizationPlanner::plan(ElementCount UserVF, unsigned UserIC) {
 
   ElementCount MaxUserVF =
       UserVF.isScalable() ? MaxFactors.ScalableVF : MaxFactors.FixedVF;
-  bool UserVFIsLegal = ElementCount::isKnownLE(UserVF, MaxUserVF);
+  bool UserVFIsLegal = ElementCount::isKnownLE(UserVF, MaxUserVF)
+    /* FIXME - EPI specific */
+    && CM.isValidScalableUserVF(UserVF);
   if (!UserVF.isZero() && UserVFIsLegal) {
     assert(isPowerOf2_32(UserVF.getKnownMinValue()) &&
            "VF needs to be a power of two");
