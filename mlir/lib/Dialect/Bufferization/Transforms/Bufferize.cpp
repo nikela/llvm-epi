@@ -180,7 +180,6 @@ struct OneShotBufferizePass
     if (!options) {
       // Make new bufferization options if none were provided when creating the
       // pass.
-      opt.dropEquivalentFuncResults = dropEquivalentFuncResults;
       opt.allowReturnAllocs = allowReturnAllocs;
       opt.allowUnknownOps = allowUnknownOps;
       opt.alwaysAliasingWithDest = alwaysAliasingWithDest;
@@ -191,7 +190,6 @@ struct OneShotBufferizePass
       opt.printConflicts = printConflicts;
       opt.testAnalysisOnly = testAnalysisOnly;
       opt.bufferizeFunctionBoundaries = bufferizeFunctionBoundaries;
-      opt.promoteBufferResultsToOutParams = promoteBufferResultsToOutParams;
       opt.unknownTypeConversion = parseLayoutMapOption(unknownTypeConversion);
 
       OpFilter::Entry::FilterFn filterFn =
@@ -291,18 +289,6 @@ static bool hasTensorSemantics(Operation *op) {
   return hasTensorResult || hasTensorOperand;
 }
 
-LogicalResult
-bufferization::finalizeBuffers(Operation *op,
-                               const BufferizationOptions &options) {
-  // Promote returned buffers to "out" parameters.
-  // TODO: Pass options to support custom dealloc ops.
-  if (options.promoteBufferResultsToOutParams && isa<ModuleOp>(op) &&
-      failed(promoteBufferResultsToOutParams(cast<ModuleOp>(op))))
-    return failure();
-
-  return success();
-}
-
 LogicalResult bufferization::bufferizeOp(Operation *op,
                                          const AnalysisState &analysisState) {
   // Catch incorrect API usage.
@@ -313,8 +299,6 @@ LogicalResult bufferization::bufferizeOp(Operation *op,
 
   BufferizationState bufferizationState(analysisState);
   if (failed(bufferizeOp(op, bufferizationState)))
-    return failure();
-  if (failed(finalizeBuffers(op, analysisState.getOptions())))
     return failure();
   return success();
 }
