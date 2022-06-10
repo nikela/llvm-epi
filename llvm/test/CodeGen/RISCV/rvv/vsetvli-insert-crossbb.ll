@@ -864,6 +864,31 @@ if.end:
   ret <vscale x 2 x i32> %b
 }
 
+define <vscale x 1 x double> @compat_store_consistency(i1 %cond, <vscale x 1 x double> %a, <vscale x 1 x double> %b, <vscale x 1 x double>* %p1, <vscale x 1 x float> %c, <vscale x 1 x float>* %p2) {
+; CHECK-LABEL: compat_store_consistency:
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    andi a0, a0, 1
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vfadd.vv v8, v8, v9
+; CHECK-NEXT:    vs1r.v v8, (a1)
+; CHECK-NEXT:    beqz a0, .LBB19_2
+; CHECK-NEXT:  # %bb.1: # %if.then
+; CHECK-NEXT:    vse32.v v10, (a2)
+; CHECK-NEXT:  .LBB19_2: # %if.end
+; CHECK-NEXT:    ret
+entry:
+  %res = fadd <vscale x 1 x double> %a, %b
+  store <vscale x 1 x double> %res, <vscale x 1 x double>* %p1
+  br i1 %cond, label %if.then, label %if.end
+
+if.then:                                          ; preds = %entry
+  store <vscale x 1 x float> %c, <vscale x 1 x float>* %p2
+  br label %if.end
+
+if.end:                                           ; preds = %if.else, %if.then
+  ret <vscale x 1 x double> %res
+}
+
 declare i64 @llvm.riscv.vsetvlimax.i64(i64, i64)
 declare <vscale x 1 x double> @llvm.riscv.vle.nxv1f64.i64(<vscale x 1 x double>, <vscale x 1 x double>* nocapture, i64)
 declare <vscale x 1 x double> @llvm.riscv.vfadd.nxv1f64.nxv1f64.i64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x double>, i64)

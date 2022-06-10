@@ -155,6 +155,7 @@ public:
   bool DisableUnrollLoops;
   bool CallGraphProfile;
   bool SLPVectorize;
+  bool WFVVectorize;
   bool LoopVectorize;
   bool LoopsInterleaved;
   bool RerollLoops;

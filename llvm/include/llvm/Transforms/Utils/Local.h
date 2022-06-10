@@ -242,7 +242,7 @@ CallInst *changeToCall(InvokeInst *II, DomTreeUpdater *DTU = nullptr);
 /// Inserts a llvm.dbg.value intrinsic before a store to an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.
 void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                     StoreInst *SI, DIBuilder &Builder);
+                                     Instruction *SI, DIBuilder &Builder);
 
 /// Inserts a llvm.dbg.value intrinsic before a load of an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.

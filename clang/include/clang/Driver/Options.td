@@ -2178,6 +2178,8 @@ def fms_memptr_rep_EQ : Joined<["-"], "fms-memptr-rep=">, Group<f_Group>, Flags<
   NormalizedValues<["PPTMK_FullGeneralitySingleInheritance", "PPTMK_FullGeneralityMultipleInheritance",
                     "PPTMK_FullGeneralityVirtualInheritance"]>,
   MarshallingInfoEnum<LangOpts<"MSPointerToMemberRepresentationMethod">, "PPTMK_BestCase">;
+def fms_kernel : Flag<["-"], "fms-kernel">, Group<f_Group>, Flags<[CC1Option, NoDriverOption]>,
+  MarshallingInfoFlag<LangOpts<"Kernel">>;
 // __declspec is enabled by default for the PS4 by the driver, and also
 // enabled for Microsoft Extensions or Borland Extensions, here.
 //
@@ -2914,13 +2916,6 @@ def fvisibility_ms_compat : Flag<["-"], "fvisibility-ms-compat">, Group<f_Group>
 def fvisibility_global_new_delete_hidden : Flag<["-"], "fvisibility-global-new-delete-hidden">, Group<f_Group>,
   HelpText<"Give global C++ operator new and delete declarations hidden visibility">, Flags<[CC1Option]>,
   MarshallingInfoFlag<LangOpts<"GlobalAllocationFunctionVisibilityHidden">>;
-def mdefault_visibility_export_mapping_EQ : Joined<["-"], "mdefault-visibility-export-mapping=">,
-  Values<"none,explicit,all">,
-  NormalizedValuesScope<"LangOptions::DefaultVisiblityExportMapping">,
-  NormalizedValues<["None", "Explicit", "All"]>,
-  HelpText<"Mapping between default visibility and export">,
-  Group<m_Group>, Flags<[CC1Option]>,
-  MarshallingInfoEnum<LangOpts<"DefaultVisibilityExportMapping">,"None">;
 defm new_infallible : BoolFOption<"new-infallible",
   LangOpts<"NewInfallible">, DefaultFalse,
   PosFlag<SetTrue, [], "Enable">, NegFlag<SetFalse, [], "Disable">,
@@ -5352,6 +5347,9 @@ def vectorize_loops : Flag<["-"], "vectorize-loops">,
 def vectorize_slp : Flag<["-"], "vectorize-slp">,
   HelpText<"Run the SLP vectorization passes">,
   MarshallingInfoFlag<CodeGenOpts<"VectorizeSLP">>;
+def vectorize_wfv : Flag<["-"], "vectorize-wfv">,
+  HelpText<"Run the WFV vectorization passes">,
+  MarshallingInfoFlag<CodeGenOpts<"VectorizeWFV">>;
 def dependent_lib : Joined<["--"], "dependent-lib=">,
   HelpText<"Add dependent library">,
   MarshallingInfoStringVector<CodeGenOpts<"DependentLibraries">>;

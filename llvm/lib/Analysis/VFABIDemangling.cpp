@@ -45,6 +45,15 @@ ParseRet tryParseISA(StringRef &MangledName, VFISAKind &ISA) {
   return ParseRet::OK;
 }
 
+static bool ISAHasVL(VFISAKind ISA) {
+  switch (ISA) {
+  default:
+    return false;
+  case VFISAKind::EPI:
+    return true;
+  }
+}
+
 /// Extracts the `<mask>` information from the mangled string, and
 /// sets `IsMasked` accordingly. The input string `MangledName` is
 /// left unmodified.
@@ -318,7 +327,8 @@ ElementCount getECFromSignature(FunctionType *Signature) {
 // Format of the ABI name:
 // _ZGV<isa><mask><vlen><parameters>_<scalarname>[(<redirection>)]
 Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
-                                            const Module &M) {
+                                            const Module &M,
+                                            bool RequireDeclaration) {
   const StringRef OriginalName = MangledName;
   // Assume there is no custom name <redirection>, and therefore the
   // vector name consists of
@@ -334,6 +344,8 @@ Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
   VFISAKind ISA;
   if (tryParseISA(MangledName, ISA) != ParseRet::OK)
     return None;
+
+  bool HasVL = ISAHasVL(ISA);
 
   // Extract <mask>.
   bool IsMasked;
@@ -415,6 +427,11 @@ Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
     Parameters.push_back({Pos, VFParamKind::GlobalPredicate});
   }
 
+  if (HasVL) {
+    const unsigned Pos = Parameters.size();
+    Parameters.push_back({Pos, VFParamKind::GlobalVL});
+  }
+
   // Asserts for parameters of type `VFParamKind::GlobalPredicate`, as
   // prescribed by the Vector Function ABI specifications supported by
   // this parser:
@@ -425,9 +442,22 @@ Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
         return PK.ParamKind == VFParamKind::GlobalPredicate;
       });
   assert(NGlobalPreds < 2 && "Cannot have more than one global predicate.");
-  if (NGlobalPreds)
-    assert(Parameters.back().ParamKind == VFParamKind::GlobalPredicate &&
-           "The global predicate must be the last parameter");
+
+  const auto NGlobalVLs = std::count_if(
+      Parameters.begin(), Parameters.end(), [](const VFParameter PK) {
+        return PK.ParamKind == VFParamKind::GlobalVL;
+      });
+  assert(NGlobalVLs < 2 && "Cannot have more than one global VL.");
+  if (NGlobalPreds) {
+    assert((Parameters.end() - (NGlobalVLs + 1))->ParamKind ==
+               VFParamKind::GlobalPredicate &&
+           "The global predicate must be the last parameter or the one before "
+           "the last if there is GlobalVL");
+  }
+  if (NGlobalVLs) {
+    assert((Parameters.back().ParamKind == VFParamKind::GlobalVL) &&
+           "The global VL must be the last parameter");
+  }
 
   // Adjust the VF for signatures defined as scalable through the use of "x" for
   // <vlen>. The EC.Min is not encoded in the name of the function, but it is
@@ -451,7 +481,7 @@ Optional<VFInfo> VFABI::tryDemangleForVFABI(StringRef MangledName,
   // present in the module.
   if (VF == 0)
     return None;
-  if (!M.getFunction(VectorName))
+  if (RequireDeclaration && !M.getFunction(VectorName))
     return None;
 
   const VFShape Shape({ElementCount::get(VF, IsScalable), Parameters});

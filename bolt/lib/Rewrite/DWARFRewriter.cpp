@@ -102,12 +102,11 @@ extern cl::OptionCategory BoltCategory;
 extern cl::opt<unsigned> Verbosity;
 extern cl::opt<std::string> OutputFilename;
 
-static cl::opt<bool>
-KeepARanges("keep-aranges",
-  cl::desc("keep or generate .debug_aranges section if .gdb_index is written"),
-  cl::ZeroOrMore,
-  cl::Hidden,
-  cl::cat(BoltCategory));
+static cl::opt<bool> KeepARanges(
+    "keep-aranges",
+    cl::desc(
+        "keep or generate .debug_aranges section if .gdb_index is written"),
+    cl::Hidden, cl::cat(BoltCategory));
 
 static cl::opt<bool>
 DeterministicDebugInfo("deterministic-debuginfo",
@@ -1539,7 +1538,7 @@ void DWARFRewriter::writeDWP(
   writeIndex(*Streamer.get(), MCOFI.getDwarfCUIndexSection(),
              ContributionOffsets, IndexEntries, IndexVersion);
 
-  Streamer->Finish();
+  Streamer->finish();
   Out->keep();
 }
 
@@ -1638,7 +1637,7 @@ void DWARFRewriter::writeDWOFiles(
               RangeListssWriter))
         Streamer->emitBytes(*OutData);
     }
-    Streamer->Finish();
+    Streamer->finish();
     TempOut->keep();
   }
 }

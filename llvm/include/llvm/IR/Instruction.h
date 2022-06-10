@@ -679,6 +679,12 @@ public:
   /// llvm.strip.invariant.group.
   bool isLaunderOrStripInvariantGroup() const;
 
+  /// Returns true if this llvm.vp.load.
+  bool isVPLoad() const;
+
+  /// Returns true if this llvm.vp.store.
+  bool isVPStore() const;
+
   /// Return true if the instruction is a DbgInfoIntrinsic or PseudoProbeInst.
   bool isDebugOrPseudoInst() const;
 

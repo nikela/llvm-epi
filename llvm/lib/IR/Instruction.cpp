@@ -732,6 +732,20 @@ bool Instruction::isLaunderOrStripInvariantGroup() const {
          ID == Intrinsic::strip_invariant_group;
 }
 
+bool Instruction::isVPLoad() const {
+  if (auto *II = dyn_cast<IntrinsicInst>(this))
+    return II->getIntrinsicID() == Intrinsic::vp_load;
+
+  return false;
+}
+
+bool Instruction::isVPStore() const {
+  if (auto *II = dyn_cast<IntrinsicInst>(this))
+    return II->getIntrinsicID() == Intrinsic::vp_store;
+
+  return false;
+}
+
 bool Instruction::isDebugOrPseudoInst() const {
   return isa<DbgInfoIntrinsic>(this) || isa<PseudoProbeInst>(this);
 }

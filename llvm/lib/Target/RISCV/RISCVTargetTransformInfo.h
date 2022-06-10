@@ -281,6 +281,18 @@ public:
     return isLegalMaskedGatherScatter(DataType, Alignment);
   }
 
+  bool forceScalarizeMaskedGather(VectorType *VTy, Align Alignment) {
+    // Scalarize masked gather for RV64 if EEW=64 indices aren't supported.
+    return ST->is64Bit() && !ST->hasVInstructionsI64();
+  }
+
+  bool forceScalarizeMaskedScatter(VectorType *VTy, Align Alignment) {
+    // Scalarize masked scatter for RV64 if EEW=64 indices aren't supported.
+    return ST->is64Bit() && !ST->hasVInstructionsI64();
+  }
+
+  /// \returns How the target needs this vector-predicated operation to be
+  /// transformed.
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
     // FIXME: we may want to be more selective.
@@ -324,36 +336,80 @@ public:
     return VF == 1 ? 1 : ST->getMaxInterleaveFactor();
   }
 
+  enum RISCVRegisterClass { GPRRC, FPRRC, VRRC };
+
   unsigned getNumberOfRegistersEPI(unsigned ClassID) const {
-    if (ClassID == 1 && ST->hasVInstructions())
-      // Although there are 32 vector registers, v0 is special in that it is
-      // the only register that can be used to hold a mask. We conservatively
-      // return 31 as the number of usable vector registers.
-      return 31;
-    else if (ClassID == 0)
+    switch (ClassID) {
+    case RISCVRegisterClass::GPRRC:
       // Similarly for scalar registers, x0(zero), x1(ra) and x2(sp) are
       // special and we return 29 usable registers.
       return 29;
-    else
+    case RISCVRegisterClass::FPRRC:
+      if (ST->hasStdExtF())
+        return 32;
       return 0;
+    case RISCVRegisterClass::VRRC:
+      // Although there are 32 vector registers, v0 is special in that it is
+      // the only register that can be used to hold a mask. We conservatively
+      // return 31 as the number of usable vector registers.
+      return ST->hasVInstructions() ? 31 : 0;
+    }
+    llvm_unreachable("unknown register class");
   }
 
-  // TODO: We should define RISC-V's own register classes.
-  //       e.g. register class for FPR.
   unsigned getNumberOfRegisters(unsigned ClassID) const {
     if (ST->hasEPI())
       return getNumberOfRegistersEPI(ClassID);
 
-    bool Vector = (ClassID == 1);
-    if (Vector) {
-      if (ST->hasVInstructions())
+    switch (ClassID) {
+    case RISCVRegisterClass::GPRRC:
+      // 31 = 32 GPR - x0 (zero register)
+      // FIXME: Should we exclude fixed registers like SP, TP or GP?
+      return 31;
+    case RISCVRegisterClass::FPRRC:
+      if (ST->hasStdExtF())
         return 32;
       return 0;
+    case RISCVRegisterClass::VRRC:
+      // Although there are 32 vector registers, v0 is special in that it is the
+      // only register that can be used to hold a mask.
+      // FIXME: Should we conservatively return 31 as the number of usable
+      // vector registers?
+      return ST->hasVInstructions() ? 32 : 0;
     }
-    // 31 = 32 GPR - x0 (zero register)
-    // FIXME: Should we exclude fixed registers like SP, TP or GP?
-    return 31;
+    llvm_unreachable("unknown register class");
   }
+
+  unsigned getRegisterClassForType(bool Vector, Type *Ty = nullptr) const {
+    if (Vector)
+      return RISCVRegisterClass::VRRC;
+    if (!Ty)
+      return RISCVRegisterClass::GPRRC;
+
+    Type *ScalarTy = Ty->getScalarType();
+    if ((ScalarTy->isHalfTy() && ST->hasStdExtZfh()) ||
+        (ScalarTy->isFloatTy() && ST->hasStdExtF()) ||
+        (ScalarTy->isDoubleTy() && ST->hasStdExtD())) {
+      return RISCVRegisterClass::FPRRC;
+    }
+
+    return RISCVRegisterClass::GPRRC;
+  }
+
+  const char *getRegisterClassName(unsigned ClassID) const {
+    switch (ClassID) {
+    case RISCVRegisterClass::GPRRC:
+      return "RISCV::GPRRC";
+    case RISCVRegisterClass::FPRRC:
+      return "RISCV::FPRRC";
+    case RISCVRegisterClass::VRRC:
+      return "RISCV::VRRC";
+    }
+    llvm_unreachable("unknown register class");
+  }
+
+  Optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
+                                               IntrinsicInst &II) const;
 };
 
 } // end namespace llvm

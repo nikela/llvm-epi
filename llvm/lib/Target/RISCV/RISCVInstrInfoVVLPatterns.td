@@ -2151,14 +2151,15 @@ foreach vti = !listconcat(AllIntegerVectors, AllFloatVectors) in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEUP_VI_"#vti.LMul.MX)
                 vti.RegClass:$rs3, vti.RegClass:$rs1, uimm5:$rs2,
-                GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                GPR:$vl, vti.Log2SEW, TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
   def : Pat<(vti.Vector (riscv_slideup_vl (vti.Vector vti.RegClass:$rs3),
                                           (vti.Vector vti.RegClass:$rs1),
                                           uimm5:$rs2, (vti.Mask V0),
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEUP_VI_"#vti.LMul.MX#"_MASK")
                 vti.RegClass:$rs3, vti.RegClass:$rs1, uimm5:$rs2,
-                (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                (vti.Mask V0), GPR:$vl, vti.Log2SEW,
+                TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
 
   def : Pat<(vti.Vector (riscv_slideup_vl (vti.Vector vti.RegClass:$rs3),
                                           (vti.Vector vti.RegClass:$rs1),
@@ -2166,14 +2167,15 @@ foreach vti = !listconcat(AllIntegerVectors, AllFloatVectors) in {
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEUP_VX_"#vti.LMul.MX)
                 vti.RegClass:$rs3, vti.RegClass:$rs1, GPR:$rs2,
-                GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                GPR:$vl, vti.Log2SEW, TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
   def : Pat<(vti.Vector (riscv_slideup_vl (vti.Vector vti.RegClass:$rs3),
                                           (vti.Vector vti.RegClass:$rs1),
                                           GPR:$rs2, (vti.Mask V0),
                                           VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEUP_VX_"#vti.LMul.MX#"_MASK")
                 vti.RegClass:$rs3, vti.RegClass:$rs1, GPR:$rs2,
-                (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                (vti.Mask V0), GPR:$vl, vti.Log2SEW,
+                TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
 
   def : Pat<(vti.Vector (riscv_slidedown_vl (vti.Vector vti.RegClass:$rs3),
                                             (vti.Vector vti.RegClass:$rs1),
@@ -2181,14 +2183,15 @@ foreach vti = !listconcat(AllIntegerVectors, AllFloatVectors) in {
                                             VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEDOWN_VI_"#vti.LMul.MX)
                 vti.RegClass:$rs3, vti.RegClass:$rs1, uimm5:$rs2,
-                GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                GPR:$vl, vti.Log2SEW, TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
   def : Pat<(vti.Vector (riscv_slidedown_vl (vti.Vector vti.RegClass:$rs3),
                                             (vti.Vector vti.RegClass:$rs1),
                                             uimm5:$rs2, (vti.Mask V0),
                                             VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEDOWN_VI_"#vti.LMul.MX#"_MASK")
                 vti.RegClass:$rs3, vti.RegClass:$rs1, uimm5:$rs2,
-                (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                (vti.Mask V0), GPR:$vl, vti.Log2SEW,
+                TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
 
   def : Pat<(vti.Vector (riscv_slidedown_vl (vti.Vector vti.RegClass:$rs3),
                                             (vti.Vector vti.RegClass:$rs1),
@@ -2196,14 +2199,15 @@ foreach vti = !listconcat(AllIntegerVectors, AllFloatVectors) in {
                                             VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEDOWN_VX_"#vti.LMul.MX)
                 vti.RegClass:$rs3, vti.RegClass:$rs1, GPR:$rs2,
-                GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                GPR:$vl, vti.Log2SEW, TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
   def : Pat<(vti.Vector (riscv_slidedown_vl (vti.Vector vti.RegClass:$rs3),
                                             (vti.Vector vti.RegClass:$rs1),
                                             GPR:$rs2, (vti.Mask V0),
                                             VLOpFrag)),
             (!cast<Instruction>("PseudoVSLIDEDOWN_VX_"#vti.LMul.MX#"_MASK")
                 vti.RegClass:$rs3, vti.RegClass:$rs1, GPR:$rs2,
-                (vti.Mask V0), GPR:$vl, vti.Log2SEW, TAIL_AGNOSTIC)>;
+                (vti.Mask V0), GPR:$vl, vti.Log2SEW,
+                TAIL_UNDISTURBED_MASK_UNDISTURBED)>;
 }
 
 } // Predicates = [HasVInstructions]

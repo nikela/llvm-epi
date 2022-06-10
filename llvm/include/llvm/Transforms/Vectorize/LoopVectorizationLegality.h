@@ -139,8 +139,9 @@ public:
   void emitRemarkWithHints() const;
 
   ElementCount getWidth() const {
-    return ElementCount::get(Width.Value, (ScalableForceKind)Scalable.Value ==
-                                              SK_PreferScalable);
+    return ElementCount::get(
+        Width.Value, (ScalableForceKind)Scalable.Value == SK_PreferScalable ||
+                         (ScalableForceKind)Scalable.Value == SK_ScalableOnly);
   }
 
   unsigned getInterleave() const {

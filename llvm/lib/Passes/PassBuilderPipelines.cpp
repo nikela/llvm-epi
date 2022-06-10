@@ -124,6 +124,7 @@
 #include "llvm/Transforms/Utils/NameAnonGlobals.h"
 #include "llvm/Transforms/Utils/RelLookupTableConverter.h"
 #include "llvm/Transforms/Utils/SimplifyCFGOptions.h"
+#include "llvm/Transforms/Utils/VecCloneVP.h"
 #include "llvm/Transforms/Vectorize/LoopVectorize.h"
 #include "llvm/Transforms/Vectorize/SLPVectorizer.h"
 #include "llvm/Transforms/Vectorize/VectorCombine.h"
@@ -141,7 +142,7 @@ static cl::opt<InliningAdvisorMode> UseInlineAdvisor(
                           "Use release mode (AOT-compiled model).")));
 
 static cl::opt<bool> EnableSyntheticCounts(
-    "enable-npm-synthetic-counts", cl::init(false), cl::Hidden, cl::ZeroOrMore,
+    "enable-npm-synthetic-counts", cl::Hidden,
     cl::desc("Run synthetic function entry count generation "
              "pass"));
 
@@ -151,8 +152,7 @@ static cl::opt<bool>
                             cl::Hidden,
                             cl::desc("Enable inline deferral during PGO"));
 
-static cl::opt<bool> EnableMemProfiler("enable-mem-prof", cl::init(false),
-                                       cl::Hidden, cl::ZeroOrMore,
+static cl::opt<bool> EnableMemProfiler("enable-mem-prof", cl::Hidden,
                                        cl::desc("Enable memory profiler"));
 
 static cl::opt<bool> EnableModuleInliner("enable-module-inliner",
@@ -160,13 +160,13 @@ static cl::opt<bool> EnableModuleInliner("enable-module-inliner",
                                          cl::desc("Enable module inliner"));
 
 static cl::opt<bool> PerformMandatoryInliningsFirst(
-    "mandatory-inlining-first", cl::init(true), cl::Hidden, cl::ZeroOrMore,
+    "mandatory-inlining-first", cl::init(true), cl::Hidden,
     cl::desc("Perform mandatory inlinings module-wide, before performing "
              "inlining."));
 
 static cl::opt<bool> EnableO3NonTrivialUnswitching(
     "enable-npm-O3-nontrivial-unswitch", cl::init(true), cl::Hidden,
-    cl::ZeroOrMore, cl::desc("Enable non-trivial loop unswitching for -O3"));
+    cl::desc("Enable non-trivial loop unswitching for -O3"));
 
 static cl::opt<bool> EnableEagerlyInvalidateAnalyses(
     "eagerly-invalidate-analyses", cl::init(true), cl::Hidden,
@@ -185,6 +185,7 @@ static cl::opt<bool> EnableMergeFunctions(
 
 PipelineTuningOptions::PipelineTuningOptions() {
   LoopInterleaving = true;
+  WFVVectorization = false;
   LoopVectorization = true;
   SLPVectorization = false;
   LoopUnrolling = true;
@@ -1001,7 +1002,14 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
 
 /// TODO: Should LTO cause any differences to this set of passes?
 void PassBuilder::addVectorPasses(OptimizationLevel Level,
+                                  ModulePassManager &MPM,
                                   FunctionPassManager &FPM, bool IsFullLTO) {
+  // Run the VecCloneVP pass if we want WFV vectorization.
+  // This is caused by #pragma omp declare simd.
+  if (PTO.WFVVectorization) {
+    MPM.addPass(VecCloneVPPass());
+  }
+
   FPM.addPass(LoopVectorizePass(
       LoopVectorizeOptions(!PTO.LoopInterleaving, !PTO.LoopVectorization)));
 
@@ -1028,6 +1036,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
     // of the current iteration.
     FPM.addPass(LoopLoadEliminationPass());
   }
+
   // Cleanup after the loop optimization passes.
   FPM.addPass(InstCombinePass());
 
@@ -1123,6 +1132,11 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
 
   if (IsFullLTO)
     FPM.addPass(InstCombinePass());
+
+  // We need to do a bunch of cleanups for WFV Vectorization.
+  if (PTO.WFVVectorization) {
+    FPM.addPass(PromotePass());
+  }
 }
 
 ModulePassManager
@@ -1227,7 +1241,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // from the TargetLibraryInfo.
   OptimizePM.addPass(InjectTLIMappings());
 
-  addVectorPasses(Level, OptimizePM, /* IsFullLTO */ false);
+  addVectorPasses(Level, MPM, OptimizePM, /* IsFullLTO */ false);
 
   // LoopSink pass sinks instructions hoisted by LICM, which serves as a
   // canonicalization pass that enables other optimizations. As a result,
@@ -1694,7 +1708,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
 
   MainFPM.addPass(LoopDistributePass());
 
-  addVectorPasses(Level, MainFPM, /* IsFullLTO */ true);
+  addVectorPasses(Level, MPM, MainFPM, /* IsFullLTO */ true);
 
   // Run the OpenMPOpt CGSCC pass again late.
   MPM.addPass(

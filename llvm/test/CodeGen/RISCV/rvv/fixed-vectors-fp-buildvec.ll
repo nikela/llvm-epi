@@ -61,6 +61,7 @@ define <4 x float> @hang_when_merging_stores_after_legalization(<8 x float> %x, 
 ; LMULMAX2-NEXT:    addi a0, sp, 24
 ; LMULMAX2-NEXT:    vsetivli zero, 1, e32, m2, ta, mu
 ; LMULMAX2-NEXT:    vse32.v v10, (a0)
+; LMULMAX2-NEXT:    vsetvli zero, zero, e32, m2, tu, mu
 ; LMULMAX2-NEXT:    vslidedown.vi v10, v10, 7
 ; LMULMAX2-NEXT:    addi a0, sp, 28
 ; LMULMAX2-NEXT:    vse32.v v10, (a0)
@@ -117,7 +118,7 @@ define void @buildvec_dominant0_v4f32(<4 x float>* %x) {
 ; CHECK-NEXT:    addi a1, a1, %lo(.LCPI4_0)
 ; CHECK-NEXT:    vlse32.v v8, (a1), zero
 ; CHECK-NEXT:    vmv.s.x v9, zero
-; CHECK-NEXT:    vsetivli zero, 3, e32, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 3, e32, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vi v8, v9, 2
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
@@ -132,7 +133,7 @@ define void @buildvec_dominant1_v4f32(<4 x float>* %x, float %f) {
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vmv.s.x v8, zero
 ; CHECK-NEXT:    vfmv.v.f v9, fa0
-; CHECK-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vi v9, v8, 1
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v9, (a0)
@@ -153,7 +154,7 @@ define void @buildvec_dominant2_v4f32(<4 x float>* %x, float %f) {
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vfmv.s.f v8, ft0
 ; CHECK-NEXT:    vfmv.v.f v9, fa0
-; CHECK-NEXT:    vsetivli zero, 2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 2, e32, m1, tu, mu
 ; CHECK-NEXT:    vslideup.vi v9, v8, 1
 ; CHECK-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v9, (a0)

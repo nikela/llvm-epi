@@ -1126,7 +1126,7 @@ bool llvm::TryToSimplifyUncondBranchFromEmptyBlock(BasicBlock *BB,
     // If there is more than one pred of succ, and there are PHI nodes in
     // the successor, then we need to add incoming edges for the PHI nodes
     //
-    const PredBlockVector BBPreds(pred_begin(BB), pred_end(BB));
+    const PredBlockVector BBPreds(predecessors(BB));
 
     // Loop over all of the PHI nodes in the successor of BB.
     for (BasicBlock::iterator I = Succ->begin(); isa<PHINode>(I); ++I) {
@@ -1454,14 +1454,14 @@ static DebugLoc getDebugValueLoc(DbgVariableIntrinsic *DII, Instruction *Src) {
 /// Inserts a llvm.dbg.value intrinsic before a store to an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.
 void llvm::ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                           StoreInst *SI, DIBuilder &Builder) {
+                                           Instruction *I, DIBuilder &Builder) {
   assert(DII->isAddressOfVariable());
   auto *DIVar = DII->getVariable();
   assert(DIVar && "Missing variable");
   auto *DIExpr = DII->getExpression();
-  Value *DV = SI->getValueOperand();
-
-  DebugLoc NewLoc = getDebugValueLoc(DII, SI);
+  assert(isa<StoreInst>(I) || I->isVPStore());
+  Value *DV = I->getOperand(0);
+  DebugLoc NewLoc = getDebugValueLoc(DII, I);
 
   if (!valueCoversEntireFragment(DV->getType(), DII)) {
     // FIXME: If storing to a part of the variable described by the dbg.declare,
@@ -1472,11 +1472,11 @@ void llvm::ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
     // know which part) we insert an dbg.value intrinsic to indicate that we
     // know nothing about the variable's content.
     DV = UndefValue::get(DV->getType());
-    Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, SI);
+    Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, I);
     return;
   }
 
-  Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, SI);
+  Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, I);
 }
 
 /// Inserts a llvm.dbg.value intrinsic before a load of an alloca'd value

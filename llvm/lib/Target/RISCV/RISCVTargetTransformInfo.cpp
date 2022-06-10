@@ -8,16 +8,21 @@
 
 #include "RISCVTargetTransformInfo.h"
 #include "MCTargetDesc/RISCVMatInt.h"
+#include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/IntrinsicsEPI.h"
+#include "llvm/IR/PatternMatch.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/InstructionCost.h"
 #include "llvm/Support/MathExtras.h"
+#include "llvm/Transforms/InstCombine/InstCombiner.h"
 #include <algorithm>
 #include <cmath>
 using namespace llvm;
+using namespace llvm::PatternMatch;
 
 #define DEBUG_TYPE "riscvtti"
 
@@ -356,10 +361,6 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
       return getSpliceCost(Tp, Index);
     }
   }
-
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Tp);
-  if (Kind == TTI::SK_Broadcast && isa<ScalableVectorType>(Tp))
-    return LT.first * 1;
 
   return BaseT::getShuffleCost(Kind, Tp, Mask, Index, SubTp);
 }
@@ -787,4 +788,59 @@ unsigned RISCVTTIImpl::getRegUsageForType(Type *Ty) {
   }
 
   return BaseT::getRegUsageForType(Ty);
+}
+
+Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II) {
+  assert(II.getIntrinsicID() == Intrinsic::epi_vsetvl && "This is not an epi_vsetvl!");
+
+  // The rvl argument may be the result of a zeroext op;
+  // in that case, we retrieve the value being extended,
+  // otherwise we just use the value we find in that position.
+  Value *RVL = nullptr;
+  if (!match(II.getArgOperand(0), m_ZExt(m_Value(RVL))))
+    RVL = II.getArgOperand(0);
+
+  auto &AC = IC.getAssumptionCache();
+  for (auto &Assumption : AC.assumptionsFor(RVL)) {
+    if (!Assumption)
+      continue;
+
+    if (auto *Assume = dyn_cast<AssumeInst>(Assumption)) {
+      // The assumption on the rvl is an icmp intrinsic (either ule or uge)
+      // that compares VL with VLMax.
+      Value *VLMax;
+      CmpInst::Predicate Pred;
+      if (!match(Assume->getArgOperand(0), m_c_ICmp(Pred, m_Specific(RVL), m_Value(VLMax))))
+        continue;
+      if (Pred != CmpInst::ICMP_UGE && Pred != CmpInst::ICMP_ULE)
+        continue;
+
+      // VLMax = <vscale x k>, so it could either be the direct result of a
+      // @llvm.vscale() call or the result of a binary operation between
+      // vscale and the VF value k.
+      BinaryOperator *BinOp;
+      if (!match(VLMax, m_BinOp(BinOp))) {
+        if (dyn_cast<IntrinsicInst>(VLMax)->getIntrinsicID() != Intrinsic::vscale)
+          continue;
+      } else if (dyn_cast<IntrinsicInst>(BinOp->getOperand(0))->getIntrinsicID() != Intrinsic::vscale)
+        continue;
+
+      return IC.replaceInstUsesWith(II, II.getArgOperand(0));
+    }
+  }
+
+  return None;
+}
+
+Optional<Instruction *>
+RISCVTTIImpl::instCombineIntrinsic(InstCombiner &IC, IntrinsicInst &II) const {
+  Intrinsic::ID IID = II.getIntrinsicID();
+  switch (IID) {
+  default:
+    break;
+  case Intrinsic::epi_vsetvl:
+    return instCombineEPIVSetVL(IC, II);
+  }
+
+  return None;
 }

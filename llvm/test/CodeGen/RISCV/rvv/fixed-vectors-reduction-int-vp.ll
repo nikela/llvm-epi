@@ -851,7 +851,7 @@ define signext i32 @vpreduce_xor_v64i32(i32 signext %s, <64 x i32> %v, <64 x i1>
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    mv a2, a3
 ; CHECK-NEXT:  .LBB49_2:
-; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetivli zero, 4, e8, mf2, tu, mu
 ; CHECK-NEXT:    li a3, 32
 ; CHECK-NEXT:    vslidedown.vi v24, v0, 4
 ; CHECK-NEXT:    bltu a1, a3, .LBB49_4

@@ -364,7 +364,7 @@ define <vscale x 32 x i32> @select_nxv32i32(<vscale x 32 x i1> %a, <vscale x 32 
 ; CHECK-NEXT:    add a4, a0, a4
 ; CHECK-NEXT:    vl8re32.v v8, (a4)
 ; CHECK-NEXT:    srli a5, a1, 2
-; CHECK-NEXT:    vsetvli a4, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli a4, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    sub a4, a2, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a5
@@ -422,7 +422,7 @@ define <vscale x 32 x i32> @select_evl_nxv32i32(<vscale x 32 x i1> %a, <vscale x
 ; CHECK-NEXT:    add a2, a0, a2
 ; CHECK-NEXT:    vl8re32.v v8, (a2)
 ; CHECK-NEXT:    srli a5, a1, 2
-; CHECK-NEXT:    vsetvli a2, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e8, mf2, tu, mu
 ; CHECK-NEXT:    slli a2, a1, 1
 ; CHECK-NEXT:    sub a4, a1, a2
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a5
@@ -710,7 +710,7 @@ define <vscale x 16 x double> @select_nxv16f64(<vscale x 16 x i1> %a, <vscale x 
 ; CHECK-NEXT:    add a4, a0, a4
 ; CHECK-NEXT:    vl8re64.v v8, (a4)
 ; CHECK-NEXT:    srli a5, a1, 3
-; CHECK-NEXT:    vsetvli a4, zero, e8, mf4, ta, mu
+; CHECK-NEXT:    vsetvli a4, zero, e8, mf4, tu, mu
 ; CHECK-NEXT:    sub a4, a2, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a5
 ; CHECK-NEXT:    bltu a2, a4, .LBB48_2

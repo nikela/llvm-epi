@@ -651,7 +651,7 @@ protected:
 
   /// Emit a bypass check to see if the vector trip count is zero, including if
   /// it overflows.
-  void emitIterationCountCheck(BasicBlock *Bypass);
+  void emitIterationCountCheck(BasicBlock *Bypass, bool ForbiddenEpilogue);
 
   /// Emit a bypass check to see if all of the SCEV assumptions we've
   /// had to make are correct. Returns the block containing the checks or
@@ -3032,7 +3032,8 @@ Value *InnerLoopVectorizer::createBitOrPointerCast(Value *V, VectorType *DstVTy,
   return Builder.CreateBitOrPointerCast(CastVal, DstVTy);
 }
 
-void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass) {
+void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass,
+                                                  bool ForbiddenEpilogue) {
   Value *Count = getOrCreateTripCount(LoopVectorPreHeader);
   // Reuse existing vector loop preheader for TC checks.
   // Note that new preheader block is generated for vector loop.
@@ -3053,7 +3054,7 @@ void InnerLoopVectorizer::emitIterationCountCheck(BasicBlock *Bypass) {
   Value *Step = createStepForVF(Builder, CountTy, VF, UF);
   if (!Cost->foldTailByMasking())
     CheckMinIters = Builder.CreateICmp(P, Count, Step, "min.iters.check");
-  else if (VF.isScalable()) {
+  else if (VF.isScalable() && !ForbiddenEpilogue) {
     // vscale is not necessarily a power-of-2, which means we cannot guarantee
     // an overflow to zero when updating induction variables and so an
     // additional overflow check is required before entering the vector loop.
@@ -3376,7 +3377,9 @@ InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // backedge-taken count is uint##_max: adding one to it will overflow leading
   // to an incorrect trip count of zero. In this (rare) case we will also jump
   // to the scalar loop.
-  emitIterationCountCheck(LoopScalarPreHeader);
+  bool ForbiddenEpilogue =
+      findOptionMDForLoopID(OrigLoopID, "llvm.loop.epilogue.forbid");
+  emitIterationCountCheck(LoopScalarPreHeader, ForbiddenEpilogue);
 
   // Generate the code to check any assumptions that we've made for SCEV
   // expressions.
@@ -4030,17 +4033,20 @@ void InnerLoopVectorizer::fixReduction(VPReductionPHIRecipe *PhiR,
   if (Cost->foldTailByMasking() && !PhiR->isInLoop()) {
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *VecLoopExitInst = State.get(LoopExitInstDef, Part);
-      Value *Sel = nullptr;
+      SelectInst *Sel = nullptr;
       for (User *U : VecLoopExitInst->users()) {
         if (isa<SelectInst>(U)) {
           assert(!Sel && "Reduction exit feeding two selects");
-          Sel = U;
+          Sel = cast<SelectInst>(U);
         } else {
           // assert(isa<PHINode>(U) && "Reduction exit must feed Phi's or select");
         }
       }
       assert(Sel && "Reduction exit feeds no select");
       State.reset(LoopExitInstDef, Sel, Part);
+
+      if (isa<FPMathOperator>(Sel))
+        Sel->setFastMathFlags(RdxDesc.getFastMathFlags());
 
       // If the target can create a predicated operator for the reduction at no
       // extra cost in the loop (for example a predicated vadd), it can be
@@ -5412,12 +5418,14 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
   // then a suitable VF is chosen. If UserVF is specified and there are
   // dependencies, check if it's legal. However, if a UserVF is specified and
   // there are no dependencies, then there's nothing to do.
-  if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
-    if (!canVectorizeReductions(UserVF))
-      return computeFeasibleMaxVF(ConstTripCount, UserVF, FoldTailByMasking);
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
+      !canVectorizeReductions(UserVF)) {
+    IgnoreScalableUserVF = true;
+  }
 
-    if (Legal->isSafeForAnyVectorWidth())
-      return UserVF;
+  if (UserVF.isNonZero() && !IgnoreScalableUserVF &&
+      Legal->isSafeForAnyVectorWidth()) {
+    return UserVF;
   }
 
   if (Hints->isFixedVectorizationDisabled() &&
@@ -8526,6 +8534,16 @@ void LoopVectorizationPlanner::executePlan(ElementCount BestVF, unsigned BestUF,
     LoopVectorizeHints Hints(L, true, *ORE);
     Hints.setAlreadyVectorized();
   }
+  // If `llvm.loop.single.iteration` exists, change latch branch condition to
+  // always jump to exit
+  if (findOptionMDForLoop(L, "llvm.loop.single.iteration")) {
+    VPBasicBlock *ExitBB =
+        BestVPlan.getVectorLoopRegion()->getExitingBasicBlock();
+    BasicBlock *Latch = State.CFG.VPBB2IRBB[ExitBB];
+    if (auto *Branch = dyn_cast<BranchInst>(Latch->getTerminator()))
+      Branch->setCondition(ILV.Builder.getTrue());
+  }
+
   // Disable runtime unrolling when vectorizing the epilogue loop.
   if (CanonicalIVStartValue)
     AddRuntimeUnrollDisableMetaData(L);
@@ -9565,7 +9583,7 @@ VPRegionBlock *VPRecipeBuilder::createReplicateRegion(Instruction *Instr,
 
   // Note: first set Entry as region entry and then connect successors starting
   // from it in order, to propagate the "parent" of each VPBasicBlock.
-  VPBlockUtils::insertTwoBlocksAfter(Pred, Exiting, BlockInMask, Entry);
+  VPBlockUtils::insertTwoBlocksAfter(Pred, Exiting, Entry);
   VPBlockUtils::connectBlocks(Pred, Exiting);
 
   return Region;
@@ -9721,7 +9739,7 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
 // CanonicalIVIncrement{NUW} VPInstruction to increment it by VF * UF and a
 // BranchOnCount VPInstruction to the latch.
 static void addCanonicalIVRecipes(VPlan &Plan, Type *IdxTy, DebugLoc DL,
-                                  bool HasNUW, bool IsVPlanNative) {
+                                  bool HasNUW) {
   Value *StartIdx = ConstantInt::get(IdxTy, 0);
   auto *StartV = Plan.getOrAddVPValue(StartIdx);
 
@@ -9737,8 +9755,6 @@ static void addCanonicalIVRecipes(VPlan &Plan, Type *IdxTy, DebugLoc DL,
   CanonicalIVPHI->addOperand(CanonicalIVIncrement);
 
   VPBasicBlock *EB = TopRegion->getExitingBasicBlock();
-  if (IsVPlanNative)
-    EB->setCondBit(nullptr);
   EB->appendRecipe(CanonicalIVIncrement);
 
   auto *BranchOnCount =
@@ -9845,7 +9861,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       getDebugLocFromInstOrOperands(Legal->getPrimaryInduction());
   addCanonicalIVRecipes(*Plan, Legal->getWidestInductionType(),
                         DLInst ? DLInst->getDebugLoc() : DebugLoc(),
-                        !CM.foldTailByMasking(), false);
+                        !CM.foldTailByMasking());
 
   // Scan the body of the loop in a topological order to visit each basic block
   // after having visited its predecessor basic blocks.
@@ -10175,8 +10191,14 @@ VPlanPtr LoopVectorizationPlanner::buildVPlan(VFRange &Range) {
       [this](PHINode *P) { return Legal->getIntOrFpInductionDescriptor(P); },
       DeadInstructions, *PSE.getSE());
 
+  // Remove the existing terminator of the exiting block of the top-most region.
+  // A BranchOnCount will be added instead when adding the canonical IV recipes.
+  auto *Term =
+      Plan->getVectorLoopRegion()->getExitingBasicBlock()->getTerminator();
+  Term->eraseFromParent();
+
   addCanonicalIVRecipes(*Plan, Legal->getWidestInductionType(), DebugLoc(),
-                        true, true);
+                        true);
   return Plan;
 }
 
@@ -10560,14 +10582,19 @@ Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
   std::tie(SmallestType, WidestType) = Cost->getSmallestAndWidestTypes();
   const std::map<unsigned, unsigned> SEWArgMap = {
       {8, 0}, {16, 1}, {32, 2}, {64, 3}};
-  const std::map<unsigned, unsigned> LMULArgMap = {
-      {1, 0}, {2, 1}, {4, 2}, {8, 3}};
+  const std::map<int, unsigned> LMULArgMap = {
+      {1, 0}, {2, 1}, {4, 2}, {8, 3},
+      // Fractional LMUL (-x means LMUL=1/x)
+      {-8, 5}, {-4, 6}, {-2, 7}};
   assert(SEWArgMap.find(WidestType) != SEWArgMap.end() &&
          SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
          "Cannot set vector length: Unsupported type");
   SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  unsigned LMULVal =
+  int LMULVal =
       (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
+  // This might be fractional.
+  if (LMULVal == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
+    LMULVal = -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
   LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
   Constant *SEWArg =
       ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);

@@ -690,7 +690,7 @@ static void InitializeCPlusPlusFeatureTestMacros(const LangOptions &LangOpts,
     Builder.defineMacro("__cpp_implicit_move", "202011L");
     Builder.defineMacro("__cpp_size_t_suffix", "202011L");
     Builder.defineMacro("__cpp_if_consteval", "202106L");
-    Builder.defineMacro("__cpp_­multidimensional_­subscript", "202110L");
+    Builder.defineMacro("__cpp_multidimensional_subscript", "202110L");
   }
   if (LangOpts.Char8)
     Builder.defineMacro("__cpp_char8_t", "201811L");
@@ -781,6 +781,9 @@ static void InitializePredefinedMacros(const TargetInfo &TI,
     Builder.defineMacro("__epi_m2", "1");
     Builder.defineMacro("__epi_m4", "2");
     Builder.defineMacro("__epi_m8", "3");
+    Builder.defineMacro("__epi_mf8", "5");
+    Builder.defineMacro("__epi_mf4", "6");
+    Builder.defineMacro("__epi_mf2", "7");
 
     // NonTemporal flag
     Builder.defineMacro("__epi_nt", "0x200UL");

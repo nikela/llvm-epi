@@ -44,6 +44,9 @@ public:
   /// Tuning option to set loop interleaving on/off, set based on opt level.
   bool LoopInterleaving;
 
+  /// Tuning option to set whole function vectorization on/off.
+  bool WFVVectorization;
+
   /// Tuning option to enable/disable loop vectorization, set based on opt
   /// level.
   bool LoopVectorization;
@@ -586,8 +589,8 @@ private:
 
   void addRequiredLTOPreLinkPasses(ModulePassManager &MPM);
 
-  void addVectorPasses(OptimizationLevel Level, FunctionPassManager &FPM,
-                       bool IsFullLTO);
+  void addVectorPasses(OptimizationLevel Level, ModulePassManager &MPM,
+                       FunctionPassManager &FPM, bool IsFullLTO);
 
   static Optional<std::vector<PipelineElement>>
   parsePipelineText(StringRef Text);
