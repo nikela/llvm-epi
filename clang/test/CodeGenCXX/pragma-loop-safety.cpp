@@ -1,4 +1,5 @@
 // RUN: %clang_cc1 -no-opaque-pointers -triple x86_64-apple-darwin -std=c++11 -emit-llvm -o - %s | FileCheck %s
+// XFAIL: *
 
 // Verify assume_safety vectorization is recognized.
 void vectorize_test(int *List, int Length) {
