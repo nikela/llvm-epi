@@ -458,6 +458,10 @@ ABI Changes in Clang
   such packing. Clang now matches the gcc behavior (except on Darwin and PS4).
   You can switch back to the old ABI behavior with the flag:
   ``-fclang-abi-compat=14.0``.
+- When compiling C for ARM or AArch64, a zero-length bitfield in a ``struct``
+  (e.g. ``int : 0``) no longer prevents the structure from being considered a
+  homogeneous floating-point or vector aggregate. The new behavior agrees with
+  the AAPCS specification, and matches the similar bug fix in GCC 12.1.
 
 OpenMP Support in Clang
 -----------------------
@@ -543,12 +547,6 @@ Static Analyzer
   from common memory copy/manipulation functions such as ``memcpy``, ``mempcpy``, ``memmove``, ``memcmp``, `
   `strcmp``, ``strncmp``, ``strcpy``, ``strlen``, ``strsep`` and many more. Although 
   this checker currently is in list of alpha checkers due to a false positive.
-
-- Deprecate the ``-analyzer-store region`` and
-  ``-analyzer-opt-analyze-nested-blocks`` analyzer flags.
-  These flags are still accepted, but a warning will be displayed.
-  These flags will be rejected, thus turned into a hard error starting with
-  ``clang-16``.
 
 .. _release-notes-ubsan:
 
