@@ -91,8 +91,9 @@ bool LoopVectorizeHints::Hint::validate(unsigned Val) {
     return (Val <= 1);
   case HK_ISVECTORIZED:
   case HK_PREDICATE:
-  case HK_SCALABLE:
     return (Val == 0 || Val == 1);
+  case HK_SCALABLE:
+    return (Val == 0 || Val == 1 || Val == 2);
   }
   return false;
 }
@@ -142,10 +143,6 @@ LoopVectorizeHints::LoopVectorizeHints(const Loop *L,
   // Scalable vectorization is disabled if no preference is specified.
   if ((LoopVectorizeHints::ScalableForceKind)Scalable.Value == SK_Unspecified)
     Scalable.Value = SK_FixedWidthOnly;
-  else if (ForceScalableVectorization == SK_ScalableOnly)
-    // If the flag is set to disable any use of fixed vectors, override the
-    // loop hint.
-    Scalable.Value = SK_ScalableOnly;
 
   if (IsVectorized.Value != 1)
     // If the vectorization width and interleaving count are both 1 then

@@ -54,6 +54,7 @@
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/SymbolRewriter.h"
 #include "llvm/Transforms/Utils/UnifyFunctionExitNodes.h"
+#include "llvm/Transforms/Utils/VecCloneVP.h"
 #include "llvm/Transforms/Vectorize.h"
 #include <cstdlib>
 
@@ -233,6 +234,7 @@ namespace {
       (void) llvm::createFixIrreduciblePass();
       (void)llvm::createFunctionSpecializationPass();
       (void)llvm::createSelectOptimizePass();
+      (void) llvm::createVecCloneVPPass();
 
       (void)new llvm::IntervalPartition();
       (void)new llvm::ScalarEvolutionWrapperPass();

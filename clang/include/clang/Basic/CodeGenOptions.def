@@ -291,6 +291,7 @@ CODEGENOPT(RerollLoops       , 1, 0) ///< Control whether loops are rerolled.
 CODEGENOPT(NoUseJumpTables   , 1, 0) ///< Set when -fno-jump-tables is enabled.
 VALUE_CODEGENOPT(UnwindTables, 2, 0) ///< Unwind tables (1) or asynchronous unwind tables (2)
 CODEGENOPT(VectorizeLoop     , 1, 0) ///< Run loop vectorizer.
+CODEGENOPT(VectorizeWFV      , 1, 0) ///< Run WFV vectorization pass.
 CODEGENOPT(VectorizeSLP      , 1, 0) ///< Run SLP vectorizer.
 CODEGENOPT(ProfileSampleAccurate, 1, 0) ///< Sample profile is accurate.
 

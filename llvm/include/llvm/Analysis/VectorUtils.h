@@ -37,6 +37,7 @@ enum class VFParamKind {
                      // of the input and output mask concurrently. For
                      // example, it is implied by the `M` token in the
                      // Vector Function ABI mangled name.
+  GlobalVL,          // Global vector length.
   Unknown
 };
 
@@ -158,14 +159,19 @@ static constexpr char const *_LLVM_Scalarize_ = "_LLVM_Scalarize_";
 /// * x86 (libmvec): https://sourceware.org/glibc/wiki/libmvec and
 ///  https://sourceware.org/glibc/wiki/libmvec?action=AttachFile&do=view&target=VectorABI.txt
 ///
-/// \param MangledName -> input string in the format
+/// \param MangledName input string in the format
 /// _ZGV<isa><mask><vlen><parameters>_<scalarname>[(<redirection>)].
-/// \param M -> Module used to retrieve informations about the vector
+/// \param M Module used to retrieve informations about the vector
 /// function that are not possible to retrieve from the mangled
 /// name. At the moment, this parameter is needed only to retrieve the
 /// Vectorization Factor of scalable vector functions from their
 /// respective IR declarations.
-Optional<VFInfo> tryDemangleForVFABI(StringRef MangledName, const Module &M);
+/// \param RequireDeclaration Set this to false if you only want to parse the
+/// MangledName regardless of the existence of the Vector function. Note that
+/// for some scalable cases this does not work (as specified in the description
+/// of \a M)
+Optional<VFInfo> tryDemangleForVFABI(StringRef MangledName, const Module &M,
+                                     bool RequireDeclaration = true);
 
 /// This routine mangles the given VectorName according to the LangRef
 /// specification for vector-function-abi-variant attribute and is specific to

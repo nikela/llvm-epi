@@ -675,7 +675,7 @@ simplifyAndDCEInstruction(Instruction *I,
     return true;
   }
 
-  if (Value *SimpleV = SimplifyInstruction(I, DL)) {
+  if (Value *SimpleV = simplifyInstruction(I, DL)) {
     // Add the users to the worklist. CAREFUL: an instruction can use itself,
     // in the case of a phi node.
     for (User *U : I->users()) {
@@ -1454,14 +1454,14 @@ static DebugLoc getDebugValueLoc(DbgVariableIntrinsic *DII, Instruction *Src) {
 /// Inserts a llvm.dbg.value intrinsic before a store to an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.
 void llvm::ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                           StoreInst *SI, DIBuilder &Builder) {
+                                           Instruction *I, DIBuilder &Builder) {
   assert(DII->isAddressOfVariable());
   auto *DIVar = DII->getVariable();
   assert(DIVar && "Missing variable");
   auto *DIExpr = DII->getExpression();
-  Value *DV = SI->getValueOperand();
-
-  DebugLoc NewLoc = getDebugValueLoc(DII, SI);
+  assert(isa<StoreInst>(I) || I->isVPStore());
+  Value *DV = I->getOperand(0);
+  DebugLoc NewLoc = getDebugValueLoc(DII, I);
 
   if (!valueCoversEntireFragment(DV->getType(), DII)) {
     // FIXME: If storing to a part of the variable described by the dbg.declare,
@@ -1472,11 +1472,11 @@ void llvm::ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
     // know which part) we insert an dbg.value intrinsic to indicate that we
     // know nothing about the variable's content.
     DV = UndefValue::get(DV->getType());
-    Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, SI);
+    Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, I);
     return;
   }
 
-  Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, SI);
+  Builder.insertDbgValueIntrinsic(DV, DIVar, DIExpr, NewLoc, I);
 }
 
 /// Inserts a llvm.dbg.value intrinsic before a load of an alloca'd value

@@ -83,17 +83,26 @@ protected:
     return false;
   }
 
-  // Checks that 1. the last Parameter in the Shape is of type
-  // VFParamKind::GlobalPredicate and 2. it is the only one of such
-  // type.
+  // Checks that:
+  // 1. the last Parameter in the Shape is of type VFParamKind::GlobalPredicate
+  //    or, if it is of type VFParamKind::GlobalVL, that the second to last is
+  //    of type VFParamKind::GlobalPredicate;
+  // 2. it is the only one of such type.
   bool IsMasked() const {
     const auto NGlobalPreds =
         std::count_if(Info.Shape.Parameters.begin(),
                       Info.Shape.Parameters.end(), [](const VFParameter PK) {
                         return PK.ParamKind == VFParamKind::GlobalPredicate;
                       });
-    return NGlobalPreds == 1 && Info.Shape.Parameters.back().ParamKind ==
-                                    VFParamKind::GlobalPredicate;
+    bool GlobalPredIsInPosition =
+        Info.Shape.Parameters.back().ParamKind == VFParamKind::GlobalPredicate;
+    if (!GlobalPredIsInPosition &&
+        Info.Shape.Parameters.back().ParamKind == VFParamKind::GlobalVL &&
+        Info.Shape.Parameters.size() > 1) {
+      GlobalPredIsInPosition = (*(Info.Shape.Parameters.end() - 2)).ParamKind ==
+                               VFParamKind::GlobalPredicate;
+    }
+    return NGlobalPreds == 1 && GlobalPredIsInPosition;
   }
 };
 } // unnamed namespace
@@ -412,9 +421,15 @@ TEST_F(VFABIParserTest, ISAIndependentMangling) {
   EXPECT_EQ(VectorName, "_ZGVeN2vls2Ls27Us4Rs5l1L10U100R1000u_sin");
 
   // EPI: <isa> = "E"
+  SmallVector<VFParameter, 8> EPIExpectedParams = ExpectedParams;
+  EPIExpectedParams.push_back(VFParameter({10, VFParamKind::GlobalVL}));
   EXPECT_TRUE(invokeParser("_ZGVEN2vls2Ls27Us4Rs5l1L10U100R1000u_sin"));
   EXPECT_EQ(ISA, VFISAKind::EPI);
-  __COMMON_CHECKS;
+  EXPECT_EQ(VF, ElementCount::getFixed(2));
+  EXPECT_FALSE(IsMasked());
+  EXPECT_EQ(Parameters.size(), (unsigned)11);
+  EXPECT_EQ(Parameters, EPIExpectedParams);
+  EXPECT_EQ(ScalarName, "sin");
   EXPECT_EQ(VectorName, "_ZGVEN2vls2Ls27Us4Rs5l1L10U100R1000u_sin");
 
   // LLVM: <isa> = "_LLVM_" internal vector function.
@@ -517,9 +532,10 @@ TEST_F(VFABIParserTest, ParseMaskingEPI) {
   EXPECT_EQ(VF, ElementCount::getFixed(2));
   EXPECT_TRUE(IsMasked());
   EXPECT_EQ(ISA, VFISAKind::EPI);
-  EXPECT_EQ(Parameters.size(), (unsigned)2);
+  EXPECT_EQ(Parameters.size(), (unsigned)3);
   EXPECT_EQ(Parameters[0], VFParameter({0, VFParamKind::Vector}));
   EXPECT_EQ(Parameters[1], VFParameter({1, VFParamKind::GlobalPredicate}));
+  EXPECT_EQ(Parameters[2], VFParameter({2, VFParamKind::GlobalVL}));
   EXPECT_EQ(ScalarName, "sin");
 }
 

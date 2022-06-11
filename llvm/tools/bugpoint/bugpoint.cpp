@@ -153,6 +153,7 @@ int main(int argc, char **argv) {
   initializeAggressiveInstCombine(Registry);
   initializeInstrumentation(Registry);
   initializeTarget(Registry);
+  initializeVecCloneVPPass(Registry);
 
   if (std::getenv("bar") == (char*) -1) {
     InitializeAllTargets();

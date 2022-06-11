@@ -225,6 +225,10 @@ public:
                                              Optional<FastMathFlags> FMF,
                                              TTI::TargetCostKind CostKind);
 
+  bool isElementTypeLegalForScalableVector(Type *Ty) const {
+    return TLI->isLegalElementTypeForRVV(Ty);
+  }
+
   bool isLegalMaskedLoadStore(Type *DataType, Align Alignment) {
     if (!ST->hasVInstructions())
       return false;
@@ -407,6 +411,9 @@ public:
     }
     llvm_unreachable("unknown register class");
   }
+
+  Optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
+                                               IntrinsicInst &II) const;
 };
 
 } // end namespace llvm

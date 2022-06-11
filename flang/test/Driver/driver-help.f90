@@ -153,6 +153,7 @@
 ! HELP-FC1-NEXT: -U <macro>              Undefine macro <macro>
 ! HELP-FC1-NEXT: -vectorize-loops        Run the Loop vectorization passes
 ! HELP-FC1-NEXT: -vectorize-slp          Run the SLP vectorization passes
+! HELP-FC1-NEXT: -vectorize-wfv          Run the WFV vectorization passes
 ! HELP-FC1-NEXT: -version                Print the compiler version
 ! HELP-FC1-NEXT: -W<warning>             Enable the specified warning
 

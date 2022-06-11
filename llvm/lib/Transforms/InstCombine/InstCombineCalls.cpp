@@ -274,7 +274,7 @@ Instruction *InstCombinerImpl::SimplifyAnyMemSet(AnyMemSetInst *MI) {
     return nullptr;
   const uint64_t Len = LenC->getLimitedValue();
   assert(Len && "0-sized memory setting should be removed already.");
-  const Align Alignment = assumeAligned(MI->getDestAlignment());
+  const Align Alignment = MI->getDestAlign().valueOrOne();
 
   // If it is an atomic and alignment is less than the size then we will
   // introduce the unaligned memory access which will be later transformed
@@ -1130,6 +1130,57 @@ foldShuffledIntrinsicOperands(IntrinsicInst *II,
   return new ShuffleVectorInst(NewIntrinsic, Mask);
 }
 
+Instruction *InstCombinerImpl::visitVPSelect(IntrinsicInst *II) {
+  auto *VPSelect = cast<VPIntrinsic>(II);
+  Type *RetType = VPSelect->getType();
+  Value *CondVal = VPSelect->getArgOperand(0);
+  Value *TrueVal = VPSelect->getArgOperand(1);
+  Value *FalseVal = VPSelect->getArgOperand(2);
+  Value *VL = VPSelect->getVectorLengthParam();
+
+  // If true and false values are the same, no need for the select.
+  if (TrueVal == FalseVal)
+    return replaceInstUsesWith(*II, TrueVal);
+
+  // No need for a select when the cond is an allzeros or allones vector.
+  if (match(CondVal, m_One()))
+    return replaceInstUsesWith(*II, TrueVal);
+  if (match(CondVal, m_Zero()))
+    return replaceInstUsesWith(*II, FalseVal);
+
+  // Merge two selects with the same condition value.
+  if (auto *PrevVPSelect = dyn_cast<VPIntrinsic>(FalseVal))
+    if (PrevVPSelect->getIntrinsicID() == Intrinsic::vp_select &&
+        PrevVPSelect->getArgOperand(0) == CondVal &&
+        PrevVPSelect->getVectorLengthParam() == VL)
+      return replaceOperand(*II, 2, PrevVPSelect->getArgOperand(2));
+
+  if (RetType->isIntOrIntVectorTy(1) && CondVal->getType() == TrueVal->getType()) {
+    auto *AllOnes = ConstantInt::getAllOnesValue(CondVal->getType());
+    IRBuilder<> Builder(II->getContext());
+
+    // If TrueVal is an allones vector, transform the select in an or.
+    if (match(TrueVal, m_One())) {
+      auto *VPDecl = VPIntrinsic::getDeclarationForParams(
+          II->getModule(), Intrinsic::vp_or, nullptr,
+          {CondVal, FalseVal, AllOnes, VL});
+      return Builder.CreateCall(VPDecl, {CondVal, FalseVal, AllOnes, VL},
+                                VPSelect->getName() + ".or");
+    }
+
+    // If FalseVal is an allzeros vector, transform the select in an and.
+    if (match(FalseVal, m_Zero())) {
+      auto *VPDecl = VPIntrinsic::getDeclarationForParams(
+          II->getModule(), Intrinsic::vp_and, nullptr,
+          {CondVal, TrueVal, AllOnes, VL});
+      return Builder.CreateCall(VPDecl, {CondVal, TrueVal, AllOnes, VL},
+                                VPSelect->getName() + ".and");
+    }
+  }
+
+  return nullptr;
+}
+
 /// CallInst simplification. This mostly only handles folding of intrinsic
 /// instructions. For normal calls, it allows visitCallBase to do the heavy
 /// lifting.
@@ -1137,7 +1188,7 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
   // Don't try to simplify calls without uses. It will not do anything useful,
   // but will result in the following folds being skipped.
   if (!CI.use_empty())
-    if (Value *V = SimplifyCall(&CI, SQ.getWithInstruction(&CI)))
+    if (Value *V = simplifyCall(&CI, SQ.getWithInstruction(&CI)))
       return replaceInstUsesWith(CI, V);
 
   if (isFreeCall(&CI, &TLI))
@@ -1242,7 +1293,7 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
   // actually absent. To detect this case, call SimplifyConstrainedFPCall. If it
   // returns a replacement, the call may be removed.
   if (CI.use_empty() && isa<ConstrainedFPIntrinsic>(CI)) {
-    if (SimplifyConstrainedFPCall(&CI, SQ.getWithInstruction(&CI)))
+    if (simplifyConstrainedFPCall(&CI, SQ.getWithInstruction(&CI)))
       return eraseInstFromFunction(CI);
   }
 
@@ -1840,7 +1891,7 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
     }
 
     // Try to simplify the underlying FMul.
-    if (Value *V = SimplifyFMulInst(II->getArgOperand(0), II->getArgOperand(1),
+    if (Value *V = simplifyFMulInst(II->getArgOperand(0), II->getArgOperand(1),
                                     II->getFastMathFlags(),
                                     SQ.getWithInstruction(II))) {
       auto *FAdd = BinaryOperator::CreateFAdd(V, II->getArgOperand(2));
@@ -1871,7 +1922,7 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
 
     // Try to simplify the underlying FMul. We can only apply simplifications
     // that do not require rounding.
-    if (Value *V = SimplifyFMAFMul(II->getArgOperand(0), II->getArgOperand(1),
+    if (Value *V = simplifyFMAFMul(II->getArgOperand(0), II->getArgOperand(1),
                                    II->getFastMathFlags(),
                                    SQ.getWithInstruction(II))) {
       auto *FAdd = BinaryOperator::CreateFAdd(V, II->getArgOperand(2));
@@ -2674,6 +2725,9 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
       return nullptr;
     }
     break;
+  }
+  case Intrinsic::vp_select: {
+    return visitVPSelect(II);
   }
   default: {
     // Handle target specific intrinsics
