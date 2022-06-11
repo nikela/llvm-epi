@@ -1424,14 +1424,13 @@ std::string RISCVInstrInfo::createMIROperandComment(
 
   uint64_t TSFlags = MI.getDesc().TSFlags;
 
-  // Print the full VType operand of vsetvli/vsetivli and PseudoReadVL
-  // instructions, and the SEW operand of vector codegen pseudos.
-  if (((MI.getOpcode() == RISCV::VSETVLI || MI.getOpcode() == RISCV::VSETIVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETIVLI ||
-        MI.getOpcode() == RISCV::PseudoVSETVLIX0) &&
-       OpIdx == 2) ||
-      (MI.getOpcode() == RISCV::PseudoReadVL && OpIdx == 1)) {
+  // Print the full VType operand of vsetvli/vsetivli instructions, and the SEW
+  // operand of vector codegen pseudos.
+  if ((MI.getOpcode() == RISCV::VSETVLI || MI.getOpcode() == RISCV::VSETIVLI ||
+       MI.getOpcode() == RISCV::PseudoVSETVLI ||
+       MI.getOpcode() == RISCV::PseudoVSETIVLI ||
+       MI.getOpcode() == RISCV::PseudoVSETVLIX0) &&
+      OpIdx == 2) {
     unsigned Imm = MI.getOperand(OpIdx).getImm();
     RISCVVType::printVType(Imm, OS);
   } else if (RISCVII::hasSEWOp(TSFlags)) {
@@ -1987,4 +1986,12 @@ RISCVInstrInfo::isRVVSpillForZvlsseg(unsigned Opcode) const {
   case RISCV::PseudoVRELOAD8_M1:
     return std::make_pair(8u, 1u);
   }
+}
+
+bool RISCVInstrInfo::isFaultFirstLoad(const MachineInstr &MI) const {
+  // The check below is not precise enough for this instruction.
+  if (MI.getOpcode() == RISCV::PseudoVSETVLEXT)
+    return false;
+  return MI.getNumExplicitDefs() == 2 && MI.modifiesRegister(RISCV::VL) &&
+         !MI.isInlineAsm();
 }
