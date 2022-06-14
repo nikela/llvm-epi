@@ -556,6 +556,7 @@ static void computeTargetOpts(
 
 void CodeGenAction::setUpTargetMachine() {
   CompilerInstance &ci = this->getInstance();
+  auto &invoc = ci.getInvocation();
 
   // Set the triple based on the CompilerInvocation set-up
   const std::string &theTriple = ci.getInvocation().getTargetOpts().triple;
@@ -577,7 +578,7 @@ void CodeGenAction::setUpTargetMachine() {
   // Create `TargetMachine`
   tm.reset(theTarget->createTargetMachine(theTriple, /*CPU=*/"",
                                           /*Features=*/"",
-                                          llvm::TargetOptions(), llvm::None));
+                                          TargetOpts, invoc.RM));
   assert(tm && "Failed to create TargetMachine");
   llvmModule->setDataLayout(tm->createDataLayout());
 }
