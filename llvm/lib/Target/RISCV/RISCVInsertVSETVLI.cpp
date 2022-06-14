@@ -701,13 +701,12 @@ static VSETVLIInfo getInfoForVSETVLI(const MachineInstr &MI) {
   return NewInfo;
 }
 
-bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
-                                const VSETVLIInfo &Require,
-                                const VSETVLIInfo &CurInfo) {
-  unsigned EEW;
+/// Get the EEW for a load or store instruction.  Return None if MI is not
+/// a load or store which ignores SEW.
+static Optional<unsigned> getEEWForLoadStore(const MachineInstr &MI) {
   switch (MI.getOpcode()) {
   default:
-    return false;
+    return None;
   case RISCV::PseudoVLE8_V_M1:
   case RISCV::PseudoVLE8_V_M1_MASK:
   case RISCV::PseudoVLE8_V_M2:
@@ -764,8 +763,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE8_V_MF4_MASK:
   case RISCV::PseudoVSSE8_V_MF8:
   case RISCV::PseudoVSSE8_V_MF8_MASK:
-    EEW = 8;
-    break;
+    return 8;
   case RISCV::PseudoVLE16_V_M1:
   case RISCV::PseudoVLE16_V_M1_MASK:
   case RISCV::PseudoVLE16_V_M2:
@@ -814,8 +812,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE16_V_MF2_MASK:
   case RISCV::PseudoVSSE16_V_MF4:
   case RISCV::PseudoVSSE16_V_MF4_MASK:
-    EEW = 16;
-    break;
+    return 16;
   case RISCV::PseudoVLE32_V_M1:
   case RISCV::PseudoVLE32_V_M1_MASK:
   case RISCV::PseudoVLE32_V_M2:
@@ -856,8 +853,7 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE32_V_M8_MASK:
   case RISCV::PseudoVSSE32_V_MF2:
   case RISCV::PseudoVSSE32_V_MF2_MASK:
-    EEW = 32;
-    break;
+    return 32;
   case RISCV::PseudoVLE64_V_M1:
   case RISCV::PseudoVLE64_V_M1_MASK:
   case RISCV::PseudoVLE64_V_M2:
@@ -890,16 +886,23 @@ bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
   case RISCV::PseudoVSSE64_V_M4_MASK:
   case RISCV::PseudoVSSE64_V_M8:
   case RISCV::PseudoVSSE64_V_M8_MASK:
-    EEW = 64;
-    break;
+    return 64;
   }
+}
+
+static bool canSkipVSETVLIForLoadStore(const MachineInstr &MI,
+                                       const VSETVLIInfo &Require,
+                                       const VSETVLIInfo &CurInfo) {
+  Optional<unsigned> EEW = getEEWForLoadStore(MI);
+  if (!EEW)
+    return false;
 
   // Stores can ignore the tail and mask policies.
   const bool StoreOp = MI.getNumExplicitDefs() == 0;
   if (!StoreOp && !CurInfo.hasSamePolicy(Require))
     return false;
 
-  return CurInfo.isCompatibleWithLoadStoreEEW(EEW, Require);
+  return CurInfo.isCompatibleWithLoadStoreEEW(*EEW, Require);
 }
 
 /// Return true if a VSETVLI is required to transition from CurInfo to Require
@@ -1358,26 +1361,65 @@ void RISCVInsertVSETVLI::doPRE(MachineBasicBlock &MBB) {
                 AvailableInfo, OldInfo);
 }
 
+/// Which subfields of VL or VTYPE have values we need to preserve?
+struct DemandedFields {
+  bool VL = false;
+  bool SEW = false;
+  bool LMUL = false;
+  bool SEWLMULRatio = false;
+  bool TailPolicy = false;
+  bool MaskPolicy = false;
+
+  // Return true if any part of VTYPE was used
+  bool usedVTYPE() {
+    return SEW || LMUL || SEWLMULRatio || TailPolicy || MaskPolicy;
+  }
+};
+
+static void doUnion(DemandedFields &A, DemandedFields B) {
+  A.VL |= B.VL;
+  A.SEW |= B.SEW;
+  A.LMUL |= B.LMUL;
+  A.SEWLMULRatio |= B.SEWLMULRatio;
+  A.TailPolicy |= B.TailPolicy;
+  A.MaskPolicy |= B.MaskPolicy;
+}
+
+// Return which fields are demanded by the given instruction.
+static DemandedFields getDemanded(const MachineInstr &MI) {
+  // Most instructions don't use any of these subfeilds.
+  DemandedFields Res;
+  // Start conservative if registers are used
+  if (MI.isCall() || MI.isInlineAsm() || MI.readsRegister(RISCV::VL))
+    Res.VL = true;
+  if (MI.isCall() || MI.isInlineAsm() || MI.readsRegister(RISCV::VTYPE)) {
+    Res.SEW = true;
+    Res.LMUL = true;
+    Res.SEWLMULRatio = true;
+    Res.TailPolicy = true;
+    Res.MaskPolicy = true;
+  }
+
+  return Res;
+}
+
 void RISCVInsertVSETVLI::doLocalPostpass(MachineBasicBlock &MBB) {
   MachineInstr *PrevMI = nullptr;
-  bool UsedVL = false, UsedVTYPE = false;
+  DemandedFields Used;
   SmallVector<MachineInstr*> ToDelete;
   for (MachineInstr &MI : MBB) {
     // Note: Must be *before* vsetvli handling to account for config cases
     // which only change some subfields.
-    if (MI.isCall() || MI.isInlineAsm() || MI.readsRegister(RISCV::VL))
-      UsedVL = true;
-    if (MI.isCall() || MI.isInlineAsm() || MI.readsRegister(RISCV::VTYPE))
-      UsedVTYPE = true;
+    doUnion(Used, getDemanded(MI));
 
     if (!isVectorConfigInstr(MI))
       continue;
 
     if (PrevMI) {
-      if (!UsedVL && !UsedVTYPE) {
+      if (!Used.VL && !Used.usedVTYPE()) {
         ToDelete.push_back(PrevMI);
         // fallthrough
-      } else if (!UsedVTYPE && isVLPreservingConfig(MI)) {
+      } else if (!Used.usedVTYPE() && isVLPreservingConfig(MI)) {
         // Note: `vsetvli x0, x0, vtype' is the canonical instruction
         // for this case.  If you find yourself wanting to add other forms
         // to this "unused VTYPE" case, we're probably missing a
@@ -1392,12 +1434,11 @@ void RISCVInsertVSETVLI::doLocalPostpass(MachineBasicBlock &MBB) {
       }
     }
     PrevMI = &MI;
-    UsedVL = false;
-    UsedVTYPE = false;
+    Used = getDemanded(MI);
     Register VRegDef = MI.getOperand(0).getReg();
     if (VRegDef != RISCV::X0 &&
         !(VRegDef.isVirtual() && MRI->use_nodbg_empty(VRegDef)))
-      UsedVL = true;
+      Used.VL = true;
   }
 
   for (auto *MI : ToDelete)
