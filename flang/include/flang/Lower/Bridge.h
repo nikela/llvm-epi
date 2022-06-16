@@ -50,9 +50,11 @@ public:
          const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
          const Fortran::evaluate::IntrinsicProcTable &intrinsics,
          const Fortran::parser::AllCookedSources &allCooked,
-         llvm::StringRef triple, fir::KindMapping &kindMap) {
+         llvm::StringRef triple, fir::KindMapping &kindMap,
+         llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+             funcAttrs) {
     return LoweringBridge(ctx, defaultKinds, intrinsics, allCooked, triple,
-                          kindMap);
+                          kindMap, funcAttrs);
   }
 
   //===--------------------------------------------------------------------===//
@@ -94,13 +96,21 @@ public:
   void lower(const Fortran::parser::Program &program,
              const Fortran::semantics::SemanticsContext &semanticsContext);
 
+  const llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>,
+                          4> &
+  getFunctionAttributes() const {
+    return funcAttributes;
+  }
+
 private:
   explicit LoweringBridge(
       mlir::MLIRContext &ctx,
       const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
       const Fortran::evaluate::IntrinsicProcTable &intrinsics,
       const Fortran::parser::AllCookedSources &cooked, llvm::StringRef triple,
-      fir::KindMapping &kindMap);
+      fir::KindMapping &kindMap,
+      llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+          funcAttrs);
   LoweringBridge() = delete;
   LoweringBridge(const LoweringBridge &) = delete;
 
@@ -110,6 +120,8 @@ private:
   mlir::MLIRContext &context;
   std::unique_ptr<mlir::ModuleOp> module;
   fir::KindMapping &kindMap;
+  llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>, 4>
+      funcAttributes;
 };
 
 } // namespace lower

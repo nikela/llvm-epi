@@ -54,7 +54,8 @@ private:
   /// \param [in] Args The list of input driver arguments
   /// \param [out] CmdArgs The list of output command arguments
   void AddCodeModelOptions(const llvm::opt::ArgList &Args,
-                           llvm::opt::ArgStringList &CmdArgs) const;
+                           llvm::opt::ArgStringList &CmdArgs,
+                           const llvm::Triple &Triple) const;
 
   /// Extract other compilation options from the driver arguments and add them
   /// to the command arguments.
@@ -68,8 +69,12 @@ private:
                            const llvm::opt::ArgList &Args,
                            llvm::opt::ArgStringList &CmdArgs) const;
 
+  void AddAArch64TargetArgs(const llvm::opt::ArgList &Args,
+                            llvm::opt::ArgStringList &CmdArgs) const;
   void AddRISCVTargetArgs(const llvm::opt::ArgList &Args,
                           llvm::opt::ArgStringList &CmdArgs) const;
+  void AddX86TargetArgs(const llvm::opt::ArgList &Args,
+                        llvm::opt::ArgStringList &CmdArgs) const;
 
 public:
   Flang(const ToolChain &TC);

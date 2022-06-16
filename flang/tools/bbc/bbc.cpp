@@ -208,7 +208,7 @@ static mlir::LogicalResult convertFortranSourceToMLIR(
       &ctx, llvm::ArrayRef<fir::KindTy>{fir::fromDefaultKinds(defKinds)});
   auto burnside = Fortran::lower::LoweringBridge::create(
       ctx, defKinds, semanticsContext.intrinsics(), parsing.allCooked(), "",
-      kindMap);
+      kindMap, {});
   burnside.lower(parseTree, semanticsContext);
   mlir::ModuleOp mlirModule = burnside.getModule();
   std::error_code ec;

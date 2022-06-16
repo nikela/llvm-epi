@@ -246,6 +246,9 @@ struct FrontendOptions {
   /// Target features as spelled by the driver.
   std::vector<std::string> FeaturesAsWritten;
 
+  // Frame pointer
+  std::string FramePointer;
+
   /// LLVM options.
   std::vector<std::string> LLVMArgs;
 

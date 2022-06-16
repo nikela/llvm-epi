@@ -287,9 +287,21 @@ static bool parseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
   opts.FeaturesAsWritten =
       args.getAllArgValues(clang::driver::options::OPT_target_feature);
 
+  if (const llvm::opt::Arg *a =
+          args.getLastArg(clang::driver::options::OPT_mframe_pointer_EQ)) {
+    llvm::StringRef framePointerValue = a->getValue();
+    bool Valid = llvm::StringSwitch<bool>(framePointerValue)
+                     .Cases("none", "non-leaf", "all", true)
+                     .Default(false);
+    if (!Valid)
+      diags.Report(clang::diag::err_drv_invalid_value)
+          << a->getAsString(args) << a->getValue();
+    if (Valid)
+      opts.FramePointer = framePointerValue;
+  }
+
   // Keep -mllvm options so we can honor them later.
-  opts.LLVMArgs =
-      args.getAllArgValues(clang::driver::options::OPT_mllvm);
+  opts.LLVMArgs = args.getAllArgValues(clang::driver::options::OPT_mllvm);
 
   // Collect the input files and save them in our instance of FrontendOptions.
   std::vector<std::string> inputs =
@@ -310,88 +322,93 @@ static bool parseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
     }
 
     opts.inputs.emplace_back(std::move(inputs[i]), ik);
-  }
-
-  // Set fortranForm based on options -ffree-form and -ffixed-form.
-  if (const auto *arg = args.getLastArg(clang::driver::options::OPT_ffixed_form,
-          clang::driver::options::OPT_ffree_form)) {
-    opts.fortranForm =
-        arg->getOption().matches(clang::driver::options::OPT_ffixed_form)
-        ? FortranForm::FixedForm
-        : FortranForm::FreeForm;
-  }
-
-  // Set fixedFormColumns based on -ffixed-line-length=<value>
-  if (const auto *arg =
-          args.getLastArg(clang::driver::options::OPT_ffixed_line_length_EQ)) {
-    llvm::StringRef argValue = llvm::StringRef(arg->getValue());
-    std::int64_t columns = -1;
-    if (argValue == "none") {
-      columns = 0;
-    } else if (argValue.getAsInteger(/*Radix=*/10, columns)) {
-      columns = -1;
     }
-    if (columns < 0) {
-      diags.Report(clang::diag::err_drv_negative_columns)
-          << arg->getOption().getName() << arg->getValue();
-    } else if (columns == 0) {
-      opts.fixedFormColumns = 1000000;
-    } else if (columns < 7) {
-      diags.Report(clang::diag::err_drv_small_columns)
-          << arg->getOption().getName() << arg->getValue() << "7";
-    } else {
-      opts.fixedFormColumns = columns;
+
+    // Set fortranForm based on options -ffree-form and -ffixed-form.
+    if (const auto *arg =
+            args.getLastArg(clang::driver::options::OPT_ffixed_form,
+                            clang::driver::options::OPT_ffree_form)) {
+      opts.fortranForm =
+          arg->getOption().matches(clang::driver::options::OPT_ffixed_form)
+              ? FortranForm::FixedForm
+              : FortranForm::FreeForm;
     }
-  }
 
-  // -f{no-}implicit-none
-  opts.features.Enable(
-      Fortran::common::LanguageFeature::ImplicitNoneTypeAlways,
-      args.hasFlag(clang::driver::options::OPT_fimplicit_none,
-          clang::driver::options::OPT_fno_implicit_none, false));
-
-  // -f{no-}backslash
-  opts.features.Enable(Fortran::common::LanguageFeature::BackslashEscapes,
-      args.hasFlag(clang::driver::options::OPT_fbackslash,
-          clang::driver::options::OPT_fno_backslash, false));
-
-  // -f{no-}logical-abbreviations
-  opts.features.Enable(Fortran::common::LanguageFeature::LogicalAbbreviations,
-      args.hasFlag(clang::driver::options::OPT_flogical_abbreviations,
-          clang::driver::options::OPT_fno_logical_abbreviations, false));
-
-  // -f{no-}xor-operator
-  opts.features.Enable(Fortran::common::LanguageFeature::XOROperator,
-      args.hasFlag(clang::driver::options::OPT_fxor_operator,
-          clang::driver::options::OPT_fno_xor_operator, false));
-
-  // -fno-automatic
-  if (args.hasArg(clang::driver::options::OPT_fno_automatic)) {
-    opts.features.Enable(Fortran::common::LanguageFeature::DefaultSave);
-  }
-
-  if (args.hasArg(
-          clang::driver::options::OPT_falternative_parameter_statement)) {
-    opts.features.Enable(Fortran::common::LanguageFeature::OldStyleParameter);
-  }
-  if (const llvm::opt::Arg *arg =
-          args.getLastArg(clang::driver::options::OPT_finput_charset_EQ)) {
-    llvm::StringRef argValue = arg->getValue();
-    if (argValue == "utf-8") {
-      opts.encoding = Fortran::parser::Encoding::UTF_8;
-    } else if (argValue == "latin-1") {
-      opts.encoding = Fortran::parser::Encoding::LATIN_1;
-    } else {
-      diags.Report(clang::diag::err_drv_invalid_value)
-          << arg->getAsString(args) << argValue;
+    // Set fixedFormColumns based on -ffixed-line-length=<value>
+    if (const auto *arg = args.getLastArg(
+            clang::driver::options::OPT_ffixed_line_length_EQ)) {
+      llvm::StringRef argValue = llvm::StringRef(arg->getValue());
+      std::int64_t columns = -1;
+      if (argValue == "none") {
+        columns = 0;
+      } else if (argValue.getAsInteger(/*Radix=*/10, columns)) {
+        columns = -1;
+      }
+      if (columns < 0) {
+        diags.Report(clang::diag::err_drv_negative_columns)
+            << arg->getOption().getName() << arg->getValue();
+      } else if (columns == 0) {
+        opts.fixedFormColumns = 1000000;
+      } else if (columns < 7) {
+        diags.Report(clang::diag::err_drv_small_columns)
+            << arg->getOption().getName() << arg->getValue() << "7";
+      } else {
+        opts.fixedFormColumns = columns;
+      }
     }
+
+    // -f{no-}implicit-none
+    opts.features.Enable(
+        Fortran::common::LanguageFeature::ImplicitNoneTypeAlways,
+        args.hasFlag(clang::driver::options::OPT_fimplicit_none,
+                     clang::driver::options::OPT_fno_implicit_none, false));
+
+    // -f{no-}backslash
+    opts.features.Enable(Fortran::common::LanguageFeature::BackslashEscapes,
+                         args.hasFlag(clang::driver::options::OPT_fbackslash,
+                                      clang::driver::options::OPT_fno_backslash,
+                                      false));
+
+    // -f{no-}logical-abbreviations
+    opts.features.Enable(
+        Fortran::common::LanguageFeature::LogicalAbbreviations,
+        args.hasFlag(clang::driver::options::OPT_flogical_abbreviations,
+                     clang::driver::options::OPT_fno_logical_abbreviations,
+                     false));
+
+    // -f{no-}xor-operator
+    opts.features.Enable(
+        Fortran::common::LanguageFeature::XOROperator,
+        args.hasFlag(clang::driver::options::OPT_fxor_operator,
+                     clang::driver::options::OPT_fno_xor_operator, false));
+
+    // -fno-automatic
+    if (args.hasArg(clang::driver::options::OPT_fno_automatic)) {
+      opts.features.Enable(Fortran::common::LanguageFeature::DefaultSave);
+    }
+
+    if (args.hasArg(
+            clang::driver::options::OPT_falternative_parameter_statement)) {
+      opts.features.Enable(Fortran::common::LanguageFeature::OldStyleParameter);
+    }
+    if (const llvm::opt::Arg *arg =
+            args.getLastArg(clang::driver::options::OPT_finput_charset_EQ)) {
+      llvm::StringRef argValue = arg->getValue();
+      if (argValue == "utf-8") {
+        opts.encoding = Fortran::parser::Encoding::UTF_8;
+      } else if (argValue == "latin-1") {
+        opts.encoding = Fortran::parser::Encoding::LATIN_1;
+      } else {
+        diags.Report(clang::diag::err_drv_invalid_value)
+            << arg->getAsString(args) << argValue;
+      }
+    }
+
+    setUpFrontendBasedOnAction(opts);
+    opts.dashX = dashX;
+
+    return diags.getNumErrors() == numErrorsBefore;
   }
-
-  setUpFrontendBasedOnAction(opts);
-  opts.dashX = dashX;
-
-  return diags.getNumErrors() == numErrorsBefore;
-}
 
 // Generate the path to look for intrinsic modules
 static std::string getIntrinsicDir() {

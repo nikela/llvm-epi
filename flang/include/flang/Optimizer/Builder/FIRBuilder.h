@@ -256,13 +256,14 @@ public:
   /// `addNamedFunction` instead.
   mlir::func::FuncOp createFunction(mlir::Location loc, llvm::StringRef name,
                                     mlir::FunctionType ty) {
-    return createFunction(loc, getModule(), name, ty);
+    return createFunction(loc, getModule(), name, ty, {});
   }
 
-  static mlir::func::FuncOp createFunction(mlir::Location loc,
-                                           mlir::ModuleOp module,
-                                           llvm::StringRef name,
-                                           mlir::FunctionType ty);
+  static mlir::func::FuncOp createFunction(
+      mlir::Location loc, mlir::ModuleOp module, llvm::StringRef name,
+      mlir::FunctionType ty,
+      llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+          functionAttributes);
 
   /// Determine if the named function is already in the module. Return the
   /// instance if found, otherwise add a new named function to the module.
@@ -279,7 +280,7 @@ public:
                                              mlir::FunctionType ty) {
     if (auto func = getNamedFunction(module, name))
       return func;
-    return createFunction(loc, module, name, ty);
+    return createFunction(loc, module, name, ty, {});
   }
 
   /// Cast the input value to IndexType.

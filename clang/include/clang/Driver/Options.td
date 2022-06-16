@@ -4923,7 +4923,7 @@ def emit_fir : Flag<["-"], "emit-fir">, Alias<emit_mlir>;
 // Target Options (cc1 + cc1as)
 //===----------------------------------------------------------------------===//
 
-let Flags = [CC1Option, CC1AsOption, NoDriverOption] in {
+let Flags = [CC1Option, CC1AsOption, FC1Option, NoDriverOption] in {
 
 def target_cpu : Separate<["-"], "target-cpu">,
   HelpText<"Target a specific cpu type">,
@@ -5228,7 +5228,7 @@ def fuse_ctor_homing: Flag<["-"], "fuse-ctor-homing">,
 
 } // let Flags = [CC1Option, CC1AsOption, NoDriverOption]
 
-let Flags = [CC1Option, NoDriverOption] in {
+let Flags = [CC1Option, FC1Option, NoDriverOption] in {
 
 def disable_llvm_verifier : Flag<["-"], "disable-llvm-verifier">,
   HelpText<"Don't run the LLVM IR verifier pass">,
@@ -5494,7 +5494,7 @@ def ehcontguard : Flag<["-"], "ehcontguard">,
 def fdenormal_fp_math_f32_EQ : Joined<["-"], "fdenormal-fp-math-f32=">,
    Group<f_Group>;
 
-} // let Flags = [CC1Option, NoDriverOption]
+} // let Flags = [CC1Option, FC1Option, NoDriverOption]
 
 //===----------------------------------------------------------------------===//
 // Dependency Output Options
@@ -5911,7 +5911,7 @@ def split_dwarf_output : Separate<["-"], "split-dwarf-output">,
   Flags<[CC1Option, CC1AsOption, NoDriverOption]>,
   MarshallingInfoString<CodeGenOpts<"SplitDwarfOutput">>;
 
-let Flags = [CC1Option, NoDriverOption] in {
+let Flags = [CC1Option, FC1Option, NoDriverOption] in {
 
 def fblocks_runtime_optional : Flag<["-"], "fblocks-runtime-optional">,
   HelpText<"Weakly link in the blocks runtime">,

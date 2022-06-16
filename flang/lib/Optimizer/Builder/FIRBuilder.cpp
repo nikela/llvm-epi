@@ -31,11 +31,33 @@ static llvm::cl::opt<std::size_t>
                                       "name"),
                        llvm::cl::init(32));
 
-mlir::func::FuncOp fir::FirOpBuilder::createFunction(mlir::Location loc,
-                                                     mlir::ModuleOp module,
-                                                     llvm::StringRef name,
-                                                     mlir::FunctionType ty) {
-  return fir::createFuncOp(loc, module, name, ty);
+mlir::func::FuncOp fir::FirOpBuilder::createFunction(
+    mlir::Location loc, mlir::ModuleOp module, llvm::StringRef name,
+    mlir::FunctionType ty,
+    llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+        functionAttributes) {
+  llvm::SmallVector<mlir::NamedAttribute, 4> funcAttrs;
+  auto ctx = module->getContext();
+  mlir::Builder builder{ctx};
+
+  llvm::SmallVector<mlir::Attribute, 4> passthroughAttrs;
+  if (!functionAttributes.empty()) {
+    for (const auto &attr : functionAttributes) {
+      if (attr.second.hasValue()) {
+        auto targetFeaturesAttr =
+            builder.getArrayAttr({builder.getStringAttr(attr.first),
+                                  builder.getStringAttr(*attr.second)});
+        passthroughAttrs.push_back(targetFeaturesAttr);
+      } else {
+        auto targetFeaturesAttr = builder.getStringAttr(attr.first);
+        passthroughAttrs.push_back(targetFeaturesAttr);
+      }
+    }
+  }
+  if (!passthroughAttrs.empty())
+    funcAttrs.push_back(builder.getNamedAttr(
+        "passthrough", builder.getArrayAttr(passthroughAttrs)));
+  return fir::createFuncOp(loc, module, name, ty, funcAttrs);
 }
 
 mlir::func::FuncOp fir::FirOpBuilder::getNamedFunction(mlir::ModuleOp modOp,

@@ -10,7 +10,7 @@
 ! RUN: %flang_fc1 -triple x86_64-unknown-linux-gnu -emit-obj %s -o %t.o
 ! RUN: llvm-objdump --triple x86_64-unknown-linux-gnu --disassemble-all %t.o | FileCheck %s --check-prefix=CORRECT_TRIPLE
 ! RUN: rm -f %t.o
-! RUN: %flang --target=x86_64-unknown-linux-gnu -c %s -o %t.o
+! RUN: %flang --target=x86_64-unknown-linux-gnu -fomit-frame-pointer -c %s -o %t.o
 ! RUN: llvm-objdump --triple x86_64-unknown-linux-gnu --disassemble-all %t.o | FileCheck %s --check-prefix=CORRECT_TRIPLE
 
 ! RUN: %flang -c --target=x86_64-unknown-linux-gnu %s -o %t.o

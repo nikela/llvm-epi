@@ -422,7 +422,8 @@ void Fortran::lower::CallInterface<T>::declare() {
     if (!func) {
       mlir::Location loc = side().getCalleeLocation();
       mlir::FunctionType ty = genFunctionType();
-      func = fir::FirOpBuilder::createFunction(loc, module, name, ty);
+      func = fir::FirOpBuilder::createFunction(loc, module, name, ty,
+                                               functionAttributes);
       if (const Fortran::semantics::Symbol *sym = side().getProcedureSymbol())
         addSymbolAttribute(func, *sym, converter.getMLIRContext());
       for (const auto &placeHolder : llvm::enumerate(inputs))
@@ -1095,7 +1096,7 @@ class SignatureBuilder
 public:
   SignatureBuilder(const Fortran::evaluate::characteristics::Procedure &p,
                    Fortran::lower::AbstractConverter &c, bool forceImplicit)
-      : CallInterface{c}, proc{p} {
+      : CallInterface{c, {}}, proc{p} {
     bool isImplicit = forceImplicit || proc.CanBeCalledViaImplicitInterface();
     determineInterface(isImplicit, proc);
   }
@@ -1189,7 +1190,7 @@ mlir::func::FuncOp Fortran::lower::getOrDeclareFunction(
                                            /*forceImplicit=*/false}
                               .getFunctionType();
   mlir::func::FuncOp newFunc =
-      fir::FirOpBuilder::createFunction(loc, module, name, ty);
+      fir::FirOpBuilder::createFunction(loc, module, name, ty, {});
   addSymbolAttribute(newFunc, *symbol, converter.getMLIRContext());
   return newFunc;
 }

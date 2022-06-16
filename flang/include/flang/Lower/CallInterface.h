@@ -215,7 +215,12 @@ public:
   }
 
 protected:
-  CallInterface(Fortran::lower::AbstractConverter &c) : converter{c} {}
+  CallInterface(
+      Fortran::lower::AbstractConverter &c,
+      llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+          functionAttrs)
+      : converter{c}, functionAttributes{functionAttrs.begin(),
+                                         functionAttrs.end()} {}
   /// CRTP handle.
   T &side() { return *static_cast<T *>(this); }
   /// Entry point to be called by child ctor to analyze the signature and
@@ -238,6 +243,9 @@ protected:
   /// (e.g. getting the length of character result)
   std::optional<Fortran::evaluate::characteristics::Procedure> characteristic =
       std::nullopt;
+
+  llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>, 4>
+      functionAttributes;
 };
 
 //===----------------------------------------------------------------------===//
@@ -252,7 +260,7 @@ class CallerInterface : public CallInterface<CallerInterface> {
 public:
   CallerInterface(const Fortran::evaluate::ProcedureRef &p,
                   Fortran::lower::AbstractConverter &c)
-      : CallInterface{c}, procRef{p} {
+      : CallInterface{c, {}}, procRef{p} {
     declare();
     mapPassedEntities();
     actualInputs.resize(getNumFIRArguments());
@@ -348,9 +356,12 @@ private:
 /// to abstract the specificities of the callee side.
 class CalleeInterface : public CallInterface<CalleeInterface> {
 public:
-  CalleeInterface(Fortran::lower::pft::FunctionLikeUnit &f,
-                  Fortran::lower::AbstractConverter &c)
-      : CallInterface{c}, funit{f} {
+  CalleeInterface(
+      Fortran::lower::pft::FunctionLikeUnit &f,
+      Fortran::lower::AbstractConverter &c,
+      llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+          functionAttrs)
+      : CallInterface{c, functionAttrs}, funit{f} {
     declare();
   }
 

@@ -80,9 +80,24 @@ bool PrescanAndSemaDebugAction::beginSourceFileAction() {
          (generateRtTypeTables() || true);
 }
 
+static void renderFeatures(CompilerInvocation &invoc, std::string &Features) {
+  auto &FeaturesAsWritten = invoc.getFrontendOpts().FeaturesAsWritten;
+  Features.reserve(FeaturesAsWritten.size() +
+      std::accumulate(FeaturesAsWritten.begin(), FeaturesAsWritten.end(),
+          std::size_t(0), [](size_t Res, const std::string &Curr) {
+            return Res + Curr.size();
+          }));
+  for (auto &Feature : FeaturesAsWritten) {
+    if (!Features.empty())
+      Features += ",";
+    Features += Feature;
+  }
+}
+
 bool CodeGenAction::beginSourceFileAction() {
   llvmCtx = std::make_unique<llvm::LLVMContext>();
   CompilerInstance &ci = this->getInstance();
+  CompilerInvocation &invoc = ci.getInvocation();
 
   // If the input is an LLVM file, just parse it and return.
   if (this->getCurrentInput().getKind().getLanguage() == Language::LLVM_IR) {
@@ -140,7 +155,20 @@ bool CodeGenAction::beginSourceFileAction() {
   if (!res)
     return res;
 
+
   // Create a LoweringBridge
+  llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>, 4>
+      funcAttributes;
+  std::string targetFeatures;
+  renderFeatures(invoc, targetFeatures);
+  if (!targetFeatures.empty())
+    funcAttributes.push_back(std::make_pair("target-features", targetFeatures));
+
+  if (!invoc.getFrontendOpts().FramePointer.empty()) {
+    funcAttributes.push_back(
+        std::make_pair("frame-pointer", invoc.getFrontendOpts().FramePointer));
+  }
+
   const common::IntrinsicTypeDefaultKinds &defKinds =
       ci.getInvocation().getSemanticsContext().defaultKinds();
   fir::KindMapping kindMap(mlirCtx.get(),
@@ -148,7 +176,7 @@ bool CodeGenAction::beginSourceFileAction() {
   lower::LoweringBridge lb = Fortran::lower::LoweringBridge::create(
       *mlirCtx, defKinds, ci.getInvocation().getSemanticsContext().intrinsics(),
       ci.getParsing().allCooked(), ci.getInvocation().getTargetOpts().triple,
-      kindMap);
+      kindMap, funcAttributes);
 
   // Create a parse tree and lower it to FIR
   Fortran::parser::Program &parseTree{*ci.getParsing().parseTree()};
@@ -568,6 +596,8 @@ void CodeGenAction::setUpTargetMachine() {
 
   llvm::TargetOptions TargetOpts;
   computeTargetOpts(*llvmModule, TargetOpts);
+  std::string Features;
+  renderFeatures(invoc, Features);
 
   // Create `Target`
   std::string error;
@@ -576,8 +606,7 @@ void CodeGenAction::setUpTargetMachine() {
   assert(theTarget && "Failed to create Target");
 
   // Create `TargetMachine`
-  tm.reset(theTarget->createTargetMachine(theTriple, /*CPU=*/"",
-                                          /*Features=*/"",
+  tm.reset(theTarget->createTargetMachine(theTriple, /*CPU=*/"", Features,
                                           TargetOpts, invoc.RM));
   assert(tm && "Failed to create TargetMachine");
   llvmModule->setDataLayout(tm->createDataLayout());

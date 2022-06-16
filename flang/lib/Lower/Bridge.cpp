@@ -250,7 +250,8 @@ public:
       // with the number of arguments, so it is not awful to do it that way for
       // now, but the linear coefficient might be non negligible. Until
       // measured, stick to the solution that impacts the code less.
-      Fortran::lower::CalleeInterface{funit, *this};
+      Fortran::lower::CalleeInterface{funit, *this,
+                                      bridge.getFunctionAttributes()};
     }
     funit.setActiveEntry(0);
 
@@ -2483,7 +2484,8 @@ private:
   /// Prepare to translate a new function
   void startNewFunction(Fortran::lower::pft::FunctionLikeUnit &funit) {
     assert(!builder && "expected nullptr");
-    Fortran::lower::CalleeInterface callee(funit, *this);
+    Fortran::lower::CalleeInterface callee(funit, *this,
+                                           bridge.getFunctionAttributes());
     mlir::func::FuncOp func = callee.addEntryBlockAndMapArguments();
     builder = new fir::FirOpBuilder(func, bridge.getKindMap());
     assert(builder && "FirOpBuilder did not instantiate");
@@ -2683,7 +2685,7 @@ private:
     mlir::func::FuncOp func = fir::FirOpBuilder::createFunction(
         mlir::UnknownLoc::get(context), getModuleOp(),
         fir::NameUniquer::doGenerated("Sham"),
-        mlir::FunctionType::get(context, llvm::None, llvm::None));
+        mlir::FunctionType::get(context, llvm::None, llvm::None), {});
     func.addEntryBlock();
     builder = new fir::FirOpBuilder(func, bridge.getKindMap());
     createGlobals();
@@ -3052,9 +3054,12 @@ Fortran::lower::LoweringBridge::LoweringBridge(
     const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
     const Fortran::evaluate::IntrinsicProcTable &intrinsics,
     const Fortran::parser::AllCookedSources &cooked, llvm::StringRef triple,
-    fir::KindMapping &kindMap)
+    fir::KindMapping &kindMap,
+    llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
+        funcAttrs)
     : defaultKinds{defaultKinds}, intrinsics{intrinsics}, cooked{&cooked},
-      context{context}, kindMap{kindMap} {
+      context{context}, kindMap{kindMap}, funcAttributes{funcAttrs.begin(),
+                                                         funcAttrs.end()} {
   // Register the diagnostic handler.
   context.getDiagEngine().registerHandler([](mlir::Diagnostic &diag) {
     llvm::raw_ostream &os = llvm::errs();
