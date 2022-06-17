@@ -11,9 +11,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/ExecutionEngine/JITLink/ELF_aarch64.h"
+#include "EHFrameSupportImpl.h"
 #include "ELFLinkGraphBuilder.h"
 #include "JITLinkGeneric.h"
 #include "llvm/BinaryFormat/ELF.h"
+#include "llvm/ExecutionEngine/JITLink/DWARFRecordSectionSplitter.h"
 #include "llvm/ExecutionEngine/JITLink/aarch64.h"
 #include "llvm/Object/ELFObjectFile.h"
 #include "llvm/Support/Endian.h"
@@ -57,6 +59,8 @@ private:
     ELFLdSt64Abs12,
     ELFLdSt128Abs12,
     ELFAbs64,
+    ELFPrel32,
+    ELFPrel64,
     ELFAdrGOTPage21,
     ELFLd64GOTLo12,
   };
@@ -66,6 +70,7 @@ private:
     using namespace aarch64;
     switch (Type) {
     case ELF::R_AARCH64_CALL26:
+    case ELF::R_AARCH64_JUMP26:
       return ELFCall26;
     case ELF::R_AARCH64_ADR_PREL_PG_HI21:
       return ELFAdrPage21;
@@ -83,6 +88,10 @@ private:
       return ELFLdSt128Abs12;
     case ELF::R_AARCH64_ABS64:
       return ELFAbs64;
+    case ELF::R_AARCH64_PREL32:
+      return ELFPrel32;
+    case ELF::R_AARCH64_PREL64:
+      return ELFPrel64;
     case ELF::R_AARCH64_ADR_GOT_PAGE:
       return ELFAdrGOTPage21;
     case ELF::R_AARCH64_LD64_GOT_LO12_NC:
@@ -214,6 +223,14 @@ private:
       Kind = aarch64::Pointer64;
       break;
     }
+    case ELFPrel32: {
+      Kind = aarch64::Delta32;
+      break;
+    }
+    case ELFPrel64: {
+      Kind = aarch64::Delta64;
+      break;
+    }
     case ELFAdrGOTPage21: {
       Kind = aarch64::GOTPage21;
       break;
@@ -256,6 +273,10 @@ private:
       return "ELFLdSt128Abs12";
     case ELFAbs64:
       return "ELFAbs64";
+    case ELFPrel32:
+      return "ELFPrel32";
+    case ELFPrel64:
+      return "ELFPrel64";
     case ELFAdrGOTPage21:
       return "ELFAdrGOTPage21";
     case ELFLd64GOTLo12:
@@ -302,14 +323,24 @@ public:
       llvm_unreachable("Not a GOT edge?");
   }
 
-  bool isExternalBranchEdge(Edge &E) { return false; }
-
-  Symbol &createPLTStub(Symbol &Target) {
-    assert(false && "unimplemetned");
-    return Target;
+  bool isExternalBranchEdge(Edge &E) {
+    return E.getKind() == aarch64::Branch26 && !E.getTarget().isDefined();
   }
 
-  void fixPLTEdge(Edge &E, Symbol &Stub) { assert(false && "unimplemetned"); }
+  Symbol &createPLTStub(Symbol &Target) {
+    auto &StubContentBlock = G.createContentBlock(
+        getStubsSection(), getStubBlockContent(), orc::ExecutorAddr(), 1, 0);
+    // Re-use GOT entries for stub targets.
+    auto &GOTEntrySymbol = getGOTEntry(Target);
+    StubContentBlock.addEdge(aarch64::LDRLiteral19, 0, GOTEntrySymbol, 0);
+    return G.addAnonymousSymbol(StubContentBlock, 0, 8, true, false);
+  }
+
+  void fixPLTEdge(Edge &E, Symbol &Stub) {
+    assert(E.getKind() == aarch64::Branch26 && "Not a Branch26 edge?");
+    assert(E.getAddend() == 0 && "Branch26 edge has non-zero addend?");
+    E.setTarget(Stub);
+  }
 
 private:
   Section &getGOTSection() {
@@ -318,17 +349,34 @@ private:
     return *GOTSection;
   }
 
+  Section &getStubsSection() {
+    if (!StubsSection)
+      StubsSection =
+          &G.createSection("$__STUBS", MemProt::Read | MemProt::Exec);
+    return *StubsSection;
+  }
+
   ArrayRef<char> getGOTEntryBlockContent() {
     return {reinterpret_cast<const char *>(NullGOTEntryContent),
             sizeof(NullGOTEntryContent)};
   }
 
+  ArrayRef<char> getStubBlockContent() {
+    return {reinterpret_cast<const char *>(StubContent), sizeof(StubContent)};
+  }
+
   static const uint8_t NullGOTEntryContent[8];
+  static const uint8_t StubContent[8];
   Section *GOTSection = nullptr;
+  Section *StubsSection = nullptr;
 };
 
 const uint8_t PerGraphGOTAndPLTStubsBuilder_ELF_arm64::NullGOTEntryContent[8] =
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const uint8_t PerGraphGOTAndPLTStubsBuilder_ELF_arm64::StubContent[8] = {
+    0x10, 0x00, 0x00, 0x58, // LDR x16, <literal>
+    0x00, 0x02, 0x1f, 0xd6  // BR  x16
+};
 
 Expected<std::unique_ptr<LinkGraph>>
 createLinkGraphFromELFObject_aarch64(MemoryBufferRef ObjectBuffer) {
@@ -356,6 +404,10 @@ void link_ELF_aarch64(std::unique_ptr<LinkGraph> G,
   PassConfiguration Config;
   const Triple &TT = G->getTargetTriple();
   if (Ctx->shouldAddDefaultTargetPasses(TT)) {
+    Config.PrePrunePasses.push_back(DWARFRecordSectionSplitter(".eh_frame"));
+    Config.PrePrunePasses.push_back(EHFrameEdgeFixer(
+        ".eh_frame", 8, aarch64::Pointer32, aarch64::Pointer64,
+        aarch64::Delta32, aarch64::Delta64, aarch64::NegDelta32));
     if (auto MarkLive = Ctx->getMarkLivePass(TT))
       Config.PrePrunePasses.push_back(std::move(MarkLive));
     else

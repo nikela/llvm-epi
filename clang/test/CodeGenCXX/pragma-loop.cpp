@@ -224,8 +224,8 @@ void for_test_scalable_1(int *List, int Length) {
 // CHECK: ![[WIDTH_2]] = !{!"llvm.loop.vectorize.width", i32 2}
 // CHECK: ![[INTERLEAVE_2]] = !{!"llvm.loop.interleave.count", i32 2}
 
-// CHECK: ![[LOOP_5]] = distinct !{![[LOOP_5]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[WIDTH_1:.*]]}
-// CHECK: ![[WIDTH_1]] = !{!"llvm.loop.vectorize.width", i32 1}
+// CHECK: ![[LOOP_5]] = distinct !{![[LOOP_5]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[VECTORIZE_DISABLE:.*]]}
+// CHECK: ![[VECTORIZE_DISABLE]] = !{!"llvm.loop.vectorize.enable", i1 false}
 
 // CHECK: ![[LOOP_6]] = distinct !{![[LOOP_6]], [[MP]], ![[WIDTH_2:.*]], ![[FIXED_VEC]], ![[INTERLEAVE_2:.*]], ![[FOLLOWUP_VECTOR_6:.*]]}
 // CHECK: ![[FOLLOWUP_VECTOR_6]] = !{!"llvm.loop.vectorize.followup_all", ![[AFTER_VECTOR_6:.*]]}
@@ -270,4 +270,5 @@ void for_test_scalable_1(int *List, int Length) {
 
 // CHECK: ![[LOOP_17]] = distinct !{![[LOOP_17]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[FIXED_VEC]], ![[INTERLEAVE_4:.*]], ![[VECTORIZE_ENABLE:.*]]}
 // CHECK: ![[LOOP_18]] = distinct !{![[LOOP_18]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[SCALABLE_VEC]], ![[INTERLEAVE_4:.*]], ![[VECTORIZE_ENABLE:.*]]}
-// CHECK: ![[LOOP_19]] = distinct !{![[LOOP_19]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[WIDTH_1]], ![[SCALABLE_VEC]], ![[INTERLEAVE_4:.*]], ![[VECTORIZE_ENABLE:.*]]}
+// CHECK: ![[LOOP_19]] = distinct !{![[LOOP_19]], ![[UNROLL_DISABLE:.*]], ![[DISTRIBUTE_DISABLE:.*]], ![[WIDTH_1:.*]], ![[SCALABLE_VEC]], ![[INTERLEAVE_4:.*]], ![[VECTORIZE_ENABLE:.*]]}
+// CHECK: ![[WIDTH_1]] = !{!"llvm.loop.vectorize.width", i32 1}

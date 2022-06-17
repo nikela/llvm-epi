@@ -428,7 +428,7 @@ void VecCloneVPPass::addLoopMetadata(BasicBlock *Latch, ElementCount VF) {
     MDs.push_back(MDNode::get(
         Context, {MDString::get(Context, "llvm.loop.vectorize.scalable.enable"),
                   ConstantAsMetadata::get(
-                      ConstantInt::get(Type::getInt1Ty(Context), 1))}));
+                      ConstantInt::get(Type::getInt32Ty(Context), 2))}));
   }
   MDs.push_back(MDNode::get(
       Context, {MDString::get(Context, "llvm.loop.vectorize.predicate.enable"),

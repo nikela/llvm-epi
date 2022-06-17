@@ -642,6 +642,9 @@ void LoopInfoStack::push(BasicBlock *Header, clang::ASTContext &Ctx,
         // Disable vectorization by specifying a width of 1.
         setVectorizeWidth(1);
         setVectorizeScalable(LoopAttributes::Unspecified);
+        // FIXME: Doing this prevents us from doing interleaving without
+        // vectorization.
+        setVectorizeEnable(false);
         break;
       case LoopHintAttr::Interleave:
         // Disable interleaving by speciyfing a count of 1.

@@ -338,12 +338,9 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
                                              ArrayRef<const Value *> Args) {
   if (isa<ScalableVectorType>(Tp) &&
       (!SubTp || isa<ScalableVectorType>(SubTp))) {
+    std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Tp);
     switch (Kind) {
-    case TTI::SK_Broadcast:
-      // Broadcasts from lane 0 should not be slow.
-      return 1;
     case TTI::SK_Select:
-    case TTI::SK_Reverse:
     case TTI::SK_Transpose:
     case TTI::SK_PermuteSingleSrc:
     case TTI::SK_PermuteTwoSrc:
@@ -357,8 +354,22 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
       return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
                                         cast<ScalableVectorType>(SubTp));
       // Use the default.
+    case TTI::SK_Broadcast: {
+      return LT.first * 1;
+    }
     case TTI::SK_Splice:
       return getSpliceCost(Tp, Index);
+    case TTI::SK_Reverse:
+      // Most of the cost here is producing the vrgather index register
+      // Example sequence:
+      //   csrr a0, vlenb
+      //   srli a0, a0, 3
+      //   addi a0, a0, -1
+      //   vsetvli a1, zero, e8, mf8, ta, mu (ignored)
+      //   vid.v v9
+      //   vrsub.vx v10, v9, a0
+      //   vrgather.vv v9, v8, v10
+      return LT.first * 6;
     }
   }
 
@@ -626,10 +637,15 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
   if (Ty->getScalarSizeInBits() > ST->getELEN())
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
+  if (Ty->getElementType()->isIntegerTy(1))
+    // vcpop sequences, see vreduction-mask.ll.  umax, smin actually only
+    // cost 2, but we don't have enough info here so we slightly over cost.
+    return (LT.first - 1) + 3;
+
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
   unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, Ty);
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
 }
 
@@ -666,10 +682,6 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *VTy,
   if (!isa<FixedVectorType>(VTy))
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
-  // FIXME: Do not support i1 and/or reduction now.
-  if (VTy->getElementType()->isIntegerTy(1))
-    return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
-
   if (!ST->useRVVForFixedLengthVectors())
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
@@ -684,11 +696,14 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *VTy,
       ISD != ISD::FADD)
     return BaseT::getArithmeticReductionCost(Opcode, VTy, FMF, CostKind);
 
+  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, VTy);
+  if (VTy->getElementType()->isIntegerTy(1))
+    // vcpop sequences, see vreduction-mask.ll
+    return (LT.first - 1) + (ISD == ISD::AND ? 3 : 2);
+
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
   unsigned VL = cast<FixedVectorType>(VTy)->getNumElements();
-  std::pair<InstructionCost, MVT> LT = TLI->getTypeLegalizationCost(DL, VTy);
-
   if (TTI::requiresOrderedReduction(FMF))
     return (LT.first - 1) + BaseCost + VL;
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
