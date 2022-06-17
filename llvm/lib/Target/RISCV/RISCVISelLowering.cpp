@@ -13161,6 +13161,11 @@ SDValue RISCVTargetLowering::LowerCall(CallLoweringInfo &CLI,
         ++i;
       }
       SDValue SpillSlot = DAG.CreateStackTemporary(StoredSize, StackAlign);
+      // MachineFrameInfo::CreateStackObject explicitly does not update
+      // the alignment for non-default stacks. Do it now to avoid
+      // changes between hasBP() before frame layout of RVV.
+      if (StoredSize.isScalable())
+        MF.getFrameInfo().ensureMaxAlignment(StackAlign);
       int FI = cast<FrameIndexSDNode>(SpillSlot)->getIndex();
       MemOpChains.push_back(
           DAG.getStore(Chain, DL, ArgValue, SpillSlot,

@@ -969,7 +969,18 @@ void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
   // Ensure the entire stack is aligned to at least the RVV requirement: some
   // scalable-vector object alignments are not considered by the
   // target-independent code.
+#ifndef NDEBUG
+  bool HasBPBeforeRVV = hasBP(MF);
+#endif
+  // FIXME - This should not be needed if we ensure the alignment is
+  // correctly set before reaching here.
   MFI.ensureMaxAlignment(RVVStackAlign);
+#ifndef NDEBUG
+  // Ensure we're stable when it comes to the frame layout even if we
+  // have somehow increased the stack alignment.
+  assert((!hasBP(MF) || HasBPBeforeRVV == hasBP(MF)) &&
+         "assignment of RVV stack objects causes BP to become needed");
+#endif
 
   const RISCVInstrInfo &TII = *MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
 
