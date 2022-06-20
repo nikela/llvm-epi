@@ -340,15 +340,15 @@ struct FrameDataInfo {
     FieldIndexMap[V] = Index;
   }
 
-  uint64_t getAlign(Value *V) const {
+  Align getAlign(Value *V) const {
     auto Iter = FieldAlignMap.find(V);
     assert(Iter != FieldAlignMap.end());
     return Iter->second;
   }
 
-  void setAlign(Value *V, uint64_t Align) {
+  void setAlign(Value *V, Align AL) {
     assert(FieldAlignMap.count(V) == 0);
-    FieldAlignMap.insert({V, Align});
+    FieldAlignMap.insert({V, AL});
   }
 
   uint64_t getDynamicAlign(Value *V) const {
@@ -386,7 +386,7 @@ private:
   DenseMap<Value *, uint32_t> FieldIndexMap;
   // Map from values to their alignment on the frame. They would be set after
   // the frame is built.
-  DenseMap<Value *, uint64_t> FieldAlignMap;
+  DenseMap<Value *, Align> FieldAlignMap;
   DenseMap<Value *, uint64_t> FieldDynamicAlignMap;
   // Map from values to their offset on the frame. They would be set after
   // the frame is built.
@@ -580,7 +580,7 @@ void FrameDataInfo::updateLayoutIndex(FrameTypeBuilder &B) {
   auto Updater = [&](Value *I) {
     auto Field = B.getLayoutField(getFieldIndex(I));
     setFieldIndex(I, Field.LayoutFieldIndex);
-    setAlign(I, Field.Alignment.value());
+    setAlign(I, Field.Alignment);
     uint64_t dynamicAlign =
         Field.DynamicAlignBuffer
             ? Field.DynamicAlignBuffer + Field.Alignment.value()
@@ -612,7 +612,7 @@ void FrameTypeBuilder::addFieldForAllocas(const Function &F,
     }
   });
 
-  if (!Shape.OptimizeFrame) {
+  if (!Shape.Optimizing) {
     for (const auto &A : FrameData.Allocas) {
       AllocaInst *Alloca = A.Alloca;
       NonOverlapedAllocas.emplace_back(AllocaSetType(1, Alloca));
@@ -1040,7 +1040,7 @@ static void buildFrameDebugInfo(Function &F, coro::Shape &Shape,
     auto Index = FrameData.getFieldIndex(V);
 
     OffsetCache.insert(
-        {Index, {FrameData.getAlign(V), FrameData.getOffset(V)}});
+        {Index, {FrameData.getAlign(V).value(), FrameData.getOffset(V)}});
   }
 
   DenseMap<Type *, DIType *> DITypeCache;
@@ -1579,11 +1579,12 @@ static void insertSpills(const FrameDataInfo &FrameData, coro::Shape &Shape) {
         Builder.CreateInBoundsGEP(FrameTy, FramePtr, Indices));
     if (auto *AI = dyn_cast<AllocaInst>(Orig)) {
       if (FrameData.getDynamicAlign(Orig) != 0) {
-        assert(FrameData.getDynamicAlign(Orig) == AI->getAlignment());
+        assert(FrameData.getDynamicAlign(Orig) == AI->getAlign().value());
         auto *M = AI->getModule();
         auto *IntPtrTy = M->getDataLayout().getIntPtrType(AI->getType());
         auto *PtrValue = Builder.CreatePtrToInt(GEP, IntPtrTy);
-        auto *AlignMask = ConstantInt::get(IntPtrTy, AI->getAlignment() - 1);
+        auto *AlignMask =
+            ConstantInt::get(IntPtrTy, AI->getAlign().value() - 1);
         PtrValue = Builder.CreateAdd(PtrValue, AlignMask);
         PtrValue = Builder.CreateAnd(PtrValue, Builder.CreateNot(AlignMask));
         return Builder.CreateIntToPtr(PtrValue, AI->getType());
@@ -1695,14 +1696,14 @@ static void insertSpills(const FrameDataInfo &FrameData, coro::Shape &Shape) {
                              &*Builder.GetInsertPoint());
           // This dbg.declare is for the main function entry point.  It
           // will be deleted in all coro-split functions.
-          coro::salvageDebugInfo(DbgPtrAllocaCache, DDI, Shape.OptimizeFrame);
+          coro::salvageDebugInfo(DbgPtrAllocaCache, DDI, Shape.Optimizing);
         }
       }
 
       // Salvage debug info on any dbg.addr that we see. We do not insert them
       // into each block where we have a use though.
       if (auto *DI = dyn_cast<DbgAddrIntrinsic>(U)) {
-        coro::salvageDebugInfo(DbgPtrAllocaCache, DI, Shape.OptimizeFrame);
+        coro::salvageDebugInfo(DbgPtrAllocaCache, DI, Shape.Optimizing);
       }
 
       // If we have a single edge PHINode, remove it and replace it with a
@@ -2171,7 +2172,7 @@ static void lowerLocalAllocas(ArrayRef<CoroAllocaAllocInst*> LocalAllocas,
 
     // Allocate memory.
     auto Alloca = Builder.CreateAlloca(Builder.getInt8Ty(), AI->getSize());
-    Alloca->setAlignment(Align(AI->getAlignment()));
+    Alloca->setAlignment(AI->getAlignment());
 
     for (auto U : AI->users()) {
       // Replace gets with the allocation.
@@ -2551,7 +2552,7 @@ static void collectFrameAllocas(Function &F, coro::Shape &Shape,
 
 void coro::salvageDebugInfo(
     SmallDenseMap<llvm::Value *, llvm::AllocaInst *, 4> &DbgPtrAllocaCache,
-    DbgVariableIntrinsic *DVI, bool OptimizeFrame) {
+    DbgVariableIntrinsic *DVI, bool Optimizing) {
   Function *F = DVI->getFunction();
   IRBuilder<> Builder(F->getContext());
   auto InsertPt = F->getEntryBlock().getFirstInsertionPt();
@@ -2604,7 +2605,7 @@ void coro::salvageDebugInfo(
   //
   // Avoid to create the alloca would be eliminated by optimization
   // passes and the corresponding dbg.declares would be invalid.
-  if (!OptimizeFrame)
+  if (!Optimizing)
     if (auto *Arg = dyn_cast<llvm::Argument>(Storage)) {
       auto &Cached = DbgPtrAllocaCache[Storage];
       if (!Cached) {

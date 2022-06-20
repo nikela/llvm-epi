@@ -52,10 +52,11 @@ mlir::bufferization::insertTensorCopies(Operation *op,
     // Find AllocTensorOps without an `escape` attribute and add the attribute
     // based on analysis results.
     if (auto allocTensorOp = dyn_cast<AllocTensorOp>(op)) {
-      if (allocTensorOp.escape())
+      if (allocTensorOp.getEscape())
         return WalkResult::advance();
-      bool escape = state.isTensorYielded(allocTensorOp.result());
-      allocTensorOp.escapeAttr(rewriter.getBoolAttr(escape));
+      bool escape = !state.getOptions().createDeallocs ||
+                    state.isTensorYielded(allocTensorOp.getResult());
+      allocTensorOp.setEscapeAttr(rewriter.getBoolAttr(escape));
       return WalkResult::advance();
     }
 
@@ -92,6 +93,7 @@ struct TensorCopyInsertionPass
       OneShotBufferizationOptions options;
       options.allowReturnAllocs = allowReturnAllocs;
       options.bufferizeFunctionBoundaries = bufferizeFunctionBoundaries;
+      options.createDeallocs = createDeallocs;
       if (failed(insertTensorCopies(getOperation(), options)))
         signalPassFailure();
     }

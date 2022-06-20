@@ -580,7 +580,7 @@ define <128 x i1> @fcmp_oeq_vv_v128f16(<128 x half> %va, <128 x half> %vb, <128 
 ; CHECK-NEXT:    addi a4, a0, 128
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m8, ta, mu
 ; CHECK-NEXT:    vle16.v v24, (a4)
-; CHECK-NEXT:    vsetivli zero, 8, e8, m1, tu, mu
+; CHECK-NEXT:    vsetivli zero, 8, e8, m1, ta, mu
 ; CHECK-NEXT:    addi a4, a2, -64
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 8
 ; CHECK-NEXT:    bltu a2, a4, .LBB43_2
@@ -1201,7 +1201,7 @@ define <32 x i1> @fcmp_oeq_vv_v32f64(<32 x double> %va, <32 x double> %vb, <32 x
 ; CHECK-NEXT:    mul a1, a1, a3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    vmv1r.v v2, v0
-; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 2
 ; CHECK-NEXT:    addi a1, a0, 128
 ; CHECK-NEXT:    vsetivli zero, 16, e64, m8, ta, mu

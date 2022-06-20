@@ -42,16 +42,13 @@ define <4 x float> @hang_when_merging_stores_after_legalization(<8 x float> %x, 
 ; LMULMAX1-NEXT:    vrgather.vi v12, v8, 0
 ; LMULMAX1-NEXT:    vrgather.vi v12, v9, 3, v0.t
 ; LMULMAX1-NEXT:    li a0, 8
-; LMULMAX1-NEXT:    vsetivli zero, 1, e8, mf8, ta, mu
 ; LMULMAX1-NEXT:    vmv.s.x v0, a0
-; LMULMAX1-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
-; LMULMAX1-NEXT:    vrgather.vi v8, v10, 0
-; LMULMAX1-NEXT:    vrgather.vi v8, v11, 3, v0.t
+; LMULMAX1-NEXT:    vrgather.vi v9, v10, 0
 ; LMULMAX1-NEXT:    li a0, 3
-; LMULMAX1-NEXT:    vsetivli zero, 1, e8, mf8, ta, mu
-; LMULMAX1-NEXT:    vmv.s.x v0, a0
-; LMULMAX1-NEXT:    vsetivli zero, 4, e32, m1, ta, mu
-; LMULMAX1-NEXT:    vmerge.vvm v8, v8, v12, v0
+; LMULMAX1-NEXT:    vmv.s.x v8, a0
+; LMULMAX1-NEXT:    vrgather.vi v9, v11, 3, v0.t
+; LMULMAX1-NEXT:    vmv.v.v v0, v8
+; LMULMAX1-NEXT:    vmerge.vvm v8, v9, v12, v0
 ; LMULMAX1-NEXT:    ret
 ;
 ; LMULMAX2-LABEL: hang_when_merging_stores_after_legalization:
@@ -61,7 +58,6 @@ define <4 x float> @hang_when_merging_stores_after_legalization(<8 x float> %x, 
 ; LMULMAX2-NEXT:    addi a0, sp, 24
 ; LMULMAX2-NEXT:    vsetivli zero, 1, e32, m2, ta, mu
 ; LMULMAX2-NEXT:    vse32.v v10, (a0)
-; LMULMAX2-NEXT:    vsetvli zero, zero, e32, m2, tu, mu
 ; LMULMAX2-NEXT:    vslidedown.vi v10, v10, 7
 ; LMULMAX2-NEXT:    addi a0, sp, 28
 ; LMULMAX2-NEXT:    vse32.v v10, (a0)

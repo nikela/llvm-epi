@@ -661,7 +661,7 @@ define <32 x double> @vfma_vv_v32f64(<32 x double> %va, <32 x double> %b, <32 x 
 ; CHECK-NEXT:    mul a1, a1, a3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    vmv1r.v v1, v0
-; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 2
 ; CHECK-NEXT:    addi a1, a2, 128
 ; CHECK-NEXT:    vsetivli zero, 16, e64, m8, ta, mu

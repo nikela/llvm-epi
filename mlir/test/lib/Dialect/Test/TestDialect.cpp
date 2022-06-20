@@ -865,7 +865,7 @@ ParseResult PrettyPrintedRegionOp::parse(OpAsmParser &parser,
 
   // If location of the op is explicitly provided, then use it; Else use
   // the parser's current location.
-  Location opLoc = explicitLoc.getValueOr(currLocation);
+  Location opLoc = explicitLoc.value_or(currLocation);
 
   // Derive the SSA-values for op's operands.
   if (parser.resolveOperands(operands, opFntype.getInputs(), loc,
@@ -1301,8 +1301,8 @@ ParseResult RegionIfOp::parse(OpAsmParser &parser, OperationState &result) {
                                 parser.getCurrentLocation(), result.operands);
 }
 
-OperandRange RegionIfOp::getSuccessorEntryOperands(unsigned index) {
-  assert(index < 2 && "invalid region index");
+OperandRange RegionIfOp::getSuccessorEntryOperands(Optional<unsigned> index) {
+  assert(index && *index < 2 && "invalid region index");
   return getOperands();
 }
 
@@ -1339,7 +1339,7 @@ void AnyCondOp::getSuccessorRegions(Optional<unsigned> index,
                                     SmallVectorImpl<RegionSuccessor> &regions) {
   // The parent op branches into the only region, and the region branches back
   // to the parent op.
-  if (index)
+  if (!index)
     regions.emplace_back(&getRegion());
   else
     regions.emplace_back(getResults());

@@ -228,7 +228,7 @@ const SanitizerMetadata &GlobalValue::getSanitizerMetadata() const {
   return getContext().pImpl->GlobalValueSanitizerMetadata[this];
 }
 
-void GlobalValue::setSanitizerMetadata(const SanitizerMetadata &Meta) {
+void GlobalValue::setSanitizerMetadata(SanitizerMetadata Meta) {
   getContext().pImpl->GlobalValueSanitizerMetadata[this] = Meta;
   HasSanitizerMetadata = true;
 }
@@ -236,9 +236,7 @@ void GlobalValue::setSanitizerMetadata(const SanitizerMetadata &Meta) {
 void GlobalValue::removeSanitizerMetadata() {
   DenseMap<const GlobalValue *, SanitizerMetadata> &MetadataMap =
       getContext().pImpl->GlobalValueSanitizerMetadata;
-  auto It = MetadataMap.find(this);
-  if (It != MetadataMap.end())
-    MetadataMap.erase(It);
+  MetadataMap.erase(this);
   HasSanitizerMetadata = false;
 }
 

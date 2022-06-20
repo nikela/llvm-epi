@@ -102,23 +102,24 @@ declare <vscale x 1 x i1> @llvm.riscv.vmand.nxv1i1.i64(<vscale x 1 x i1>, <vscal
 define void @test6(i32* nocapture readonly %A, i32* nocapture %B, i64 %n) {
 ; CHECK-LABEL: test6:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a6, a2, e32, m1, ta, mu
-; CHECK-NEXT:    beqz a6, .LBB5_3
+; CHECK-NEXT:    vsetvli a3, a2, e32, m1, ta, mu
+; CHECK-NEXT:    beqz a3, .LBB5_3
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:  .LBB5_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    slli a5, a4, 2
-; CHECK-NEXT:    add a3, a0, a5
-; CHECK-NEXT:    vle32.v v8, (a3)
+; CHECK-NEXT:    add a6, a0, a5
+; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
+; CHECK-NEXT:    vle32.v v8, (a6)
 ; CHECK-NEXT:    vmsle.vi v9, v8, -3
 ; CHECK-NEXT:    vmsgt.vi v10, v8, 2
 ; CHECK-NEXT:    vmor.mm v0, v9, v10
-; CHECK-NEXT:    add a3, a1, a5
-; CHECK-NEXT:    vse32.v v8, (a3), v0.t
-; CHECK-NEXT:    add a4, a4, a6
-; CHECK-NEXT:    vsetvli a6, a2, e32, m1, ta, mu
-; CHECK-NEXT:    bnez a6, .LBB5_2
+; CHECK-NEXT:    add a5, a5, a1
+; CHECK-NEXT:    vse32.v v8, (a5), v0.t
+; CHECK-NEXT:    add a4, a4, a3
+; CHECK-NEXT:    vsetvli a3, a2, e32, m1, ta, mu
+; CHECK-NEXT:    bnez a3, .LBB5_2
 ; CHECK-NEXT:  .LBB5_3: # %for.cond.cleanup
 ; CHECK-NEXT:    ret
 entry:
@@ -491,14 +492,13 @@ entry:
 }
 
 ; Fault first loads can modify VL.
-; TODO: The first and third VSETVLIs are redundant here.
+; TODO: The VSETVLI of vadd could be removed here.
 define <vscale x 1 x i64> @vleNff(i64* %str, i64 %n, i64 %x) {
 ; CHECK-LABEL: vleNff:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64ff.v v8, (a0)
-; CHECK-NEXT:    csrr a0, vl
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, tu, mu
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, tu, mu
 ; CHECK-NEXT:    vadd.vx v8, v8, a2
 ; CHECK-NEXT:    ret
 entry:
@@ -508,6 +508,25 @@ entry:
   %3 = extractvalue { <vscale x 1 x i64>, i64 } %2, 0
   %4 = extractvalue { <vscale x 1 x i64>, i64 } %2, 1
   %5 = tail call <vscale x 1 x i64> @llvm.riscv.vadd.nxv1i64.i64.i64(<vscale x 1 x i64> %3, <vscale x 1 x i64> %3, i64 %x, i64 %4)
+  ret <vscale x 1 x i64> %5
+}
+
+; Similiar test case, but use same policy for vleff and vadd.
+; Note: The test may be redundant if we could fix the TODO of @vleNff.
+define <vscale x 1 x i64> @vleNff2(i64* %str, i64 %n, i64 %x) {
+; CHECK-LABEL: vleNff2:
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vle64ff.v v8, (a0)
+; CHECK-NEXT:    vadd.vx v8, v8, a2
+; CHECK-NEXT:    ret
+entry:
+  %0 = tail call i64 @llvm.riscv.vsetvli.i64(i64 %n, i64 0, i64 2)
+  %1 = bitcast i64* %str to <vscale x 1 x i64>*
+  %2 = tail call { <vscale x 1 x i64>, i64 } @llvm.riscv.vleff.nxv1i64.i64(<vscale x 1 x i64> undef, <vscale x 1 x i64>* %1, i64 %0)
+  %3 = extractvalue { <vscale x 1 x i64>, i64 } %2, 0
+  %4 = extractvalue { <vscale x 1 x i64>, i64 } %2, 1
+  %5 = tail call <vscale x 1 x i64> @llvm.riscv.vadd.nxv1i64.i64.i64(<vscale x 1 x i64> undef, <vscale x 1 x i64> %3, i64 %x, i64 %4)
   ret <vscale x 1 x i64> %5
 }
 

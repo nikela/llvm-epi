@@ -1088,7 +1088,7 @@ define <32 x double> @vpmerge_vv_v32f64(<32 x double> %va, <32 x double> %vb, <3
 ; RV32-NEXT:    mv a1, a3
 ; RV32-NEXT:  .LBB79_2:
 ; RV32-NEXT:    vle64.v v8, (a0)
-; RV32-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV32-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vi v0, v1, 2
 ; RV32-NEXT:    vsetvli zero, a1, e64, m8, tu, mu
 ; RV32-NEXT:    li a0, 16
@@ -1144,7 +1144,7 @@ define <32 x double> @vpmerge_vv_v32f64(<32 x double> %va, <32 x double> %vb, <3
 ; RV64-NEXT:    mv a1, a3
 ; RV64-NEXT:  .LBB79_2:
 ; RV64-NEXT:    vle64.v v8, (a0)
-; RV64-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV64-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV64-NEXT:    vslidedown.vi v0, v1, 2
 ; RV64-NEXT:    vsetvli zero, a1, e64, m8, tu, mu
 ; RV64-NEXT:    li a0, 16
@@ -1183,7 +1183,7 @@ define <32 x double> @vpmerge_vf_v32f64(double %a, <32 x double> %vb, <32 x i1> 
 ; CHECK-NEXT:  # %bb.1:
 ; CHECK-NEXT:    mv a1, a2
 ; CHECK-NEXT:  .LBB80_2:
-; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v0, v24, 2
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m8, tu, mu
 ; CHECK-NEXT:    li a1, 16

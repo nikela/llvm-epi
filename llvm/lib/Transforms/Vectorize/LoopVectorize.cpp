@@ -511,11 +511,6 @@ public:
   /// new unrolled loop, where UF is the unroll factor.
   using VectorParts = SmallVector<Value *, 2>;
 
-  /// Vectorize a single vector PHINode in a block in the VPlan-native path
-  /// only.
-  void widenPHIInstruction(Instruction *PN, VPWidenPHIRecipe *PhiR,
-                           VPTransformState &State);
-
   /// A helper function to scalarize a single Instruction in the innermost loop.
   /// Generates a sequence of scalar instances for each lane between \p MinLane
   /// and \p MaxLane, times each part between \p MinPart and \p MaxPart,
@@ -541,11 +536,10 @@ public:
 
   /// Set the debug location in the builder \p Ptr using the debug location in
   /// \p V. If \p Ptr is None then it uses the class member's Builder.
-  void setDebugLocFromInst(const Value *V,
-                           Optional<IRBuilderBase *> CustomBuilder = None);
+  void setDebugLocFromInst(const Value *V);
 
-  /// Fix the non-induction PHIs in the OrigPHIsToFix vector.
-  void fixNonInductionPHIs(VPTransformState &State);
+  /// Fix the non-induction PHIs in \p Plan.
+  void fixNonInductionPHIs(VPlan &Plan, VPTransformState &State);
 
   /// Returns true if the reordering of FP operations is not allowed, but we are
   /// able to vectorize with strict in-order reductions for the given RdxDesc.
@@ -794,10 +788,6 @@ protected:
   // so we can later fix-up the external users of the induction variables.
   DenseMap<PHINode *, Value *> IVEndValues;
 
-  // Vector of original scalar PHIs whose corresponding widened PHIs need to be
-  // fixed up at the end of vector code generation.
-  SmallVector<PHINode *, 8> OrigPHIsToFix;
-
   /// BFI and PSI are used to check for profile guided size optimizations.
   BlockFrequencyInfo *BFI;
   ProfileSummaryInfo *PSI;
@@ -985,8 +975,7 @@ static Instruction *getDebugLocFromInstOrOperands(Instruction *I) {
 }
 
 void InnerLoopVectorizer::setDebugLocFromInst(
-    const Value *V, Optional<IRBuilderBase *> CustomBuilder) {
-  IRBuilderBase *B = (CustomBuilder == None) ? &Builder : *CustomBuilder;
+    const Value *V) {
   if (const Instruction *Inst = dyn_cast_or_null<Instruction>(V)) {
     const DILocation *DIL = Inst->getDebugLoc();
 
@@ -998,15 +987,15 @@ void InnerLoopVectorizer::setDebugLocFromInst(
       auto NewDIL =
           DIL->cloneByMultiplyingDuplicationFactor(UF * VF.getKnownMinValue());
       if (NewDIL)
-        B->SetCurrentDebugLocation(NewDIL.getValue());
+        Builder.SetCurrentDebugLocation(NewDIL.getValue());
       else
         LLVM_DEBUG(dbgs()
                    << "Failed to create new discriminator: "
                    << DIL->getFilename() << " Line: " << DIL->getLine());
     } else
-      B->SetCurrentDebugLocation(DIL);
+      Builder.SetCurrentDebugLocation(DIL);
   } else
-    B->SetCurrentDebugLocation(DebugLoc());
+    Builder.SetCurrentDebugLocation(DebugLoc());
 }
 
 /// Write a \p DebugMsg about vectorization to the debug output stream. If \p I
@@ -1725,15 +1714,10 @@ private:
   /// \return the maximized element count based on the targets vector
   /// registers and the loop trip-count, but limited to a maximum safe VF.
   /// This is a helper function of computeFeasibleMaxVF.
-  /// FIXME: MaxSafeVF is currently passed by reference to avoid some obscure
-  /// issue that occurred on one of the buildbots which cannot be reproduced
-  /// without having access to the properietary compiler (see comments on
-  /// D98509). The issue is currently under investigation and this workaround
-  /// will be removed as soon as possible.
   ElementCount getMaximizedVFForTarget(unsigned ConstTripCount,
                                        unsigned SmallestType,
                                        unsigned WidestType,
-                                       const ElementCount &MaxSafeVF,
+                                       ElementCount MaxSafeVF,
                                        bool FoldTailByMasking);
 
   /// \return the maximum legal scalable VF, based on the safe max number
@@ -3754,11 +3738,8 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State,
     truncateToMinimalBitwidths(State);
 
   // Fix widened non-induction PHIs by setting up the PHI operands.
-  if (OrigPHIsToFix.size()) {
-    assert(EnableVPlanNativePath &&
-           "Unexpected non-induction PHIs for fixup in non VPlan-native path");
-    fixNonInductionPHIs(State);
-  }
+  if (EnableVPlanNativePath)
+    fixNonInductionPHIs(Plan, State);
 
   // At this point every instruction in the original loop is widened to a
   // vector form. Now we need to fix the recurrences in the loop. These PHI
@@ -4300,17 +4281,23 @@ void InnerLoopVectorizer::sinkScalarOperands(Instruction *PredInst) {
   } while (Changed);
 }
 
-void InnerLoopVectorizer::fixNonInductionPHIs(VPTransformState &State) {
-  for (PHINode *OrigPhi : OrigPHIsToFix) {
-    VPWidenPHIRecipe *VPPhi =
-        cast<VPWidenPHIRecipe>(State.Plan->getVPValue(OrigPhi));
-    PHINode *NewPhi = cast<PHINode>(State.get(VPPhi, 0));
-    // Make sure the builder has a valid insert point.
-    Builder.SetInsertPoint(NewPhi);
-    for (unsigned i = 0; i < VPPhi->getNumOperands(); ++i) {
-      VPValue *Inc = VPPhi->getIncomingValue(i);
-      VPBasicBlock *VPBB = VPPhi->getIncomingBlock(i);
-      NewPhi->addIncoming(State.get(Inc, 0), State.CFG.VPBB2IRBB[VPBB]);
+void InnerLoopVectorizer::fixNonInductionPHIs(VPlan &Plan,
+                                              VPTransformState &State) {
+  auto Iter = depth_first(
+      VPBlockRecursiveTraversalWrapper<VPBlockBase *>(Plan.getEntry()));
+  for (VPBasicBlock *VPBB : VPBlockUtils::blocksOnly<VPBasicBlock>(Iter)) {
+    for (VPRecipeBase &P : VPBB->phis()) {
+      VPWidenPHIRecipe *VPPhi = dyn_cast<VPWidenPHIRecipe>(&P);
+      if (!VPPhi)
+        continue;
+      PHINode *NewPhi = cast<PHINode>(State.get(VPPhi, 0));
+      // Make sure the builder has a valid insert point.
+      Builder.SetInsertPoint(NewPhi);
+      for (unsigned i = 0; i < VPPhi->getNumOperands(); ++i) {
+        VPValue *Inc = VPPhi->getIncomingValue(i);
+        VPBasicBlock *VPBB = VPPhi->getIncomingBlock(i);
+        NewPhi->addIncoming(State.get(Inc, 0), State.CFG.VPBB2IRBB[VPBB]);
+      }
     }
   }
 }
@@ -4318,23 +4305,6 @@ void InnerLoopVectorizer::fixNonInductionPHIs(VPTransformState &State) {
 bool InnerLoopVectorizer::useOrderedReductions(
     const RecurrenceDescriptor &RdxDesc) {
   return Cost->useOrderedReductions(RdxDesc);
-}
-
-void InnerLoopVectorizer::widenPHIInstruction(Instruction *PN,
-                                              VPWidenPHIRecipe *PhiR,
-                                              VPTransformState &State) {
-  assert(EnableVPlanNativePath &&
-         "Non-native vplans are not expected to have VPWidenPHIRecipes.");
-  // Currently we enter here in the VPlan-native path for non-induction
-  // PHIs where all control flow is uniform. We simply widen these PHIs.
-  // Create a vector phi with no operands - the vector phi operands will be
-  // set at the end of vector code generation.
-  Type *VecTy = (State.VF.isScalar())
-                    ? PN->getType()
-                    : VectorType::get(PN->getType(), State.VF);
-  Value *VecPhi = Builder.CreatePHI(VecTy, PN->getNumOperands(), "vec.phi");
-  State.set(PhiR, VecPhi, 0);
-  OrigPHIsToFix.push_back(cast<PHINode>(PN));
 }
 
 /// A helper function for checking whether an integer division-related
@@ -4465,7 +4435,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
     // Widen compares. Generate vector compares.
     bool FCmp = (I.getOpcode() == Instruction::FCmp);
     auto *Cmp = cast<CmpInst>(&I);
-    setDebugLocFromInst(Cmp, &Builder);
+    setDebugLocFromInst(Cmp);
     LLVMContext &LC = Builder.getContext();
     for (unsigned Part = 0; Part < UF; ++Part) {
       Value *A = State.get(User.getOperand(0), Part);
@@ -4516,7 +4486,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   if (Opcode == Instruction::SExt || Opcode == Instruction::ZExt ||
       Opcode == Instruction::Trunc) {
     auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
+    setDebugLocFromInst(CI);
 
     assert(isa<IntegerType>(CI->getType()) && "Invalid destination Int type.");
     IntegerType *DestElemTy = cast<IntegerType>(CI->getType());
@@ -4533,7 +4503,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   //===------------------- Float-to-Float cast instructions ---------------===//
   if (Opcode == Instruction::FPExt || Opcode == Instruction::FPTrunc) {
     auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
+    setDebugLocFromInst(CI);
     Type *DestElemTy = CI->getType();
     Type *SrcElemTy = CI->getOperand(0)->getType();
     assert(DestElemTy->isFloatingPointTy() && SrcElemTy->isFloatingPointTy() &&
@@ -4550,7 +4520,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   //===------------------- Float-to-Int cast instructions -----------------===//
   if (Opcode == Instruction::FPToUI || Opcode == Instruction::FPToSI) {
     auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
+    setDebugLocFromInst(CI);
     Type *DestElemTy = CI->getType();
     Type *SrcElemTy = CI->getOperand(0)->getType();
     assert(DestElemTy->isIntegerTy() && SrcElemTy->isFloatingPointTy() &&
@@ -4561,7 +4531,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   //===------------------- Int-to-Float cast instructions -----------------===//
   if (Opcode == Instruction::UIToFP || Opcode == Instruction::SIToFP) {
     auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
+    setDebugLocFromInst(CI);
     Type *DestElemTy = CI->getType();
     Type *SrcElemTy = CI->getOperand(0)->getType();
     assert(SrcElemTy->isIntegerTy() && DestElemTy->isFloatingPointTy() &&
@@ -4572,7 +4542,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   //===------------------- Int-Ptr cast instructions ----------------------===//
   if (Opcode == Instruction::IntToPtr || Opcode == Instruction::PtrToInt) {
     auto *CI = cast<CastInst>(&I);
-    setDebugLocFromInst(CI, &Builder);
+    setDebugLocFromInst(CI);
     Type *DestElemTy = CI->getType();
     Type *SrcElemTy = CI->getOperand(0)->getType();
     if (Opcode == Instruction::IntToPtr)
@@ -4590,7 +4560,7 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
          "Invalid number of operands.");
 
   // Just widen unops and binops.
-  setDebugLocFromInst(&I, &Builder);
+  setDebugLocFromInst(&I);
 
   for (unsigned Part = 0; Part < UF; ++Part) {
     SmallVector<Value *, 4> Ops;
@@ -4874,7 +4844,7 @@ void LoopVectorizationCostModel::collectLoopScalars(ElementCount VF) {
     }
 
   // Insert the forced scalars.
-  // FIXME: Currently widenPHIInstruction() often creates a dead vector
+  // FIXME: Currently VPWidenPHIRecipe() often creates a dead vector
   // induction variable when the PHI user is scalarized.
   auto ForcedScalar = ForcedScalars.find(VF);
   if (ForcedScalar != ForcedScalars.end())
@@ -5887,7 +5857,7 @@ LoopVectorizationCostModel::computeMaxVF(ElementCount UserVF, unsigned UserIC) {
 
 ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
     unsigned ConstTripCount, unsigned SmallestType, unsigned WidestType,
-    const ElementCount &MaxSafeVF, bool FoldTailByMasking) {
+    ElementCount MaxSafeVF, bool FoldTailByMasking) {
   bool ComputeScalableMaxVF = MaxSafeVF.isScalable();
   TypeSize WidestRegister = TTI.getRegisterBitWidth(
       ComputeScalableMaxVF ? TargetTransformInfo::RGK_ScalableVector
@@ -10934,13 +10904,8 @@ void VPScalarIVStepsRecipe::execute(VPTransformState &State) {
   }
 }
 
-void VPWidenPHIRecipe::execute(VPTransformState &State) {
-  State.ILV->widenPHIInstruction(cast<PHINode>(getUnderlyingValue()), this,
-                                 State);
-}
-
 void VPBlendRecipe::execute(VPTransformState &State) {
-  State.ILV->setDebugLocFromInst(Phi, &State.Builder);
+  State.ILV->setDebugLocFromInst(Phi);
   // We know that all PHIs in non-header blocks are converted into
   // selects, so we don't have to worry about the insertion order and we
   // can just use the builder.
@@ -10979,7 +10944,7 @@ void VPBlendRecipe::execute(VPTransformState &State) {
 }
 
 void VPPredicatedBlendRecipe::execute(VPTransformState &State) {
-  State.ILV->setDebugLocFromInst(Phi, &State.Builder);
+  State.ILV->setDebugLocFromInst(Phi);
   // We know that all PHIs in non-header blocks are converted into
   // selects, so we don't have to worry about the insertion order and we
   // can just use the builder.
