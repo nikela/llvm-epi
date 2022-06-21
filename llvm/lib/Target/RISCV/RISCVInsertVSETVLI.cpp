@@ -1608,7 +1608,8 @@ bool RISCVInsertVSETVLI::needVSETVLI(const MachineInstr &MI,
     if (VRegDef && VRegDef->isImplicitDef() &&
         CurInfo.getSEW() >= Require.getSEW())
       return false;
-    if (CurInfo.hasSameSEW(Require) && CurInfo.hasSamePolicy(Require))
+    if (!CurInfo.hasSEWLMULRatioOnly() && !Require.hasSEWLMULRatioOnly() &&
+        CurInfo.hasSameSEW(Require) && CurInfo.hasSamePolicy(Require))
       return false;
   }
 
