@@ -185,6 +185,7 @@ static bool isScalarMoveInstr(const MachineInstr &MI) {
   }
 }
 
+#if 0
 static bool isSplatMoveInstr(const MachineInstr &MI) {
   switch (MI.getOpcode()) {
   default:
@@ -216,6 +217,7 @@ static bool isSplatOfZeroOrMinusOne(const MachineInstr &MI) {
     return SrcMO.getImm() == 0 || SrcMO.getImm() == -1;
   return SrcMO.isReg() && SrcMO.getReg() == RISCV::X0;
 }
+#endif
 
 /// Get the EEW for a load or store instruction.  Return None if MI is not
 /// a load or store which ignores SEW.
@@ -527,13 +529,15 @@ static DemandedFields getDemanded(const MachineInstr &MI) {
     Res.MaskPolicy = false;
   }
 
+  // FIXME: Disabled until we figure out why this is crashing the testsuite.
+  //
   // A splat of 0/-1 is always a splat of 0/-1, regardless of etype.
   // TODO: We're currently demanding VL + SEWLMULRatio which is sufficient
   // but not neccessary.  What we really need is VLInBytes.
-  if (isSplatOfZeroOrMinusOne(MI)) {
-    Res.SEW = false;
-    Res.LMUL = false;
-  }
+  // if (isSplatOfZeroOrMinusOne(MI)) {
+  //   Res.SEW = false;
+  //   Res.LMUL = false;
+  // }
 
   // If this is a mask reg operation, it only cares about VLMAX.
   // TODO: Possible extensions to this logic
