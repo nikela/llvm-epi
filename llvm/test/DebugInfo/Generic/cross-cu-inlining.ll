@@ -1,7 +1,8 @@
 ; FIXME: Missing DwarfAccelNamesSection on AIX
 ; XFAIL: -aix
-; RUN: %llc_dwarf -O0 -filetype=obj -dwarf-linkage-names=All < %s | llvm-dwarfdump -v -debug-info - | FileCheck -implicit-check-not=DW_TAG %s
-; RUN: %llc_dwarf -accel-tables=Apple -dwarf-linkage-names=All -O0 -filetype=obj < %s | llvm-dwarfdump -v - | FileCheck --check-prefix=CHECK-ACCEL --check-prefix=CHECK %s
+; RUN: %llc_dwarf -mtriple=x86_64 -O0 -filetype=obj -dwarf-linkage-names=All < %s | llvm-dwarfdump -v -debug-info - | FileCheck -implicit-check-not=DW_TAG %s
+; RUN: %llc_dwarf -mtriple=x86_64 -accel-tables=Apple -dwarf-linkage-names=All -O0 -filetype=obj < %s | llvm-dwarfdump -v - | FileCheck --check-prefix=CHECK-ACCEL --check-prefix=CHECK %s
+; REQUIRES: x86-registered-target
 
 ; Build from source:
 ; $ clang++ a.cpp b.cpp -g -c -emit-llvm
