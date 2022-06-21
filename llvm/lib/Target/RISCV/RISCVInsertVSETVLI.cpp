@@ -204,16 +204,6 @@ static bool isSplatMoveInstr(const MachineInstr &MI) {
   case RISCV::PseudoVMV_V_I_MF4:
   case RISCV::PseudoVMV_V_I_MF8:
     return true;
-  // EPI
-  case RISCV::PseudoEPIVMV_V_X_M1:
-  case RISCV::PseudoEPIVMV_V_X_M2:
-  case RISCV::PseudoEPIVMV_V_X_M4:
-  case RISCV::PseudoEPIVMV_V_X_M8:
-  case RISCV::PseudoEPIVMV_V_I_M1:
-  case RISCV::PseudoEPIVMV_V_I_M2:
-  case RISCV::PseudoEPIVMV_V_I_M4:
-  case RISCV::PseudoEPIVMV_V_I_M8:
-    return true;
   }
 }
 
