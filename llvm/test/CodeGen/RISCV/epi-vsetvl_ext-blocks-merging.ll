@@ -8,16 +8,13 @@ define void @test_preserve_extra(i64 %rvl, i64 %extra, i64 %x, <vscale x 1 x dou
 ; CHECK-O0-LABEL: test_preserve_extra:
 ; CHECK-O0:       # %bb.0: # %entry
 ; CHECK-O0-NEXT:    mv a2, a1
-; CHECK-O0-NEXT:    mv a1, a0
-; CHECK-O0-NEXT:    ori a6, a2, 80
-; CHECK-O0-NEXT:    vsetvl a0, a1, a6
+; CHECK-O0-NEXT:    ori a1, a2, 80
+; CHECK-O0-NEXT:    vsetvl a0, a0, a1
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    ori a6, a2, 88
-; CHECK-O0-NEXT:    vsetvl a1, a1, a6
-; CHECK-O0-NEXT:    vle64.v v9, (a3)
-; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    ori a1, a2, 88
 ; CHECK-O0-NEXT:    vsetvl a0, a0, a1
+; CHECK-O0-NEXT:    vle64.v v9, (a3)
+; CHECK-O0-NEXT:    # implicit-def: $v10
 ; CHECK-O0-NEXT:    vle64.v v10, (a4)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vfadd.vv v8, v9, v10
@@ -26,13 +23,11 @@ define void @test_preserve_extra(i64 %rvl, i64 %extra, i64 %x, <vscale x 1 x dou
 ;
 ; CHECK-O2-LABEL: test_preserve_extra:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    ori a6, a1, 80
-; CHECK-O2-NEXT:    vsetvl a2, a0, a6
-; CHECK-O2-NEXT:    ori a6, a1, 88
-; CHECK-O2-NEXT:    vsetvl a0, a0, a6
+; CHECK-O2-NEXT:    ori a2, a1, 80
+; CHECK-O2-NEXT:    vsetvl a0, a0, a2
+; CHECK-O2-NEXT:    ori a2, a1, 88
+; CHECK-O2-NEXT:    vsetvl a0, a0, a2
 ; CHECK-O2-NEXT:    vle64.v v8, (a3)
-; CHECK-O2-NEXT:    ori a3, a1, 88
-; CHECK-O2-NEXT:    vsetvl a0, a2, a3
 ; CHECK-O2-NEXT:    vle64.v v9, (a4)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vse64.v v8, (a5)
