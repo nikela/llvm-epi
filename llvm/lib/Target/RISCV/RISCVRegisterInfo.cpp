@@ -176,7 +176,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   Register FrameReg;
   StackOffset Offset =
       getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg);
-  bool IsRVVSpill = TII->isRVVSpill(MI, /*CheckFIs*/ false) ||
+  bool IsRVVSpill = RISCV::isRVVSpill(MI, /*CheckFIs*/ false) ||
                     // EPI remaining cases.
                     RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode());
   if (!IsRVVSpill)
@@ -278,7 +278,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   }
 
-  auto ZvlssegInfo = TII->isRVVSpillForZvlsseg(MI.getOpcode());
+  auto ZvlssegInfo = RISCV::isRVVSpillForZvlsseg(MI.getOpcode());
   if (ZvlssegInfo) {
     Register VL = MRI.createVirtualRegister(&RISCV::GPRRegClass);
     BuildMI(MBB, II, DL, TII->get(RISCV::PseudoReadVLENB), VL);

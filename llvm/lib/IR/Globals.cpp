@@ -228,7 +228,7 @@ const SanitizerMetadata &GlobalValue::getSanitizerMetadata() const {
   return getContext().pImpl->GlobalValueSanitizerMetadata[this];
 }
 
-void GlobalValue::setSanitizerMetadata(const SanitizerMetadata &Meta) {
+void GlobalValue::setSanitizerMetadata(SanitizerMetadata Meta) {
   getContext().pImpl->GlobalValueSanitizerMetadata[this] = Meta;
   HasSanitizerMetadata = true;
 }
@@ -236,9 +236,7 @@ void GlobalValue::setSanitizerMetadata(const SanitizerMetadata &Meta) {
 void GlobalValue::removeSanitizerMetadata() {
   DenseMap<const GlobalValue *, SanitizerMetadata> &MetadataMap =
       getContext().pImpl->GlobalValueSanitizerMetadata;
-  auto It = MetadataMap.find(this);
-  if (It != MetadataMap.end())
-    MetadataMap.erase(It);
+  MetadataMap.erase(this);
   HasSanitizerMetadata = false;
 }
 
@@ -287,7 +285,7 @@ bool GlobalObject::canIncreaseAlignment() const {
   // alignment specified. (If it is assigned a section, the global
   // could be densely packed with other objects in the section, and
   // increasing the alignment could cause padding issues.)
-  if (hasSection() && getAlign().hasValue())
+  if (hasSection() && getAlign())
     return false;
 
   // On ELF platforms, we're further restricted in that we can't

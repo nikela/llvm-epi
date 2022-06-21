@@ -378,10 +378,10 @@ public:
   }
 
   /// Generate code testing \p addr is not a null address.
-  mlir::Value genIsNotNull(mlir::Location loc, mlir::Value addr);
+  mlir::Value genIsNotNullAddr(mlir::Location loc, mlir::Value addr);
 
   /// Generate code testing \p addr is a null address.
-  mlir::Value genIsNull(mlir::Location loc, mlir::Value addr);
+  mlir::Value genIsNullAddr(mlir::Location loc, mlir::Value addr);
 
   /// Generate code testing \p arg is a NaN.
   mlir::Value genIsNaN(mlir::Location loc, mlir::Value arg);

@@ -41,26 +41,24 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O0-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-O0-NEXT:    ld a1, 40(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a2, 8(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a6, 0(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    ld a3, 16(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld a7, 24(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    ld t0, 32(sp) # 8-byte Folded Reload
-; CHECK-O0-NEXT:    sub a4, a1, a2
-; CHECK-O0-NEXT:    ori a5, a6, 88
-; CHECK-O0-NEXT:    vsetvl a0, a4, a5
-; CHECK-O0-NEXT:    slli a5, a2, 3
-; CHECK-O0-NEXT:    add t0, t0, a5
+; CHECK-O0-NEXT:    ld a5, 24(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a7, 32(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    ld a0, 0(sp) # 8-byte Folded Reload
+; CHECK-O0-NEXT:    sub a6, a1, a2
+; CHECK-O0-NEXT:    ori a4, a0, 88
+; CHECK-O0-NEXT:    vsetvl a0, a6, a4
+; CHECK-O0-NEXT:    slli a4, a2, 3
+; CHECK-O0-NEXT:    add a7, a7, a4
 ; CHECK-O0-NEXT:    # implicit-def: $v9
-; CHECK-O0-NEXT:    vle64.v v9, (t0)
-; CHECK-O0-NEXT:    vsetvli zero, a4, e64, m1, ta, mu
-; CHECK-O0-NEXT:    add a7, a7, a5
+; CHECK-O0-NEXT:    vle64.v v9, (a7)
+; CHECK-O0-NEXT:    vsetvli zero, a6, e64, m1, ta, mu
+; CHECK-O0-NEXT:    add a5, a5, a4
 ; CHECK-O0-NEXT:    # implicit-def: $v10
-; CHECK-O0-NEXT:    vle64.v v10, (a7)
+; CHECK-O0-NEXT:    vle64.v v10, (a5)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vfadd.vv v8, v9, v10
-; CHECK-O0-NEXT:    add a3, a3, a5
-; CHECK-O0-NEXT:    ori a5, a6, 88
-; CHECK-O0-NEXT:    vsetvl a4, a4, a5
+; CHECK-O0-NEXT:    add a3, a3, a4
 ; CHECK-O0-NEXT:    vse64.v v8, (a3)
 ; CHECK-O0-NEXT:    add a0, a0, a2
 ; CHECK-O0-NEXT:    mv a2, a0
@@ -90,14 +88,12 @@ define void @test_extra_from_gvl(i64 %n, double* %a, double* %b, double* %c) {
 ; CHECK-O2-NEXT:    add t1, a1, t0
 ; CHECK-O2-NEXT:    vle64.v v8, (t1)
 ; CHECK-O2-NEXT:    vsetvli zero, a6, e64, m1, ta, mu
-; CHECK-O2-NEXT:    add t1, a2, t0
-; CHECK-O2-NEXT:    vle64.v v9, (t1)
+; CHECK-O2-NEXT:    add a6, a2, t0
+; CHECK-O2-NEXT:    vle64.v v9, (a6)
 ; CHECK-O2-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-O2-NEXT:    add t0, a3, t0
-; CHECK-O2-NEXT:    ori t1, a4, 88
-; CHECK-O2-NEXT:    vsetvl a6, a6, t1
+; CHECK-O2-NEXT:    add a6, a3, t0
 ; CHECK-O2-NEXT:    add a5, a7, a5
-; CHECK-O2-NEXT:    vse64.v v8, (t0)
+; CHECK-O2-NEXT:    vse64.v v8, (a6)
 ; CHECK-O2-NEXT:    blt a5, a0, .LBB0_4
 ; CHECK-O2-NEXT:  .LBB0_5: # %for.cond.cleanup
 ; CHECK-O2-NEXT:    ret

@@ -2524,7 +2524,8 @@ void IntrinsicLibrary::genGetCommandArgument(
         fir::runtime::genArgumentValue(builder, loc, number, valBox, errBox);
     if (isStaticallyPresent(status)) {
       mlir::Value statAddr = fir::getBase(status);
-      mlir::Value statIsPresentAtRuntime = builder.genIsNotNull(loc, statAddr);
+      mlir::Value statIsPresentAtRuntime =
+          builder.genIsNotNullAddr(loc, statAddr);
       builder.genIfThen(loc, statIsPresentAtRuntime)
           .genThen(
               [&]() { builder.createStoreWithConvert(loc, stat, statAddr); })
@@ -2533,7 +2534,7 @@ void IntrinsicLibrary::genGetCommandArgument(
   }
   if (isStaticallyPresent(length)) {
     mlir::Value lenAddr = fir::getBase(length);
-    mlir::Value lenIsPresentAtRuntime = builder.genIsNotNull(loc, lenAddr);
+    mlir::Value lenIsPresentAtRuntime = builder.genIsNotNullAddr(loc, lenAddr);
     builder.genIfThen(loc, lenIsPresentAtRuntime)
         .genThen([&]() {
           mlir::Value len =
@@ -2563,7 +2564,7 @@ void IntrinsicLibrary::genGetEnvironmentVariable(
     mlir::Type i1Ty = builder.getI1Type();
     mlir::Value trimNameAddr = fir::getBase(trimName);
     mlir::Value trimNameIsPresentAtRuntime =
-        builder.genIsNotNull(loc, trimNameAddr);
+        builder.genIsNotNullAddr(loc, trimNameAddr);
     trim = builder
                .genIfOp(loc, {i1Ty}, trimNameIsPresentAtRuntime,
                         /*withElseRegion=*/true)
@@ -2594,7 +2595,8 @@ void IntrinsicLibrary::genGetEnvironmentVariable(
                                                          valBox, trim, errBox);
     if (isStaticallyPresent(status)) {
       mlir::Value statAddr = fir::getBase(status);
-      mlir::Value statIsPresentAtRuntime = builder.genIsNotNull(loc, statAddr);
+      mlir::Value statIsPresentAtRuntime =
+          builder.genIsNotNullAddr(loc, statAddr);
       builder.genIfThen(loc, statIsPresentAtRuntime)
           .genThen(
               [&]() { builder.createStoreWithConvert(loc, stat, statAddr); })
@@ -2604,7 +2606,7 @@ void IntrinsicLibrary::genGetEnvironmentVariable(
 
   if (isStaticallyPresent(length)) {
     mlir::Value lenAddr = fir::getBase(length);
-    mlir::Value lenIsPresentAtRuntime = builder.genIsNotNull(loc, lenAddr);
+    mlir::Value lenIsPresentAtRuntime = builder.genIsNotNullAddr(loc, lenAddr);
     builder.genIfThen(loc, lenIsPresentAtRuntime)
         .genThen([&]() {
           mlir::Value len =
@@ -3445,7 +3447,7 @@ IntrinsicLibrary::genSize(mlir::Type resultType,
     return builder.createConvert(
         loc, resultType, fir::runtime::genSizeDim(builder, loc, array, dim));
 
-  mlir::Value isDynamicallyAbsent = builder.genIsNull(loc, dim);
+  mlir::Value isDynamicallyAbsent = builder.genIsNullAddr(loc, dim);
   return builder
       .genIfOp(loc, {resultType}, isDynamicallyAbsent,
                /*withElseRegion=*/true)

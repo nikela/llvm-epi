@@ -1,6 +1,7 @@
 ; XFAIL: -aix
-; RUN: %llc_dwarf -accel-tables=Apple -filetype=obj -o - < %s \
+; RUN: %llc_dwarf -mtriple x86_64 -accel-tables=Apple -filetype=obj -o - < %s \
 ; RUN:   | llvm-dwarfdump -apple-names - | FileCheck %s
+; REQUIRES: x86-registered-target
 
 ; Generated from the following C code using
 ; clang -S -emit-llvm hash-collision.c

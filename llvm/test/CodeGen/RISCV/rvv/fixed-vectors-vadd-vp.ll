@@ -1534,7 +1534,7 @@ define <32 x i64> @vadd_vx_v32i64(<32 x i64> %va, <32 x i1> %m, i32 zeroext %evl
 ; RV32:       # %bb.0:
 ; RV32-NEXT:    vmv1r.v v1, v0
 ; RV32-NEXT:    li a1, 0
-; RV32-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV32-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vi v0, v0, 2
 ; RV32-NEXT:    li a2, 32
 ; RV32-NEXT:    vsetvli zero, a2, e32, m8, ta, mu
@@ -1560,7 +1560,7 @@ define <32 x i64> @vadd_vx_v32i64(<32 x i64> %va, <32 x i1> %m, i32 zeroext %evl
 ; RV64:       # %bb.0:
 ; RV64-NEXT:    vmv1r.v v24, v0
 ; RV64-NEXT:    li a1, 0
-; RV64-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV64-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV64-NEXT:    addi a2, a0, -16
 ; RV64-NEXT:    vslidedown.vi v0, v0, 2
 ; RV64-NEXT:    bltu a0, a2, .LBB108_2
@@ -1659,7 +1659,7 @@ define <32 x i64> @vadd_vx_v32i64_evl12(<32 x i64> %va, <32 x i1> %m) {
 define <32 x i64> @vadd_vx_v32i64_evl27(<32 x i64> %va, <32 x i1> %m) {
 ; RV32-LABEL: vadd_vx_v32i64_evl27:
 ; RV32:       # %bb.0:
-; RV32-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV32-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vi v1, v0, 2
 ; RV32-NEXT:    li a0, 32
 ; RV32-NEXT:    vsetvli zero, a0, e32, m8, ta, mu
@@ -1673,7 +1673,7 @@ define <32 x i64> @vadd_vx_v32i64_evl27(<32 x i64> %va, <32 x i1> %m) {
 ;
 ; RV64-LABEL: vadd_vx_v32i64_evl27:
 ; RV64:       # %bb.0:
-; RV64-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; RV64-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; RV64-NEXT:    vslidedown.vi v24, v0, 2
 ; RV64-NEXT:    vsetivli zero, 16, e64, m8, ta, mu
 ; RV64-NEXT:    vadd.vi v8, v8, -1, v0.t

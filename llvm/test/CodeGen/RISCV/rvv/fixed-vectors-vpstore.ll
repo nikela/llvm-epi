@@ -299,7 +299,7 @@ define void @vpstore_v32f64(<32 x double> %val, <32 x double>* %ptr, <32 x i1> %
 ; CHECK-NEXT:  # %bb.3:
 ; CHECK-NEXT:    mv a2, a3
 ; CHECK-NEXT:  .LBB23_4:
-; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetivli zero, 2, e8, mf4, ta, mu
 ; CHECK-NEXT:    vslidedown.vi v0, v0, 2
 ; CHECK-NEXT:    addi a0, a0, 128
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m8, ta, mu

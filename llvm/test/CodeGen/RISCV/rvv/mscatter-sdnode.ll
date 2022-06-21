@@ -1831,7 +1831,7 @@ define void @mscatter_nxv16f64(<vscale x 8 x double> %val0, <vscale x 8 x double
 ; RV32-NEXT:    vsoxei32.v v8, (zero), v24, v0.t
 ; RV32-NEXT:    csrr a0, vlenb
 ; RV32-NEXT:    srli a0, a0, 3
-; RV32-NEXT:    vsetvli a1, zero, e8, mf4, tu, mu
+; RV32-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vx v0, v0, a0
 ; RV32-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vsoxei32.v v16, (zero), v28, v0.t
@@ -1852,7 +1852,7 @@ define void @mscatter_nxv16f64(<vscale x 8 x double> %val0, <vscale x 8 x double
 ; RV64-NEXT:    vsoxei64.v v8, (zero), v24, v0.t
 ; RV64-NEXT:    csrr a0, vlenb
 ; RV64-NEXT:    srli a0, a0, 3
-; RV64-NEXT:    vsetvli a1, zero, e8, mf4, tu, mu
+; RV64-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
 ; RV64-NEXT:    vslidedown.vx v0, v0, a0
 ; RV64-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
 ; RV64-NEXT:    addi a0, sp, 16
@@ -1882,7 +1882,7 @@ define void @mscatter_baseidx_nxv16i8_nxv16f64(<vscale x 8 x double> %val0, <vsc
 ; RV32-NEXT:    vsoxei32.v v8, (a0), v24, v0.t
 ; RV32-NEXT:    csrr a1, vlenb
 ; RV32-NEXT:    srli a1, a1, 3
-; RV32-NEXT:    vsetvli a2, zero, e8, mf4, tu, mu
+; RV32-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vx v0, v0, a1
 ; RV32-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vsoxei32.v v16, (a0), v28, v0.t
@@ -1897,7 +1897,7 @@ define void @mscatter_baseidx_nxv16i8_nxv16f64(<vscale x 8 x double> %val0, <vsc
 ; RV64-NEXT:    vsoxei64.v v8, (a0), v24, v0.t
 ; RV64-NEXT:    csrr a1, vlenb
 ; RV64-NEXT:    srli a1, a1, 3
-; RV64-NEXT:    vsetvli a2, zero, e8, mf4, tu, mu
+; RV64-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; RV64-NEXT:    vslidedown.vx v0, v0, a1
 ; RV64-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vsext.vf8 v8, v3
@@ -1922,7 +1922,7 @@ define void @mscatter_baseidx_nxv16i16_nxv16f64(<vscale x 8 x double> %val0, <vs
 ; RV32-NEXT:    vsoxei32.v v8, (a0), v24, v0.t
 ; RV32-NEXT:    csrr a1, vlenb
 ; RV32-NEXT:    srli a1, a1, 3
-; RV32-NEXT:    vsetvli a2, zero, e8, mf4, tu, mu
+; RV32-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; RV32-NEXT:    vslidedown.vx v0, v0, a1
 ; RV32-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; RV32-NEXT:    vsoxei32.v v16, (a0), v28, v0.t
@@ -1937,7 +1937,7 @@ define void @mscatter_baseidx_nxv16i16_nxv16f64(<vscale x 8 x double> %val0, <vs
 ; RV64-NEXT:    vsoxei64.v v8, (a0), v24, v0.t
 ; RV64-NEXT:    csrr a1, vlenb
 ; RV64-NEXT:    srli a1, a1, 3
-; RV64-NEXT:    vsetvli a2, zero, e8, mf4, tu, mu
+; RV64-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; RV64-NEXT:    vslidedown.vx v0, v0, a1
 ; RV64-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
 ; RV64-NEXT:    vsext.vf4 v8, v6

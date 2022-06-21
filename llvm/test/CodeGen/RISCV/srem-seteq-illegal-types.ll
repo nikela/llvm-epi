@@ -665,7 +665,6 @@ define void @test_srem_vec(<3 x i33>* %X) nounwind {
 ; RV32MV-NEXT:    vmerge.vim v8, v8, -1, v0
 ; RV32MV-NEXT:    vsetivli zero, 1, e32, m2, ta, mu
 ; RV32MV-NEXT:    vse32.v v8, (s2)
-; RV32MV-NEXT:    vsetvli zero, zero, e32, m2, tu, mu
 ; RV32MV-NEXT:    vslidedown.vi v10, v8, 1
 ; RV32MV-NEXT:    vmv.x.s a0, v10
 ; RV32MV-NEXT:    vslidedown.vi v10, v8, 2
@@ -760,7 +759,7 @@ define void @test_srem_vec(<3 x i33>* %X) nounwind {
 ; RV64MV-NEXT:    vmsne.vv v0, v8, v10
 ; RV64MV-NEXT:    vmv.v.i v8, 0
 ; RV64MV-NEXT:    vmerge.vim v8, v8, -1, v0
-; RV64MV-NEXT:    vsetivli zero, 1, e64, m2, tu, mu
+; RV64MV-NEXT:    vsetivli zero, 1, e64, m2, ta, mu
 ; RV64MV-NEXT:    vslidedown.vi v10, v8, 2
 ; RV64MV-NEXT:    vmv.x.s a2, v10
 ; RV64MV-NEXT:    slli a3, a2, 31
