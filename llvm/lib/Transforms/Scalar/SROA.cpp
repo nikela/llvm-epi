@@ -650,11 +650,13 @@ class AllocaSlices::SliceBuilder : public PtrUseVisitor<SliceBuilder> {
   /// Set to de-duplicate dead instructions found in the use walk.
   SmallPtrSet<Instruction *, 4> VisitedDeadInsts;
 
+  Type *AllocTy = nullptr;
+
 public:
   SliceBuilder(const DataLayout &DL, AllocaInst &AI, AllocaSlices &AS)
       : PtrUseVisitor<SliceBuilder>(DL),
         AllocSize(DL.getTypeAllocSize(AI.getAllocatedType()).getKnownMinSize()),
-        AS(AS) {}
+        AS(AS), AllocTy(AI.getAllocatedType()) {}
 
 private:
   void markAsDead(Instruction &I) {
@@ -780,6 +782,22 @@ private:
     insertUse(I, Offset, Size, IsSplittable);
   }
 
+  static bool isStructOfScalableVectorType(Type *Ty, Type *FieldTy) {
+    if (!isa<ScalableVectorType>(FieldTy))
+      return false;
+
+    auto *STy = dyn_cast<StructType>(Ty);
+    if (!STy)
+      return false;
+    if (!STy->containsScalableVectorType())
+      return false;
+    for (Type *F : STy->elements()) {
+      if (F != FieldTy)
+        return false;
+    }
+    return true;
+  }
+
   void visitLoadInst(LoadInst &LI) {
     assert((!LI.isSimple() || LI.getType()->isSingleValueType()) &&
            "All simple FCA loads should have been pre-split");
@@ -789,6 +807,11 @@ private:
 
     if (LI.isVolatile() &&
         LI.getPointerAddressSpace() != DL.getAllocaAddrSpace())
+      return PI.setAborted(&LI);
+
+    if ((isa<ScalableVectorType>(AllocTy) !=
+            isa<ScalableVectorType>(LI.getType())) &&
+        !isStructOfScalableVectorType(AllocTy, LI.getType()))
       return PI.setAborted(&LI);
 
     uint64_t Size = DL.getTypeStoreSize(LI.getType()).getKnownMinSize();
@@ -804,6 +827,11 @@ private:
 
     if (SI.isVolatile() &&
         SI.getPointerAddressSpace() != DL.getAllocaAddrSpace())
+      return PI.setAborted(&SI);
+
+    if ((isa<ScalableVectorType>(AllocTy) !=
+            isa<ScalableVectorType>(SI.getValueOperand()->getType())) &&
+        !isStructOfScalableVectorType(AllocTy, SI.getValueOperand()->getType()))
       return PI.setAborted(&SI);
 
     uint64_t Size = DL.getTypeStoreSize(ValOp->getType()).getKnownMinSize();
