@@ -22,11 +22,16 @@
 #include "llvm/Support/EndianStream.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/LEB128.h"
+#include "llvm/Support/Parallel.h"
 #include "llvm/Support/Path.h"
-#include "llvm/Support/SHA256.h"
 
 #if defined(__APPLE__)
 #include <sys/mman.h>
+
+#define COMMON_DIGEST_FOR_OPENSSL
+#include <CommonCrypto/CommonDigest.h>
+#else
+#include "llvm/Support/SHA256.h"
 #endif
 
 #ifdef LLVM_HAVE_LIBXAR
@@ -45,10 +50,16 @@ using namespace lld::macho;
 
 // Reads `len` bytes at data and writes the 32-byte SHA256 checksum to `output`.
 static void sha256(const uint8_t *data, size_t len, uint8_t *output) {
+#if defined(__APPLE__)
+  // FIXME: Make LLVM's SHA256 faster and use it unconditionally. See PR56121
+  // for some notes on this.
+  CC_SHA256(data, len, output);
+#else
   ArrayRef<uint8_t> block(data, len);
   std::array<uint8_t, 32> hash = SHA256::hash(block);
   assert(hash.size() == CodeSignatureSection::hashSize);
   memcpy(output, hash.data(), hash.size());
+#endif
 }
 
 InStruct macho::in;
@@ -842,16 +853,9 @@ SymtabSection::SymtabSection(StringTableSection &stringTableSection)
     : LinkEditSection(segment_names::linkEdit, section_names::symbolTable),
       stringTableSection(stringTableSection) {}
 
-void SymtabSection::emitBeginSourceStab(DWARFUnit *compileUnit) {
+void SymtabSection::emitBeginSourceStab(StringRef sourceFile) {
   StabsEntry stab(N_SO);
-  SmallString<261> dir(compileUnit->getCompilationDir());
-  StringRef sep = sys::path::get_separator();
-  // We don't use `path::append` here because we want an empty `dir` to result
-  // in an absolute path. `append` would give us a relative path for that case.
-  if (!dir.endswith(sep))
-    dir += sep;
-  stab.strx = stringTableSection.addString(
-      saver().save(dir + compileUnit->getUnitDIE().getShortName()));
+  stab.strx = stringTableSection.addString(saver().save(sourceFile));
   stabs.emplace_back(std::move(stab));
 }
 
@@ -946,7 +950,7 @@ void SymtabSection::emitStabs() {
         emitEndSourceStab();
       lastFile = file;
 
-      emitBeginSourceStab(file->compileUnit);
+      emitBeginSourceStab(file->sourceFile());
       emitObjectFileStab(file);
     }
 
@@ -1243,15 +1247,13 @@ uint64_t CodeSignatureSection::getRawSize() const {
 void CodeSignatureSection::writeHashes(uint8_t *buf) const {
   // NOTE: Changes to this functionality should be repeated in llvm-objcopy's
   // MachOWriter::writeSignatureData.
-  uint8_t *code = buf;
-  uint8_t *codeEnd = buf + fileOff;
-  uint8_t *hashes = codeEnd + allHeadersSize;
-  while (code < codeEnd) {
-    sha256(code, std::min(static_cast<size_t>(codeEnd - code), blockSize),
-           hashes);
-    code += blockSize;
-    hashes += hashSize;
-  }
+  uint8_t *hashes = buf + fileOff + allHeadersSize;
+  parallelFor(0, getBlockCount(), [&](size_t i) {
+    sha256(buf + i * blockSize,
+           std::min(static_cast<size_t>(fileOff - i * blockSize),
+                    static_cast<size_t>(blockSize)),
+           hashes + i * hashSize);
+  });
 #if defined(__APPLE__)
   // This is macOS-specific work-around and makes no sense for any
   // other host OS. See https://openradar.appspot.com/FB8914231
