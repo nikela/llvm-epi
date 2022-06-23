@@ -15,6 +15,7 @@
 
 #include "flang/Lower/IntrinsicCall.h"
 #include "flang/Common/static-multimap-view.h"
+#include "flang/Evaluate/tools.h"
 #include "flang/Lower/BuiltinModules.h"
 #include "flang/Lower/ConvertType.h"
 #include "flang/Lower/Mangler.h"
@@ -444,6 +445,7 @@ struct IntrinsicLibrary {
 
   mlir::Value genIEEEIsNaN(mlir::Type, llvm::ArrayRef<mlir::Value>);
   void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
+  fir::ExtendedValue genCLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
 
   /// Lowering for the ABS intrinsic. The ABS intrinsic expects one argument in
   /// the llvm::ArrayRef. The ABS intrinsic is lowered into MLIR/FIR operation
@@ -506,6 +508,7 @@ struct IntrinsicLibrary {
   fir::ExtendedValue genLbound(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genLen(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genLenTrim(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
+  fir::ExtendedValue genLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genMatmul(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genMaxloc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genMaxval(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
@@ -669,6 +672,10 @@ static constexpr IntrinsicHandler handlers[]{
      &I::genCFPointer,
      {{{"cptr", asAddr}, {"fptr", asInquired}, {"shape", asAddr}}},
      /*isElemental=*/false},
+    {"__builtin_c_loc",
+     &I::genCLoc,
+     {{{"x", asBox}}},
+     /*isElemental=*/false},
     {"__builtin_ieee_is_nan", &I::genIEEEIsNaN},
     {"abs", &I::genAbs},
     {"achar", &I::genChar},
@@ -793,6 +800,7 @@ static constexpr IntrinsicHandler handlers[]{
     {"lgt", &I::genCharacterCompare<mlir::arith::CmpIPredicate::sgt>},
     {"lle", &I::genCharacterCompare<mlir::arith::CmpIPredicate::sle>},
     {"llt", &I::genCharacterCompare<mlir::arith::CmpIPredicate::slt>},
+    {"loc", &I::genLoc, {{{"x", asAddr}}}, /*isElemental=*/false},
     {"matmul",
      &I::genMatmul,
      {{{"matrix_a", asAddr}, {"matrix_b", asAddr}}},
@@ -2904,6 +2912,60 @@ IntrinsicLibrary::genLenTrim(mlir::Type resultType,
   auto len =
       fir::factory::CharacterExprHelper(builder, loc).createLenTrim(*charBox);
   return builder.createConvert(loc, resultType, len);
+}
+
+// LOC
+fir::ExtendedValue
+IntrinsicLibrary::genLoc(mlir::Type resultType,
+                         llvm::ArrayRef<fir::ExtendedValue> args) {
+  auto base = fir::getBase(args[0]);
+  auto baseTy = base.getType();
+  auto GetAddrBox = [this](const auto &boxTy, fir::ExtendedValue arg) {
+    auto refTy = builder.getRefType(boxTy.getEleTy());
+    return builder.create<fir::BoxAddrOp>(loc, refTy, fir::getBase(arg));
+  };
+  if (baseTy.isa<fir::BoxType>()) {
+    // FIXME: gfortran assumes LOC has no interface and it will allocate a
+    // temporary for arrays with descriptor.
+    auto addr = GetAddrBox(baseTy.cast<fir::BoxType>(), base);
+    return builder.createConvert(loc, resultType, addr);
+  } else if (baseTy.isa<fir::BoxProcType>()) {
+    auto addr = GetAddrBox(baseTy.cast<fir::BoxProcType>(), base);
+    return builder.createConvert(loc, resultType, addr);
+  } else {
+    return builder.createConvert(loc, resultType, base);
+  }
+}
+
+// C_LOC
+fir::ExtendedValue
+IntrinsicLibrary::genCLoc(mlir::Type resultType,
+                          llvm::ArrayRef<fir::ExtendedValue> args) {
+  // Compute the address of the object getting the address of the box.
+  // FIXME: can we avoid the boxing and unboxing?
+  auto base = fir::getBase(args[0]);
+  auto boxTy = base.getType().dyn_cast<fir::BoxType>();
+  auto refTy = builder.getRefType(boxTy.getEleTy());
+  auto addrBox =
+      builder.create<fir::BoxAddrOp>(loc, refTy, fir::getBase(args[0]));
+
+  // Now wrap the address in the C_PTR structure.
+  mlir::Value res = builder.create<fir::UndefOp>(loc, resultType);
+
+  llvm::StringRef addrFieldName = Fortran::lower::builtin::cptrFieldName;
+  auto cPtrRecTy = resultType.cast<fir::RecordType>();
+  mlir::Type fieldTy = cPtrRecTy.getType(addrFieldName);
+  auto addr = builder.createConvert(loc, fieldTy, addrBox);
+
+  auto addrField =
+      builder.create<fir::FieldIndexOp>(loc, fieldTy, addrFieldName, resultType,
+                                        /*typeParams=*/mlir::ValueRange{});
+
+  res = builder.create<fir::InsertValueOp>(
+      loc, resultType, res, addr,
+      builder.getArrayAttr(addrField.getAttributes()));
+
+  return res;
 }
 
 // LGE, LGT, LLE, LLT

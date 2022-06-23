@@ -1454,9 +1454,16 @@ bool IsBuiltinDerivedType(const DerivedTypeSpec *derived, const char *name) {
   }
 }
 
+bool IsCPtrType(const DerivedTypeSpec *derived) {
+  return IsBuiltinDerivedType(derived, "c_ptr");
+}
+
+bool IsCFunPtrType(const DerivedTypeSpec *derived) {
+  return IsBuiltinDerivedType(derived, "c_funptr");
+}
+
 bool IsIsoCType(const DerivedTypeSpec *derived) {
-  return IsBuiltinDerivedType(derived, "c_ptr") ||
-      IsBuiltinDerivedType(derived, "c_funptr");
+  return IsCPtrType(derived) || IsCFunPtrType(derived);
 }
 
 bool IsTeamType(const DerivedTypeSpec *derived) {

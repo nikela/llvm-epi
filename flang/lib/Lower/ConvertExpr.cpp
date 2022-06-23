@@ -2812,6 +2812,7 @@ public:
             Fortran::lower::getAdaptToByRefAttr(builder)});
   }
 
+#if 0
   /// Lower an actual argument that must be passed via an address.
   /// This generates of the copy-in/copy-out if the actual is not contiguous, or
   /// the creation of the temp if the actual is a variable and \p byValue is
@@ -2903,6 +2904,7 @@ public:
     // address without making a copy.
     return readIfBoxValue(argAddr);
   }
+#endif
 
   /// Lower a non-elemental procedure reference.
   ExtValue genRawProcedureRef(const Fortran::evaluate::ProcedureRef &procRef,
