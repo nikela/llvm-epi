@@ -6227,6 +6227,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   Args.AddLastArg(CmdArgs, options::OPT_funroll_loops,
                   options::OPT_fno_unroll_loops);
 
+  Args.AddLastArg(CmdArgs, options::OPT_fstrict_flex_arrays_EQ);
+
   Args.AddLastArg(CmdArgs, options::OPT_pthread);
 
   if (Args.hasFlag(options::OPT_mspeculative_load_hardening,
@@ -6286,6 +6288,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     if (Args.hasFlag(options::OPT_fgpu_allow_device_init,
                      options::OPT_fno_gpu_allow_device_init, false))
       CmdArgs.push_back("-fgpu-allow-device-init");
+    Args.addOptInFlag(CmdArgs, options::OPT_fhip_kernel_arg_name,
+                      options::OPT_fno_hip_kernel_arg_name);
   }
 
   if (IsCuda || IsHIP) {
