@@ -441,12 +441,17 @@ endfunction(set_windows_version_resource_properties)
 #      This is used to specify that this is a component library of
 #      LLVM which means that the source resides in llvm/lib/ and it is a
 #      candidate for inclusion into libLLVM.so.
+#   EXTRA_OBJECTS
+#      Extra objects (commonly generated with a custom command) that we want
+#      to be linked in in the library. This exists because OBJECT libraries
+#      don't include pregenerated objects in their $<TARGET_OBJECTS> generator
+#      expression.
 #   )
 function(llvm_add_library name)
   cmake_parse_arguments(ARG
     "MODULE;SHARED;STATIC;OBJECT;DISABLE_LLVM_LINK_LLVM_DYLIB;SONAME;NO_INSTALL_RPATH;COMPONENT_LIB"
     "OUTPUT_NAME;PLUGIN_TOOL;ENTITLEMENTS;BUNDLE_PATH"
-    "ADDITIONAL_HEADERS;DEPENDS;LINK_COMPONENTS;LINK_LIBS;OBJLIBS"
+    "ADDITIONAL_HEADERS;DEPENDS;LINK_COMPONENTS;LINK_LIBS;OBJLIBS;EXTRA_OBJECTS"
     ${ARGN})
   list(APPEND LLVM_COMMON_DEPENDS ${ARG_DEPENDS})
   if(ARG_ADDITIONAL_HEADERS)
@@ -454,9 +459,12 @@ function(llvm_add_library name)
     set(ARG_ADDITIONAL_HEADERS ADDITIONAL_HEADERS ${ARG_ADDITIONAL_HEADERS})
   endif()
   if(ARG_OBJLIBS)
+    # Only use what we have been passed.
     set(ALL_FILES ${ARG_OBJLIBS})
   else()
     llvm_process_sources(ALL_FILES ${ARG_UNPARSED_ARGUMENTS} ${ARG_ADDITIONAL_HEADERS})
+    # Include extra objects.
+    list(APPEND ALL_FILES ${ARG_EXTRA_OBJECTS})
   endif()
 
   if(ARG_MODULE)
@@ -493,7 +501,8 @@ function(llvm_add_library name)
       file(WRITE ${DUMMY_FILE} "// This file intentionally empty\n")
       set_property(SOURCE ${DUMMY_FILE} APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-empty-translation-unit")
     endif()
-    set(ALL_FILES "$<TARGET_OBJECTS:${obj_name}>" ${DUMMY_FILE})
+    # Re-add EXTRA_OBJECTS because $<TARGET_OBJECTS> won't include it.
+    set(ALL_FILES "$<TARGET_OBJECTS:${obj_name}>" ${ARG_EXTRA_OBJECTS} ${DUMMY_FILE})
 
     # Do add_dependencies(obj) later due to CMake issue 14747.
     list(APPEND objlibs ${obj_name})
