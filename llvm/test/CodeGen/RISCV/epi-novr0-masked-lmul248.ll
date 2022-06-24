@@ -144,19 +144,17 @@ define void @test_lmul_8(<vscale x 8 x double>* %a0, <vscale x 8 x double>* %a1,
   ; CHECK-NEXT:   [[SLLI:%[0-9]+]]:gpr = SLLI [[COPY]], 32
   ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
-  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm8 = IMPLICIT_DEF
-  ; CHECK-NEXT:   [[COPY4:%[0-9]+]]:vrm8nov0 = COPY [[DEF]]
+  ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
   ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 91 /* e64, m8, ta, mu */, implicit-def $vl, implicit-def $vtype
-  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY4]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 16)
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 16)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
-  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm8 = IMPLICIT_DEF
-  ; CHECK-NEXT:   [[COPY5:%[0-9]+]]:vrm8nov0 = COPY [[DEF1]]
-  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK1:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[COPY5]], [[COPY2]], $v0, $noreg, 6 /* e64 */, 1, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a1, align 16)
+  ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
+  ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK1:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[DEF1]], [[COPY2]], $v0, $noreg, 6 /* e64 */, 1, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a1, align 16)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF2:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
-  ; CHECK-NEXT:   %16:vrm8nov0 = nofpexcept PseudoVFADD_VV_M8_MASK [[DEF2]], killed [[PseudoVLE64_V_M8_MASK]], killed [[PseudoVLE64_V_M8_MASK1]], $v0, $noreg, 6 /* e64 */, 1, implicit $frm, implicit $vl, implicit $vtype
+  ; CHECK-NEXT:   %14:vrm8nov0 = nofpexcept PseudoVFADD_VV_M8_MASK [[DEF2]], killed [[PseudoVLE64_V_M8_MASK]], killed [[PseudoVLE64_V_M8_MASK1]], $v0, $noreg, 6 /* e64 */, 1, implicit $frm, implicit $vl, implicit $vtype
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
-  ; CHECK-NEXT:   PseudoVSE64_V_M8_MASK killed %16, killed [[ADDI]], $v0, $noreg, 6 /* e64 */, implicit $vl, implicit $vtype :: (store unknown-size into %ir.store_addr, align 16)
+  ; CHECK-NEXT:   PseudoVSE64_V_M8_MASK killed %14, killed [[ADDI]], $v0, $noreg, 6 /* e64 */, implicit $vl, implicit $vtype :: (store unknown-size into %ir.store_addr, align 16)
   ; CHECK-NEXT:   PseudoRET
   %store_addr = bitcast i8* @scratch to <vscale x 8 x double>*
 

@@ -270,7 +270,7 @@ static SDValue getCopyFromParts(SelectionDAG &DAG, const SDLoc &DL,
       // For a truncate, see if we have any information to
       // indicate whether the truncated bits will always be
       // zero or sign-extension.
-      if (AssertOp.hasValue())
+      if (AssertOp)
         Val = DAG.getNode(*AssertOp, DL, PartEVT, Val,
                           DAG.getValueType(ValueVT));
       return DAG.getNode(ISD::TRUNCATE, DL, ValueVT, Val);
@@ -324,7 +324,7 @@ static SDValue getCopyFromPartsVector(SelectionDAG &DAG, const SDLoc &DL,
                                       Optional<CallingConv::ID> CallConv) {
   assert(ValueVT.isVector() && "Not a vector value");
   assert(NumParts > 0 && "No parts to assemble!");
-  const bool IsABIRegCopy = CallConv.hasValue();
+  const bool IsABIRegCopy = CallConv.has_value();
 
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   SDValue Val = Parts[0];
@@ -338,7 +338,7 @@ static SDValue getCopyFromPartsVector(SelectionDAG &DAG, const SDLoc &DL,
 
     if (IsABIRegCopy) {
       NumRegs = TLI.getVectorTypeBreakdownForCallingConv(
-          *DAG.getContext(), CallConv.getValue(), ValueVT, IntermediateVT,
+          *DAG.getContext(), *CallConv, ValueVT, IntermediateVT,
           NumIntermediates, RegisterVT);
     } else {
       NumRegs =
@@ -648,7 +648,7 @@ static void getCopyToPartsVector(SelectionDAG &DAG, const SDLoc &DL,
   EVT ValueVT = Val.getValueType();
   assert(ValueVT.isVector() && "Not a vector");
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
-  const bool IsABIRegCopy = CallConv.hasValue();
+  const bool IsABIRegCopy = CallConv.has_value();
 
   if (NumParts == 1) {
     EVT PartEVT = PartVT;
@@ -727,7 +727,7 @@ static void getCopyToPartsVector(SelectionDAG &DAG, const SDLoc &DL,
     DestEltCnt = ElementCount::getFixed(NumIntermediates);
 
   EVT BuiltVectorTy = EVT::getVectorVT(
-      *DAG.getContext(), IntermediateVT.getScalarType(), DestEltCnt.getValue());
+      *DAG.getContext(), IntermediateVT.getScalarType(), *DestEltCnt);
 
   if (ValueVT == BuiltVectorTy) {
     // Nothing to do.
@@ -2748,10 +2748,10 @@ SelectionDAGBuilder::visitSPDescriptorFailure(StackProtectorDescriptor &SPD) {
   SDValue Chain =
       TLI.makeLibCall(DAG, RTLIB::STACKPROTECTOR_CHECK_FAIL, MVT::isVoid,
                       None, CallOptions, getCurSDLoc()).second;
-  // On PS4, the "return address" must still be within the calling function,
-  // even if it's at the very end, so emit an explicit TRAP here.
+  // On PS4/PS5, the "return address" must still be within the calling
+  // function, even if it's at the very end, so emit an explicit TRAP here.
   // Passing 'true' for doesNotReturn above won't generate the trap for us.
-  if (TM.getTargetTriple().isPS4())
+  if (TM.getTargetTriple().isPS())
     Chain = DAG.getNode(ISD::TRAP, getCurSDLoc(), MVT::Other, Chain);
   // WebAssembly needs an unreachable instruction after a non-returning call,
   // because the function return type can be different from __stack_chk_fail's
@@ -4469,7 +4469,7 @@ void SelectionDAGBuilder::visitMaskedScatter(const CallInst &I) {
   EVT VT = Src0.getValueType();
   Align Alignment = cast<ConstantInt>(I.getArgOperand(2))
                         ->getMaybeAlignValue()
-                        .getValueOr(DAG.getEVTAlign(VT.getScalarType()));
+                        .value_or(DAG.getEVTAlign(VT.getScalarType()));
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
 
   SDValue Base;
@@ -4575,7 +4575,7 @@ void SelectionDAGBuilder::visitMaskedGather(const CallInst &I) {
   EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
   Align Alignment = cast<ConstantInt>(I.getArgOperand(1))
                         ->getMaybeAlignValue()
-                        .getValueOr(DAG.getEVTAlign(VT.getScalarType()));
+                        .value_or(DAG.getEVTAlign(VT.getScalarType()));
 
   const MDNode *Ranges = I.getMetadata(LLVMContext::MD_range);
 
@@ -4715,7 +4715,7 @@ void SelectionDAGBuilder::visitAtomicLoad(const LoadInst &I) {
   EVT MemVT = TLI.getMemValueType(DAG.getDataLayout(), I.getType());
 
   if (!TLI.supportsUnalignedAtomics() &&
-      I.getAlignment() < MemVT.getSizeInBits() / 8)
+      I.getAlign().value() < MemVT.getSizeInBits() / 8)
     report_fatal_error("Cannot generate unaligned atomic load");
 
   auto Flags = TLI.getLoadMemOperandFlags(I, DAG.getDataLayout());
@@ -4767,7 +4767,7 @@ void SelectionDAGBuilder::visitAtomicStore(const StoreInst &I) {
   EVT MemVT =
       TLI.getMemValueType(DAG.getDataLayout(), I.getValueOperand()->getType());
 
-  if (I.getAlignment() < MemVT.getSizeInBits() / 8)
+  if (I.getAlign().value() < MemVT.getSizeInBits() / 8)
     report_fatal_error("Cannot generate unaligned atomic store");
 
   auto Flags = TLI.getStoreMemOperandFlags(I, DAG.getDataLayout());
@@ -6422,7 +6422,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     SDValue Result;
     Result = DAG.getNode(
         ISD::FPTRUNC_ROUND, sdl, VT, getValue(I.getArgOperand(0)),
-        DAG.getTargetConstant((int)RoundMode.getValue(), sdl,
+        DAG.getTargetConstant((int)*RoundMode, sdl,
                               TLI.getPointerTy(DAG.getDataLayout())));
     setValue(&I, Result);
 
@@ -7353,7 +7353,7 @@ void SelectionDAGBuilder::visitConstrainedFPIntrinsic(
   };
 
   SDVTList VTs = DAG.getVTList(ValueVTs);
-  fp::ExceptionBehavior EB = FPI.getExceptionBehavior().getValue();
+  fp::ExceptionBehavior EB = *FPI.getExceptionBehavior();
 
   SDNodeFlags Flags;
   if (EB == fp::ExceptionBehavior::ebIgnore)
@@ -7425,6 +7425,10 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
 #include "llvm/IR/VPIntrinsics.def"
   }
 
+  if (!ResOPC)
+    llvm_unreachable(
+        "Inconsistency: no SDNode available for this VPIntrinsic!");
+
   if (*ResOPC == ISD::VP_REDUCE_SEQ_FADD ||
       *ResOPC == ISD::VP_REDUCE_SEQ_FMUL) {
     if (VPIntrin.getFastMathFlags().allowReassoc())
@@ -7432,7 +7436,7 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
                                                 : ISD::VP_REDUCE_FMUL;
   }
 
-  return ResOPC.getValue();
+  return *ResOPC;
 }
 
 void SelectionDAGBuilder::visitVPLoadGather(const VPIntrinsic &VPIntrin, EVT VT,

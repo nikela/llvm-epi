@@ -941,14 +941,14 @@ RISCVFrameLowering::assignRVVStackObjectOffsets(MachineFrameInfo &MFI) const {
   return std::make_pair(StackSize, RVVStackAlign);
 }
 
-static bool hasRVVSpillWithFIs(MachineFunction &MF, const RISCVInstrInfo &TII) {
+static bool hasRVVSpillWithFIs(MachineFunction &MF) {
   if (!MF.getSubtarget<RISCVSubtarget>().hasVInstructions())
     return false;
-  return any_of(MF, [&TII](const MachineBasicBlock &MBB) {
-    return any_of(MBB, [&TII](const MachineInstr &MI) {
-      return TII.isRVVSpill(MI, /*CheckFIs*/ true);
-    });
-  });
+  for (const MachineBasicBlock &MBB : MF)
+    for (const MachineInstr &MI : MBB)
+      if (RISCV::isRVVSpill(MI, /*CheckFIs*/ true))
+        return true;
+  return false;
 }
 
 void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
@@ -969,9 +969,18 @@ void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
   // Ensure the entire stack is aligned to at least the RVV requirement: some
   // scalable-vector object alignments are not considered by the
   // target-independent code.
+#ifndef NDEBUG
+  bool HasBPBeforeRVV = hasBP(MF);
+#endif
+  // FIXME - This should not be needed if we ensure the alignment is
+  // correctly set before reaching here.
   MFI.ensureMaxAlignment(RVVStackAlign);
-
-  const RISCVInstrInfo &TII = *MF.getSubtarget<RISCVSubtarget>().getInstrInfo();
+#ifndef NDEBUG
+  // Ensure we're stable when it comes to the frame layout even if we
+  // have somehow increased the stack alignment.
+  assert((!hasBP(MF) || HasBPBeforeRVV == hasBP(MF)) &&
+         "assignment of RVV stack objects causes BP to become needed");
+#endif
 
   // estimateStackSize has been observed to under-estimate the final stack
   // size, so give ourselves wiggle-room by checking for stack size
@@ -982,7 +991,7 @@ void RISCVFrameLowering::processFunctionBeforeFrameFinalized(
   // RVV loads & stores have no capacity to hold the immediate address offsets
   // so we must always reserve an emergency spill slot if the MachineFunction
   // contains any RVV spills.
-  if (!isInt<11>(MFI.estimateStackSize(MF)) || hasRVVSpillWithFIs(MF, TII)) {
+  if (!isInt<11>(MFI.estimateStackSize(MF)) || hasRVVSpillWithFIs(MF)) {
     int RegScavFI = MFI.CreateStackObject(RegInfo->getSpillSize(*RC),
                                           RegInfo->getSpillAlign(*RC), false);
     RS->addScavengingFrameIndex(RegScavFI);

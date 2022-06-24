@@ -398,7 +398,7 @@ define <vscale x 16 x double> @vfneg_vv_nxv16f64(<vscale x 16 x double> %va, <vs
 ; CHECK-NEXT:    li a2, 0
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    srli a4, a1, 3
-; CHECK-NEXT:    vsetvli a3, zero, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetvli a3, zero, e8, mf4, ta, mu
 ; CHECK-NEXT:    sub a3, a0, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a4
 ; CHECK-NEXT:    bltu a0, a3, .LBB32_2

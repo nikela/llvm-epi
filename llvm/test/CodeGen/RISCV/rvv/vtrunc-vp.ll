@@ -161,7 +161,7 @@ define <vscale x 15 x i16> @vtrunc_nxv15i16_nxv15i64(<vscale x 15 x i64> %a, <vs
 ; CHECK-NEXT:    li a2, 0
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    srli a4, a1, 3
-; CHECK-NEXT:    vsetvli a3, zero, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetvli a3, zero, e8, mf4, ta, mu
 ; CHECK-NEXT:    sub a3, a0, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a4
 ; CHECK-NEXT:    bltu a0, a3, .LBB12_2
@@ -220,7 +220,7 @@ define <vscale x 32 x i7> @vtrunc_nxv32i7_nxv32i32(<vscale x 32 x i32> %a, <vsca
 ; CHECK-NEXT:    li a2, 0
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    srli a4, a1, 2
-; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, tu, mu
+; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, ta, mu
 ; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    sub a3, a0, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a4
@@ -256,7 +256,7 @@ define <vscale x 32 x i8> @vtrunc_nxv32i8_nxv32i32(<vscale x 32 x i32> %a, <vsca
 ; CHECK-NEXT:    li a2, 0
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    srli a4, a1, 2
-; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, tu, mu
+; CHECK-NEXT:    vsetvli a3, zero, e8, mf2, ta, mu
 ; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    sub a3, a0, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v0, a4
@@ -308,7 +308,7 @@ define <vscale x 32 x i32> @vtrunc_nxv32i64_nxv32i32(<vscale x 32 x i64> %a, <vs
 ; CHECK-NEXT:    mv a5, a4
 ; CHECK-NEXT:  .LBB17_2:
 ; CHECK-NEXT:    li a6, 0
-; CHECK-NEXT:    vsetvli a7, zero, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetvli a7, zero, e8, mf4, ta, mu
 ; CHECK-NEXT:    sub a7, a5, a1
 ; CHECK-NEXT:    vslidedown.vx v0, v24, a3
 ; CHECK-NEXT:    bltu a5, a7, .LBB17_4
@@ -324,7 +324,7 @@ define <vscale x 32 x i32> @vtrunc_nxv32i64_nxv32i32(<vscale x 32 x i64> %a, <vs
 ; CHECK-NEXT:    mv a5, a1
 ; CHECK-NEXT:  .LBB17_6:
 ; CHECK-NEXT:    li a6, 0
-; CHECK-NEXT:    vsetvli t1, zero, e8, mf2, tu, mu
+; CHECK-NEXT:    vsetvli t1, zero, e8, mf2, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v1, v24, a7
 ; CHECK-NEXT:    add a7, a0, t0
 ; CHECK-NEXT:    vsetvli zero, a5, e32, m4, ta, mu
@@ -340,7 +340,7 @@ define <vscale x 32 x i32> @vtrunc_nxv32i64_nxv32i32(<vscale x 32 x i64> %a, <vs
 ; CHECK-NEXT:  # %bb.7:
 ; CHECK-NEXT:    mv a6, a4
 ; CHECK-NEXT:  .LBB17_8:
-; CHECK-NEXT:    vsetvli a2, zero, e8, mf4, tu, mu
+; CHECK-NEXT:    vsetvli a2, zero, e8, mf4, ta, mu
 ; CHECK-NEXT:    vl8re64.v v16, (a7)
 ; CHECK-NEXT:    csrr a2, vlenb
 ; CHECK-NEXT:    slli a2, a2, 3

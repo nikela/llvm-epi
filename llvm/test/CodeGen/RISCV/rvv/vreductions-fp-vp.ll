@@ -104,7 +104,7 @@ define half @vpreduce_fadd_nxv64f16(half %s, <vscale x 64 x half> %v, <vscale x 
 ; CHECK-NEXT:    mv a3, a2
 ; CHECK-NEXT:  .LBB6_2:
 ; CHECK-NEXT:    li a4, 0
-; CHECK-NEXT:    vsetvli a5, zero, e8, m1, tu, mu
+; CHECK-NEXT:    vsetvli a5, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v24, v0, a1
 ; CHECK-NEXT:    vsetvli zero, a3, e16, m8, tu, mu
 ; CHECK-NEXT:    vfredusum.vs v25, v8, v25, v0.t
@@ -139,7 +139,7 @@ define half @vpreduce_ord_fadd_nxv64f16(half %s, <vscale x 64 x half> %v, <vscal
 ; CHECK-NEXT:    mv a3, a2
 ; CHECK-NEXT:  .LBB7_2:
 ; CHECK-NEXT:    li a4, 0
-; CHECK-NEXT:    vsetvli a5, zero, e8, m1, tu, mu
+; CHECK-NEXT:    vsetvli a5, zero, e8, m1, ta, mu
 ; CHECK-NEXT:    vslidedown.vx v24, v0, a1
 ; CHECK-NEXT:    vsetvli zero, a3, e16, m8, tu, mu
 ; CHECK-NEXT:    vfredosum.vs v25, v8, v25, v0.t
@@ -315,7 +315,7 @@ define double @vpreduce_fadd_nxv3f64(double %s, <vscale x 3 x double> %v, <vscal
   ret double %r
 }
 
-define double @vpreduce_ord_fadd_nxv3f64(double %s, <vscale x 4 x double> %v, <vscale x 4 x i1> %m, i32 zeroext %evl) {
+define double @vpreduce_ord_fadd_nxv3f64(double %s, <vscale x 3 x double> %v, <vscale x 3 x i1> %m, i32 zeroext %evl) {
 ; CHECK-LABEL: vpreduce_ord_fadd_nxv3f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetivli zero, 1, e64, m1, ta, mu
@@ -324,10 +324,9 @@ define double @vpreduce_ord_fadd_nxv3f64(double %s, <vscale x 4 x double> %v, <v
 ; CHECK-NEXT:    vfredosum.vs v12, v8, v12, v0.t
 ; CHECK-NEXT:    vfmv.f.s fa0, v12
 ; CHECK-NEXT:    ret
-  %r = call double @llvm.vp.reduce.fadd.nxv4f64(double %s, <vscale x 4 x double> %v, <vscale x 4 x i1> %m, i32 %evl)
+  %r = call double @llvm.vp.reduce.fadd.nxv3f64(double %s, <vscale x 3 x double> %v, <vscale x 3 x i1> %m, i32 %evl)
   ret double %r
 }
-
 
 declare double @llvm.vp.reduce.fadd.nxv4f64(double, <vscale x 4 x double>, <vscale x 4 x i1>, i32)
 
