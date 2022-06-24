@@ -83,8 +83,7 @@ function(add_compiler_rt_object_libraries name)
         "${libname}" MATCHES ".*\.osx.*")
       foreach(arch ${LIB_ARCHS_${libname}})
         list(APPEND target_flags
-          -target ${arch}-apple-macos${DARWIN_osx_MIN_VER}
-          -darwin-target-variant ${arch}-apple-ios13.1-macabi)
+          "SHELL:-target ${arch}-apple-macos${DARWIN_osx_MIN_VER} -darwin-target-variant ${arch}-apple-ios13.1-macabi")
       endforeach()
     endif()
 
@@ -251,11 +250,9 @@ function(add_compiler_rt_runtime name type)
           "${os}" MATCHES "^(osx)$")
         foreach(arch ${LIB_ARCHS_${libname}})
           list(APPEND extra_cflags_${libname}
-            -target ${arch}-apple-macos${DARWIN_osx_MIN_VER}
-            -darwin-target-variant ${arch}-apple-ios13.1-macabi)
+            "SHELL:-target ${arch}-apple-macos${DARWIN_osx_MIN_VER} -darwin-target-variant ${arch}-apple-ios13.1-macabi")
           list(APPEND extra_link_flags_${libname}
-            -target ${arch}-apple-macos${DARWIN_osx_MIN_VER}
-            -darwin-target-variant ${arch}-apple-ios13.1-macabi)
+            "SHELL:-target ${arch}-apple-macos${DARWIN_osx_MIN_VER} -darwin-target-variant ${arch}-apple-ios13.1-macabi")
         endforeach()
       endif()
     endforeach()
@@ -588,13 +585,6 @@ endmacro(add_compiler_rt_script src name)
 #                   CFLAGS <list of compile flags>
 #                   USE_TOOLCHAIN)
 macro(add_custom_libcxx name prefix)
-  if(NOT COMPILER_RT_LIBCXX_PATH)
-    message(FATAL_ERROR "libcxx not found!")
-  endif()
-  if(NOT COMPILER_RT_LIBCXXABI_PATH)
-    message(FATAL_ERROR "libcxxabi not found!")
-  endif()
-
   cmake_parse_arguments(LIBCXX "USE_TOOLCHAIN" "" "DEPS;CFLAGS;CMAKE_ARGS" ${ARGN})
 
   if(LIBCXX_USE_TOOLCHAIN)
