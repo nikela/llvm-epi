@@ -1,6 +1,6 @@
 // UNSUPPORTED: riscv
 // Test that the C++ headers are found on Solaris with gcc toolchain detection
-
+//
 // Sparc, 32bit
 // RUN: %clang -### %s -fsyntax-only 2>&1 \
 // RUN:     --target=sparc-sun-solaris2.11 --stdlib=platform \
