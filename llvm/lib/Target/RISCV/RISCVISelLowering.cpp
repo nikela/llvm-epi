@@ -113,6 +113,12 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   if (Subtarget.hasVInstructions()) {
     auto addRegClassForRVV = [this](MVT VT) {
+      // Disable the smallest fractional LMUL types if ELEN is less than
+      // RVVBitsPerBlock.
+      unsigned MinElts = RISCV::RVVBitsPerBlock / Subtarget.getELEN();
+      if (VT.getVectorMinNumElements() < MinElts)
+        return;
+
       unsigned Size = VT.getSizeInBits().getKnownMinValue();
       const TargetRegisterClass *RC;
       if (Size <= RISCV::RVVBitsPerBlock)
@@ -494,6 +500,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     }
 
     for (MVT VT : BoolVecVTs) {
+      if (!isTypeLegal(VT))
+        continue;
+
       setOperationAction(ISD::SPLAT_VECTOR, VT, Custom);
 
       // Mask VTs are custom-expanded into a series of standard nodes
@@ -551,8 +560,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     }
 
     for (MVT VT : IntVecVTs) {
-      if (VT.getVectorElementType() == MVT::i64 &&
-          !Subtarget.hasVInstructionsI64())
+      if (!isTypeLegal(VT))
         continue;
 
       setOperationAction(ISD::SPLAT_VECTOR, VT, Legal);
@@ -756,21 +764,31 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
           }
         };
 
-    if (Subtarget.hasVInstructionsF16())
-      for (MVT VT : F16VecVTs)
+    if (Subtarget.hasVInstructionsF16()) {
+      for (MVT VT : F16VecVTs) {
+        if (!isTypeLegal(VT))
+          continue;
         SetCommonVFPActions(VT);
-
-    for (MVT VT : F32VecVTs) {
-      if (Subtarget.hasVInstructionsF32())
-        SetCommonVFPActions(VT);
-      SetCommonVFPExtLoadTruncStoreActions(VT, F16VecVTs);
+      }
     }
 
-    for (MVT VT : F64VecVTs) {
-      if (Subtarget.hasVInstructionsF64())
+    if (Subtarget.hasVInstructionsF32()) {
+      for (MVT VT : F32VecVTs) {
+        if (!isTypeLegal(VT))
+          continue;
         SetCommonVFPActions(VT);
-      SetCommonVFPExtLoadTruncStoreActions(VT, F16VecVTs);
-      SetCommonVFPExtLoadTruncStoreActions(VT, F32VecVTs);
+        SetCommonVFPExtLoadTruncStoreActions(VT, F16VecVTs);
+      }
+    }
+
+    if (Subtarget.hasVInstructionsF64()) {
+      for (MVT VT : F64VecVTs) {
+        if (!isTypeLegal(VT))
+          continue;
+        SetCommonVFPActions(VT);
+        SetCommonVFPExtLoadTruncStoreActions(VT, F16VecVTs);
+        SetCommonVFPExtLoadTruncStoreActions(VT, F32VecVTs);
+      }
     }
 
     if (Subtarget.useRVVForFixedLengthVectors()) {
@@ -2127,7 +2145,7 @@ static bool useRVVForFixedLengthVectorVT(MVT VT,
   if (VT.getFixedSizeInBits() > 1024 * 8)
     return false;
 
-  unsigned MinVLen = Subtarget.getMinRVVVectorSizeInBits();
+  unsigned MinVLen = Subtarget.getRealMinVLen();
 
   MVT EltVT = VT.getVectorElementType();
 
@@ -2193,7 +2211,7 @@ static MVT getContainerForFixedLengthVector(const TargetLowering &TLI, MVT VT,
           useRVVForFixedLengthVectorVT(VT, Subtarget)) &&
          "Expected legal fixed length vector!");
 
-  unsigned MinVLen = Subtarget.getMinRVVVectorSizeInBits();
+  unsigned MinVLen = Subtarget.getRealMinVLen();
   unsigned MaxELen = Subtarget.getELEN();
 
   MVT EltVT = VT.getVectorElementType();
@@ -4297,7 +4315,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
   case ISD::FSQRT:
     return lowerToScalableOp(Op, DAG, RISCVISD::FSQRT_VL);
   case ISD::FMA:
-    return lowerToScalableOp(Op, DAG, RISCVISD::FMA_VL);
+    return lowerToScalableOp(Op, DAG, RISCVISD::VFMADD_VL);
   case ISD::SMIN:
     return lowerToScalableOp(Op, DAG, RISCVISD::SMIN_VL);
   case ISD::SMAX:
@@ -4406,7 +4424,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVPOp(Op, DAG, RISCVISD::FNEG_VL);
   case ISD::VP_FMA:
   case ISD::VP_FMULADD:
-    return lowerVPOp(Op, DAG, RISCVISD::FMA_VL);
+    return lowerVPOp(Op, DAG, RISCVISD::VFMADD_VL);
   case ISD::VP_SIGN_EXTEND:
   case ISD::VP_ZERO_EXTEND:
     if (Op.getOperand(0).getSimpleValueType().getVectorElementType() == MVT::i1)
@@ -7045,21 +7063,18 @@ SDValue RISCVTargetLowering::lowerVECTOR_REVERSE(SDValue Op,
   MVT VecVT = Op.getSimpleValueType();
   unsigned EltSize = VecVT.getScalarSizeInBits();
   unsigned MinSize = VecVT.getSizeInBits().getKnownMinValue();
-
-  unsigned MaxVLMAX = 0;
-  unsigned VectorBitsMax = Subtarget.getMaxRVVVectorSizeInBits();
-  if (VectorBitsMax != 0)
-    MaxVLMAX =
-        RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
+  unsigned VectorBitsMax = Subtarget.getRealMaxVLen();
+  unsigned MaxVLMAX =
+    RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
 
   unsigned GatherOpc = RISCVISD::VRGATHER_VV_VL;
   MVT IntVT = VecVT.changeVectorElementTypeToInteger();
 
-  // If this is SEW=8 and VLMAX is unknown or more than 256, we need
+  // If this is SEW=8 and VLMAX is potentially more than 256, we need
   // to use vrgatherei16.vv.
   // TODO: It's also possible to use vrgatherei16.vv for other types to
   // decrease register width for the index calculation.
-  if ((MaxVLMAX == 0 || MaxVLMAX > 256) && EltSize == 8) {
+  if (MaxVLMAX > 256 && EltSize == 8) {
     // If this is LMUL=8, we have to split before can use vrgatherei16.vv.
     // Reverse each half, then reassemble them in reverse order.
     // NOTE: It's also possible that after splitting that VLMAX no longer
@@ -8136,7 +8151,7 @@ RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op,
   unsigned EltSize = GatherVT.getScalarSizeInBits();
   unsigned MinSize = GatherVT.getSizeInBits().getKnownMinValue();
   unsigned MaxVLMAX = 0;
-  unsigned VectorBitsMax = Subtarget.getMaxRVVVectorSizeInBits();
+  unsigned VectorBitsMax = Subtarget.getRealMaxVLen();
   if (VectorBitsMax != 0)
     MaxVLMAX = ((VectorBitsMax / EltSize) * MinSize) / RISCV::RVVBitsPerBlock;
 
@@ -10518,6 +10533,40 @@ static SDValue performBITREVERSECombine(SDNode *N, SelectionDAG &DAG,
                      DAG.getConstant(7, DL, VT));
 }
 
+// Convert from one FMA opcode to another based on whether we are negating the
+// multiply result and/or the accumulator.
+// NOTE: Only supports RVV operations with VL.
+static unsigned negateFMAOpcode(unsigned Opcode, bool NegMul, bool NegAcc) {
+  assert((NegMul || NegAcc) && "Not negating anything?");
+
+  // Negating the multiply result changes ADD<->SUB and toggles 'N'.
+  if (NegMul) {
+    // clang-format off
+    switch (Opcode) {
+    default: llvm_unreachable("Unexpected opcode");
+    case RISCVISD::VFMADD_VL:  Opcode = RISCVISD::VFNMSUB_VL; break;
+    case RISCVISD::VFNMSUB_VL: Opcode = RISCVISD::VFMADD_VL;  break;
+    case RISCVISD::VFNMADD_VL: Opcode = RISCVISD::VFMSUB_VL;  break;
+    case RISCVISD::VFMSUB_VL:  Opcode = RISCVISD::VFNMADD_VL; break;
+    }
+    // clang-format on
+  }
+
+  // Negating the accumulator changes ADD<->SUB.
+  if (NegAcc) {
+    // clang-format off
+    switch (Opcode) {
+    default: llvm_unreachable("Unexpected opcode");
+    case RISCVISD::VFMADD_VL:  Opcode = RISCVISD::VFMSUB_VL;  break;
+    case RISCVISD::VFMSUB_VL:  Opcode = RISCVISD::VFMADD_VL;  break;
+    case RISCVISD::VFNMADD_VL: Opcode = RISCVISD::VFNMSUB_VL; break;
+    case RISCVISD::VFNMSUB_VL: Opcode = RISCVISD::VFNMADD_VL; break;
+    }
+    // clang-format on
+  }
+
+  return Opcode;
+}
 SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                                                DAGCombinerInfo &DCI) const {
   SelectionDAG &DAG = DCI.DAG;
@@ -11024,6 +11073,40 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       return V;
     // Mul is commutative.
     return combineMUL_VLToVWMUL_VL(N, DAG, /*Commute*/ true);
+  case RISCVISD::VFMADD_VL:
+  case RISCVISD::VFNMADD_VL:
+  case RISCVISD::VFMSUB_VL:
+  case RISCVISD::VFNMSUB_VL: {
+    // Fold FNEG_VL into FMA opcodes.
+    SDValue A = N->getOperand(0);
+    SDValue B = N->getOperand(1);
+    SDValue C = N->getOperand(2);
+    SDValue Mask = N->getOperand(3);
+    SDValue VL = N->getOperand(4);
+
+    auto invertIfNegative = [&Mask, &VL](SDValue &V) {
+      if (V.getOpcode() == RISCVISD::FNEG_VL && V.getOperand(1) == Mask &&
+          V.getOperand(2) == VL) {
+        // Return the negated input.
+        V = V.getOperand(0);
+        return true;
+      }
+
+      return false;
+    };
+
+    bool NegA = invertIfNegative(A);
+    bool NegB = invertIfNegative(B);
+    bool NegC = invertIfNegative(C);
+
+    // If no operands are negated, we're done.
+    if (!NegA && !NegB && !NegC)
+      return SDValue();
+
+    unsigned NewOpcode = negateFMAOpcode(N->getOpcode(), NegA != NegB, NegC);
+    return DAG.getNode(NewOpcode, SDLoc(N), N->getValueType(0), A, B, C, Mask,
+                       VL);
+  }
   case ISD::STORE: {
     auto *Store = cast<StoreSDNode>(N);
     SDValue Val = Store->getValue();
@@ -13693,7 +13776,10 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(FNEG_VL)
   NODE_NAME_CASE(FABS_VL)
   NODE_NAME_CASE(FSQRT_VL)
-  NODE_NAME_CASE(FMA_VL)
+  NODE_NAME_CASE(VFMADD_VL)
+  NODE_NAME_CASE(VFNMADD_VL)
+  NODE_NAME_CASE(VFMSUB_VL)
+  NODE_NAME_CASE(VFNMSUB_VL)
   NODE_NAME_CASE(FCOPYSIGN_VL)
   NODE_NAME_CASE(SMIN_VL)
   NODE_NAME_CASE(SMAX_VL)

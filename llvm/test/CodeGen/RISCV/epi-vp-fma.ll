@@ -82,8 +82,9 @@ define <vscale x 1 x double> @test_vp_fma_neg_operand_3(<vscale x 1 x double> %f
 ; CHECK-LABEL: test_vp_fma_neg_operand_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v11, v10
 ; CHECK-NEXT:    vfmsub.vv v8, v9, v10
-; CHECK-NEXT:    vfmsub.vv v9, v8, v10, v0.t
+; CHECK-NEXT:    vfmadd.vv v9, v8, v11, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -101,9 +102,10 @@ define <vscale x 1 x double> @test_vp_fma_neg_operand_1_3(<vscale x 1 x double> 
 ; CHECK-LABEL: test_vp_fma_neg_operand_1_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vfnmadd.vv v9, v8, v10
-; CHECK-NEXT:    vfnmadd.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv.v.v v8, v9
+; CHECK-NEXT:    vfneg.v v11, v8
+; CHECK-NEXT:    vfneg.v v12, v10
+; CHECK-NEXT:    vfnmadd.vv v8, v9, v10
+; CHECK-NEXT:    vfmadd.vv v8, v11, v12, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -121,9 +123,9 @@ define <vscale x 1 x double> @test_vp_fma_neg_operand_1(<vscale x 1 x double> %f
 ; CHECK-LABEL: test_vp_fma_neg_operand_1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
-; CHECK-NEXT:    vfnmsub.vv v9, v8, v10
-; CHECK-NEXT:    vfnmsub.vv v9, v8, v10, v0.t
-; CHECK-NEXT:    vmv.v.v v8, v9
+; CHECK-NEXT:    vfneg.v v11, v8
+; CHECK-NEXT:    vfnmsub.vv v8, v9, v10
+; CHECK-NEXT:    vfmadd.vv v8, v11, v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -159,8 +161,9 @@ define <vscale x 1 x double> @test_vp_fma_splat_op_1_neg_op_3(double %f0, <vscal
 ; CHECK-LABEL: test_vp_fma_splat_op_1_neg_op_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v10, v9
 ; CHECK-NEXT:    vfmsub.vf v8, fa0, v9
-; CHECK-NEXT:    vfmsub.vf v8, fa0, v9, v0.t
+; CHECK-NEXT:    vfmadd.vf v8, fa0, v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -180,8 +183,10 @@ define <vscale x 1 x double> @test_vp_fma_splat_op_1_neg_op_2_3(double %f0, <vsc
 ; CHECK-LABEL: test_vp_fma_splat_op_1_neg_op_2_3:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v10, v9
 ; CHECK-NEXT:    vfnmadd.vf v8, fa0, v9
-; CHECK-NEXT:    vfnmadd.vf v8, fa0, v9, v0.t
+; CHECK-NEXT:    vfneg.v v8, v8
+; CHECK-NEXT:    vfmadd.vf v8, fa0, v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -205,8 +210,10 @@ define <vscale x 1 x double> @test_vp_fma_splat_op_1_neg_op_2(double %f0, <vscal
 ; CHECK-LABEL: test_vp_fma_splat_op_1_neg_op_2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v10, v8
 ; CHECK-NEXT:    vfnmsac.vf v9, fa0, v8
-; CHECK-NEXT:    vfnmsub.vf v8, fa0, v9, v0.t
+; CHECK-NEXT:    vfmadd.vf v10, fa0, v9, v0.t
+; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -225,9 +232,13 @@ define <vscale x 1 x double> @test_vp_fma_splat_op_1_neg_op_2(double %f0, <vscal
 define <vscale x 1 x double> @test_vp_fma_neg_splat_op_1_neg_op_3(double %f0, <vscale x 1 x double> %f1, <vscale x 1 x double> %f2, <vscale x 1 x i1> %m, i32 zeroext %n) {
 ; CHECK-LABEL: test_vp_fma_neg_splat_op_1_neg_op_3:
 ; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vfmv.v.f v10, fa0
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v10, v10
+; CHECK-NEXT:    vfneg.v v11, v9
 ; CHECK-NEXT:    vfnmadd.vf v8, fa0, v9
-; CHECK-NEXT:    vfnmadd.vf v8, fa0, v9, v0.t
+; CHECK-NEXT:    vfmadd.vv v8, v10, v11, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
@@ -247,9 +258,12 @@ define <vscale x 1 x double> @test_vp_fma_neg_splat_op_1_neg_op_3(double %f0, <v
 define <vscale x 1 x double> @test_vp_fma_neg_splat_op_1(double %f0, <vscale x 1 x double> %f1, <vscale x 1 x double> %f2, <vscale x 1 x i1> %m, i32 zeroext %n) {
 ; CHECK-LABEL: test_vp_fma_neg_splat_op_1:
 ; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vfmv.v.f v10, fa0
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vfneg.v v10, v10
 ; CHECK-NEXT:    vfnmsub.vf v8, fa0, v9
-; CHECK-NEXT:    vfnmsub.vf v8, fa0, v9, v0.t
+; CHECK-NEXT:    vfmadd.vv v8, v10, v9, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer

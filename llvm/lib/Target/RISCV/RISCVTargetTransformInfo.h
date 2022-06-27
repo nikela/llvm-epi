@@ -172,6 +172,7 @@ public:
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasVInstructions(); }
   Optional<unsigned> getMaxVScale() const;
+  Optional<unsigned> getVScaleForTuning() const;
 
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const;
 
@@ -234,7 +235,7 @@ public:
       return false;
 
     // Only support fixed vectors if we know the minimum vector size.
-    if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
+    if (isa<FixedVectorType>(DataType) && !ST->useRVVForFixedLengthVectors())
       return false;
 
     // Don't allow elements larger than the ELEN.
@@ -262,7 +263,7 @@ public:
       return false;
 
     // Only support fixed vectors if we know the minimum vector size.
-    if (isa<FixedVectorType>(DataType) && ST->getMinRVVVectorSizeInBits() == 0)
+    if (isa<FixedVectorType>(DataType) && !ST->useRVVForFixedLengthVectors())
       return false;
 
     // Don't allow elements larger than the ELEN.
