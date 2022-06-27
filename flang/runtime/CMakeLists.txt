@@ -36,6 +36,7 @@ add_subdirectory(FortranMain)
 set(MODULES_TO_BUILD
   "iso_c_binding")
 
+
 # Create module files directly from the top-level module source directory
 foreach(filename ${MODULES_TO_BUILD})
   set(depends ${FLANG_INTRINSIC_MODULES_DIR}/__fortran_builtins.mod)
@@ -50,9 +51,10 @@ foreach(filename ${MODULES_TO_BUILD})
   set(output_file ${filename}${CMAKE_CXX_OUTPUT_EXTENSION})
   add_custom_command(OUTPUT ${output_file}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${out_modules_dir}
-    COMMAND flang-new -o ${output_file} -O -c
-      -module-dir ${out_modules_dir} ${FLANG_SOURCE_DIR}/module/${filename}.f90
-    DEPENDS flang-new ${FLANG_SOURCE_DIR}/module/${filename}.f90 ${depends}
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/wrap-flang.py $<TARGET_FILE:flang-new> -o ${output_file} -O -c
+    -module-dir ${out_modules_dir} ${FLANG_SOURCE_DIR}/module/${filename}.f90 --emulator $<TARGET_PROPERTY:flang-new,CROSSCOMPILING_EMULATOR>
+    COMMAND_EXPAND_LISTS
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/wrap-flang.py flang-new ${FLANG_SOURCE_DIR}/module/${filename}.f90 ${depends}
   )
   set_source_files_properties(
     ${output_file}
