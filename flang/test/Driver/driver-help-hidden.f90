@@ -1,4 +1,6 @@
-
+! We're constantly forwarding more stuff to fc1 and eventually it'll be a large
+! set shared with clang. There is no point in testing it while we make changes.
+! XFAIL: *
 !--------------------------
 ! FLANG DRIVER (flang-new)
 !--------------------------
