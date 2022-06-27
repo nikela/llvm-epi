@@ -27,7 +27,8 @@ driver_invocation = emulator_command + compiler_command
 
 # FIXME: is utf-8 a sensible option here?
 driver = subprocess.run(driver_invocation, \
-        capture_output=True, encoding="utf-8")
+         stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
+         encoding="utf-8")
 
 frontend_invocation = ""
 for line in driver.stderr.splitlines():
