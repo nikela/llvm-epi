@@ -598,8 +598,6 @@ bool VPRecipeBase::mayReadFromMemory() const {
 
 bool VPRecipeBase::mayHaveSideEffects() const {
   switch (getVPDefID()) {
-  case VPBranchOnMaskSC:
-    return false;
   case VPWidenIntOrFpInductionSC:
   case VPWidenPointerInductionSC:
   case VPWidenCanonicalIVSC:
@@ -1779,6 +1777,7 @@ void VPWidenCanonicalIVRecipe::print(raw_ostream &O, const Twine &Indent,
 }
 #endif
 
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 void VPWidenEVLRecipe::print(raw_ostream &O, const Twine &Indent,
                              VPSlotTracker &SlotTracker) const {
   O << Indent << "EMIT ";
@@ -1786,13 +1785,16 @@ void VPWidenEVLRecipe::print(raw_ostream &O, const Twine &Indent,
   O << " = GENERATE-EXPLICIT-VECTOR-LENGTH ";
   printOperands(O, SlotTracker);
 }
+#endif
 
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 void VPWidenEVLMaskRecipe::print(raw_ostream &O, const Twine &Indent,
                                  VPSlotTracker &SlotTracker) const {
   O << Indent << "EMIT ";
   getEVLMask()->printAsOperand(O, SlotTracker);
   O << " = GENERATE-ULT-STEPVECTOR-EVL-MASK";
 }
+#endif
 
 void VPFirstOrderRecurrencePHIRecipe::execute(VPTransformState &State) {
   auto &Builder = State.Builder;

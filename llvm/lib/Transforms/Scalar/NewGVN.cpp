@@ -1507,9 +1507,8 @@ NewGVN::performSymbolicLoadCoercion(Type *LoadType, Value *LoadPtr,
   else if (auto *II = dyn_cast<IntrinsicInst>(DepInst)) {
     if (II->getIntrinsicID() == Intrinsic::lifetime_start)
       return createConstantExpression(UndefValue::get(LoadType));
-  } else if (isAllocationFn(DepInst, TLI))
-    if (auto *InitVal = getInitialValueOfAllocation(cast<CallBase>(DepInst),
-                                                    TLI, LoadType))
+  } else if (auto *InitVal =
+                 getInitialValueOfAllocation(DepInst, TLI, LoadType))
       return createConstantExpression(InitVal);
 
   return nullptr;
@@ -3356,7 +3355,7 @@ void NewGVN::verifyStoreExpressions() const {
 // instruction set, propagating value numbers, marking things touched, etc,
 // until the set of touched instructions is completely empty.
 void NewGVN::iterateTouchedInstructions() {
-  unsigned int Iterations = 0;
+  uint64_t Iterations = 0;
   // Figure out where touchedinstructions starts
   int FirstInstr = TouchedInstructions.find_first();
   // Nothing set, nothing to iterate, just return.

@@ -582,6 +582,22 @@ static void computeTargetOpts(
   // -- Heinous code ends here.
 }
 
+static llvm::CodeGenOpt::Level
+getCGOptLevel(const Fortran::frontend::CodeGenOptions &opts) {
+  switch (opts.OptimizationLevel) {
+  default:
+    llvm_unreachable("Invalid optimization level!");
+  case 0:
+    return llvm::CodeGenOpt::None;
+  case 1:
+    return llvm::CodeGenOpt::Less;
+  case 2:
+    return llvm::CodeGenOpt::Default;
+  case 3:
+    return llvm::CodeGenOpt::Aggressive;
+  }
+}
+
 void CodeGenAction::setUpTargetMachine() {
   CompilerInstance &ci = this->getInstance();
   auto &invoc = ci.getInvocation();
@@ -606,105 +622,13 @@ void CodeGenAction::setUpTargetMachine() {
   assert(theTarget && "Failed to create Target");
 
   // Create `TargetMachine`
-  tm.reset(theTarget->createTargetMachine(theTriple, /*CPU=*/"", Features,
-                                          TargetOpts, invoc.RM));
+  llvm::CodeGenOpt::Level OptLevel =
+      getCGOptLevel(ci.getInvocation().getCodeGenOpts());
+  tm.reset(theTarget->createTargetMachine(
+      theTriple, /*CPU=*/"",
+      Features, TargetOpts, /*Reloc::Model=*/invoc.RM,
+      /*CodeModel::Model=*/llvm::None, OptLevel));
   assert(tm && "Failed to create TargetMachine");
-  llvmModule->setDataLayout(tm->createDataLayout());
-}
-
-static llvm::OptimizationLevel mapToLevel(unsigned optLevel) {
-  switch (optLevel) {
-  default:
-    llvm_unreachable("Invalid optimization level!");
-  case 0:
-    return llvm::OptimizationLevel::O0;
-  case 1:
-    return llvm::OptimizationLevel::O1;
-  case 2:
-    // FIXME - Add support for -Os / -Oz
-    // switch (Opts.OptimizeSize) {
-    // default:
-    //   llvm_unreachable("Invalid optimization level for size!");
-    // case 0:
-    return llvm::OptimizationLevel::O2;
-    // case 1:
-    //   return llvm::OptimizationLevel::Os;
-    // case 2:
-    //   return llvm::OptimizationLevel::Oz;
-    // }
-  case 3:
-    return llvm::OptimizationLevel::O3;
-  }
-}
-
-static void runOptimizationPipeline(
-    llvm::Module &llvmModule, CompilerInstance &ci,
-    llvm::TargetMachine &TM,
-    llvm::TargetLibraryInfoImpl& TLII) {
-  // Create an LLVM opt pipeline. For now use a vanilla one.
-  // Taken from clang's BackendUtil.cpp.
-  // We use the new pass manager.
-  auto &invoc = ci.getInvocation();
-  llvm::PipelineTuningOptions PTO;
-  PTO.SLPVectorization = invoc.vectorizeSLP;
-  PTO.LoopVectorization = invoc.vectorizeLoop;
-  PTO.LoopUnrolling = invoc.unrollLoops;
-  // For historical reasons, loop interleaving is set to mirror setting for loop
-  // unrolling.
-  PTO.LoopInterleaving = invoc.unrollLoops;
-
-  llvm::Optional<llvm::PGOOptions> PGOOpt;
-
-  llvm::LoopAnalysisManager LAM;
-  llvm::FunctionAnalysisManager FAM;
-  llvm::CGSCCAnalysisManager CGAM;
-  llvm::ModuleAnalysisManager MAM;
-
-  constexpr bool DebugPassStructure = false;
-  constexpr bool DebugPassManager = false;
-
-  llvm::PassInstrumentationCallbacks PIC;
-  llvm::PrintPassOptions PrintPassOpts;
-  PrintPassOpts.Indent = DebugPassStructure;
-  PrintPassOpts.SkipAnalyses = DebugPassStructure;
-  llvm::StandardInstrumentations SI(DebugPassManager || DebugPassStructure,
-      /*VerifyEach*/ false, PrintPassOpts);
-  SI.registerCallbacks(PIC, &FAM);
-  llvm::PassBuilder PB(&TM, PTO, PGOOpt, &PIC);
-
-  llvm::OptimizationLevel optLevel = mapToLevel(invoc.getOptLevel());
-  llvm::ModulePassManager MPM;
-
-  // Register the AA manager first so that our version is the one used.
-  FAM.registerPass([&] { return PB.buildDefaultAAPipeline(); });
-
-  // Register the target library analysis directly and give it a customized
-  // preset TLI.
-  FAM.registerPass([&] { return llvm::TargetLibraryAnalysis(TLII); });
-
-  PB.registerModuleAnalyses(MAM);
-  PB.registerCGSCCAnalyses(CGAM);
-  PB.registerFunctionAnalyses(FAM);
-  PB.registerLoopAnalyses(LAM);
-  PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
-
-  if (optLevel != llvm::OptimizationLevel::O0) {
-    MPM = PB.buildPerModuleDefaultPipeline(optLevel);
-  } else {
-    MPM = PB.buildO0DefaultPipeline(optLevel);
-  }
-  MPM.run(llvmModule, MAM);
-}
-
-
-void CodeGenAction::OptimizeLLVMIR() {
-  CompilerInstance &ci = this->getInstance();
-
-  // Run the optimization pipeline
-  llvm::Triple triple(llvmModule->getTargetTriple());
-  std::unique_ptr<llvm::TargetLibraryInfoImpl> tlii =
-      std::make_unique<llvm::TargetLibraryInfoImpl>(triple);
-  runOptimizationPipeline(*llvmModule, ci, *tm, *tlii);
 }
 
 static std::unique_ptr<llvm::raw_pwrite_stream>
@@ -776,23 +700,85 @@ static void generateMachineCodeOrAssemblyImpl(clang::DiagnosticsEngine &diags,
   codeGenPasses.run(llvmModule);
 }
 
-/// Generate LLVM byte code file from the input LLVM module.
-///
-/// \param [in] tm Target machine to aid the code-gen pipeline set-up
-/// \param [in] llvmModule LLVM module to lower to assembly/machine-code
-/// \param [out] os Output stream to emit the generated code to
-static void generateLLVMBCImpl(llvm::TargetMachine &tm,
-                               llvm::Module &llvmModule,
-                               llvm::raw_pwrite_stream &os) {
-  // Set-up the pass manager
-  llvm::ModulePassManager mpm;
-  llvm::ModuleAnalysisManager mam;
-  llvm::PassBuilder pb(&tm);
-  pb.registerModuleAnalyses(mam);
-  mpm.addPass(llvm::BitcodeWriterPass(os));
+static llvm::OptimizationLevel
+mapToLevel(const Fortran::frontend::CodeGenOptions &opts) {
+  switch (opts.OptimizationLevel) {
+  default:
+    llvm_unreachable("Invalid optimization level!");
+  case 0:
+    return llvm::OptimizationLevel::O0;
+  case 1:
+    return llvm::OptimizationLevel::O1;
+  case 2:
+    return llvm::OptimizationLevel::O2;
+  case 3:
+    return llvm::OptimizationLevel::O3;
+  }
+}
 
-  // run the passes
-  mpm.run(llvmModule, mam);
+void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
+  auto opts = getInstance().getInvocation().getCodeGenOpts();
+  llvm::OptimizationLevel level = mapToLevel(opts);
+
+  // Create the analysis managers.
+  llvm::LoopAnalysisManager lam;
+  llvm::FunctionAnalysisManager fam;
+  llvm::CGSCCAnalysisManager cgam;
+  llvm::ModuleAnalysisManager mam;
+
+  // Create the pass manager builder.
+  llvm::PassInstrumentationCallbacks pic;
+
+  llvm::PipelineTuningOptions pto;
+  CompilerInstance &ci = this->getInstance();
+  auto &invoc = ci.getInvocation();
+  pto.SLPVectorization = invoc.vectorizeSLP;
+  pto.LoopVectorization = invoc.vectorizeLoop;
+  pto.LoopUnrolling = invoc.unrollLoops;
+  // For historical reasons, loop interleaving is set to mirror setting for loop
+  // unrolling.
+  pto.LoopInterleaving = invoc.unrollLoops;
+
+  llvm::PrintPassOptions printPassOpts;
+  printPassOpts.Indent = /*opts.DebugPassStructure*/ false;
+  printPassOpts.SkipAnalyses = /*opts.DebugPassStructure*/ false;
+  llvm::StandardInstrumentations si(opts.DebugPassManager,
+      /*VerifyEach*/ false, printPassOpts);
+  si.registerCallbacks(pic, &fam);
+
+  llvm::Optional<llvm::PGOOptions> pgoOpt;
+  llvm::PassBuilder pb(tm.get(), pto, pgoOpt, &pic);
+
+  // Register the AA manager first so that our version is the one used.
+  fam.registerPass([&] { return pb.buildDefaultAAPipeline(); });
+
+  // Register the target library analysis directly and give it a customized
+  // preset TLI.
+  llvm::Triple triple(llvmModule->getTargetTriple());
+  std::unique_ptr<llvm::TargetLibraryInfoImpl> tlii =
+      std::make_unique<llvm::TargetLibraryInfoImpl>(triple);
+  fam.registerPass([&] { return llvm::TargetLibraryAnalysis(*tlii); });
+
+  // Register all the basic analyses with the managers.
+  pb.registerModuleAnalyses(mam);
+  pb.registerCGSCCAnalyses(cgam);
+  pb.registerFunctionAnalyses(fam);
+  pb.registerLoopAnalyses(lam);
+  pb.crossRegisterProxies(lam, fam, cgam, mam);
+
+  // Create the pass manager.
+  llvm::ModulePassManager mpm;
+
+  if (opts.OptimizationLevel == 0)
+    mpm = pb.buildO0DefaultPipeline(level, false);
+  else
+    mpm = pb.buildPerModuleDefaultPipeline(level);
+
+  if (action == BackendActionTy::Backend_EmitBC)
+    mpm.addPass(llvm::BitcodeWriterPass(os));
+
+  // Run the passes.
+  mpm.run(*llvmModule, mam);
 }
 
 void CodeGenAction::executeAction() {
@@ -827,13 +813,16 @@ void CodeGenAction::executeAction() {
     return;
   }
 
-  // generate an LLVM module if it's not already present (it will already be
+  // Generate an LLVM module if it's not already present (it will already be
   // present if the input file is an LLVM IR/BC file).
   if (!llvmModule)
     generateLLVMIR();
 
-  setUpTargetMachine();
-  OptimizeLLVMIR();
+  if (!llvmModule)
+    return;
+
+  // Run LLVM's middle-end (i.e. the optimizer).
+  runOptimizationPipeline(*os);
 
   if (action == BackendActionTy::Backend_EmitLL) {
     llvmModule->print(ci.isOutputStreamNull() ? *os : ci.getOutputStream(),
@@ -841,11 +830,15 @@ void CodeGenAction::executeAction() {
     return;
   }
 
+  setUpTargetMachine();
+  llvmModule->setDataLayout(tm->createDataLayout());
+
   if (action == BackendActionTy::Backend_EmitBC) {
-    generateLLVMBCImpl(*tm, *llvmModule, *os);
+    // This action has effectively been completed in runOptimizationPipeline.
     return;
   }
 
+  // Run LLVM's backend and generate either assembly or machine code
   if (action == BackendActionTy::Backend_EmitAssembly ||
       action == BackendActionTy::Backend_EmitObj) {
     generateMachineCodeOrAssemblyImpl(

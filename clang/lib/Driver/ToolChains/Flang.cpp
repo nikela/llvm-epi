@@ -633,6 +633,7 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
   const llvm::Triple &Triple = TC.getEffectiveTriple();
   const std::string &TripleStr = Triple.getTriple();
 
+  const Driver &D = TC.getDriver();
   ArgStringList CmdArgs;
 
   // Invoke ourselves in -fc1 mode.
@@ -684,6 +685,14 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
   // Code model options.
   AddCodeModelOptions(Args, CmdArgs, Triple);
 
+  // Color diagnostics are parsed by the driver directly from argv and later
+  // re-parsed to construct this job; claim any possible color diagnostic here
+  // to avoid warn_drv_unused_argument.
+  Args.getLastArg(options::OPT_fcolor_diagnostics,
+                  options::OPT_fno_color_diagnostics);
+  if (D.getDiags().getDiagnosticOptions().ShowColors)
+    CmdArgs.push_back("-fcolor-diagnostics");
+
   // Add other compile options
   AddOtherOptions(Args, CmdArgs);
 
@@ -704,6 +713,16 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
 
   RenderTargetOptions(Triple, Args, CmdArgs);
 
+  // Optimization level for CodeGen.
+  if (const Arg *A = Args.getLastArg(options::OPT_O_Group)) {
+    if (A->getOption().matches(options::OPT_O4)) {
+      CmdArgs.push_back("-O3");
+      D.Diag(diag::warn_O4_is_O3);
+    } else {
+      A->render(Args, CmdArgs);
+    }
+  }
+
   if (Output.isFilename()) {
     CmdArgs.push_back("-o");
     CmdArgs.push_back(Output.getFilename());
@@ -717,7 +736,6 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
 
   CmdArgs.push_back(Input.getFilename());
 
-  const auto& D = C.getDriver();
   // TODO: Replace flang-new with flang once the new driver replaces the
   // throwaway driver
   const char *Exec = Args.MakeArgString(D.GetProgramPath("flang-new", TC));

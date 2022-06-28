@@ -68,6 +68,12 @@ Major New Features
 
       Randomizing structure layout is a C-only feature.
 
+- Experimental support for HLSL has been added. The implementation is
+  incomplete and highly experimental. For more information about the ongoing
+  work to support HLSL see the `documentation
+  <https://clang.llvm.org/docs/HLSLSupport.html>`_, or the `GitHub project
+  <https://github.com/orgs/llvm/projects/4>`_.
+
 Bug Fixes
 ---------
 - ``CXXNewExpr::getArraySize()`` previously returned a ``llvm::Optional``
@@ -331,6 +337,10 @@ New Pragmas in Clang
 - Added support for MSVC's ``#pragma alloc_text``. The pragma names the code
   section functions are placed in. The pragma only applies to functions with
   C linkage.
+- Added support for an empty optimization list for MSVC's ``#pragma optimize``.
+  The pragma takes a list of optimizations to turn on or off which applies to
+  all functions following the pragma. At the moment, only an empty list is
+  supported.
 
 - ...
 
@@ -504,6 +514,9 @@ X86 Support in Clang
 
 - Support ``-mharden-sls=[none|all|return|indirect-jmp]`` for straight-line
   speculation hardening.
+- Support for the ``_Float16`` type has been added for all targets with SSE2.
+  When AVX512-FP16 is not available, arithmetic on ``_Float16`` is emulated
+  using ``float``.
 
 DWARF Support in Clang
 ----------------------

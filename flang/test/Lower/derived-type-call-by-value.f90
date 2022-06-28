@@ -63,7 +63,7 @@ end module moo
 !
 ! CHECK-LABEL: func.func @_QMmooPmysub(
 ! CHECK-SAME:                          %[[VAL_0:.*]]: !fir.ref<i32> {fir.bindc_name = "x"}) {
-! CHECK:         %[[VAL_1:.*]] = fir.alloca !fir.type<_QMmooTmytype{x:i32}> {adapt.valuebyref}
+! CHECK:         %[[VAL_1:.*]] = fir.alloca !fir.type<_QMmooTmytype{x:i32}>
 ! CHECK:         %[[VAL_2:.*]] = fir.alloca !fir.type<_QMmooTmytype{x:i32}> {bindc_name = "k", uniq_name = "_QMmooFmysubEk"}
 ! CHECK:         %[[VAL_3:.*]] = fir.load %[[VAL_0]] : !fir.ref<i32>
 ! CHECK:         %[[VAL_4:.*]] = fir.field_index x, !fir.type<_QMmooTmytype{x:i32}>
@@ -102,3 +102,4 @@ end module moo
 ! CHECK:         fir.call @_QMmooPmysub(%[[VAL_0]]) : (!fir.ref<i32>) -> ()
 ! CHECK:         return
 ! CHECK:       }
+

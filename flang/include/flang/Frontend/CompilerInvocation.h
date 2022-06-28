@@ -13,6 +13,7 @@
 #ifndef FORTRAN_FRONTEND_COMPILERINVOCATION_H
 #define FORTRAN_FRONTEND_COMPILERINVOCATION_H
 
+#include "flang/Frontend/CodeGenOptions.h"
 #include "flang/Frontend/FrontendOptions.h"
 #include "flang/Frontend/PreprocessorOptions.h"
 #include "flang/Frontend/TargetOptions.h"
@@ -31,8 +32,7 @@ namespace Fortran::frontend {
 /// When errors are encountered, return false and, if Diags is non-null,
 /// report the error(s).
 bool parseDiagnosticArgs(clang::DiagnosticOptions &opts,
-                         llvm::opt::ArgList &args,
-                         bool defaultDiagColor = true);
+                         llvm::opt::ArgList &args);
 
 class CompilerInvocationBase {
 public:
@@ -71,6 +71,9 @@ class CompilerInvocation : public CompilerInvocationBase {
 
   /// Options controlling the target.
   Fortran::frontend::TargetOptions targetOpts;
+
+  /// Options controlling IRgen and the backend.
+  Fortran::frontend::CodeGenOptions codeGenOpts;
 
   // Semantics context
   std::unique_ptr<Fortran::semantics::SemanticsContext> semanticsContext;
@@ -143,6 +146,9 @@ public:
 
   unsigned getOptLevel() { return optLevel; }
   void setOptLevel(unsigned optLevel) { this->optLevel = optLevel; }
+
+  CodeGenOptions &getCodeGenOpts() { return codeGenOpts; }
+  const CodeGenOptions &getCodeGenOpts() const { return codeGenOpts; }
 
   Fortran::semantics::SemanticsContext &getSemanticsContext() {
     return *semanticsContext;

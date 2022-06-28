@@ -12,6 +12,7 @@
 
 #include "flang/Frontend/CompilerInvocation.h"
 #include "flang/Common/Fortran-features.h"
+#include "flang/Frontend/CodeGenOptions.h"
 #include "flang/Frontend/PreprocessorOptions.h"
 #include "flang/Frontend/TargetOptions.h"
 #include "flang/Semantics/semantics.h"
@@ -20,6 +21,7 @@
 #include "clang/Basic/DiagnosticDriver.h"
 #include "clang/Basic/DiagnosticOptions.h"
 #include "clang/Driver/DriverDiagnostic.h"
+#include "clang/Driver/OptionUtils.h"
 #include "clang/Driver/Options.h"
 #include "clang/Driver/OptionUtils.h"
 #include "llvm/ADT/StringRef.h"
@@ -54,10 +56,11 @@ CompilerInvocationBase::~CompilerInvocationBase() = default;
 //===----------------------------------------------------------------------===//
 // Deserialization (from args)
 //===----------------------------------------------------------------------===//
-static bool parseShowColorsArgs(
-    const llvm::opt::ArgList &args, bool defaultColor) {
-  // Color diagnostics default to auto ("on" if terminal supports) in the driver
-  // but default to off in cc1, needing an explicit OPT_fdiagnostics_color.
+static bool parseShowColorsArgs(const llvm::opt::ArgList &args,
+                                bool defaultColor = true) {
+  // Color diagnostics default to auto ("on" if terminal supports) in the
+  // compiler driver `flang-new` but default to off in the frontend driver
+  // `flang-new -fc1`, needing an explicit OPT_fdiagnostics_color.
   // Support both clang's -f[no-]color-diagnostics and gcc's
   // -f[no-]diagnostics-colors[=never|always|auto].
   enum {
@@ -89,11 +92,22 @@ static bool parseShowColorsArgs(
 }
 
 bool Fortran::frontend::parseDiagnosticArgs(clang::DiagnosticOptions &opts,
-                                            llvm::opt::ArgList &args,
-                                            bool defaultDiagColor) {
-  opts.ShowColors = parseShowColorsArgs(args, defaultDiagColor);
+                                            llvm::opt::ArgList &args) {
+  opts.ShowColors = parseShowColorsArgs(args);
 
   return true;
+}
+
+static void parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
+                             llvm::opt::ArgList &args,
+                             clang::DiagnosticsEngine &diags) {
+  unsigned defaultOpt = llvm::CodeGenOpt::None;
+  opts.OptimizationLevel = clang::getLastArgIntValue(
+      args, clang::driver::options::OPT_O, defaultOpt, diags);
+
+  if (args.hasFlag(clang::driver::options::OPT_fdebug_pass_manager,
+                   clang::driver::options::OPT_fno_debug_pass_manager, false))
+    opts.DebugPassManager = 1;
 }
 
 /// Parses all target input arguments and populates the target
@@ -604,6 +618,10 @@ static bool parseDiagArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
     }
   }
 
+  // Default to off for `flang-new -fc1`.
+  res.getFrontendOpts().showColors =
+      parseShowColorsArgs(args, /*defaultDiagColor=*/false);
+
   return diags.getNumErrors() == numErrorsBefore;
 }
 
@@ -714,6 +732,7 @@ bool CompilerInvocation::createFromArgs(
   success &= parseFrontendArgs(res.getFrontendOpts(), args, diags);
   parseTargetArgs(res.getTargetOpts(), args);
   parsePreprocessorArgs(res.getPreprocessorOpts(), args);
+  parseCodeGenArgs(res.getCodeGenOpts(), args, diags);
   success &= parseSemaArgs(res, args, diags);
   success &= parseCodegenArgs(res, args, diags);
   success &= parseCodeShapeArgs(res, args, diags);

@@ -1,6 +1,5 @@
 ! RUN: bbc -emit-fir -o - %s | FileCheck %s
 module moo
-  ! use iso_c_binding, only: mytype
   implicit none
 
   type mytype
@@ -10,17 +9,6 @@ module moo
 contains
 
   subroutine foo(buf_ptr, y)
-! CHECK-LABEL: func @_QMmooPfoo(
-! CHECK-SAME:                   %[[VAL_0:.*]]: !fir.ref<!fir.type<_QMmooTmytype{myaddr:i64}>> {fir.bindc_name = "buf_ptr"},
-! CHECK-SAME:                   %[[VAL_1:.*]]: !fir.ref<i32> {fir.bindc_name = "y"}) {
-! CHECK:         %[[VAL_2:.*]] = fir.alloca i32 {bindc_name = "w", uniq_name = "_QMmooFfooEw"}
-! CHECK:         %[[VAL_3:.*]] = fir.load %[[VAL_1]] : !fir.ref<i32>
-! CHECK:         %[[VAL_4:.*]] = fir.load %[[VAL_0]] : !fir.ref<!fir.type<_QMmooTmytype{myaddr:i64}>>
-! CHECK:         %[[VAL_5:.*]] = fir.call @bar_c(%[[VAL_3]], %[[VAL_4]]) : (i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32
-! CHECK:         fir.store %[[VAL_5]] to %[[VAL_2]] : !fir.ref<i32>
-! CHECK:         return
-! CHECK:       }
-! CHECK:       func private @bar_c(i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32 attributes {fir.sym_name = "_QMmooFfooPbar"}
     implicit none
     type(mytype)  , intent(inout)           :: buf_ptr
     integer :: y
@@ -38,3 +26,16 @@ contains
     w = bar(y, buf_ptr)
   end subroutine foo
 end module moo
+
+! CHECK-LABEL: func.func @_QMmooPfoo(
+! CHECK-SAME:                        %[[VAL_0:.*]]: !fir.ref<!fir.type<_QMmooTmytype{myaddr:i64}>> {fir.bindc_name = "buf_ptr"},
+! CHECK-SAME:                        %[[VAL_1:.*]]: !fir.ref<i32> {fir.bindc_name = "y"}) {
+! CHECK:         %[[VAL_2:.*]] = fir.alloca i32 {bindc_name = "w", uniq_name = "_QMmooFfooEw"}
+! CHECK:         %[[VAL_3:.*]] = fir.load %[[VAL_1]] : !fir.ref<i32>
+! CHECK:         %[[VAL_4:.*]] = fir.load %[[VAL_0]] : !fir.ref<!fir.type<_QMmooTmytype{myaddr:i64}>>
+! CHECK:         %[[VAL_5:.*]] = fir.call @bar_c(%[[VAL_3]], %[[VAL_4]]) : (i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32
+! CHECK:         fir.store %[[VAL_5]] to %[[VAL_2]] : !fir.ref<i32>
+! CHECK:         return
+! CHECK:       }
+! CHECK:       func.func private @bar_c(i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32 attributes {fir.sym_name = "bar_c"}
+
