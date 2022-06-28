@@ -123,6 +123,7 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     return MinCost;
   }
 
+  unsigned getMaxVLFor(VectorType *Ty);
 public:
   explicit RISCVTTIImpl(const RISCVTargetMachine *TM, const Function &F)
       : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),

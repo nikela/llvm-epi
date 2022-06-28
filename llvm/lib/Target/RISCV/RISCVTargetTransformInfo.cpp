@@ -436,15 +436,7 @@ InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
   auto &VTy = *cast<VectorType>(DataTy);
   InstructionCost MemOpCost = getMemoryOpCost(Opcode, VTy.getElementType(),
                                               Alignment, 0, CostKind, I);
-  if (isa<ScalableVectorType>(VTy)) {
-    const unsigned EltSize = DL.getTypeSizeInBits(VTy.getElementType());
-    const unsigned MinSize = DL.getTypeSizeInBits(&VTy).getKnownMinValue();
-    const unsigned VectorBitsMax = ST->getRealMaxVLen();
-    const unsigned MaxVLMAX =
-      RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
-    return MaxVLMAX * MemOpCost;
-  }
-  unsigned NumLoads = cast<FixedVectorType>(VTy).getNumElements();
+  unsigned NumLoads = getMaxVLFor(&VTy);
   return NumLoads * MemOpCost;
 }
 
@@ -522,6 +514,16 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
     }
   }
   return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
+}
+
+unsigned RISCVTTIImpl::getMaxVLFor(VectorType *Ty) {
+  if (isa<ScalableVectorType>(Ty)) {
+    const unsigned EltSize = DL.getTypeSizeInBits(Ty->getElementType());
+    const unsigned MinSize = DL.getTypeSizeInBits(Ty).getKnownMinValue();
+    const unsigned VectorBitsMax = ST->getRealMaxVLen();
+    return RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
+  }
+  return cast<FixedVectorType>(Ty)->getNumElements();
 }
 
 InstructionCost
@@ -631,10 +633,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
     return LegalizationCost + /*Cost of horizontal reduction*/ 2;
   }
 
-  if (!isa<FixedVectorType>(Ty))
-    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
-
-  if (!ST->useRVVForFixedLengthVectors())
+  if (isa<FixedVectorType>(Ty) && !ST->useRVVForFixedLengthVectors())
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
@@ -649,7 +648,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
-  unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
+  unsigned VL = getMaxVLFor(Ty);
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
 }
 
@@ -682,7 +681,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
     }
   }
 
-  if (!ST->useRVVForFixedLengthVectors())
+  if (isa<FixedVectorType>(Ty) && !ST->useRVVForFixedLengthVectors())
     return BaseT::getArithmeticReductionCost(Opcode, Ty, FMF, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
@@ -703,7 +702,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
-  unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
+  unsigned VL = getMaxVLFor(Ty);
   if (TTI::requiresOrderedReduction(FMF))
     return (LT.first - 1) + BaseCost + VL;
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
