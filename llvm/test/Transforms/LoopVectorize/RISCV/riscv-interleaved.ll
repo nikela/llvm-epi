@@ -2,7 +2,7 @@
 ; REQUIRES: asserts
 ; RUN: opt -loop-vectorize -dce -instcombine -mtriple riscv64-linux-gnu \
 ; RUN:   -mattr=+v -debug-only=loop-vectorize \
-; RUN:   -riscv-v-vector-bits-min=128 -S < %s 2>&1 | FileCheck %s
+; RUN:   -riscv-v-vector-bits-min=128 -scalable-vectorization=off -S < %s 2>&1 | FileCheck %s
 
 ; Function Attrs: nofree norecurse nosync nounwind writeonly
 define dso_local void @foo(i32 signext %n, i32* nocapture %A) local_unnamed_addr #0 {
