@@ -19011,15 +19011,40 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
   SmallVector<Value *, 4> Ops;
   llvm::Type *ResultType = ConvertType(E->getType());
 
+  // Find out if any arguments are required to be integer constant expressions.
+  unsigned ICEArguments = 0;
+  ASTContext::GetBuiltinTypeError Error;
+  getContext().GetBuiltinType(BuiltinID, Error, &ICEArguments);
+  if (Error == ASTContext::GE_Missing_type) {
+    // Vector intrinsics don't have a type string.
+    assert(BuiltinID >= clang::RISCV::FirstRVVBuiltin &&
+           BuiltinID <= clang::RISCV::LastRVVBuiltin);
+    ICEArguments = 0;
+    if (BuiltinID == RISCVVector::BI__builtin_rvv_vget_v ||
+        BuiltinID == RISCVVector::BI__builtin_rvv_vset_v)
+      ICEArguments = 1 << 1;
+  } else {
+    assert(Error == ASTContext::GE_None && "Unexpected error");
+  }
+
   for (unsigned i = 0, e = E->getNumArgs(); i != e; i++) {
-    const Expr *Arg = E->getArg(i);
-    if (hasAggregateEvaluationKind(Arg->getType())) {
-      LValue L = EmitAggExprToLValue(Arg);
-      llvm::Value *AggValue = Builder.CreateLoad(L.getAddress(*this));
-      Ops.push_back(AggValue);
-    } else {
-      Ops.push_back(EmitScalarExpr(Arg));
+    if ((ICEArguments & (1 << i)) == 0) {
+      const Expr *Arg = E->getArg(i);
+      if (hasAggregateEvaluationKind(Arg->getType())) {
+        LValue L = EmitAggExprToLValue(Arg);
+        llvm::Value *AggValue = Builder.CreateLoad(L.getAddress(*this));
+        Ops.push_back(AggValue);
+      } else {
+        // If this is a normal argument, just emit it as a scalar.
+        Ops.push_back(EmitScalarExpr(Arg));
+      }
+      continue;
     }
+
+    // If this is required to be a constant, constant fold it so that we know
+    // that the generated intrinsic gets a ConstantInt.
+    Ops.push_back(llvm::ConstantInt::get(
+        getLLVMContext(), *E->getArg(i)->getIntegerConstantExpr(getContext())));
   }
 
   Intrinsic::ID ID = Intrinsic::not_intrinsic;

@@ -212,8 +212,7 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
                                         bool IsScalable) const {
   return ST->hasVInstructions() && IsScalable
              ? ElementCount::get(
-                   std::max<unsigned>(1, ST->getMinRVVVectorSizeInBits() /
-                                             ElemWidth),
+                   std::max<unsigned>(1, ST->getRealMinVLen() / ElemWidth),
                    IsScalable)
              : ElementCount::getNull();
 }
@@ -233,9 +232,9 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
   SmallestType = std::max<unsigned>(8, SmallestType);
   WidestType = std::max<unsigned>(8, WidestType);
   unsigned WidestRegister = std::min<unsigned>(
-      ST->getMinRVVVectorSizeInBits() * RegWidthFactor, MaxSafeRegisterWidth);
+      ST->getRealMinVLen() * RegWidthFactor, MaxSafeRegisterWidth);
   unsigned SmallestRegister =
-      std::min(ST->getMinRVVVectorSizeInBits(), MaxSafeRegisterWidth);
+      std::min(ST->getRealMinVLen(), MaxSafeRegisterWidth);
 
   unsigned LowerBoundVFKnownMin =
       std::max<unsigned>(1, PowerOf2Floor(SmallestRegister / SmallestType));
@@ -291,17 +290,15 @@ bool RISCVTTIImpl::shouldExpandReduction(const IntrinsicInst *II) const {
 }
 
 Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
-  // There is no assumption of the maximum vector length in V specification.
-  // We use the value specified by users as the maximum vector length.
-  // This function will use the assumed maximum vector length to get the
-  // maximum vscale for LoopVectorizer.
-  // If users do not specify the maximum vector length, we have no way to
-  // know whether the LoopVectorizer is safe to do or not.
-  // We only consider to use single vector register (LMUL = 1) to vectorize.
-  unsigned MaxVectorSizeInBits = ST->getMaxRVVVectorSizeInBits();
-  if (ST->hasVInstructions() && MaxVectorSizeInBits != 0)
-    return MaxVectorSizeInBits / RISCV::RVVBitsPerBlock;
+  if (ST->hasVInstructions())
+    return ST->getRealMaxVLen() / RISCV::RVVBitsPerBlock;
   return BaseT::getMaxVScale();
+}
+
+Optional<unsigned> RISCVTTIImpl::getVScaleForTuning() const {
+  if (ST->hasVInstructions())
+    return ST->getRealMinVLen() / RISCV::RVVBitsPerBlock;
+  return BaseT::getVScaleForTuning();
 }
 
 TypeSize
@@ -313,7 +310,7 @@ RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
     return TypeSize::getFixed(ST->getXLen());
   case TargetTransformInfo::RGK_FixedWidthVector:
     return TypeSize::getFixed(
-        ST->hasVInstructions() ? LMUL * ST->getMinRVVVectorSizeInBits() : 0);
+        ST->useRVVForFixedLengthVectors() ? LMUL * ST->getRealMinVLen() : 0);
   case TargetTransformInfo::RGK_ScalableVector:
     return TypeSize::getScalable(
         ST->hasVInstructions() ? LMUL * RISCV::RVVBitsPerBlock : 0);
@@ -439,15 +436,7 @@ InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
   auto &VTy = *cast<VectorType>(DataTy);
   InstructionCost MemOpCost = getMemoryOpCost(Opcode, VTy.getElementType(),
                                               Alignment, 0, CostKind, I);
-  if (isa<ScalableVectorType>(VTy)) {
-    const unsigned EltSize = DL.getTypeSizeInBits(VTy.getElementType());
-    const unsigned MinSize = DL.getTypeSizeInBits(&VTy).getKnownMinValue();
-    const unsigned VectorBitsMax = ST->getRealMaxVLen();
-    const unsigned MaxVLMAX =
-      RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
-    return MaxVLMAX * MemOpCost;
-  }
-  unsigned NumLoads = cast<FixedVectorType>(VTy).getNumElements();
+  unsigned NumLoads = getMaxVLFor(&VTy);
   return NumLoads * MemOpCost;
 }
 
@@ -525,6 +514,16 @@ InstructionCost RISCVTTIImpl::getCastInstrCost(unsigned Opcode, Type *Dst,
     }
   }
   return BaseT::getCastInstrCost(Opcode, Dst, Src, CCH, CostKind, I);
+}
+
+unsigned RISCVTTIImpl::getMaxVLFor(VectorType *Ty) {
+  if (isa<ScalableVectorType>(Ty)) {
+    const unsigned EltSize = DL.getTypeSizeInBits(Ty->getElementType());
+    const unsigned MinSize = DL.getTypeSizeInBits(Ty).getKnownMinValue();
+    const unsigned VectorBitsMax = ST->getRealMaxVLen();
+    return RISCVTargetLowering::computeVLMAX(VectorBitsMax, EltSize, MinSize);
+  }
+  return cast<FixedVectorType>(Ty)->getNumElements();
 }
 
 InstructionCost
@@ -634,10 +633,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
     return LegalizationCost + /*Cost of horizontal reduction*/ 2;
   }
 
-  if (!isa<FixedVectorType>(Ty))
-    return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
-
-  if (!ST->useRVVForFixedLengthVectors())
+  if (isa<FixedVectorType>(Ty) && !ST->useRVVForFixedLengthVectors())
     return BaseT::getMinMaxReductionCost(Ty, CondTy, IsUnsigned, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
@@ -652,7 +648,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
-  unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
+  unsigned VL = getMaxVLFor(Ty);
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
 }
 
@@ -685,7 +681,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
     }
   }
 
-  if (!ST->useRVVForFixedLengthVectors())
+  if (isa<FixedVectorType>(Ty) && !ST->useRVVForFixedLengthVectors())
     return BaseT::getArithmeticReductionCost(Opcode, Ty, FMF, CostKind);
 
   // Skip if scalar size of Ty is bigger than ELEN.
@@ -706,7 +702,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
 
   // IR Reduction is composed by two vmv and one rvv reduction instruction.
   InstructionCost BaseCost = 2;
-  unsigned VL = cast<FixedVectorType>(Ty)->getNumElements();
+  unsigned VL = getMaxVLFor(Ty);
   if (TTI::requiresOrderedReduction(FMF))
     return (LT.first - 1) + BaseCost + VL;
   return (LT.first - 1) + BaseCost + Log2_32_Ceil(VL);
@@ -802,7 +798,7 @@ unsigned RISCVTTIImpl::getRegUsageForType(Type *Ty) {
       return divideCeil(Size.getKnownMinValue(), RISCV::RVVBitsPerBlock);
 
     if (ST->useRVVForFixedLengthVectors())
-      return divideCeil(Size, ST->getMinRVVVectorSizeInBits());
+      return divideCeil(Size, ST->getRealMinVLen());
   }
 
   return BaseT::getRegUsageForType(Ty);
