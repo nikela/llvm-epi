@@ -287,23 +287,26 @@ uint64_t RISCVFrameLowering::getStackSizeWithRVVPadding(
   return alignTo(MFI.getStackSize() + RVFI->getRVVPadding(), getStackAlign());
 }
 
-void RISCVFrameLowering::adjustReg(MachineBasicBlock &MBB,
+// Returns true if we had to use a scratch register (either the one provided or
+// a freshly created one).
+bool RISCVFrameLowering::adjustReg(MachineBasicBlock &MBB,
                                    MachineBasicBlock::iterator MBBI,
                                    const DebugLoc &DL, Register DestReg,
                                    Register SrcReg, int64_t Val,
-                                   MachineInstr::MIFlag Flag) const {
+                                   MachineInstr::MIFlag Flag,
+                                   Register ScratchReg) const {
   MachineRegisterInfo &MRI = MBB.getParent()->getRegInfo();
   const RISCVInstrInfo *TII = STI.getInstrInfo();
 
   if (DestReg == SrcReg && Val == 0)
-    return;
+    return false;
 
   if (isInt<12>(Val)) {
     BuildMI(MBB, MBBI, DL, TII->get(RISCV::ADDI), DestReg)
         .addReg(SrcReg)
         .addImm(Val)
         .setMIFlag(Flag);
-    return;
+    return false;
   }
 
   // Try to split the offset across two ADDIs. We need to keep the stack pointer
@@ -325,7 +328,7 @@ void RISCVFrameLowering::adjustReg(MachineBasicBlock &MBB,
         .addReg(DestReg, RegState::Kill)
         .addImm(Val)
         .setMIFlag(Flag);
-    return;
+    return false;
   }
 
   unsigned Opc = RISCV::ADD;
@@ -334,12 +337,15 @@ void RISCVFrameLowering::adjustReg(MachineBasicBlock &MBB,
     Opc = RISCV::SUB;
   }
 
-  Register ScratchReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
+  if (ScratchReg == RISCV::NoRegister)
+    ScratchReg = MRI.createVirtualRegister(&RISCV::GPRRegClass);
   TII->movImm(MBB, MBBI, DL, ScratchReg, Val, Flag);
   BuildMI(MBB, MBBI, DL, TII->get(Opc), DestReg)
       .addReg(SrcReg)
       .addReg(ScratchReg, RegState::Kill)
       .setMIFlag(Flag);
+
+  return true;
 }
 
 // Returns the register used to hold the frame pointer.
@@ -468,7 +474,19 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
   }
 
   // Allocate space on the stack if necessary.
-  adjustReg(MBB, MBBI, DL, SPReg, SPReg, -StackSize, MachineInstr::FrameSetup);
+  bool UsesScratchReg = adjustReg(MBB, MBBI, DL, SPReg, SPReg, -StackSize,
+                                  MachineInstr::FrameSetup,
+                                  RISCV::X7);
+  // The register scavenger (RS) cannot possibly work when updating the SP as RS
+  // can choose to use an emergency spill slot which will see its offset
+  // modified.
+  // X5 (t0) and X6 (t1) may be already used for libcall and
+  // outlining. Force the use of t2.
+  if (UsesScratchReg && STI.isRegisterReservedByUser(FPReg)) {
+    MF.getFunction().getContext().diagnose(DiagnosticInfoUnsupported{
+        MF.getFunction(),
+        "Register 'x7' (t2) required, but it has been reserved."});
+  }
 
   // Emit ".cfi_def_cfa_offset RealStackSize"
   unsigned CFIIndex = MF.addFrameInst(
@@ -532,7 +550,8 @@ void RISCVFrameLowering::emitPrologue(MachineFunction &MF,
     assert(SecondSPAdjustAmount > 0 &&
            "SecondSPAdjustAmount should be greater than zero");
     adjustReg(MBB, MBBI, DL, SPReg, SPReg, -SecondSPAdjustAmount,
-              MachineInstr::FrameSetup);
+              MachineInstr::FrameSetup,
+              RISCV::X7);
 
     // If we are using a frame-pointer, and thus emitted ".cfi_def_cfa fp, 0",
     // don't emit an sp-based .cfi_def_cfa_offset
@@ -663,14 +682,17 @@ void RISCVFrameLowering::emitEpilogue(MachineFunction &MF,
            "SecondSPAdjustAmount should be greater than zero");
 
     adjustReg(MBB, LastFrameDestroy, DL, SPReg, SPReg, SecondSPAdjustAmount,
-              MachineInstr::FrameDestroy);
+              MachineInstr::FrameDestroy, RISCV::X7);
+    // Not checking that the register x7 is reserved here because we'd have
+    // detected this when emitting the prologue.
   }
 
   if (FirstSPAdjustAmount)
     StackSize = FirstSPAdjustAmount;
 
   // Deallocate stack
-  adjustReg(MBB, MBBI, DL, SPReg, SPReg, StackSize, MachineInstr::FrameDestroy);
+  adjustReg(MBB, MBBI, DL, SPReg, SPReg, StackSize, MachineInstr::FrameDestroy,
+            RISCV::X7);
 
   // Emit epilogue for shadow call stack.
   emitSCSEpilogue(MF, MBB, MBBI, DL);

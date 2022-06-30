@@ -149,9 +149,9 @@ define dso_local void @test4() nounwind {
 ; RV32-NEXT:    sw ra, 2028(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    sw s0, 2024(sp) # 4-byte Folded Spill
 ; RV32-NEXT:    addi s0, sp, 2032
-; RV32-NEXT:    lui a0, 2
-; RV32-NEXT:    addi a0, a0, -2032
-; RV32-NEXT:    sub sp, sp, a0
+; RV32-NEXT:    lui t2, 2
+; RV32-NEXT:    addi t2, t2, -2032
+; RV32-NEXT:    sub sp, sp, t2
 ; RV32-NEXT:    srli a0, sp, 12
 ; RV32-NEXT:    slli sp, a0, 12
 ; RV32-NEXT:    lui a0, 1
@@ -163,9 +163,9 @@ define dso_local void @test4() nounwind {
 ; RV32-NEXT:    sw a0, 0(a1)
 ; RV32-NEXT:    lui a0, 2
 ; RV32-NEXT:    sub sp, s0, a0
-; RV32-NEXT:    lui a0, 2
-; RV32-NEXT:    addi a0, a0, -2032
-; RV32-NEXT:    add sp, sp, a0
+; RV32-NEXT:    lui t2, 2
+; RV32-NEXT:    addi t2, t2, -2032
+; RV32-NEXT:    add sp, sp, t2
 ; RV32-NEXT:    lw ra, 2028(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    lw s0, 2024(sp) # 4-byte Folded Reload
 ; RV32-NEXT:    addi sp, sp, 2032
@@ -177,9 +177,9 @@ define dso_local void @test4() nounwind {
 ; RV64-NEXT:    sd ra, 2024(sp) # 8-byte Folded Spill
 ; RV64-NEXT:    sd s0, 2016(sp) # 8-byte Folded Spill
 ; RV64-NEXT:    addi s0, sp, 2032
-; RV64-NEXT:    lui a0, 2
-; RV64-NEXT:    addiw a0, a0, -2032
-; RV64-NEXT:    sub sp, sp, a0
+; RV64-NEXT:    lui t2, 2
+; RV64-NEXT:    addiw t2, t2, -2032
+; RV64-NEXT:    sub sp, sp, t2
 ; RV64-NEXT:    srli a0, sp, 12
 ; RV64-NEXT:    slli sp, a0, 12
 ; RV64-NEXT:    lui a0, 1
@@ -191,9 +191,9 @@ define dso_local void @test4() nounwind {
 ; RV64-NEXT:    sw a0, 0(a1)
 ; RV64-NEXT:    lui a0, 2
 ; RV64-NEXT:    sub sp, s0, a0
-; RV64-NEXT:    lui a0, 2
-; RV64-NEXT:    addiw a0, a0, -2032
-; RV64-NEXT:    add sp, sp, a0
+; RV64-NEXT:    lui t2, 2
+; RV64-NEXT:    addiw t2, t2, -2032
+; RV64-NEXT:    add sp, sp, t2
 ; RV64-NEXT:    ld ra, 2024(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    ld s0, 2016(sp) # 8-byte Folded Reload
 ; RV64-NEXT:    addi sp, sp, 2032
