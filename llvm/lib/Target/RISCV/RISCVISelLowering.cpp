@@ -581,9 +581,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
 
-      setOperationAction(ISD::CTTZ, VT, Expand);
-      setOperationAction(ISD::CTLZ, VT, Expand);
-      setOperationAction(ISD::CTPOP, VT, Expand);
       setOperationAction({ISD::CTTZ, ISD::CTLZ, ISD::CTPOP, ISD::BSWAP}, VT,
                          Expand);
 
@@ -1010,9 +1007,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   // Jumps are expensive, compared to logic
   setJumpIsExpensive();
-
-  // We can use any register for comparisons
-  setHasMultipleConditionRegisters();
 
   if (Subtarget.hasVInstructions()) {
     // EPI & VPred intrinsics may have illegal operands/results
