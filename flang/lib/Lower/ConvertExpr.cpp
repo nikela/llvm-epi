@@ -1518,8 +1518,10 @@ public:
     // Otherwise, the string is in a plain old expression so "outline" the value
     // by hashconsing it to a constant literal object.
 
-    std::string globalName =
-        fir::factory::uniqueCGIdent("cl", (const char *)value.c_str());
+    auto size =
+        converter.getKindMap().getCharacterBitsize(KIND) / 8 * value.size();
+    llvm::StringRef strVal(reinterpret_cast<const char *>(value.c_str()), size);
+    std::string globalName = fir::factory::uniqueCGIdent("cl", strVal);
     fir::GlobalOp global = builder.getNamedGlobal(globalName);
     if (!global)
       global = builder.createGlobalConstant(
@@ -2598,6 +2600,12 @@ public:
           cast = builder.create<fir::EmboxProcOp>(loc, boxProcTy, fst);
         }
       } else {
+        if (fir::isa_derived(snd)) {
+          // FIXME: This seems like a serious bug elsewhere in lowering. Paper
+          // over the problem for now.
+          TODO(loc, "derived type argument passed by value");
+        }
+        assert(!fir::isa_derived(snd));
         cast = builder.convertWithSemantics(loc, snd, fst,
                                             callingImplicitInterface);
       }
@@ -3818,7 +3826,7 @@ public:
     // be needed afterwards.
     stmtCtx.pushScope();
     [[maybe_unused]] ExtValue loopRes = lowerArrayExpression(expr);
-    stmtCtx.finalize(/*popScope=*/true);
+    stmtCtx.finalizeAndPop();
     assert(fir::getBase(loopRes));
   }
 
@@ -4631,7 +4639,7 @@ private:
     auto seqTy = type.dyn_cast<fir::SequenceType>();
     assert(seqTy && "must be an array");
     mlir::Location loc = getLoc();
-    // TODO: Need to thread the length parameters here. For character, they may
+    // TODO: Need to thread the LEN parameters here. For character, they may
     // differ from the operands length (e.g concatenation). So the array loads
     // type parameters are not enough.
     if (auto charTy = seqTy.getEleTy().dyn_cast<fir::CharacterType>())
@@ -4724,7 +4732,7 @@ private:
   /// fir::ResultOp at the end of the innermost loop.
   void finalizeElementCtx() {
     if (elementCtx) {
-      stmtCtx.finalize(/*popScope=*/true);
+      stmtCtx.finalizeAndPop();
       elementCtx = false;
     }
   }
@@ -6093,9 +6101,14 @@ private:
       mlir::Operation::operand_range triples = slOp.getTriples();
       fir::SequenceType::Shape shape;
       // reduce the rank for each invariant dimension
-      for (unsigned i = 1, end = triples.size(); i < end; i += 3)
-        if (!mlir::isa_and_nonnull<fir::UndefOp>(triples[i].getDefiningOp()))
+      for (unsigned i = 1, end = triples.size(); i < end; i += 3) {
+        if (auto extent = fir::factory::getExtentFromTriplet(
+                triples[i - 1], triples[i], triples[i + 1]))
+          shape.push_back(*extent);
+        else if (!mlir::isa_and_nonnull<fir::UndefOp>(
+                     triples[i].getDefiningOp()))
           shape.push_back(fir::SequenceType::getUnknownExtent());
+      }
       return fir::SequenceType::get(shape, seqTy.getEleTy());
     }
     // not sliced, so no change in rank
@@ -6148,7 +6161,7 @@ private:
     mlir::Value multiplier = builder.createIntegerConstant(loc, idxTy, 1);
     if (fir::hasDynamicSize(eleTy)) {
       if (auto charTy = eleTy.dyn_cast<fir::CharacterType>()) {
-        // Array of char with dynamic length parameter. Downcast to an array
+        // Array of char with dynamic LEN parameter. Downcast to an array
         // of singleton char, and scale by the len type parameter from
         // `exv`.
         exv.match(
@@ -6438,7 +6451,7 @@ private:
         builder.create<fir::StoreOp>(loc, castLen, charLen.value());
       }
     }
-    stmtCtx.finalize(/*popScope=*/true);
+    stmtCtx.finalizeAndPop();
 
     builder.create<fir::ResultOp>(loc, mem);
     builder.restoreInsertionPoint(insPt);
