@@ -6757,7 +6757,8 @@ Sema::DeclGroupPtrTy Sema::ActOnOpenMPDeclareSimdDirective(
     DeclGroupPtrTy DG, OMPDeclareSimdDeclAttr::BranchStateTy BS, Expr *Simdlen,
     ArrayRef<Expr *> Uniforms, ArrayRef<Expr *> Aligneds,
     ArrayRef<Expr *> Alignments, ArrayRef<Expr *> Linears,
-    ArrayRef<unsigned> LinModifiers, ArrayRef<Expr *> Steps, SourceRange SR) {
+    ArrayRef<unsigned> LinModifiers, ArrayRef<Expr *> Steps, SourceRange SR,
+    bool IsMaxLengthRequested) {
   assert(Aligneds.size() == Alignments.size());
   assert(Linears.size() == LinModifiers.size());
   assert(Linears.size() == Steps.size());
@@ -6999,7 +7000,7 @@ Sema::DeclGroupPtrTy Sema::ActOnOpenMPDeclareSimdDirective(
       const_cast<Expr **>(NewAligns.data()), NewAligns.size(),
       const_cast<Expr **>(Linears.data()), Linears.size(),
       const_cast<unsigned *>(LinModifiers.data()), LinModifiers.size(),
-      NewSteps.data(), NewSteps.size(), SR);
+      NewSteps.data(), NewSteps.size(), IsMaxLengthRequested, SR);
   ADecl->addAttr(NewAttr);
   return DG;
 }
@@ -16308,15 +16309,16 @@ OMPClause *Sema::ActOnOpenMPSafelenClause(Expr *Len, SourceLocation StartLoc,
 
 OMPClause *Sema::ActOnOpenMPSimdlenClause(Expr *Len, SourceLocation StartLoc,
                                           SourceLocation LParenLoc,
-                                          SourceLocation EndLoc) {
+                                          SourceLocation EndLoc,
+                                          bool IsMaxLengthRequested) {
   // OpenMP [2.8.1, simd construct, Description]
   // The parameter of the simdlen clause must be a constant
   // positive integer expression.
   ExprResult Simdlen = VerifyPositiveIntegerConstantInClause(Len, OMPC_simdlen);
-  if (Simdlen.isInvalid())
+  if (!IsMaxLengthRequested && Simdlen.isInvalid())
     return nullptr;
-  return new (Context)
-      OMPSimdlenClause(Simdlen.get(), StartLoc, LParenLoc, EndLoc);
+  return new (Context) OMPSimdlenClause(Simdlen.get(), StartLoc, LParenLoc,
+                                        EndLoc, IsMaxLengthRequested);
 }
 
 /// Tries to find omp_allocator_handle_t type.

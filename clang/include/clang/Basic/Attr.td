@@ -3753,7 +3753,7 @@ def OMPDeclareSimdDecl : Attr {
     ExprArgument<"Simdlen">, VariadicExprArgument<"Uniforms">,
     VariadicExprArgument<"Aligneds">, VariadicExprArgument<"Alignments">,
     VariadicExprArgument<"Linears">, VariadicUnsignedArgument<"Modifiers">,
-    VariadicExprArgument<"Steps">
+    VariadicExprArgument<"Steps">, BoolArgument<"IsMaxLengthRequested">
   ];
   let AdditionalMembers = [{
     void printPrettyPragma(raw_ostream & OS, const PrintingPolicy &Policy)
