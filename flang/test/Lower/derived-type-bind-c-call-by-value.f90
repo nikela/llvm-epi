@@ -37,5 +37,4 @@ end module moo
 ! CHECK:         fir.store %[[VAL_5]] to %[[VAL_2]] : !fir.ref<i32>
 ! CHECK:         return
 ! CHECK:       }
-! CHECK:       func.func private @bar_c(i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32 attributes {fir.sym_name = "bar_c"}
-
+! CHECK:       func.func private @bar_c(i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32 attributes {fir.bindc_name = "bar_c"}
