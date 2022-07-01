@@ -97,8 +97,10 @@ static const RISCVSupportedExtension SupportedExtensions[] = {
     {"zve64f", RISCVExtensionVersion{1, 0}},
     {"zve64d", RISCVExtensionVersion{1, 0}},
 
-    // We filter anything not appearing here or as an experimental extension
-    // below.
+    {"zicbom", RISCVExtensionVersion{1, 0}},
+    {"zicboz", RISCVExtensionVersion{1, 0}},
+    {"zicbop", RISCVExtensionVersion{1, 0}},
+
     {"zepi", RISCVExtensionVersion{1, 0}},
 };
 

@@ -539,9 +539,9 @@ define void @caller4096() {
 ; RV32I-NEXT:    .cfi_offset s0, -8
 ; RV32I-NEXT:    addi s0, sp, 2032
 ; RV32I-NEXT:    .cfi_def_cfa s0, 0
-; RV32I-NEXT:    lui a0, 2
-; RV32I-NEXT:    addi a0, a0, -2032
-; RV32I-NEXT:    sub sp, sp, a0
+; RV32I-NEXT:    lui t2, 2
+; RV32I-NEXT:    addi t2, t2, -2032
+; RV32I-NEXT:    sub sp, sp, t2
 ; RV32I-NEXT:    srli a0, sp, 12
 ; RV32I-NEXT:    slli sp, a0, 12
 ; RV32I-NEXT:    lui a0, 1
@@ -549,9 +549,9 @@ define void @caller4096() {
 ; RV32I-NEXT:    call callee@plt
 ; RV32I-NEXT:    lui a0, 2
 ; RV32I-NEXT:    sub sp, s0, a0
-; RV32I-NEXT:    lui a0, 2
-; RV32I-NEXT:    addi a0, a0, -2032
-; RV32I-NEXT:    add sp, sp, a0
+; RV32I-NEXT:    lui t2, 2
+; RV32I-NEXT:    addi t2, t2, -2032
+; RV32I-NEXT:    add sp, sp, t2
 ; RV32I-NEXT:    lw ra, 2028(sp) # 4-byte Folded Reload
 ; RV32I-NEXT:    lw s0, 2024(sp) # 4-byte Folded Reload
 ; RV32I-NEXT:    addi sp, sp, 2032
@@ -567,9 +567,9 @@ define void @caller4096() {
 ; RV64I-NEXT:    .cfi_offset s0, -16
 ; RV64I-NEXT:    addi s0, sp, 2032
 ; RV64I-NEXT:    .cfi_def_cfa s0, 0
-; RV64I-NEXT:    lui a0, 2
-; RV64I-NEXT:    addiw a0, a0, -2032
-; RV64I-NEXT:    sub sp, sp, a0
+; RV64I-NEXT:    lui t2, 2
+; RV64I-NEXT:    addiw t2, t2, -2032
+; RV64I-NEXT:    sub sp, sp, t2
 ; RV64I-NEXT:    srli a0, sp, 12
 ; RV64I-NEXT:    slli sp, a0, 12
 ; RV64I-NEXT:    lui a0, 1
@@ -577,9 +577,9 @@ define void @caller4096() {
 ; RV64I-NEXT:    call callee@plt
 ; RV64I-NEXT:    lui a0, 2
 ; RV64I-NEXT:    sub sp, s0, a0
-; RV64I-NEXT:    lui a0, 2
-; RV64I-NEXT:    addiw a0, a0, -2032
-; RV64I-NEXT:    add sp, sp, a0
+; RV64I-NEXT:    lui t2, 2
+; RV64I-NEXT:    addiw t2, t2, -2032
+; RV64I-NEXT:    add sp, sp, t2
 ; RV64I-NEXT:    ld ra, 2024(sp) # 8-byte Folded Reload
 ; RV64I-NEXT:    ld s0, 2016(sp) # 8-byte Folded Reload
 ; RV64I-NEXT:    addi sp, sp, 2032

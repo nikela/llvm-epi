@@ -527,6 +527,12 @@ class SVE_3_Op_BSP_Pat<ValueType vtd, SDPatternOperator op, ValueType vt1,
 : Pat<(vtd (op vt1:$Op1, vt2:$Op2, vt3:$Op3)),
       (inst $Op2, $Op3, $Op1)>;
 
+class SVE_Shift_Add_All_Active_Pat<ValueType vtd, SDPatternOperator op, ValueType pt,
+                                   ValueType vt1, ValueType vt2, ValueType vt3,
+                                   Instruction inst>
+: Pat<(vtd (add vt1:$Op1, (op (pt (SVEAllActive)), vt2:$Op2, vt3:$Op3))),
+      (inst $Op1, $Op2, $Op3)>;
+
 //===----------------------------------------------------------------------===//
 // SVE pattern match helpers.
 //===----------------------------------------------------------------------===//
@@ -3802,7 +3808,8 @@ class sve2_int_bin_accum_shift_imm<bits<4> tsz8_64, bits<2> opc, string asm,
 }
 
 multiclass sve2_int_bin_accum_shift_imm_right<bits<2> opc, string asm,
-                                              SDPatternOperator op> {
+                                              SDPatternOperator op,
+                                              SDPatternOperator shift_op = null_frag> {
   def _B : sve2_int_bin_accum_shift_imm<{0,0,0,1}, opc, asm, ZPR8, vecshiftR8>;
   def _H : sve2_int_bin_accum_shift_imm<{0,0,1,?}, opc, asm, ZPR16, vecshiftR16> {
     let Inst{19} = imm{3};
@@ -3819,6 +3826,11 @@ multiclass sve2_int_bin_accum_shift_imm_right<bits<2> opc, string asm,
   def : SVE_3_Op_Imm_Pat<nxv8i16, op, nxv8i16, nxv8i16, i32, tvecshiftR16, !cast<Instruction>(NAME # _H)>;
   def : SVE_3_Op_Imm_Pat<nxv4i32, op, nxv4i32, nxv4i32, i32, tvecshiftR32, !cast<Instruction>(NAME # _S)>;
   def : SVE_3_Op_Imm_Pat<nxv2i64, op, nxv2i64, nxv2i64, i32, tvecshiftR64, !cast<Instruction>(NAME # _D)>;
+
+  def : SVE_Shift_Add_All_Active_Pat<nxv16i8, shift_op, nxv16i1, nxv16i8, nxv16i8, i32, !cast<Instruction>(NAME # _B)>;
+  def : SVE_Shift_Add_All_Active_Pat<nxv8i16, shift_op, nxv8i1, nxv8i16, nxv8i16, i32, !cast<Instruction>(NAME # _H)>;
+  def : SVE_Shift_Add_All_Active_Pat<nxv4i32, shift_op, nxv4i1, nxv4i32, nxv4i32, i32, !cast<Instruction>(NAME # _S)>;
+  def : SVE_Shift_Add_All_Active_Pat<nxv2i64, shift_op, nxv2i1, nxv2i64, nxv2i64, i32, !cast<Instruction>(NAME # _D)>;
 }
 
 class sve2_int_cadd<bits<2> sz, bit opc, string asm, ZPRRegOp zprty>
@@ -4648,6 +4660,19 @@ multiclass sve_int_dup_imm_pred_merge<string asm> {
                   (!cast<Instruction>(NAME # _S) ZPR32:$Zd, PPRAny:$Pg, 0, 0), 0>;
   def : InstAlias<"fmov $Zd, $Pg/m, #0.0",
                   (!cast<Instruction>(NAME # _D) ZPR64:$Zd, PPRAny:$Pg, 0, 0), 0>;
+
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv8f16 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _H) $Zd, $Pg, 0, 0)>;
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv4f16 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _S) $Zd, $Pg, 0, 0)>;
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv2f16 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _D) $Zd, $Pg, 0, 0)>;
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv4f32 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _S) $Zd, $Pg, 0, 0)>;
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv2f32 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _D) $Zd, $Pg, 0, 0)>;
+  def : Pat<(vselect PPRAny:$Pg, (SVEDup0), (nxv2f64 ZPR:$Zd)),
+            (!cast<Instruction>(NAME # _D) $Zd, $Pg, 0, 0)>;
 }
 
 multiclass sve_int_dup_imm_pred_zero_inst<
@@ -4729,6 +4754,10 @@ multiclass SVE_SETCC_Pat_With_Zero<CondCode cc, CondCode invcc, ValueType predvt
             (cmp $Op1, $Op2)>;
   def : Pat<(predvt (AArch64setcc_z predvt:$Op1, (SVEDup0), intvt:$Op2, invcc)),
             (cmp $Op1, $Op2)>;
+  def : Pat<(predvt (and predvt:$Pg, (AArch64setcc_z (predvt (AArch64ptrue 31)), intvt:$Op1, (SVEDup0), cc))),
+            (cmp $Pg, $Op1)>;
+  def : Pat<(predvt (and predvt:$Pg, (AArch64setcc_z (predvt (AArch64ptrue 31)), (SVEDup0), intvt:$Op1, invcc))),
+            (cmp $Pg, $Op1)>;
 }
 
 multiclass sve_int_cmp_0<bits<3> opc, string asm, CondCode cc, CondCode invcc> {
@@ -4800,14 +4829,26 @@ multiclass SVE_SETCC_Imm_Pat<CondCode cc, CondCode commuted_cc,
                              ValueType predvt, ValueType intvt,
                              Operand immtype, Instruction cmp> {
   def : Pat<(predvt (AArch64setcc_z (predvt PPR_3b:$Pg),
-                                       (intvt ZPR:$Zs1),
-                                       (intvt (splat_vector (immtype:$imm))),
-                                       cc)),
+                                    (intvt ZPR:$Zs1),
+                                    (intvt (splat_vector (immtype:$imm))),
+                                    cc)),
             (cmp $Pg, $Zs1, immtype:$imm)>;
   def : Pat<(predvt (AArch64setcc_z (predvt PPR_3b:$Pg),
-                                       (intvt (splat_vector (immtype:$imm))),
-                                       (intvt ZPR:$Zs1),
-                                       commuted_cc)),
+                                    (intvt (splat_vector (immtype:$imm))),
+                                    (intvt ZPR:$Zs1),
+                                    commuted_cc)),
+            (cmp $Pg, $Zs1, immtype:$imm)>;
+  def : Pat<(predvt (and predvt:$Pg,
+                         (AArch64setcc_z (predvt (AArch64ptrue 31)),
+                                         (intvt ZPR:$Zs1),
+                                         (intvt (splat_vector (immtype:$imm))),
+                                         cc))),
+            (cmp $Pg, $Zs1, immtype:$imm)>;
+  def : Pat<(predvt (and predvt:$Pg,
+                         (AArch64setcc_z (predvt (AArch64ptrue 31)),
+                                         (intvt (splat_vector (immtype:$imm))),
+                                         (intvt ZPR:$Zs1),
+                                         commuted_cc))),
             (cmp $Pg, $Zs1, immtype:$imm)>;
 }
 

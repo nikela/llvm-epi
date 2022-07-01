@@ -581,9 +581,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
       setOperationAction(ISD::VECTOR_SHUFFLE, VT, Custom);
 
-      setOperationAction(ISD::CTTZ, VT, Expand);
-      setOperationAction(ISD::CTLZ, VT, Expand);
-      setOperationAction(ISD::CTPOP, VT, Expand);
       setOperationAction({ISD::CTTZ, ISD::CTLZ, ISD::CTPOP, ISD::BSWAP}, VT,
                          Expand);
 
@@ -1011,9 +1008,6 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
   // Jumps are expensive, compared to logic
   setJumpIsExpensive();
 
-  // We can use any register for comparisons
-  setHasMultipleConditionRegisters();
-
   if (Subtarget.hasVInstructions()) {
     // EPI & VPred intrinsics may have illegal operands/results
     for (auto VT : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::nxv1i32}) {
@@ -1071,6 +1065,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   setTargetDAGCombine({ISD::INTRINSIC_WO_CHAIN, ISD::ADD, ISD::SUB, ISD::AND,
                        ISD::OR, ISD::XOR});
+  if (Subtarget.is64Bit())
+    setTargetDAGCombine(ISD::SRA);
 
   if (Subtarget.hasStdExtF())
     setTargetDAGCombine({ISD::FADD, ISD::FMAXNUM, ISD::FMINNUM});
@@ -10573,6 +10569,79 @@ static unsigned negateFMAOpcode(unsigned Opcode, bool NegMul, bool NegAcc) {
 
   return Opcode;
 }
+
+// Combine (sra (shl X, 32), 32 - C) -> (shl (sext_inreg X, i32), C)
+// FIXME: Should this be a generic combine? There's a similar combine on X86.
+//
+// Also try these folds where an add or sub is in the middle.
+// (sra (add (shl X, 32), C1), 32 - C) -> (shl (sext_inreg (add X, C1), C)
+// (sra (sub C1, (shl X, 32)), 32 - C) -> (shl (sext_inreg (sub C1, X), C)
+static SDValue performSRACombine(SDNode *N, SelectionDAG &DAG,
+                                 const RISCVSubtarget &Subtarget) {
+  assert(N->getOpcode() == ISD::SRA && "Unexpected opcode");
+
+  if (N->getValueType(0) != MVT::i64 || !Subtarget.is64Bit())
+    return SDValue();
+
+  auto *ShAmtC = dyn_cast<ConstantSDNode>(N->getOperand(1));
+  if (!ShAmtC || ShAmtC->getZExtValue() > 32)
+    return SDValue();
+
+  SDValue N0 = N->getOperand(0);
+
+  SDValue Shl;
+  ConstantSDNode *AddC = nullptr;
+
+  // We might have an ADD or SUB between the SRA and SHL.
+  bool IsAdd = N0.getOpcode() == ISD::ADD;
+  if ((IsAdd || N0.getOpcode() == ISD::SUB)) {
+    if (!N0.hasOneUse())
+      return SDValue();
+    // Other operand needs to be a constant we can modify.
+    AddC = dyn_cast<ConstantSDNode>(N0.getOperand(IsAdd ? 1 : 0));
+    if (!AddC)
+      return SDValue();
+
+    // AddC needs to have at least 32 trailing zeros.
+    if (AddC->getAPIntValue().countTrailingZeros() < 32)
+      return SDValue();
+
+    Shl = N0.getOperand(IsAdd ? 0 : 1);
+  } else {
+    // Not an ADD or SUB.
+    Shl = N0;
+  }
+
+  // Look for a shift left by 32.
+  if (Shl.getOpcode() != ISD::SHL || !Shl.hasOneUse() ||
+      !isa<ConstantSDNode>(Shl.getOperand(1)) ||
+      Shl.getConstantOperandVal(1) != 32)
+    return SDValue();
+
+  SDLoc DL(N);
+  SDValue In = Shl.getOperand(0);
+
+  // If we looked through an ADD or SUB, we need to rebuild it with the shifted
+  // constant.
+  if (AddC) {
+    SDValue ShiftedAddC =
+        DAG.getConstant(AddC->getAPIntValue().lshr(32), DL, MVT::i64);
+    if (IsAdd)
+      In = DAG.getNode(ISD::ADD, DL, MVT::i64, In, ShiftedAddC);
+    else
+      In = DAG.getNode(ISD::SUB, DL, MVT::i64, ShiftedAddC, In);
+  }
+
+  SDValue SExt = DAG.getNode(ISD::SIGN_EXTEND_INREG, DL, MVT::i64, In,
+                             DAG.getValueType(MVT::i32));
+  if (ShAmtC->getZExtValue() == 32)
+    return SExt;
+
+  return DAG.getNode(
+      ISD::SHL, DL, MVT::i64, SExt,
+      DAG.getConstant(32 - ShAmtC->getZExtValue(), DL, MVT::i64));
+}
+
 SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                                                DAGCombinerInfo &DCI) const {
   SelectionDAG &DAG = DCI.DAG;
@@ -11049,6 +11118,9 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
     break;
   }
   case ISD::SRA:
+    if (SDValue V = performSRACombine(N, DAG, Subtarget))
+      return V;
+    LLVM_FALLTHROUGH;
   case ISD::SRL:
   case ISD::SHL: {
     SDValue ShAmt = N->getOperand(1);
@@ -11528,14 +11600,15 @@ void RISCVTargetLowering::computeKnownBitsForTargetNode(const SDValue Op,
     break;
   }
   case RISCVISD::READ_VLENB: {
-    // If we know the minimum VLen from Zvl extensions, we can use that to
-    // determine the trailing zeros of VLENB.
-    // FIXME: Limit to 128 bit vectors until we have more testing.
-    unsigned MinVLenB = std::min(128U, Subtarget.getMinVLen()) / 8;
-    if (MinVLenB > 0)
-      Known.Zero.setLowBits(Log2_32(MinVLenB));
-    // We assume VLENB is no more than 65536 / 8 bytes.
-    Known.Zero.setBitsFrom(14);
+    // We can use the minimum and maximum VLEN values to bound VLENB.  We
+    // know VLEN must be a power of two.
+    const unsigned MinVLenB = Subtarget.getRealMinVLen() / 8;
+    const unsigned MaxVLenB = Subtarget.getRealMaxVLen() / 8;
+    assert(MinVLenB > 0 && "READ_VLENB without vector extension enabled?");
+    Known.Zero.setLowBits(Log2_32(MinVLenB));
+    Known.Zero.setBitsFrom(Log2_32(MaxVLenB)+1);
+    if (MaxVLenB == MinVLenB)
+      Known.One.setBit(Log2_32(MinVLenB));
     break;
   }
   case ISD::INTRINSIC_W_CHAIN:
