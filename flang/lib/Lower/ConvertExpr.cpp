@@ -2600,12 +2600,6 @@ public:
           cast = builder.create<fir::EmboxProcOp>(loc, boxProcTy, fst);
         }
       } else {
-        if (fir::isa_derived(snd)) {
-          // FIXME: This seems like a serious bug elsewhere in lowering. Paper
-          // over the problem for now.
-          TODO(loc, "derived type argument passed by value");
-        }
-        assert(!fir::isa_derived(snd));
         cast = builder.convertWithSemantics(loc, snd, fst,
                                             callingImplicitInterface);
       }
