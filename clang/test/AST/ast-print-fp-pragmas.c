@@ -1,4 +1,4 @@
-// RUN: %clang_cc1 -ast-print %s -o - | FileCheck %s
+// RUN: %clang_cc1 -fsyntax-only -triple x86_64-pc-linux -ast-print %s -o - | FileCheck %s
 
 float func_1(float x, float y) {
 #pragma STDC FENV_ACCESS ON
@@ -40,7 +40,7 @@ float func_3(float x, float y) {
 }
 
 // CHECK-LABEL: float func_3(float x, float y) {
-// CHECK-NEXT:  #pragma STDC FENV_ROUND FE_UPWARD
+// CHECK-NEXT:  #pragma STDC FENV_ROUND FE_DOWNWARD
 // CHECK-NEXT:      return x + y;
 // CHECK-NEXT:  }
 
@@ -59,7 +59,7 @@ float func_4(float x, float y, float z) {
 // CHECK-LABEL: float func_4(float x, float y, float z) {
 // CHECK-NEXT:  #pragma STDC FENV_ACCESS ON
 // CHECK-NEXT:  #pragma clang fp exceptions(maytrap)
-// CHECK-NEXT:  #pragma STDC FENV_ROUND FE_DOWNWARD
+// CHECK-NEXT:  #pragma STDC FENV_ROUND FE_UPWARD
 // CHECK-NEXT:      if (z != 0) {
 // CHECK-NEXT:      #pragma STDC FENV_ACCESS OFF
 // CHECK-NEXT:      #pragma STDC FENV_ROUND FE_TOWARDZERO

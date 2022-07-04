@@ -106,6 +106,7 @@ set(files
   __algorithm/ranges_replace_if.h
   __algorithm/ranges_reverse.h
   __algorithm/ranges_sort.h
+  __algorithm/ranges_stable_sort.h
   __algorithm/ranges_swap_ranges.h
   __algorithm/ranges_transform.h
   __algorithm/ranges_upper_bound.h
@@ -215,6 +216,7 @@ set(files
   __coroutine/noop_coroutine_handle.h
   __coroutine/trivial_awaitables.h
   __debug
+  __debug_utils/randomize_range.h
   __errc
   __filesystem/copy_options.h
   __filesystem/directory_entry.h

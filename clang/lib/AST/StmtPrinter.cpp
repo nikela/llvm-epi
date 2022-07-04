@@ -224,10 +224,10 @@ void StmtPrinter::PrintFPPragmas(CompoundStmt *S) {
       OS << "FE_TONEAREST";
       break;
     case llvm::RoundingMode::TowardPositive:
-      OS << "FE_DOWNWARD";
+      OS << "FE_UPWARD";
       break;
     case llvm::RoundingMode::TowardNegative:
-      OS << "FE_UPWARD";
+      OS << "FE_DOWNWARD";
       break;
     case llvm::RoundingMode::NearestTiesToAway:
       OS << "FE_TONEARESTFROMZERO";
@@ -975,6 +975,12 @@ void StmtPrinter::VisitOMPParallelMaskedTaskLoopDirective(
 void StmtPrinter::VisitOMPParallelMasterTaskLoopSimdDirective(
     OMPParallelMasterTaskLoopSimdDirective *Node) {
   Indent() << "#pragma omp parallel master taskloop simd";
+  PrintOMPExecutableDirective(Node);
+}
+
+void StmtPrinter::VisitOMPParallelMaskedTaskLoopSimdDirective(
+    OMPParallelMaskedTaskLoopSimdDirective *Node) {
+  Indent() << "#pragma omp parallel masked taskloop simd";
   PrintOMPExecutableDirective(Node);
 }
 
