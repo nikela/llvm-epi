@@ -387,8 +387,7 @@ static fir::ExtendedValue genLoad(fir::FirOpBuilder &builder,
       [&](const fir::BoxValue &box) -> fir::ExtendedValue {
         if (box.isUnlimitedPolymorphic())
           fir::emitFatalError(
-              loc,
-              "lowering attempting to load an unlimited polymorphic entity");
+              loc, "attempting to load an unlimited polymorphic entity");
         return genLoad(builder, loc,
                        fir::factory::readBoxValue(builder, loc, box));
       },
@@ -578,7 +577,8 @@ isIntrinsicModuleProcRef(const Fortran::evaluate::ProcedureRef &procRef) {
     return false;
   const Fortran::semantics::Symbol *module =
       symbol->GetUltimate().owner().GetSymbol();
-  return module && module->attrs().test(Fortran::semantics::Attr::INTRINSIC);
+  return module && module->attrs().test(Fortran::semantics::Attr::INTRINSIC) &&
+         module->name().ToString().find("omp_lib") == std::string::npos;
 }
 
 namespace {
@@ -1399,27 +1399,28 @@ public:
       std::string str = value.DumpHexadecimal();
 #ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
       if constexpr (KIND == 2) {
-        llvm::APFloat floatVal{llvm::APFloatBase::IEEEhalf(), str};
+        auto floatVal = consAPFloat(llvm::APFloatBase::IEEEhalf(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       } else if constexpr (KIND == 3) {
-        llvm::APFloat floatVal{llvm::APFloatBase::BFloat(), str};
+        auto floatVal = consAPFloat(llvm::APFloatBase::BFloat(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       } else
 #endif
-        if constexpr (KIND == 4) {
+      if constexpr (KIND == 4) {
         llvm::APFloat floatVal{llvm::APFloatBase::IEEEsingle(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
 #ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
       } else if constexpr (KIND == 10) {
-        llvm::APFloat floatVal{llvm::APFloatBase::x87DoubleExtended(), str};
+        auto floatVal =
+            consAPFloat(llvm::APFloatBase::x87DoubleExtended(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
 #endif
       } else if constexpr (KIND == 16) {
-        llvm::APFloat floatVal{llvm::APFloatBase::IEEEquad(), str};
+        auto floatVal = consAPFloat(llvm::APFloatBase::IEEEquad(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       } else {
         // convert everything else to double
-        llvm::APFloat floatVal{llvm::APFloatBase::IEEEdouble(), str};
+        auto floatVal = consAPFloat(llvm::APFloatBase::IEEEdouble(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       }
     } else if constexpr (TC == Fortran::common::TypeCategory::Complex) {
@@ -1434,6 +1435,23 @@ public:
     } else /*constexpr*/ {
       llvm_unreachable("unhandled constant");
     }
+  }
+
+  /// Convert string, \p s, to an APFloat value. Recognize and handle Inf and
+  /// NaN strings as well. \p s is assumed to not contain any spaces.
+  static llvm::APFloat consAPFloat(const llvm::fltSemantics &fsem,
+                                   llvm::StringRef s) {
+    assert(s.find(' ') == llvm::StringRef::npos);
+    if (s.compare_insensitive("-inf") == 0)
+      return llvm::APFloat::getInf(fsem, /*negative=*/true);
+    if (s.compare_insensitive("inf") == 0 || s.compare_insensitive("+inf") == 0)
+      return llvm::APFloat::getInf(fsem);
+    // TODO: Add support for quiet and signaling NaNs.
+    if (s.compare_insensitive("-nan") == 0)
+      return llvm::APFloat::getNaN(fsem, /*negative=*/true);
+    if (s.compare_insensitive("nan") == 0 || s.compare_insensitive("+nan") == 0)
+      return llvm::APFloat::getNaN(fsem);
+    return {fsem, s};
   }
 
   /// Generate a raw literal value and store it in the rawVals vector.
@@ -1453,18 +1471,19 @@ public:
     } else if constexpr (TC == Fortran::common::TypeCategory::Real) {
       std::string str = value.DumpHexadecimal();
       inInitializer->rawType = converter.genType(TC, KIND);
-      llvm::APFloat floatVal{builder.getKindMap().getFloatSemantics(KIND), str};
+      auto floatVal =
+          consAPFloat(builder.getKindMap().getFloatSemantics(KIND), str);
       val = builder.getFloatAttr(inInitializer->rawType, floatVal);
     } else if constexpr (TC == Fortran::common::TypeCategory::Complex) {
       std::string strReal = value.REAL().DumpHexadecimal();
       std::string strImg = value.AIMAG().DumpHexadecimal();
       inInitializer->rawType = converter.genType(TC, KIND);
-      llvm::APFloat realVal{builder.getKindMap().getFloatSemantics(KIND),
-                            strReal};
+      auto realVal =
+          consAPFloat(builder.getKindMap().getFloatSemantics(KIND), strReal);
       val = builder.getFloatAttr(inInitializer->rawType, realVal);
       inInitializer->rawVals.push_back(val);
-      llvm::APFloat imgVal{builder.getKindMap().getFloatSemantics(KIND),
-                           strImg};
+      auto imgVal =
+          consAPFloat(builder.getKindMap().getFloatSemantics(KIND), strImg);
       val = builder.getFloatAttr(inInitializer->rawType, imgVal);
     }
     inInitializer->rawVals.push_back(val);
@@ -1690,8 +1709,7 @@ public:
 
   template <typename A>
   ExtValue genval(const Fortran::evaluate::ArrayConstructor<A> &) {
-    fir::emitFatalError(getLoc(),
-                        "array constructor: lowering should not reach here");
+    fir::emitFatalError(getLoc(), "array constructor: should not reach here");
   }
 
   ExtValue gen(const Fortran::evaluate::ComplexPart &x) {
@@ -1872,7 +1890,7 @@ public:
         return genval(*sub);
       return genIntegerConstant<8>(builder.getContext(), 1);
     }
-    TODO(getLoc(), "non explicit semantics::Bound lowering");
+    TODO(getLoc(), "non explicit semantics::Bound implementation");
   }
 
   static bool isSlice(const Fortran::evaluate::ArrayRef &aref) {
@@ -2002,7 +2020,7 @@ public:
               loc, "internal: BoxValue in dim-collapsed fir.coordinate_of");
         },
         [&](const auto &) -> ExtValue {
-          fir::emitFatalError(loc, "internal: array lowering failed");
+          fir::emitFatalError(loc, "internal: array processing failed");
         });
   }
 
@@ -2584,9 +2602,9 @@ public:
     bool callingImplicitInterface = caller.canBeCalledViaImplicitInterface();
     for (auto [fst, snd] :
          llvm::zip(caller.getInputs(), funcType.getInputs())) {
-      // When passing arguments to a procedure that can be called an implicit
-      // interface, allow character actual arguments to be passed to dummy
-      // arguments of any type and vice versa
+      // When passing arguments to a procedure that can be called by implicit
+      // interface, allow any character actual arguments to be passed to dummy
+      // arguments of any type and vice versa.
       mlir::Value cast;
       auto *context = builder.getContext();
       if (snd.isa<fir::BoxProcType>() &&
@@ -2993,7 +3011,7 @@ public:
       }
       const auto *expr = actual->UnwrapExpr();
       if (!expr)
-        TODO(loc, "assumed type actual argument lowering");
+        TODO(loc, "assumed type actual argument");
 
       if (arg.passBy == PassBy::Value) {
         ExtValue argVal = genval(*expr);
@@ -3649,7 +3667,7 @@ public:
     // changed by concatenations).
     if ((mutableBox.isCharacter() && !mutableBox.hasNonDeferredLenParams()) ||
         mutableBox.isDerivedWithLenParameters())
-      TODO(loc, "gather rhs length parameters in assignment to allocatable");
+      TODO(loc, "gather rhs LEN parameters in assignment to allocatable");
 
     // The allocatable must take lower bounds from the expr if it is
     // reallocated and the right hand side is not a scalar.
@@ -4837,7 +4855,7 @@ private:
           // a potentially absent argument to something else than a value (apart
           // from character MAX/MIN that are handled elsewhere.)
           if (argRules.lowerAs != Fortran::lower::LowerIntrinsicArgAs::Value)
-            TODO(loc, "lowering non trivial optional elemental intrinsic array "
+            TODO(loc, "non trivial optional elemental intrinsic array "
                       "argument");
           PushSemantics(ConstituentSemantics::RefTransparent);
           operands.emplace_back(genarrForwardOptionalArgumentToCall(*expr));
@@ -4910,7 +4928,7 @@ private:
       }
       const auto *expr = actual->UnwrapExpr();
       if (!expr)
-        TODO(loc, "assumed type actual argument lowering");
+        TODO(loc, "assumed type actual argument");
 
       LLVM_DEBUG(expr->AsFortran(llvm::dbgs()
                                  << "argument: " << arg.firArgument << " = [")
