@@ -2143,8 +2143,7 @@ mlir::Value IntrinsicLibrary::genIeeeIsNaN(mlir::Type resultType,
                                            llvm::ArrayRef<mlir::Value> args) {
   assert(args.size() == 1);
   mlir::Value arg = args[0];
-  mlir::Type type = arg.getType();
-  assert(fir::isa_real(type));
+  assert(fir::isa_real(arg.getType()));
   return builder.createConvert(loc, resultType, builder.genIsNaN(loc, arg));
 }
 
