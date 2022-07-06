@@ -52,6 +52,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
+#include <cfloat>
 
 #define DEBUG_TYPE "flang-lower-expr"
 
@@ -1409,15 +1410,16 @@ public:
       if constexpr (KIND == 4) {
         llvm::APFloat floatVal{llvm::APFloatBase::IEEEsingle(), str};
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
       } else if constexpr (KIND == 10) {
         auto floatVal =
             consAPFloat(llvm::APFloatBase::x87DoubleExtended(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-#endif
+#elif LDBL_MANT_DIG == 113
       } else if constexpr (KIND == 16) {
         auto floatVal = consAPFloat(llvm::APFloatBase::IEEEquad(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
+#endif
       } else {
         // convert everything else to double
         auto floatVal = consAPFloat(llvm::APFloatBase::IEEEdouble(), str);

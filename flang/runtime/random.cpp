@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cfloat>
 #include <ctime>
 #include <limits>
 #include <memory>

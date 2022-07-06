@@ -22,6 +22,7 @@
 #include "io-stmt.h"
 #include "flang/Common/uint128.h"
 #include "flang/Decimal/decimal.h"
+#include <cfloat>
 
 namespace Fortran::runtime::io {
 
@@ -137,11 +138,12 @@ extern template class RealOutputEditing<3>;
 #endif
 extern template class RealOutputEditing<4>;
 extern template class RealOutputEditing<8>;
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template class RealOutputEditing<10>;
-#endif
+#elif LDBL_MANT_DIG == 113
 // TODO: double/double
 extern template class RealOutputEditing<16>;
+#endif
 
 } // namespace Fortran::runtime::io
 #endif // FORTRAN_RUNTIME_EDIT_OUTPUT_H_

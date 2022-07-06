@@ -20,11 +20,6 @@ end
 ! CHECK-LABEL: func @_QPfct4() -> i64
 ! CHECK:         return %{{.*}} : i64
 
-integer(16) function fct5()
-end
-! CHECK-LABEL: func @_QPfct5() -> i128
-! CHECK:         return %{{.*}} : i128
-
 function fct()
   integer :: fct
 end
@@ -92,11 +87,6 @@ end
 ! CHECK-LABEL: func @_QPrfct4() -> f64
 ! CHECK:         return %{{.*}} : f64
 
-real(16) function rfct6()
-end
-! CHECK-LABEL: func @_QPrfct6() -> f128
-! CHECK:         return %{{.*}} : f128
-
 complex(4) function cplxfct3()
 end
 ! CHECK-LABEL: func @_QPcplxfct3() -> !fir.complex<4>
@@ -106,11 +96,6 @@ complex(8) function cplxfct4()
 end
 ! CHECK-LABEL: func @_QPcplxfct4() -> !fir.complex<8>
 ! CHECK:         return %{{.*}} : !fir.complex<8>
-
-complex(16) function cplxfct6()
-end
-! CHECK-LABEL: func @_QPcplxfct6() -> !fir.complex<16>
-! CHECK:         return %{{.*}} : !fir.complex<16>
 
 function fct_with_character_return(i)
   character(10) :: fct_with_character_return

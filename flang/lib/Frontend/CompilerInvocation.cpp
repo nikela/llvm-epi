@@ -634,7 +634,13 @@ static bool parseDialectArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
   // -fdefault* family
   if (args.hasArg(clang::driver::options::OPT_fdefault_real_8)) {
     res.getDefaultKinds().set_defaultRealKind(8);
+#if LDBL_MANT_DIG == 64
+    res.getDefaultKinds().set_doublePrecisionKind(10);
+#elif LDBL_MANT_DIG == 113
     res.getDefaultKinds().set_doublePrecisionKind(16);
+#else
+#error Unhandled LDBL_MANT_DIG case
+#endif
   }
   if (args.hasArg(clang::driver::options::OPT_fdefault_integer_8)) {
     res.getDefaultKinds().set_defaultIntegerKind(8);

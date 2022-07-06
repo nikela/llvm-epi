@@ -46,7 +46,7 @@ module __Fortran_ieee_exceptions
 !! #define SPECIFICS_R(G) \
 !!   G(2) G(3) G(4) G(8) G(10) G(16)
 #define SPECIFICS_R(G) \
-  G(4) G(8) G(16)
+  G(4) G(8) G(__FLANG_LDK)
 
 ! Set PRIVATE accessibility for specifics with 1 LOGICAL or REAL argument for
 ! generic G.

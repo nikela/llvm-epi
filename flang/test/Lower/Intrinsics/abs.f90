@@ -17,20 +17,6 @@ subroutine abs_testi(a, b)
   b = abs(a)
 end subroutine
 
-! CHECK-LABEL: func @_QPabs_testi16
-! CHECK-SAME: %[[VAL_0:.*]]: !fir.ref<i128>{{.*}}, %[[VAL_1:.*]]: !fir.ref<i128>
-subroutine abs_testi16(a, b)
-! CHECK:  %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<i128>
-! CHECK:  %[[VAL_3:.*]] = arith.constant 127 : i128
-! CHECK:  %[[VAL_4:.*]] = arith.shrsi %[[VAL_2]], %[[VAL_3]] : i128
-! CHECK:  %[[VAL_5:.*]] = arith.xori %[[VAL_2]], %[[VAL_4]] : i128
-! CHECK:  %[[VAL_6:.*]] = arith.subi %[[VAL_5]], %[[VAL_4]] : i128
-! CHECK:  fir.store %[[VAL_6]] to %[[VAL_1]] : !fir.ref<i128>
-! CHECK:  return
-  integer(kind=16) :: a, b
-  b = abs(a)
-end subroutine
-
 ! CHECK-LABEL: func @_QPabs_testr(
 ! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<f32>{{.*}}, %[[VAL_1:.*]]: !fir.ref<f32>{{.*}}) {
 subroutine abs_testr(a, b)

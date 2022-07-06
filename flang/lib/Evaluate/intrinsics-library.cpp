@@ -325,7 +325,6 @@ template <> struct HostRuntimeLibrary<double, LibraryVersion::LibmExtensions> {
   static_assert(map.Verify(), "map must be sorted");
 };
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #if LDBL_MANT_DIG == 80 || LDBL_MANT_DIG == 113
 template <>
 struct HostRuntimeLibrary<long double, LibraryVersion::LibmExtensions> {
@@ -343,7 +342,6 @@ struct HostRuntimeLibrary<long double, LibraryVersion::LibmExtensions> {
   static_assert(map.Verify(), "map must be sorted");
 };
 #endif // LDBL_MANT_DIG == 80 || LDBL_MANT_DIG == 113
-#endif // FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #endif
 
 /// Define pgmath description

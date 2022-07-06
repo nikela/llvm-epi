@@ -15,6 +15,7 @@
 #include "flang/Common/real.h"
 #include "flang/Evaluate/common.h"
 #include <cinttypes>
+#include <cfloat>
 #include <limits>
 #include <string>
 
@@ -426,10 +427,11 @@ extern template class Real<Integer<16>, 8>; // the "other" half format
 #endif
 extern template class Real<Integer<32>, 24>; // IEEE single
 extern template class Real<Integer<64>, 53>; // IEEE double
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template class Real<Integer<80>, 64>; // 80387 extended precision
-#endif
+#elif LDBL_MANT_DIG == 113
 extern template class Real<Integer<128>, 113>; // IEEE quad
+#endif
 // N.B. No "double-double" support.
 } // namespace Fortran::evaluate::value
 #endif // FORTRAN_EVALUATE_REAL_H_

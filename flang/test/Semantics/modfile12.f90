@@ -12,7 +12,7 @@ module m
   class(t(a+4,:)), allocatable :: z2
   class(*), allocatable :: z4
   real*8 :: f
-  complex*32 :: g
+  complex*16 :: g
   type t2(i, j, h)
     integer, len :: h
     integer, kind :: j
@@ -47,7 +47,7 @@ end
 !  class(t(c=5_4,d=:)),allocatable::z2
 !  class(*),allocatable::z4
 !  real(8)::f
-!  complex(16)::g
+!  complex(8)::g
 !  type::t2(i,j,h)
 !    integer(4),len::h
 !    integer(4),kind::j

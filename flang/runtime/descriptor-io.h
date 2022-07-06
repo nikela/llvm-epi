@@ -23,6 +23,7 @@
 #include "flang/Common/uint128.h"
 #include "flang/Runtime/cpp-type.h"
 #include "flang/Runtime/descriptor.h"
+#include <float.h>
 
 namespace Fortran::runtime::io::descr {
 template <typename A>
@@ -423,13 +424,14 @@ static bool DescriptorIO(IoStatementState &io, const Descriptor &descriptor) {
         return FormattedRealIO<4, DIR>(io, descriptor);
       case 8:
         return FormattedRealIO<8, DIR>(io, descriptor);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
       case 10:
         return FormattedRealIO<10, DIR>(io, descriptor);
-#endif
+#elif LDBL_MANT_DIG == 113
       // TODO: case double/double
       case 16:
         return FormattedRealIO<16, DIR>(io, descriptor);
+#endif
       default:
         handler.Crash(
             "DescriptorIO: Unimplemented REAL kind (%d) in descriptor", kind);
@@ -447,13 +449,14 @@ static bool DescriptorIO(IoStatementState &io, const Descriptor &descriptor) {
         return FormattedComplexIO<4, DIR>(io, descriptor);
       case 8:
         return FormattedComplexIO<8, DIR>(io, descriptor);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
       case 10:
         return FormattedComplexIO<10, DIR>(io, descriptor);
-#endif
+#elif LDBL_MANT_DIG == 113
       // TODO: case double/double
       case 16:
         return FormattedComplexIO<16, DIR>(io, descriptor);
+#endif
       default:
         handler.Crash(
             "DescriptorIO: Unimplemented COMPLEX kind (%d) in descriptor",

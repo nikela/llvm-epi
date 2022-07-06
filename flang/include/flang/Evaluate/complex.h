@@ -12,6 +12,7 @@
 #include "formatting.h"
 #include "real.h"
 #include <string>
+#include <cfloat>
 
 namespace llvm {
 class raw_ostream;
@@ -105,9 +106,10 @@ extern template class Complex<Real<Integer<16>, 8>>;
 #endif
 extern template class Complex<Real<Integer<32>, 24>>;
 extern template class Complex<Real<Integer<64>, 53>>;
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template class Complex<Real<Integer<80>, 64>>;
-#endif
+#elif LDBL_MANT_DIG == 113
 extern template class Complex<Real<Integer<128>, 113>>;
+#endif
 } // namespace Fortran::evaluate::value
 #endif // FORTRAN_EVALUATE_COMPLEX_H_

@@ -24,6 +24,7 @@
 #include <climits>
 #include <cstddef>
 #include <cstdint>
+#include <cfloat>
 #include <string>
 #include <type_traits>
 
@@ -1042,7 +1043,7 @@ extern template class Integer<8>;
 extern template class Integer<16>;
 extern template class Integer<32>;
 extern template class Integer<64>;
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template class Integer<80>;
 #endif
 extern template class Integer<128>;

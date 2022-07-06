@@ -9,6 +9,7 @@
 #include "edit-output.h"
 #include "utf.h"
 #include "flang/Common/uint128.h"
+#include <cfloat>
 #include <algorithm>
 
 namespace Fortran::runtime::io {
@@ -711,11 +712,12 @@ template class RealOutputEditing<3>;
 #endif
 template class RealOutputEditing<4>;
 template class RealOutputEditing<8>;
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 template class RealOutputEditing<10>;
-#endif
+#elif LDBL_MANT_DIG == 113
 // TODO: double/double
 template class RealOutputEditing<16>;
+#endif
 
 template bool ListDirectedCharacterOutput(IoStatementState &,
     ListDirectedStatementState<Direction::Output> &, const char *,

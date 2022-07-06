@@ -65,6 +65,8 @@ static mlir::Type genIntegerType(mlir::MLIRContext *context, int kind) {
       return mlir::IntegerType::get(context, getIntegerBits<4>());
     case 8:
       return mlir::IntegerType::get(context, getIntegerBits<8>());
+    case 10:
+      return mlir::IntegerType::get(context, getIntegerBits<10>());
     case 16:
       return mlir::IntegerType::get(context, getIntegerBits<16>());
     }

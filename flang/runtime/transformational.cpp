@@ -22,6 +22,7 @@
 #include "tools.h"
 #include "flang/Runtime/descriptor.h"
 #include <algorithm>
+#include <cfloat>
 
 namespace Fortran::runtime {
 
@@ -617,10 +618,11 @@ static struct RealKinds {
 #endif
     {4, 6, 38}, // Binary32
     {8, 15, 307}, // Binary64
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
     {10, 18, 4931}, // 80387 extended precision
-#endif
+#elif LDBL_MANT_DIG == 113
     {16, 33, 4931}, // Binary 128
+#endif
 };
 
 std::int32_t RTNAME(SelectedRealKind)(

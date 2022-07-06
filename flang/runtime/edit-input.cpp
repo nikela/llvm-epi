@@ -12,6 +12,7 @@
 #include "flang/Common/real.h"
 #include "flang/Common/uint128.h"
 #include <algorithm>
+#include <cfloat>
 #include <cfenv>
 
 namespace Fortran::runtime::io {
@@ -770,11 +771,12 @@ template bool EditRealInput<3>(IoStatementState &, const DataEdit &, void *);
 #endif
 template bool EditRealInput<4>(IoStatementState &, const DataEdit &, void *);
 template bool EditRealInput<8>(IoStatementState &, const DataEdit &, void *);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 template bool EditRealInput<10>(IoStatementState &, const DataEdit &, void *);
-#endif
+#elif LDBL_MANT_DIG == 113
 // TODO: double/double
 template bool EditRealInput<16>(IoStatementState &, const DataEdit &, void *);
+#endif
 
 template bool EditCharacterInput(
     IoStatementState &, const DataEdit &, char *, std::size_t);

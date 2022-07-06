@@ -29,7 +29,8 @@
 
 ! REAL8: integer(4),parameter::real_kind=8_4
 ! REAL8-NEXT: intrinsic::kind
-! REAL8-NEXT: integer(4),parameter::double_kind=16_4
+! This is untestable for us
+! REAL8-NEXT- integer(4),parameter::double_kind=16_4
 
 ! DOUBLE8: integer(4),parameter::real_kind=8_4
 ! DOUBLE8-NEXT: intrinsic::kind

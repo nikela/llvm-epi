@@ -12,6 +12,7 @@
 #include "flang/Decimal/binary-floating-point.h"
 #include "flang/Decimal/decimal.h"
 #include <cinttypes>
+#include <cfloat>
 #include <cstring>
 #include <ctype.h>
 
@@ -471,12 +472,13 @@ template ConversionToBinaryResult<24> ConvertToBinary<24>(
     const char *&, enum FortranRounding, const char *end);
 template ConversionToBinaryResult<53> ConvertToBinary<53>(
     const char *&, enum FortranRounding, const char *end);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 template ConversionToBinaryResult<64> ConvertToBinary<64>(
     const char *&, enum FortranRounding, const char *end);
-#endif
+#elif LDBL_MANT_DIG == 113
 template ConversionToBinaryResult<113> ConvertToBinary<113>(
     const char *&, enum FortranRounding, const char *end);
+#endif
 
 extern "C" {
 enum ConversionResultFlags ConvertDecimalToFloat(
@@ -493,7 +495,7 @@ enum ConversionResultFlags ConvertDecimalToDouble(
       reinterpret_cast<const void *>(&result.binary), sizeof *d);
   return result.flags;
 }
-#ifdef LONG_DOUBLE
+#if LDBL_MANT_DIG == 64
 enum ConversionResultFlags ConvertDecimalToLongDouble(
     const char **p, long double *ld, enum FortranRounding rounding) {
   auto result{Fortran::decimal::ConvertToBinary<64>(*p, rounding)};

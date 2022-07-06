@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <optional>
 #include <string>
+#include <cfloat>
 
 // IsDescriptor() predicate: true when a symbol is implemented
 // at runtime with a descriptor.
@@ -132,9 +133,13 @@ static constexpr std::size_t RealKindBytes(int kind) {
 #ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 3: // non-IEEE 16-bit format (truncated 32-bit)
     return 2;
+#endif
+#if LDBL_MANT_DIG == 64
   case 10: // 80387 80-bit extended precision
   case 12: // possible variant spelling
-    return 16;
+    return 10;
+#elif LDBL_MANT_DIG == 113
+    // Nothing to do here.
 #endif
   default:
     return kind;

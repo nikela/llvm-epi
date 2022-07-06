@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "flang/Evaluate/integer.h"
+#include <cfloat>
 
 namespace Fortran::evaluate::value {
 
@@ -14,7 +15,7 @@ template class Integer<8>;
 template class Integer<16>;
 template class Integer<32>;
 template class Integer<64>;
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 template class Integer<80>;
 #endif
 template class Integer<128>;

@@ -13,6 +13,7 @@
 #define FORTRAN_DECIMAL_DECIMAL_H_
 
 #include <stddef.h>
+#include <cfloat>
 
 #ifdef __cplusplus
 // Binary-to-decimal conversions (formatting) produce a sequence of decimal
@@ -90,14 +91,15 @@ extern template ConversionToDecimalResult ConvertToDecimal<24>(char *, size_t,
 extern template ConversionToDecimalResult ConvertToDecimal<53>(char *, size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<53>);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template ConversionToDecimalResult ConvertToDecimal<64>(char *, size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<64>);
-#endif
+#elif LDBL_MANT_DIG == 113
 extern template ConversionToDecimalResult ConvertToDecimal<113>(char *, size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<113>);
+#endif
 
 template <int PREC> struct ConversionToBinaryResult {
   BinaryFloatingPointNumber<PREC> binary;
@@ -118,12 +120,13 @@ extern template ConversionToBinaryResult<24> ConvertToBinary<24>(
     const char *&, enum FortranRounding, const char *end);
 extern template ConversionToBinaryResult<53> ConvertToBinary<53>(
     const char *&, enum FortranRounding, const char *end);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 extern template ConversionToBinaryResult<64> ConvertToBinary<64>(
     const char *&, enum FortranRounding, const char *end);
-#endif
+#elif LDBL_MANT_DIG == 113
 extern template ConversionToBinaryResult<113> ConvertToBinary<113>(
     const char *&, enum FortranRounding, const char *end);
+#endif
 } // namespace Fortran::decimal
 extern "C" {
 #define NS(x) Fortran::decimal::x

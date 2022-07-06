@@ -330,14 +330,15 @@ template ConversionToDecimalResult ConvertToDecimal<24>(char *, std::size_t,
 template ConversionToDecimalResult ConvertToDecimal<53>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<53>);
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
+#if LDBL_MANT_DIG == 64
 template ConversionToDecimalResult ConvertToDecimal<64>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<64>);
-#endif
+#elif LDBL_MANT_DIG == 113
 template ConversionToDecimalResult ConvertToDecimal<113>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<113>);
+#endif
 
 extern "C" {
 ConversionToDecimalResult ConvertFloatToDecimal(char *buffer, std::size_t size,
@@ -354,7 +355,6 @@ ConversionToDecimalResult ConvertDoubleToDecimal(char *buffer, std::size_t size,
       rounding, Fortran::decimal::BinaryFloatingPointNumber<53>(x));
 }
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #if LDBL_MANT_DIG == 64
 ConversionToDecimalResult ConvertLongDoubleToDecimal(char *buffer,
     std::size_t size, enum DecimalConversionFlags flags, int digits,
@@ -370,7 +370,6 @@ ConversionToDecimalResult ConvertLongDoubleToDecimal(char *buffer,
       rounding, Fortran::decimal::BinaryFloatingPointNumber<113>(x));
 }
 #endif
-#endif // FLANG_ENABLE_UNUSUAL_REAL_KINDS
 }
 
 template <int PREC, int LOG10RADIX>
