@@ -25,6 +25,7 @@ class IntrinsicTypeDefaultKinds;
 } // namespace common
 namespace evaluate {
 class IntrinsicProcTable;
+class TargetCharacteristics;
 } // namespace evaluate
 namespace parser {
 class AllCookedSources;
@@ -49,12 +50,13 @@ public:
   create(mlir::MLIRContext &ctx,
          const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
          const Fortran::evaluate::IntrinsicProcTable &intrinsics,
+         const Fortran::evaluate::TargetCharacteristics &targetCharacteristics,
          const Fortran::parser::AllCookedSources &allCooked,
          llvm::StringRef triple, fir::KindMapping &kindMap,
          llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
              funcAttrs) {
-    return LoweringBridge(ctx, defaultKinds, intrinsics, allCooked, triple,
-                          kindMap, funcAttrs);
+    return LoweringBridge(ctx, defaultKinds, intrinsics, targetCharacteristics,
+                          allCooked, triple, kindMap, funcAttrs);
   }
 
   //===--------------------------------------------------------------------===//
@@ -71,6 +73,10 @@ public:
   }
   const Fortran::evaluate::IntrinsicProcTable &getIntrinsicTable() const {
     return intrinsics;
+  }
+  const Fortran::evaluate::TargetCharacteristics &
+  getTargetCharacteristics() const {
+    return targetCharacteristics;
   }
   const Fortran::parser::AllCookedSources *getCookedSource() const {
     return cooked;
@@ -107,6 +113,7 @@ private:
       mlir::MLIRContext &ctx,
       const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
       const Fortran::evaluate::IntrinsicProcTable &intrinsics,
+      const Fortran::evaluate::TargetCharacteristics &targetCharacteristics,
       const Fortran::parser::AllCookedSources &cooked, llvm::StringRef triple,
       fir::KindMapping &kindMap,
       llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
@@ -116,6 +123,7 @@ private:
 
   const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds;
   const Fortran::evaluate::IntrinsicProcTable &intrinsics;
+  const Fortran::evaluate::TargetCharacteristics &targetCharacteristics;
   const Fortran::parser::AllCookedSources *cooked;
   mlir::MLIRContext &context;
   std::unique_ptr<mlir::ModuleOp> module;

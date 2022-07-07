@@ -14,9 +14,9 @@ define dso_local void @exp_vec(i64 noundef %N, ptr noalias nocapture noundef wri
 ; CHECK-NEXT:    [[CMP7:%.*]] = icmp sgt i64 [[N:%.*]], 0
 ; CHECK-NEXT:    br i1 [[CMP7]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; CHECK:       for.body.preheader:
-; CHECK-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP1:%.*]] = xor i64 [[N]], -1
-; CHECK-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP0]], [[TMP1]]
+; CHECK-NEXT:    [[TMP0:%.*]] = xor i64 [[N]], -1
+; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], [[TMP0]]
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]

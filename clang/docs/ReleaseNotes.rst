@@ -385,6 +385,10 @@ Attribute Changes in Clang
 
 - Added half float to types that can be represented by ``__attribute__((mode(XX)))``.
 
+- The ``format`` attribute can now be applied to non-variadic functions. The
+  format string must correctly format the fixed parameter types of the function.
+  Using the attribute this way emits a GCC compatibility diagnostic.
+
 Windows Support
 ---------------
 
@@ -523,6 +527,9 @@ X86 Support in Clang
 - Support for the ``_Float16`` type has been added for all targets with SSE2.
   When AVX512-FP16 is not available, arithmetic on ``_Float16`` is emulated
   using ``float``.
+- Added the ``-m[no-]rdpru`` flag to enable/disable the RDPRU instruction
+  provided by AMD Zen2 and later processors. Defined intrinsics for using
+  this instruction (see rdpruintrin.h).
 
 DWARF Support in Clang
 ----------------------
@@ -536,6 +543,10 @@ DWARF Support in Clang
 
 Arm and AArch64 Support in Clang
 --------------------------------
+
+- clang now supports the Cortex-M85 CPU, which can be chosen with
+  `-mcpu=cortex-m85`. By default, this has PACBTI turned on, but it can be
+  disabled with `-mcpu=cortex-m85+nopacbti`.
 
 Floating Point Support in Clang
 -------------------------------
@@ -582,6 +593,13 @@ clang-format
 
 - Option ``InsertBraces`` has been added to insert optional braces after control
   statements.
+
+clang-extdef-mapping
+--------------------
+
+- clang-extdef-mapping now accepts .ast files as input. This is faster than to
+  recompile the files from sources when extracting method definitons. This can
+  be really beneficial when creating .ast files for input to the clang-static-analyzer.
 
 libclang
 --------
