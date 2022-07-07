@@ -821,7 +821,12 @@ class OMPSimdlenClause : public OMPClause {
   /// Location of '('.
   SourceLocation LParenLoc;
 
+  /// Use maximum value allowed as safe iteration space distance.
+  bool IsMaxLengthRequested = false;
+
   /// Safe iteration space distance.
+  /// FIXME: write better comments
+  /// If IsMaxLengthRequested is true, instead it represents the LMUL value.
   Stmt *Simdlen = nullptr;
 
   /// Set simdlen.
@@ -834,9 +839,10 @@ public:
   /// \param StartLoc Starting location of the clause.
   /// \param EndLoc Ending location of the clause.
   OMPSimdlenClause(Expr *Len, SourceLocation StartLoc, SourceLocation LParenLoc,
-                   SourceLocation EndLoc)
+                   SourceLocation EndLoc, bool IsMaxLengthRequested = false)
       : OMPClause(llvm::omp::OMPC_simdlen, StartLoc, EndLoc),
-        LParenLoc(LParenLoc), Simdlen(Len) {}
+        LParenLoc(LParenLoc), IsMaxLengthRequested(IsMaxLengthRequested),
+        Simdlen(Len) {}
 
   /// Build an empty clause.
   explicit OMPSimdlenClause()
@@ -848,6 +854,9 @@ public:
 
   /// Returns the location of '('.
   SourceLocation getLParenLoc() const { return LParenLoc; }
+
+  /// Returns IsMaxLengthRequested value.
+  bool getIsMaxLengthRequested() const { return IsMaxLengthRequested; }
 
   /// Return safe iteration space distance.
   Expr *getSimdlen() const { return cast_or_null<Expr>(Simdlen); }

@@ -11315,7 +11315,8 @@ public:
       DeclGroupPtrTy DG, OMPDeclareSimdDeclAttr::BranchStateTy BS,
       Expr *Simdlen, ArrayRef<Expr *> Uniforms, ArrayRef<Expr *> Aligneds,
       ArrayRef<Expr *> Alignments, ArrayRef<Expr *> Linears,
-      ArrayRef<unsigned> LinModifiers, ArrayRef<Expr *> Steps, SourceRange SR);
+      ArrayRef<unsigned> LinModifiers, ArrayRef<Expr *> Steps, SourceRange SR,
+      bool IsMaxLengthRequested = false);
 
   /// Checks '\#pragma omp declare variant' variant function and original
   /// functions after parsing of the associated method/function.
@@ -11392,7 +11393,8 @@ public:
   /// Called on well-formed 'simdlen' clause.
   OMPClause *ActOnOpenMPSimdlenClause(Expr *Length, SourceLocation StartLoc,
                                       SourceLocation LParenLoc,
-                                      SourceLocation EndLoc);
+                                      SourceLocation EndLoc,
+                                      bool IsMaxLengthRequested = false);
   /// Called on well-form 'sizes' clause.
   OMPClause *ActOnOpenMPSizesClause(ArrayRef<Expr *> SizeExprs,
                                     SourceLocation StartLoc,

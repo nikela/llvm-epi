@@ -1693,8 +1693,17 @@ void OMPClausePrinter::VisitOMPSafelenClause(OMPSafelenClause *Node) {
 }
 
 void OMPClausePrinter::VisitOMPSimdlenClause(OMPSimdlenClause *Node) {
+  Expr *Simdlen = Node->getSimdlen();
   OS << "simdlen(";
-  Node->getSimdlen()->printPretty(OS, nullptr, Policy, 0);
+  if (Node->getIsMaxLengthRequested()) {
+    OS << "omp_max_simdlen";
+    if (Simdlen) {
+      OS << ": ";
+      Simdlen->printPretty(OS, nullptr, Policy, 0);
+    }
+  } else {
+    Simdlen->printPretty(OS, nullptr, Policy, 0);
+  }
   OS << ")";
 }
 

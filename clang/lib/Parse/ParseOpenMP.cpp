@@ -714,7 +714,8 @@ static bool parseDeclareSimdClauses(
     Parser &P, OMPDeclareSimdDeclAttr::BranchStateTy &BS, ExprResult &SimdLen,
     SmallVectorImpl<Expr *> &Uniforms, SmallVectorImpl<Expr *> &Aligneds,
     SmallVectorImpl<Expr *> &Alignments, SmallVectorImpl<Expr *> &Linears,
-    SmallVectorImpl<unsigned> &LinModifiers, SmallVectorImpl<Expr *> &Steps) {
+    SmallVectorImpl<unsigned> &LinModifiers, SmallVectorImpl<Expr *> &Steps,
+    bool &IsMaxLengthRequested) {
   SourceRange BSRange;
   const Token &Tok = P.getCurToken();
   bool IsError = false;
@@ -742,8 +743,8 @@ static bool parseDeclareSimdClauses(
         IsError = true;
       }
       P.ConsumeToken();
-      SourceLocation RLoc;
-      SimdLen = P.ParseOpenMPParensExpr(ClauseName, RLoc);
+      SourceLocation LLoc, RLoc;
+      SimdLen = P.ParseOpenMPSimdlenExpr(LLoc, RLoc, IsMaxLengthRequested);
       if (SimdLen.isInvalid())
         IsError = true;
     } else {
@@ -810,9 +811,10 @@ Parser::ParseOMPDeclareSimdClauses(Parser::DeclGroupPtrTy Ptr,
   SmallVector<Expr *, 4> Linears;
   SmallVector<unsigned, 4> LinModifiers;
   SmallVector<Expr *, 4> Steps;
-  bool IsError =
-      parseDeclareSimdClauses(*this, BS, Simdlen, Uniforms, Aligneds,
-                              Alignments, Linears, LinModifiers, Steps);
+  bool IsMaxLengthRequested = false;
+  bool IsError = parseDeclareSimdClauses(*this, BS, Simdlen, Uniforms, Aligneds,
+                                         Alignments, Linears, LinModifiers,
+                                         Steps, IsMaxLengthRequested);
   skipUntilPragmaOpenMPEnd(OMPD_declare_simd);
   // Skip the last annot_pragma_openmp_end.
   SourceLocation EndLoc = ConsumeAnnotationToken();
@@ -820,7 +822,7 @@ Parser::ParseOMPDeclareSimdClauses(Parser::DeclGroupPtrTy Ptr,
     return Ptr;
   return Actions.ActOnOpenMPDeclareSimdDirective(
       Ptr, BS, Simdlen.get(), Uniforms, Aligneds, Alignments, Linears,
-      LinModifiers, Steps, SourceRange(Loc, EndLoc));
+      LinModifiers, Steps, SourceRange(Loc, EndLoc), IsMaxLengthRequested);
 }
 
 namespace {
@@ -3157,10 +3159,20 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
   }
 
   switch (CKind) {
+  case OMPC_simdlen:
+    // OpenMP [2.8.1, simd construct, Restrictions]
+    //  Only one simdlen  clause can appear on a simd directive.
+    if (!FirstClause) {
+      Diag(Tok, diag::err_omp_more_one_clause)
+          << getOpenMPDirectiveName(DKind) << getOpenMPClauseName(CKind) << 0;
+      ErrorFound = true;
+    }
+
+    Clause = ParseOpenMPSimdlen(CKind, WrongDirective);
+    break;
   case OMPC_final:
   case OMPC_num_threads:
   case OMPC_safelen:
-  case OMPC_simdlen:
   case OMPC_collapse:
   case OMPC_ordered:
   case OMPC_num_teams:
@@ -3181,7 +3193,6 @@ OMPClause *Parser::ParseOpenMPClause(OpenMPDirectiveKind DKind,
     //  At most one num_threads clause can appear on the directive.
     // OpenMP [2.8.1, simd construct, Restrictions]
     //  Only one safelen  clause can appear on a simd directive.
-    //  Only one simdlen  clause can appear on a simd directive.
     //  Only one collapse clause can appear on a simd directive.
     // OpenMP [2.11.1, task Construct, Restrictions]
     //  At most one if clause can appear on the directive.
@@ -3398,10 +3409,76 @@ ExprResult Parser::ParseOpenMPParensExpr(StringRef ClauseName,
   return Val;
 }
 
+/// Parses simdlen expression in parens.
+/// \param LLoc Returned location of left paren.
+/// \param RLoc Returned location of right paren.
+/// \param IsMaxLengthRequested Set to true if omp_max_simdlen is found.
+ExprResult Parser::ParseOpenMPSimdlenExpr(SourceLocation &LLoc,
+                                          SourceLocation &RLoc,
+                                          bool &IsMaxLengthRequested) {
+  // Parse '('.
+  BalancedDelimiterTracker T(*this, tok::l_paren, tok::annot_pragma_openmp_end);
+  if (T.expectAndConsume(diag::err_expected_lparen_after,
+                         getOpenMPClauseName(OMPC_simdlen).data()))
+    return ExprError();
+
+  LLoc = T.getOpenLocation();
+  ExprResult Val;
+  bool NeedsExpression = true;
+  if (!Tok.isAnnotation() && PP.getSpelling(Tok) == "omp_max_simdlen") {
+    IsMaxLengthRequested = true;
+    // Parse 'omp_max_simdlen'.
+    ConsumeAnyToken();
+    // Now check if the optional expression is present and act accordingly.
+    if (Tok.is(tok::colon))
+      // Parse ':'
+      ConsumeAnyToken();
+    else
+      NeedsExpression = false;
+  }
+  if (NeedsExpression) {
+    // Parse expression.
+    SourceLocation ELoc = Tok.getLocation();
+    ExprResult LHS(ParseCastExpression(AnyCastExpr, false, NotTypeCast));
+    Val = ParseRHSOfBinaryExpression(LHS, prec::Conditional);
+    Val =
+        Actions.ActOnFinishFullExpr(Val.get(), ELoc, /*DiscardedValue*/ false);
+  }
+
+  // Parse ')'.
+  RLoc = Tok.getLocation();
+  if (!T.consumeClose())
+    RLoc = T.getCloseLocation();
+
+  return Val;
+}
+
+/// Parse simdlen clause.
+///
+///   simdlen-clause:
+///     'simdlen' '(' expression ')'
+///     'simdlen' '(' 'omp_max_simdlen' [ ':' expression ] ')'
+OMPClause *Parser::ParseOpenMPSimdlen(OpenMPClauseKind Kind, bool ParseOnly) {
+  assert(Kind == OMPC_simdlen);
+
+  bool IsMaxLengthRequested = false;
+  SourceLocation Loc = ConsumeToken();
+  SourceLocation LLoc, RLoc;
+  ExprResult Val = ParseOpenMPSimdlenExpr(LLoc, RLoc, IsMaxLengthRequested);
+
+  if (Val.isInvalid())
+    return nullptr;
+
+  if (ParseOnly)
+    return nullptr;
+
+  return Actions.ActOnOpenMPSimdlenClause(Val.get(), Loc, LLoc, RLoc,
+                                          IsMaxLengthRequested);
+}
+
 /// Parsing of OpenMP clauses with single expressions like 'final',
-/// 'collapse', 'safelen', 'num_threads', 'simdlen', 'num_teams',
-/// 'thread_limit', 'simdlen', 'priority', 'grainsize', 'num_tasks', 'hint' or
-/// 'detach'.
+/// 'collapse', 'safelen', 'num_threads', 'num_teams', 'thread_limit',
+/// 'priority', 'grainsize', 'num_tasks', 'hint' or 'detach'.
 ///
 ///    final-clause:
 ///      'final' '(' expression ')'
@@ -3411,9 +3488,6 @@ ExprResult Parser::ParseOpenMPParensExpr(StringRef ClauseName,
 ///
 ///    safelen-clause:
 ///      'safelen' '(' expression ')'
-///
-///    simdlen-clause:
-///      'simdlen' '(' expression ')'
 ///
 ///    collapse-clause:
 ///      'collapse' '(' expression ')'

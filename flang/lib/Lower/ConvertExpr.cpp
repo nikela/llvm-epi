@@ -893,7 +893,7 @@ public:
   }
 
   static bool
-  isDerivedTypeWithLengthParameters(const Fortran::semantics::Symbol &sym) {
+  isDerivedTypeWithLenParameters(const Fortran::semantics::Symbol &sym) {
     if (const Fortran::semantics::DeclTypeSpec *declTy = sym.GetType())
       if (const Fortran::semantics::DerivedTypeSpec *derived =
               declTy->AsDerived())
@@ -944,7 +944,7 @@ public:
         continue;
       }
 
-      if (isDerivedTypeWithLengthParameters(sym))
+      if (isDerivedTypeWithLenParameters(sym))
         TODO(loc, "component with length parameters in structure constructor");
 
       if (isBuiltinCPtr(sym)) {
@@ -1014,7 +1014,7 @@ public:
       if (sym.test(Fortran::semantics::Symbol::Flag::ParentComp))
         TODO(loc, "parent component in structure constructor");
 
-      if (isDerivedTypeWithLengthParameters(sym))
+      if (isDerivedTypeWithLenParameters(sym))
         TODO(loc, "component with length parameters in structure constructor");
 
       llvm::StringRef name = toStringRef(sym.name());
@@ -2143,7 +2143,7 @@ public:
     mlir::Value box = builder.createBox(loc, exv);
     return fir::BoxValue(
         box, fir::factory::getNonDefaultLowerBounds(builder, loc, exv),
-        fir::factory::getNonDeferredLengthParams(exv));
+        fir::factory::getNonDeferredLenParams(exv));
   }
 
   /// Generate a call to a Fortran intrinsic or intrinsic module procedure.
