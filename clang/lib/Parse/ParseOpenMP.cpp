@@ -3424,22 +3424,19 @@ ExprResult Parser::ParseOpenMPSimdlenExpr(SourceLocation &LLoc,
 
   LLoc = T.getOpenLocation();
   ExprResult Val;
+  bool NeedsExpression = true;
   if (!Tok.isAnnotation() && PP.getSpelling(Tok) == "omp_max_simdlen") {
     IsMaxLengthRequested = true;
     // Parse 'omp_max_simdlen'.
     ConsumeAnyToken();
     // Now check if the optional expression is present and act accordingly.
-    if (Tok.is(tok::colon)) {
+    if (Tok.is(tok::colon))
       // Parse ':'
       ConsumeAnyToken();
-      // Parse constant expression.
-      SourceLocation ELoc = Tok.getLocation();
-      Val = ParseConstantExpression();
-      Val = Actions.ActOnFinishFullExpr(Val.get(), ELoc,
-                                        /*DiscardedValue*/ false,
-                                        /*IsConstexpr*/ true);
-    }
-  } else {
+    else
+      NeedsExpression = false;
+  }
+  if (NeedsExpression) {
     // Parse expression.
     SourceLocation ELoc = Tok.getLocation();
     ExprResult LHS(ParseCastExpression(AnyCastExpr, false, NotTypeCast));

@@ -12064,7 +12064,7 @@ void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
         VLENVal = VLENExpr->EvaluateKnownConstInt(C);
         ExprLoc = VLENExpr->getExprLoc();
       } else if (Attr->getIsMaxLengthRequested()) {
-        VLENVal = llvm::APSInt("1");
+        VLENVal = llvm::APSInt::get(1);
       }
 
       OMPDeclareSimdDeclAttr::BranchStateTy State = Attr->getBranchState();
