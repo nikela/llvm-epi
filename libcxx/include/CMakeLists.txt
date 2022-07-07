@@ -94,6 +94,7 @@ set(files
   __algorithm/ranges_lower_bound.h
   __algorithm/ranges_max.h
   __algorithm/ranges_max_element.h
+  __algorithm/ranges_merge.h
   __algorithm/ranges_min.h
   __algorithm/ranges_min_element.h
   __algorithm/ranges_minmax.h
@@ -102,6 +103,8 @@ set(files
   __algorithm/ranges_move.h
   __algorithm/ranges_move_backward.h
   __algorithm/ranges_none_of.h
+  __algorithm/ranges_remove.h
+  __algorithm/ranges_remove_if.h
   __algorithm/ranges_replace.h
   __algorithm/ranges_replace_if.h
   __algorithm/ranges_reverse.h

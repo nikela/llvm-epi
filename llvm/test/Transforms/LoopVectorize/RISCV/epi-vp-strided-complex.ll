@@ -35,10 +35,10 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER-NEXT:    [[IDXPROM1:%.*]] = sext i32 [[J]] to i64
 ; GATHER-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[J]] to i64
 ; GATHER-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
-; GATHER-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; GATHER-NEXT:    [[TMP2:%.*]] = shl i64 [[TMP1]], 1
-; GATHER-NEXT:    [[TMP3:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
-; GATHER-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP2]], [[TMP3]]
+; GATHER-NEXT:    [[TMP1:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
+; GATHER-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; GATHER-NEXT:    [[TMP3:%.*]] = shl i64 [[TMP2]], 1
+; GATHER-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP3]], [[TMP1]]
 ; GATHER-NEXT:    br i1 [[TMP4]], label [[FOR_BODY:%.*]], label [[VECTOR_PH:%.*]]
 ; GATHER:       vector.ph:
 ; GATHER-NEXT:    [[TMP5:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
@@ -149,10 +149,10 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED-NEXT:    [[IDXPROM1:%.*]] = sext i32 [[J]] to i64
 ; STRIDED-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[J]] to i64
 ; STRIDED-NEXT:    [[ARRAYIDX:%.*]] = getelementptr { float, float }, { float, float }* [[A:%.*]], i64 [[IDXPROM1]]
-; STRIDED-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; STRIDED-NEXT:    [[TMP2:%.*]] = shl i64 [[TMP1]], 1
-; STRIDED-NEXT:    [[TMP3:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
-; STRIDED-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP2]], [[TMP3]]
+; STRIDED-NEXT:    [[TMP1:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
+; STRIDED-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; STRIDED-NEXT:    [[TMP3:%.*]] = shl i64 [[TMP2]], 1
+; STRIDED-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP3]], [[TMP1]]
 ; STRIDED-NEXT:    br i1 [[TMP4]], label [[FOR_BODY:%.*]], label [[VECTOR_PH:%.*]]
 ; STRIDED:       vector.ph:
 ; STRIDED-NEXT:    [[SCEVGEP:%.*]] = getelementptr { float, float }, { float, float }* [[X:%.*]], i64 0, i32 1

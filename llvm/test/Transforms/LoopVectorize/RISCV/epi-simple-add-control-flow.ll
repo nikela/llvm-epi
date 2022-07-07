@@ -18,10 +18,10 @@ define dso_local void @vec_add(i32 signext %N, double* noalias nocapture %c, dou
 ; CHECK-NEXT:    br i1 [[CMP22]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
-; CHECK-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 8
-; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    [[TMP3:%.*]] = icmp ult i64 [[TMP2]], [[TMP1]]
+; CHECK-NEXT:    [[TMP0:%.*]] = sub i64 -1, [[WIDE_TRIP_COUNT]]
+; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP2:%.*]] = mul i64 [[TMP1]], 8
+; CHECK-NEXT:    [[TMP3:%.*]] = icmp ult i64 [[TMP0]], [[TMP2]]
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], 1
@@ -109,9 +109,9 @@ define dso_local void @vec_add(i32 signext %N, double* noalias nocapture %c, dou
 ; CHECK1-NEXT:    br i1 [[CMP22]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
 ; CHECK1:       for.body.preheader:
 ; CHECK1-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
-; CHECK1-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP1:%.*]] = sub i64 -1, [[WIDE_TRIP_COUNT]]
-; CHECK1-NEXT:    [[TMP2:%.*]] = icmp ult i64 [[TMP1]], [[TMP0]]
+; CHECK1-NEXT:    [[TMP0:%.*]] = sub i64 -1, [[WIDE_TRIP_COUNT]]
+; CHECK1-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP2:%.*]] = icmp ult i64 [[TMP0]], [[TMP1]]
 ; CHECK1-NEXT:    br i1 [[TMP2]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK1:       vector.ph:
 ; CHECK1-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], 1

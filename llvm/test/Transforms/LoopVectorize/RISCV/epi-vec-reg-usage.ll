@@ -60,10 +60,10 @@ define dso_local void @highRegUage(i32 signext %N, double* noalias nocapture %c,
 ; CHECK-NEXT:    [[TMP0:%.*]] = add nuw i32 [[N]], 1
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[TMP0]] to i64
 ; CHECK-NEXT:    [[TMP1:%.*]] = add nsw i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 4
-; CHECK-NEXT:    [[TMP4:%.*]] = sub i64 -1, [[TMP1]]
-; CHECK-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP4]], [[TMP3]]
+; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
+; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP4:%.*]] = mul i64 [[TMP3]], 4
+; CHECK-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP2]], [[TMP4]]
 ; CHECK-NEXT:    br i1 [[TMP5]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[IND_END:%.*]] = add i64 1, [[TMP1]]
@@ -169,9 +169,9 @@ define dso_local void @highRegUage(i32 signext %N, double* noalias nocapture %c,
 ; CHECK1-NEXT:    [[TMP0:%.*]] = add nuw i32 [[N]], 1
 ; CHECK1-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[TMP0]] to i64
 ; CHECK1-NEXT:    [[TMP1:%.*]] = add nsw i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK1-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP3:%.*]] = sub i64 -1, [[TMP1]]
-; CHECK1-NEXT:    [[TMP4:%.*]] = icmp ult i64 [[TMP3]], [[TMP2]]
+; CHECK1-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
+; CHECK1-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP4:%.*]] = icmp ult i64 [[TMP2]], [[TMP3]]
 ; CHECK1-NEXT:    br i1 [[TMP4]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK1:       vector.ph:
 ; CHECK1-NEXT:    [[IND_END:%.*]] = add i64 1, [[TMP1]]

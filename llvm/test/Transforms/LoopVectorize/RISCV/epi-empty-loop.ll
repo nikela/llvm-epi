@@ -29,10 +29,10 @@ define dso_local signext i32 @xerbla_array(i8* nocapture readonly %srname_array,
 ; CHECK-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
 ; CHECK-NEXT:    [[TMP1:%.*]] = zext i32 [[COND]] to i64
 ; CHECK-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 1 [[SRNAME16]], i8* align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
-; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
-; CHECK-NEXT:    [[TMP4:%.*]] = sub i64 -1, [[TMP1]]
-; CHECK-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP4]], [[TMP3]]
+; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
+; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP4:%.*]] = mul i64 [[TMP3]], 8
+; CHECK-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP2]], [[TMP4]]
 ; CHECK-NEXT:    br i1 [[TMP5]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
@@ -82,10 +82,10 @@ define dso_local signext i32 @xerbla_array(i8* nocapture readonly %srname_array,
 ; CHECK1-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
 ; CHECK1-NEXT:    [[TMP1:%.*]] = zext i32 [[COND]] to i64
 ; CHECK1-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 1 [[SRNAME16]], i8* align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
-; CHECK1-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
-; CHECK1-NEXT:    [[TMP4:%.*]] = sub i64 -1, [[TMP1]]
-; CHECK1-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP4]], [[TMP3]]
+; CHECK1-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
+; CHECK1-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP4:%.*]] = mul i64 [[TMP3]], 8
+; CHECK1-NEXT:    [[TMP5:%.*]] = icmp ult i64 [[TMP2]], [[TMP4]]
 ; CHECK1-NEXT:    br i1 [[TMP5]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK1:       vector.ph:
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
