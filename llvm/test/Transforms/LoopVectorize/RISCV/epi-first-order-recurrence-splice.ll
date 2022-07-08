@@ -153,10 +153,10 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECKVP-NEXT:    [[TMP0:%.*]] = add i32 [[N:%.*]], -1
 ; CHECKVP-NEXT:    [[TMP1:%.*]] = zext i32 [[TMP0]] to i64
 ; CHECKVP-NEXT:    [[TMP2:%.*]] = add nuw nsw i64 [[TMP1]], 1
-; CHECKVP-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
-; CHECKVP-NEXT:    [[TMP4:%.*]] = shl i64 [[TMP3]], 1
-; CHECKVP-NEXT:    [[TMP5:%.*]] = sub nuw nsw i64 -2, [[TMP1]]
-; CHECKVP-NEXT:    [[TMP6:%.*]] = icmp ult i64 [[TMP5]], [[TMP4]]
+; CHECKVP-NEXT:    [[TMP3:%.*]] = sub nuw nsw i64 -2, [[TMP1]]
+; CHECKVP-NEXT:    [[TMP4:%.*]] = call i64 @llvm.vscale.i64()
+; CHECKVP-NEXT:    [[TMP5:%.*]] = shl i64 [[TMP4]], 1
+; CHECKVP-NEXT:    [[TMP6:%.*]] = icmp ult i64 [[TMP3]], [[TMP5]]
 ; CHECKVP-NEXT:    br i1 [[TMP6]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECKVP:       vector.ph:
 ; CHECKVP-NEXT:    [[TMP7:%.*]] = call i32 @llvm.vscale.i32()

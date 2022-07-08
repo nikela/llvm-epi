@@ -5,10 +5,10 @@
 define void @store(<vscale x 1 x i64> %v1) nounwind
 ; CHECK-LABEL: store:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -528
-; CHECK-NEXT:    addi a0, sp, 16
+; CHECK-NEXT:    addi sp, sp, -512
+; CHECK-NEXT:    mv a0, sp
 ; CHECK-NEXT:    vs1r.v v8, (a0)
-; CHECK-NEXT:    addi sp, sp, 528
+; CHECK-NEXT:    addi sp, sp, 512
 ; CHECK-NEXT:    ret
 {
   %buffer = alloca [64 x i64], align 8

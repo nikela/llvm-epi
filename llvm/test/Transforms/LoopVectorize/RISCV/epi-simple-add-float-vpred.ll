@@ -17,10 +17,10 @@ define dso_local void @simple_add(i32 signext %N, float* noalias nocapture %c, f
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK-NEXT:    [[TMP0:%.*]] = add nsw i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP2:%.*]] = shl i64 [[TMP1]], 3
-; CHECK-NEXT:    [[TMP3:%.*]] = sub nsw i64 0, [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP2]], [[TMP3]]
+; CHECK-NEXT:    [[TMP1:%.*]] = sub nsw i64 0, [[WIDE_TRIP_COUNT]]
+; CHECK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP3:%.*]] = shl i64 [[TMP2]], 3
+; CHECK-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP3]], [[TMP1]]
 ; CHECK-NEXT:    br i1 [[TMP4]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
@@ -64,10 +64,10 @@ define dso_local void @simple_add(i32 signext %N, float* noalias nocapture %c, f
 ; CHECK1:       for.body.preheader:
 ; CHECK1-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK1-NEXT:    [[TMP0:%.*]] = add nsw i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK1-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP2:%.*]] = shl i64 [[TMP1]], 1
-; CHECK1-NEXT:    [[TMP3:%.*]] = sub nsw i64 0, [[WIDE_TRIP_COUNT]]
-; CHECK1-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP2]], [[TMP3]]
+; CHECK1-NEXT:    [[TMP1:%.*]] = sub nsw i64 0, [[WIDE_TRIP_COUNT]]
+; CHECK1-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[TMP3:%.*]] = shl i64 [[TMP2]], 1
+; CHECK1-NEXT:    [[TMP4:%.*]] = icmp ugt i64 [[TMP3]], [[TMP1]]
 ; CHECK1-NEXT:    br i1 [[TMP4]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]

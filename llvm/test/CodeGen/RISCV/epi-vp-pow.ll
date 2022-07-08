@@ -91,21 +91,21 @@ define <vscale x 4 x double> @vp_pow_nxv4f64_unmasked(<vscale x 4 x double> %a, 
 define <vscale x 8 x double> @vp_pow_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b, <vscale x 8 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_pow_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    slli a1, a1, 3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv a1, a0
-; CHECK-NEXT:    addi a0, sp, 32
-; CHECK-NEXT:    addi a2, sp, 32
+; CHECK-NEXT:    addi a2, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv8f64_m@plt
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 8 x double> @llvm.vp.pow.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b, <vscale x 8 x i1> %mask, i32 %evl)
   ret <vscale x 8 x double> %1
@@ -114,21 +114,21 @@ define <vscale x 8 x double> @vp_pow_nxv8f64(<vscale x 8 x double> %a, <vscale x
 define <vscale x 8 x double> @vp_pow_nxv8f64_unmasked(<vscale x 8 x double> %a, <vscale x 8 x double> %b, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_pow_nxv8f64_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    slli a1, a1, 3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv a1, a0
-; CHECK-NEXT:    addi a0, sp, 32
-; CHECK-NEXT:    addi a2, sp, 32
+; CHECK-NEXT:    addi a2, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv8f64@plt
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 8 x i1> %head, <vscale x 8 x i1> undef, <vscale x 8 x i32> zeroinitializer
@@ -256,21 +256,21 @@ define <vscale x 8 x float> @vp_pow_nxv8f32_unmasked(<vscale x 8 x float> %a, <v
 define <vscale x 16 x float> @vp_pow_nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b, <vscale x 16 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_pow_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    slli a1, a1, 3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv a1, a0
-; CHECK-NEXT:    addi a0, sp, 32
-; CHECK-NEXT:    addi a2, sp, 32
+; CHECK-NEXT:    addi a2, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv16f32_m@plt
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 16 x float> @llvm.vp.pow.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b, <vscale x 16 x i1> %mask, i32 %evl)
   ret <vscale x 16 x float> %1
@@ -279,21 +279,21 @@ define <vscale x 16 x float> @vp_pow_nxv16f32(<vscale x 16 x float> %a, <vscale 
 define <vscale x 16 x float> @vp_pow_nxv16f32_unmasked(<vscale x 16 x float> %a, <vscale x 16 x float> %b, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_pow_nxv16f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    addi sp, sp, -48
-; CHECK-NEXT:    sd ra, 40(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addi sp, sp, -32
+; CHECK-NEXT:    sd ra, 24(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    csrr a1, vlenb
 ; CHECK-NEXT:    slli a1, a1, 3
 ; CHECK-NEXT:    sub sp, sp, a1
 ; CHECK-NEXT:    mv a1, a0
-; CHECK-NEXT:    addi a0, sp, 32
-; CHECK-NEXT:    addi a2, sp, 32
+; CHECK-NEXT:    addi a2, sp, 16
+; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv16f32@plt
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    add sp, sp, a0
-; CHECK-NEXT:    ld ra, 40(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    addi sp, sp, 48
+; CHECK-NEXT:    ld ra, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    addi sp, sp, 32
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 16 x i1> undef, i1 1, i32 0
   %allones = shufflevector <vscale x 16 x i1> %head, <vscale x 16 x i1> undef, <vscale x 16 x i32> zeroinitializer

@@ -3270,6 +3270,8 @@ private:
   ///
   OMPClause *ParseOpenMPClause(OpenMPDirectiveKind DKind,
                                OpenMPClauseKind CKind, bool FirstClause);
+  /// TODO: add comment
+  OMPClause *ParseOpenMPSimdlen(OpenMPClauseKind Kind, bool ParseOnly);
   /// Parses clause with a single expression of a kind \a Kind.
   ///
   /// \param Kind Kind of current clause.
@@ -3345,6 +3347,13 @@ public:
   /// \param RLoc Returned location of right paren.
   ExprResult ParseOpenMPParensExpr(StringRef ClauseName, SourceLocation &RLoc,
                                    bool IsAddressOfOperand = false);
+
+  /// Parses simdlen expression in parens.
+  /// \param LLoc Returned location of left paren.
+  /// \param RLoc Returned location of right paren.
+  /// \param IsMaxLengthRequested Set to true if omp_max_simdlen is found.
+  ExprResult ParseOpenMPSimdlenExpr(SourceLocation &LLoc, SourceLocation &RLoc,
+                                    bool &IsMaxLengthRequested);
 
   /// Parses a reserved locator like 'omp_all_memory'.
   bool ParseOpenMPReservedLocator(OpenMPClauseKind Kind,

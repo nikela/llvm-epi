@@ -86,9 +86,17 @@ void OMPDeclareSimdDeclAttr::printPrettyPragma(
     raw_ostream &OS, const PrintingPolicy &Policy) const {
   if (getBranchState() != BS_Undefined)
     OS << ' ' << ConvertBranchStateTyToStr(getBranchState());
-  if (auto *E = getSimdlen()) {
+  auto *SL = getSimdlen();
+  if (getIsMaxLengthRequested()) {
+    OS << " simdlen(omp_max_simdlen";
+    if (SL) {
+      OS << ": ";
+      SL->printPretty(OS, nullptr, Policy);
+    }
+    OS << ")";
+  } else if (SL) {
     OS << " simdlen(";
-    E->printPretty(OS, nullptr, Policy);
+    SL->printPretty(OS, nullptr, Policy);
     OS << ")";
   }
   if (uniforms_size() > 0) {

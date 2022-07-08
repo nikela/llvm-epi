@@ -254,10 +254,10 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECKVP-NEXT:    br i1 [[CMP13]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
 ; CHECKVP:       for.body.preheader:
 ; CHECKVP-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
-; CHECKVP-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECKVP-NEXT:    [[TMP1:%.*]] = shl i64 [[TMP0]], 3
-; CHECKVP-NEXT:    [[TMP2:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
-; CHECKVP-NEXT:    [[TMP3:%.*]] = icmp ugt i64 [[TMP1]], [[TMP2]]
+; CHECKVP-NEXT:    [[TMP0:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
+; CHECKVP-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECKVP-NEXT:    [[TMP2:%.*]] = shl i64 [[TMP1]], 3
+; CHECKVP-NEXT:    [[TMP3:%.*]] = icmp ugt i64 [[TMP2]], [[TMP0]]
 ; CHECKVP-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECKVP:       vector.ph:
 ; CHECKVP-NEXT:    br label [[VECTOR_BODY:%.*]]

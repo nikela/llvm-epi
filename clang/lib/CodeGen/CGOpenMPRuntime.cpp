@@ -11855,30 +11855,15 @@ static void emitRISCV64DeclareSimdFunction(
     CodeGenModule &CGM, const FunctionDecl *FD, llvm::Function *Fn,
     const llvm::APSInt &VLENVal, ArrayRef<ParamAttrTy> ParamAttrs,
     OMPDeclareSimdDeclAttr::BranchStateTy State, SourceLocation SLoc) {
-  unsigned TypeSize = evaluateCDTSize(FD, ParamAttrs);
-  assert(TypeSize && "Non-zero simdlen/cdtsize expected");
-  // These values represent the feasible vector (group) sizes currently allowed
-  // in EPI
-  llvm::SmallVector<unsigned, 4> VecSizes = {64, 128, 256, 512};
   llvm::SmallVector<unsigned, 4> LMULs;
-  if (!VLENVal) {
-    for (unsigned VecSize : VecSizes)
-      LMULs.push_back(VecSize / TypeSize);
-  } else {
+  if (!VLENVal)
+    LMULs = {1, 2, 4, 8};
+  else {
     unsigned UserVLEN = VLENVal.getExtValue();
     if (!llvm::isPowerOf2_32(UserVLEN)) {
       unsigned DiagID = CGM.getDiags().getCustomDiagID(
           DiagnosticsEngine::Warning,
           "The value specified in simdlen must be a power of 2.");
-      CGM.getDiags().Report(SLoc, DiagID);
-      return;
-    }
-    if ((UserVLEN * TypeSize) < VecSizes.front() ||
-        (UserVLEN * TypeSize) > VecSizes.back()) {
-      unsigned DiagID = CGM.getDiags().getCustomDiagID(
-          DiagnosticsEngine::Warning,
-          "The value specified in simdlen multiplied by the size of the data "
-          "type must be included in the [64,512] range.");
       CGM.getDiags().Report(SLoc, DiagID);
       return;
     }
@@ -12071,13 +12056,17 @@ void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
         ++SI;
         ++MI;
       }
+
+      // SimdLen
       llvm::APSInt VLENVal;
       SourceLocation ExprLoc;
-      const Expr *VLENExpr = Attr->getSimdlen();
-      if (VLENExpr) {
+      if (const auto *VLENExpr = Attr->getSimdlen()) {
         VLENVal = VLENExpr->EvaluateKnownConstInt(C);
         ExprLoc = VLENExpr->getExprLoc();
+      } else if (Attr->getIsMaxLengthRequested()) {
+        VLENVal = llvm::APSInt::get(1);
       }
+
       OMPDeclareSimdDeclAttr::BranchStateTy State = Attr->getBranchState();
       if (CGM.getTriple().isX86()) {
         emitX86DeclareSimdFunction(FD, Fn, VLENVal, ParamAttrs, State);
@@ -12092,8 +12081,15 @@ void CGOpenMPRuntime::emitDeclareSimdFunction(const FunctionDecl *FD,
                                          MangledName, 'n', 128, Fn, ExprLoc);
       } else if (CGM.getTriple().getArch() == llvm::Triple::riscv64 &&
                  CGM.getTarget().hasFeature("zepi")) {
-        emitRISCV64DeclareSimdFunction(CGM, FD, Fn, VLENVal, ParamAttrs, State,
-                                       ExprLoc);
+        if (VLENVal.getBoolValue() && !Attr->getIsMaxLengthRequested()) {
+          unsigned DiagID = CGM.getDiags().getCustomDiagID(
+              DiagnosticsEngine::Warning,
+              "omp_max_simdlen is required in EPI.");
+          CGM.getDiags().Report(ExprLoc, DiagID);
+        } else {
+          emitRISCV64DeclareSimdFunction(CGM, FD, Fn, VLENVal, ParamAttrs, State,
+                                         ExprLoc);
+        }
       }
     }
     FD = FD->getPreviousDecl();

@@ -176,9 +176,9 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   Register FrameReg;
   StackOffset Offset =
       getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg);
-  bool IsRVVSpill = RISCV::isRVVSpill(MI, /*CheckFIs*/ false) ||
+  bool IsRVVSpill = RISCV::isRVVSpill(MI)
                     // EPI remaining cases.
-                    RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode());
+                    || RISCVEPIPseudosTable::getEPIPseudoInfo(MI.getOpcode());
   if (!IsRVVSpill)
     Offset += StackOffset::getFixed(MI.getOperand(FIOperandNum + 1).getImm());
 
