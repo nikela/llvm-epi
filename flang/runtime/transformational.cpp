@@ -602,8 +602,13 @@ std::int32_t RTNAME(SelectedIntKind)(std::int32_t precision) {
     return 4;
   if (precision <= 18)
     return 8;
+#if LDBL_MANT_DIG == 64
+    // Returning KIND=10 it is going to be confusing for everyone, so act
+    // warily here.
+#elif LDBL_MANT_DIG == 113
   if (precision <= 38)
     return 16;
+#endif
   return -1;
 }
 
