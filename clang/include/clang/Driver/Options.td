@@ -3444,6 +3444,8 @@ def mno_save_restore : Flag<["-"], "mno-save-restore">, Group<m_riscv_Features_G
   HelpText<"Disable using library calls for save and restore">;
 def mepi : Flag<["-"], "mepi">, Flags<[CC1Option, FC1Option]>,
   HelpText<"Enable EPI extensions">;
+def mepi_allow_fixed_vectorization : Flag<["-"], "mepi-allow-fixed-vectorization">,
+  HelpText<"Allow EPI to vectorize using fixed vectors">;
 def mno_prefer_predicate_over_epilog : Flag<["-"], "mno-prefer-predicate-over-epilog">,
   Flags<[CC1Option, FC1Option]>,
   HelpText<"Indicate that an epilogue is desired and shouldn't be replaced by predication">;
