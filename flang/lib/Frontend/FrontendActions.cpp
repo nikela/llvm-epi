@@ -823,6 +823,7 @@ void CodeGenAction::executeAction() {
     return;
 
   // Run LLVM's middle-end (i.e. the optimizer).
+  setUpTargetMachine();
   runOptimizationPipeline(*os);
 
   if (action == BackendActionTy::Backend_EmitLL) {
@@ -831,7 +832,6 @@ void CodeGenAction::executeAction() {
     return;
   }
 
-  setUpTargetMachine();
   llvmModule->setDataLayout(tm->createDataLayout());
 
   if (action == BackendActionTy::Backend_EmitBC) {
