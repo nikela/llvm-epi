@@ -2211,8 +2211,10 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
     CmdArgs.push_back("-mepi");
 
     // We are only interested in scalable vectorization in EPI.
-    CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back("--scalable-vectorization=only");
+    if (!Args.hasArg(options::OPT_mepi_allow_fixed_vectorization)) {
+      CmdArgs.push_back("-mllvm");
+      CmdArgs.push_back("--scalable-vectorization=only");
+    }
 
     // Predicates are preferred when vectorising in EPI.
     CmdArgs.push_back("-mllvm");
