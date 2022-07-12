@@ -347,6 +347,7 @@ static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
     aarch64::getAArch64TargetFeatures(D, Triple, Args, Features, ForAS);
     break;
   case llvm::Triple::riscv64:
+    Features.push_back("+64bit");
     riscv::getRISCVTargetFeatures(D, Triple, Args, Features);
     break;
   case llvm::Triple::x86:
