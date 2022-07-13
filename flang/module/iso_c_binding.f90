@@ -15,7 +15,8 @@ module iso_c_binding
     c_ptr => __builtin_c_ptr, &
     c_funptr => __builtin_c_funptr, &
     c_sizeof => sizeof, &
-    c_loc => __builtin_c_loc
+    c_loc => __builtin_c_loc, &
+    c_funloc => __builtin_c_funloc
 
   type(c_ptr), parameter :: c_null_ptr = c_ptr(0)
   type(c_funptr), parameter :: c_null_funptr = c_funptr(0)
@@ -113,12 +114,6 @@ module iso_c_binding
       c_associated_c_funptr = .true.
     end if
   end function c_associated_c_funptr
-
-  function c_funloc(x)
-    type(c_funptr) :: c_funloc
-    external :: x
-    c_funloc = c_funptr(loc(x))
-  end function c_funloc
 
   ! TODO c_f_procpointer
 

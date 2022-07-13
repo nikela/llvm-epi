@@ -79,6 +79,7 @@ ENUM_CLASS(KindCode, none, defaultIntegerKind,
     operand, // match any kind, with promotion (non-standard)
     typeless, // BOZ literals are INTEGER with this kind
     teamType, // TEAM_TYPE from module ISO_FORTRAN_ENV (for coarrays)
+    cFunPtrType, // C_FUNPTR from module ISO_C_BINDING
     cPtrType, // C_PTR from module ISO_C_BINDING
     kindArg, // this argument is KIND=
     effectiveKind, // for function results: "kindArg" value, possibly defaulted
@@ -111,6 +112,7 @@ static constexpr TypePattern DefaultLogical{
 static constexpr TypePattern BOZ{IntType, KindCode::typeless};
 static constexpr TypePattern TeamType{DerivedType, KindCode::teamType};
 static constexpr TypePattern CPtrType{DerivedType, KindCode::cPtrType};
+static constexpr TypePattern CFunPtrType{DerivedType, KindCode::cFunPtrType};
 static constexpr TypePattern DoublePrecision{
     RealType, KindCode::doublePrecision};
 static constexpr TypePattern DoublePrecisionComplex{
@@ -801,6 +803,7 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
             {"back", AnyLogical, Rank::elemental, Optionality::optional},
             DefaultingKIND},
         KINDInt},
+    {"__builtin_c_funloc", {{"x", Addressable, Rank::known}}, CFunPtrType},
     {"__builtin_c_loc", {{"x", Addressable, Rank::known}}, CPtrType},
     {"__builtin_ieee_is_nan", {{"x", AnyFloating}}, DefaultLogical},
     {"__builtin_ieee_is_negative", {{"a", AnyFloating}}, DefaultLogical},
@@ -1409,6 +1412,11 @@ std::optional<SpecificCall> IntrinsicInterface::Match(
           type->category() == TypeCategory::Derived &&
           semantics::IsTeamType(&type->GetDerivedTypeSpec());
       break;
+    case KindCode::cFunPtrType:
+      argOk = !type->IsUnlimitedPolymorphic() &&
+          type->category() == TypeCategory::Derived &&
+          semantics::IsCFunPtrType(&type->GetDerivedTypeSpec());
+      break;
     case KindCode::cPtrType:
       argOk = !type->IsUnlimitedPolymorphic() &&
           type->category() == TypeCategory::Derived &&
@@ -1744,6 +1752,12 @@ std::optional<SpecificCall> IntrinsicInterface::Match(
       CHECK(*category == TypeCategory::Derived);
       resultType = DynamicType{
           GetBuiltinDerivedType(builtinsScope, "__builtin_team_type")};
+      break;
+    case KindCode::cFunPtrType:
+      CHECK(result.categorySet == DerivedType);
+      CHECK(*category == TypeCategory::Derived);
+      resultType = DynamicType{
+          GetBuiltinDerivedType(builtinsScope, "__builtin_c_funptr")};
       break;
     case KindCode::cPtrType:
       CHECK(result.categorySet == DerivedType);

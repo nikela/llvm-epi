@@ -40,6 +40,7 @@ module __Fortran_builtins
   end type
 
   intrinsic :: __builtin_c_loc
+  intrinsic :: __builtin_c_funloc
 
   intrinsic :: __builtin_ieee_is_nan, __builtin_ieee_is_negative, &
     __builtin_ieee_is_normal

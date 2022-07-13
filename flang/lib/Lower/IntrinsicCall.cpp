@@ -446,6 +446,7 @@ struct IntrinsicLibrary {
 
   mlir::Value genIeeeIsNaN(mlir::Type, llvm::ArrayRef<mlir::Value>);
   void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
+  fir::ExtendedValue genCFunLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
 
   /// Lowering for the ABS intrinsic. The ABS intrinsic expects one argument in
@@ -706,6 +707,10 @@ static constexpr IntrinsicHandler handlers[]{
     {"c_f_pointer",
      &I::genCFPointer,
      {{{"cptr", asAddr}, {"fptr", asInquired}, {"shape", asAddr}}},
+     /*isElemental=*/false},
+    {"c_funloc",
+     &I::genCFunLoc,
+     {{{"x", asAddr}}},
      /*isElemental=*/false},
     {"c_loc",
      &I::genCLoc,
@@ -3291,6 +3296,31 @@ IntrinsicLibrary::genLoc(mlir::Type resultType,
   } else {
     return builder.createConvert(loc, resultType, base);
   }
+}
+
+// C_FUNLOC
+fir::ExtendedValue
+IntrinsicLibrary::genCFunLoc(mlir::Type resultType,
+                          llvm::ArrayRef<fir::ExtendedValue> args) {
+  auto base = fir::getBase(args[0]);
+
+  // Now wrap the address in the C_FUNPTR structure.
+  mlir::Value res = builder.create<fir::UndefOp>(loc, resultType);
+
+  llvm::StringRef addrFieldName = Fortran::lower::builtin::cptrFieldName;
+  auto cFunPtrRecTy = resultType.cast<fir::RecordType>();
+  mlir::Type fieldTy = cFunPtrRecTy.getType(addrFieldName);
+  auto addr = builder.createConvert(loc, fieldTy, base);
+
+  auto addrField =
+      builder.create<fir::FieldIndexOp>(loc, fieldTy, addrFieldName, resultType,
+                                        /*typeParams=*/mlir::ValueRange{});
+
+  res = builder.create<fir::InsertValueOp>(
+      loc, resultType, res, addr,
+      builder.getArrayAttr(addrField.getAttributes()));
+
+  return res;
 }
 
 // C_LOC
