@@ -31,6 +31,8 @@ def err_drv_invalid_riscv_arch_name : Error<
   "invalid arch name '%0', %1">;
 def err_drv_invalid_riscv_epi_ext : Error<
   "EPI extension is only valid in rv64mfad">;
+def err_drv_mepi_fixed_needs_mepi : Error<
+  "flag -mepi-allow-fixed-vectorization needs -mepi">;
 def warn_drv_invalid_arch_name_with_suggestion : Warning<
   "ignoring invalid /arch: argument '%0'; for %select{64|32}1-bit expected one of %2">,
   InGroup<UnusedCommandLineArgument>;

@@ -813,6 +813,10 @@ public:
     ActiveLaneMask,
     CanonicalIVIncrement,
     CanonicalIVIncrementNUW,
+    // The next two are similar to the above, but instead increment the
+    // canonical IV separately for each unrolled part.
+    CanonicalIVIncrementForPart,
+    CanonicalIVIncrementForPartNUW,
     BranchOnCount,
     BranchOnCond,
     // Vector predication combining masks.
@@ -829,6 +833,9 @@ private:
   FastMathFlags FMF;
   DebugLoc DL;
 
+  /// An optional name that can be used for the generated IR instruction.
+  const std::string Name;
+
   /// Utility method serving execute(): generates a single instance of the
   /// modeled instruction.
   void generateInstruction(VPTransformState &State, unsigned Part);
@@ -837,14 +844,15 @@ protected:
   void setUnderlyingInstr(Instruction *I) { setUnderlyingValue(I); }
 
 public:
-  VPInstruction(unsigned Opcode, ArrayRef<VPValue *> Operands, DebugLoc DL)
+  VPInstruction(unsigned Opcode, ArrayRef<VPValue *> Operands, DebugLoc DL,
+                const Twine &Name = "")
       : VPRecipeBase(VPRecipeBase::VPInstructionSC, Operands),
         VPValue(VPValue::VPVInstructionSC, nullptr, this), Opcode(Opcode),
-        DL(DL) {}
+        DL(DL), Name(Name.str()) {}
 
   VPInstruction(unsigned Opcode, std::initializer_list<VPValue *> Operands,
-                DebugLoc DL = {})
-      : VPInstruction(Opcode, ArrayRef<VPValue *>(Operands), DL) {}
+                DebugLoc DL = {}, const Twine &Name = "")
+      : VPInstruction(Opcode, ArrayRef<VPValue *>(Operands), DL, Name) {}
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPValue *V) {
@@ -853,7 +861,7 @@ public:
 
   VPInstruction *clone() const {
     SmallVector<VPValue *, 2> Operands(operands());
-    return new VPInstruction(Opcode, Operands, DL);
+    return new VPInstruction(Opcode, Operands, DL, Name);
   }
 
   /// Method to support type inquiry through isa, cast, and dyn_cast.
@@ -932,6 +940,8 @@ public:
     case VPInstruction::ActiveLaneMask:
     case VPInstruction::CanonicalIVIncrement:
     case VPInstruction::CanonicalIVIncrementNUW:
+    case VPInstruction::CanonicalIVIncrementForPart:
+    case VPInstruction::CanonicalIVIncrementForPartNUW:
     case VPInstruction::BranchOnCount:
       return true;
     };
@@ -1288,6 +1298,7 @@ public:
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *B) {
     return B->getVPDefID() == VPRecipeBase::VPCanonicalIVPHISC ||
+           B->getVPDefID() == VPRecipeBase::VPActiveLaneMaskPHISC ||
            B->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC ||
            B->getVPDefID() ==
                VPRecipeBase::VPPredicatedFirstOrderRecurrencePHISC ||
@@ -1297,6 +1308,7 @@ public:
   }
   static inline bool classof(const VPValue *V) {
     return V->getVPValueID() == VPValue::VPVCanonicalIVPHISC ||
+           V->getVPValueID() == VPValue::VPVActiveLaneMaskPHISC ||
            V->getVPValueID() == VPValue::VPVFirstOrderRecurrencePHISC ||
            V->getVPValueID() ==
                VPValue::VPVPredicatedFirstOrderRecurrencePHISC ||
@@ -2229,6 +2241,42 @@ public:
   }
 };
 
+/// A recipe for generating the active lane mask for the vector loop that is
+/// used to predicate the vector operations.
+/// TODO: It would be good to use the existing VPWidenPHIRecipe instead and
+/// remove VPActiveLaneMaskPHIRecipe.
+class VPActiveLaneMaskPHIRecipe : public VPHeaderPHIRecipe {
+  DebugLoc DL;
+
+public:
+  VPActiveLaneMaskPHIRecipe(VPValue *StartMask, DebugLoc DL)
+      : VPHeaderPHIRecipe(VPValue::VPVActiveLaneMaskPHISC,
+                          VPActiveLaneMaskPHISC, nullptr, StartMask),
+        DL(DL) {}
+
+  ~VPActiveLaneMaskPHIRecipe() override = default;
+
+  /// Method to support type inquiry through isa, cast, and dyn_cast.
+  static inline bool classof(const VPDef *D) {
+    return D->getVPDefID() == VPActiveLaneMaskPHISC;
+  }
+  static inline bool classof(const VPHeaderPHIRecipe *D) {
+    return D->getVPDefID() == VPActiveLaneMaskPHISC;
+  }
+  static inline bool classof(const VPValue *V) {
+    return V->getVPValueID() == VPValue::VPVActiveLaneMaskPHISC;
+  }
+
+  /// Generate the active lane mask phi of the vector loop.
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+};
+
 /// A Recipe for widening the canonical induction variable of the vector loop.
 class VPWidenCanonicalIVRecipe : public VPRecipeBase, public VPValue {
 public:
@@ -2905,13 +2953,6 @@ class VPlan {
   /// the tail. It equals TripCount - 1.
   VPValue *BackedgeTakenCount = nullptr;
 
-  /// Represents the runtime VF. Some recipes like Vector Predicated recipes may
-  /// use runtime VF as an operand. At the time of plan construction while it is
-  /// known that this value is a loop invariant, but the corresponding IR value
-  /// is only available at plan execution once the final VF and corresponding
-  /// plan are chosen.
-  VPValue *RuntimeVF = nullptr;
-
   /// Represents the vector trip count.
   VPValue VectorTripCount;
 
@@ -2952,8 +2993,6 @@ public:
       delete TripCount;
     if (BackedgeTakenCount)
       delete BackedgeTakenCount;
-    if (RuntimeVF)
-      delete RuntimeVF;
     for (auto &P : VPExternalDefs)
       delete P.second;
   }
@@ -2987,14 +3026,6 @@ public:
     if (!BackedgeTakenCount)
       BackedgeTakenCount = new VPValue();
     return BackedgeTakenCount;
-  }
-
-  /// A VPValue representing the loop invariant runtime VF to be expanded at
-  /// paln execution.
-  VPValue *getOrCreateRuntimeVF() {
-    if (!RuntimeVF)
-      RuntimeVF = new VPValue();
-    return RuntimeVF;
   }
 
   /// The vector trip count.
@@ -3109,6 +3140,10 @@ public:
     }
     return cast<VPCanonicalIVPHIRecipe>(&*EntryVPBB->begin());
   }
+
+  /// Find and return the VPActiveLaneMaskPHIRecipe from the header - there
+  /// be only one at most. If there isn't one, then return nullptr.
+  VPActiveLaneMaskPHIRecipe *getActiveLaneMaskPhi();
 
   void addLiveOut(PHINode *PN, VPValue *V);
 

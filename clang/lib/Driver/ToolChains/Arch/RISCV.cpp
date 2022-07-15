@@ -174,6 +174,8 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
         // ????? What happened here?
         // Features.push_back("+experimental-zvlsseg");
       }
+    } else if (Args.getLastArg(options::OPT_mepi_allow_fixed_vectorization)) {
+      D.Diag(diag::err_drv_mepi_fixed_needs_mepi);
     }
   }
 

@@ -2329,6 +2329,11 @@ bool ConstantExpr::isDesirableBinOp(unsigned Opcode) {
   case Instruction::SDiv:
   case Instruction::URem:
   case Instruction::SRem:
+  case Instruction::FAdd:
+  case Instruction::FSub:
+  case Instruction::FMul:
+  case Instruction::FDiv:
+  case Instruction::FRem:
     return false;
   case Instruction::Add:
   case Instruction::Sub:
@@ -2339,11 +2344,6 @@ bool ConstantExpr::isDesirableBinOp(unsigned Opcode) {
   case Instruction::And:
   case Instruction::Or:
   case Instruction::Xor:
-  case Instruction::FAdd:
-  case Instruction::FSub:
-  case Instruction::FMul:
-  case Instruction::FDiv:
-  case Instruction::FRem:
     return true;
   default:
     llvm_unreachable("Argument must be binop opcode");
@@ -2356,6 +2356,11 @@ bool ConstantExpr::isSupportedBinOp(unsigned Opcode) {
   case Instruction::SDiv:
   case Instruction::URem:
   case Instruction::SRem:
+  case Instruction::FAdd:
+  case Instruction::FSub:
+  case Instruction::FMul:
+  case Instruction::FDiv:
+  case Instruction::FRem:
     return false;
   case Instruction::Add:
   case Instruction::Sub:
@@ -2366,11 +2371,6 @@ bool ConstantExpr::isSupportedBinOp(unsigned Opcode) {
   case Instruction::And:
   case Instruction::Or:
   case Instruction::Xor:
-  case Instruction::FAdd:
-  case Instruction::FSub:
-  case Instruction::FMul:
-  case Instruction::FDiv:
-  case Instruction::FRem:
     return true;
   default:
     llvm_unreachable("Argument must be binop opcode");
@@ -2669,10 +2669,6 @@ Constant *ConstantExpr::getAdd(Constant *C1, Constant *C2,
   return get(Instruction::Add, C1, C2, Flags);
 }
 
-Constant *ConstantExpr::getFAdd(Constant *C1, Constant *C2) {
-  return get(Instruction::FAdd, C1, C2);
-}
-
 Constant *ConstantExpr::getSub(Constant *C1, Constant *C2,
                                bool HasNUW, bool HasNSW) {
   unsigned Flags = (HasNUW ? OverflowingBinaryOperator::NoUnsignedWrap : 0) |
@@ -2680,27 +2676,11 @@ Constant *ConstantExpr::getSub(Constant *C1, Constant *C2,
   return get(Instruction::Sub, C1, C2, Flags);
 }
 
-Constant *ConstantExpr::getFSub(Constant *C1, Constant *C2) {
-  return get(Instruction::FSub, C1, C2);
-}
-
 Constant *ConstantExpr::getMul(Constant *C1, Constant *C2,
                                bool HasNUW, bool HasNSW) {
   unsigned Flags = (HasNUW ? OverflowingBinaryOperator::NoUnsignedWrap : 0) |
                    (HasNSW ? OverflowingBinaryOperator::NoSignedWrap   : 0);
   return get(Instruction::Mul, C1, C2, Flags);
-}
-
-Constant *ConstantExpr::getFMul(Constant *C1, Constant *C2) {
-  return get(Instruction::FMul, C1, C2);
-}
-
-Constant *ConstantExpr::getFDiv(Constant *C1, Constant *C2) {
-  return get(Instruction::FDiv, C1, C2);
-}
-
-Constant *ConstantExpr::getFRem(Constant *C1, Constant *C2) {
-  return get(Instruction::FRem, C1, C2);
 }
 
 Constant *ConstantExpr::getAnd(Constant *C1, Constant *C2) {

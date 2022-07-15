@@ -172,6 +172,10 @@ public:
 
   bool shouldExpandReduction(const IntrinsicInst *II) const;
   bool supportsScalableVectors() const { return ST->hasVInstructions(); }
+  PredicationStyle emitGetActiveLaneMask() const {
+    return (ST->hasVInstructions() && !ST->hasEPI()) ? PredicationStyle::Data
+                                                     : PredicationStyle::None;
+  }
   Optional<unsigned> getMaxVScale() const;
   Optional<unsigned> getVScaleForTuning() const;
 
