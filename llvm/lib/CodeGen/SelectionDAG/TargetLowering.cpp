@@ -1723,6 +1723,26 @@ bool TargetLowering::SimplifyDemandedBits(
       if ((ShAmt < DemandedBits.getActiveBits()) &&
           ShrinkDemandedOp(Op, BitWidth, DemandedBits, TLO))
         return true;
+    } else {
+      // This is a variable shift, so we can't shift the demand mask by a known
+      // amount. But if we are not demanding high bits, then we are not
+      // demanding those bits from the pre-shifted operand either.
+      if (unsigned CTLZ = DemandedBits.countLeadingZeros()) {
+        APInt DemandedFromOp(APInt::getLowBitsSet(BitWidth, BitWidth - CTLZ));
+        if (SimplifyDemandedBits(Op0, DemandedFromOp, DemandedElts, Known, TLO,
+                                 Depth + 1)) {
+          SDNodeFlags Flags = Op.getNode()->getFlags();
+          if (Flags.hasNoSignedWrap() || Flags.hasNoUnsignedWrap()) {
+            // Disable the nsw and nuw flags. We can no longer guarantee that we
+            // won't wrap after simplification.
+            Flags.setNoSignedWrap(false);
+            Flags.setNoUnsignedWrap(false);
+            Op->setFlags(Flags);
+          }
+          return true;
+        }
+        Known.resetAll();
+      }
     }
 
     // If we are only demanding sign bits then we can use the shift source
@@ -5204,6 +5224,7 @@ TargetLowering::ParseConstraints(const DataLayout &DL,
   // ConstraintOperands list.
   unsigned ArgNo = 0; // ArgNo - The argument of the CallInst.
   unsigned ResNo = 0; // ResNo - The result number of the next output.
+  unsigned LabelNo = 0; // LabelNo - CallBr indirect dest number.
 
   for (InlineAsm::ConstraintInfo &CI : IA->ParseConstraints()) {
     ConstraintOperands.emplace_back(std::move(CI));
@@ -5240,6 +5261,14 @@ TargetLowering::ParseConstraints(const DataLayout &DL,
     case InlineAsm::isInput:
       OpInfo.CallOperandVal = Call.getArgOperand(ArgNo);
       break;
+    case InlineAsm::isLabel:
+      OpInfo.CallOperandVal =
+          cast<CallBrInst>(&Call)->getBlockAddressForIndirectDest(LabelNo);
+      OpInfo.ConstraintVT =
+          getAsmOperandValueType(DL, OpInfo.CallOperandVal->getType())
+              .getSimpleVT();
+      ++LabelNo;
+      continue;
     case InlineAsm::isClobber:
       // Nothing to do.
       break;

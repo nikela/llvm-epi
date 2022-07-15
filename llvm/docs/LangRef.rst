@@ -4695,6 +4695,17 @@ output.
 Note that clobbering named registers that are also present in output
 constraints is not legal.
 
+Label constraints
+"""""""""""""""""
+
+A label constraint is indicated by a "``!``" prefix and typically used in the
+form ``"!i"``. Instead of consuming call arguments, label constraints consume
+indirect destination labels of ``callbr`` instructions.
+
+Label constraints can only be used in conjunction with ``callbr`` and the
+number of label constraints must match the number of indirect destination
+labels in the ``callbr`` instruction.
+
 
 Constraint Codes
 """"""""""""""""
@@ -7364,6 +7375,8 @@ functions is small.
 - "frame-pointer": **Max**. The value can be 0, 1, or 2. A synthesized function
   will get the "frame-pointer" function attribute, with value being "none",
   "non-leaf", or "all", respectively.
+- "function_return_thunk_extern": The synthesized function will get the
+  ``fn_return_thunk_extern`` function attribute.
 - "uwtable": **Max**. The value can be 0, 1, or 2. If the value is 1, a synthesized
   function will get the ``uwtable(sync)`` function attribute, if the value is 2,
   a synthesized function will get the ``uwtable(async)`` function attribute.
@@ -8414,8 +8427,8 @@ This instruction requires several arguments:
 #. '``fallthrough label``': the label reached when the inline assembly's
    execution exits the bottom.
 #. '``indirect labels``': the labels reached when a callee transfers control
-   to a location other than the '``fallthrough label``'. The blockaddress
-   constant for these should also be in the list of '``function args``'.
+   to a location other than the '``fallthrough label``'. Label constraints
+   refer to these destinations.
 #. The optional :ref:`function attributes <fnattrs>` list.
 #. The optional :ref:`operand bundles <opbundles>` list.
 
@@ -8440,11 +8453,11 @@ Example:
 .. code-block:: llvm
 
       ; "asm goto" without output constraints.
-      callbr void asm "", "r,X"(i32 %x, i8 *blockaddress(@foo, %indirect))
+      callbr void asm "", "r,!i"(i32 %x)
                   to label %fallthrough [label %indirect]
 
       ; "asm goto" with output constraints.
-      <result> = callbr i32 asm "", "=r,r,X"(i32 %x, i8 *blockaddress(@foo, %indirect))
+      <result> = callbr i32 asm "", "=r,r,!i"(i32 %x)
                   to label %fallthrough [label %indirect]
 
 .. _i_resume:
