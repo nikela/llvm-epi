@@ -18,7 +18,8 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
 ; CHECK-NEXT:    li a7, 0
 ; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    remu a6, a0, a4
+; CHECK-NEXT:    addi a5, a4, -1
+; CHECK-NEXT:    and a6, a0, a5
 ; CHECK-NEXT:    sub a5, a0, a6
 ; CHECK-NEXT:    vsetvli t1, zero, e32, m1, ta, mu
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
@@ -130,7 +131,8 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
 ; CHECK-NEXT:    li a7, 0
 ; CHECK-NEXT:    li t0, 0
-; CHECK-NEXT:    remu a6, a0, a4
+; CHECK-NEXT:    addi a5, a4, -1
+; CHECK-NEXT:    and a6, a0, a5
 ; CHECK-NEXT:    sub a5, a0, a6
 ; CHECK-NEXT:    vsetvli t1, zero, e64, m1, ta, mu
 ; CHECK-NEXT:  .LBB1_4: # %vector.body

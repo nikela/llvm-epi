@@ -18,7 +18,8 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:  .LBB0_3: # %vector.ph
 ; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    li t1, 0
-; CHECK-NEXT:    remu a7, a0, a5
+; CHECK-NEXT:    addi a6, a5, -1
+; CHECK-NEXT:    and a7, a0, a6
 ; CHECK-NEXT:    sub a6, a0, a7
 ; CHECK-NEXT:    vsetvli t2, zero, e16, m1, ta, mu
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
@@ -131,7 +132,8 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:  .LBB1_3: # %vector.ph
 ; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    li t1, 0
-; CHECK-NEXT:    remu a7, a0, a5
+; CHECK-NEXT:    addi a6, a5, -1
+; CHECK-NEXT:    and a7, a0, a6
 ; CHECK-NEXT:    sub a6, a0, a7
 ; CHECK-NEXT:    vsetvli t2, zero, e32, m1, ta, mu
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
@@ -243,7 +245,8 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:  .LBB2_3: # %vector.ph
 ; CHECK-NEXT:    li t0, 0
 ; CHECK-NEXT:    li t1, 0
-; CHECK-NEXT:    remu a7, a0, a5
+; CHECK-NEXT:    addi a6, a5, -1
+; CHECK-NEXT:    and a7, a0, a6
 ; CHECK-NEXT:    sub a6, a0, a7
 ; CHECK-NEXT:    vsetvli t2, zero, e64, m1, ta, mu
 ; CHECK-NEXT:  .LBB2_4: # %vector.body

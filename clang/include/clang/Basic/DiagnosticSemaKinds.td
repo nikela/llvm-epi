@@ -1526,12 +1526,12 @@ def err_messaging_class_with_direct_method : Error<
 
 // C++ declarations
 def err_static_assert_expression_is_not_constant : Error<
-  "static_assert expression is not an integral constant expression">;
+  "static assertion expression is not an integral constant expression">;
 def err_constexpr_if_condition_expression_is_not_constant : Error<
   "constexpr if condition is not a constant expression">;
-def err_static_assert_failed : Error<"static_assert failed%select{: %1|}0">;
+def err_static_assert_failed : Error<"static assertion failed%select{: %1|}0">;
 def err_static_assert_requirement_failed : Error<
-  "static_assert failed due to requirement '%0'%select{: %2|}1">;
+  "static assertion failed due to requirement '%0'%select{: %2|}1">;
 
 def warn_consteval_if_always_true : Warning<
   "consteval if is always true in an %select{unevaluated|immediate}0 context">,
@@ -3341,10 +3341,11 @@ def warn_assume_aligned_too_great
               "alignment assumed">,
       InGroup<DiagGroup<"builtin-assume-aligned-alignment">>;
 def warn_not_xl_compatible
-    : Warning<"requesting an alignment of 16 bytes or greater for struct"
-              " members is not binary compatible with IBM XL C/C++ for AIX"
-              " 16.1.0 and older">,
+    : Warning<"alignment of 16 bytes for a struct member is not binary "
+              "compatible with IBM XL C/C++ for AIX 16.1.0 or older">,
       InGroup<AIXCompat>;
+def note_misaligned_member_used_here : Note<
+    "passing byval argument %0 with potentially incompatible alignment here">;
 def warn_redeclaration_without_attribute_prev_attribute_ignored : Warning<
   "%q0 redeclared without %1 attribute: previous %1 ignored">,
   InGroup<MicrosoftInconsistentDllImport>;
@@ -5562,6 +5563,9 @@ def warn_deprecated_def : Warning<
 def warn_unavailable_def : Warning<
   "implementing unavailable method">,
   InGroup<DeprecatedImplementations>, DefaultIgnore;
+def warn_deprecated_builtin : Warning<
+  "builtin %0 is deprecated; use %1 instead">,
+  InGroup<DeprecatedBuiltins>;
 def err_unavailable : Error<"%0 is unavailable">;
 def err_property_method_unavailable :
     Error<"property access is using %0 method which is unavailable">;
