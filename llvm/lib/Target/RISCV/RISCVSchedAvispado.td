@@ -302,6 +302,20 @@ let Latency = 16, ResourceCycles = [8] in
   def : WriteRes<WriteVLD8R16, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLD8R32, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLD8R64, [AvispadoVPUMemLoad]>;
+
+  foreach nf=2-8 in {
+    foreach eew = [8, 16, 32, 64] in {
+      def : WriteRes<!cast<SchedWrite>("WriteVLSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVLSEGFF" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVLSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVSSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVLUXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVSUXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVLOXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      def : WriteRes<!cast<SchedWrite>("WriteVSOXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+    }
+  }
 }
 
 let Latency = 16, ResourceCycles = [16] in
