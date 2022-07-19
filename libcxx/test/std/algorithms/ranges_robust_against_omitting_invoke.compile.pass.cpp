@@ -136,11 +136,11 @@ void test_all() {
   in_pred(std::ranges::minmax_element, in, &Foo::binary_pred, &Bar::val);
   in_val(std::ranges::count, in, x, &Bar::val);
   in_pred(std::ranges::count_if, in, &Foo::unary_pred, &Bar::val);
-  //in2_pred(std::ranges::search, in, in2, &Foo::binary_pred, &Bar::val, &Bar::val);
+  in2_pred(std::ranges::search, in, in2, &Foo::binary_pred, &Bar::val, &Bar::val);
   // search_n
-  //std::ranges::search_n(in.begin(), in.end(), count, x, &Foo::binary_pred, &Bar::val);
-  //std::ranges::search_n(in, count, x, &Foo::binary_pred, &Bar::val);
-  //in2_pred(std::ranges::find_end, in, in2, &Foo::binary_pred, &Bar::val, &Bar::val);
+  std::ranges::search_n(in.begin(), in.end(), count, x, &Foo::binary_pred, &Bar::val);
+  std::ranges::search_n(in, count, x, &Foo::binary_pred, &Bar::val);
+  in2_pred(std::ranges::find_end, in, in2, &Foo::binary_pred, &Bar::val, &Bar::val);
   in_pred(std::ranges::is_partitioned, in, &Foo::unary_pred, &Bar::val);
   in_pred(std::ranges::is_sorted, in, &Foo::binary_pred, &Bar::val);
   in_pred(std::ranges::is_sorted_until, in, &Foo::binary_pred, &Bar::val);
@@ -201,8 +201,8 @@ void test_all() {
   // `rotate` has neither a projection nor a predicate.
   // `shuffle` has neither a projection nor a predicate.
   //in_pred(std::ranges::unique, in, &Foo::binary_pred, &Bar::val);
-  //in_pred(std::ranges::partition, in, &Foo::binary_pred, &Bar::val);
-  //in_pred(std::ranges::stable_partition, in, &Foo::binary_pred, &Bar::val);
+  in_pred(std::ranges::partition, in, &Foo::unary_pred, &Bar::val);
+  in_pred(std::ranges::stable_partition, in, &Foo::unary_pred, &Bar::val);
   in_pred(std::ranges::sort, in, &Foo::binary_pred, &Bar::val);
   in_pred(std::ranges::stable_sort, in, &Foo::binary_pred, &Bar::val);
   //in_mid_pred(std::ranges::partial_sort, in, mid, binary_pred);

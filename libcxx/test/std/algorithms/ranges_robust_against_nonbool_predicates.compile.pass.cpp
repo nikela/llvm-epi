@@ -87,7 +87,7 @@ void test_all() {
   //auto out2 = output.begin() + 1;
 
   int x = 2;
-  //int count = 1;
+  int count = 1;
 
   in_pred(std::ranges::any_of, in, unary_pred);
   in_pred(std::ranges::all_of, in, unary_pred);
@@ -123,9 +123,9 @@ void test_all() {
   in_pred(std::ranges::minmax_element, in, binary_pred);
   in_pred(std::ranges::count_if, in, unary_pred);
   //in2_pred(std::ranges::search, in, in2, binary_pred);
-  //std::ranges::search_n(in.begin(), in.end(), count, x, binary_pred);
-  //std::ranges::search_n(in, count, x, binary_pred);
-  //in2_pred(std::ranges::find_end, in, in2, binary_pred);
+  std::ranges::search_n(in.begin(), in.end(), count, x, binary_pred);
+  std::ranges::search_n(in, count, x, binary_pred);
+  in2_pred(std::ranges::find_end, in, in2, binary_pred);
   in_pred(std::ranges::is_partitioned, in, unary_pred);
   in_pred(std::ranges::is_sorted, in, binary_pred);
   in_pred(std::ranges::is_sorted_until, in, binary_pred);
@@ -156,8 +156,8 @@ void test_all() {
   in2_out_pred(std::ranges::set_union, in, in2, out, binary_pred);
   in_pred(std::ranges::remove_if, in, unary_pred);
   //in_pred(std::ranges::unique, in, binary_pred);
-  //in_pred(std::ranges::partition, in, binary_pred);
-  //in_pred(std::ranges::stable_partition, in, binary_pred);
+  in_pred(std::ranges::partition, in, unary_pred);
+  in_pred(std::ranges::stable_partition, in, unary_pred);
   in_pred(std::ranges::sort, in, binary_pred);
   in_pred(std::ranges::stable_sort, in, binary_pred);
   //in_mid_pred(std::ranges::partial_sort, in, mid, binary_pred);
