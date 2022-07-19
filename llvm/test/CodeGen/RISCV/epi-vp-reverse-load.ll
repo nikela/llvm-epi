@@ -19,6 +19,45 @@ define <vscale x 1 x double> @test_load_vp_reverse_nxv1f64(<vscale x 1 x double>
   ret <vscale x 1 x double> %dst
 }
 
+define <vscale x 1 x double> @test_load_vp_reverse_different_evl_nxv1f64(<vscale x 1 x double> *%ptr, i32 zeroext %evl1, i32 zeroext %evl2) {
+; CHECK-LABEL: test_load_vp_reverse_different_evl_nxv1f64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vle64.v v9, (a0)
+; CHECK-NEXT:    addi a0, a2, -1
+; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-NEXT:    vid.v v8
+; CHECK-NEXT:    vrsub.vx v10, v8, a0
+; CHECK-NEXT:    vrgather.vv v8, v9, v10
+; CHECK-NEXT:    ret
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
+  %v = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %ptr, <vscale x 1 x i1> %allones, i32 %evl1)
+  %dst = call <vscale x 1 x double> @llvm.experimental.vp.reverse.nxv1f64(<vscale x 1 x double> %v, <vscale x 1 x i1> %allones, i32 %evl2)
+  ret <vscale x 1 x double> %dst
+}
+
+define <vscale x 1 x double> @test_load_vp_reverse_many_uses_nxv1f64(<vscale x 1 x double> *%ptr, i32 zeroext %evl) {
+; CHECK-LABEL: test_load_vp_reverse_many_uses_nxv1f64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vle64.v v8, (a0)
+; CHECK-NEXT:    addi a0, a1, -1
+; CHECK-NEXT:    vid.v v9
+; CHECK-NEXT:    vrsub.vx v9, v9, a0
+; CHECK-NEXT:    vrgather.vv v10, v8, v9
+; CHECK-NEXT:    vfadd.vv v8, v8, v10
+; CHECK-NEXT:    ret
+  %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
+  %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
+
+  %v = call <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>* %ptr, <vscale x 1 x i1> %allones, i32 %evl)
+  %rev = call <vscale x 1 x double> @llvm.experimental.vp.reverse.nxv1f64(<vscale x 1 x double> %v, <vscale x 1 x i1> %allones, i32 %evl)
+  %z = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> %v, <vscale x 1 x double> %rev, <vscale x 1 x i1> %allones, i32 %evl)
+  ret <vscale x 1 x double> %z
+}
+
 define <vscale x 1 x double> @test_load_vp_reverse_general_mask_nxv1f64(<vscale x 1 x double> *%ptr, <vscale x 1 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_load_vp_reverse_general_mask_nxv1f64:
 ; CHECK:       # %bb.0:
@@ -89,5 +128,6 @@ define <vscale x 1 x double> @test_load_vp_inconsistent_mask_nxv1f64(<vscale x 1
 }
 
 declare <vscale x 1 x double> @llvm.vp.load.nxv1f64(<vscale x 1 x double>*, <vscale x 1 x i1>, i32)
+declare <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double>, <vscale x 1 x double>, <vscale x 1 x i1>, i32)
 declare <vscale x 1 x double> @llvm.experimental.vp.reverse.nxv1f64(<vscale x 1 x double>, <vscale x 1 x i1>, i32)
 declare <vscale x 1 x i1> @llvm.experimental.vp.reverse.nxv1i1(<vscale x 1 x i1>, <vscale x 1 x i1>, i32)
