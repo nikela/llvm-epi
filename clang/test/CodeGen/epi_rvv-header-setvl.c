@@ -6,7 +6,7 @@
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e64__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 0) #[[ATTR1:[0-9]+]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e64__epi_m1(unsigned long rvl)
@@ -17,7 +17,7 @@ unsigned long test_vsetvl__epi_e64__epi_m1(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e32__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e32__epi_m1(unsigned long rvl)
@@ -28,7 +28,7 @@ unsigned long test_vsetvl__epi_e32__epi_m1(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e16__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e16__epi_m1(unsigned long rvl)
@@ -39,7 +39,7 @@ unsigned long test_vsetvl__epi_e16__epi_m1(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e8__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e8__epi_m1(unsigned long rvl)
@@ -50,7 +50,7 @@ unsigned long test_vsetvl__epi_e8__epi_m1(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e64__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e64__epi_m2(unsigned long rvl)
@@ -61,7 +61,7 @@ unsigned long test_vsetvl__epi_e64__epi_m2(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e32__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e32__epi_m2(unsigned long rvl)
@@ -72,7 +72,7 @@ unsigned long test_vsetvl__epi_e32__epi_m2(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e16__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e16__epi_m2(unsigned long rvl)
@@ -83,7 +83,7 @@ unsigned long test_vsetvl__epi_e16__epi_m2(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e8__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e8__epi_m2(unsigned long rvl)
@@ -94,7 +94,7 @@ unsigned long test_vsetvl__epi_e8__epi_m2(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e64__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e64__epi_m4(unsigned long rvl)
@@ -105,7 +105,7 @@ unsigned long test_vsetvl__epi_e64__epi_m4(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e32__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e32__epi_m4(unsigned long rvl)
@@ -116,7 +116,7 @@ unsigned long test_vsetvl__epi_e32__epi_m4(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e16__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e16__epi_m4(unsigned long rvl)
@@ -127,7 +127,7 @@ unsigned long test_vsetvl__epi_e16__epi_m4(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e8__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e8__epi_m4(unsigned long rvl)
@@ -138,7 +138,7 @@ unsigned long test_vsetvl__epi_e8__epi_m4(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e64__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 3, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e64__epi_m8(unsigned long rvl)
@@ -149,7 +149,7 @@ unsigned long test_vsetvl__epi_e64__epi_m8(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e32__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 2, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e32__epi_m8(unsigned long rvl)
@@ -160,7 +160,7 @@ unsigned long test_vsetvl__epi_e32__epi_m8(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e16__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 1, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e16__epi_m8(unsigned long rvl)
@@ -171,7 +171,7 @@ unsigned long test_vsetvl__epi_e16__epi_m8(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvl__epi_e8__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvli.i64(i64 [[RVL:%.*]], i64 0, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvl__epi_e8__epi_m8(unsigned long rvl)
@@ -182,7 +182,7 @@ unsigned long test_vsetvl__epi_e8__epi_m8(unsigned long rvl)
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e64__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e64__epi_m1()
@@ -193,7 +193,7 @@ unsigned long test_vsetvlmax__epi_e64__epi_m1()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e32__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e32__epi_m1()
@@ -204,7 +204,7 @@ unsigned long test_vsetvlmax__epi_e32__epi_m1()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e16__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e16__epi_m1()
@@ -215,7 +215,7 @@ unsigned long test_vsetvlmax__epi_e16__epi_m1()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e8__epi_m1(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 0) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 0)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e8__epi_m1()
@@ -226,7 +226,7 @@ unsigned long test_vsetvlmax__epi_e8__epi_m1()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e64__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e64__epi_m2()
@@ -237,7 +237,7 @@ unsigned long test_vsetvlmax__epi_e64__epi_m2()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e32__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e32__epi_m2()
@@ -248,7 +248,7 @@ unsigned long test_vsetvlmax__epi_e32__epi_m2()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e16__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e16__epi_m2()
@@ -259,7 +259,7 @@ unsigned long test_vsetvlmax__epi_e16__epi_m2()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e8__epi_m2(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 1) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 1)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e8__epi_m2()
@@ -270,7 +270,7 @@ unsigned long test_vsetvlmax__epi_e8__epi_m2()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e64__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e64__epi_m4()
@@ -281,7 +281,7 @@ unsigned long test_vsetvlmax__epi_e64__epi_m4()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e32__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e32__epi_m4()
@@ -292,7 +292,7 @@ unsigned long test_vsetvlmax__epi_e32__epi_m4()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e16__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e16__epi_m4()
@@ -303,7 +303,7 @@ unsigned long test_vsetvlmax__epi_e16__epi_m4()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e8__epi_m4(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 2) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 2)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e8__epi_m4()
@@ -314,7 +314,7 @@ unsigned long test_vsetvlmax__epi_e8__epi_m4()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e64__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 3, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e64__epi_m8()
@@ -325,7 +325,7 @@ unsigned long test_vsetvlmax__epi_e64__epi_m8()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e32__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 2, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e32__epi_m8()
@@ -336,7 +336,7 @@ unsigned long test_vsetvlmax__epi_e32__epi_m8()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e16__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 1, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e16__epi_m8()
@@ -347,7 +347,7 @@ unsigned long test_vsetvlmax__epi_e16__epi_m8()
 
 // CHECK-O2-LABEL: @test_vsetvlmax__epi_e8__epi_m8(
 // CHECK-O2-NEXT:  entry:
-// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 3) #[[ATTR1]]
+// CHECK-O2-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.riscv.vsetvlimax.i64(i64 0, i64 3)
 // CHECK-O2-NEXT:    ret i64 [[TMP0]]
 //
 unsigned long test_vsetvlmax__epi_e8__epi_m8()

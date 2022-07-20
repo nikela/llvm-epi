@@ -28,7 +28,6 @@
 namespace llvm {
 
 class Triple;
-class FunctionPass;
 class ModulePass;
 class OptimizationRemarkEmitter;
 class Comdat;
@@ -123,8 +122,6 @@ struct InstrProfOptions {
 
   InstrProfOptions() = default;
 };
-
-ModulePass *createInstrOrderFilePass();
 
 // Insert DataFlowSanitizer (dynamic data flow analysis) instrumentation
 ModulePass *createDataFlowSanitizerLegacyPassPass(

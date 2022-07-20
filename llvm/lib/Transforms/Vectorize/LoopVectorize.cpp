@@ -93,6 +93,7 @@
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Analysis/ValueTracking.h"
 #include "llvm/Analysis/VectorUtils.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/BasicBlock.h"
@@ -497,7 +498,7 @@ public:
                                   VPValue *BlockInMask, VPValue *EVL);
 
   /// Widen a single call instruction within the innermost loop.
-  void widenCallInstruction(CallInst &I, VPValue *Def, VPUser &ArgOperands,
+  void widenCallInstruction(CallInst &CI, VPValue *Def, VPUser &ArgOperands,
                             VPTransformState &State);
   /// Widen a single call instruction within the innermost loop.
   void predicatedWidenCallInstruction(CallInst &I, VPValue *Def,
@@ -4306,24 +4307,6 @@ bool InnerLoopVectorizer::useOrderedReductions(
   return Cost->useOrderedReductions(RdxDesc);
 }
 
-/// A helper function for checking whether an integer division-related
-/// instruction may divide by zero (in which case it must be predicated if
-/// executed conditionally in the scalar code).
-/// TODO: It may be worthwhile to generalize and check isKnownNonZero().
-/// Non-zero divisors that are non compile-time constants will not be
-/// converted into multiplication, so we will still end up scalarizing
-/// the division, but can do so w/o predication.
-static bool mayDivideByZero(Instruction &I) {
-  assert((I.getOpcode() == Instruction::UDiv ||
-          I.getOpcode() == Instruction::SDiv ||
-          I.getOpcode() == Instruction::URem ||
-          I.getOpcode() == Instruction::SRem) &&
-         "Unexpected instruction");
-  Value *Divisor = I.getOperand(1);
-  auto *CInt = dyn_cast<ConstantInt>(Divisor);
-  return !CInt || CInt->isZero();
-}
-
 InnerLoopVectorizer::VPIntrinsicAndKind
 InnerLoopVectorizer::getVPIntrInstr(unsigned Opcode) {
   switch (Opcode) {
@@ -4582,29 +4565,26 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   }
 }
 
-void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
+void InnerLoopVectorizer::widenCallInstruction(CallInst &CI, VPValue *Def,
                                                VPUser &ArgOperands,
                                                VPTransformState &State) {
-  assert(!isa<DbgInfoIntrinsic>(I) &&
+  assert(!isa<DbgInfoIntrinsic>(CI) &&
          "DbgInfoIntrinsic should have been dropped during VPlan construction");
-  State.setDebugLocFromInst(&I);
-
-  Module *M = I.getParent()->getParent()->getParent();
-  auto *CI = cast<CallInst>(&I);
+  State.setDebugLocFromInst(&CI);
 
   SmallVector<Type *, 4> Tys;
-  for (Value *ArgOperand : CI->args())
+  for (Value *ArgOperand : CI.args())
     Tys.push_back(ToVectorTy(ArgOperand->getType(), VF.getKnownMinValue()));
 
-  Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
+  Intrinsic::ID ID = getVectorIntrinsicIDForCall(&CI, TLI);
 
   // The flag shows whether we use Intrinsic or a usual Call for vectorized
   // version of the instruction.
   // Is it beneficial to perform intrinsic call compared to lib call?
   bool NeedToScalarize = false;
-  InstructionCost CallCost = Cost->getVectorCallCost(CI, VF, NeedToScalarize);
+  InstructionCost CallCost = Cost->getVectorCallCost(&CI, VF, NeedToScalarize);
   InstructionCost IntrinsicCost =
-      ID ? Cost->getVectorIntrinsicCost(CI, VF) : InstructionCost::getInvalid();
+      ID ? Cost->getVectorIntrinsicCost(&CI, VF) : InstructionCost::getInvalid();
   bool UseVectorIntrinsic = ID && IntrinsicCost <= CallCost;
   assert((UseVectorIntrinsic || !NeedToScalarize) &&
          "Instruction should be scalarized elsewhere.");
@@ -4612,7 +4592,7 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
          "Either the intrinsic cost or vector call cost must be valid");
 
   for (unsigned Part = 0; Part < UF; ++Part) {
-    SmallVector<Type *, 2> TysForDecl = {CI->getType()};
+    SmallVector<Type *, 2> TysForDecl = {CI.getType()};
     SmallVector<Value *, 4> Args;
     for (auto &I : enumerate(ArgOperands.operands())) {
       // Some intrinsics have a scalar argument - don't replace it with a
@@ -4632,27 +4612,28 @@ void InnerLoopVectorizer::widenCallInstruction(CallInst &I, VPValue *Def,
     if (UseVectorIntrinsic) {
       // Use vector version of the intrinsic.
       if (VF.isVector())
-        TysForDecl[0] = VectorType::get(CI->getType()->getScalarType(), VF);
+        TysForDecl[0] = VectorType::get(CI.getType()->getScalarType(), VF);
+      Module *M = State.Builder.GetInsertBlock()->getModule();
       VectorF = Intrinsic::getDeclaration(M, ID, TysForDecl);
       assert(VectorF && "Can't retrieve vector intrinsic.");
     } else {
       // Use vector version of the function call.
-      const VFShape Shape = VFShape::get(*CI, VF, false /*HasGlobalPred*/);
+      const VFShape Shape = VFShape::get(CI, VF, false /*HasGlobalPred*/);
 #ifndef NDEBUG
-      assert(VFDatabase(*CI).getVectorizedFunction(Shape) != nullptr &&
+      assert(VFDatabase(CI).getVectorizedFunction(Shape) != nullptr &&
              "Can't create vector function.");
 #endif
-        VectorF = VFDatabase(*CI).getVectorizedFunction(Shape);
+      VectorF = VFDatabase(CI).getVectorizedFunction(Shape);
     }
       SmallVector<OperandBundleDef, 1> OpBundles;
-      CI->getOperandBundlesAsDefs(OpBundles);
+      CI.getOperandBundlesAsDefs(OpBundles);
       CallInst *V = Builder.CreateCall(VectorF, Args, OpBundles);
 
       if (isa<FPMathOperator>(V))
-        V->copyFastMathFlags(CI);
+        V->copyFastMathFlags(&CI);
 
       State.set(Def, V, Part);
-      State.addMetadata(V, &I);
+      State.addMetadata(V, &CI);
   }
 }
 
@@ -4950,9 +4931,9 @@ bool LoopVectorizationCostModel::isScalarWithPredication(
   case Instruction::SDiv:
   case Instruction::SRem:
   case Instruction::URem:
-    if (Legal->preferPredicatedVectorOps())
-      return false;
-    return mayDivideByZero(*I);
+    // TODO: We can use the loop-preheader as context point here and get
+    // context sensitive reasoning
+    return !isSafeToSpeculativelyExecute(I);
   }
   return false;
 }
@@ -9398,7 +9379,7 @@ void VPRecipeBuilder::fixHeaderPhis(VPlanPtr &Plan) {
       if (!EVLPhiRecipe) {
         EVLPhiRecipe = new VPEVLPHIRecipe();
         // See comment below.
-        R->getParent()->insert(EVLPhiRecipe, R->getParent()->getFirstNonPhi());
+        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
         EVLPhiRecipe->addOperand(getOrCreateEVL(Plan));
       }
       // This will be used later when adding the recipe
@@ -9467,8 +9448,6 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
 
   auto *Recipe = new VPReplicateRecipe(I, Plan->mapToVPValues(I->operands()),
                                        IsUniform, IsPredicated);
-  setRecipe(I, Recipe);
-  Plan->addVPValue(I, Recipe);
 
   // Find if I uses a predicated instruction. If so, it will use its scalar
   // value. Avoid hoisting the insert-element which packs the scalar value into
@@ -9487,6 +9466,8 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
   // Finalize the recipe for Instr, first if it is not predicated.
   if (!IsPredicated) {
     LLVM_DEBUG(dbgs() << "LV: Scalarizing:" << *I << "\n");
+    setRecipe(I, Recipe);
+    Plan->addVPValue(I, Recipe);
     VPBB->appendRecipe(Recipe);
     return VPBB;
   }
@@ -9497,7 +9478,7 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
                        "predicated replication.");
   VPBlockUtils::disconnectBlocks(VPBB, SingleSucc);
   // Record predicated instructions for above packing optimizations.
-  VPBlockBase *Region = createReplicateRegion(I, Recipe, Plan);
+  VPBlockBase *Region = createReplicateRegion(Recipe, Plan);
   VPBlockUtils::insertBlockAfter(Region, VPBB);
   auto *RegSucc = new VPBasicBlock();
   VPBlockUtils::insertBlockAfter(RegSucc, Region);
@@ -9505,11 +9486,12 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
   return RegSucc;
 }
 
-VPRegionBlock *VPRecipeBuilder::createReplicateRegion(
-    Instruction *Instr, VPReplicateRecipe *PredRecipe, VPlanPtr &Plan) {
+VPRegionBlock *
+VPRecipeBuilder::createReplicateRegion(VPReplicateRecipe *PredRecipe,
+                                       VPlanPtr &Plan) {
+  Instruction *Instr = PredRecipe->getUnderlyingInstr();
   // Instructions marked for predication are replicated and placed under an
   // if-then construct to prevent side-effects.
-
   // Generate recipes to compute the block mask for this region.
   VPValue *BlockInMask = createBlockInMask(Instr->getParent(), Plan);
 
@@ -9522,9 +9504,13 @@ VPRegionBlock *VPRecipeBuilder::createReplicateRegion(
                         ? nullptr
                         : new VPPredInstPHIRecipe(PredRecipe);
   if (PHIRecipe) {
-    Plan->removeVPValueFor(Instr);
+    setRecipe(Instr, PHIRecipe);
     Plan->addVPValue(Instr, PHIRecipe);
+  } else {
+    setRecipe(Instr, PredRecipe);
+    Plan->addVPValue(Instr, PredRecipe);
   }
+
   auto *Exiting = new VPBasicBlock(Twine(RegionName) + ".continue", PHIRecipe);
   auto *Pred = new VPBasicBlock(Twine(RegionName) + ".if", PredRecipe);
   VPRegionBlock *Region = new VPRegionBlock(Entry, Exiting, RegionName, true);
