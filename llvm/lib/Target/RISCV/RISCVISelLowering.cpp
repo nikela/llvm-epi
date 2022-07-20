@@ -11277,15 +11277,21 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   }
   case ISD::EXPERIMENTAL_VP_REVERSE: {
     SDValue Load = N->getOperand(0);
-    if (N->hasOneUse() && Load.getOpcode() == ISD::VP_LOAD) {
+    if (Load.getOpcode() == ISD::VP_LOAD && Load.hasOneUse()) {
       SDLoc DL(N);
       MVT XLenVT = Subtarget.getXLenVT();
       auto *VPLoad = cast<VPLoadSDNode>(Load);
+      // If the VT is not simple, bail out.
+      if (!VPLoad->getValueType(0).isSimple())
+        break;
       MVT VT = VPLoad->getSimpleValueType(0);
       if (VT.getVectorElementType() == MVT::i1) {
         // We do not have a strided_load version for masks
         break;
       }
+      // If the EVL is different, bail out.
+      if (N->getOperand(2) != VPLoad->getVectorLength())
+        break;
       SDValue Mask = VPLoad->getMask();
       if (!isOneOrOneSplat(Mask)) {
         // This requires reversing the mask, so do the optimisation only if
@@ -11313,9 +11319,12 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       SDValue Base = DAG.getNode(ISD::ADD, DL, XLenVT, VPLoad->getBasePtr(),
                                  LastElementOffset);
 
-      return DAG.getStridedLoadVP(VT, DL, VPLoad->getChain(), Base, Stride,
-                                  Mask, VPLoad->getVectorLength(),
-                                  VPLoad->getMemOperand(), VPLoad->isExpandingLoad());
+      SDValue StridedLoad = DAG.getStridedLoadVP(
+          VT, DL, VPLoad->getChain(), Base, Stride, Mask,
+          VPLoad->getVectorLength(), VPLoad->getMemOperand(),
+          VPLoad->isExpandingLoad());
+      DAG.ReplaceAllUsesOfValueWith(Load.getValue(1), StridedLoad.getValue(1));
+      return StridedLoad;
     }
 
     break;
@@ -11326,11 +11335,18 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       SDLoc DL(N);
       MVT XLenVT = Subtarget.getXLenVT();
       SDValue OrigVal = Val.getOperand(0);
-      if (OrigVal.getSimpleValueType().getVectorElementType() == MVT::i1) {
+      // If the VT is not simple, bail out.
+      if (!OrigVal.getValueType().isSimple())
+        break;
+      MVT OrigValVT = OrigVal.getSimpleValueType();
+      if (OrigValVT.getVectorElementType() == MVT::i1) {
         // We do not have a strided_store version for masks
         break;
       }
       auto *VPStore = cast<VPStoreSDNode>(N);
+      // If the EVL is different, bail out.
+      if (Val->getOperand(2) != VPStore->getVectorLength())
+        break;
       SDValue Mask = VPStore->getMask();
       if (!isOneOrOneSplat(Mask)) {
         // This requires reversing the mask, so do the optimisation only if
@@ -11359,12 +11375,15 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
       SDValue Base = DAG.getNode(ISD::ADD, DL, XLenVT, VPStore->getBasePtr(),
                                  LastElementOffset);
 
-      return DAG.getStridedStoreVP(
+      SDValue StridedStore = DAG.getStridedStoreVP(
           VPStore->getChain(), DL, OrigVal, Base, VPStore->getOffset(), Stride,
           Mask, VPStore->getVectorLength(),
           VPStore->getMemoryVT(), VPStore->getMemOperand(),
           VPStore->getAddressingMode(), VPStore->isTruncatingStore(),
           VPStore->isCompressingStore());
+      DAG.ReplaceAllUsesOfValueWith(SDValue(N, 0),
+                                    StridedStore.getValue(0));
+      return StridedStore;
     }
 
     break;
