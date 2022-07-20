@@ -1333,6 +1333,8 @@ void VPEVLPHIRecipe::print(
   O << Indent << "EVL-PHI ";
   printAsOperand(O, SlotTracker);
   O << " = evl-phi ";
+
+  printOperands(O, SlotTracker);
 }
 #endif
 

@@ -370,7 +370,6 @@ struct TypeBuilder {
       params.push_back(getCharacterLength(exprOrSym));
     else if (category == Fortran::common::TypeCategory::Derived)
       TODO(converter.getCurrentLocation(), "derived type length parameters");
-    return;
   }
   Fortran::lower::LenParameterTy
   getCharacterLength(const Fortran::semantics::Symbol &symbol) {
