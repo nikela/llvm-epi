@@ -122,12 +122,7 @@ class CompilerInvocation : public CompilerInvocationBase {
       },
   };
 
-  // FIXME: Move these to a CodeGenOpts
-  unsigned optLevel = llvm::CodeGenOpt::None;
 public:
-  bool vectorizeSLP = false;
-  bool vectorizeLoop = false;
-  bool unrollLoops = false;
   uint32_t PICLevel = 0;
   bool PIE = false;
   llvm::Reloc::Model RM = llvm::Reloc::PIC_;
@@ -143,9 +138,6 @@ public:
 
   TargetOptions &getTargetOpts() { return targetOpts; }
   const TargetOptions &getTargetOpts() const { return targetOpts; }
-
-  unsigned getOptLevel() { return optLevel; }
-  void setOptLevel(unsigned optLevel) { this->optLevel = optLevel; }
 
   CodeGenOptions &getCodeGenOpts() { return codeGenOpts; }
   const CodeGenOptions &getCodeGenOpts() const { return codeGenOpts; }

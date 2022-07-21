@@ -117,14 +117,35 @@ bool Fortran::frontend::parseDiagnosticArgs(clang::DiagnosticOptions &opts,
   return true;
 }
 
-static void parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
+static bool parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
                              llvm::opt::ArgList &args,
                              clang::DiagnosticsEngine &diags) {
-  opts.OptimizationLevel = getOptimizationLevel(args, diags);
+  unsigned numErrorsBefore = diags.getNumErrors();
+
+  unsigned optLevel = getOptimizationLevel(args, diags);
+
+  unsigned maxOptLevel = 3;
+  if (optLevel > maxOptLevel) {
+    // If the optimization level is not supported, fall back on the default
+    // optimization
+    diags.Report(clang::diag::warn_drv_optimization_value)
+        << args.getLastArg(clang::driver::options::OPT_O)->getAsString(args)
+        << "-O" << maxOptLevel;
+    optLevel = maxOptLevel;
+  }
+  opts.OptimizationLevel = optLevel;
 
   if (args.hasFlag(clang::driver::options::OPT_fdebug_pass_manager,
                    clang::driver::options::OPT_fno_debug_pass_manager, false))
     opts.DebugPassManager = 1;
+
+  opts.VectorizeLoop = args.hasArg(clang::driver::options::OPT_vectorize_loops);
+  opts.VectorizeSLP = args.hasArg(clang::driver::options::OPT_vectorize_slp);
+  opts.UnrollLoops = args.hasFlag(clang::driver::options::OPT_funroll_loops,
+                                  clang::driver::options::OPT_fno_unroll_loops,
+                                  (opts.OptimizationLevel > 1));
+
+  return diags.getNumErrors() == numErrorsBefore;
 }
 
 /// Parses all target input arguments and populates the target
@@ -538,60 +559,6 @@ static bool parseSemaArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
   return diags.getNumErrors() == numErrorsBefore;
 }
 
-// Shamelessly copied from clang.
-static unsigned getOptimizationLevel(
-    llvm::opt::ArgList &Args, clang::DiagnosticsEngine &Diags) {
-  unsigned defaultOp = llvm::CodeGenOpt::None;
-
-  if (llvm::opt::Arg *A =
-          Args.getLastArg(clang::driver::options::OPT_O_Group)) {
-    if (A->getOption().matches(clang::driver::options::OPT_O0))
-      return llvm::CodeGenOpt::None;
-
-    if (A->getOption().matches(clang::driver::options::OPT_Ofast))
-      return llvm::CodeGenOpt::Aggressive;
-
-    assert(A->getOption().matches(clang::driver::options::OPT_O));
-
-    llvm::StringRef S(A->getValue());
-    if (S == "s" || S == "z")
-      return llvm::CodeGenOpt::Default;
-
-    if (S == "g")
-      return llvm::CodeGenOpt::Less;
-
-    return clang::getLastArgIntValue(
-        Args, clang::driver::options::OPT_O, defaultOp, Diags);
-  }
-
-  return defaultOp;
-}
-
-static bool parseCodegenArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
-    clang::DiagnosticsEngine &diags) {
-  unsigned numErrorsBefore = diags.getNumErrors();
-
-  unsigned optLevel = getOptimizationLevel(args, diags);
-
-  unsigned maxOptLevel = 3;
-  if (optLevel > maxOptLevel) {
-    // If the optimization level is not supported, fall back on the default
-    // optimization
-    diags.Report(clang::diag::warn_drv_optimization_value)
-        << args.getLastArg(clang::driver::options::OPT_O)->getAsString(args)
-        << "-O" << maxOptLevel;
-    optLevel = maxOptLevel;
-  }
-  res.setOptLevel(optLevel);
-
-  res.vectorizeLoop = args.hasArg(clang::driver::options::OPT_vectorize_loops);
-  res.vectorizeSLP = args.hasArg(clang::driver::options::OPT_vectorize_slp);
-  res.unrollLoops = args.hasFlag(clang::driver::options::OPT_funroll_loops,
-      clang::driver::options::OPT_fno_unroll_loops, (optLevel > 1));
-
-  return diags.getNumErrors() == numErrorsBefore;
-}
-
 static bool parseCodeShapeArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
     clang::DiagnosticsEngine &diags) {
   unsigned numErrorsBefore = diags.getNumErrors();
@@ -755,10 +722,9 @@ bool CompilerInvocation::createFromArgs(
   success &= parseFrontendArgs(res.getFrontendOpts(), args, diags);
   parseTargetArgs(res.getTargetOpts(), args);
   parsePreprocessorArgs(res.getPreprocessorOpts(), args);
-  parseCodeGenArgs(res.getCodeGenOpts(), args, diags);
-  success &= parseSemaArgs(res, args, diags);
-  success &= parseCodegenArgs(res, args, diags);
+  success &= parseCodeGenArgs(res.getCodeGenOpts(), args, diags);
   success &= parseCodeShapeArgs(res, args, diags);
+  success &= parseSemaArgs(res, args, diags);
   success &= parseDialectArgs(res, args, diags);
   success &= parseDiagArgs(res, args, diags);
   res.frontendOpts.llvmArgs =

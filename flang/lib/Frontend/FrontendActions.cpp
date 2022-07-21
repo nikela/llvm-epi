@@ -731,14 +731,12 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   llvm::PassInstrumentationCallbacks pic;
 
   llvm::PipelineTuningOptions pto;
-  CompilerInstance &ci = this->getInstance();
-  auto &invoc = ci.getInvocation();
-  pto.SLPVectorization = invoc.vectorizeSLP;
-  pto.LoopVectorization = invoc.vectorizeLoop;
-  pto.LoopUnrolling = invoc.unrollLoops;
+  pto.SLPVectorization = opts.VectorizeSLP;
+  pto.LoopVectorization = opts.VectorizeLoop;
+  pto.LoopUnrolling = opts.UnrollLoops;
   // For historical reasons, loop interleaving is set to mirror setting for loop
   // unrolling.
-  pto.LoopInterleaving = invoc.unrollLoops;
+  pto.LoopInterleaving = opts.UnrollLoops;
 
   llvm::PrintPassOptions printPassOpts;
   printPassOpts.Indent = /*opts.DebugPassStructure*/ false;

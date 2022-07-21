@@ -19,4 +19,8 @@ CODEGENOPT(OptimizationLevel, 2, 0) ///< The -O[0-3] option specified.
 CODEGENOPT(DebugPassManager, 1, 0) ///< Prints debug information for the new
                                    ///< pass manager.
 
+CODEGENOPT(VectorizeLoop, 1, 0)
+CODEGENOPT(VectorizeSLP, 1, 0)
+CODEGENOPT(UnrollLoops, 1, 0)
+
 #undef CODEGENOPT
