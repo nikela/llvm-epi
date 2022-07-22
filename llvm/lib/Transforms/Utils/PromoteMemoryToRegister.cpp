@@ -585,31 +585,33 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
         StoresByIndex,
         std::make_pair(LoadIdx, static_cast<Instruction *>(nullptr)),
         less_first());
+    Value *ReplVal;
     if (It == StoresByIndex.begin()) {
       if (StoresByIndex.empty())
         // If there are no stores, the load takes the undef value.
-        I->replaceAllUsesWith(UndefValue::get(I->getType()));
+        ReplVal = UndefValue::get(I->getType());
       else
         // There is no store before this load, bail out (load may be affected
         // by the following stores - see main comment).
         return false;
     } else {
-      // Otherwise, there was a store before this load, the load takes its value.
-      // Note, if the load was marked as nonnull we don't want to lose that
-      // information when we erase it. So we preserve it with an assume.
-      Value *ReplVal = std::prev(It)->second->getOperand(0);
-      if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-          !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
-        addAssumeNonNull(AC, I);
-
-      // If the replacement value is the load, this must occur in unreachable
-      // code.
-      if (ReplVal == I)
-        ReplVal = PoisonValue::get(I->getType());
-
-      I->replaceAllUsesWith(ReplVal);
+      // Otherwise, there was a store before this load, the load takes its
+      // value.
+      ReplVal = std::prev(It)->second->getOperand(0);
     }
 
+    // Note, if the load was marked as nonnull we don't want to lose that
+    // information when we erase it. So we preserve it with an assume.
+    if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
+        !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
+      addAssumeNonNull(AC, I);
+
+    // If the replacement value is the load, this must occur in unreachable
+    // code.
+    if (ReplVal == I)
+      ReplVal = PoisonValue::get(I->getType());
+
+    I->replaceAllUsesWith(ReplVal);
     I->eraseFromParent();
     LBI.deleteValue(I);
   }

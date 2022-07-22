@@ -75,7 +75,8 @@ static bool callHasFP128Argument(const CallInst *CI) {
   });
 }
 
-static Value *convertStrToNumber(CallInst *CI, StringRef &Str, int64_t Base) {
+static Value *convertStrToNumber(CallInst *CI, StringRef &Str, Value *EndPtr,
+                                 int64_t Base, IRBuilderBase &B) {
   if (Base < 2 || Base > 36)
     // handle special zero base
     if (Base != 0)
@@ -96,6 +97,15 @@ static Value *convertStrToNumber(CallInst *CI, StringRef &Str, int64_t Base) {
 
   if (!isIntN(CI->getType()->getPrimitiveSizeInBits(), Result))
     return nullptr;
+
+  if (EndPtr) {
+    // Store the pointer to the end.
+    uint64_t ILen = End - nptr.c_str();
+    Value *Off = B.getInt64(ILen);
+    Value *StrBeg = CI->getArgOperand(0);
+    Value *StrEnd = B.CreateInBoundsGEP(B.getInt8Ty(), StrBeg, Off, "endptr");
+    B.CreateStore(StrEnd, EndPtr);
+  }
 
   return ConstantInt::get(CI->getType(), Result);
 }
@@ -1938,14 +1948,16 @@ Value *LibCallSimplifier::optimizePow(CallInst *Pow, IRBuilderBase &B) {
   if (Value *Sqrt = replacePowWithSqrt(Pow, B))
     return Sqrt;
 
+  // If we can approximate pow:
   // pow(x, n) -> powi(x, n) * sqrt(x) if n has exactly a 0.5 fraction
+  // pow(x, n) -> powi(x, n) if n is a constant signed integer value
   const APFloat *ExpoF;
-  if (match(Expo, m_APFloat(ExpoF)) && !ExpoF->isExactlyValue(0.5) &&
-      !ExpoF->isExactlyValue(-0.5)) {
+  if (AllowApprox && match(Expo, m_APFloat(ExpoF)) &&
+      !ExpoF->isExactlyValue(0.5) && !ExpoF->isExactlyValue(-0.5)) {
     APFloat ExpoA(abs(*ExpoF));
     APFloat ExpoI(*ExpoF);
     Value *Sqrt = nullptr;
-    if (AllowApprox && !ExpoA.isInteger()) {
+    if (!ExpoA.isInteger()) {
       APFloat Expo2 = ExpoA;
       // To check if ExpoA is an integer + 0.5, we add it to itself. If there
       // is no floating point exception and the result is an integer, then
@@ -1969,7 +1981,8 @@ Value *LibCallSimplifier::optimizePow(CallInst *Pow, IRBuilderBase &B) {
         return nullptr;
     }
 
-    // pow(x, n) -> powi(x, n) if n is a constant signed integer value
+    // 0.5 fraction is now optionally handled.
+    // Do pow -> powi for remaining integer exponent
     APSInt IntExpo(TLI->getIntSize(), /*isUnsigned=*/false);
     if (ExpoF->isInteger() &&
         ExpoF->convertToInteger(IntExpo, APFloat::rmTowardZero, &Ignored) ==
@@ -2523,7 +2536,7 @@ Value *LibCallSimplifier::optimizeAtoi(CallInst *CI, IRBuilderBase &B) {
   if (!getConstantStringInfo(CI->getArgOperand(0), Str))
     return nullptr;
 
-  return convertStrToNumber(CI, Str, 10);
+  return convertStrToNumber(CI, Str, nullptr, 10, B);
 }
 
 Value *LibCallSimplifier::optimizeStrtol(CallInst *CI, IRBuilderBase &B) {
@@ -2531,11 +2544,14 @@ Value *LibCallSimplifier::optimizeStrtol(CallInst *CI, IRBuilderBase &B) {
   if (!getConstantStringInfo(CI->getArgOperand(0), Str))
     return nullptr;
 
-  if (!isa<ConstantPointerNull>(CI->getArgOperand(1)))
+  Value *EndPtr = CI->getArgOperand(1);
+  if (isa<ConstantPointerNull>(EndPtr))
+    EndPtr = nullptr;
+  else if (!isKnownNonZero(EndPtr, DL))
     return nullptr;
 
   if (ConstantInt *CInt = dyn_cast<ConstantInt>(CI->getArgOperand(2))) {
-    return convertStrToNumber(CI, Str, CInt->getSExtValue());
+    return convertStrToNumber(CI, Str, EndPtr, CInt->getSExtValue(), B);
   }
 
   return nullptr;

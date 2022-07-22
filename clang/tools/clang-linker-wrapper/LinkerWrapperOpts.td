@@ -52,6 +52,13 @@ def print_wrapped_module : Flag<["--"], "print-wrapped-module">,
 def save_temps : Flag<["--"], "save-temps">,
   Flags<[WrapperOnlyOption]>, HelpText<"Save intermediate results">;
 
+def wrapper_time_trace_eq : Joined<["--"], "wrapper-time-trace=">,
+  Flags<[WrapperOnlyOption]>, MetaVarName<"<file>">,
+  HelpText<"Enable time-trace and write the output to <file>">;
+def wrapper_time_trace_granularity : Joined<["--"], "wrapper-time-trace-granularity=">,
+  Flags<[WrapperOnlyOption]>, MetaVarName<"<number>">,
+  HelpText<"Set the granularity of time-trace updates">;
+
 // Flags passed to the device linker.
 def arch_EQ : Joined<["--"], "arch=">,
   Flags<[DeviceOnlyOption, HelpHidden]>, MetaVarName<"<arch>">,
@@ -73,6 +80,8 @@ def separator : Flag<["--"], "">, Flags<[WrapperOnlyOption]>,
 // Arguments for the LLVM backend.
 def mllvm : Separate<["-"], "mllvm">, Flags<[WrapperOnlyOption]>,
   MetaVarName<"<arg>">, HelpText<"Arguments passed to the LLVM invocation">;
+def offload_opt_eq_minus : Joined<["--", "-"], "offload-opt=-">, Flags<[HelpHidden, WrapperOnlyOption]>,
+  HelpText<"Options passed to LLVM">;
 
 // Standard linker flags also used by the linker wrapper.
 def sysroot_EQ : Joined<["--"], "sysroot">, HelpText<"Set the system root">;

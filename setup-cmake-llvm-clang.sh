@@ -31,6 +31,11 @@ function warning()
   nice_message "WARNING" "$1"
 }
 
+function help()
+{
+  echo "Usage: $0 debug|release"
+}
+
 function run()
 {
   for i in "$@";
@@ -118,7 +123,7 @@ then
         CC="$(which gcc)"
         CXX="$(which g++)"
       else
-        error "g++ not found in the PATH but gcc was found. This usually means that your system is missing development packages"
+        die "g++ not found in the PATH but gcc was found. This usually means that your system is missing development packages"
       fi
     fi
   else
@@ -138,7 +143,7 @@ then
       CC="$(which clang)"
       CXX="$(which clang++)"
     else
-      error "clang++ not found in the PATH but clang was found. You may have to review your installation"
+      die "clang++ not found in the PATH but clang was found. You may have to review your installation"
     fi
   fi
 elif [ "${COMPILER}" = gcc ];
@@ -265,6 +270,13 @@ if [ "$1" = "debug" ];
 then
   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_BUILD_TYPE=Debug")
   info "Build in Debug mode"
+elif [ "$1" = "release" ];
+then
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_BUILD_TYPE=Release")
+  info "Build in Release mode"
+else
+  help
+  die "Please specify debug or release"
 fi
 
 if [ -d "${SRCDIR}/rv" ];

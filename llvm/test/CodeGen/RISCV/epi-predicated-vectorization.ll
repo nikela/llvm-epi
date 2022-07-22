@@ -9,32 +9,30 @@ define void @vec_add(i32 signext %N, double* noalias nocapture %c, double* noali
 ; CHECK-NEXT:  # %bb.1: # %for.body.preheader
 ; CHECK-NEXT:    lui a5, %hi(.LCPI0_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_0)(a5)
-; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    slli a0, a0, 32
-; CHECK-NEXT:    srli a6, a0, 32
+; CHECK-NEXT:    li t2, 0
 ; CHECK-NEXT:  .LBB0_2: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    slli t2, a5, 3
-; CHECK-NEXT:    add a7, a1, t2
-; CHECK-NEXT:    sub t0, a6, a5
+; CHECK-NEXT:    slli a6, t2, 3
+; CHECK-NEXT:    add a7, a1, a6
+; CHECK-NEXT:    sub t0, a0, t2
 ; CHECK-NEXT:    vsetvli t1, t0, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v8, (a7)
 ; CHECK-NEXT:    vmflt.vf v8, v8, ft0
-; CHECK-NEXT:    add a0, a2, t2
-; CHECK-NEXT:    vle64.v v9, (a0)
-; CHECK-NEXT:    add a0, a3, t2
-; CHECK-NEXT:    vle64.v v10, (a0)
-; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    add a5, a2, a6
+; CHECK-NEXT:    vle64.v v9, (a5)
+; CHECK-NEXT:    add a5, a3, a6
+; CHECK-NEXT:    vle64.v v10, (a5)
+; CHECK-NEXT:    vsetvli a5, zero, e8, mf8, ta, mu
 ; CHECK-NEXT:    vmnot.m v0, v8
 ; CHECK-NEXT:    vsetvli zero, t0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v11, v9, v10, v0.t
-; CHECK-NEXT:    add a0, a4, t2
-; CHECK-NEXT:    vse64.v v11, (a0), v0.t
+; CHECK-NEXT:    add a5, a4, a6
+; CHECK-NEXT:    vse64.v v11, (a5), v0.t
 ; CHECK-NEXT:    vmv1r.v v0, v8
 ; CHECK-NEXT:    vfadd.vv v9, v9, v10, v0.t
-; CHECK-NEXT:    add a5, a5, t1
+; CHECK-NEXT:    add t2, t2, t1
 ; CHECK-NEXT:    vse64.v v9, (a7), v0.t
-; CHECK-NEXT:    bne a5, a6, .LBB0_2
+; CHECK-NEXT:    bne t2, a0, .LBB0_2
 ; CHECK-NEXT:  .LBB0_3: # %for.cond.cleanup
 ; CHECK-NEXT:    ret
 entry:

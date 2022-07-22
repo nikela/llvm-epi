@@ -161,15 +161,15 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECKVP:       vector.ph:
 ; CHECKVP-NEXT:    [[TMP7:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECKVP-NEXT:    [[TMP8:%.*]] = shl i32 [[TMP7]], 1
-; CHECKVP-NEXT:    [[TMP9:%.*]] = add i32 [[TMP8]], -1
-; CHECKVP-NEXT:    [[VECTOR_RECUR_INIT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 [[PRE_LOAD]], i32 [[TMP9]]
-; CHECKVP-NEXT:    [[TMP10:%.*]] = call i32 @llvm.vscale.i32()
-; CHECKVP-NEXT:    [[TMP11:%.*]] = shl i32 [[TMP10]], 1
+; CHECKVP-NEXT:    [[TMP9:%.*]] = call i32 @llvm.vscale.i32()
+; CHECKVP-NEXT:    [[TMP10:%.*]] = shl i32 [[TMP9]], 1
+; CHECKVP-NEXT:    [[TMP11:%.*]] = add i32 [[TMP10]], -1
+; CHECKVP-NEXT:    [[VECTOR_RECUR_INIT:%.*]] = insertelement <vscale x 2 x i32> poison, i32 [[PRE_LOAD]], i32 [[TMP11]]
 ; CHECKVP-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECKVP:       vector.body:
 ; CHECKVP-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECKVP-NEXT:    [[PREV_EVL:%.*]] = phi i32 [ [[TMP8]], [[VECTOR_PH]] ], [ [[TMP16:%.*]], [[VECTOR_BODY]] ]
 ; CHECKVP-NEXT:    [[VECTOR_RECUR:%.*]] = phi <vscale x 2 x i32> [ [[VECTOR_RECUR_INIT]], [[VECTOR_PH]] ], [ [[VP_OP_LOAD:%.*]], [[VECTOR_BODY]] ]
-; CHECKVP-NEXT:    [[PREV_EVL:%.*]] = phi i32 [ [[TMP11]], [[VECTOR_PH]] ], [ [[TMP16:%.*]], [[VECTOR_BODY]] ]
 ; CHECKVP-NEXT:    [[TMP12:%.*]] = add nuw nsw i64 [[INDEX]], 1
 ; CHECKVP-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[TMP12]]
 ; CHECKVP-NEXT:    [[TMP14:%.*]] = sub i64 [[TMP2]], [[INDEX]]
