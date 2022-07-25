@@ -7622,7 +7622,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
       if (isa<StoreInst>(&I) && isScalarWithPredication(&I, VF))
         NumPredStores++;
 
-      if (Legal->isUniformMemOp(I)) {
+      if (Legal->isUniformMemOp(I) && !Hints->isFixedVectorizationDisabled()) {
         // Lowering story for uniform memory ops is currently a bit complicated.
         // Scalarization works for everything which isn't a store with scalable
         // VF.  Fixed len VFs just scalarize and then DCE later; scalarization
@@ -7631,10 +7631,20 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         // scalable stores, we use a scatter if legal.  If not, we have no way
         // to lower (currently) and thus have to abort vectorization.
         if (isa<StoreInst>(&I) && VF.isScalable()) {
-          if (isLegalGatherOrScatter(&I, VF))
-            setWideningDecision(&I, VF, CM_GatherScatter,
-                                getGatherScatterCost(&I, VF));
-          else
+          if (isLegalGatherOrScatter(&I, VF)) {
+            InstructionCost Cost = getGatherScatterCost(&I, VF);
+            if (UseStridedAccesses && canUseStridedAccess(&I)) {
+              setWideningDecision(&I, VF, CM_Strided, Cost);
+              LLVM_DEBUG(llvm::dbgs()
+                         << "Can use strided access " << I << "\n");
+            } else {
+              if (UseStridedAccesses) {
+                LLVM_DEBUG(llvm::dbgs()
+                           << "Cannot use strided access " << I << "\n");
+              }
+              setWideningDecision(&I, VF, CM_GatherScatter, Cost);
+            }
+          } else
             // Error case, abort vectorization
             setWideningDecision(&I, VF, CM_Scalarize,
                                 InstructionCost::getInvalid());
@@ -7642,25 +7652,10 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         }
         // Load: Scalar load + broadcast
         // Store: Scalar store + isLoopInvariantStoreValue ? 0 : extract
-        if (isa<StoreInst>(&I) && VF.isScalable() &&
-            isLegalGatherOrScatter(&I, VF)) {
-          InstructionCost Cost = getGatherScatterCost(&I, VF);
-          if (UseStridedAccesses && canUseStridedAccess(&I)) {
-            setWideningDecision(&I, VF, CM_Strided, Cost);
-            LLVM_DEBUG(llvm::dbgs() << "Can use strided access " << I << "\n");
-          } else {
-            if (UseStridedAccesses) {
-              LLVM_DEBUG(llvm::dbgs()
-                         << "Cannot use strided access " << I << "\n");
-            }
-            setWideningDecision(&I, VF, CM_GatherScatter, Cost);
-          }
-        } else {
-          // TODO: Avoid replicating loads and stores instead of relying on
-          // instcombine to remove them.
+        // TODO: Avoid replicating loads and stores instead of relying on
+        // instcombine to remove them.
         setWideningDecision(&I, VF, CM_Scalarize,
                             getUniformMemOpCost(&I, VF));
-        }
         continue;
       }
 
