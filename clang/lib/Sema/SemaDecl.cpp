@@ -16223,7 +16223,10 @@ Decl *Sema::ActOnTag(Scope *S, unsigned TagSpec, TagUseKind TUK,
           ED->setIntegerTypeSourceInfo(TI);
         else
           ED->setIntegerType(QualType(EnumUnderlying.get<const Type *>(), 0));
-        ED->setPromotionType(ED->getIntegerType());
+        QualType EnumTy = ED->getIntegerType();
+        ED->setPromotionType(EnumTy->isPromotableIntegerType()
+                                 ? Context.getPromotedIntegerType(EnumTy)
+                                 : EnumTy);
       }
     } else { // struct/union
       New = RecordDecl::Create(Context, Kind, SearchDC, KWLoc, Loc, Name,
@@ -16845,8 +16848,11 @@ CreateNewDecl:
       if (TypeSourceInfo *TI = EnumUnderlying.dyn_cast<TypeSourceInfo*>())
         ED->setIntegerTypeSourceInfo(TI);
       else
-        ED->setIntegerType(QualType(EnumUnderlying.get<const Type*>(), 0));
-      ED->setPromotionType(ED->getIntegerType());
+        ED->setIntegerType(QualType(EnumUnderlying.get<const Type *>(), 0));
+      QualType EnumTy = ED->getIntegerType();
+      ED->setPromotionType(EnumTy->isPromotableIntegerType()
+                               ? Context.getPromotedIntegerType(EnumTy)
+                               : EnumTy);
       assert(ED->isComplete() && "enum with type should be complete");
     }
   } else {

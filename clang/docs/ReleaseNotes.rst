@@ -192,6 +192,8 @@ Bug Fixes
   Fixes `Issue 56310 <https://github.com/llvm/llvm-project/issues/56310>`_.
 - Clang will now look through type sugar when checking a member function is a
   move assignment operator. Fixes `Issue 56456 <https://github.com/llvm/llvm-project/issues/56456>`_.
+- Fixed a crash when a variable with a bool enum type that has no definition
+  used in comparison operators. Fixes `Issue 56560 <https://github.com/llvm/llvm-project/issues/56560>`_.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -295,6 +297,11 @@ Improvements to Clang's diagnostics
   member of the contained class.
 - Added ``-Winvalid-utf8`` which diagnoses invalid UTF-8 code unit sequences in
   comments.
+- The ``-Wint-conversion`` warning diagnostic for implicit int <-> pointer
+  conversions now defaults to an error in all C language modes. It may be
+  downgraded to a warning with ``-Wno-error=int-conversion``, or disabled
+  entirely with ``-Wno-int-conversion``.
+
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
