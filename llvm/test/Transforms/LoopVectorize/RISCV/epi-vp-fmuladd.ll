@@ -13,7 +13,7 @@ define void @axpy_ref(double %a, ptr %dx, ptr %dy, i32 %n) {
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
 ; CHECK-NEXT:    [[TMP0:%.*]] = xor i64 [[WIDE_TRIP_COUNT]], -1
-; CHECK-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP1:%.*]] = tail call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], [[TMP0]]
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[FOR_BODY_PREHEADER7:%.*]], label [[VECTOR_MEMCHECK:%.*]]
 ; CHECK:       for.body.preheader7:
@@ -34,13 +34,13 @@ define void @axpy_ref(double %a, ptr %dx, ptr %dy, i32 %n) {
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds double, ptr [[DX]], i64 [[INDEX]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
-; CHECK-NEXT:    [[TMP6:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP5]], i64 3, i64 0)
+; CHECK-NEXT:    [[TMP6:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP5]], i64 3, i64 0)
 ; CHECK-NEXT:    [[TMP7:%.*]] = trunc i64 [[TMP6]] to i32
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP4]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !0
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = tail call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP4]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !0
 ; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, ptr [[DY]], i64 [[INDEX]]
-; CHECK-NEXT:    [[VP_OP_LOAD4:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP8]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !3, !noalias !0
-; CHECK-NEXT:    [[TMP9:%.*]] = call <vscale x 1 x double> @llvm.vp.fmuladd.nxv1f64(<vscale x 1 x double> [[BROADCAST_SPLAT6]], <vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD4]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]])
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1f64.p0(<vscale x 1 x double> [[TMP9]], ptr [[TMP8]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !3, !noalias !0
+; CHECK-NEXT:    [[VP_OP_LOAD4:%.*]] = tail call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP8]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !3, !noalias !0
+; CHECK-NEXT:    [[TMP9:%.*]] = tail call <vscale x 1 x double> @llvm.vp.fmuladd.nxv1f64(<vscale x 1 x double> [[BROADCAST_SPLAT6]], <vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD4]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]])
+; CHECK-NEXT:    tail call void @llvm.vp.store.nxv1f64.p0(<vscale x 1 x double> [[TMP9]], ptr [[TMP8]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP7]]), !alias.scope !3, !noalias !0
 ; CHECK-NEXT:    [[TMP10:%.*]] = and i64 [[TMP6]], 4294967295
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP10]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]

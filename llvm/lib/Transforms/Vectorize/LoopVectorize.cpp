@@ -852,8 +852,7 @@ public:
 
   // Override this function to handle the more complex control flow around the
   // three loops.
-  std::pair<BasicBlock *, Value *>
-  createVectorizedLoopSkeleton() final override {
+  std::pair<BasicBlock *, Value *> createVectorizedLoopSkeleton() final {
     return createEpilogueVectorizedLoopSkeleton();
   }
 
@@ -889,8 +888,7 @@ public:
                                        EPI, LVL, CM, BFI, PSI, Check) {}
   /// Implements the interface for creating a vectorized skeleton using the
   /// *main loop* strategy (ie the first pass of vplan execution).
-  std::pair<BasicBlock *, Value *>
-  createEpilogueVectorizedLoopSkeleton() final override;
+  std::pair<BasicBlock *, Value *> createEpilogueVectorizedLoopSkeleton() final;
 
 protected:
   /// Emits an iteration count bypass check once for the main loop (when \p
@@ -920,8 +918,7 @@ public:
   }
   /// Implements the interface for creating a vectorized skeleton using the
   /// *epilogue loop* strategy (ie the second pass of vplan execution).
-  std::pair<BasicBlock *, Value *>
-  createEpilogueVectorizedLoopSkeleton() final override;
+  std::pair<BasicBlock *, Value *> createEpilogueVectorizedLoopSkeleton() final;
 
 protected:
   /// Emits an iteration count bypass check after the main vector loop has
@@ -1725,10 +1722,6 @@ private:
   /// convenience wrapper for the type-based getScalarizationOverhead API.
   InstructionCost getScalarizationOverhead(Instruction *I,
                                            ElementCount VF) const;
-
-  /// Returns whether the instruction is a load or store and will be a emitted
-  /// as a vector operation.
-  bool isConsecutiveLoadOrStore(Instruction *I);
 
   /// Returns true if an artificially high cost for emulated masked memrefs
   /// should be used.
@@ -8191,14 +8184,6 @@ Pass *createLoopVectorizePass(bool InterleaveOnlyWhenForced,
 }
 
 } // end namespace llvm
-
-bool LoopVectorizationCostModel::isConsecutiveLoadOrStore(Instruction *Inst) {
-  // Check if the pointer operand of a load or store instruction is
-  // consecutive.
-  if (auto *Ptr = getLoadStorePointerOperand(Inst))
-    return Legal->isConsecutivePtr(getLoadStoreType(Inst), Ptr);
-  return false;
-}
 
 void LoopVectorizationCostModel::collectValuesToIgnore() {
   // Ignore ephemeral values.

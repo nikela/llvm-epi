@@ -194,6 +194,14 @@ Bug Fixes
   move assignment operator. Fixes `Issue 56456 <https://github.com/llvm/llvm-project/issues/56456>`_.
 - Fixed a crash when a variable with a bool enum type that has no definition
   used in comparison operators. Fixes `Issue 56560 <https://github.com/llvm/llvm-project/issues/56560>`_.
+- Fix that ``if consteval`` could evaluate to ``true`` at runtime because it was incorrectly
+  constant folded. Fixes `Issue 55638 <https://github.com/llvm/llvm-project/issues/55638>`_.
+- Fixed incompatibility of Clang's ``<stdatomic.h>`` with MSVC ``<atomic>``.
+  Fixes `MSVC STL Issue 2862 <https://github.com/microsoft/STL/issues/2862>`_.
+- Empty enums and enums with a single enumerator with value zero will be
+  considered to have one positive bit in order to represent the underlying
+  value. This effects whether we consider the store of the value one to be well
+  defined.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -262,7 +270,7 @@ Improvements to Clang's diagnostics
 - Added the ``-Wgnu-line-marker`` diagnostic flag (grouped under the ``-Wgnu``
   flag) which is a portability warning about use of GNU linemarker preprocessor
   directives. Fixes `Issue 55067 <https://github.com/llvm/llvm-project/issues/55067>`_.
-- Using ``#elifdef`` and ``#elifndef`` that are incompatible with C/C++
+- Using ``#warning``, ``#elifdef`` and ``#elifndef`` that are incompatible with C/C++
   standards before C2x/C++2b are now warned via ``-pedantic``. Additionally,
   on such language mode, ``-Wpre-c2x-compat`` and ``-Wpre-c++2b-compat``
   diagnostic flags report a compatibility issue.
@@ -469,6 +477,7 @@ C2x Feature Support
   support for functions without prototypes, which no longer exist in C2x.
 - Implemented `WG14 N2841 No function declarators without prototypes <https://www9.open-std.org/jtc1/sc22/wg14/www/docs/n2841.htm>`_
   and `WG14 N2432 Remove support for function definitions with identifier lists <https://www9.open-std.org/jtc1/sc22/wg14/www/docs/n2432.pdf>`_.
+- Implemented `WG14 N2836 Identifier Syntax using Unicode Standard Annex 31 <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2836.pdf>`_.
 
 C++ Language Changes in Clang
 -----------------------------
@@ -515,10 +524,11 @@ C++2b Feature Support
 - Implemented `P0849R8: auto(x): decay-copy in the language <https://wg21.link/P0849R8>`_.
 - Implemented `P2242R3: Non-literal variables (and labels and gotos) in constexpr functions	<https://wg21.link/P2242R3>`_.
 - Implemented `LWG3659: Consider ATOMIC_FLAG_INIT undeprecation <https://wg21.link/LWG3659>`_.
-- Implemented `P2290 Delimited escape sequences <https://wg21.link/P2290R3>`_.
+- Implemented `P2290R3 Delimited escape sequences <https://wg21.link/P2290R3>`_.
   This feature is available as an extension in all C and C++ language modes.
-- Implemented `P2071 Named universal character escapes <https://wg21.link/P2290R2>`_.
+- Implemented `P2071R2 Named universal character escapes <https://wg21.link/P2290R2>`_.
   This feature is available as an extension in all C and C++ language modes.
+- Implemented `P2327R1 De-deprecating volatile compound operations <https://wg21.link/P2327R1>`_
 
 CUDA/HIP Language Changes in Clang
 ----------------------------------
@@ -660,7 +670,8 @@ clang-extdef-mapping
 libclang
 --------
 
-- ...
+- The soversion for libclang will now change for each new LLVM major release.  This matches
+  the behavior of clang <= 13.
 
 Static Analyzer
 ---------------
