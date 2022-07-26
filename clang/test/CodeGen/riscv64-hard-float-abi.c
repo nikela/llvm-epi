@@ -11,21 +11,21 @@ void pair_of_float_homogeneous(struct pair_of_float_homogeneous_t);
 
 // RISCV64-LP64-LABEL: @test_pair_of_float_homogeneous(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_homogeneous, align 4
 // RISCV64-LP64-NEXT:    call void @pair_of_float_homogeneous(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_pair_of_float_homogeneous(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_homogeneous, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_homogeneous, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @pair_of_float_homogeneous(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_pair_of_float_homogeneous(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_homogeneous, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_homogeneous, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @pair_of_float_homogeneous(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -37,21 +37,21 @@ void last_still_ok_for_homogeneous_pair(float a1, float a2, float a3, float a4, 
 
 // RISCV64-LP64-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_homogeneous, align 4
 // RISCV64-LP64-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_homogeneous, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_homogeneous, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_last_still_ok_for_homogeneous_pair(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_homogeneous, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_homogeneous, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @last_still_ok_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -63,19 +63,19 @@ void too_many_floats_1_for_homogeneous_pair(float a1, float a2, float a3, float 
 
 // RISCV64-LP64-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_homogeneous, align 4
 // RISCV64-LP64-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_homogeneous, align 4
 // RISCV64-LP64F-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_too_many_floats_1_for_homogeneous_pair(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_homogeneous_t* @a_pair_of_float_homogeneous to i64*), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_homogeneous, align 4
 // RISCV64-LP64D-NEXT:    call void @too_many_floats_1_for_homogeneous_pair(float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, float noundef 0.000000e+00, i64 [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -94,21 +94,21 @@ void pair_of_float_nesting1(struct pair_of_float_nesting1_t);
 
 // RISCV64-LP64-LABEL: @test_pair_of_float_nesting1(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_nesting1_t* @a_pair_of_float_nesting1 to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_nesting1, align 4
 // RISCV64-LP64-NEXT:    call void @pair_of_float_nesting1(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_pair_of_float_nesting1(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting1_t* @a_pair_of_float_nesting1 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting1_t* @a_pair_of_float_nesting1 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting1, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting1, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @pair_of_float_nesting1(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_pair_of_float_nesting1(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting1_t* @a_pair_of_float_nesting1 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting1_t* @a_pair_of_float_nesting1 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting1, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting1, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @pair_of_float_nesting1(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -124,21 +124,21 @@ void pair_of_float_nesting2(struct pair_of_float_nesting2_t);
 
 // RISCV64-LP64-LABEL: @test_pair_of_float_nesting2(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_nesting2_t* @a_pair_of_float_nesting2 to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_nesting2, align 4
 // RISCV64-LP64-NEXT:    call void @pair_of_float_nesting2(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_pair_of_float_nesting2(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting2_t* @a_pair_of_float_nesting2 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting2_t* @a_pair_of_float_nesting2 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting2, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting2, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @pair_of_float_nesting2(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_pair_of_float_nesting2(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting2_t* @a_pair_of_float_nesting2 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting2_t* @a_pair_of_float_nesting2 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting2, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting2, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @pair_of_float_nesting2(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -164,21 +164,21 @@ void pair_of_float_nesting4(struct pair_of_float_nesting4_t);
 
 // RISCV64-LP64-LABEL: @test_pair_of_float_nesting4(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_nesting4_t* @a_pair_of_float_nesting4 to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_nesting4, align 4
 // RISCV64-LP64-NEXT:    call void @pair_of_float_nesting4(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_pair_of_float_nesting4(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting4_t* @a_pair_of_float_nesting4 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting4_t* @a_pair_of_float_nesting4 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting4, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting4, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @pair_of_float_nesting4(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_pair_of_float_nesting4(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting4_t* @a_pair_of_float_nesting4 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting4_t* @a_pair_of_float_nesting4 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting4, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting4, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @pair_of_float_nesting4(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -197,21 +197,21 @@ void pair_of_float_nesting5(struct pair_of_float_nesting5_t);
 
 // RISCV64-LP64-LABEL: @test_pair_of_float_nesting5(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.pair_of_float_nesting5_t* @a_pair_of_float_nesting5 to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_pair_of_float_nesting5, align 4
 // RISCV64-LP64-NEXT:    call void @pair_of_float_nesting5(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_pair_of_float_nesting5(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting5_t* @a_pair_of_float_nesting5 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting5_t* @a_pair_of_float_nesting5 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting5, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting5, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @pair_of_float_nesting5(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_pair_of_float_nesting5(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting5_t* @a_pair_of_float_nesting5 to { float, float }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, float }, { float, float }* bitcast (%struct.pair_of_float_nesting5_t* @a_pair_of_float_nesting5 to { float, float }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_pair_of_float_nesting5, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr getelementptr inbounds ({ float, float }, ptr @a_pair_of_float_nesting5, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @pair_of_float_nesting5(float [[TMP0]], float [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -228,20 +228,20 @@ void float_and_double(struct float_and_double_t);
 
 // RISCV64-LP64-LABEL: @test_float_and_double(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.float_and_double_t* @a_float_and_double to [2 x i64]*), align 8
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr @a_float_and_double, align 8
 // RISCV64-LP64-NEXT:    call void @float_and_double([2 x i64] [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_float_and_double(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.float_and_double_t* @a_float_and_double to [2 x i64]*), align 8
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr @a_float_and_double, align 8
 // RISCV64-LP64F-NEXT:    call void @float_and_double([2 x i64] [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_float_and_double(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, double }, { float, double }* bitcast (%struct.float_and_double_t* @a_float_and_double to { float, double }*), i32 0, i32 0), align 8
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* getelementptr inbounds ({ float, double }, { float, double }* bitcast (%struct.float_and_double_t* @a_float_and_double to { float, double }*), i32 0, i32 1), align 8
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_float_and_double, align 8
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, ptr getelementptr inbounds ({ float, double }, ptr @a_float_and_double, i32 0, i32 1), align 8
 // RISCV64-LP64D-NEXT:    call void @float_and_double(float [[TMP0]], double [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -260,20 +260,20 @@ void float_and_double_nesting1(struct float_and_double_nesting1_t);
 
 // RISCV64-LP64-LABEL: @test_float_and_double_nesting1(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.float_and_double_nesting1_t* @a_float_and_double_nesting1 to [2 x i64]*), align 8
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr @a_float_and_double_nesting1, align 8
 // RISCV64-LP64-NEXT:    call void @float_and_double_nesting1([2 x i64] [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_float_and_double_nesting1(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.float_and_double_nesting1_t* @a_float_and_double_nesting1 to [2 x i64]*), align 8
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr @a_float_and_double_nesting1, align 8
 // RISCV64-LP64F-NEXT:    call void @float_and_double_nesting1([2 x i64] [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_float_and_double_nesting1(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, double }, { float, double }* bitcast (%struct.float_and_double_nesting1_t* @a_float_and_double_nesting1 to { float, double }*), i32 0, i32 0), align 8
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* getelementptr inbounds ({ float, double }, { float, double }* bitcast (%struct.float_and_double_nesting1_t* @a_float_and_double_nesting1 to { float, double }*), i32 0, i32 1), align 8
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_float_and_double_nesting1, align 8
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, ptr getelementptr inbounds ({ float, double }, ptr @a_float_and_double_nesting1, i32 0, i32 1), align 8
 // RISCV64-LP64D-NEXT:    call void @float_and_double_nesting1(float [[TMP0]], double [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -290,21 +290,21 @@ void mixed_float_int(struct mixed_float_int_t);
 
 // RISCV64-LP64-LABEL: @test_mixed_float_int(
 // RISCV64-LP64-NEXT:  entry:
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, i64* bitcast (%struct.mixed_float_int_t* @a_mixed_float_int to i64*), align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr @a_mixed_float_int, align 4
 // RISCV64-LP64-NEXT:    call void @mixed_float_int(i64 [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_mixed_float_int(
 // RISCV64-LP64F-NEXT:  entry:
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, i32 }, { float, i32 }* bitcast (%struct.mixed_float_int_t* @a_mixed_float_int to { float, i32 }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load i32, i32* getelementptr inbounds ({ float, i32 }, { float, i32 }* bitcast (%struct.mixed_float_int_t* @a_mixed_float_int to { float, i32 }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load float, ptr @a_mixed_float_int, align 4
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load i32, ptr getelementptr inbounds ({ float, i32 }, ptr @a_mixed_float_int, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @mixed_float_int(float [[TMP0]], i32 [[TMP1]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_mixed_float_int(
 // RISCV64-LP64D-NEXT:  entry:
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, float* getelementptr inbounds ({ float, i32 }, { float, i32 }* bitcast (%struct.mixed_float_int_t* @a_mixed_float_int to { float, i32 }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load i32, i32* getelementptr inbounds ({ float, i32 }, { float, i32 }* bitcast (%struct.mixed_float_int_t* @a_mixed_float_int to { float, i32 }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load float, ptr @a_mixed_float_int, align 4
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load i32, ptr getelementptr inbounds ({ float, i32 }, ptr @a_mixed_float_int, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @mixed_float_int(float [[TMP0]], i32 [[TMP1]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -323,29 +323,29 @@ void mixed_float_short(struct mixed_float_short_t, short c);
 // RISCV64-LP64-LABEL: @test_mixed_float_short(
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load i64, i64* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to i64*), align 4
+// RISCV64-LP64-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load i64, ptr @a_mixed_float_short, align 4
 // RISCV64-LP64-NEXT:    call void @mixed_float_short(i64 [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_mixed_float_short(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64F-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 0), align 4
-// RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 1), align 4
+// RISCV64-LP64F-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr @a_mixed_float_short, align 4
+// RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = load i16, ptr getelementptr inbounds ({ float, i16 }, ptr @a_mixed_float_short, i32 0, i32 1), align 4
 // RISCV64-LP64F-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_mixed_float_short(
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64D-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 0), align 4
-// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ float, i16 }, { float, i16 }* bitcast (%struct.mixed_float_short_t* @a_mixed_float_short to { float, i16 }*), i32 0, i32 1), align 4
+// RISCV64-LP64D-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr @a_mixed_float_short, align 4
+// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, ptr getelementptr inbounds ({ float, i16 }, ptr @a_mixed_float_short, i32 0, i32 1), align 4
 // RISCV64-LP64D-NEXT:    call void @mixed_float_short(float [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -365,28 +365,28 @@ void mixed_double_short(struct mixed_double_short_t, short c);
 // RISCV64-LP64-LABEL: @test_mixed_double_short(
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to [2 x i64]*), align 8
+// RISCV64-LP64-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load [2 x i64], ptr @a_mixed_double_short, align 8
 // RISCV64-LP64-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_mixed_double_short(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64F-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to [2 x i64]*), align 8
+// RISCV64-LP64F-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load [2 x i64], ptr @a_mixed_double_short, align 8
 // RISCV64-LP64F-NEXT:    call void @mixed_double_short([2 x i64] [[TMP1]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_mixed_double_short(
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[S:%.*]] = alloca i16, align 2
-// RISCV64-LP64D-NEXT:    store i16 1, i16* [[S]], align 2
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, i16* [[S]], align 2
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* getelementptr inbounds ({ double, i16 }, { double, i16 }* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to { double, i16 }*), i32 0, i32 0), align 8
-// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, i16* getelementptr inbounds ({ double, i16 }, { double, i16 }* bitcast (%struct.mixed_double_short_t* @a_mixed_double_short to { double, i16 }*), i32 0, i32 1), align 8
+// RISCV64-LP64D-NEXT:    store i16 1, ptr [[S]], align 2
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = load i16, ptr [[S]], align 2
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, ptr @a_mixed_double_short, align 8
+// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = load i16, ptr getelementptr inbounds ({ double, i16 }, ptr @a_mixed_double_short, i32 0, i32 1), align 8
 // RISCV64-LP64D-NEXT:    call void @mixed_double_short(double [[TMP1]], i16 [[TMP2]], i16 noundef signext [[TMP0]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -402,43 +402,42 @@ void complex_float(_Complex float d);
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[D:%.*]] = alloca { float, float }, align 4
 // RISCV64-LP64-NEXT:    [[COERCE:%.*]] = alloca { float, float }, align 4
-// RISCV64-LP64-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    store float 1.250000e+00, float* [[D_REALP]], align 4
-// RISCV64-LP64-NEXT:    store float 0.000000e+00, float* [[D_IMAGP]], align 4
-// RISCV64-LP64-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[D_REAL:%.*]] = load float, float* [[D_REALP1]], align 4
-// RISCV64-LP64-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    [[D_IMAG:%.*]] = load float, float* [[D_IMAGP2]], align 4
-// RISCV64-LP64-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    store float [[D_REAL]], float* [[COERCE_REALP]], align 4
-// RISCV64-LP64-NEXT:    store float [[D_IMAG]], float* [[COERCE_IMAGP]], align 4
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = bitcast { float, float }* [[COERCE]] to i64*
-// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load i64, i64* [[TMP0]], align 4
-// RISCV64-LP64-NEXT:    call void @complex_float(i64 noundef [[TMP1]])
+// RISCV64-LP64-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    store float 1.250000e+00, ptr [[D_REALP]], align 4
+// RISCV64-LP64-NEXT:    store float 0.000000e+00, ptr [[D_IMAGP]], align 4
+// RISCV64-LP64-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[D_REAL:%.*]] = load float, ptr [[D_REALP1]], align 4
+// RISCV64-LP64-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    [[D_IMAG:%.*]] = load float, ptr [[D_IMAGP2]], align 4
+// RISCV64-LP64-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    store float [[D_REAL]], ptr [[COERCE_REALP]], align 4
+// RISCV64-LP64-NEXT:    store float [[D_IMAG]], ptr [[COERCE_IMAGP]], align 4
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load i64, ptr [[COERCE]], align 4
+// RISCV64-LP64-NEXT:    call void @complex_float(i64 noundef [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_complex_float(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[D:%.*]] = alloca { float, float }, align 4
 // RISCV64-LP64F-NEXT:    [[COERCE:%.*]] = alloca { float, float }, align 4
-// RISCV64-LP64F-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    store float 1.250000e+00, float* [[D_REALP]], align 4
-// RISCV64-LP64F-NEXT:    store float 0.000000e+00, float* [[D_IMAGP]], align 4
-// RISCV64-LP64F-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[D_REAL:%.*]] = load float, float* [[D_REALP1]], align 4
-// RISCV64-LP64F-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    [[D_IMAG:%.*]] = load float, float* [[D_IMAGP2]], align 4
-// RISCV64-LP64F-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    store float [[D_REAL]], float* [[COERCE_REALP]], align 4
-// RISCV64-LP64F-NEXT:    store float [[D_IMAG]], float* [[COERCE_IMAGP]], align 4
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, float* [[TMP0]], align 4
-// RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    [[TMP3:%.*]] = load float, float* [[TMP2]], align 4
+// RISCV64-LP64F-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    store float 1.250000e+00, ptr [[D_REALP]], align 4
+// RISCV64-LP64F-NEXT:    store float 0.000000e+00, ptr [[D_IMAGP]], align 4
+// RISCV64-LP64F-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[D_REAL:%.*]] = load float, ptr [[D_REALP1]], align 4
+// RISCV64-LP64F-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    [[D_IMAG:%.*]] = load float, ptr [[D_IMAGP2]], align 4
+// RISCV64-LP64F-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    store float [[D_REAL]], ptr [[COERCE_REALP]], align 4
+// RISCV64-LP64F-NEXT:    store float [[D_IMAG]], ptr [[COERCE_IMAGP]], align 4
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load float, ptr [[TMP0]], align 4
+// RISCV64-LP64F-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    [[TMP3:%.*]] = load float, ptr [[TMP2]], align 4
 // RISCV64-LP64F-NEXT:    call void @complex_float(float noundef [[TMP1]], float noundef [[TMP3]])
 // RISCV64-LP64F-NEXT:    ret void
 //
@@ -446,22 +445,22 @@ void complex_float(_Complex float d);
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[D:%.*]] = alloca { float, float }, align 4
 // RISCV64-LP64D-NEXT:    [[COERCE:%.*]] = alloca { float, float }, align 4
-// RISCV64-LP64D-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    store float 1.250000e+00, float* [[D_REALP]], align 4
-// RISCV64-LP64D-NEXT:    store float 0.000000e+00, float* [[D_IMAGP]], align 4
-// RISCV64-LP64D-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[D_REAL:%.*]] = load float, float* [[D_REALP1]], align 4
-// RISCV64-LP64D-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[D]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    [[D_IMAG:%.*]] = load float, float* [[D_IMAGP2]], align 4
-// RISCV64-LP64D-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    store float [[D_REAL]], float* [[COERCE_REALP]], align 4
-// RISCV64-LP64D-NEXT:    store float [[D_IMAG]], float* [[COERCE_IMAGP]], align 4
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, float* [[TMP0]], align 4
-// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load float, float* [[TMP2]], align 4
+// RISCV64-LP64D-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    store float 1.250000e+00, ptr [[D_REALP]], align 4
+// RISCV64-LP64D-NEXT:    store float 0.000000e+00, ptr [[D_IMAGP]], align 4
+// RISCV64-LP64D-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[D_REAL:%.*]] = load float, ptr [[D_REALP1]], align 4
+// RISCV64-LP64D-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { float, float }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    [[D_IMAG:%.*]] = load float, ptr [[D_IMAGP2]], align 4
+// RISCV64-LP64D-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    store float [[D_REAL]], ptr [[COERCE_REALP]], align 4
+// RISCV64-LP64D-NEXT:    store float [[D_IMAG]], ptr [[COERCE_IMAGP]], align 4
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load float, ptr [[TMP0]], align 4
+// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { float, float }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load float, ptr [[TMP2]], align 4
 // RISCV64-LP64D-NEXT:    call void @complex_float(float noundef [[TMP1]], float noundef [[TMP3]])
 // RISCV64-LP64D-NEXT:    ret void
 //
@@ -477,64 +476,62 @@ void complex_double(_Complex double d);
 // RISCV64-LP64-NEXT:  entry:
 // RISCV64-LP64-NEXT:    [[D:%.*]] = alloca { double, double }, align 8
 // RISCV64-LP64-NEXT:    [[COERCE:%.*]] = alloca { double, double }, align 8
-// RISCV64-LP64-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    store double 1.250000e+00, double* [[D_REALP]], align 8
-// RISCV64-LP64-NEXT:    store double 0.000000e+00, double* [[D_IMAGP]], align 8
-// RISCV64-LP64-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[D_REAL:%.*]] = load double, double* [[D_REALP1]], align 8
-// RISCV64-LP64-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    [[D_IMAG:%.*]] = load double, double* [[D_IMAGP2]], align 8
-// RISCV64-LP64-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64-NEXT:    store double [[D_REAL]], double* [[COERCE_REALP]], align 8
-// RISCV64-LP64-NEXT:    store double [[D_IMAG]], double* [[COERCE_IMAGP]], align 8
-// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = bitcast { double, double }* [[COERCE]] to [2 x i64]*
-// RISCV64-LP64-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* [[TMP0]], align 8
-// RISCV64-LP64-NEXT:    call void @complex_double([2 x i64] noundef [[TMP1]])
+// RISCV64-LP64-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    store double 1.250000e+00, ptr [[D_REALP]], align 8
+// RISCV64-LP64-NEXT:    store double 0.000000e+00, ptr [[D_IMAGP]], align 8
+// RISCV64-LP64-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[D_REAL:%.*]] = load double, ptr [[D_REALP1]], align 8
+// RISCV64-LP64-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    [[D_IMAG:%.*]] = load double, ptr [[D_IMAGP2]], align 8
+// RISCV64-LP64-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64-NEXT:    store double [[D_REAL]], ptr [[COERCE_REALP]], align 8
+// RISCV64-LP64-NEXT:    store double [[D_IMAG]], ptr [[COERCE_IMAGP]], align 8
+// RISCV64-LP64-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr [[COERCE]], align 8
+// RISCV64-LP64-NEXT:    call void @complex_double([2 x i64] noundef [[TMP0]])
 // RISCV64-LP64-NEXT:    ret void
 //
 // RISCV64-LP64F-LABEL: @test_complex_double(
 // RISCV64-LP64F-NEXT:  entry:
 // RISCV64-LP64F-NEXT:    [[D:%.*]] = alloca { double, double }, align 8
 // RISCV64-LP64F-NEXT:    [[COERCE:%.*]] = alloca { double, double }, align 8
-// RISCV64-LP64F-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    store double 1.250000e+00, double* [[D_REALP]], align 8
-// RISCV64-LP64F-NEXT:    store double 0.000000e+00, double* [[D_IMAGP]], align 8
-// RISCV64-LP64F-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[D_REAL:%.*]] = load double, double* [[D_REALP1]], align 8
-// RISCV64-LP64F-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    [[D_IMAG:%.*]] = load double, double* [[D_IMAGP2]], align 8
-// RISCV64-LP64F-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64F-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64F-NEXT:    store double [[D_REAL]], double* [[COERCE_REALP]], align 8
-// RISCV64-LP64F-NEXT:    store double [[D_IMAG]], double* [[COERCE_IMAGP]], align 8
-// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = bitcast { double, double }* [[COERCE]] to [2 x i64]*
-// RISCV64-LP64F-NEXT:    [[TMP1:%.*]] = load [2 x i64], [2 x i64]* [[TMP0]], align 8
-// RISCV64-LP64F-NEXT:    call void @complex_double([2 x i64] noundef [[TMP1]])
+// RISCV64-LP64F-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    store double 1.250000e+00, ptr [[D_REALP]], align 8
+// RISCV64-LP64F-NEXT:    store double 0.000000e+00, ptr [[D_IMAGP]], align 8
+// RISCV64-LP64F-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[D_REAL:%.*]] = load double, ptr [[D_REALP1]], align 8
+// RISCV64-LP64F-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    [[D_IMAG:%.*]] = load double, ptr [[D_IMAGP2]], align 8
+// RISCV64-LP64F-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64F-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64F-NEXT:    store double [[D_REAL]], ptr [[COERCE_REALP]], align 8
+// RISCV64-LP64F-NEXT:    store double [[D_IMAG]], ptr [[COERCE_IMAGP]], align 8
+// RISCV64-LP64F-NEXT:    [[TMP0:%.*]] = load [2 x i64], ptr [[COERCE]], align 8
+// RISCV64-LP64F-NEXT:    call void @complex_double([2 x i64] noundef [[TMP0]])
 // RISCV64-LP64F-NEXT:    ret void
 //
 // RISCV64-LP64D-LABEL: @test_complex_double(
 // RISCV64-LP64D-NEXT:  entry:
 // RISCV64-LP64D-NEXT:    [[D:%.*]] = alloca { double, double }, align 8
 // RISCV64-LP64D-NEXT:    [[COERCE:%.*]] = alloca { double, double }, align 8
-// RISCV64-LP64D-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    store double 1.250000e+00, double* [[D_REALP]], align 8
-// RISCV64-LP64D-NEXT:    store double 0.000000e+00, double* [[D_IMAGP]], align 8
-// RISCV64-LP64D-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[D_REAL:%.*]] = load double, double* [[D_REALP1]], align 8
-// RISCV64-LP64D-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[D]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    [[D_IMAG:%.*]] = load double, double* [[D_IMAGP2]], align 8
-// RISCV64-LP64D-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    store double [[D_REAL]], double* [[COERCE_REALP]], align 8
-// RISCV64-LP64D-NEXT:    store double [[D_IMAG]], double* [[COERCE_IMAGP]], align 8
-// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 0
-// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, double* [[TMP0]], align 8
-// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { double, double }, { double, double }* [[COERCE]], i32 0, i32 1
-// RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load double, double* [[TMP2]], align 8
+// RISCV64-LP64D-NEXT:    [[D_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[D_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    store double 1.250000e+00, ptr [[D_REALP]], align 8
+// RISCV64-LP64D-NEXT:    store double 0.000000e+00, ptr [[D_IMAGP]], align 8
+// RISCV64-LP64D-NEXT:    [[D_REALP1:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[D_REAL:%.*]] = load double, ptr [[D_REALP1]], align 8
+// RISCV64-LP64D-NEXT:    [[D_IMAGP2:%.*]] = getelementptr inbounds { double, double }, ptr [[D]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    [[D_IMAG:%.*]] = load double, ptr [[D_IMAGP2]], align 8
+// RISCV64-LP64D-NEXT:    [[COERCE_REALP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[COERCE_IMAGP:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    store double [[D_REAL]], ptr [[COERCE_REALP]], align 8
+// RISCV64-LP64D-NEXT:    store double [[D_IMAG]], ptr [[COERCE_IMAGP]], align 8
+// RISCV64-LP64D-NEXT:    [[TMP0:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 0
+// RISCV64-LP64D-NEXT:    [[TMP1:%.*]] = load double, ptr [[TMP0]], align 8
+// RISCV64-LP64D-NEXT:    [[TMP2:%.*]] = getelementptr inbounds { double, double }, ptr [[COERCE]], i32 0, i32 1
+// RISCV64-LP64D-NEXT:    [[TMP3:%.*]] = load double, ptr [[TMP2]], align 8
 // RISCV64-LP64D-NEXT:    call void @complex_double(double noundef [[TMP1]], double noundef [[TMP3]])
 // RISCV64-LP64D-NEXT:    ret void
 //

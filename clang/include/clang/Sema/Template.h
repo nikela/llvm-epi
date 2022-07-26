@@ -125,7 +125,7 @@ enum class TemplateSubstitutionKind : char {
 
     // Determine the number of substituted args at 'Depth'.
     unsigned getNumSubsitutedArgs(unsigned Depth) const {
-      assert(NumretainedOuterLevels <= Depth && Depth < getNumLevels());
+      assert(NumRetainedOuterLevels <= Depth && Depth < getNumLevels());
       return TemplateArgumentLists[getNumLevels() - Depth - 1].size();
     }
 
