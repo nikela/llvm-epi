@@ -22,8 +22,6 @@ libomptarget_say("Building EPI offloading plugin.")
 # Define the suffix for the runtime messaging dumps.
 add_definitions(-DTARGET_NAME=EPI)
 
-# include_directories(${LIBOMPTARGET_DEP_EPI_INCLUDE_DIRS})
-include_directories(${LIBOMPTARGET_DEP_LIBELF_INCLUDE_DIRS})
 
 add_library(omptarget.rtl.epi SHARED src/rtl.cpp)
 
@@ -34,6 +32,11 @@ target_link_libraries(omptarget.rtl.epi
   ${LIBOMPTARGET_DEP_EPI_DRIVER_LIBRARIES}
   ${LIBOMPTARGET_DEP_LIBELF_LIBRARIES}
   "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../exports")
+
+target_include_directories(omptarget.rtl.epi PRIVATE
+  ${LIBOMPTARGET_INCLUDE_DIR}
+  ${LIBOMPTARGET_DEP_LIBELF_INCLUDE_DIRS}
+)
 
 # Report to the parent scope that we are building a plugin for EPI.
 set(LIBOMPTARGET_SYSTEM_TARGETS "${LIBOMPTARGET_SYSTEM_TARGETS} riscv64-unknown-linux-gnu" PARENT_SCOPE)
