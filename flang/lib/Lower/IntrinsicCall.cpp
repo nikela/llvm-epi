@@ -946,14 +946,14 @@ static constexpr IntrinsicHandler handlers[]{
      /*isElemental=*/true},
     {"selected_int_kind",
      &I::genSelectedIntKind,
-     {{{"r", asValue}}},
+     {{{"scalar", asAddr}}},
      /*isElemental=*/false},
     {"selected_real_kind",
      &I::genSelectedRealKind,
-     {{{"p", asValue, handleDynamicOptional},
-       {"r", asValue, handleDynamicOptional},
-       {"radix", asValue, handleDynamicOptional}}},
-     /*isElemental*/ false},
+     {{{"precision", asAddr, handleDynamicOptional},
+       {"range", asAddr, handleDynamicOptional},
+       {"radix", asAddr, handleDynamicOptional}}},
+     /*isElemental=*/false},
     {"set_exponent", &I::genSetExponent},
     {"shifta", &I::genShift<mlir::arith::ShRSIOp>},
     {"shiftl", &I::genShift<mlir::arith::ShLIOp>},
@@ -1103,6 +1103,11 @@ static mlir::FunctionType genF64F64FuncType(mlir::MLIRContext *context) {
   return mlir::FunctionType::get(context, {t}, {t});
 }
 
+static mlir::FunctionType genF80F80FuncType(mlir::MLIRContext *context) {
+  mlir::Type t = mlir::FloatType::getF80(context);
+  return mlir::FunctionType::get(context, {t}, {t});
+}
+
 static mlir::FunctionType genF128F128FuncType(mlir::MLIRContext *context) {
   mlir::Type t = mlir::FloatType::getF128(context);
   return mlir::FunctionType::get(context, {t}, {t});
@@ -1248,10 +1253,16 @@ static constexpr MathOperation mathOperations[] = {
     // llvm.trunc behaves the same way as libm's trunc.
     {"aint", "llvm.trunc.f32", genF32F32FuncType, genLibCall},
     {"aint", "llvm.trunc.f64", genF64F64FuncType, genLibCall},
+    {"aint", "llvm.trunc.f80", genF80F80FuncType, genLibCall},
+    {"aint", "llvm.trunc.f128", genF128F128FuncType, genLibCall},
     // llvm.round behaves the same way as libm's round.
     {"anint", "llvm.round.f32", genF32F32FuncType,
      genMathOp<mlir::LLVM::RoundOp>},
     {"anint", "llvm.round.f64", genF64F64FuncType,
+     genMathOp<mlir::LLVM::RoundOp>},
+    {"anint", "llvm.round.f80", genF80F80FuncType,
+     genMathOp<mlir::LLVM::RoundOp>},
+    {"anint", "llvm.round.f128", genF128F128FuncType,
      genMathOp<mlir::LLVM::RoundOp>},
     {"atan", "atanf", genF32F32FuncType, genMathOp<mlir::math::AtanOp>},
     {"atan", "atan", genF64F64FuncType, genMathOp<mlir::math::AtanOp>},
@@ -3938,6 +3949,49 @@ IntrinsicLibrary::genScan(mlir::Type resultType,
   return readAndAddCleanUp(resultMutableBox, resultType, "SCAN");
 }
 
+// SELECTED_INT_KIND
+mlir::Value
+IntrinsicLibrary::genSelectedIntKind(mlir::Type resultType,
+                                     llvm::ArrayRef<mlir::Value> args) {
+  assert(args.size() == 1);
+
+  return builder.createConvert(
+      loc, resultType,
+      fir::runtime::genSelectedIntKind(builder, loc, fir::getBase(args[0])));
+}
+
+// SELECTED_REAL_KIND
+mlir::Value
+IntrinsicLibrary::genSelectedRealKind(mlir::Type resultType,
+                                      llvm::ArrayRef<mlir::Value> args) {
+  assert(args.size() == 3);
+
+  // Handle optional precision(P) argument
+  mlir::Value precision =
+      isStaticallyAbsent(args[0])
+          ? builder.create<fir::AbsentOp>(
+                loc, fir::ReferenceType::get(builder.getI1Type()))
+          : fir::getBase(args[0]);
+
+  // Handle optional range(R) argument
+  mlir::Value range =
+      isStaticallyAbsent(args[1])
+          ? builder.create<fir::AbsentOp>(
+                loc, fir::ReferenceType::get(builder.getI1Type()))
+          : fir::getBase(args[1]);
+
+  // Handle optional radix(RADIX) argument
+  mlir::Value radix =
+      isStaticallyAbsent(args[2])
+          ? builder.create<fir::AbsentOp>(
+                loc, fir::ReferenceType::get(builder.getI1Type()))
+          : fir::getBase(args[2]);
+
+  return builder.createConvert(
+      loc, resultType,
+      fir::runtime::genSelectedRealKind(builder, loc, precision, range, radix));
+}
+
 // SET_EXPONENT
 mlir::Value IntrinsicLibrary::genSetExponent(mlir::Type resultType,
                                              llvm::ArrayRef<mlir::Value> args) {
@@ -3947,42 +4001,6 @@ mlir::Value IntrinsicLibrary::genSetExponent(mlir::Type resultType,
       loc, resultType,
       fir::runtime::genSetExponent(builder, loc, fir::getBase(args[0]),
                                    fir::getBase(args[1])));
-}
-
-// SELECTED_INT_KIND
-mlir::Value
-IntrinsicLibrary::genSelectedIntKind(mlir::Type resultType,
-                                     llvm::ArrayRef<mlir::Value> args) {
-  assert(args.size() == 1);
-  assert(resultType == builder.getDefaultIntegerType() &&
-         "result type is not default integer kind type");
-
-  return fir::runtime::genSelectedIntKind(builder, loc, fir::getBase(args[0]));
-}
-
-// SELECTED_REAL_KIND
-mlir::Value
-IntrinsicLibrary::genSelectedRealKind(mlir::Type resultType,
-                                      llvm::ArrayRef<mlir::Value> args) {
-  assert(args.size() == 3);
-  assert(resultType == builder.getDefaultIntegerType() &&
-         "result type is not default integer kind type");
-
-  mlir::Value p = isStaticallyAbsent(args[0])
-                      ? builder.createIntegerConstant(
-                            loc, builder.getDefaultIntegerType(), 0)
-                      : fir::getBase(args[0]);
-  mlir::Value r = isStaticallyAbsent(args[1])
-                      ? builder.createIntegerConstant(
-                            loc, builder.getDefaultIntegerType(), 0)
-                      : fir::getBase(args[1]);
-  // A radix of zero means it doesn't matter.
-  mlir::Value radix = isStaticallyAbsent(args[2])
-                          ? builder.createIntegerConstant(
-                                loc, builder.getDefaultIntegerType(), 2)
-                          : fir::getBase(args[2]);
-
-  return fir::runtime::genSelectedRealKind(builder, loc, p, r, radix);
 }
 
 // SHIFTA, SHIFTL, SHIFTR

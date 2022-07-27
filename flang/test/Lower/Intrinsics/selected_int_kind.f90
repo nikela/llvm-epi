@@ -1,27 +1,65 @@
-! RUN: bbc -emit-fir %s -o - | FileCheck --check-prefixes=CHECK %s
-! RUN: flang-new -fc1 -fdefault-integer-8 -emit-fir %s -o - | FileCheck --check-prefix=CHECK-DEFAULT-KIND-8 %s
-function nonconstant(prec) result(k)
-! CHECK-LABEL: func @_QPnonconstant(
-! CHECK: %[[VAL_0:.*]] = fir.alloca i32 {bindc_name = "k", uniq_name = "_QFnonconstantEk"}
-! CHECK-NEXT: %[[VAL_1:.*]] = fir.load %[[VAL_2:.*]] : !fir.ref<i32>
-! CHECK-NEXT: %[[VAL_3:.*]] = fir.call @_FortranASelectedIntKind(%[[VAL_1]]) : (i32) -> i32
-! CHECK-NEXT: fir.store %[[VAL_3]] to %[[VAL_0]] : !fir.ref<i32>
-! CHECK-NEXT: %[[VAL_4:.*]] = fir.load %[[VAL_0]] : !fir.ref<i32>
-! CHECK-NEXT: return %[[VAL_4]] : i32
+! REQUIRES: shell
+! RUN: bbc -emit-fir %s -o - | FileCheck %s
 
-! CHECK-DEFAULT-KIND-8-LABEL: func @_QPnonconstant(
-! CHECK-DEFAULT-KIND-8: %[[VAL_0:.*]]: !fir.ref<i64> {fir.bindc_name = "prec"}) -> i64 {
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_1:.*]] = fir.alloca i64 {bindc_name = "k", uniq_name = "_QFnonconstantEk"}
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<i64>
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_3:.*]] = fir.convert %[[VAL_2]] : (i64) -> i32
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_4:.*]] = fir.call @_FortranASelectedIntKind(%[[VAL_3]]) : (i32) -> i32
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_5:.*]] = fir.convert %[[VAL_4]] : (i32) -> i64
-! CHECK-DEFAULT-KIND-8-NEXT: fir.store %[[VAL_5]] to %[[VAL_1]] : !fir.ref<i64>
-! CHECK-DEFAULT-KIND-8-NEXT: %[[VAL_6:.*]] = fir.load %[[VAL_1]] : !fir.ref<i64>
-! CHECK-DEFAULT-KIND-8-NEXT: return %[[VAL_6]] : i64
+! CHECK-LABEL: func.func @_QPselected_int_kind_test1(
+! CHECK-SAME:                                        %[[VAL_0:.*]]: !fir.ref<i8> {fir.bindc_name = "a"}) {
+! CHECK:         %[[VAL_1:.*]] = fir.alloca i8 {bindc_name = "res", uniq_name = "_QFselected_int_kind_test1Eres"}
+! CHECK:         %[[VAL_4:.*]] = arith.constant 1 : i32
+! CHECK:         %[[VAL_6:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i8>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_7:.*]] = fir.call @_FortranASelectedIntKind(%{{.*}}, %{{.*}}, %[[VAL_6]], %[[VAL_4]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         %[[VAL_8:.*]] = fir.convert %[[VAL_7]] : (i32) -> i8
+! CHECK:         fir.store %[[VAL_8]] to %[[VAL_1]] : !fir.ref<i8>
+! CHECK:         return
+! CHECK:       }
 
-  implicit none
-  integer :: prec, k
-  k = selected_int_kind(prec)
-end function nonconstant
+subroutine selected_int_kind_test1(a)
+  integer(1) :: a, res
+  res = selected_int_kind(a)
+end
 
+! CHECK-LABEL: func.func @_QPselected_int_kind_test2(
+! CHECK-SAME:                                        %[[VAL_0:.*]]: !fir.ref<i16> {fir.bindc_name = "a"}) {
+! CHECK:         %[[VAL_1:.*]] = fir.alloca i16 {bindc_name = "res", uniq_name = "_QFselected_int_kind_test2Eres"}
+! CHECK:         %[[VAL_4:.*]] = arith.constant 2 : i32
+! CHECK:         %[[VAL_6:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i16>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_7:.*]] = fir.call @_FortranASelectedIntKind(%{{.*}}, %{{.*}}, %[[VAL_6]], %[[VAL_4]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         %[[VAL_8:.*]] = fir.convert %[[VAL_7]] : (i32) -> i16
+! CHECK:         fir.store %[[VAL_8]] to %[[VAL_1]] : !fir.ref<i16>
+! CHECK:         return
+! CHECK:       }
+
+subroutine selected_int_kind_test2(a)
+  integer(2) :: a, res
+  res = selected_int_kind(a)
+end
+
+! CHECK-LABEL: func.func @_QPselected_int_kind_test4(
+! CHECK-SAME:                                        %[[VAL_0:.*]]: !fir.ref<i32> {fir.bindc_name = "a"}) {
+! CHECK:         %[[VAL_1:.*]] = fir.alloca i32 {bindc_name = "res", uniq_name = "_QFselected_int_kind_test4Eres"}
+! CHECK:         %[[VAL_4:.*]] = arith.constant 4 : i32
+! CHECK:         %[[VAL_6:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i32>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_7:.*]] = fir.call @_FortranASelectedIntKind(%{{.*}}, %{{.*}}, %[[VAL_6]], %[[VAL_4]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         fir.store %[[VAL_7]] to %[[VAL_1]] : !fir.ref<i32>
+! CHECK:         return
+! CHECK:       }
+
+subroutine selected_int_kind_test4(a)
+  integer(4) :: a, res
+  res = selected_int_kind(a)
+end
+
+! CHECK-LABEL: func.func @_QPselected_int_kind_test8(
+! CHECK-SAME:                                        %[[VAL_0:.*]]: !fir.ref<i64> {fir.bindc_name = "a"}) {
+! CHECK:         %[[VAL_1:.*]] = fir.alloca i64 {bindc_name = "res", uniq_name = "_QFselected_int_kind_test8Eres"}
+! CHECK:         %[[VAL_4:.*]] = arith.constant 8 : i32
+! CHECK:         %[[VAL_6:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i64>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_7:.*]] = fir.call @_FortranASelectedIntKind(%{{.*}}, %{{.*}}, %[[VAL_6]], %[[VAL_4]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         %[[VAL_8:.*]] = fir.convert %[[VAL_7]] : (i32) -> i64
+! CHECK:         fir.store %[[VAL_8]] to %[[VAL_1]] : !fir.ref<i64>
+! CHECK:         return
+! CHECK:       }
+
+subroutine selected_int_kind_test8(a)
+  integer(8) :: a, res
+  res = selected_int_kind(a)
+end

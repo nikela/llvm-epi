@@ -132,29 +132,6 @@ void fir::runtime::genReshape(fir::FirOpBuilder &builder, mlir::Location loc,
   builder.create<fir::CallOp>(loc, func, args);
 }
 
-mlir::Value fir::runtime::genSelectedIntKind(fir::FirOpBuilder &builder,
-                                             mlir::Location loc,
-                                             mlir::Value precision) {
-  auto selectedIntKindFunc =
-      fir::runtime::getRuntimeFunc<mkRTKey(SelectedIntKind)>(loc, builder);
-  llvm::SmallVector<mlir::Value> args = fir::runtime::createArguments(
-      builder, loc, selectedIntKindFunc.getFunctionType(), precision);
-  return builder.create<fir::CallOp>(loc, selectedIntKindFunc, args)
-      .getResult(0);
-}
-
-mlir::Value fir::runtime::genSelectedRealKind(fir::FirOpBuilder &builder,
-                                              mlir::Location loc, mlir::Value p,
-                                              mlir::Value r,
-                                              mlir::Value radix) {
-  auto selectedRealKindFunc =
-      fir::runtime::getRuntimeFunc<mkRTKey(SelectedRealKind)>(loc, builder);
-  llvm::SmallVector<mlir::Value> args = fir::runtime::createArguments(
-      builder, loc, selectedRealKindFunc.getFunctionType(), p, r, radix);
-  return builder.create<fir::CallOp>(loc, selectedRealKindFunc, args)
-      .getResult(0);
-}
-
 /// Generate call to Spread intrinsic runtime routine.
 void fir::runtime::genSpread(fir::FirOpBuilder &builder, mlir::Location loc,
                              mlir::Value resultBox, mlir::Value sourceBox,

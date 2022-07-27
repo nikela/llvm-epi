@@ -756,6 +756,27 @@ template <typename W, int P> Real<W, P> Real<W, P>::SPACING() const {
   }
 }
 
+// 16.9.171
+template <typename W, int P>
+Real<W, P> Real<W, P>::SET_EXPONENT(int expo) const {
+  if (IsNotANumber()) {
+    return *this;
+  } else if (IsInfinite()) {
+    return NotANumber();
+  } else if (IsZero()) {
+    return *this;
+  } else {
+    Real result;
+    result.Normalize(IsNegative(), expo + exponentBias - 1, GetFraction());
+    return result;
+  }
+}
+
+// 16.9.171
+template <typename W, int P> Real<W, P> Real<W, P>::FRACTION() const {
+  return SET_EXPONENT(0);
+}
+
 #ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Real<Integer<16>, 11>;
 template class Real<Integer<16>, 8>;

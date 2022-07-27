@@ -47,14 +47,6 @@ void genReshape(fir::FirOpBuilder &builder, mlir::Location loc,
                 mlir::Value resultBox, mlir::Value sourceBox,
                 mlir::Value shapeBox, mlir::Value padBox, mlir::Value orderBox);
 
-mlir::Value genSelectedIntKind(fir::FirOpBuilder &builder, mlir::Location loc,
-                               mlir::Value precision);
-
-mlir::Value genSelectedRealKind(fir::FirOpBuilder &builder, mlir::Location loc,
-                                             mlir::Value p,
-                                             mlir::Value r,
-                                             mlir::Value radix);
-
 void genSpread(fir::FirOpBuilder &builder, mlir::Location loc,
                mlir::Value resultBox, mlir::Value sourceBox, mlir::Value dim,
                mlir::Value ncopies);
