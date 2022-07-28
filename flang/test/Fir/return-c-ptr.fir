@@ -1,4 +1,4 @@
-// RUN: fir-opt %s --abstract-result-opt | FileCheck %s
+// RUN: fir-opt %s --abstract-result-on-func-opt | FileCheck %s
 
 func.func @_QPsub(%arg0: !fir.ref<!fir.type<_QM__fortran_builtinsT__builtin_c_ptr{__address:i64}>> {fir.bindc_name = "p"}) {
   %c3_i32 = arith.constant 3 : i32
