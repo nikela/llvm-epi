@@ -109,7 +109,9 @@ static SmallVector<OpFoldResult> getGenericOpLoopRange(OpBuilder &b,
   auto allShapesSizes =
       cast<LinalgOp>(op.getOperation()).createFlatListOfOperandDims(b, loc);
   AffineMap map = op.getShapesToLoopsMap();
-  return getAsOpFoldResult(applyMapToValues(b, loc, map, allShapesSizes));
+  IRRewriter rewriter(b);
+  return makeComposedFoldedMultiResultAffineApply(rewriter, loc, map,
+                                                  allShapesSizes);
 }
 
 /// Helper method to permute the list of `values` based on the `map`.
@@ -117,7 +119,7 @@ SmallVector<OpFoldResult> permuteValues(ArrayRef<OpFoldResult> values,
                                         AffineMap map) {
   assert(map.isPermutation());
   SmallVector<OpFoldResult> permutedValues(values.size());
-  for (auto position :
+  for (const auto &position :
        llvm::enumerate(llvm::map_range(map.getResults(), [](AffineExpr expr) {
          return expr.cast<AffineDimExpr>().getPosition();
        })))
@@ -334,7 +336,7 @@ DecomposeLinalgOp::matchAndRewrite(GenericOp genericOp,
   /// In the split operations, replace block arguments uses that refer to
   /// original operation to the block arguments of the newly created operation.
   unsigned origNumInputs = genericOp.getNumInputs();
-  for (auto inputBlockArg :
+  for (const auto &inputBlockArg :
        llvm::enumerate(genericOp.getBody()->getArguments())) {
     Value residualOpReplacementArg =
         residualGenericOpBody->getArgument(inputBlockArg.index());
@@ -356,7 +358,7 @@ DecomposeLinalgOp::matchAndRewrite(GenericOp genericOp,
   /// corresponding result have to be remapped to result of the generic op for
   /// the peeled operation.
   SmallVector<Value> replacements;
-  for (auto yieldValue : llvm::enumerate(yieldOp->getOperands())) {
+  for (const auto &yieldValue : llvm::enumerate(yieldOp->getOperands())) {
     OpResult opr = yieldValue.value().dyn_cast<OpResult>();
     if (!opr || opr.getOwner() != peeledScalarOperation)
       replacements.push_back(residualGenericOp.getResult(yieldValue.index()));

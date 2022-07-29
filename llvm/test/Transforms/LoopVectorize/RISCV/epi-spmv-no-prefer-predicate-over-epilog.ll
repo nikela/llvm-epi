@@ -27,15 +27,15 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    br i1 [[CMP532]], label [[FOR_BODY7_PREHEADER:%.*]], label [[FOR_END]]
 ; CHECK:       for.body7.preheader:
 ; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 [[TMP1]], [[CONV231]]
-; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP3:%.*]] = tail call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[TMP2]], [[TMP3]]
 ; CHECK-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[FOR_BODY7_PREHEADER3:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
-; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP4:%.*]] = tail call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[TMP2]], [[TMP4]]
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 [[TMP2]], [[N_MOD_VF]]
 ; CHECK-NEXT:    [[IND_END:%.*]] = add i64 [[CONV231]], [[N_VEC]]
-; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP5:%.*]] = tail call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
@@ -48,14 +48,14 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i64* [[TMP8]] to <vscale x 1 x i64>*
 ; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, <vscale x 1 x i64>* [[TMP9]], align 8
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds double, double* [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
-; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP10]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> undef)
+; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = tail call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP10]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> undef)
 ; CHECK-NEXT:    [[TMP11:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[TMP12]] = fadd fast <vscale x 1 x double> [[TMP11]], [[VEC_PHI]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP5]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP14:%.*]] = call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP12]])
+; CHECK-NEXT:    [[TMP14:%.*]] = tail call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP12]])
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END]], label [[FOR_BODY7_PREHEADER3]]
 ; CHECK:       for.body7.preheader3:

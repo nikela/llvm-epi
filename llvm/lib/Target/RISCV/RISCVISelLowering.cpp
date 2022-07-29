@@ -1773,6 +1773,25 @@ bool RISCVTargetLowering::shouldSinkOperands(
   return true;
 }
 
+bool RISCVTargetLowering::shouldScalarizeBinop(SDValue VecOp) const {
+  unsigned Opc = VecOp.getOpcode();
+
+  // Assume target opcodes can't be scalarized.
+  // TODO - do we have any exceptions?
+  if (Opc >= ISD::BUILTIN_OP_END)
+    return false;
+
+  // If the vector op is not supported, try to convert to scalar.
+  EVT VecVT = VecOp.getValueType();
+  if (!isOperationLegalOrCustomOrPromote(Opc, VecVT))
+    return true;
+
+  // If the vector op is supported, but the scalar op is not, the transform may
+  // not be worthwhile.
+  EVT ScalarVT = VecVT.getScalarType();
+  return isOperationLegalOrCustomOrPromote(Opc, ScalarVT);
+}
+
 bool RISCVTargetLowering::isOffsetFoldingLegal(
     const GlobalAddressSDNode *GA) const {
   // In order to maximise the opportunity for common subexpression elimination,
@@ -1847,18 +1866,28 @@ static void translateSetCCForBranch(const SDLoc &DL, SDValue &LHS, SDValue &RHS,
     }
   }
 
-  // Convert X > -1 to X >= 0.
-  if (CC == ISD::SETGT && isAllOnesConstant(RHS)) {
-    RHS = DAG.getConstant(0, DL, RHS.getValueType());
-    CC = ISD::SETGE;
-    return;
-  }
-  // Convert X < 1 to 0 >= X.
-  if (CC == ISD::SETLT && isOneConstant(RHS)) {
-    RHS = LHS;
-    LHS = DAG.getConstant(0, DL, RHS.getValueType());
-    CC = ISD::SETGE;
-    return;
+  if (auto *RHSC = dyn_cast<ConstantSDNode>(RHS)) {
+    int64_t C = RHSC->getSExtValue();
+    switch (CC) {
+    default: break;
+    case ISD::SETGT:
+      // Convert X > -1 to X >= 0.
+      if (C == -1) {
+        RHS = DAG.getConstant(0, DL, RHS.getValueType());
+        CC = ISD::SETGE;
+        return;
+      }
+      break;
+    case ISD::SETLT:
+      // Convert X < 1 to 0 <= X.
+      if (C == 1) {
+        RHS = LHS;
+        LHS = DAG.getConstant(0, DL, RHS.getValueType());
+        CC = ISD::SETGE;
+        return;
+      }
+      break;
+    }
   }
 
   switch (CC) {
@@ -8954,8 +8983,9 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
            "Unexpected custom legalisation");
     // Don't promote division/remainder by constant since we should expand those
     // to multiply by magic constant.
-    // FIXME: What if the expansion is disabled for minsize.
-    if (N->getOperand(1).getOpcode() == ISD::Constant)
+    AttributeList Attr = DAG.getMachineFunction().getFunction().getAttributes();
+    if (N->getOperand(1).getOpcode() == ISD::Constant &&
+        !isIntDivCheap(N->getValueType(0), Attr))
       return;
 
     // If the input is i32, use ANY_EXTEND since the W instructions don't read
@@ -12229,15 +12259,15 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
       LastSelectPseudo = &*SequenceMBBI;
       SequenceMBBI->collectDebugValues(SelectDebugValues);
       SelectDests.insert(SequenceMBBI->getOperand(0).getReg());
-    } else {
-      if (SequenceMBBI->hasUnmodeledSideEffects() ||
-          SequenceMBBI->mayLoadOrStore())
-        break;
-      if (llvm::any_of(SequenceMBBI->operands(), [&](MachineOperand &MO) {
-            return MO.isReg() && MO.isUse() && SelectDests.count(MO.getReg());
-          }))
-        break;
+      continue;
     }
+    if (SequenceMBBI->hasUnmodeledSideEffects() ||
+        SequenceMBBI->mayLoadOrStore())
+      break;
+    if (llvm::any_of(SequenceMBBI->operands(), [&](MachineOperand &MO) {
+          return MO.isReg() && MO.isUse() && SelectDests.count(MO.getReg());
+        }))
+      break;
   }
 
   const RISCVInstrInfo &TII = *Subtarget.getInstrInfo();
@@ -14645,7 +14675,8 @@ bool RISCVTargetLowering::isVScaleKnownToBeAPowerOfTwo() const {
   // FIXME: This doesn't work for zve32, but that's already broken
   // elsewhere for the same reason.
   assert(Subtarget.getRealMinVLen() >= 64 && "zve32* unsupported");
-  assert(RISCV::RVVBitsPerBlock == 64 && "RVVBitsPerBlock changed, audit needed");
+  static_assert(RISCV::RVVBitsPerBlock == 64,
+                "RVVBitsPerBlock changed, audit needed");
   return true;
 }
 
@@ -14930,6 +14961,14 @@ RISCVTargetLowering::BuildSDIVPow2(SDNode *N, const APInt &Divisor,
 
   Created.push_back(SRA.getNode());
   return DAG.getNode(ISD::SUB, DL, VT, DAG.getConstant(0, DL, VT), SRA);
+}
+
+bool RISCVTargetLowering::isIntDivCheap(EVT VT, AttributeList Attr) const {
+  // When aggressively optimizing for code size, we prefer to use a div
+  // instruction, as it is usually smaller than the alternative sequence.
+  // TODO: Add vector division?
+  bool OptSize = Attr.hasFnAttr(Attribute::MinSize);
+  return OptSize && !VT.isVector();
 }
 
 #define GET_REGISTER_MATCHER
