@@ -732,7 +732,7 @@ bool VecCloneVPPass::runImpl(
   // function vector parameters.
   removeIncompatibleAttributes(Clone);
 
-  // Everything else beyond this point deals with function instructions,
+  // Everything else beyond this point deals with function definitions,
   // so if we are dealing with a function declaration, we're done.
   if (F.isDeclaration())
     return true; // LLVM IR has been modified

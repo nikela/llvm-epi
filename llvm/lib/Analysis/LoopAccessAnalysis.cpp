@@ -2162,7 +2162,8 @@ void LoopAccessInfo::analyzeLoop(AAResults *AA, LoopInfo *LI,
         // If the function has an explicit vectorized counterpart, we can safely
         // assume that it can be vectorized.
         if (Call && !Call->isNoBuiltin() && Call->getCalledFunction() &&
-            !VFDatabase::getMappings(*Call).empty())
+            (!VFDatabase::getMappings(*Call).empty() ||
+              VFABI::isDeclareSimdFn(Call->getCalledFunction())))
           continue;
 
         auto *Ld = dyn_cast<LoadInst>(&I);
