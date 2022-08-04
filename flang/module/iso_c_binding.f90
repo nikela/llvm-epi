@@ -16,7 +16,8 @@ module iso_c_binding
     c_funptr => __builtin_c_funptr, &
     c_sizeof => sizeof, &
     c_loc => __builtin_c_loc, &
-    c_funloc => __builtin_c_funloc
+    c_funloc => __builtin_c_funloc, &
+    c_associated => __builtin_c_associated
 
   type(c_ptr), parameter :: c_null_ptr = c_ptr(0)
   type(c_funptr), parameter :: c_null_funptr = c_funptr(0)
@@ -78,42 +79,12 @@ module iso_c_binding
   character(kind=c_char, len=1), parameter :: c_horizontal_tab = achar(9)
   character(kind=c_char, len=1), parameter :: c_vertical_tab =  achar(11)
 
-  interface c_associated
-    module procedure c_associated_c_ptr
-    module procedure c_associated_c_funptr
-  end interface
-  private :: c_associated_c_ptr, c_associated_c_funptr
-
   ! gfortran extensions
   integer, parameter :: &
     c_float128 = 16, &
     c_float128_complex = c_float128
 
  contains
-
-  pure logical function c_associated_c_ptr(c_ptr_1, c_ptr_2)
-    type(c_ptr), intent(in) :: c_ptr_1
-    type(c_ptr), intent(in), optional :: c_ptr_2
-    if (c_ptr_1%__address == c_null_ptr%__address) then
-      c_associated_c_ptr = .false.
-    else if (present(c_ptr_2)) then
-      c_associated_c_ptr = c_ptr_1%__address == c_ptr_2%__address
-    else
-      c_associated_c_ptr = .true.
-    end if
-  end function c_associated_c_ptr
-
-  pure logical function c_associated_c_funptr(c_funptr_1, c_funptr_2)
-    type(c_funptr), intent(in) :: c_funptr_1
-    type(c_funptr), intent(in), optional :: c_funptr_2
-    if (c_funptr_1%__address == c_null_ptr%__address) then
-      c_associated_c_funptr = .false.
-    else if (present(c_funptr_2)) then
-      c_associated_c_funptr = c_funptr_1%__address == c_funptr_2%__address
-    else
-      c_associated_c_funptr = .true.
-    end if
-  end function c_associated_c_funptr
 
   ! TODO c_f_procpointer
 

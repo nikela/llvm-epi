@@ -445,6 +445,8 @@ struct IntrinsicLibrary {
                           mlir::FunctionType soughtFuncType);
 
   mlir::Value genIeeeIsNaN(mlir::Type, llvm::ArrayRef<mlir::Value>);
+  fir::ExtendedValue genCAssociated(mlir::Type resultType,
+                             llvm::ArrayRef<fir::ExtendedValue> args);
   void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCFunLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
@@ -725,6 +727,10 @@ static constexpr IntrinsicHandler handlers[]{
     {"ble", &I::genBitwiseCompare<mlir::arith::CmpIPredicate::ule>},
     {"blt", &I::genBitwiseCompare<mlir::arith::CmpIPredicate::ult>},
     {"btest", &I::genBtest},
+    {"c_associated",
+     &I::genCAssociated,
+     {{{"c_ptr_1", asAddr}, {"c_ptr_2", asAddr}}},
+     /*isElemental=*/false},
     {"c_f_pointer",
      &I::genCFPointer,
      {{{"cptr", asAddr}, {"fptr", asInquired}, {"shape", asAddr}}},
@@ -2141,6 +2147,46 @@ static fir::ShapeOp genShapeOp(mlir::Location loc, fir::FirOpBuilder &builder,
     idxShape.push_back(builder.createConvert(loc, idxTy, s));
   auto shapeTy = fir::ShapeType::get(builder.getContext(), idxShape.size());
   return builder.create<fir::ShapeOp>(loc, shapeTy, idxShape);
+}
+
+fir::ExtendedValue
+IntrinsicLibrary::genCAssociated(mlir::Type resultType,
+                                 llvm::ArrayRef<fir::ExtendedValue> args) {
+  // FIXME: Not sure whether we have to handle a dynamically not present
+  // argument here.
+  mlir::Value cptr1Value = fir::getBase(args[0]);
+  fir::RecordType recTy = cptr1Value.getType()
+                              .cast<fir::ReferenceType>()
+                              .getEleTy()
+                              .cast<fir::RecordType>();
+  llvm::StringRef addrFieldName = Fortran::lower::builtin::cptrFieldName;
+  mlir::Type componentTy = recTy.getType(addrFieldName);
+  mlir::Type fieldTy = fir::FieldType::get(componentTy.getContext());
+  mlir::Value addrFieldIndex = builder.create<fir::FieldIndexOp>(
+      loc, fieldTy, addrFieldName, recTy,
+      /*typeParams=*/mlir::ValueRange{} /* TODO */);
+  mlir::Value addrFieldAddr = builder.create<fir::CoordinateOp>(
+      loc, builder.getRefType(componentTy), cptr1Value, addrFieldIndex);
+  mlir::Value addrFieldValue = builder.create<fir::LoadOp>(loc, addrFieldAddr);
+
+  mlir::Value addrFieldValue2;
+  mlir::Value cmpOp;
+  if (isStaticallyAbsent(args[1])) {
+    // Create a zero here.
+    addrFieldValue2 =
+        builder.createIntegerConstant(loc, addrFieldValue.getType(), 0);
+    cmpOp = builder.create<mlir::arith::CmpIOp>(
+        loc, mlir::arith::CmpIPredicate::ne, addrFieldValue, addrFieldValue2);
+  } else {
+    mlir::Value cptr2Value = fir::getBase(args[1]);
+    addrFieldAddr = builder.create<fir::CoordinateOp>(
+        loc, builder.getRefType(componentTy), cptr2Value, addrFieldIndex);
+    addrFieldValue2 = builder.create<fir::LoadOp>(loc, addrFieldAddr);
+    cmpOp = builder.create<mlir::arith::CmpIOp>(
+        loc, mlir::arith::CmpIPredicate::eq, addrFieldValue, addrFieldValue2);
+  }
+
+  return builder.createConvert(loc, resultType, cmpOp);
 }
 
 void IntrinsicLibrary::genCFPointer(llvm::ArrayRef<fir::ExtendedValue> args) {

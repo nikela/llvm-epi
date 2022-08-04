@@ -805,6 +805,14 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
             {"back", AnyLogical, Rank::elemental, Optionality::optional},
             DefaultingKIND},
         KINDInt},
+    {"__builtin_c_associated",
+        {{"c_ptr_1", CPtrType, Rank::scalar},
+            {"c_ptr_2", CPtrType, Rank::scalar, Optionality::optional}},
+        DefaultLogical},
+    {"__builtin_c_associated",
+        {{"c_ptr_1", CFunPtrType, Rank::scalar},
+            {"c_ptr_2", CFunPtrType, Rank::scalar, Optionality::optional}},
+        DefaultLogical},
     {"__builtin_c_funloc", {{"x", Addressable, Rank::known}}, CFunPtrType},
     {"__builtin_c_loc", {{"x", Addressable, Rank::known}}, CPtrType},
     {"__builtin_ieee_is_nan", {{"x", AnyFloating}}, DefaultLogical},
@@ -1893,11 +1901,22 @@ std::optional<SpecificCall> IntrinsicInterface::Match(
       } else {
         auto category{d.typePattern.categorySet.LeastElement().value()};
         if (category == TypeCategory::Derived) {
-          // TODO: any other built-in derived types used as optional intrinsic
-          // dummies?
-          CHECK(d.typePattern.kindCode == KindCode::teamType);
-          characteristics::TypeAndShape typeAndShape{
-              GetBuiltinDerivedType(builtinsScope, "__builtin_team_type")};
+          characteristics::TypeAndShape typeAndShape = [&]() {
+            // TODO: any other built-in derived types used as optional intrinsic
+            // dummies?
+            if (d.typePattern.kindCode == KindCode::teamType) {
+              return characteristics::TypeAndShape{
+                  GetBuiltinDerivedType(builtinsScope, "__builtin_team_type")};
+            } else if (d.typePattern.kindCode == KindCode::cPtrType) {
+              return characteristics::TypeAndShape{
+                  GetBuiltinDerivedType(builtinsScope, "__builtin_c_ptr")};
+            } else if (d.typePattern.kindCode == KindCode::cFunPtrType) {
+              return characteristics::TypeAndShape{
+                  GetBuiltinDerivedType(builtinsScope, "__builtin_c_funptr")};
+            } else {
+              CHECK(false && "Unexpected derived type");
+            }
+          }();
           dummyArgs.emplace_back(std::string{d.keyword},
               characteristics::DummyDataObject{std::move(typeAndShape)});
         } else {
