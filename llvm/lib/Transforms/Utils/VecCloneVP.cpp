@@ -728,15 +728,14 @@ bool VecCloneVPPass::runImpl(
     return false;
   }
 
-  BasicBlock &EntryBlock = Clone->getEntryBlock();
-  if (isSimpleFunction(Clone, EntryBlock)) {
-    LLVM_DEBUG(dbgs() << "[VecCloneVP] Function is too simple\n");
-    return false;
-  }
-
   // Remove any incompatible attributes that happen as part of widening
   // function vector parameters.
   removeIncompatibleAttributes(Clone);
+
+  // Everything else beyond this point deals with function definitions,
+  // so if we are dealing with a function declaration, we're done.
+  if (F.isDeclaration())
+    return true; // LLVM IR has been modified
 
   IRBuilder<> Builder(Clone->getContext());
 
@@ -752,6 +751,12 @@ bool VecCloneVPPass::runImpl(
 
   const DataLayout &DL = Clone->getParent()->getDataLayout();
   DenseMap<AllocaInst *, Instruction *> AllocaMap;
+
+  BasicBlock &EntryBlock = Clone->getEntryBlock();
+  if (isSimpleFunction(Clone, EntryBlock)) {
+    LLVM_DEBUG(dbgs() << "[VecCloneVP] Function is too simple\n");
+    return false;
+  }
 
   // Split the entry block to create the one for the loop body.
   BasicBlock *LoopBlock =
