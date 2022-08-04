@@ -1104,7 +1104,8 @@ bool LoopVectorizationLegality::blockCanBePredicated(
       continue;
 
     if (auto *Call = dyn_cast<CallInst>(&I)) {
-      if (VFABI::isDeclareSimdFn(Call->getCalledFunction())) {
+      if (Call->getCalledFunction() &&
+          VFABI::isDeclareSimdFn(Call->getCalledFunction())) {
         // NOTE: we do this in order to still be able to vectorize
         // when we do not have a inbranch version, since otherwise the
         // check on whether we can tailFoldByMasking would fail.
