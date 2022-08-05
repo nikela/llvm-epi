@@ -739,13 +739,16 @@ bool LoopVectorizationLegality::canVectorizeInstrs() {
       //   * Are debug info intrinsics.
       //   * Have a mapping to an IR intrinsic.
       //   * Have a vector version available.
+      //   * Have a declare simd attribute.
       auto *CI = dyn_cast<CallInst>(&I);
 
       if (CI && !getVectorIntrinsicIDForCall(CI, TLI) &&
           !isa<DbgInfoIntrinsic>(CI) &&
           !(CI->getCalledFunction() && TLI &&
             (!VFDatabase::getMappings(*CI).empty() ||
-             isTLIScalarize(*TLI, *CI)))) {
+             isTLIScalarize(*TLI, *CI))) &&
+          !(CI->getCalledFunction() &&
+            VFABI::isDeclareSimdFn(CI->getCalledFunction()))) {
         // If the call is a recognized math libary call, it is likely that
         // we can vectorize it given loosened floating-point constraints.
         LibFunc Func;
@@ -1100,6 +1103,36 @@ bool LoopVectorizationLegality::blockCanBePredicated(
     if (isa<NoAliasScopeDeclInst>(&I))
       continue;
 
+    if (auto *Call = dyn_cast<CallInst>(&I)) {
+      if (Call->getCalledFunction() &&
+          VFABI::isDeclareSimdFn(Call->getCalledFunction())) {
+        // NOTE: we do this in order to still be able to vectorize
+        // when we do not have a inbranch version, since otherwise the
+        // check on whether we can tailFoldByMasking would fail.
+        if (!blockNeedsPredication(BB))
+          continue;
+
+        bool HasInBranchVariant = false;
+        for (const auto &Attr :
+             Call->getCalledFunction()->getAttributes().getFnAttrs()) {
+          // Check if at least an attribute starts with "_ZGVEM".
+          // FIXME: this check should be more robust.
+          if (Attr.isStringAttribute() &&
+              Attr.getKindAsString().startswith("_ZGVEM")) {
+            HasInBranchVariant = true;
+            break;
+          }
+        }
+
+        if (HasInBranchVariant) {
+          MaskedOp.insert(Call);
+          continue;
+        }
+
+        return false;
+      }
+    }
+
     // We might be able to hoist the load.
     if (I.mayReadFromMemory()) {
       auto *LI = dyn_cast<LoadInst>(&I);
@@ -1123,6 +1156,7 @@ bool LoopVectorizationLegality::blockCanBePredicated(
       MaskedOp.insert(SI);
       continue;
     }
+
     if (I.mayThrow())
       return false;
   }

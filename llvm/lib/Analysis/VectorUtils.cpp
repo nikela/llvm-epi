@@ -1524,6 +1524,34 @@ void VFABI::getVectorVariantNames(
   }
 }
 
+bool VFABI::isDeclareSimdFn(Function *Fn) {
+  for (const auto &Attr : Fn->getAttributes().getFnAttrs()) {
+    // Check if at least an attribute starting with "_ZGV" is present
+    if (!Attr.isStringAttribute())
+      continue;
+    StringRef AttrText = Attr.getKindAsString();
+    if (AttrText.startswith("_ZGV"))
+      return true;
+  }
+
+  return false;
+}
+
+Function *VFABI::findVariant(Function *F, VFShape Shape) {
+  Module *M = F->getParent();
+  for (const auto &Attr : F->getAttributes().getFnAttrs()) {
+    if (!Attr.isStringAttribute())
+      continue;
+    StringRef AttrText = Attr.getKindAsString();
+    Optional<VFInfo> VFInfo = VFABI::tryDemangleForVFABI(
+        AttrText, *M, /* RequireDeclaration */ false);
+    if (VFInfo && (VFInfo.value().Shape == Shape)) {
+      return M->getFunction(VFInfo.value().VectorName);
+    }
+  }
+  return nullptr;
+}
+
 bool VFShape::hasValidParameterList() const {
   for (unsigned Pos = 0, NumParams = Parameters.size(); Pos < NumParams;
        ++Pos) {

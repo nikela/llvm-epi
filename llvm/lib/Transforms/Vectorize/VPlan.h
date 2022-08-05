@@ -1054,6 +1054,8 @@ public:
 
 /// A recipe for predicate widening Call instructions.
 class VPPredicatedWidenCallRecipe : public VPRecipeBase, public VPValue {
+private:
+  bool IsMasked;
 
 public:
   template <typename IterT>
@@ -1061,7 +1063,13 @@ public:
                               VPValue *Mask, VPValue *EVL)
       : VPRecipeBase(VPRecipeBase::VPPredicatedWidenCallSC, CallArguments),
         VPValue(VPValue::VPVPredicatedWidenCallSC, &I, this) {
-    addOperand(Mask);
+    if (!Mask)
+      IsMasked = false;
+    else {
+      IsMasked = true;
+      addOperand(Mask);
+    }
+
     addOperand(EVL);
   }
 
@@ -1079,7 +1087,7 @@ public:
   void execute(VPTransformState &State) override;
 
   /// Return the mask used by this recipe.
-  VPValue *getMask() const { return getOperand(getNumOperands() - 2); }
+  VPValue *getMask() const { return IsMasked ? getOperand(getNumOperands() - 2) : nullptr; }
 
   /// Return the explicit vector length used by this recipe.
   VPValue *getEVL() const { return getOperand(getNumOperands() - 1); }

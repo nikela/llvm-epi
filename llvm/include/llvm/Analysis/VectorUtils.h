@@ -107,13 +107,18 @@ struct VFShape {
   // parameters are mapped to VFParamKind::Vector with \p EC
   // lanes. Specifies whether the function has a Global Predicate
   // argument via \p HasGlobalPred.
-  static VFShape get(const CallInst &CI, ElementCount EC, bool HasGlobalPred) {
+  static VFShape get(const CallInst &CI, ElementCount EC, bool HasGlobalPred,
+                     bool HasVL = false) {
     SmallVector<VFParameter, 8> Parameters;
     for (unsigned I = 0; I < CI.arg_size(); ++I)
       Parameters.push_back(VFParameter({I, VFParamKind::Vector}));
     if (HasGlobalPred)
       Parameters.push_back(
           VFParameter({CI.arg_size(), VFParamKind::GlobalPredicate}));
+    if (HasVL)
+      Parameters.push_back(VFParameter(
+          {static_cast<unsigned int>(Parameters.size()),
+          VFParamKind::GlobalVL}));
 
     return {EC, Parameters};
   }
@@ -206,6 +211,10 @@ static constexpr char const *MappingsAttrName = "vector-function-abi-variant";
 /// the presence of the attribute (see InjectTLIMappings).
 void getVectorVariantNames(const CallInst &CI,
                            SmallVectorImpl<std::string> &VariantMappings);
+
+bool isDeclareSimdFn(Function *Fn);
+
+Function * findVariant(Function *F, VFShape Shape);
 } // end namespace VFABI
 
 /// The Vector Function Database.
