@@ -227,6 +227,22 @@ public:
                                          bool IsUnsigned,
                                          TTI::TargetCostKind CostKind);
 
+  InstructionCost
+  getArithmeticInstrCost(unsigned int Opcode, Type *Ty,
+                         TTI::TargetCostKind CostKind,
+                         TTI::OperandValueKind Opd1Info = TTI::OK_AnyValue,
+                         TTI::OperandValueKind Opd2Info = TTI::OK_AnyValue,
+                         TTI::OperandValueProperties Opd1PropInfo = TTI::OP_None,
+                         TTI::OperandValueProperties Opd2PropInfo = TTI::OP_None,
+                         ArrayRef<const Value *> Args = ArrayRef<const Value *>(),
+                         const Instruction *CxtI = nullptr) {
+    if (ST->hasEPI() && isa<ScalableVectorType>(Ty) && !isTypeLegal(Ty))
+      return InstructionCost::getInvalid();
+
+    return BaseT::getArithmeticInstrCost(Opcode, Ty, CostKind, Opd1Info, Opd2Info,
+                                         Opd1PropInfo, Opd2PropInfo, Args, CxtI);
+  }
+
   InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
                                              Optional<FastMathFlags> FMF,
                                              TTI::TargetCostKind CostKind);
