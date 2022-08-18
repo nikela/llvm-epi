@@ -180,12 +180,6 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
     TTI::OperandValueProperties Opd1PropInfo,
     TTI::OperandValueProperties Opd2PropInfo, ArrayRef<const Value *> Args,
     const Instruction *CxtI) {
-  // TODO: Handle more cost kinds.
-  if (CostKind != TTI::TCK_RecipThroughput)
-    return BaseT::getArithmeticInstrCost(Opcode, Ty, CostKind, Op1Info,
-                                         Op2Info, Opd1PropInfo,
-                                         Opd2PropInfo, Args, CxtI);
-
   // vXi8 multiplications are always promoted to vXi16.
   if (Opcode == Instruction::Mul && Ty->isVectorTy() &&
       Ty->getScalarSizeInBits() == 8) {
@@ -290,6 +284,12 @@ InstructionCost X86TTIImpl::getArithmeticInstrCost(
                                   Op2Info, TargetTransformInfo::OP_None,
                                   TargetTransformInfo::OP_None);
   }
+
+  // TODO: Handle more cost kinds.
+  if (CostKind != TTI::TCK_RecipThroughput)
+    return BaseT::getArithmeticInstrCost(Opcode, Ty, CostKind, Op1Info, Op2Info,
+                                         Opd1PropInfo, Opd2PropInfo, Args,
+                                         CxtI);
 
   static const CostTblEntry GLMCostTable[] = {
     { ISD::FDIV,  MVT::f32,   18 }, // divss
@@ -2696,6 +2696,13 @@ InstructionCost X86TTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
   static const CostTblEntry SLMCostTbl[] = {
     // slm pcmpeq/pcmpgt throughput is 2
     { ISD::SETCC,   MVT::v2i64,   2 },
+    // slm pblendvb/blendvpd/blendvps throughput is 4
+    { ISD::SELECT,  MVT::v2f64,   4 }, // vblendvpd
+    { ISD::SELECT,  MVT::v4f32,   4 }, // vblendvps
+    { ISD::SELECT,  MVT::v2i64,   4 }, // pblendvb
+    { ISD::SELECT,  MVT::v8i32,   4 }, // pblendvb
+    { ISD::SELECT,  MVT::v8i16,   4 }, // pblendvb
+    { ISD::SELECT,  MVT::v16i8,   4 }, // pblendvb
   };
 
   static const CostTblEntry AVX512BWCostTbl[] = {
