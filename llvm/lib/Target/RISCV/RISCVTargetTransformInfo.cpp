@@ -405,6 +405,9 @@ InstructionCost RISCVTTIImpl::getMemoryOpCost(unsigned Opcode, Type *Ty,
     return BaseT::getMemoryOpCost(Opcode, Ty, Alignment, AddressSpace,
                                   CostKind);
 
+  if (ST->hasEPI() && !isTypeLegal(Ty))
+    return InstructionCost::getInvalid();
+
   // Taken from AArch64.
   auto LT = TLI->getTypeLegalizationCost(DL, Ty);
   if (!LT.first.isValid())
