@@ -6,7 +6,8 @@
 
 define dso_local float @powf32(float %a, float %b) nounwind {
 ; CHECK-LABEL: powf32:
-; CHECK:    call powf
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail powf@plt
 entry:
   %p = call float @llvm.pow.f32(float %a, float %b)
   ret float  %p
@@ -14,7 +15,8 @@ entry:
 
 define dso_local double @powf64(double %a, double %b) nounwind {
 ; CHECK-LABEL: powf64:
-; CHECK:    call pow
+; CHECK:       # %bb.0: # %ntry
+; CHECK-NEXT:    tail pow@plt
 ntry:
   %p = call double @llvm.pow.f64(double %a, double %b)
   ret double  %p

@@ -901,12 +901,8 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLENUNK-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V:%.*]], i32 0
 ; VLENUNK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x ptr> poison, ptr [[B:%.*]], i32 0
-; VLENUNK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x ptr> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x ptr> poison, <vscale x 2 x i32> zeroinitializer
-; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT3:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
-; VLENUNK-NEXT:    [[BROADCAST_SPLAT4:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT3]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT5:%.*]] = insertelement <vscale x 2 x ptr> poison, ptr [[B]], i32 0
-; VLENUNK-NEXT:    [[BROADCAST_SPLAT6:%.*]] = shufflevector <vscale x 2 x ptr> [[BROADCAST_SPLATINSERT5]], <vscale x 2 x ptr> poison, <vscale x 2 x i32> zeroinitializer
+; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
+; VLENUNK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; VLENUNK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; VLENUNK:       vector.body:
 ; VLENUNK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
@@ -916,8 +912,8 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLENUNK-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
 ; VLENUNK-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
 ; VLENUNK-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
-; VLENUNK-NEXT:    call void @llvm.masked.scatter.nxv2i64.nxv2p0(<vscale x 2 x i64> [[BROADCAST_SPLAT]], <vscale x 2 x ptr> [[BROADCAST_SPLAT2]], i32 8, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer))
-; VLENUNK-NEXT:    call void @llvm.masked.scatter.nxv2i64.nxv2p0(<vscale x 2 x i64> [[BROADCAST_SPLAT4]], <vscale x 2 x ptr> [[BROADCAST_SPLAT6]], i32 8, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer))
+; VLENUNK-NEXT:    store i64 [[V]], ptr [[B:%.*]], align 8
+; VLENUNK-NEXT:    store i64 [[V]], ptr [[B]], align 8
 ; VLENUNK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[TMP4]]
 ; VLENUNK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP9]]
 ; VLENUNK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
@@ -925,7 +921,7 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLENUNK-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
 ; VLENUNK-NEXT:    [[TMP14:%.*]] = mul i32 [[TMP13]], 2
 ; VLENUNK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP14]]
-; VLENUNK-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT4]], ptr [[TMP15]], align 8
+; VLENUNK-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP15]], align 8
 ; VLENUNK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
 ; VLENUNK-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 4
 ; VLENUNK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP17]]
@@ -961,12 +957,8 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLEN128-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V:%.*]], i32 0
 ; VLEN128-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x ptr> poison, ptr [[B:%.*]], i32 0
-; VLEN128-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x ptr> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x ptr> poison, <vscale x 2 x i32> zeroinitializer
-; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT3:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
-; VLEN128-NEXT:    [[BROADCAST_SPLAT4:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT3]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT5:%.*]] = insertelement <vscale x 2 x ptr> poison, ptr [[B]], i32 0
-; VLEN128-NEXT:    [[BROADCAST_SPLAT6:%.*]] = shufflevector <vscale x 2 x ptr> [[BROADCAST_SPLATINSERT5]], <vscale x 2 x ptr> poison, <vscale x 2 x i32> zeroinitializer
+; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
+; VLEN128-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; VLEN128-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; VLEN128:       vector.body:
 ; VLEN128-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
@@ -976,8 +968,8 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLEN128-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
 ; VLEN128-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
 ; VLEN128-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
-; VLEN128-NEXT:    call void @llvm.masked.scatter.nxv2i64.nxv2p0(<vscale x 2 x i64> [[BROADCAST_SPLAT]], <vscale x 2 x ptr> [[BROADCAST_SPLAT2]], i32 8, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer))
-; VLEN128-NEXT:    call void @llvm.masked.scatter.nxv2i64.nxv2p0(<vscale x 2 x i64> [[BROADCAST_SPLAT4]], <vscale x 2 x ptr> [[BROADCAST_SPLAT6]], i32 8, <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer))
+; VLEN128-NEXT:    store i64 [[V]], ptr [[B:%.*]], align 8
+; VLEN128-NEXT:    store i64 [[V]], ptr [[B]], align 8
 ; VLEN128-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[TMP4]]
 ; VLEN128-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP9]]
 ; VLEN128-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
@@ -985,7 +977,7 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; VLEN128-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
 ; VLEN128-NEXT:    [[TMP14:%.*]] = mul i32 [[TMP13]], 2
 ; VLEN128-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP14]]
-; VLEN128-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT4]], ptr [[TMP15]], align 8
+; VLEN128-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP15]], align 8
 ; VLEN128-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
 ; VLEN128-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 4
 ; VLEN128-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP17]]
@@ -1027,49 +1019,104 @@ for.end:
 define void @uniform_store_unaligned(ptr noalias nocapture %a, ptr noalias nocapture %b, i64 %v, i64 %n) {
 ; VLENUNK-LABEL: @uniform_store_unaligned(
 ; VLENUNK-NEXT:  entry:
+; VLENUNK-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; VLENUNK-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 4
+; VLENUNK-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 1024, [[TMP1]]
+; VLENUNK-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; VLENUNK:       vector.ph:
+; VLENUNK-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; VLENUNK-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 4
+; VLENUNK-NEXT:    [[N_MOD_VF:%.*]] = urem i64 1024, [[TMP3]]
+; VLENUNK-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
+; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V:%.*]], i32 0
+; VLENUNK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; VLENUNK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
+; VLENUNK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; VLENUNK-NEXT:    br label [[VECTOR_BODY:%.*]]
+; VLENUNK:       vector.body:
+; VLENUNK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; VLENUNK-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; VLENUNK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; VLENUNK-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 2
+; VLENUNK-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; VLENUNK-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; VLENUNK-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; VLENUNK-NEXT:    store i64 [[V]], ptr [[B:%.*]], align 1
+; VLENUNK-NEXT:    store i64 [[V]], ptr [[B]], align 1
+; VLENUNK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[TMP4]]
+; VLENUNK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP9]]
+; VLENUNK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
+; VLENUNK-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT]], ptr [[TMP12]], align 8
+; VLENUNK-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
+; VLENUNK-NEXT:    [[TMP14:%.*]] = mul i32 [[TMP13]], 2
+; VLENUNK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP14]]
+; VLENUNK-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP15]], align 8
+; VLENUNK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; VLENUNK-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 4
+; VLENUNK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP17]]
+; VLENUNK-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; VLENUNK-NEXT:    br i1 [[TMP18]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP16:![0-9]+]]
+; VLENUNK:       middle.block:
+; VLENUNK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
+; VLENUNK-NEXT:    br i1 [[CMP_N]], label [[FOR_END:%.*]], label [[SCALAR_PH]]
+; VLENUNK:       scalar.ph:
+; VLENUNK-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[ENTRY:%.*]] ]
 ; VLENUNK-NEXT:    br label [[FOR_BODY:%.*]]
 ; VLENUNK:       for.body:
-; VLENUNK-NEXT:    [[IV:%.*]] = phi i64 [ 0, [[ENTRY:%.*]] ], [ [[IV_NEXT:%.*]], [[FOR_BODY]] ]
-; VLENUNK-NEXT:    store i64 [[V:%.*]], ptr [[B:%.*]], align 1
-; VLENUNK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[IV]]
+; VLENUNK-NEXT:    [[IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[IV_NEXT:%.*]], [[FOR_BODY]] ]
+; VLENUNK-NEXT:    store i64 [[V]], ptr [[B]], align 1
+; VLENUNK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[IV]]
 ; VLENUNK-NEXT:    store i64 [[V]], ptr [[ARRAYIDX]], align 8
 ; VLENUNK-NEXT:    [[IV_NEXT]] = add nuw nsw i64 [[IV]], 1
 ; VLENUNK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[IV_NEXT]], 1024
-; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END:%.*]], label [[FOR_BODY]]
+; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP17:![0-9]+]]
 ; VLENUNK:       for.end:
 ; VLENUNK-NEXT:    ret void
 ;
 ; VLEN128-LABEL: @uniform_store_unaligned(
 ; VLEN128-NEXT:  entry:
-; VLEN128-NEXT:    br i1 false, label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; VLEN128-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; VLEN128-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 4
+; VLEN128-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 1024, [[TMP1]]
+; VLEN128-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; VLEN128:       vector.ph:
-; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <2 x i64> poison, i64 [[V:%.*]], i32 0
-; VLEN128-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <2 x i64> [[BROADCAST_SPLATINSERT]], <2 x i64> poison, <2 x i32> zeroinitializer
-; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <2 x i64> poison, i64 [[V]], i32 0
-; VLEN128-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <2 x i64> [[BROADCAST_SPLATINSERT1]], <2 x i64> poison, <2 x i32> zeroinitializer
+; VLEN128-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; VLEN128-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 4
+; VLEN128-NEXT:    [[N_MOD_VF:%.*]] = urem i64 1024, [[TMP3]]
+; VLEN128-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
+; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V:%.*]], i32 0
+; VLEN128-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+; VLEN128-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[V]], i32 0
+; VLEN128-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; VLEN128-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; VLEN128:       vector.body:
 ; VLEN128-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; VLEN128-NEXT:    [[TMP0:%.*]] = add i64 [[INDEX]], 0
-; VLEN128-NEXT:    [[TMP1:%.*]] = add i64 [[INDEX]], 2
+; VLEN128-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; VLEN128-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; VLEN128-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 2
+; VLEN128-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; VLEN128-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; VLEN128-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
 ; VLEN128-NEXT:    store i64 [[V]], ptr [[B:%.*]], align 1
 ; VLEN128-NEXT:    store i64 [[V]], ptr [[B]], align 1
-; VLEN128-NEXT:    store i64 [[V]], ptr [[B]], align 1
-; VLEN128-NEXT:    store i64 [[V]], ptr [[B]], align 1
-; VLEN128-NEXT:    [[TMP2:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[TMP0]]
-; VLEN128-NEXT:    [[TMP3:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP1]]
-; VLEN128-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i64, ptr [[TMP2]], i32 0
-; VLEN128-NEXT:    store <2 x i64> [[BROADCAST_SPLAT]], ptr [[TMP4]], align 8
-; VLEN128-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i64, ptr [[TMP2]], i32 2
-; VLEN128-NEXT:    store <2 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP5]], align 8
-; VLEN128-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], 4
-; VLEN128-NEXT:    [[TMP6:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
-; VLEN128-NEXT:    br i1 [[TMP6]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP16:![0-9]+]]
+; VLEN128-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A:%.*]], i64 [[TMP4]]
+; VLEN128-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP9]]
+; VLEN128-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
+; VLEN128-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT]], ptr [[TMP12]], align 8
+; VLEN128-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
+; VLEN128-NEXT:    [[TMP14:%.*]] = mul i32 [[TMP13]], 2
+; VLEN128-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP14]]
+; VLEN128-NEXT:    store <vscale x 2 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP15]], align 8
+; VLEN128-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; VLEN128-NEXT:    [[TMP17:%.*]] = mul i64 [[TMP16]], 4
+; VLEN128-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP17]]
+; VLEN128-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; VLEN128-NEXT:    br i1 [[TMP18]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP16:![0-9]+]]
 ; VLEN128:       middle.block:
-; VLEN128-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, 1024
+; VLEN128-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; VLEN128-NEXT:    br i1 [[CMP_N]], label [[FOR_END:%.*]], label [[SCALAR_PH]]
 ; VLEN128:       scalar.ph:
-; VLEN128-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ 1024, [[MIDDLE_BLOCK]] ], [ 0, [[ENTRY:%.*]] ]
+; VLEN128-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[ENTRY:%.*]] ]
 ; VLEN128-NEXT:    br label [[FOR_BODY:%.*]]
 ; VLEN128:       for.body:
 ; VLEN128-NEXT:    [[IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[IV_NEXT:%.*]], [[FOR_BODY]] ]
@@ -1137,7 +1184,7 @@ define i64 @uniform_load(ptr noalias nocapture %a, ptr noalias nocapture %b, i64
 ; VLENUNK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 4
 ; VLENUNK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP19]]
 ; VLENUNK-NEXT:    [[TMP20:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; VLENUNK-NEXT:    br i1 [[TMP20]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP16:![0-9]+]]
+; VLENUNK-NEXT:    br i1 [[TMP20]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP18:![0-9]+]]
 ; VLENUNK:       middle.block:
 ; VLENUNK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; VLENUNK-NEXT:    br i1 [[CMP_N]], label [[FOR_END:%.*]], label [[SCALAR_PH]]
@@ -1151,7 +1198,7 @@ define i64 @uniform_load(ptr noalias nocapture %a, ptr noalias nocapture %b, i64
 ; VLENUNK-NEXT:    store i64 [[V]], ptr [[ARRAYIDX]], align 8
 ; VLENUNK-NEXT:    [[IV_NEXT]] = add nuw nsw i64 [[IV]], 1
 ; VLENUNK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[IV_NEXT]], 1024
-; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP17:![0-9]+]]
+; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP19:![0-9]+]]
 ; VLENUNK:       for.end:
 ; VLENUNK-NEXT:    [[V_LCSSA:%.*]] = phi i64 [ [[V]], [[FOR_BODY]] ], [ [[TMP11]], [[MIDDLE_BLOCK]] ]
 ; VLENUNK-NEXT:    ret i64 [[V_LCSSA]]
@@ -1268,7 +1315,7 @@ define i64 @uniform_load_unaligned(ptr noalias nocapture %a, ptr noalias nocaptu
 ; VLENUNK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 4
 ; VLENUNK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP19]]
 ; VLENUNK-NEXT:    [[TMP20:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; VLENUNK-NEXT:    br i1 [[TMP20]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP18:![0-9]+]]
+; VLENUNK-NEXT:    br i1 [[TMP20]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP20:![0-9]+]]
 ; VLENUNK:       middle.block:
 ; VLENUNK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 1024, [[N_VEC]]
 ; VLENUNK-NEXT:    br i1 [[CMP_N]], label [[FOR_END:%.*]], label [[SCALAR_PH]]
@@ -1282,7 +1329,7 @@ define i64 @uniform_load_unaligned(ptr noalias nocapture %a, ptr noalias nocaptu
 ; VLENUNK-NEXT:    store i64 [[V]], ptr [[ARRAYIDX]], align 8
 ; VLENUNK-NEXT:    [[IV_NEXT]] = add nuw nsw i64 [[IV]], 1
 ; VLENUNK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[IV_NEXT]], 1024
-; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP19:![0-9]+]]
+; VLENUNK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP21:![0-9]+]]
 ; VLENUNK:       for.end:
 ; VLENUNK-NEXT:    [[V_LCSSA:%.*]] = phi i64 [ [[V]], [[FOR_BODY]] ], [ [[TMP11]], [[MIDDLE_BLOCK]] ]
 ; VLENUNK-NEXT:    ret i64 [[V_LCSSA]]

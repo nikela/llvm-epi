@@ -43,34 +43,32 @@ static cl::opt<bool> PreferWholeRegisterMove(
     "riscv-prefer-whole-register-move", cl::init(false), cl::Hidden,
     cl::desc("Prefer whole register move for vector registers."));
 
-namespace llvm {
-namespace RISCVEPIIntrinsicsTable {
+namespace llvm::RISCVEPIIntrinsicsTable {
 
 using namespace RISCV;
 
 #define GET_EPIIntrinsicsTable_IMPL
 #include "RISCVGenSearchableTables.inc"
 
-} // namespace RISCVEPIIntrinsicsTable
+} // namespace llvm::RISCVEPIIntrinsicsTable
 
-namespace RISCVEPIPseudosTable {
+namespace llvm::RISCVEPIPseudosTable {
 
 using namespace RISCV;
 
 #define GET_EPIPseudosTable_IMPL
 #include "RISCVGenSearchableTables.inc"
 
-} // namespace RISCVEPIPseudosTable
+} // namespace llvm::RISCVEPIPseudosTable
 
-namespace RISCVVPseudosTable {
+namespace llvm::RISCVVPseudosTable {
 
 using namespace RISCV;
 
 #define GET_RISCVVPseudosTable_IMPL
 #include "RISCVGenSearchableTables.inc"
 
-} // namespace RISCVVPseudosTable
-} // namespace llvm
+} // namespace llvm::RISCVVPseudosTable
 
 RISCVInstrInfo::RISCVInstrInfo(RISCVSubtarget &STI)
     : RISCVGenInstrInfo(RISCV::ADJCALLSTACKDOWN, RISCV::ADJCALLSTACKUP),

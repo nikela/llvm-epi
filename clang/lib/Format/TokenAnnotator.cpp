@@ -238,11 +238,13 @@ private:
     }
 
     bool StartsObjCMethodExpr = false;
-    if (FormatToken *MaybeSel = OpeningParen.Previous) {
-      // @selector( starts a selector.
-      if (MaybeSel->isObjCAtKeyword(tok::objc_selector) && MaybeSel->Previous &&
-          MaybeSel->Previous->is(tok::at)) {
-        StartsObjCMethodExpr = true;
+    if (!Style.isVerilog()) {
+      if (FormatToken *MaybeSel = OpeningParen.Previous) {
+        // @selector( starts a selector.
+        if (MaybeSel->isObjCAtKeyword(tok::objc_selector) &&
+            MaybeSel->Previous && MaybeSel->Previous->is(tok::at)) {
+          StartsObjCMethodExpr = true;
+        }
       }
     }
 
@@ -315,8 +317,10 @@ private:
       if (PrevNonComment->is(tok::kw___attribute)) {
         OpeningParen.setType(TT_AttributeParen);
       } else if (PrevNonComment->isOneOf(TT_TypenameMacro, tok::kw_decltype,
-                                         tok::kw_typeof, tok::kw__Atomic,
-                                         tok::kw___underlying_type)) {
+                                         tok::kw_typeof,
+#define TRANSFORM_TYPE_TRAIT_DEF(_, Trait) tok::kw___##Trait,
+#include "clang/Basic/TransformTypeTraits.def"
+                                         tok::kw__Atomic)) {
         OpeningParen.setType(TT_TypeDeclarationParen);
         // decltype() and typeof() usually contain expressions.
         if (PrevNonComment->isOneOf(tok::kw_decltype, tok::kw_typeof))
@@ -761,7 +765,8 @@ private:
           // Remember that this is a [[using ns: foo]] C++ attribute, so we
           // don't add a space before the colon (unlike other colons).
           CurrentToken->setType(TT_AttributeColon);
-        } else if (Left->isOneOf(TT_ArraySubscriptLSquare,
+        } else if (!Style.isVerilog() &&
+                   Left->isOneOf(TT_ArraySubscriptLSquare,
                                  TT_DesignatedInitializerLSquare)) {
           Left->setType(TT_ObjCMethodExpr);
           StartsObjCMethodExpr = true;
@@ -914,6 +919,10 @@ private:
   bool consumeToken() {
     FormatToken *Tok = CurrentToken;
     next();
+    // In Verilog primitives' state tables, `:`, `?`, and `-` aren't normal
+    // operators.
+    if (Tok->is(TT_VerilogTableItem))
+      return true;
     switch (Tok->Tok.getKind()) {
     case tok::plus:
     case tok::minus:
@@ -947,6 +956,25 @@ private:
           Tok->setType(TT_CSharpNamedArgumentColon);
           break;
         }
+      } else if (Style.isVerilog() && Tok->isNot(TT_BinaryOperator)) {
+        // The distribution weight operators are labeled
+        // TT_BinaryOperator by the lexer.
+        if (Keywords.isVerilogEnd(*Tok->Previous) ||
+            Keywords.isVerilogBegin(*Tok->Previous)) {
+          Tok->setType(TT_VerilogBlockLabelColon);
+        } else if (Contexts.back().ContextKind == tok::l_square) {
+          Tok->setType(TT_BitFieldColon);
+        } else if (Contexts.back().ColonIsDictLiteral) {
+          Tok->setType(TT_DictLiteral);
+        } else if (Contexts.size() == 1) {
+          // In Verilog a case label doesn't have the case keyword. We
+          // assume a colon following an expression is a case label.
+          // Colons from ?: are annotated in parseConditional().
+          Tok->setType(TT_GotoLabelColon);
+          if (Line.Level > 1 || (!Line.InPPDirective && Line.Level > 0))
+            --Line.Level;
+        }
+        break;
       }
       if (Line.First->isOneOf(Keywords.kw_module, Keywords.kw_import) ||
           Line.First->startsSequence(tok::kw_export, Keywords.kw_module) ||
@@ -1035,7 +1063,7 @@ private:
           CurrentToken->isOneOf(tok::kw_constexpr, tok::identifier)) {
         next();
       }
-      LLVM_FALLTHROUGH;
+      [[fallthrough]];
     case tok::kw_while:
       if (CurrentToken && CurrentToken->is(tok::l_paren)) {
         next();
@@ -1215,6 +1243,13 @@ private:
       if (Contexts.back().ContextType == Context::ForEachMacro)
         Contexts.back().IsExpression = true;
       break;
+    case tok::kw_default:
+      // Unindent case labels.
+      if (Style.isVerilog() && Keywords.isVerilogEndOfLabel(*Tok) &&
+          (Line.Level > 1 || (!Line.InPPDirective && Line.Level > 0))) {
+        --Line.Level;
+      }
+      break;
     case tok::identifier:
       if (Tok->isOneOf(Keywords.kw___has_include,
                        Keywords.kw___has_include_next)) {
@@ -1224,6 +1259,8 @@ private:
           Tok->Next->isNot(tok::l_paren)) {
         Tok->setType(TT_CSharpGenericTypeConstraint);
         parseCSharpGenericTypeConstraint();
+        if (Tok->getPreviousNonComment() == nullptr)
+          Line.IsContinuation = true;
       }
       break;
     case tok::arrow:
@@ -1405,8 +1442,8 @@ public:
     IdentifierInfo *Info = CurrentToken->Tok.getIdentifierInfo();
     if ((Style.Language == FormatStyle::LK_Java &&
          CurrentToken->is(Keywords.kw_package)) ||
-        (Info && Info->getPPKeywordID() == tok::pp_import &&
-         CurrentToken->Next &&
+        (!Style.isVerilog() && Info &&
+         Info->getPPKeywordID() == tok::pp_import && CurrentToken->Next &&
          CurrentToken->Next->isOneOf(tok::string_literal, tok::identifier,
                                      tok::kw_static))) {
       next();
@@ -1842,7 +1879,8 @@ private:
           Current,
           Contexts.back().CanBeExpression && Contexts.back().IsExpression,
           Contexts.back().ContextType == Context::TemplateArgument));
-    } else if (Current.isOneOf(tok::minus, tok::plus, tok::caret)) {
+    } else if (Current.isOneOf(tok::minus, tok::plus, tok::caret) ||
+               (Style.isVerilog() && Current.is(tok::pipe))) {
       Current.setType(determinePlusMinusCaretUsage(Current));
       if (Current.is(TT_UnaryOperator) && Current.is(tok::caret))
         Contexts.back().CaretFound = true;
@@ -2027,6 +2065,11 @@ private:
 
     // MyClass a;
     if (PreviousNotConst->isSimpleTypeSpecifier())
+      return true;
+
+    // type[] a in Java
+    if (Style.Language == FormatStyle::LK_Java &&
+        PreviousNotConst->is(tok::r_square))
       return true;
 
     // const a = in JavaScript.
@@ -2329,25 +2372,6 @@ private:
         !PrevToken->MatchingParen)
       return TT_PointerOrReference;
 
-    // For "} &&"
-    if (PrevToken->is(tok::r_brace) && Tok.is(tok::ampamp)) {
-      const FormatToken *MatchingLBrace = PrevToken->MatchingParen;
-
-      // We check whether there is a TemplateCloser(">") to indicate it's a
-      // template or not. If it's not a template, "&&" is likely a reference
-      // operator.
-      //   struct {} &&ref = {};
-      if (!MatchingLBrace)
-        return TT_PointerOrReference;
-      FormatToken *BeforeLBrace = MatchingLBrace->getPreviousNonComment();
-      if (!BeforeLBrace || BeforeLBrace->isNot(TT_TemplateCloser))
-        return TT_PointerOrReference;
-
-      // If it is a template, "&&" is a binary operator.
-      //   enable_if<>{} && ...
-      return TT_BinaryOperator;
-    }
-
     if (PrevToken->Tok.isLiteral() ||
         PrevToken->isOneOf(tok::r_paren, tok::r_square, tok::kw_true,
                            tok::kw_false, tok::r_brace)) {
@@ -2591,6 +2615,10 @@ private:
                            Keywords.kw_throws)) {
         return 0;
       }
+      // In Verilog case labels are not on separate lines straight out of
+      // UnwrappedLineParser. The colon is not part of an expression.
+      if (Style.isVerilog() && Current->is(tok::colon))
+        return 0;
     }
     return -1;
   }
@@ -2670,15 +2698,18 @@ void TokenAnnotator::setCommentLineLevels(
         NextNonCommentLine->First->NewlinesBefore <= 1 &&
         NextNonCommentLine->First->OriginalColumn ==
             Line->First->OriginalColumn) {
+      const bool PPDirectiveOrImportStmt =
+          NextNonCommentLine->Type == LT_PreprocessorDirective ||
+          NextNonCommentLine->Type == LT_ImportStatement;
+      if (PPDirectiveOrImportStmt)
+        Line->Type = LT_CommentAbovePPDirective;
       // Align comments for preprocessor lines with the # in column 0 if
       // preprocessor lines are not indented. Otherwise, align with the next
       // line.
-      Line->Level =
-          (Style.IndentPPDirectives != FormatStyle::PPDIS_BeforeHash &&
-           (NextNonCommentLine->Type == LT_PreprocessorDirective ||
-            NextNonCommentLine->Type == LT_ImportStatement))
-              ? 0
-              : NextNonCommentLine->Level;
+      Line->Level = Style.IndentPPDirectives != FormatStyle::PPDIS_BeforeHash &&
+                            PPDirectiveOrImportStmt
+                        ? 0
+                        : NextNonCommentLine->Level;
     } else {
       NextNonCommentLine = Line->First->isNot(tok::r_brace) ? Line : nullptr;
     }
@@ -3310,6 +3341,13 @@ bool TokenAnnotator::spaceRequiredBetween(const AnnotatedLine &Line,
     }
   }
 
+  // trailing return type 'auto': []() -> auto {}, auto foo() -> auto {}
+  if (Left.is(tok::kw_auto) && Right.isOneOf(TT_LambdaLBrace, TT_FunctionLBrace,
+                                             // function return type 'auto'
+                                             TT_FunctionTypeLParen)) {
+    return true;
+  }
+
   // auto{x} auto(x)
   if (Left.is(tok::kw_auto) && Right.isOneOf(tok::l_paren, tok::l_brace))
     return false;
@@ -3591,7 +3629,8 @@ bool TokenAnnotator::spaceRequiredBetween(const AnnotatedLine &Line,
       return true;
     if (Left.isOneOf(tok::pp_elif, tok::kw_for, tok::kw_while, tok::kw_switch,
                      tok::kw_case, TT_ForEachMacro, TT_ObjCForIn) ||
-        Left.isIf(Line.Type != LT_PreprocessorDirective)) {
+        Left.isIf(Line.Type != LT_PreprocessorDirective) ||
+        Right.is(TT_ConditionLParen)) {
       return Style.SpaceBeforeParensOptions.AfterControlStatements ||
              spaceRequiredBeforeParens(Right);
     }
@@ -3977,8 +4016,16 @@ bool TokenAnnotator::spaceRequiredBefore(const AnnotatedLine &Line,
       return true;
     }
   } else if (Style.isVerilog()) {
+    // Add space between things in a primitive's state table unless in a
+    // transition like `(0?)`.
+    if ((Left.is(TT_VerilogTableItem) &&
+         !Right.isOneOf(tok::r_paren, tok::semi)) ||
+        (Right.is(TT_VerilogTableItem) && Left.isNot(tok::l_paren))) {
+      const FormatToken *Next = Right.getNextNonComment();
+      return !(Next && Next->is(tok::r_paren));
+    }
     // Don't add space within a delay like `#0`.
-    if (!Left.is(TT_BinaryOperator) &&
+    if (Left.isNot(TT_BinaryOperator) &&
         Left.isOneOf(Keywords.kw_verilogHash, Keywords.kw_verilogHashHash)) {
       return false;
     }
@@ -3991,6 +4038,31 @@ bool TokenAnnotator::spaceRequiredBefore(const AnnotatedLine &Line,
           Left.MatchingParen->endsSequence(tok::l_paren, tok::at)))) {
       return true;
     }
+    // Don't add embedded spaces in a number literal like `16'h1?ax` or an array
+    // literal like `'{}`.
+    if (Left.is(Keywords.kw_apostrophe) ||
+        (Left.is(TT_VerilogNumberBase) && Right.is(tok::numeric_constant))) {
+      return false;
+    }
+    // Add space between the type name and dimension like `logic [1:0]`.
+    if (Right.is(tok::l_square) &&
+        Left.isOneOf(TT_VerilogDimensionedTypeName, Keywords.kw_function)) {
+      return true;
+    }
+    // Don't add spaces between a casting type and the quote or repetition count
+    // and the brace.
+    if ((Right.is(Keywords.kw_apostrophe) ||
+         (Right.is(BK_BracedInit) && Right.is(tok::l_brace))) &&
+        !(Left.isOneOf(Keywords.kw_assign, Keywords.kw_unique) ||
+          Keywords.isVerilogWordOperator(Left)) &&
+        (Left.isOneOf(tok::r_square, tok::r_paren, tok::r_brace,
+                      tok::numeric_constant) ||
+         Keywords.isWordLike(Left))) {
+      return false;
+    }
+    // Add space in attribute like `(* ASYNC_REG = "TRUE" *)`.
+    if (Left.endsSequence(tok::star, tok::l_paren) && Right.is(tok::identifier))
+      return true;
   }
   if (Left.is(TT_ImplicitStringLiteral))
     return Right.hasWhitespaceBefore();
@@ -4032,6 +4104,11 @@ bool TokenAnnotator::spaceRequiredBefore(const AnnotatedLine &Line,
            Style.BitFieldColonSpacing == FormatStyle::BFCS_After;
   }
   if (Right.is(tok::colon)) {
+    if (Right.is(TT_GotoLabelColon) ||
+        (!Style.isVerilog() &&
+         Line.First->isOneOf(tok::kw_default, tok::kw_case))) {
+      return Style.SpaceBeforeCaseColon;
+    }
     if (Line.First->isOneOf(tok::kw_default, tok::kw_case))
       return Style.SpaceBeforeCaseColon;
     const FormatToken *Next = Right.getNextNonComment();
@@ -4294,6 +4371,11 @@ bool TokenAnnotator::mustBreakBefore(const AnnotatedLine &Line,
         Right.Next->is(tok::string_literal)) {
       return true;
     }
+  } else if (Style.isVerilog()) {
+    // Break after labels. In Verilog labels don't have the 'case' keyword, so
+    // it is hard to identify them in UnwrappedLineParser.
+    if (!Keywords.isVerilogBegin(Right) && Keywords.isVerilogEndOfLabel(Left))
+      return true;
   } else if (Style.Language == FormatStyle::LK_Cpp ||
              Style.Language == FormatStyle::LK_ObjC ||
              Style.Language == FormatStyle::LK_Proto ||
@@ -4961,7 +5043,8 @@ bool TokenAnnotator::canBreakBefore(const AnnotatedLine &Line,
 }
 
 void TokenAnnotator::printDebugInfo(const AnnotatedLine &Line) const {
-  llvm::errs() << "AnnotatedTokens(L=" << Line.Level << "):\n";
+  llvm::errs() << "AnnotatedTokens(L=" << Line.Level << ", T=" << Line.Type
+               << ", C=" << Line.IsContinuation << "):\n";
   const FormatToken *Tok = Line.First;
   while (Tok) {
     llvm::errs() << " M=" << Tok->MustBreakBefore

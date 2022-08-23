@@ -7,9 +7,9 @@ define <vscale x 8 x i8> @test_trunc_i32_i8_m1(<vscale x 8 x i32> %a) nounwind
 ; CHECK-LABEL: test_trunc_i32_i8_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v12, v8
+; CHECK-NEXT:    vnsrl.wi v12, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v12
+; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
 {
   %b = trunc <vscale x 8 x i32> %a to <vscale x 8 x i8>
@@ -21,11 +21,11 @@ define <vscale x 8 x i8> @test_trunc_i64_i8_m1(<vscale x 8 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i8_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v16, v8
+; CHECK-NEXT:    vnsrl.wi v16, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v10, v16
+; CHECK-NEXT:    vnsrl.wi v10, v16, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e8, m1, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v10
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    ret
 {
   %b = trunc <vscale x 8 x i64> %a to <vscale x 8 x i8>
@@ -37,9 +37,9 @@ define <vscale x 4 x i16> @test_trunc_i64_i16_m1(<vscale x 4 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i16_m1:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v12, v8
+; CHECK-NEXT:    vnsrl.wi v12, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v12
+; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
 {
   %b = trunc <vscale x 4 x i64> %a to <vscale x 4 x i16>
@@ -50,9 +50,9 @@ define <vscale x 8 x i16> @test_trunc_i64_i16_m2(<vscale x 8 x i64> %a) nounwind
 ; CHECK-LABEL: test_trunc_i64_i16_m2:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v16, v8
+; CHECK-NEXT:    vnsrl.wi v16, v8, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e16, m2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v16
+; CHECK-NEXT:    vnsrl.wi v8, v16, 0
 ; CHECK-NEXT:    ret
 {
   %b = trunc <vscale x 8 x i64> %a to <vscale x 8 x i16>

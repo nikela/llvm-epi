@@ -224,10 +224,10 @@ static llvm::CachePruningPolicy getLTOCachePolicy(InputArgList &args) {
     val.toVector(ltoPolicy);
   };
   for (const Arg *arg :
-       args.filtered(OPT_thinlto_cache_policy, OPT_prune_interval_lto,
+       args.filtered(OPT_thinlto_cache_policy_eq, OPT_prune_interval_lto,
                      OPT_prune_after_lto, OPT_max_relative_cache_size_lto)) {
     switch (arg->getOption().getID()) {
-    case OPT_thinlto_cache_policy:
+    case OPT_thinlto_cache_policy_eq:
       add(arg->getValue());
       break;
     case OPT_prune_interval_lto:
@@ -526,7 +526,7 @@ static void initLLVM() {
   InitializeAllAsmParsers();
 }
 
-static void compileBitcodeFiles() {
+static bool compileBitcodeFiles() {
   TimeTraceScope timeScope("LTO");
   auto *lto = make<BitcodeCompiler>();
   for (InputFile *file : inputFiles)
@@ -534,8 +534,11 @@ static void compileBitcodeFiles() {
       if (!file->lazy)
         lto->add(*bitcodeFile);
 
-  for (ObjFile *file : lto->compile())
+  std::vector<ObjFile *> compiled = lto->compile();
+  for (ObjFile *file : compiled)
     inputFiles.insert(file);
+
+  return !compiled.empty();
 }
 
 // Replaces common symbols with defined symbols residing in __common sections.
@@ -721,10 +724,7 @@ static TargetInfo *createTargetInfo(InputArgList &args) {
         MachO::Target(getArchitectureFromName(archName), PLATFORM_MACCATALYST);
   }
 
-  uint32_t cpuType;
-  uint32_t cpuSubtype;
-  std::tie(cpuType, cpuSubtype) = getCPUTypeFromArchitecture(config->arch());
-
+  auto [cpuType, cpuSubtype] = getCPUTypeFromArchitecture(config->arch());
   switch (cpuType) {
   case CPU_TYPE_X86_64:
     return createX86_64TargetInfo();
@@ -779,6 +779,17 @@ static ICFLevel getICFLevel(const ArgList &args) {
     icfLevel = ICFLevel::none;
   }
   return icfLevel;
+}
+
+static ObjCStubsMode getObjCStubsMode(const ArgList &args) {
+  const Arg *arg = args.getLastArg(OPT_objc_stubs_fast, OPT_objc_stubs_small);
+  if (!arg)
+    return ObjCStubsMode::fast;
+
+  if (arg->getOption().getID() == OPT_objc_stubs_small)
+    warn("-objc_stubs_small is not yet implemented, defaulting to "
+         "-objc_stubs_fast");
+  return ObjCStubsMode::fast;
 }
 
 static void warnIfDeprecatedOption(const Option &opt) {
@@ -1099,9 +1110,15 @@ static void gatherInputSections() {
           inputSections.push_back(isec);
         } else if (auto *isec =
                        dyn_cast<CStringInputSection>(subsection.isec)) {
-          if (in.cStringSection->inputOrder == UnspecifiedInputOrder)
-            in.cStringSection->inputOrder = inputOrder++;
-          in.cStringSection->addInput(isec);
+          if (isec->getName() == section_names::objcMethname) {
+            if (in.objcMethnameSection->inputOrder == UnspecifiedInputOrder)
+              in.objcMethnameSection->inputOrder = inputOrder++;
+            in.objcMethnameSection->addInput(isec);
+          } else {
+            if (in.cStringSection->inputOrder == UnspecifiedInputOrder)
+              in.cStringSection->inputOrder = inputOrder++;
+            in.cStringSection->addInput(isec);
+          }
         } else if (auto *isec =
                        dyn_cast<WordLiteralInputSection>(subsection.isec)) {
           if (in.wordLiteralSection->inputOrder == UnspecifiedInputOrder)
@@ -1124,8 +1141,37 @@ static void foldIdenticalLiterals() {
   // true. If it isn't, we simply create a non-deduplicating CStringSection.
   // Either way, we must unconditionally finalize it here.
   in.cStringSection->finalizeContents();
+  in.objcMethnameSection->finalizeContents();
   if (in.wordLiteralSection)
     in.wordLiteralSection->finalizeContents();
+}
+
+static void addSynthenticMethnames() {
+  std::string &data = *make<std::string>();
+  llvm::raw_string_ostream os(data);
+  const int prefixLength = ObjCStubsSection::symbolPrefix.size();
+  for (Symbol *sym : symtab->getSymbols())
+    if (isa<Undefined>(sym))
+      if (sym->getName().startswith(ObjCStubsSection::symbolPrefix))
+        os << sym->getName().drop_front(prefixLength) << '\0';
+
+  if (data.empty())
+    return;
+
+  const auto *buf = reinterpret_cast<const uint8_t *>(data.c_str());
+  Section &section = *make<Section>(/*file=*/nullptr, segment_names::text,
+                                    section_names::objcMethname,
+                                    S_CSTRING_LITERALS, /*addr=*/0);
+
+  auto *isec =
+      make<CStringInputSection>(section, ArrayRef<uint8_t>{buf, data.size()},
+                                /*align=*/1, /*dedupLiterals=*/true);
+  isec->splitIntoPieces();
+  for (auto &piece : isec->pieces)
+    piece.live = true;
+  section.subsections.push_back({0, isec});
+  in.objcMethnameSection->addInput(isec);
+  in.objcMethnameSection->isec->markLive(0);
 }
 
 static void referenceStubBinder() {
@@ -1143,6 +1189,52 @@ static void referenceStubBinder() {
   // StubHelperSection::setup() adds a reference and errors out if
   // dyld_stub_binder doesn't exist in case it is actually needed.
   symtab->addUndefined("dyld_stub_binder", /*file=*/nullptr, /*isWeak=*/false);
+}
+
+static void createAliases() {
+  for (const auto &pair : config->aliasedSymbols) {
+    if (const auto &sym = symtab->find(pair.first)) {
+      if (const auto &defined = dyn_cast<Defined>(sym)) {
+        symtab->aliasDefined(defined, pair.second);
+        continue;
+      }
+    }
+
+    warn("undefined base symbol '" + pair.first + "' for alias '" +
+         pair.second + "'\n");
+  }
+}
+
+static void handleExplicitExports() {
+  if (config->hasExplicitExports) {
+    parallelForEach(symtab->getSymbols(), [](Symbol *sym) {
+      if (auto *defined = dyn_cast<Defined>(sym)) {
+        StringRef symbolName = defined->getName();
+        if (config->exportedSymbols.match(symbolName)) {
+          if (defined->privateExtern) {
+            if (defined->weakDefCanBeHidden) {
+              // weak_def_can_be_hidden symbols behave similarly to
+              // private_extern symbols in most cases, except for when
+              // it is explicitly exported.
+              // The former can be exported but the latter cannot.
+              defined->privateExtern = false;
+            } else {
+              warn("cannot export hidden symbol " + toString(*defined) +
+                   "\n>>> defined in " + toString(defined->getFile()));
+            }
+          }
+        } else {
+          defined->privateExtern = true;
+        }
+      }
+    });
+  } else if (!config->unexportedSymbols.empty()) {
+    parallelForEach(symtab->getSymbols(), [](Symbol *sym) {
+      if (auto *defined = dyn_cast<Defined>(sym))
+        if (config->unexportedSymbols.match(defined->getName()))
+          defined->privateExtern = true;
+    });
+  }
 }
 
 bool macho::link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
@@ -1349,7 +1441,10 @@ bool macho::link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
   config->ignoreOptimizationHints = args.hasArg(OPT_ignore_optimization_hints);
   config->callGraphProfileSort = args.hasFlag(
       OPT_call_graph_profile_sort, OPT_no_call_graph_profile_sort, true);
-  config->printSymbolOrder = args.getLastArgValue(OPT_print_symbol_order);
+  config->printSymbolOrder = args.getLastArgValue(OPT_print_symbol_order_eq);
+  config->forceExactCpuSubtypeMatch =
+      getenv("LD_DYLIB_CPU_SUBTYPES_MUST_MATCH");
+  config->objcStubsMode = getObjCStubsMode(args);
 
   for (const Arg *arg : args.filtered(OPT_alias)) {
     config->aliasedSymbols.push_back(
@@ -1593,7 +1688,21 @@ bool macho::link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
     for (const Arg *arg : args.filtered(OPT_mllvm))
       parseClangOption(arg->getValue(), arg->getSpelling());
 
-    compileBitcodeFiles();
+    createSyntheticSections();
+    createSyntheticSymbols();
+    addSynthenticMethnames();
+
+    createAliases();
+    // If we are in "explicit exports" mode, hide everything that isn't
+    // explicitly exported. Do this before running LTO so that LTO can better
+    // optimize.
+    handleExplicitExports();
+    // LTO may emit a non-hidden (extern) object file symbol even if the
+    // corresponding bitcode symbol is hidden. In particular, this happens for
+    // cross-module references to hidden symbols under ThinLTO. Thus, if we
+    // compiled any bitcode files, we must redo the symbol hiding.
+    if (compileBitcodeFiles())
+      handleExplicitExports();
     replaceCommonSymbols();
 
     StringRef orderFile = args.getLastArgValue(OPT_order_file);
@@ -1604,51 +1713,6 @@ bool macho::link(ArrayRef<const char *> argsArr, llvm::raw_ostream &stdoutOS,
 
     // FIXME: should terminate the link early based on errors encountered so
     // far?
-
-    createSyntheticSections();
-    createSyntheticSymbols();
-
-    for (const auto &pair : config->aliasedSymbols) {
-      if (const auto &sym = symtab->find(pair.first)) {
-        if (const auto &defined = dyn_cast<Defined>(sym)) {
-          symtab->aliasDefined(defined, pair.second);
-          continue;
-        }
-      }
-
-      warn("undefined base symbol '" + pair.first + "' for alias '" +
-           pair.second + "'\n");
-    }
-
-    if (config->hasExplicitExports) {
-      parallelForEach(symtab->getSymbols(), [](Symbol *sym) {
-        if (auto *defined = dyn_cast<Defined>(sym)) {
-          StringRef symbolName = defined->getName();
-          if (config->exportedSymbols.match(symbolName)) {
-            if (defined->privateExtern) {
-              if (defined->weakDefCanBeHidden) {
-                // weak_def_can_be_hidden symbols behave similarly to
-                // private_extern symbols in most cases, except for when
-                // it is explicitly exported.
-                // The former can be exported but the latter cannot.
-                defined->privateExtern = false;
-              } else {
-                warn("cannot export hidden symbol " + toString(*defined) +
-                     "\n>>> defined in " + toString(defined->getFile()));
-              }
-            }
-          } else {
-            defined->privateExtern = true;
-          }
-        }
-      });
-    } else if (!config->unexportedSymbols.empty()) {
-      parallelForEach(symtab->getSymbols(), [](Symbol *sym) {
-        if (auto *defined = dyn_cast<Defined>(sym))
-          if (config->unexportedSymbols.match(defined->getName()))
-            defined->privateExtern = true;
-      });
-    }
 
     for (const Arg *arg : args.filtered(OPT_sectcreate)) {
       StringRef segName = arg->getValue(0);

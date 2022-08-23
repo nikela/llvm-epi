@@ -412,7 +412,7 @@ define i64 @avl_forward1b_neg(<vscale x 2 x i32> %v, <vscale x 2 x i32>* %p) nou
 ; CHECK-LABEL: avl_forward1b_neg:
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetivli a1, 6, e16, m1, ta, mu
-; CHECK-NEXT:    vsetivli zero, 6, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
 ; CHECK-NEXT:    mv a0, a1
 ; CHECK-NEXT:    ret
@@ -467,6 +467,7 @@ entry:
 define void @avl_forward4(<vscale x 2 x i32> %v, <vscale x 2 x i32>* %p, i64 %reg) nounwind {
 ; CHECK-LABEL: avl_forward4:
 ; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
 ; CHECK-NEXT:    ret
@@ -480,10 +481,10 @@ entry:
 define i64 @avl_forward4b(<vscale x 2 x i32> %v, <vscale x 2 x i32>* %p, i64 %reg) nounwind {
 ; CHECK-LABEL: avl_forward4b:
 ; CHECK:       # %bb.0: # %entry
-; CHECK-NEXT:    vsetvli a2, a1, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, a1, e16, m1, ta, mu
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
 ; CHECK-NEXT:    vse32.v v8, (a0)
-; CHECK-NEXT:    mv a0, a2
+; CHECK-NEXT:    mv a0, a1
 ; CHECK-NEXT:    ret
 entry:
   %vl = tail call i64 @llvm.riscv.vsetvli(i64 %reg, i64 1, i64 0)
@@ -496,6 +497,7 @@ entry:
 define <vscale x 1 x i64> @vleNff(i64* %str, i64 %n, i64 %x) {
 ; CHECK-LABEL: vleNff:
 ; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    vsetvli a1, a1, e8, m4, ta, mu
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64ff.v v8, (a0)
 ; CHECK-NEXT:    vsetvli zero, zero, e64, m1, tu, mu
@@ -516,6 +518,7 @@ entry:
 define <vscale x 1 x i64> @vleNff2(i64* %str, i64 %n, i64 %x) {
 ; CHECK-LABEL: vleNff2:
 ; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    vsetvli a1, a1, e8, m4, ta, mu
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64ff.v v8, (a0)
 ; CHECK-NEXT:    vadd.vx v8, v8, a2

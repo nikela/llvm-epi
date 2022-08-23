@@ -60,7 +60,9 @@ public:
     // Update the indent level cache size so that we can rely on it
     // having the right size in adjustToUnmodifiedline.
     skipLine(Line, /*UnknownIndent=*/true);
-    if (Line.InPPDirective) {
+    if (Line.InPPDirective ||
+        (Style.IndentPPDirectives == FormatStyle::PPDIS_BeforeHash &&
+         Line.Type == LT_CommentAbovePPDirective)) {
       unsigned IndentWidth =
           (Style.PPIndentWidth >= 0) ? Style.PPIndentWidth : Style.IndentWidth;
       Indent = Line.Level * IndentWidth + AdditionalIndent;
@@ -69,7 +71,7 @@ public:
     }
     if (static_cast<int>(Indent) + Offset >= 0)
       Indent += Offset;
-    if (Line.First->is(TT_CSharpGenericTypeConstraint))
+    if (Line.IsContinuation)
       Indent = Line.Level * Style.IndentWidth + Style.ContinuationIndentWidth;
   }
 

@@ -899,7 +899,7 @@ INITIALIZE_PASS(RISCVInsertVSETVLI, DEBUG_TYPE, RISCV_INSERT_VSETVLI_NAME,
 
 Register RISCVInsertVSETVLI::getNTRegister(MachineBasicBlock *MBB) {
   BlockData &BBInfo = BlockInfo[MBB->getNumber()];
-  if (!BBInfo.NTExtraReg.hasValue()) {
+  if (!BBInfo.NTExtraReg.has_value()) {
     // Create virtual register and assign 512 to it
     DebugLoc DL = MBB->findBranchDebugLoc();
     Register TmpReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
@@ -913,12 +913,12 @@ Register RISCVInsertVSETVLI::getNTRegister(MachineBasicBlock *MBB) {
     ExtraOperand NewMIEO;
     ExtraOpInfo.insert({MIB.getInstr(), NewMIEO});
   }
-  return BBInfo.NTExtraReg.getValue();
+  return BBInfo.NTExtraReg.value();
 }
 
 Register RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock *MBB) {
   BlockData &BBInfo = BlockInfo[MBB->getNumber()];
-  if (!BBInfo.FakeExtraReg.hasValue()) {
+  if (!BBInfo.FakeExtraReg.has_value()) {
     // Create virtual register and assign 0 to it
     DebugLoc DL = MBB->findBranchDebugLoc();
     Register TmpReg = MRI->createVirtualRegister(&RISCV::GPRRegClass);
@@ -932,7 +932,7 @@ Register RISCVInsertVSETVLI::getFakeRegister(MachineBasicBlock *MBB) {
     ExtraOperand NewMIEO;
     ExtraOpInfo.insert({MIB.getInstr(), NewMIEO});
   }
-  return BBInfo.FakeExtraReg.getValue();
+  return BBInfo.FakeExtraReg.value();
 }
 
 static bool isVectorConfigInstr(const MachineInstr &MI) {
@@ -1634,16 +1634,10 @@ void RISCVInsertVSETVLI::transferBefore(VSETVLIInfo &Info,
     return;
   }
 
-  // Two cases involving an AVL resulting from a previous vsetvli.
-  // 1) If the AVL is the result of a previous vsetvli which has the
-  //    same AVL and VLMAX as our current state, we can reuse the AVL
-  //    from the current state for the new one.  This allows us to
-  //    generate 'vsetvli x0, x0, vtype" or possible skip the transition
-  //    entirely.
-  // 2) If AVL is defined by a vsetvli with the same VLMAX, we can
-  //    replace the AVL operand with the AVL of the defining vsetvli.
-  //    We avoid general register AVLs to avoid extending live ranges
-  //    without being sure we can kill the original source reg entirely.
+  // If AVL is defined by a vsetvli with the same VLMAX, we can
+  // replace the AVL operand with the AVL of the defining vsetvli.
+  // We avoid general register AVLs to avoid extending live ranges
+  // without being sure we can kill the original source reg entirely.
   if (!Info.hasAVLReg() || !Info.getAVLReg().isVirtual())
     return;
   MachineInstr *DefMI = MRI->getVRegDef(Info.getAVLReg());
@@ -1651,17 +1645,6 @@ void RISCVInsertVSETVLI::transferBefore(VSETVLIInfo &Info,
     return;
 
   VSETVLIInfo DefInfo = getInfoForVSETVLI(*DefMI);
-  // case 1
-  if (PrevInfo.isValid() && !PrevInfo.isUnknown() &&
-      DefInfo.hasSameAVL(PrevInfo) &&
-      DefInfo.hasSameVLMAX(PrevInfo)) {
-    if (PrevInfo.hasAVLImm())
-      Info.setAVLImm(PrevInfo.getAVLImm());
-    else
-      Info.setAVLReg(PrevInfo.getAVLReg());
-    return;
-  }
-  // case 2
   if (DefInfo.hasSameVLMAX(Info) &&
       (DefInfo.hasAVLImm() || DefInfo.getAVLReg() == RISCV::X0)) {
     if (DefInfo.hasAVLImm())
