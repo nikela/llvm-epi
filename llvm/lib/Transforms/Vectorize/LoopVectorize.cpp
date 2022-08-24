@@ -10053,8 +10053,9 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
          "entry block must be set to a VPRegionBlock having a non-empty entry "
          "VPBasicBlock");
   // Ensure EVL is available.
-  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
+  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps()) {
     RecipeBuilder.getOrCreateEVL(Plan);
+  }
   RecipeBuilder.fixHeaderPhis(Plan);
 
   // ---------------------------------------------------------------------------
@@ -10141,17 +10142,32 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
        Plan->getVectorLoopRegion()->getEntryBasicBlock()->phis()) {
     if (auto *RecurPhi =
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
+      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
+      // Fixed-order recurrences do not contain cycles, so this loop is
+      // guaranteed to terminate.
+      while (
+          auto *PrevPhi =
+              dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(PrevRecipe)) {
+        PrevRecipe = PrevPhi->getBackedgeRecipe();
+      }
+      VPBasicBlock *InsertBlock = PrevRecipe->getParent();
+      auto *Region = GetReplicateRegion(PrevRecipe);
+      if (Region)
+        InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
+      if (!InsertBlock) {
+        InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
+        VPBlockUtils::insertBlockAfter(InsertBlock, Region);
+      }
+      if (Region || PrevRecipe->isPhi())
+        Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
+      else
+        Builder.setInsertPoint(InsertBlock,
+                               std::next(PrevRecipe->getIterator()));
+      auto *EVL = RecipeBuilder.getOrCreateEVL(Plan);
       auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
           VPInstruction::PredicatedFirstOrderRecurrenceSplice,
-          {RecurPhi, RecurPhi->getBackedgeValue(),
-           RecipeBuilder.getOrCreateEVL(Plan)}));
+          {RecurPhi, RecurPhi->getBackedgeValue(), EVL}));
 
-      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
-      if (auto *Region = GetReplicateRegion(PrevRecipe)) {
-        VPBasicBlock *Succ = cast<VPBasicBlock>(Region->getSingleSuccessor());
-        RecurSplice->moveBefore(*Succ, Succ->getFirstNonPhi());
-      } else
-        RecurSplice->moveAfter(PrevRecipe);
       RecurPhi->replaceAllUsesWith(RecurSplice);
       // Set the first operand of RecurSplice to RecurPhi again, after replacing
       // all users.
@@ -10254,7 +10270,21 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   // VPBasicBlock as exit.
   VPBlockUtils::tryToMergeBlockIntoPredecessor(TopRegion->getExiting());
 
-  assert(VPlanVerifier::verifyPlanIsValid(*Plan) && "VPlan is invalid");
+  // Finally make sure EVL is as early as possible. This is not very elegant
+  // but sometimes we move recipes that depend on EVL and we break the relative
+  // order.
+  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps()) {
+    auto *EVL =
+        cast<VPRecipeBase>(RecipeBuilder.getOrCreateEVL(Plan)->getDef());
+    auto I = EVL->getParent()->getFirstNonPhi();
+    if (&*I != EVL) {
+      EVL->moveBefore(*EVL->getParent(), I);
+    }
+  }
+
+  bool ValidVPlan = VPlanVerifier::verifyPlanIsValid(*Plan);
+  LLVM_DEBUG(if (!ValidVPlan) { Plan->dump(); });
+  assert(ValidVPlan && "VPlan is invalid");
   return Plan;
 }
 

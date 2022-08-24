@@ -188,6 +188,8 @@ verifyVPBasicBlock(const VPBasicBlock *VPBB,
         // block.
         if (UI->getParent() == VPBB) {
           if (RecipeNumbering[UI] < RecipeNumbering[&R]) {
+            LLVM_DEBUG(errs() << "Def: "; R.dump(); errs() << "\n";
+                       errs() << "Use: "; UI->dump(); errs() << "\n";);
             errs() << "Use before def!\n";
             return false;
           }
