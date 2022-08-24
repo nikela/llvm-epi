@@ -623,7 +623,7 @@ public:
   InstructionCost getMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
                                   unsigned AddressSpace,
                                   TTI::TargetCostKind CostKind,
-                                  TTI::OperandValueKind OpdInfo,
+                                  TTI::OperandValueInfo OpInfo,
                                   const Instruction *I) const {
     return 1;
   }
@@ -1127,10 +1127,10 @@ public:
     case Instruction::Store: {
       auto *SI = cast<StoreInst>(U);
       Type *ValTy = U->getOperand(0)->getType();
-      TTI::OperandValueKind OpVK = TTI::getOperandInfo(U->getOperand(0)).Kind;
+      TTI::OperandValueInfo OpInfo = TTI::getOperandInfo(U->getOperand(0));
       return TargetTTI->getMemoryOpCost(Opcode, ValTy, SI->getAlign(),
                                         SI->getPointerAddressSpace(), CostKind,
-                                        OpVK, I);
+                                        OpInfo, I);
     }
     case Instruction::Load: {
       // FIXME: Arbitary cost which could come from the backend.
@@ -1152,7 +1152,7 @@ public:
       }
       return TargetTTI->getMemoryOpCost(Opcode, LoadType, LI->getAlign(),
                                         LI->getPointerAddressSpace(), CostKind,
-                                        TTI::OK_AnyValue, I);
+                                        {TTI::OK_AnyValue, TTI::OP_None}, I);
     }
     case Instruction::Select: {
       const Value *Op0, *Op1;
@@ -1269,6 +1269,11 @@ public:
             TTI::SK_InsertSubvector, VecTy, Shuffle->getShuffleMask(), CostKind,
             SubIndex, FixedVectorType::get(VecTy->getScalarType(), NumSubElts),
             Operands);
+
+      if (Shuffle->isSplice(SubIndex))
+        return TargetTTI->getShuffleCost(TTI::SK_Splice, VecTy,
+                                         Shuffle->getShuffleMask(), CostKind,
+                                         SubIndex, nullptr, Operands);
 
       return TargetTTI->getShuffleCost(TTI::SK_PermuteTwoSrc, VecTy,
                                        Shuffle->getShuffleMask(), CostKind, 0,
