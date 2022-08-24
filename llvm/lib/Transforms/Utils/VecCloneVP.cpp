@@ -677,36 +677,32 @@ void VecCloneVPPass::updateParameterUsers(Function *Clone,
 
         User->setOperand(Use->getOperandNo(), ArgElemLoad);
       } else if (ParmKinds[ArgNo].ParamKind == VFParamKind::OMP_Linear) {
-        llvm_unreachable("There should not be a not-vector parameter, for now.");
-        // FIXME: There is a plethora of linear stuff that will probably need
-        // different ways of handling it.
-        // int Stride = ParmKinds[ArgNo].LinearStepOrPos;
-        // Constant *StrideConst =
-        //     ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
-        // auto *Mul = Builder.CreateMul(StrideConst, Phi, "stride.mul");
+        int Stride = ParmKinds[ArgNo].LinearStepOrPos;
+        Constant *StrideConst =
+            ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
+        auto *Mul = Builder.CreateNSWMul(StrideConst, Phi, "stride.mul");
 
-        // Value *UserOp = nullptr;
-        // if (PointerType *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
-        //   if (ParmPtrType->isOpaque())
-        //     llvm::report_fatal_error(
-        //         "Can't retrieve missing type info from the pointer itself.");
+        Value *UserOp = nullptr;
+        if (auto *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
+          Type *PointeeType = nullptr;
+          if (ParmPtrType->isOpaque())
+            // NOTE: with opaque pointers, the LinearStepOrPos field yields the
+            // value of the stride as number of bytes, which means we have to
+            // use i8 as pointee type in the GEP.
+            PointeeType = Type::getInt8Ty(Clone->getContext());
+          else
+            PointeeType = ParmPtrType->getNonOpaquePointerElementType();
 
-        //   UserOp =
-        //       Builder.CreateGEP(ParmPtrType->getNonOpaquePointerElementType(),
-        //                         &Arg, Mul, ArgName + ".gep");
-        // } else {
-        //   if (Mul->getType() != ArgTy)
-        //     Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
-        //                                       Mul->getName() + ".cast");
+          UserOp = Builder.CreateGEP(PointeeType, &Arg, Mul, ArgName + ".gep");
+        } else {
+          if (Mul->getType() != ArgTy)
+            Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
+                                              Mul->getName() + ".cast");
 
-        //   UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
-        // }
+          UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
+        }
 
-        // unsigned NumOps = U->getNumOperands();
-        // for (unsigned Op = 0; Op < NumOps; Op++) {
-        //   if (U->getOperand(Op) == &Arg)
-        //     U->setOperand(Op, UserOp);
-        // }
+        User->setOperand(Use->getOperandNo(), UserOp);
       }
     }
   }
