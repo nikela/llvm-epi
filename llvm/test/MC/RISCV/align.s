@@ -41,15 +41,15 @@ test:
 # If the +c extension is enabled, the text section will be 2-byte aligned, so
 # one c.nop instruction is sufficient.
 # C-EXT-RELAX-RELOC-NOT: R_RISCV_ALIGN - 0x2
-# C-EXT-RELAX-INST:  c.nop
+# C-EXT-RELAX-INST-NOT:  c.nop
 	bne     zero, a0, .LBB0_2
 	mv	a0, zero
 	.p2align 3
 # RELAX-RELOC: R_RISCV_ALIGN - 0x4
 # RELAX-INST:  addi    zero, zero, 0
 # C-EXT-RELAX-RELOC: R_RISCV_ALIGN - 0x6
-# C-EXT-RELAX-INST:  addi    zero, zero, 0
 # C-EXT-RELAX-INST:  c.nop
+# C-EXT-RELAX-INST:  addi    zero, zero, 0
 # C-EXT-NORELAX-INST: addi    zero, zero, 0
 	add	a0, a0, a1
 	.align 4

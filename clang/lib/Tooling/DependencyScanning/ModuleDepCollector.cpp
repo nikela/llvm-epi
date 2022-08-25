@@ -52,9 +52,8 @@ static std::vector<std::string> splitString(std::string S, char Separator) {
   return Result;
 }
 
-void ModuleDepCollector::addOutputPaths(ModuleDeps &Deps) {
-  CompilerInvocation &CI = Deps.BuildInvocation;
-
+void ModuleDepCollector::addOutputPaths(CompilerInvocation &CI,
+                                        ModuleDeps &Deps) {
   // These are technically *inputs* to the compilation, but we populate them
   // here in order to make \c getModuleContextHash() independent of
   // \c lookupModuleOutput().
@@ -170,11 +169,8 @@ ModuleDepCollector::makeInvocationForModuleBuildWithoutOutputs(
   return CI;
 }
 
-std::vector<std::string> ModuleDeps::getCanonicalCommandLine() const {
-  return BuildInvocation.getCC1CommandLine();
-}
-
 static std::string getModuleContextHash(const ModuleDeps &MD,
+                                        const CompilerInvocation &CI,
                                         bool EagerLoadModules) {
   llvm::HashBuilder<llvm::TruncatedBLAKE3<16>,
                     llvm::support::endianness::native>
@@ -188,7 +184,7 @@ static std::string getModuleContextHash(const ModuleDeps &MD,
 
   // Hash the BuildInvocation without any input files.
   SmallVector<const char *, 32> DummyArgs;
-  MD.BuildInvocation.generateCC1CommandLine(DummyArgs, [&](const Twine &Arg) {
+  CI.generateCC1CommandLine(DummyArgs, [&](const Twine &Arg) {
     Scratch.clear();
     StringRef Str = Arg.toStringRef(Scratch);
     HashBuilder.add(Str);
@@ -277,6 +273,11 @@ void ModuleDepCollectorPP::EndOfMainFile() {
 
   if (!MDC.ScanInstance.getPreprocessorOpts().ImplicitPCHInclude.empty())
     MDC.addFileDep(MDC.ScanInstance.getPreprocessorOpts().ImplicitPCHInclude);
+
+  for (const Module *M :
+       MDC.ScanInstance.getPreprocessor().getAffectingModules())
+    if (!MDC.isPrebuiltModule(M))
+      DirectModularDeps.insert(M);
 
   for (const Module *M : DirectModularDeps) {
     // A top-level module might not be actually imported as a module when
@@ -389,8 +390,10 @@ ModuleID ModuleDepCollectorPP::handleTopLevelModule(const Module *M) {
   addAllSubmodulePrebuiltDeps(M, MD, SeenModules);
   llvm::DenseSet<const Module *> AddedModules;
   addAllSubmoduleDeps(M, MD, AddedModules);
+  llvm::DenseSet<const Module *> ProcessedModules;
+  addAllAffectingModules(M, MD, ProcessedModules);
 
-  MD.BuildInvocation = MDC.makeInvocationForModuleBuildWithoutOutputs(
+  CompilerInvocation CI = MDC.makeInvocationForModuleBuildWithoutOutputs(
       MD, [&](CompilerInvocation &BuildInvocation) {
         if (MDC.OptimizeArgs)
           optimizeHeaderSearchOpts(BuildInvocation.getHeaderSearchOpts(),
@@ -398,9 +401,12 @@ ModuleID ModuleDepCollectorPP::handleTopLevelModule(const Module *M) {
       });
 
   // Compute the context hash from the inputs. Requires dependencies.
-  MD.ID.ContextHash = getModuleContextHash(MD, MDC.EagerLoadModules);
+  MD.ID.ContextHash = getModuleContextHash(MD, CI, MDC.EagerLoadModules);
   // Finish the compiler invocation. Requires dependencies and the context hash.
-  MDC.addOutputPaths(MD);
+  MDC.addOutputPaths(CI, MD);
+
+  MD.BuildArguments = CI.getCC1CommandLine();
+
   return MD.ID;
 }
 
@@ -456,6 +462,30 @@ void ModuleDepCollectorPP::addModuleDep(
         !MDC.isPrebuiltModule(Import)) {
       ModuleID ImportID = handleTopLevelModule(Import->getTopLevelModule());
       if (AddedModules.insert(Import->getTopLevelModule()).second)
+        MD.ClangModuleDeps.push_back(ImportID);
+    }
+  }
+}
+
+void ModuleDepCollectorPP::addAllAffectingModules(
+    const Module *M, ModuleDeps &MD,
+    llvm::DenseSet<const Module *> &AddedModules) {
+  addAffectingModule(M, MD, AddedModules);
+
+  for (const Module *SubM : M->submodules())
+    addAllAffectingModules(SubM, MD, AddedModules);
+}
+
+void ModuleDepCollectorPP::addAffectingModule(
+    const Module *M, ModuleDeps &MD,
+    llvm::DenseSet<const Module *> &AddedModules) {
+  for (const Module *Affecting : M->AffectingModules) {
+    assert(Affecting == Affecting->getTopLevelModule() &&
+           "Not quite import not top-level module");
+    if (Affecting != M->getTopLevelModule() &&
+        !MDC.isPrebuiltModule(Affecting)) {
+      ModuleID ImportID = handleTopLevelModule(Affecting);
+      if (AddedModules.insert(Affecting).second)
         MD.ClangModuleDeps.push_back(ImportID);
     }
   }
