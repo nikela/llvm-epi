@@ -3486,8 +3486,8 @@ unsigned FunctionDecl::getMinRequiredArguments() const {
 bool FunctionDecl::hasOneParamOrDefaultArgs() const {
   return getNumParams() == 1 ||
          (getNumParams() > 1 &&
-          std::all_of(param_begin() + 1, param_end(),
-                      [](ParmVarDecl *P) { return P->hasDefaultArg(); }));
+          llvm::all_of(llvm::drop_begin(parameters()),
+                       [](ParmVarDecl *P) { return P->hasDefaultArg(); }));
 }
 
 /// The combination of the extern and inline keywords under MSVC forces
@@ -4621,6 +4621,21 @@ SourceRange EnumDecl::getSourceRange() const {
   return Res;
 }
 
+void EnumDecl::getValueRange(llvm::APInt &Max, llvm::APInt &Min) const {
+  unsigned Bitwidth = getASTContext().getIntWidth(getIntegerType());
+  unsigned NumNegativeBits = getNumNegativeBits();
+  unsigned NumPositiveBits = getNumPositiveBits();
+
+  if (NumNegativeBits) {
+    unsigned NumBits = std::max(NumNegativeBits, NumPositiveBits + 1);
+    Max = llvm::APInt(Bitwidth, 1) << (NumBits - 1);
+    Min = -Max;
+  } else {
+    Max = llvm::APInt(Bitwidth, 1) << NumPositiveBits;
+    Min = llvm::APInt::getZero(Bitwidth);
+  }
+}
+
 //===----------------------------------------------------------------------===//
 // RecordDecl Implementation
 //===----------------------------------------------------------------------===//
@@ -4967,6 +4982,12 @@ bool ValueDecl::isWeak() const {
   auto *MostRecent = getMostRecentDecl();
   return MostRecent->hasAttr<WeakAttr>() ||
          MostRecent->hasAttr<WeakRefAttr>() || isWeakImported();
+}
+
+bool ValueDecl::isInitCapture() const {
+  if (auto *Var = llvm::dyn_cast<VarDecl>(this))
+    return Var->isInitCapture();
+  return false;
 }
 
 void ImplicitParamDecl::anchor() {}

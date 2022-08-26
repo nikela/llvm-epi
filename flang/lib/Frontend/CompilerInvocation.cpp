@@ -145,6 +145,39 @@ static bool parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
                                   clang::driver::options::OPT_fno_unroll_loops,
                                   (opts.OptimizationLevel > 1));
 
+  // -mrelocation-model option.
+  if (const llvm::opt::Arg *A =
+          args.getLastArg(clang::driver::options::OPT_mrelocation_model)) {
+    llvm::StringRef ModelName = A->getValue();
+    auto RM = llvm::StringSwitch<llvm::Optional<llvm::Reloc::Model>>(ModelName)
+                  .Case("static", llvm::Reloc::Static)
+                  .Case("pic", llvm::Reloc::PIC_)
+                  .Case("dynamic-no-pic", llvm::Reloc::DynamicNoPIC)
+                  .Case("ropi", llvm::Reloc::ROPI)
+                  .Case("rwpi", llvm::Reloc::RWPI)
+                  .Case("ropi-rwpi", llvm::Reloc::ROPI_RWPI)
+                  .Default(llvm::None);
+    if (RM.has_value())
+      opts.setRelocationModel(*RM);
+    else
+      diags.Report(clang::diag::err_drv_invalid_value)
+          << A->getAsString(args) << ModelName;
+  }
+
+  // -pic-level and -pic-is-pie option.
+  if (int PICLevel = getLastArgIntValue(
+          args, clang::driver::options::OPT_pic_level, 0, diags)) {
+    if (PICLevel > 2)
+      diags.Report(clang::diag::err_drv_invalid_value)
+          << args.getLastArg(clang::driver::options::OPT_pic_level)
+                 ->getAsString(args)
+          << PICLevel;
+
+    opts.PICLevel = PICLevel;
+    if (args.hasArg(clang::driver::options::OPT_pic_is_pie))
+      opts.IsPIE = 1;
+  }
+
   return diags.getNumErrors() == numErrorsBefore;
 }
 
@@ -559,28 +592,6 @@ static bool parseSemaArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
   return diags.getNumErrors() == numErrorsBefore;
 }
 
-static bool parseCodeShapeArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
-    clang::DiagnosticsEngine &diags) {
-  unsigned numErrorsBefore = diags.getNumErrors();
-
-  res.PICLevel =
-      getLastArgIntValue(args, clang::driver::options::OPT_pic_level, 0, diags);
-  res.PIE = args.hasArg(clang::driver::options::OPT_pic_is_pie);
-  llvm::StringRef RM =
-      args.getLastArgValue(clang::driver::options::OPT_mrelocation_model, "");
-  res.RM = llvm::StringSwitch<llvm::Reloc::Model>(RM)
-               .Case("static", llvm::Reloc::Static)
-               .Case("pic", llvm::Reloc::PIC_)
-               .Case("ropi", llvm::Reloc::ROPI)
-               .Case("rwpi", llvm::Reloc::RWPI)
-               .Case("ropi-rwpi", llvm::Reloc::ROPI_RWPI)
-               .Case("dynamic-no-pic", llvm::Reloc::DynamicNoPIC)
-               // This is the default in clang::CodegenOptions.
-               .Default(llvm::Reloc::PIC_);
-
-  return diags.getNumErrors() == numErrorsBefore;
-}
-
 /// Parses all diagnostics related arguments and populates the variables
 /// options accordingly. Returns false if new errors are generated.
 static bool parseDiagArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
@@ -723,7 +734,6 @@ bool CompilerInvocation::createFromArgs(
   parseTargetArgs(res.getTargetOpts(), args);
   parsePreprocessorArgs(res.getPreprocessorOpts(), args);
   success &= parseCodeGenArgs(res.getCodeGenOpts(), args, diags);
-  success &= parseCodeShapeArgs(res, args, diags);
   success &= parseSemaArgs(res, args, diags);
   success &= parseDialectArgs(res, args, diags);
   success &= parseDiagArgs(res, args, diags);
@@ -869,4 +879,13 @@ void CompilerInvocation::setSemanticsOpts(
       .set_warnOnNonstandardUsage(getEnableConformanceChecks())
       .set_warningsAreErrors(getWarnAsErr())
       .set_moduleFileSuffix(getModuleFileSuffix());
+}
+
+/// Set \p loweringOptions controlling lowering behavior based
+/// on the \p optimizationLevel.
+void CompilerInvocation::setLoweringOptions() {
+  const auto &codegenOpts = getCodeGenOpts();
+
+  // Lower TRANSPOSE as a runtime call under -O0.
+  loweringOpts.setOptimizeTranspose(codegenOpts.OptimizationLevel > 0);
 }

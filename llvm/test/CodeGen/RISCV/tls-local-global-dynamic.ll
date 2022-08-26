@@ -11,10 +11,9 @@ define void @test_1() nounwind {
 ; RV32:       # %bb.0: # %entry
 ; RV32-NEXT:    addi sp, sp, -16
 ; RV32-NEXT:    sw ra, 12(sp) # 4-byte Folded Spill
-; RV32-NEXT:  .LBB0_1: # %entry
-; RV32-NEXT:    # Label of block must be emitted
+; RV32-NEXT:  .Lpcrel_hi0:
 ; RV32-NEXT:    auipc a0, %tls_gd_pcrel_hi(x)
-; RV32-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
+; RV32-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi0)
 ; RV32-NEXT:    call __tls_get_addr@plt
 ; RV32-NEXT:    lw a1, 0(a0)
 ; RV32-NEXT:    addi a1, a1, 1
@@ -27,10 +26,9 @@ define void @test_1() nounwind {
 ; RV64:       # %bb.0: # %entry
 ; RV64-NEXT:    addi sp, sp, -16
 ; RV64-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64-NEXT:  .LBB0_1: # %entry
-; RV64-NEXT:    # Label of block must be emitted
+; RV64-NEXT:  .Lpcrel_hi0:
 ; RV64-NEXT:    auipc a0, %tls_gd_pcrel_hi(x)
-; RV64-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
+; RV64-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi0)
 ; RV64-NEXT:    call __tls_get_addr@plt
 ; RV64-NEXT:    lw a1, 0(a0)
 ; RV64-NEXT:    addiw a1, a1, 1
@@ -52,10 +50,9 @@ define void @test_2() nounwind {
 ; RV32:       # %bb.0: # %entry
 ; RV32-NEXT:    addi sp, sp, -16
 ; RV32-NEXT:    sw ra, 12(sp) # 4-byte Folded Spill
-; RV32-NEXT:  .LBB1_1: # %entry
-; RV32-NEXT:    # Label of block must be emitted
+; RV32-NEXT:  .Lpcrel_hi1:
 ; RV32-NEXT:    auipc a0, %tls_gd_pcrel_hi(y)
-; RV32-NEXT:    addi a0, a0, %pcrel_lo(.LBB1_1)
+; RV32-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi1)
 ; RV32-NEXT:    call __tls_get_addr@plt
 ; RV32-NEXT:    lw a1, 0(a0)
 ; RV32-NEXT:    addi a1, a1, 1
@@ -68,10 +65,9 @@ define void @test_2() nounwind {
 ; RV64:       # %bb.0: # %entry
 ; RV64-NEXT:    addi sp, sp, -16
 ; RV64-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64-NEXT:  .LBB1_1: # %entry
-; RV64-NEXT:    # Label of block must be emitted
+; RV64-NEXT:  .Lpcrel_hi1:
 ; RV64-NEXT:    auipc a0, %tls_gd_pcrel_hi(y)
-; RV64-NEXT:    addi a0, a0, %pcrel_lo(.LBB1_1)
+; RV64-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi1)
 ; RV64-NEXT:    call __tls_get_addr@plt
 ; RV64-NEXT:    lw a1, 0(a0)
 ; RV64-NEXT:    addiw a1, a1, 1

@@ -11,7 +11,6 @@
 !FIRDialect:     %[[ARG2_PVT:.*]] = fir.alloca !fir.complex<8> {bindc_name = "arg2", pinned, uniq_name = "_QFfirstprivate_complexEarg2"}
 !FIRDialect:     %[[ARG2_VAL:.*]] = fir.load %[[ARG2]] : !fir.ref<!fir.complex<8>>
 !FIRDialect:     fir.store %[[ARG2_VAL]] to %[[ARG2_PVT]] : !fir.ref<!fir.complex<8>>
-!FIRDialect:     omp.barrier
 !FIRDialect:     fir.call @_QPfoo(%[[ARG1_PVT]], %[[ARG2_PVT]]) : (!fir.ref<!fir.complex<4>>, !fir.ref<!fir.complex<8>>) -> ()
 !FIRDialect:     omp.terminator
 !FIRDialect:   }
@@ -43,7 +42,6 @@ end subroutine
 !FIRDialect:    %[[ARG5_PVT:.*]] = fir.alloca i64 {bindc_name = "arg5", pinned, uniq_name = "_QFfirstprivate_integerEarg5"}
 !FIRDialect:    %[[ARG5_VAL:.*]] = fir.load %[[ARG5]] : !fir.ref<i64>
 !FIRDialect:    fir.store %[[ARG5_VAL]] to %[[ARG5_PVT]] : !fir.ref<i64>
-!FIRDialect:    omp.barrier
 !FIRDialect:    fir.call @_QPbar(%[[ARG1_PVT]], %[[ARG2_PVT]], %[[ARG3_PVT]], %[[ARG4_PVT]], %[[ARG5_PVT]]) : (!fir.ref<i32>, !fir.ref<i8>, !fir.ref<i16>, !fir.ref<i32>, !fir.ref<i64>) -> ()
 !FIRDialect:    omp.terminator
 !FIRDialect:  }
@@ -78,7 +76,6 @@ end subroutine
 !FIRDialect:     %[[ARG5_PVT:.*]] = fir.alloca !fir.logical<8> {bindc_name = "arg5", pinned, uniq_name = "_QFfirstprivate_logicalEarg5"}
 !FIRDialect:     %[[ARG5_VAL:.*]] = fir.load %[[ARG5]] : !fir.ref<!fir.logical<8>>
 !FIRDialect:     fir.store %[[ARG5_VAL]] to %[[ARG5_PVT]] : !fir.ref<!fir.logical<8>>
-!FIRDialect:     omp.barrier
 !FIRDialect:     fir.call @_QPbaz(%[[ARG1_PVT]], %[[ARG2_PVT]], %[[ARG3_PVT]], %[[ARG4_PVT]], %[[ARG5_PVT]]) : (!fir.ref<!fir.logical<4>>, !fir.ref<!fir.logical<1>>, !fir.ref<!fir.logical<2>>, !fir.ref<!fir.logical<4>>, !fir.ref<!fir.logical<8>>) -> ()
 !FIRDialect:     omp.terminator
 !FIRDialect:   }
@@ -107,7 +104,6 @@ end subroutine
 !FIRDialect:     %[[ARG4_PVT:.*]] = fir.alloca f64 {bindc_name = "arg4", pinned, uniq_name = "_QFfirstprivate_realEarg4"}
 !FIRDialect:     %[[ARG4_VAL:.*]] = fir.load %[[ARG4]] : !fir.ref<f64>
 !FIRDialect:     fir.store %[[ARG4_VAL]] to %[[ARG4_PVT]] : !fir.ref<f64>
-!FIRDialect:     omp.barrier
 !FIRDialect:     fir.call @_QPqux(%[[ARG1_PVT]], %[[ARG3_PVT]], %[[ARG4_PVT]]) : (!fir.ref<f32>, !fir.ref<f32>, !fir.ref<f64>) -> ()
 !FIRDialect:     omp.terminator
 !FIRDialect:   }
@@ -133,7 +129,6 @@ end subroutine
 !FIRDialect:             %[[B_PRIV_ADDR:.*]] = fir.alloca i32 {bindc_name = "b", pinned, uniq_name = "_QFmultiple_firstprivateEb"}
 !FIRDialect:             %[[B:.*]] = fir.load %[[B_ADDR]] : !fir.ref<i32>
 !FIRDialect:             fir.store %[[B]] to %[[B_PRIV_ADDR]] : !fir.ref<i32>
-!FIRDialect:             omp.barrier
 !FIRDialect-NOT:         omp.barrier
 !FIRDialect:             fir.call @_QPquux(%[[A_PRIV_ADDR]], %[[B_PRIV_ADDR]]) : (!fir.ref<i32>, !fir.ref<i32>) -> ()
 !FIRDialect:             omp.terminator

@@ -14,8 +14,8 @@ function test_real4(x)
 end function
 
 ! ALL-LABEL: @_QPtest_real4
-! FAST: {{%[A-Za-z0-9._]+}} = math.abs {{%[A-Za-z0-9._]+}} : f32
-! RELAXED: {{%[A-Za-z0-9._]+}} = math.abs {{%[A-Za-z0-9._]+}} : f32
+! FAST: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f32
+! RELAXED: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f32
 ! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @fabsf({{%[A-Za-z0-9._]+}}) : (f32) -> f32
 
 function test_real8(x)
@@ -24,8 +24,8 @@ function test_real8(x)
 end function
 
 ! ALL-LABEL: @_QPtest_real8
-! FAST: {{%[A-Za-z0-9._]+}} = math.abs {{%[A-Za-z0-9._]+}} : f64
-! RELAXED: {{%[A-Za-z0-9._]+}} = math.abs {{%[A-Za-z0-9._]+}} : f64
+! FAST: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f64
+! RELAXED: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f64
 ! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @fabs({{%[A-Za-z0-9._]+}}) : (f64) -> f64
 
 function test_complex4(c)

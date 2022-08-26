@@ -21,7 +21,7 @@ end subroutine
 ! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<f32>{{.*}}, %[[VAL_1:.*]]: !fir.ref<f32>{{.*}}) {
 subroutine abs_testr(a, b)
 ! CHECK: %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<f32>
-! CHECK: %[[VAL_3:.*]] = math.abs %[[VAL_2]] : f32
+! CHECK: %[[VAL_3:.*]] = math.absf %[[VAL_2]] : f32
 ! CHECK: fir.store %[[VAL_3]] to %[[VAL_1]] : !fir.ref<f32>
 ! CHECK: return
   real :: a, b
@@ -32,7 +32,7 @@ end subroutine
 ! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<f64>{{.*}}, %[[VAL_1:.*]]: !fir.ref<f64>{{.*}}) {
 subroutine abs_testd(a, b)
 ! CHECK: %[[VAL_2:.*]] = fir.load %[[VAL_0]] : !fir.ref<f64>
-! CHECK: %[[VAL_3:.*]] = math.abs %[[VAL_2]] : f64
+! CHECK: %[[VAL_3:.*]] = math.absf %[[VAL_2]] : f64
 ! CHECK: fir.store %[[VAL_3]] to %[[VAL_1]] : !fir.ref<f64>
 ! CHECK: return
   real(kind=8) :: a, b

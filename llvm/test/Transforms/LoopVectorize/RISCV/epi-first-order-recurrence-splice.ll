@@ -168,24 +168,24 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECKVP-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECKVP:       vector.body:
 ; CHECKVP-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECKVP-NEXT:    [[PREV_EVL:%.*]] = phi i32 [ [[TMP8]], [[VECTOR_PH]] ], [ [[TMP16:%.*]], [[VECTOR_BODY]] ]
+; CHECKVP-NEXT:    [[PREV_EVL:%.*]] = phi i32 [ [[TMP8]], [[VECTOR_PH]] ], [ [[TMP14:%.*]], [[VECTOR_BODY]] ]
 ; CHECKVP-NEXT:    [[VECTOR_RECUR:%.*]] = phi <vscale x 2 x i32> [ [[VECTOR_RECUR_INIT]], [[VECTOR_PH]] ], [ [[VP_OP_LOAD:%.*]], [[VECTOR_BODY]] ]
-; CHECKVP-NEXT:    [[TMP12:%.*]] = add nuw nsw i64 [[INDEX]], 1
-; CHECKVP-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[TMP12]]
-; CHECKVP-NEXT:    [[TMP14:%.*]] = sub i64 [[TMP2]], [[INDEX]]
-; CHECKVP-NEXT:    [[TMP15:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP14]], i64 2, i64 0)
-; CHECKVP-NEXT:    [[TMP16]] = trunc i64 [[TMP15]] to i32
-; CHECKVP-NEXT:    [[TMP17:%.*]] = bitcast i32* [[TMP13]] to <vscale x 2 x i32>*
-; CHECKVP-NEXT:    [[VP_OP_LOAD]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* nonnull [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP16]])
+; CHECKVP-NEXT:    [[TMP12:%.*]] = sub i64 [[TMP2]], [[INDEX]]
+; CHECKVP-NEXT:    [[TMP13:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP12]], i64 2, i64 0)
+; CHECKVP-NEXT:    [[TMP14]] = trunc i64 [[TMP13]] to i32
+; CHECKVP-NEXT:    [[TMP15:%.*]] = add nuw nsw i64 [[INDEX]], 1
+; CHECKVP-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[TMP15]]
+; CHECKVP-NEXT:    [[TMP17:%.*]] = bitcast i32* [[TMP16]] to <vscale x 2 x i32>*
+; CHECKVP-NEXT:    [[VP_OP_LOAD]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* nonnull [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
 ; CHECKVP-NEXT:    [[TMP18:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECKVP-NEXT:    [[TMP19:%.*]] = shl i32 [[TMP18]], 1
 ; CHECKVP-NEXT:    [[TMP20:%.*]] = add i32 [[TMP19]], -1
-; CHECKVP-NEXT:    [[TMP21:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vp.splice.nxv2i32(<vscale x 2 x i32> [[VECTOR_RECUR]], <vscale x 2 x i32> [[VP_OP_LOAD]], i32 [[TMP20]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[PREV_EVL]], i32 [[TMP16]])
+; CHECKVP-NEXT:    [[TMP21:%.*]] = call <vscale x 2 x i32> @llvm.experimental.vp.splice.nxv2i32(<vscale x 2 x i32> [[VECTOR_RECUR]], <vscale x 2 x i32> [[VP_OP_LOAD]], i32 [[TMP20]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[PREV_EVL]], i32 [[TMP14]])
 ; CHECKVP-NEXT:    [[TMP22:%.*]] = getelementptr inbounds i32, i32* [[B:%.*]], i64 [[INDEX]]
-; CHECKVP-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> [[TMP21]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP16]])
+; CHECKVP-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i32> [[TMP21]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
 ; CHECKVP-NEXT:    [[TMP23:%.*]] = bitcast i32* [[TMP22]] to <vscale x 2 x i32>*
-; CHECKVP-NEXT:    call void @llvm.vp.store.nxv2i32.p0nxv2i32(<vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32>* [[TMP23]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP16]])
-; CHECKVP-NEXT:    [[TMP24:%.*]] = and i64 [[TMP15]], 4294967295
+; CHECKVP-NEXT:    call void @llvm.vp.store.nxv2i32.p0nxv2i32(<vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32>* [[TMP23]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; CHECKVP-NEXT:    [[TMP24:%.*]] = and i64 [[TMP13]], 4294967295
 ; CHECKVP-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP24]]
 ; CHECKVP-NEXT:    [[TMP25:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[TMP2]]
 ; CHECKVP-NEXT:    br i1 [[TMP25]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]

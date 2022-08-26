@@ -39,7 +39,6 @@ private:
   /// \param [out] CmdArgs The list of output command arguments
   void AddPreprocessingOptions(const llvm::opt::ArgList &Args,
                                llvm::opt::ArgStringList &CmdArgs) const;
-
   /// Extract code generation options from the driver arguments and add them to
   /// the list of arguments for the generated command/job.
   ///
@@ -56,6 +55,14 @@ private:
   void AddCodeModelOptions(const llvm::opt::ArgList &Args,
                            llvm::opt::ArgStringList &CmdArgs,
                            const llvm::Triple &Triple) const;
+
+  /// Extract PIC options from the driver arguments and add them to
+  /// the command arguments.
+  ///
+  /// \param [in] Args The list of input driver arguments
+  /// \param [out] CmdArgs The list of output command arguments
+  void AddPicOptions(const llvm::opt::ArgList &Args,
+                     llvm::opt::ArgStringList &CmdArgs) const;
 
   /// Extract other compilation options from the driver arguments and add them
   /// to the command arguments.

@@ -46,9 +46,11 @@ struct ModuleID {
   /// or a header-name for C++20 header units.
   std::string ModuleName;
 
-  /// The context hash of a module represents the set of compiler options that
-  /// may make one version of a module incompatible with another. This includes
-  /// things like language mode, predefined macros, header search paths, etc...
+  /// The context hash of a module represents the compiler options that affect
+  /// the resulting command-line invocation.
+  ///
+  /// Modules with the same name and ContextHash but different invocations could
+  /// cause non-deterministic build results.
   ///
   /// Modules with the same name but a different \c ContextHash should be
   /// treated as separate modules for the purpose of a build.
@@ -117,29 +119,9 @@ struct ModuleDeps {
   // the primary TU.
   bool ImportedByMainFile = false;
 
-  /// Whether the TU had a dependency file. The path in \c BuildInvocation is
-  /// cleared to avoid leaking the specific path from the TU into the module.
-  bool HadDependencyFile = false;
-
-  /// Whether the TU had serialized diagnostics. The path in \c BuildInvocation
-  /// is cleared to avoid leaking the specific path from the TU into the module.
-  bool HadSerializedDiagnostics = false;
-
-  /// Compiler invocation that can be used to build this module (without paths).
-  CompilerInvocation BuildInvocation;
-
-  /// Gets the canonical command line suitable for passing to clang.
-  ///
-  /// \param LookupModuleOutput This function is called to fill in
-  ///                           "-fmodule-file=", "-o" and other output
-  ///                           arguments.
-  std::vector<std::string> getCanonicalCommandLine(
-      llvm::function_ref<std::string(const ModuleID &, ModuleOutputKind)>
-          LookupModuleOutput) const;
-
-  /// Gets the canonical command line suitable for passing to clang, excluding
-  /// "-fmodule-file=" and "-o" arguments.
-  std::vector<std::string> getCanonicalCommandLineWithoutModulePaths() const;
+  /// Compiler invocation that can be used to build this module. Does not
+  /// include argv[0].
+  std::vector<std::string> BuildArguments;
 };
 
 class ModuleDepCollector;
@@ -192,6 +174,13 @@ private:
                            llvm::DenseSet<const Module *> &AddedModules);
   void addModuleDep(const Module *M, ModuleDeps &MD,
                     llvm::DenseSet<const Module *> &AddedModules);
+
+  /// Traverses the affecting modules and updates \c MD with references to the
+  /// parent \c ModuleDepCollector info.
+  void addAllAffectingModules(const Module *M, ModuleDeps &MD,
+                              llvm::DenseSet<const Module *> &AddedModules);
+  void addAffectingModule(const Module *M, ModuleDeps &MD,
+                          llvm::DenseSet<const Module *> &AddedModules);
 };
 
 /// Collects modular and non-modular dependencies of the main file by attaching
@@ -200,7 +189,8 @@ class ModuleDepCollector final : public DependencyCollector {
 public:
   ModuleDepCollector(std::unique_ptr<DependencyOutputOptions> Opts,
                      CompilerInstance &ScanInstance, DependencyConsumer &C,
-                     CompilerInvocation &&OriginalCI, bool OptimizeArgs);
+                     CompilerInvocation &&OriginalCI, bool OptimizeArgs,
+                     bool EagerLoadModules);
 
   void attachToPreprocessor(Preprocessor &PP) override;
   void attachToASTReader(ASTReader &R) override;
@@ -227,16 +217,26 @@ private:
   CompilerInvocation OriginalInvocation;
   /// Whether to optimize the modules' command-line arguments.
   bool OptimizeArgs;
+  /// Whether to set up command-lines to load PCM files eagerly.
+  bool EagerLoadModules;
 
   /// Checks whether the module is known as being prebuilt.
   bool isPrebuiltModule(const Module *M);
 
+  /// Adds \p Path to \c FileDeps, making it absolute if necessary.
+  void addFileDep(StringRef Path);
+  /// Adds \p Path to \c MD.FileDeps, making it absolute if necessary.
+  void addFileDep(ModuleDeps &MD, StringRef Path);
+
   /// Constructs a CompilerInvocation that can be used to build the given
   /// module, excluding paths to discovered modular dependencies that are yet to
   /// be built.
-  CompilerInvocation makeInvocationForModuleBuildWithoutPaths(
+  CompilerInvocation makeInvocationForModuleBuildWithoutOutputs(
       const ModuleDeps &Deps,
       llvm::function_ref<void(CompilerInvocation &)> Optimize) const;
+
+  /// Add paths that require looking up outputs to the given dependencies.
+  void addOutputPaths(CompilerInvocation &CI, ModuleDeps &Deps);
 };
 
 } // end namespace dependencies

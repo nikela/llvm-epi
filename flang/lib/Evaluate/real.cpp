@@ -750,8 +750,7 @@ template <typename W, int P> Real<W, P> Real<W, P>::SPACING() const {
     return TINY();
   } else {
     Real result;
-    result.Normalize(
-        false, Exponent() - binaryPrecision + 1, Fraction::MASKL(1));
+    result.Normalize(false, Exponent(), Fraction::MASKR(1));
     return result;
   }
 }
@@ -766,9 +765,7 @@ Real<W, P> Real<W, P>::SET_EXPONENT(int expo) const {
   } else if (IsZero()) {
     return *this;
   } else {
-    Real result;
-    result.Normalize(IsNegative(), expo + exponentBias - 1, GetFraction());
-    return result;
+    return SCALE(Integer<32>(expo - UnbiasedExponent() - 1)).value;
   }
 }
 

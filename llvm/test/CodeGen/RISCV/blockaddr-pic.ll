@@ -50,10 +50,9 @@ define signext i32 @foo(i32 signext %w) nounwind {
 ; RV32-PIC-LABEL: foo:
 ; RV32-PIC:       # %bb.0: # %entry
 ; RV32-PIC-NEXT:    addi sp, sp, -16
-; RV32-PIC-NEXT:  .LBB0_4: # %entry
-; RV32-PIC-NEXT:    # Label of block must be emitted
+; RV32-PIC-NEXT:  .Lpcrel_hi0:
 ; RV32-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_4)
+; RV32-PIC-NEXT:    addi a1, a1, %pcrel_lo(.Lpcrel_hi0)
 ; RV32-PIC-NEXT:    li a2, 101
 ; RV32-PIC-NEXT:    sw a1, 8(sp)
 ; RV32-PIC-NEXT:    blt a0, a2, .LBB0_3
@@ -73,10 +72,9 @@ define signext i32 @foo(i32 signext %w) nounwind {
 ; RV64-PIC-LABEL: foo:
 ; RV64-PIC:       # %bb.0: # %entry
 ; RV64-PIC-NEXT:    addi sp, sp, -16
-; RV64-PIC-NEXT:  .LBB0_4: # %entry
-; RV64-PIC-NEXT:    # Label of block must be emitted
+; RV64-PIC-NEXT:  .Lpcrel_hi0:
 ; RV64-PIC-NEXT:    auipc a1, %pcrel_hi(.Ltmp0)
-; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.LBB0_4)
+; RV64-PIC-NEXT:    addi a1, a1, %pcrel_lo(.Lpcrel_hi0)
 ; RV64-PIC-NEXT:    li a2, 101
 ; RV64-PIC-NEXT:    sd a1, 8(sp)
 ; RV64-PIC-NEXT:    blt a0, a2, .LBB0_3

@@ -1,4 +1,4 @@
-; RUN: opt -S -loop-vectorize < %s -o - |& FileCheck %s
+; RUN: opt -S -loop-vectorize < %s -o - 2>&1 | FileCheck %s
 
 ; ModuleID = 'custom/LoopVectorize/declare_simd-wrong_simdlen.c'
 source_filename = "custom/LoopVectorize/declare_simd-wrong_simdlen.c"

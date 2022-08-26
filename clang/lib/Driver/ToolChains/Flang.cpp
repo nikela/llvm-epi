@@ -120,24 +120,6 @@ void Flang::AddCodeGenOptions(const ArgList &Args,
                   options::OPT_fno_unroll_loops);
 }
 
-static const char *RelocationModelName(llvm::Reloc::Model Model) {
-  switch (Model) {
-  case llvm::Reloc::Static:
-    return "static";
-  case llvm::Reloc::PIC_:
-    return "pic";
-  case llvm::Reloc::DynamicNoPIC:
-    return "dynamic-no-pic";
-  case llvm::Reloc::ROPI:
-    return "ropi";
-  case llvm::Reloc::RWPI:
-    return "rwpi";
-  case llvm::Reloc::ROPI_RWPI:
-    return "ropi-rwpi";
-  }
-  llvm_unreachable("Unknown Reloc::Model kind");
-}
-
 static bool mustUseNonLeafFramePointerForTarget(const llvm::Triple &Triple) {
   switch (Triple.getArch()){
   default:
@@ -259,28 +241,6 @@ getFramePointerKind(const ArgList &Args, const llvm::Triple &Triple) {
 void Flang::AddCodeModelOptions(const ArgList &Args,
                                 ArgStringList &CmdArgs,
                                 const llvm::Triple &Triple) const {
-  // FIXME: Some of this stuff is copied from Clang.cpp.
-  // Handle -fPIC et al -- the relocation-model affects the assembler
-  // for some targets.
-  llvm::Reloc::Model RelocationModel;
-  unsigned PICLevel;
-  bool IsPIE;
-  std::tie(RelocationModel, PICLevel, IsPIE) =
-      ParsePICArgs(getToolChain(), Args);
-
-  if (PICLevel > 0) {
-    CmdArgs.push_back("-pic-level");
-    CmdArgs.push_back(PICLevel == 1 ? "1" : "2");
-    if (IsPIE)
-      CmdArgs.push_back("-pic-is-pie");
-  }
-
-  const char *RMName = RelocationModelName(RelocationModel);
-  if (RMName) {
-    CmdArgs.push_back("-mrelocation-model");
-    CmdArgs.push_back(RMName);
-  }
-
   CodeGenOptions::FramePointerKind FPKeepKind =
       getFramePointerKind(Args, Triple);
   const char *FPKeepKindStr = nullptr;
@@ -615,7 +575,6 @@ void Flang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
     AddAArch64TargetArgs(Args, CmdArgs);
-    CmdArgs.push_back("-fallow-half-arguments-and-returns");
     break;
   case llvm::Triple::riscv64:
     AddRISCVTargetArgs(Args, CmdArgs);
@@ -624,6 +583,27 @@ void Flang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
   case llvm::Triple::x86_64:
     AddX86TargetArgs(Args, CmdArgs);
     break;
+  }
+}
+
+void Flang::AddPicOptions(const ArgList &Args, ArgStringList &CmdArgs) const {
+  // ParsePICArgs parses -fPIC/-fPIE and their variants and returns a tuple of
+  // (RelocationModel, PICLevel, IsPIE).
+  llvm::Reloc::Model RelocationModel;
+  unsigned PICLevel;
+  bool IsPIE;
+  std::tie(RelocationModel, PICLevel, IsPIE) =
+      ParsePICArgs(getToolChain(), Args);
+
+  if (auto *RMName = RelocationModelName(RelocationModel)) {
+    CmdArgs.push_back("-mrelocation-model");
+    CmdArgs.push_back(RMName);
+  }
+  if (PICLevel > 0) {
+    CmdArgs.push_back("-pic-level");
+    CmdArgs.push_back(PICLevel == 1 ? "1" : "2");
+    if (IsPIE)
+      CmdArgs.push_back("-pic-is-pie");
   }
 }
 
@@ -693,6 +673,9 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
                   options::OPT_fno_color_diagnostics);
   if (D.getDiags().getDiagnosticOptions().ShowColors)
     CmdArgs.push_back("-fcolor-diagnostics");
+
+  // -fPIC and related options.
+  AddPicOptions(Args, CmdArgs);
 
   // Add other compile options
   AddOtherOptions(Args, CmdArgs);

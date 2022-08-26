@@ -99,7 +99,7 @@ define <4 x i8> @test_vp_fptoui_v4i8_v4f32(<4 x float> %a, i32 zeroext %evl) {
 ; CHECK-NEXT:    vsetvli zero, a0, e16, mf2, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v9, v8
 ; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v9
+; CHECK-NEXT:    vnsrl.wi v8, v9, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <4 x i1> %m.first, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -113,7 +113,7 @@ define <4 x i8> @test_vp_fptoui_v4i8_v4f32_mask(<4 x float> %a, <4 x i1> %m, i32
 ; CHECK-NEXT:    vsetvli zero, a0, e16, mf2, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v9, v8, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v9, v0.t
+; CHECK-NEXT:    vnsrl.wi v8, v9, 0, v0.t
 ; CHECK-NEXT:    ret
     %x = call <4 x i8> @llvm.vp.fptoui.v4i8.v4f32(<4 x float> %a, <4 x i1> %m, i32 %evl)
     ret <4 x i8> %x
@@ -125,9 +125,9 @@ define <4 x i8> @test_vp_fptoui_v4i8_v4f64(<4 x double> %a, i32 zeroext %evl) {
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8
 ; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v10
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v8
+; CHECK-NEXT:    vnsrl.wi v8, v8, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <4 x i1> %m.first, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -141,9 +141,9 @@ define <4 x i8> @test_vp_fptoui_v4i8_v4f64_mask(<4 x double> %a, <4 x i1> %m, i3
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v10, v0.t
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e8, mf4, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v8, v0.t
+; CHECK-NEXT:    vnsrl.wi v8, v8, 0, v0.t
 ; CHECK-NEXT:    ret
     %x = call <4 x i8> @llvm.vp.fptoui.v4i8.v4f64(<4 x double> %a, <4 x i1> %m, i32 %evl)
     ret <4 x i8> %x
@@ -155,7 +155,7 @@ define <4 x i16> @test_vp_fptoui_v4i16_v4f64(<4 x double> %a, i32 zeroext %evl) 
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8
 ; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v10
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <4 x i1> undef, i1 1, i32 0
     %m.splat = shufflevector <4 x i1> %m.first, <4 x i1> undef, <4 x i32> zeroinitializer
@@ -169,7 +169,7 @@ define <4 x i16> @test_vp_fptoui_v4i16_v4f64_mask(<4 x double> %a, <4 x i1> %m, 
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e16, mf2, ta, mu
-; CHECK-NEXT:    vncvt.x.x.w v8, v10, v0.t
+; CHECK-NEXT:    vnsrl.wi v8, v10, 0, v0.t
 ; CHECK-NEXT:    ret
     %x = call <4 x i16> @llvm.vp.fptoui.v4i16.v4f64(<4 x double> %a, <4 x i1> %m, i32 %evl)
     ret <4 x i16> %x

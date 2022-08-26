@@ -188,6 +188,8 @@ verifyVPBasicBlock(const VPBasicBlock *VPBB,
         // block.
         if (UI->getParent() == VPBB) {
           if (RecipeNumbering[UI] < RecipeNumbering[&R]) {
+            LLVM_DEBUG(errs() << "Def: "; R.dump(); errs() << "\n";
+                       errs() << "Use: "; UI->dump(); errs() << "\n";);
             errs() << "Use before def!\n";
             return false;
           }
@@ -285,7 +287,7 @@ bool VPlanVerifier::verifyPlanIsValid(const VPlan &Plan) {
     }
   }
 
-  for (auto &KV : Plan.getLiveOuts())
+  for (const auto &KV : Plan.getLiveOuts())
     if (KV.second->getNumOperands() != 1) {
       errs() << "live outs must have a single operand\n";
       return false;
