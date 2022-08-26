@@ -6,7 +6,8 @@
 
 define dso_local float @fremf32(float %a, float %b) nounwind {
 ; CHECK-LABEL: fremf32:
-; CHECK:    call fmodf
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail fmodf@plt
 entry:
   %p = frem float %a, %b
   ret float  %p
@@ -14,7 +15,8 @@ entry:
 
 define dso_local double @fremf64(double %a, double %b) nounwind {
 ; CHECK-LABEL: fremf64:
-; CHECK:    call fmod
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail fmod@plt
 entry:
   %p = frem double %a, %b
   ret double  %p

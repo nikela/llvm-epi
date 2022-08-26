@@ -36,6 +36,21 @@ Operation *TensorDialect::materializeConstant(OpBuilder &builder,
   return nullptr;
 }
 
+SmallVector<OpFoldResult> tensor::getMixedSizes(OpBuilder &builder,
+                                                Location loc, Value value) {
+  auto tensorType = value.getType().cast<RankedTensorType>();
+  SmallVector<OpFoldResult> result;
+  for (int64_t i = 0; i < tensorType.getRank(); ++i) {
+    if (tensorType.isDynamicDim(i)) {
+      Value size = builder.create<tensor::DimOp>(loc, value, i);
+      result.push_back(size);
+    } else {
+      result.push_back(builder.getIndexAttr(tensorType.getDimSize(i)));
+    }
+  }
+  return result;
+}
+
 //===----------------------------------------------------------------------===//
 // CastOp
 //===----------------------------------------------------------------------===//
@@ -928,6 +943,36 @@ struct FoldReshapeWithFromElements : OpRewritePattern<TensorReshapeOp> {
   }
 };
 
+// Fold CastOp into CollapseShapeOp when adding static information.
+struct FoldCollapseOfCastOp : public OpRewritePattern<CollapseShapeOp> {
+  using OpRewritePattern<CollapseShapeOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(CollapseShapeOp collapseShapeOp,
+                                PatternRewriter &rewriter) const override {
+    auto castOp = collapseShapeOp.getSrc().getDefiningOp<tensor::CastOp>();
+    if (!tensor::canFoldIntoConsumerOp(castOp))
+      return failure();
+
+    RankedTensorType srcType =
+        castOp.getSource().getType().cast<RankedTensorType>();
+    RankedTensorType newResultType = computeTensorReshapeCollapsedType(
+        srcType, collapseShapeOp.getReassociationMaps());
+
+    if (newResultType == collapseShapeOp.getResultType()) {
+      rewriter.updateRootInPlace(collapseShapeOp, [&]() {
+        collapseShapeOp.getSrcMutable().assign(castOp.getSource());
+      });
+    } else {
+      auto newOp = rewriter.create<CollapseShapeOp>(
+          collapseShapeOp.getLoc(), newResultType, castOp.getSource(),
+          collapseShapeOp.getReassociation());
+      rewriter.replaceOpWithNewOp<tensor::CastOp>(
+          collapseShapeOp, collapseShapeOp.getResultType(), newOp);
+    }
+    return success();
+  }
+};
+
 } // namespace
 
 void ExpandShapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
@@ -940,10 +985,12 @@ void ExpandShapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
 
 void CollapseShapeOp::getCanonicalizationPatterns(RewritePatternSet &results,
                                                   MLIRContext *context) {
-  results.add<ComposeReassociativeReshapeOps<CollapseShapeOp>,
-              ComposeCollapseOfExpandOp<CollapseShapeOp, ExpandShapeOp>,
-              FoldReshapeWithConstant<CollapseShapeOp>,
-              FoldReshapeWithFromElements<CollapseShapeOp>>(context);
+  results
+      .add<ComposeReassociativeReshapeOps<CollapseShapeOp>,
+           ComposeCollapseOfExpandOp<CollapseShapeOp, ExpandShapeOp>,
+           FoldReshapeWithConstant<CollapseShapeOp>,
+           FoldReshapeWithFromElements<CollapseShapeOp>, FoldCollapseOfCastOp>(
+          context);
 }
 
 OpFoldResult ExpandShapeOp::fold(ArrayRef<Attribute> operands) {
@@ -1433,18 +1480,8 @@ Value mlir::tensor::createCanonicalRankReducingExtractSliceOp(
     OpBuilder &b, Location loc, Value tensor, RankedTensorType targetType) {
   auto rankedTensorType = tensor.getType().cast<RankedTensorType>();
   unsigned rank = rankedTensorType.getRank();
-  auto shape = rankedTensorType.getShape();
   SmallVector<OpFoldResult> offsets(rank, b.getIndexAttr(0));
-  SmallVector<OpFoldResult> sizes;
-  for (unsigned i = 0, e = rank; i < e; ++i) {
-    OpFoldResult dim;
-    if (rankedTensorType.isDynamicDim(i))
-      dim = b.createOrFold<tensor::DimOp>(
-          loc, tensor, b.create<arith::ConstantIndexOp>(loc, i));
-    else
-      dim = b.getIndexAttr(shape[i]);
-    sizes.push_back(dim);
-  }
+  SmallVector<OpFoldResult> sizes = getMixedSizes(b, loc, tensor);
   SmallVector<OpFoldResult> strides(rank, b.getIndexAttr(1));
   return b.createOrFold<tensor::ExtractSliceOp>(loc, targetType, tensor,
                                                 offsets, sizes, strides);
@@ -1786,18 +1823,8 @@ Value mlir::tensor::createCanonicalRankReducingInsertSliceOp(OpBuilder &b,
                                                              Value dest) {
   auto rankedTensorType = dest.getType().cast<RankedTensorType>();
   unsigned rank = rankedTensorType.getRank();
-  auto shape = rankedTensorType.getShape();
   SmallVector<OpFoldResult> offsets(rank, b.getIndexAttr(0));
-  SmallVector<OpFoldResult> sizes;
-  for (unsigned i = 0, e = rank; i < e; ++i) {
-    OpFoldResult dim;
-    if (rankedTensorType.isDynamicDim(i))
-      dim = b.createOrFold<tensor::DimOp>(
-          loc, dest, b.create<arith::ConstantIndexOp>(loc, i));
-    else
-      dim = b.getIndexAttr(shape[i]);
-    sizes.push_back(dim);
-  }
+  SmallVector<OpFoldResult> sizes = getMixedSizes(b, loc, dest);
   SmallVector<OpFoldResult> strides(rank, b.getIndexAttr(1));
   return b.createOrFold<tensor::InsertSliceOp>(loc, tensor, dest, offsets,
                                                sizes, strides);

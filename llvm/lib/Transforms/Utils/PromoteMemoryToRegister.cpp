@@ -101,7 +101,15 @@ bool llvm::isAllocaPromotable(const AllocaInst *AI) {
     } else if (const IntrinsicInst *II = dyn_cast<IntrinsicInst>(U)) {
       if (!II->isLifetimeStartOrEnd() && !II->isDroppable()) {
         if (II->isVPLoad() || II->isVPStore()) {
-          if (!FirstMemUser) { // First memory user
+          if (II->isVPLoad() && II->getType() != AI->getAllocatedType())
+            return false;
+          if (II->isVPStore() &&
+              (II->getArgOperand(0) == AI ||
+               II->getArgOperand(0)->getType() != AI->getAllocatedType()))
+            // Don't allow a store OF the AI, only INTO the AI.
+            return false;
+
+          if (!FirstMemUser) {
             FirstMemUser = II;
             continue;
           }
