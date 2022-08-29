@@ -43,7 +43,7 @@ mlir::func::FuncOp fir::FirOpBuilder::createFunction(
   llvm::SmallVector<mlir::Attribute, 4> passthroughAttrs;
   if (!functionAttributes.empty()) {
     for (const auto &attr : functionAttributes) {
-      if (attr.second.hasValue()) {
+      if (attr.second.has_value()) {
         auto targetFeaturesAttr =
             builder.getArrayAttr({builder.getStringAttr(attr.first),
                                   builder.getStringAttr(*attr.second)});
