@@ -1524,6 +1524,7 @@ void VFABI::getVectorVariantNames(
   }
 }
 
+// TODO: improve check?
 bool VFABI::isDeclareSimdFn(Function *Fn) {
   for (const auto &Attr : Fn->getAttributes().getFnAttrs()) {
     // Check if at least an attribute starting with "_ZGV" is present
@@ -1535,21 +1536,6 @@ bool VFABI::isDeclareSimdFn(Function *Fn) {
   }
 
   return false;
-}
-
-Function *VFABI::findVariant(Function *F, VFShape Shape) {
-  Module *M = F->getParent();
-  for (const auto &Attr : F->getAttributes().getFnAttrs()) {
-    if (!Attr.isStringAttribute())
-      continue;
-    StringRef AttrText = Attr.getKindAsString();
-    Optional<VFInfo> VFInfo = VFABI::tryDemangleForVFABI(
-        AttrText, *M, /* RequireDeclaration */ false);
-    if (VFInfo && (VFInfo.value().Shape == Shape)) {
-      return M->getFunction(VFInfo.value().VectorName);
-    }
-  }
-  return nullptr;
 }
 
 bool VFShape::hasValidParameterList() const {
