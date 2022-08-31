@@ -3726,25 +3726,29 @@ static void RenderModulesOptions(Compilation &C, const Driver &D,
                      options::OPT_fno_modules_validate_input_files_content,
                      false))
       CmdArgs.push_back("-fvalidate-ast-input-files-content");
-  }
 
-  // -fmodule-name specifies the module that is currently being built (or
-  // used for header checking by -fmodule-maps).
-  Args.AddLastArg(CmdArgs, options::OPT_fmodule_name_EQ);
+    // -fmodule-name specifies the module that is currently being built (or
+    // used for header checking by -fmodule-maps).
+    Args.AddLastArg(CmdArgs, options::OPT_fmodule_name_EQ);
 
-  // -fmodule-map-file can be used to specify files containing module
-  // definitions.
-  Args.AddAllArgs(CmdArgs, options::OPT_fmodule_map_file);
+    // -fmodule-map-file can be used to specify files containing module
+    // definitions.
+    Args.AddAllArgs(CmdArgs, options::OPT_fmodule_map_file);
 
-  // -fbuiltin-module-map can be used to load the clang
-  // builtin headers modulemap file.
-  if (Args.hasArg(options::OPT_fbuiltin_module_map)) {
-    SmallString<128> BuiltinModuleMap(D.ResourceDir);
-    llvm::sys::path::append(BuiltinModuleMap, "include");
-    llvm::sys::path::append(BuiltinModuleMap, "module.modulemap");
-    if (llvm::sys::fs::exists(BuiltinModuleMap))
-      CmdArgs.push_back(
-          Args.MakeArgString("-fmodule-map-file=" + BuiltinModuleMap));
+    // -fbuiltin-module-map can be used to load the clang
+    // builtin headers modulemap file.
+    if (Args.hasArg(options::OPT_fbuiltin_module_map)) {
+      SmallString<128> BuiltinModuleMap(D.ResourceDir);
+      llvm::sys::path::append(BuiltinModuleMap, "include");
+      llvm::sys::path::append(BuiltinModuleMap, "module.modulemap");
+      if (llvm::sys::fs::exists(BuiltinModuleMap))
+        CmdArgs.push_back(
+            Args.MakeArgString("-fmodule-map-file=" + BuiltinModuleMap));
+    }
+  } else {
+    Args.ClaimAllArgs(options::OPT_fmodule_name_EQ);
+    Args.ClaimAllArgs(options::OPT_fmodule_map_file);
+    Args.ClaimAllArgs(options::OPT_fbuiltin_module_map);
   }
 
   // The -fmodule-file=<name>=<file> form specifies the mapping of module
@@ -8310,36 +8314,6 @@ void OffloadBundler::ConstructJobMultipleOutputs(
       JA, *this, ResponseFileSupport::None(),
       TCArgs.MakeArgString(getToolChain().GetProgramPath(getShortName())),
       CmdArgs, None, Outputs));
-}
-
-void OffloadWrapper::ConstructJob(Compilation &C, const JobAction &JA,
-                                  const InputInfo &Output,
-                                  const InputInfoList &Inputs,
-                                  const ArgList &Args,
-                                  const char *LinkingOutput) const {
-  ArgStringList CmdArgs;
-
-  const llvm::Triple &Triple = getToolChain().getEffectiveTriple();
-
-  // Add the "effective" target triple.
-  CmdArgs.push_back("-target");
-  CmdArgs.push_back(Args.MakeArgString(Triple.getTriple()));
-
-  // Add the output file name.
-  assert(Output.isFilename() && "Invalid output.");
-  CmdArgs.push_back("-o");
-  CmdArgs.push_back(Output.getFilename());
-
-  // Add inputs.
-  for (const InputInfo &I : Inputs) {
-    assert(I.isFilename() && "Invalid input.");
-    CmdArgs.push_back(I.getFilename());
-  }
-
-  C.addCommand(std::make_unique<Command>(
-      JA, *this, ResponseFileSupport::None(),
-      Args.MakeArgString(getToolChain().GetProgramPath(getShortName())),
-      CmdArgs, Inputs, Output));
 }
 
 void OffloadPackager::ConstructJob(Compilation &C, const JobAction &JA,

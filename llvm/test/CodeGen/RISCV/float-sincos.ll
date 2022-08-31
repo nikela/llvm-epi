@@ -11,7 +11,8 @@ declare double    @llvm.cos.f64(double %Val)
 
 define dso_local float @fsinf32(float %a) nounwind {
 ; CHECK-LABEL: fsinf32:
-; CHECK:    call sinf
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail sinf@plt
 entry:
   %t = call float @llvm.sin.f32(float %a)
   ret float %t
@@ -19,7 +20,8 @@ entry:
 
 define dso_local double @fsinf64(double %a) nounwind {
 ; CHECK-LABEL: fsinf64:
-; CHECK:    call sin
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail sin@plt
 entry:
   %t = call double @llvm.sin.f64(double %a)
   ret double %t
@@ -27,7 +29,8 @@ entry:
 
 define dso_local float @fcosf32(float %a) nounwind {
 ; CHECK-LABEL: fcosf32:
-; CHECK:    call cosf
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail cosf@plt
 entry:
   %t = call float @llvm.cos.f32(float %a)
   ret float %t
@@ -35,16 +38,14 @@ entry:
 
 define dso_local double @fcosf64(double %a) nounwind {
 ; CHECK-LABEL: fcosf64:
-; CHECK:    call cos
+; CHECK:       # %bb.0: # %entry
+; CHECK-NEXT:    tail cos@plt
 entry:
   %t = call double @llvm.cos.f64(double %a)
   ret double %t
 }
 
 define dso_local float @fsincosf32(float %a) nounwind {
-; CHECK-LABEL: fsincosf32:
-; CHECK:    call sinf
-; CHECK:    call cosf
 entry:
   %t1 = tail call fast float @llvm.sin.f32(float %a)
   %t2 = tail call fast float @llvm.cos.f32(float %a)
@@ -53,9 +54,6 @@ entry:
 }
 
 define dso_local double @fsincosf64(double %a) nounwind {
-; CHECK-LABEL: fsincosf64:
-; CHECK:    call sin
-; CHECK:    call cos
 entry:
   %t1 = tail call fast double @llvm.sin.f64(double %a)
   %t2 = tail call fast double @llvm.cos.f64(double %a)

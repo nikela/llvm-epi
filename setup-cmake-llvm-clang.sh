@@ -31,6 +31,11 @@ function warning()
   nice_message "WARNING" "$1"
 }
 
+function help()
+{
+  echo "Usage: $0 debug|release"
+}
+
 function run()
 {
   for i in "$@";
@@ -118,7 +123,7 @@ then
         CC="$(which gcc)"
         CXX="$(which g++)"
       else
-        error "g++ not found in the PATH but gcc was found. This usually means that your system is missing development packages"
+        die "g++ not found in the PATH but gcc was found. This usually means that your system is missing development packages"
       fi
     fi
   else
@@ -138,7 +143,7 @@ then
       CC="$(which clang)"
       CXX="$(which clang++)"
     else
-      error "clang++ not found in the PATH but clang was found. You may have to review your installation"
+      die "clang++ not found in the PATH but clang was found. You may have to review your installation"
     fi
   fi
 elif [ "${COMPILER}" = gcc ];
@@ -168,6 +173,18 @@ then
    LINKER=lld
  else
    info "Using GNU ld because we didn't find lld"
+ fi
+
+ CLANG_BINDIR="$(dirname ${CC})"
+ if [ -x "${CLANG_BINDIR}/llvm-ar" ];
+ then
+   LLVM_AR="${CLANG_BINDIR}/llvm-ar"
+   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_AR=${LLVM_AR}")
+ fi
+ if [ -x "${CLANG_BINDIR}/llvm-ranlib" ];
+ then
+   LLVM_RANLIB="${CLANG_BINDIR}/llvm-ranlib"
+   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_RANLIB=${LLVM_RANLIB}")
  fi
 else
   info "Using GNU ld because we are using gcc"
@@ -222,7 +239,7 @@ CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_CXX_FLAGS_DEBUG=-g -ggnu-pubnames")
 if [ "$LINKER" = "lld" ];
 then
   info "Make LLD generate '.gdb_index' section for faster debugging"
-  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_EXE_LINKER_FLAGS_DEBUG=-Wl,-gdb-index")
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_EXE_LINKER_FLAGS_DEBUG=-Wl,--gdb-index")
 else
    info "GNU ld is used, '.gdb_index' sections for faster debugging won't be generated"
 fi
@@ -230,6 +247,19 @@ fi
 ################################################################################
 # cmake
 ################################################################################
+
+if [ "$1" = "debug" ];
+then
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_BUILD_TYPE=Debug")
+  info "Build in Debug mode"
+elif [ "$1" = "release" ];
+then
+  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_BUILD_TYPE=Release")
+  info "Build in Release mode"
+else
+  help
+  die "Please specify debug or release"
+fi
 
 info "Running cmake..."
 run cmake -G "${BUILD_SYSTEM}" ${SRCDIR}/llvm \
@@ -245,5 +275,5 @@ then
   echo ""
   echo "cmake finished successfully, you may want to tune the configuration in CMakeCache.txt or using a GUI tool like ccmake"
   echo ""
-  echo "Now run '${COMMAND_TO_BUILD}' to build."
+  echo "Now run '${COMMAND_TO_BUILD}' to build. Use '${COMMAND_TO_BUILD} install' to build and install."
 fi

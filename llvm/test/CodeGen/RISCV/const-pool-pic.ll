@@ -11,26 +11,26 @@ define void @test1() nounwind {
 ; RV32-NOPIC:       # %bb.0:
 ; RV32-NOPIC-NEXT:    lui a0, %hi(.L.str)
 ; RV32-NOPIC-NEXT:    addi a0, a0, %lo(.L.str)
-; RV32-NOPIC-NEXT:    tail a
+; RV32-NOPIC-NEXT:    tail a@plt
 ;
 ; RV64-NOPIC-LABEL: test1:
 ; RV64-NOPIC:       # %bb.0:
 ; RV64-NOPIC-NEXT:    lui a0, %hi(.L.str)
 ; RV64-NOPIC-NEXT:    addi a0, a0, %lo(.L.str)
-; RV64-NOPIC-NEXT:    tail a
+; RV64-NOPIC-NEXT:    tail a@plt
 ;
 ; RV32-PIC-LABEL: test1:
 ; RV32-PIC:       # %bb.0:
-; RV32-PIC-NEXT:  .LBB0_1: # Label of block must be emitted
+; RV32-PIC-NEXT:  .Lpcrel_hi0:
 ; RV32-PIC-NEXT:    auipc a0, %pcrel_hi(.L.str)
-; RV32-PIC-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
+; RV32-PIC-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi0)
 ; RV32-PIC-NEXT:    tail a@plt
 ;
 ; RV64-PIC-LABEL: test1:
 ; RV64-PIC:       # %bb.0:
-; RV64-PIC-NEXT:  .LBB0_1: # Label of block must be emitted
+; RV64-PIC-NEXT:  .Lpcrel_hi0:
 ; RV64-PIC-NEXT:    auipc a0, %pcrel_hi(.L.str)
-; RV64-PIC-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
+; RV64-PIC-NEXT:    addi a0, a0, %pcrel_lo(.Lpcrel_hi0)
 ; RV64-PIC-NEXT:    tail a@plt
     tail call void @a(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @.str, i32 0, i32 0)) #2
     ret void

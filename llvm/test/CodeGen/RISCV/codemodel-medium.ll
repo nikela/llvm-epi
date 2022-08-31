@@ -16,13 +16,11 @@ define void @foo() nounwind {
 ;
 ; MEDIUM-LABEL: foo:
 ; MEDIUM:       # %bb.0: # %entry
-; MEDIUM-NEXT:  .LBB0_1: # %entry
-; MEDIUM-NEXT:    # Label of block must be emitted
+; MEDIUM-NEXT:  .Lpcrel_hi0:
 ; MEDIUM-NEXT:    auipc a0, %pcrel_hi(x)
-; MEDIUM-NEXT:    addi a0, a0, %pcrel_lo(.LBB0_1)
-; MEDIUM-NEXT:    lw a1, 0(a0)
+; MEDIUM-NEXT:    lw a1, %pcrel_lo(.Lpcrel_hi0)(a0)
 ; MEDIUM-NEXT:    addiw a1, a1, 1
-; MEDIUM-NEXT:    sw a1, 0(a0)
+; MEDIUM-NEXT:    sw a1, %pcrel_lo(.Lpcrel_hi0)(a0)
 ; MEDIUM-NEXT:    ret
 entry:
   %0 = load i32, i32* @x, align 4
