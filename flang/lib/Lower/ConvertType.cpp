@@ -270,20 +270,6 @@ struct TypeBuilder {
     return ty;
   }
 
-  /// Does \p component has non deferred lower bounds that are not compile time
-  /// constant 1.
-  static bool componentHasNonDefaultLowerBounds(
-      const Fortran::semantics::Symbol &component) {
-    if (const auto *objDetails =
-            component.detailsIf<Fortran::semantics::ObjectEntityDetails>())
-      for (const Fortran::semantics::ShapeSpec &bounds : objDetails->shape())
-        if (auto lb = bounds.lbound().GetExplicit())
-          if (auto constant = Fortran::evaluate::ToInt64(*lb))
-            if (!constant || *constant != 1)
-              return true;
-    return false;
-  }
-
   mlir::Type genDerivedType(const Fortran::semantics::DerivedTypeSpec &tySpec) {
     std::vector<std::pair<std::string, mlir::Type>> ps;
     std::vector<std::pair<std::string, mlir::Type>> cs;
@@ -303,11 +289,6 @@ struct TypeBuilder {
     // (1) The data components.
     for (const auto &field :
          Fortran::semantics::OrderedComponentIterator(tySpec)) {
-      // Lowering is assuming non deferred component lower bounds are always 1.
-      // Catch any situations where this is not true for now.
-      if (componentHasNonDefaultLowerBounds(field))
-        TODO(converter.genLocation(field.name()),
-             "derived type components with non default lower bounds");
       if (IsProcedure(field))
         TODO(converter.genLocation(field.name()), "procedure components");
       mlir::Type ty = genSymbolType(field);

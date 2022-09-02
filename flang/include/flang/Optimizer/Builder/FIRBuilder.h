@@ -19,6 +19,7 @@
 #include "flang/Optimizer/Dialect/FIROps.h"
 #include "flang/Optimizer/Dialect/FIRType.h"
 #include "flang/Optimizer/Support/KindMapping.h"
+#include "flang/Semantics/symbol.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "llvm/ADT/DenseMap.h"
@@ -28,6 +29,12 @@ namespace fir {
 class AbstractArrayBox;
 class ExtendedValue;
 class BoxValue;
+
+struct ComponentExtInfo {
+  // This is empty if this is not a non-static array or it does not have
+  // non all-ones lower bounds.
+  llvm::SmallVector<int64_t> lbounds;
+};
 
 //===----------------------------------------------------------------------===//
 // FirOpBuilder
@@ -485,9 +492,10 @@ mlir::Value locationToLineNo(fir::FirOpBuilder &, mlir::Location, mlir::Type);
 
 /// Return the extended value for a component of a derived type instance given
 /// the address of the component.
-fir::ExtendedValue componentToExtendedValue(fir::FirOpBuilder &builder,
-                                            mlir::Location loc,
-                                            mlir::Value component);
+fir::ExtendedValue
+componentToExtendedValue(fir::FirOpBuilder &builder, mlir::Location loc,
+                         mlir::Value component,
+                         std::optional<ComponentExtInfo> componentExtInfo);
 
 /// Given the address of an array element and the ExtendedValue describing the
 /// array, returns the ExtendedValue describing the array element. The purpose

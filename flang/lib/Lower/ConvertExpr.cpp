@@ -18,6 +18,7 @@
 #include "flang/Evaluate/traverse.h"
 #include "flang/Lower/Allocatable.h"
 #include "flang/Lower/Bridge.h"
+#include "flang/Lower/BoxAnalyzer.h"
 #include "flang/Lower/BuiltinModules.h"
 #include "flang/Lower/CallInterface.h"
 #include "flang/Lower/Coarray.h"
@@ -648,6 +649,17 @@ isOptimizableTranspose(Fortran::evaluate::Expr<T> expr,
 
 namespace {
 
+fir::ComponentExtInfo
+computeComponentExtInfo(const Fortran::semantics::Symbol &sym) {
+  fir::ComponentExtInfo res;
+  Fortran::lower::BoxAnalyzer ba;
+  ba.analyze(sym);
+  if (ba.isStaticArray() && !ba.lboundIsAllOnes()) {
+    res.lbounds = llvm::SmallVector<int64_t>{ba.staticLBound()};
+  }
+  return res;
+}
+
 /// Lowering of Fortran::evaluate::Expr<T> expressions
 class ScalarExprLowering {
 public:
@@ -1074,7 +1086,9 @@ public:
       mlir::Type coorTy = builder.getRefType(recTy.getType(name));
       auto coor = builder.create<fir::CoordinateOp>(loc, coorTy,
                                                     fir::getBase(res), field);
-      ExtValue to = fir::factory::componentToExtendedValue(builder, loc, coor);
+      fir::ComponentExtInfo componentExtInfo = computeComponentExtInfo(sym);
+      ExtValue to = fir::factory::componentToExtendedValue(builder, loc, coor,
+                                                           componentExtInfo);
       to.match(
           [&](const fir::UnboxedValue &toPtr) {
             ExtValue value = genval(expr);
@@ -1878,6 +1892,19 @@ public:
         cmpt.base().u);
   }
 
+  static bool symIsArray(const Fortran::semantics::Symbol &sym) {
+    const auto *det =
+        sym.GetUltimate().detailsIf<Fortran::semantics::ObjectEntityDetails>();
+    return det && det->IsArray();
+  }
+
+  static const Fortran::semantics::ArraySpec &
+  getSymShape(const Fortran::semantics::Symbol &sym) {
+    return sym.GetUltimate()
+        .get<Fortran::semantics::ObjectEntityDetails>()
+        .shape();
+  }
+
   // Return the coordinate of the component reference
   ExtValue genComponent(const Fortran::evaluate::Component &cmpt) {
     std::list<const Fortran::evaluate::Component *> list;
@@ -1897,10 +1924,15 @@ public:
       ty = recTy.getType(name);
     }
     ty = builder.getRefType(ty);
+
+    // Compute info that componentToExtendedValue will need.
+    fir::ComponentExtInfo componentExtInfo =
+        computeComponentExtInfo(cmpt.GetLastSymbol());
+
     return fir::factory::componentToExtendedValue(
         builder, loc,
         builder.create<fir::CoordinateOp>(loc, ty, fir::getBase(obj),
-                                          coorArgs));
+                                          coorArgs), componentExtInfo);
   }
 
   ExtValue gen(const Fortran::evaluate::Component &cmpt) {

@@ -911,7 +911,8 @@ fir::factory::createExtents(fir::FirOpBuilder &builder, mlir::Location loc,
 // type-based helper functions, so caching the result of this operation in the
 // client would be advised as well.
 fir::ExtendedValue fir::factory::componentToExtendedValue(
-    fir::FirOpBuilder &builder, mlir::Location loc, mlir::Value component) {
+    fir::FirOpBuilder &builder, mlir::Location loc, mlir::Value component,
+    std::optional<ComponentExtInfo> componentExtInfo) {
   auto fieldTy = component.getType();
   if (auto ty = fir::dyn_cast_ptrEleTy(fieldTy))
     fieldTy = ty;
@@ -935,7 +936,7 @@ fir::ExtendedValue fir::factory::componentToExtendedValue(
     return fir::MutableBoxValue(component, nonDeferredTypeParams,
                                 /*mutableProperties=*/{});
   }
-  llvm::SmallVector<mlir::Value> extents;
+  llvm::SmallVector<mlir::Value> extents, lbounds;
   if (auto seqTy = fieldTy.dyn_cast<fir::SequenceType>()) {
     fieldTy = seqTy.getEleTy();
     auto idxTy = builder.getIndexType();
@@ -943,6 +944,12 @@ fir::ExtendedValue fir::factory::componentToExtendedValue(
       if (extent == fir::SequenceType::getUnknownExtent())
         TODO(loc, "array component shape depending on length parameters");
       extents.emplace_back(builder.createIntegerConstant(loc, idxTy, extent));
+    }
+    if (componentExtInfo.has_value()) {
+      for (const auto &l : componentExtInfo->lbounds) {
+        lbounds.emplace_back(builder.createIntegerConstant(loc, idxTy, l));
+      }
+      assert(lbounds.empty() || (lbounds.size() == extents.size()));
     }
   }
   if (auto charTy = fieldTy.dyn_cast<fir::CharacterType>()) {
@@ -960,7 +967,7 @@ fir::ExtendedValue fir::factory::componentToExtendedValue(
       TODO(loc,
            "lower component ref that is a derived type with length parameter");
   if (!extents.empty())
-    return fir::ArrayBoxValue{component, extents};
+    return fir::ArrayBoxValue{component, extents, lbounds};
   return component;
 }
 
@@ -998,7 +1005,8 @@ fir::ExtendedValue fir::factory::arraySectionElementToExtendedValue(
   // For F95, using componentToExtendedValue will work, but when PDTs are
   // lowered. It will be required to go down the slice to propagate the length
   // parameters.
-  return fir::factory::componentToExtendedValue(builder, loc, element);
+  return fir::factory::componentToExtendedValue(builder, loc, element,
+                                                /* FIXME */ {});
 }
 
 void fir::factory::genScalarAssignment(fir::FirOpBuilder &builder,
@@ -1091,9 +1099,10 @@ static void genComponentByComponentAssignment(fir::FirOpBuilder &builder,
       auto castTo = builder.createConvert(loc, fieldEleTy, fromPointerValue);
       builder.create<fir::StoreOp>(loc, castTo, toCoor);
     } else {
-      auto from =
-          fir::factory::componentToExtendedValue(builder, loc, fromCoor);
-      auto to = fir::factory::componentToExtendedValue(builder, loc, toCoor);
+      auto from = fir::factory::componentToExtendedValue(builder, loc, fromCoor,
+                                                         /* FIXME */ {});
+      auto to = fir::factory::componentToExtendedValue(builder, loc, toCoor,
+                                                       /* FIXME */ {});
       fir::factory::genScalarAssignment(builder, loc, to, from);
     }
     if (outerLoop)
