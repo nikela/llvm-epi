@@ -1240,7 +1240,7 @@ public:
   /// If interleave count has been specified by metadata it will be returned.
   /// Otherwise, the interleave count is computed and returned. VF and LoopCost
   /// are the selected vectorization factor and the cost of the selected VF.
-  unsigned selectInterleaveCount(ElementCount VF, unsigned LoopCost);
+  unsigned selectInterleaveCount(ElementCount VF, InstructionCost LoopCost);
 
   /// Memory access instruction may be vectorized in more than one way.
   /// Form of instruction after vectorization depends on cost.
@@ -2836,8 +2836,7 @@ void InnerLoopVectorizer::scalarizeInstruction(Instruction *Instr,
   for (const auto &I : enumerate(RepRecipe->operands())) {
     auto InputInstance = Instance;
     VPValue *Operand = I.value();
-    VPReplicateRecipe *OperandR = dyn_cast<VPReplicateRecipe>(Operand);
-    if (OperandR && OperandR->isUniform())
+    if (vputils::isUniformAfterVectorization(Operand))
       InputInstance.Lane = VPLane::getFirstLane();
     Cloned->setOperand(I.index(), State.get(Operand, InputInstance));
   }
@@ -4831,8 +4830,10 @@ void LoopVectorizationCostModel::collectLoopScalars(ElementCount VF) {
   // induction variable when the PHI user is scalarized.
   auto ForcedScalar = ForcedScalars.find(VF);
   if (ForcedScalar != ForcedScalars.end())
-    for (auto *I : ForcedScalar->second)
+    for (auto *I : ForcedScalar->second) {
+      LLVM_DEBUG(dbgs() << "LV: Found (forced) scalar instruction: " << *I << "\n");
       Worklist.insert(I);
+    }
 
   // Expand the worklist by looking through any bitcasts and getelementptr
   // instructions we've already identified as scalar. This is similar to the
@@ -5235,7 +5236,7 @@ void LoopVectorizationCostModel::collectLoopUniforms(ElementCount VF) {
   while (idx != Worklist.size()) {
     Instruction *I = Worklist[idx++];
 
-    for (auto OV : I->operand_values()) {
+    for (auto *OV : I->operand_values()) {
       // isOutOfScope operands cannot be uniform instructions.
       if (isOutOfScope(OV))
         continue;
@@ -6407,8 +6408,9 @@ void LoopVectorizationCostModel::collectElementTypesForWidening() {
   }
 }
 
-unsigned LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
-                                                           unsigned LoopCost) {
+unsigned
+LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
+                                                  InstructionCost LoopCost) {
   // -- The interleave heuristics --
   // We interleave the loop in order to expose ILP and reduce the loop overhead.
   // There are many micro-architectural considerations that we can't predict
@@ -6444,9 +6446,8 @@ unsigned LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   // If we did not calculate the cost for VF (because the user selected the VF)
   // then we calculate the cost of VF here.
   if (LoopCost == 0) {
-    InstructionCost C = expectedCost(VF).first;
-    assert(C.isValid() && "Expected to have chosen a VF with valid cost");
-    LoopCost = *C.getValue();
+    LoopCost = expectedCost(VF).first;
+    assert(LoopCost.isValid() && "Expected to have chosen a VF with valid cost");
 
     // Loop body is free and there is no need for interleaving.
     if (LoopCost == 0)
@@ -6574,8 +6575,8 @@ unsigned LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
     // We assume that the cost overhead is 1 and we use the cost model
     // to estimate the cost of the loop and interleave until the cost of the
     // loop overhead is about 5% of the cost of the loop.
-    unsigned SmallIC =
-        std::min(IC, (unsigned)PowerOf2Floor(SmallLoopCost / LoopCost));
+    unsigned SmallIC = std::min(
+        IC, (unsigned)PowerOf2Floor(SmallLoopCost / *LoopCost.getValue()));
 
     // Interleave until store/load ports (estimated by max interleave count) are
     // saturated.
@@ -6770,7 +6771,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
       SmallMapVector<unsigned, unsigned, 4> RegUsage;
 
       if (VFs[j].isScalar()) {
-        for (auto Inst : OpenIntervals) {
+        for (auto *Inst : OpenIntervals) {
           unsigned ClassID = TTI.getRegisterClassForType(false, Inst->getType());
           if (RegUsage.find(ClassID) == RegUsage.end())
             RegUsage[ClassID] = 1;
@@ -6779,7 +6780,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
         }
       } else {
         collectUniformsAndScalars(VFs[j]);
-        for (auto Inst : OpenIntervals) {
+        for (auto *Inst : OpenIntervals) {
           // Skip ignored values for VF > 1.
           if (VecValuesToIgnore.count(Inst))
             continue;
@@ -6817,7 +6818,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   for (unsigned i = 0, e = VFs.size(); i < e; ++i) {
     SmallMapVector<unsigned, unsigned, 4> Invariant;
 
-    for (auto Inst : LoopInvariants) {
+    for (auto *Inst : LoopInvariants) {
       unsigned Usage =
           VFs[i].isScalar() ? 1 : GetRegUsage(Inst->getType(), VFs[i]);
       unsigned ClassID =
@@ -9263,12 +9264,8 @@ VPRecipeOrVPValueTy VPRecipeBuilder::tryToBlend(PHINode *Phi,
                                                 VPlanPtr &Plan) {
   // If all incoming values are equal, the incoming VPValue can be used directly
   // instead of creating a new VPBlendRecipe.
-  VPValue *FirstIncoming = Operands[0];
-  if (all_of(Operands, [FirstIncoming](const VPValue *Inc) {
-        return FirstIncoming == Inc;
-      })) {
+  if (llvm::all_equal(Operands))
     return Operands[0];
-  }
 
   unsigned NumIncoming = Phi->getNumIncomingValues();
   // For in-loop reductions, we do not need to create an additional select.
@@ -9335,7 +9332,6 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
     return nullptr;
 
   auto willWiden = [&](ElementCount VF) -> bool {
-    Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
     // The following case may be scalarized depending on the VF.
     // The flag shows whether we use Intrinsic or a usual Call for vectorized
     // version of the instruction.
@@ -11421,8 +11417,7 @@ Value *VPTransformState::get(VPValue *Def, unsigned Part) {
     return ScalarValue;
   }
 
-  auto *RepR = dyn_cast<VPReplicateRecipe>(Def);
-  bool IsUniform = RepR && RepR->isUniform();
+  bool IsUniform = vputils::isUniformAfterVectorization(Def);
 
   unsigned LastLane = IsUniform ? 0 : VF.getKnownMinValue() - 1;
   // Check if there is a scalar value for the selected lane.
@@ -11863,7 +11858,7 @@ bool LoopVectorizePass::processLoop(Loop *L) {
   if (MaybeVF) {
     VF = *MaybeVF;
     // Select the interleave count.
-    IC = CM.selectInterleaveCount(VF.Width, *VF.Cost.getValue());
+    IC = CM.selectInterleaveCount(VF.Width, VF.Cost);
 
     unsigned SelectedIC = std::max(IC, UserIC);
     //  Optimistically generate runtime checks if they are needed. Drop them if

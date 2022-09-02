@@ -158,10 +158,6 @@ fi
 CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_C_COMPILER=${CC}")
 CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_CXX_COMPILER=${CXX}")
 
-# Use C++ 14.
-CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_CXX_STANDARD=14")
-
-
 ################################################################################
 # Detection of the linker
 ################################################################################
@@ -246,20 +242,6 @@ then
   CMAKE_INVOCATION_EXTRA_FLAGS+=("-DCMAKE_EXE_LINKER_FLAGS_DEBUG=-Wl,--gdb-index")
 else
    info "GNU ld is used, '.gdb_index' sections for faster debugging won't be generated"
-fi
-
-################################################################################
-# Prefer Python 3 (2.7 is deprecated and 3.x is often faster in lit)
-################################################################################
-
-PYTHON_BIN=${PYTHON_BIN:-$(which python3)}
-
-if [ -n "${PYTHON_BIN}" ];
-then
-  info "Using python executable at '${PYTHON_BIN}'. Set PYTHON_BIN to override this."
-  CMAKE_INVOCATION_EXTRA_FLAGS+=("-DPYTHON_EXECUTABLE=${PYTHON_BIN}")
-else
-  info "python3 not found in the PATH. Set PYTHON_BIN to override this."
 fi
 
 ################################################################################

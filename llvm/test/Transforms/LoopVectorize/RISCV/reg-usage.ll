@@ -54,12 +54,12 @@ define void @add(float* noalias nocapture readonly %src1, float* noalias nocaptu
 ; CHECK-LMUL1-NEXT:    br i1 [[CMP10_NOT]], label [[FOR_COND_CLEANUP:%.*]], label [[FOR_BODY_PREHEADER:%.*]]
 ; CHECK-LMUL1:       for.body.preheader:
 ; CHECK-LMUL1-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL1-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 8
+; CHECK-LMUL1-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 4
 ; CHECK-LMUL1-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[CONV]], [[TMP1]]
 ; CHECK-LMUL1-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK-LMUL1:       vector.ph:
 ; CHECK-LMUL1-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL1-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
+; CHECK-LMUL1-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 4
 ; CHECK-LMUL1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[CONV]], [[TMP3]]
 ; CHECK-LMUL1-NEXT:    [[N_VEC:%.*]] = sub i64 [[CONV]], [[N_MOD_VF]]
 ; CHECK-LMUL1-NEXT:    br label [[VECTOR_BODY:%.*]]
@@ -67,44 +67,44 @@ define void @add(float* noalias nocapture readonly %src1, float* noalias nocaptu
 ; CHECK-LMUL1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-LMUL1-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
 ; CHECK-LMUL1-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL1-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 4
+; CHECK-LMUL1-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 2
 ; CHECK-LMUL1-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
 ; CHECK-LMUL1-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
 ; CHECK-LMUL1-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
 ; CHECK-LMUL1-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, float* [[SRC1:%.*]], i64 [[TMP4]]
 ; CHECK-LMUL1-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, float* [[SRC1]], i64 [[TMP9]]
 ; CHECK-LMUL1-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, float* [[TMP10]], i32 0
-; CHECK-LMUL1-NEXT:    [[TMP13:%.*]] = bitcast float* [[TMP12]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 4 x float>, <vscale x 4 x float>* [[TMP13]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP13:%.*]] = bitcast float* [[TMP12]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 2 x float>, <vscale x 2 x float>* [[TMP13]], align 4
 ; CHECK-LMUL1-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-LMUL1-NEXT:    [[TMP15:%.*]] = mul i32 [[TMP14]], 4
+; CHECK-LMUL1-NEXT:    [[TMP15:%.*]] = mul i32 [[TMP14]], 2
 ; CHECK-LMUL1-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, float* [[TMP10]], i32 [[TMP15]]
-; CHECK-LMUL1-NEXT:    [[TMP17:%.*]] = bitcast float* [[TMP16]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 4 x float>, <vscale x 4 x float>* [[TMP17]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP17:%.*]] = bitcast float* [[TMP16]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 2 x float>, <vscale x 2 x float>* [[TMP17]], align 4
 ; CHECK-LMUL1-NEXT:    [[TMP18:%.*]] = getelementptr inbounds float, float* [[SRC2:%.*]], i64 [[TMP4]]
 ; CHECK-LMUL1-NEXT:    [[TMP19:%.*]] = getelementptr inbounds float, float* [[SRC2]], i64 [[TMP9]]
 ; CHECK-LMUL1-NEXT:    [[TMP20:%.*]] = getelementptr inbounds float, float* [[TMP18]], i32 0
-; CHECK-LMUL1-NEXT:    [[TMP21:%.*]] = bitcast float* [[TMP20]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 4 x float>, <vscale x 4 x float>* [[TMP21]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP21:%.*]] = bitcast float* [[TMP20]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 2 x float>, <vscale x 2 x float>* [[TMP21]], align 4
 ; CHECK-LMUL1-NEXT:    [[TMP22:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-LMUL1-NEXT:    [[TMP23:%.*]] = mul i32 [[TMP22]], 4
+; CHECK-LMUL1-NEXT:    [[TMP23:%.*]] = mul i32 [[TMP22]], 2
 ; CHECK-LMUL1-NEXT:    [[TMP24:%.*]] = getelementptr inbounds float, float* [[TMP18]], i32 [[TMP23]]
-; CHECK-LMUL1-NEXT:    [[TMP25:%.*]] = bitcast float* [[TMP24]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    [[WIDE_LOAD3:%.*]] = load <vscale x 4 x float>, <vscale x 4 x float>* [[TMP25]], align 4
-; CHECK-LMUL1-NEXT:    [[TMP26:%.*]] = fadd <vscale x 4 x float> [[WIDE_LOAD]], [[WIDE_LOAD2]]
-; CHECK-LMUL1-NEXT:    [[TMP27:%.*]] = fadd <vscale x 4 x float> [[WIDE_LOAD1]], [[WIDE_LOAD3]]
+; CHECK-LMUL1-NEXT:    [[TMP25:%.*]] = bitcast float* [[TMP24]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    [[WIDE_LOAD3:%.*]] = load <vscale x 2 x float>, <vscale x 2 x float>* [[TMP25]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP26:%.*]] = fadd <vscale x 2 x float> [[WIDE_LOAD]], [[WIDE_LOAD2]]
+; CHECK-LMUL1-NEXT:    [[TMP27:%.*]] = fadd <vscale x 2 x float> [[WIDE_LOAD1]], [[WIDE_LOAD3]]
 ; CHECK-LMUL1-NEXT:    [[TMP28:%.*]] = getelementptr inbounds float, float* [[RESULT:%.*]], i64 [[TMP4]]
 ; CHECK-LMUL1-NEXT:    [[TMP29:%.*]] = getelementptr inbounds float, float* [[RESULT]], i64 [[TMP9]]
 ; CHECK-LMUL1-NEXT:    [[TMP30:%.*]] = getelementptr inbounds float, float* [[TMP28]], i32 0
-; CHECK-LMUL1-NEXT:    [[TMP31:%.*]] = bitcast float* [[TMP30]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    store <vscale x 4 x float> [[TMP26]], <vscale x 4 x float>* [[TMP31]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP31:%.*]] = bitcast float* [[TMP30]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    store <vscale x 2 x float> [[TMP26]], <vscale x 2 x float>* [[TMP31]], align 4
 ; CHECK-LMUL1-NEXT:    [[TMP32:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-LMUL1-NEXT:    [[TMP33:%.*]] = mul i32 [[TMP32]], 4
+; CHECK-LMUL1-NEXT:    [[TMP33:%.*]] = mul i32 [[TMP32]], 2
 ; CHECK-LMUL1-NEXT:    [[TMP34:%.*]] = getelementptr inbounds float, float* [[TMP28]], i32 [[TMP33]]
-; CHECK-LMUL1-NEXT:    [[TMP35:%.*]] = bitcast float* [[TMP34]] to <vscale x 4 x float>*
-; CHECK-LMUL1-NEXT:    store <vscale x 4 x float> [[TMP27]], <vscale x 4 x float>* [[TMP35]], align 4
+; CHECK-LMUL1-NEXT:    [[TMP35:%.*]] = bitcast float* [[TMP34]] to <vscale x 2 x float>*
+; CHECK-LMUL1-NEXT:    store <vscale x 2 x float> [[TMP27]], <vscale x 2 x float>* [[TMP35]], align 4
 ; CHECK-LMUL1-NEXT:    [[TMP36:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL1-NEXT:    [[TMP37:%.*]] = mul i64 [[TMP36]], 8
+; CHECK-LMUL1-NEXT:    [[TMP37:%.*]] = mul i64 [[TMP36]], 4
 ; CHECK-LMUL1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP37]]
 ; CHECK-LMUL1-NEXT:    [[TMP38:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
 ; CHECK-LMUL1-NEXT:    br i1 [[TMP38]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
