@@ -1630,6 +1630,224 @@ define <vscale x 8 x double> @reverse_nxv8f64(<vscale x 8 x double> %a) {
   ret <vscale x 8 x double> %res
 }
 
+; Test widen reverse vector
+
+define <vscale x 3 x i64> @reverse_nxv3i64(<vscale x 3 x i64> %a) {
+; CHECK-LABEL: reverse_nxv3i64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    srli a0, a0, 1
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vsetvli a1, zero, e64, m4, ta, mu
+; CHECK-NEXT:    vid.v v12
+; CHECK-NEXT:    vrsub.vx v12, v12, a0
+; CHECK-NEXT:    vrgather.vv v16, v8, v12
+; CHECK-NEXT:    vmv1r.v v8, v17
+; CHECK-NEXT:    vmv1r.v v9, v18
+; CHECK-NEXT:    vmv1r.v v10, v19
+; CHECK-NEXT:    ret
+  %res = call <vscale x 3 x i64> @llvm.experimental.vector.reverse.nxv3i64(<vscale x 3 x i64> %a)
+  ret <vscale x 3 x i64> %res
+}
+
+define <vscale x 6 x i64> @reverse_nxv6i64(<vscale x 6 x i64> %a) {
+; CHECK-LABEL: reverse_nxv6i64:
+; CHECK:       # %bb.0:
+; CHECK-NEXT:    csrr a0, vlenb
+; CHECK-NEXT:    addi a0, a0, -1
+; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vid.v v16
+; CHECK-NEXT:    vrsub.vx v16, v16, a0
+; CHECK-NEXT:    vrgather.vv v24, v8, v16
+; CHECK-NEXT:    vmv2r.v v8, v26
+; CHECK-NEXT:    vmv2r.v v10, v28
+; CHECK-NEXT:    vmv2r.v v12, v30
+; CHECK-NEXT:    ret
+  %res = call <vscale x 6 x i64> @llvm.experimental.vector.reverse.nxv6i64(<vscale x 6 x i64> %a)
+  ret <vscale x 6 x i64> %res
+}
+
+define <vscale x 12 x i64> @reverse_nxv12i64(<vscale x 12 x i64> %a) {
+; RV32-BITS-UNKNOWN-LABEL: reverse_nxv12i64:
+; RV32-BITS-UNKNOWN:       # %bb.0:
+; RV32-BITS-UNKNOWN-NEXT:    addi sp, sp, -64
+; RV32-BITS-UNKNOWN-NEXT:    .cfi_def_cfa_offset 64
+; RV32-BITS-UNKNOWN-NEXT:    addi s0, sp, 64
+; RV32-BITS-UNKNOWN-NEXT:    .cfi_def_cfa s0, 0
+; RV32-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
+; RV32-BITS-UNKNOWN-NEXT:    slli a0, a0, 4
+; RV32-BITS-UNKNOWN-NEXT:    sub sp, sp, a0
+; RV32-BITS-UNKNOWN-NEXT:    andi sp, sp, -64
+; RV32-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
+; RV32-BITS-UNKNOWN-NEXT:    addi a1, a0, -1
+; RV32-BITS-UNKNOWN-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV32-BITS-UNKNOWN-NEXT:    vid.v v24
+; RV32-BITS-UNKNOWN-NEXT:    vrsub.vx v24, v24, a1
+; RV32-BITS-UNKNOWN-NEXT:    vrgather.vv v0, v16, v24
+; RV32-BITS-UNKNOWN-NEXT:    vmv4r.v v16, v4
+; RV32-BITS-UNKNOWN-NEXT:    vrgather.vv v0, v8, v24
+; RV32-BITS-UNKNOWN-NEXT:    vmv4r.v v20, v0
+; RV32-BITS-UNKNOWN-NEXT:    slli a0, a0, 3
+; RV32-BITS-UNKNOWN-NEXT:    addi a1, sp, 64
+; RV32-BITS-UNKNOWN-NEXT:    add a0, a1, a0
+; RV32-BITS-UNKNOWN-NEXT:    vs4r.v v4, (a0)
+; RV32-BITS-UNKNOWN-NEXT:    vs8r.v v16, (a1)
+; RV32-BITS-UNKNOWN-NEXT:    vl8re64.v v16, (a0)
+; RV32-BITS-UNKNOWN-NEXT:    vl8re64.v v8, (a1)
+; RV32-BITS-UNKNOWN-NEXT:    addi sp, s0, -64
+; RV32-BITS-UNKNOWN-NEXT:    addi sp, sp, 64
+; RV32-BITS-UNKNOWN-NEXT:    ret
+;
+; RV32-BITS-256-LABEL: reverse_nxv12i64:
+; RV32-BITS-256:       # %bb.0:
+; RV32-BITS-256-NEXT:    addi sp, sp, -64
+; RV32-BITS-256-NEXT:    .cfi_def_cfa_offset 64
+; RV32-BITS-256-NEXT:    addi s0, sp, 64
+; RV32-BITS-256-NEXT:    .cfi_def_cfa s0, 0
+; RV32-BITS-256-NEXT:    csrr a0, vlenb
+; RV32-BITS-256-NEXT:    slli a0, a0, 4
+; RV32-BITS-256-NEXT:    sub sp, sp, a0
+; RV32-BITS-256-NEXT:    andi sp, sp, -64
+; RV32-BITS-256-NEXT:    csrr a0, vlenb
+; RV32-BITS-256-NEXT:    addi a1, a0, -1
+; RV32-BITS-256-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV32-BITS-256-NEXT:    vid.v v24
+; RV32-BITS-256-NEXT:    vrsub.vx v24, v24, a1
+; RV32-BITS-256-NEXT:    vrgather.vv v0, v16, v24
+; RV32-BITS-256-NEXT:    vmv4r.v v16, v4
+; RV32-BITS-256-NEXT:    vrgather.vv v0, v8, v24
+; RV32-BITS-256-NEXT:    vmv4r.v v20, v0
+; RV32-BITS-256-NEXT:    slli a0, a0, 3
+; RV32-BITS-256-NEXT:    addi a1, sp, 64
+; RV32-BITS-256-NEXT:    add a0, a1, a0
+; RV32-BITS-256-NEXT:    vs4r.v v4, (a0)
+; RV32-BITS-256-NEXT:    vs8r.v v16, (a1)
+; RV32-BITS-256-NEXT:    vl8re64.v v16, (a0)
+; RV32-BITS-256-NEXT:    vl8re64.v v8, (a1)
+; RV32-BITS-256-NEXT:    addi sp, s0, -64
+; RV32-BITS-256-NEXT:    addi sp, sp, 64
+; RV32-BITS-256-NEXT:    ret
+;
+; RV32-BITS-512-LABEL: reverse_nxv12i64:
+; RV32-BITS-512:       # %bb.0:
+; RV32-BITS-512-NEXT:    addi sp, sp, -64
+; RV32-BITS-512-NEXT:    .cfi_def_cfa_offset 64
+; RV32-BITS-512-NEXT:    addi s0, sp, 64
+; RV32-BITS-512-NEXT:    .cfi_def_cfa s0, 0
+; RV32-BITS-512-NEXT:    csrr a0, vlenb
+; RV32-BITS-512-NEXT:    slli a0, a0, 4
+; RV32-BITS-512-NEXT:    sub sp, sp, a0
+; RV32-BITS-512-NEXT:    andi sp, sp, -64
+; RV32-BITS-512-NEXT:    csrr a0, vlenb
+; RV32-BITS-512-NEXT:    addi a1, a0, -1
+; RV32-BITS-512-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV32-BITS-512-NEXT:    vid.v v24
+; RV32-BITS-512-NEXT:    vrsub.vx v24, v24, a1
+; RV32-BITS-512-NEXT:    vrgather.vv v0, v16, v24
+; RV32-BITS-512-NEXT:    vmv4r.v v16, v4
+; RV32-BITS-512-NEXT:    vrgather.vv v0, v8, v24
+; RV32-BITS-512-NEXT:    vmv4r.v v20, v0
+; RV32-BITS-512-NEXT:    slli a0, a0, 3
+; RV32-BITS-512-NEXT:    addi a1, sp, 64
+; RV32-BITS-512-NEXT:    add a0, a1, a0
+; RV32-BITS-512-NEXT:    vs4r.v v4, (a0)
+; RV32-BITS-512-NEXT:    vs8r.v v16, (a1)
+; RV32-BITS-512-NEXT:    vl8re64.v v16, (a0)
+; RV32-BITS-512-NEXT:    vl8re64.v v8, (a1)
+; RV32-BITS-512-NEXT:    addi sp, s0, -64
+; RV32-BITS-512-NEXT:    addi sp, sp, 64
+; RV32-BITS-512-NEXT:    ret
+;
+; RV64-BITS-UNKNOWN-LABEL: reverse_nxv12i64:
+; RV64-BITS-UNKNOWN:       # %bb.0:
+; RV64-BITS-UNKNOWN-NEXT:    addi sp, sp, -16
+; RV64-BITS-UNKNOWN-NEXT:    .cfi_def_cfa_offset 16
+; RV64-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
+; RV64-BITS-UNKNOWN-NEXT:    slli a0, a0, 4
+; RV64-BITS-UNKNOWN-NEXT:    sub sp, sp, a0
+; RV64-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
+; RV64-BITS-UNKNOWN-NEXT:    addi a1, a0, -1
+; RV64-BITS-UNKNOWN-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV64-BITS-UNKNOWN-NEXT:    vid.v v24
+; RV64-BITS-UNKNOWN-NEXT:    vrsub.vx v24, v24, a1
+; RV64-BITS-UNKNOWN-NEXT:    vrgather.vv v0, v16, v24
+; RV64-BITS-UNKNOWN-NEXT:    vmv4r.v v16, v4
+; RV64-BITS-UNKNOWN-NEXT:    vrgather.vv v0, v8, v24
+; RV64-BITS-UNKNOWN-NEXT:    vmv4r.v v20, v0
+; RV64-BITS-UNKNOWN-NEXT:    slli a0, a0, 3
+; RV64-BITS-UNKNOWN-NEXT:    addi a1, sp, 16
+; RV64-BITS-UNKNOWN-NEXT:    add a0, a1, a0
+; RV64-BITS-UNKNOWN-NEXT:    vs4r.v v4, (a0)
+; RV64-BITS-UNKNOWN-NEXT:    vs8r.v v16, (a1)
+; RV64-BITS-UNKNOWN-NEXT:    vl8re64.v v16, (a0)
+; RV64-BITS-UNKNOWN-NEXT:    vl8re64.v v8, (a1)
+; RV64-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
+; RV64-BITS-UNKNOWN-NEXT:    slli a0, a0, 4
+; RV64-BITS-UNKNOWN-NEXT:    add sp, sp, a0
+; RV64-BITS-UNKNOWN-NEXT:    addi sp, sp, 16
+; RV64-BITS-UNKNOWN-NEXT:    ret
+;
+; RV64-BITS-256-LABEL: reverse_nxv12i64:
+; RV64-BITS-256:       # %bb.0:
+; RV64-BITS-256-NEXT:    addi sp, sp, -16
+; RV64-BITS-256-NEXT:    .cfi_def_cfa_offset 16
+; RV64-BITS-256-NEXT:    csrr a0, vlenb
+; RV64-BITS-256-NEXT:    slli a0, a0, 4
+; RV64-BITS-256-NEXT:    sub sp, sp, a0
+; RV64-BITS-256-NEXT:    csrr a0, vlenb
+; RV64-BITS-256-NEXT:    addi a1, a0, -1
+; RV64-BITS-256-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV64-BITS-256-NEXT:    vid.v v24
+; RV64-BITS-256-NEXT:    vrsub.vx v24, v24, a1
+; RV64-BITS-256-NEXT:    vrgather.vv v0, v16, v24
+; RV64-BITS-256-NEXT:    vmv4r.v v16, v4
+; RV64-BITS-256-NEXT:    vrgather.vv v0, v8, v24
+; RV64-BITS-256-NEXT:    vmv4r.v v20, v0
+; RV64-BITS-256-NEXT:    slli a0, a0, 3
+; RV64-BITS-256-NEXT:    addi a1, sp, 16
+; RV64-BITS-256-NEXT:    add a0, a1, a0
+; RV64-BITS-256-NEXT:    vs4r.v v4, (a0)
+; RV64-BITS-256-NEXT:    vs8r.v v16, (a1)
+; RV64-BITS-256-NEXT:    vl8re64.v v16, (a0)
+; RV64-BITS-256-NEXT:    vl8re64.v v8, (a1)
+; RV64-BITS-256-NEXT:    csrr a0, vlenb
+; RV64-BITS-256-NEXT:    slli a0, a0, 4
+; RV64-BITS-256-NEXT:    add sp, sp, a0
+; RV64-BITS-256-NEXT:    addi sp, sp, 16
+; RV64-BITS-256-NEXT:    ret
+;
+; RV64-BITS-512-LABEL: reverse_nxv12i64:
+; RV64-BITS-512:       # %bb.0:
+; RV64-BITS-512-NEXT:    addi sp, sp, -16
+; RV64-BITS-512-NEXT:    .cfi_def_cfa_offset 16
+; RV64-BITS-512-NEXT:    csrr a0, vlenb
+; RV64-BITS-512-NEXT:    slli a0, a0, 4
+; RV64-BITS-512-NEXT:    sub sp, sp, a0
+; RV64-BITS-512-NEXT:    csrr a0, vlenb
+; RV64-BITS-512-NEXT:    addi a1, a0, -1
+; RV64-BITS-512-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; RV64-BITS-512-NEXT:    vid.v v24
+; RV64-BITS-512-NEXT:    vrsub.vx v24, v24, a1
+; RV64-BITS-512-NEXT:    vrgather.vv v0, v16, v24
+; RV64-BITS-512-NEXT:    vmv4r.v v16, v4
+; RV64-BITS-512-NEXT:    vrgather.vv v0, v8, v24
+; RV64-BITS-512-NEXT:    vmv4r.v v20, v0
+; RV64-BITS-512-NEXT:    slli a0, a0, 3
+; RV64-BITS-512-NEXT:    addi a1, sp, 16
+; RV64-BITS-512-NEXT:    add a0, a1, a0
+; RV64-BITS-512-NEXT:    vs4r.v v4, (a0)
+; RV64-BITS-512-NEXT:    vs8r.v v16, (a1)
+; RV64-BITS-512-NEXT:    vl8re64.v v16, (a0)
+; RV64-BITS-512-NEXT:    vl8re64.v v8, (a1)
+; RV64-BITS-512-NEXT:    csrr a0, vlenb
+; RV64-BITS-512-NEXT:    slli a0, a0, 4
+; RV64-BITS-512-NEXT:    add sp, sp, a0
+; RV64-BITS-512-NEXT:    addi sp, sp, 16
+; RV64-BITS-512-NEXT:    ret
+  %res = call <vscale x 12 x i64> @llvm.experimental.vector.reverse.nxv12i64(<vscale x 12 x i64> %a)
+  ret <vscale x 12 x i64> %res
+}
+
 declare <vscale x 2 x i1> @llvm.experimental.vector.reverse.nxv2i1(<vscale x 2 x i1>)
 declare <vscale x 4 x i1> @llvm.experimental.vector.reverse.nxv4i1(<vscale x 4 x i1>)
 declare <vscale x 8 x i1> @llvm.experimental.vector.reverse.nxv8i1(<vscale x 8 x i1>)
@@ -1673,3 +1891,6 @@ declare <vscale x 1 x double> @llvm.experimental.vector.reverse.nxv1f64(<vscale 
 declare <vscale x 2 x double> @llvm.experimental.vector.reverse.nxv2f64(<vscale x 2 x double>)
 declare <vscale x 4 x double> @llvm.experimental.vector.reverse.nxv4f64(<vscale x 4 x double>)
 declare <vscale x 8 x double> @llvm.experimental.vector.reverse.nxv8f64(<vscale x 8 x double>)
+declare <vscale x 3 x i64> @llvm.experimental.vector.reverse.nxv3i64(<vscale x 3 x i64>)
+declare <vscale x 6 x i64> @llvm.experimental.vector.reverse.nxv6i64(<vscale x 6 x i64>)
+declare <vscale x 12 x i64> @llvm.experimental.vector.reverse.nxv12i64(<vscale x 12 x i64>)

@@ -2,7 +2,7 @@
 module moo
   implicit none
 
-  type mytype
+  type, bind(c) :: mytype
     integer(kind=8) :: myaddr
   end type mytype
 

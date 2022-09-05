@@ -1491,6 +1491,13 @@ bool IsCFunPtrType(const DerivedTypeSpec *derived) {
   return IsBuiltinDerivedType(derived, "c_funptr");
 }
 
+bool IsBuiltinCPtr(const Symbol &symbol) {
+  if (const DeclTypeSpec *declType = symbol.GetType())
+    if (const DerivedTypeSpec *derived = declType->AsDerived())
+      return IsIsoCType(derived);
+  return false;
+}
+
 bool IsIsoCType(const DerivedTypeSpec *derived) {
   return IsCPtrType(derived) || IsCFunPtrType(derived);
 }
