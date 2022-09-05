@@ -2954,6 +2954,15 @@ static IntrinsicInst *findInitTrampoline(Value *Callee) {
   return nullptr;
 }
 
+static bool callPassesUndefToPassingUndefUBParam(CallBase &Call) {
+  for (unsigned I = 0; I < Call.arg_size(); ++I) {
+    if (isa<UndefValue>(Call.getArgOperand(I)) && Call.isPassingUndefUB(I)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool InstCombinerImpl::annotateAnyAllocSite(CallBase &Call,
                                             const TargetLibraryInfo *TLI) {
   // Note: We only handle cases which can't be driven from generic attributes
@@ -3080,9 +3089,11 @@ Instruction *InstCombinerImpl::visitCallBase(CallBase &Call) {
 
   // Calling a null function pointer is undefined if a null address isn't
   // dereferenceable.
+  // Passing undef/poison to any parameter where doing so is UB is undefined (of
+  // course).
   if ((isa<ConstantPointerNull>(Callee) &&
        !NullPointerIsDefined(Call.getFunction())) ||
-      isa<UndefValue>(Callee)) {
+      isa<UndefValue>(Callee) || callPassesUndefToPassingUndefUBParam(Call)) {
     // If Call does not return void then replaceInstUsesWith poison.
     // This allows ValueHandlers and custom metadata to adjust itself.
     if (!Call.getType()->isVoidTy())
@@ -3549,18 +3560,9 @@ bool InstCombinerImpl::transformConstExprCastCall(CallBase &Call) {
       NV = NC = CastInst::CreateBitOrPointerCast(NC, OldRetTy);
       NC->setDebugLoc(Caller->getDebugLoc());
 
-      // If this is an invoke/callbr instruction, we should insert it after the
-      // first non-phi instruction in the normal successor block.
-      if (InvokeInst *II = dyn_cast<InvokeInst>(Caller)) {
-        BasicBlock::iterator I = II->getNormalDest()->getFirstInsertionPt();
-        InsertNewInstBefore(NC, *I);
-      } else if (CallBrInst *CBI = dyn_cast<CallBrInst>(Caller)) {
-        BasicBlock::iterator I = CBI->getDefaultDest()->getFirstInsertionPt();
-        InsertNewInstBefore(NC, *I);
-      } else {
-        // Otherwise, it's a call, just insert cast right after the call.
-        InsertNewInstBefore(NC, *Caller);
-      }
+      Instruction *InsertPt = NewCall->getInsertionPointAfterDef();
+      assert(InsertPt && "No place to insert cast");
+      InsertNewInstBefore(NC, *InsertPt);
       Worklist.pushUsersToWorkList(*Caller);
     } else {
       NV = PoisonValue::get(Caller->getType());

@@ -179,11 +179,11 @@ public:
                         unsigned MaxSafeRegisterWidth = -1U,
                         unsigned RegWidthFactor = 1,
                         bool IsScalable = false) const;
-  InstructionCost
-  getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
-                     CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
-                     TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
-                     const Instruction *I = nullptr);
+  // InstructionCost
+  // getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy = nullptr,
+  //                    CmpInst::Predicate VecPred = CmpInst::BAD_ICMP_PREDICATE,
+  //                    TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput,
+  //                    const Instruction *I = nullptr);
 
   TargetTransformInfo::PopcntSupportKind getPopcntSupport(unsigned TyWidth);
 
@@ -270,6 +270,11 @@ public:
                   unsigned AddressSpace, TTI::TargetCostKind CostKind,
                   TTI::OperandValueInfo OpdInfo = {TTI::OK_AnyValue, TTI::OP_None},
                   const Instruction *I = nullptr);
+
+  InstructionCost getCmpSelInstrCost(unsigned Opcode, Type *ValTy, Type *CondTy,
+                                     CmpInst::Predicate VecPred,
+                                     TTI::TargetCostKind CostKind,
+                                     const Instruction *I = nullptr);
 
   bool isElementTypeLegalForScalableVector(Type *Ty) const {
     return TLI->isLegalElementTypeForRVV(Ty);
