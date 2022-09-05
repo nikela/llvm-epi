@@ -24,7 +24,7 @@ set(MODULES
 # used for generating module files. However, if we are CMAKE_CROSSCOMPILING and
 # we have a CROSSCOMPILING_EMULATOR this can work.
 if ((NOT CMAKE_CROSSCOMPILING)
-     OR (CMAKE_CROSSCOMPILING AND CROSSCOMPILING_EMULATOR))
+     OR (CMAKE_CROSSCOMPILING AND CMAKE_CROSSCOMPILING_EMULATOR))
   foreach(filename ${MODULES})
     set(base ${FLANG_INTRINSIC_MODULES_DIR}/${filename})
     if(${filename} STREQUAL "__fortran_builtins")
