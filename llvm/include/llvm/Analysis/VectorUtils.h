@@ -194,6 +194,53 @@ struct VFInfo {
   std::string ScalarName; /// Scalar Function Name.
   std::string VectorName; /// Vector Function Name associated to this VFInfo.
   VFISAKind ISA;          /// Instruction Set Architecture.
+
+  bool operator<(const VFInfo &Other) const {
+    if (Other.Shape.hasMask() && !Shape.hasMask())
+      return true;
+    if (!Other.Shape.hasMask() && Shape.hasMask())
+      return false;
+
+    SmallVector<VFParameter, 8> Params = Shape.Parameters;
+    SmallVector<VFParameter, 8> OtherParams = Other.Shape.Parameters;
+    assert(OtherParams.size() == Params.size());
+
+    unsigned OtherScore = 0;
+    unsigned Score = 0;
+    for (size_t I = 0; I < OtherParams.size(); I++) {
+      switch (Params[I].ParamKind) {
+      case VFParamKind::OMP_Uniform: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        Score += OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ? 0 : 1;
+        break;
+      }
+      case VFParamKind::OMP_Linear: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Linear ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        Score += OtherParams[I].ParamKind == VFParamKind::OMP_Linear ? 0 : 1;
+        break;
+      }
+      case VFParamKind::Vector: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ||
+               OtherParams[I].ParamKind == VFParamKind::OMP_Linear ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        OtherScore += OtherParams[I].ParamKind == VFParamKind::Vector ? 0 : 1;
+        break;
+      }
+      case VFParamKind::GlobalPredicate:
+        assert(OtherParams[I].ParamKind == VFParamKind::GlobalPredicate);
+        break;
+      case VFParamKind::GlobalVL:
+        assert(OtherParams[I].ParamKind == VFParamKind::GlobalVL);
+        break;
+      default:
+        llvm_unreachable("Unexpected VFParamKind found.");
+      }
+    }
+
+    return Score > OtherScore;
+  }
 };
 
 namespace VFABI {
