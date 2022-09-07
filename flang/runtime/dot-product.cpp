@@ -209,11 +209,13 @@ void RTNAME(CppDotProductComplex10)(
 }
 #endif
 #if LDBL_MANT_DIG == 113 || HAS_FLOAT128
+#if 0
 void RTNAME(CppDotProductComplex16)(
     CppTypeFor<TypeCategory::Complex, 16> &result, const Descriptor &x,
     const Descriptor &y, const char *source, int line) {
   result = DotProduct<TypeCategory::Complex, 16>{}(x, y, source, line);
 }
+#endif
 #endif
 
 bool RTNAME(DotProductLogical)(
