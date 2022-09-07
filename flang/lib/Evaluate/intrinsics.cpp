@@ -193,6 +193,7 @@ ENUM_CLASS(Rank,
     reduceOperation, // a pure function with constraints for REDUCE
     dimReduced, // scalar if no DIM= argument, else rank(array)-1
     dimRemovedOrScalar, // rank(array)-1 (less DIM) or scalar
+    scalarIfDim, // scalar if DIM= argument is present, else rank one array
     locReduced, // vector(1:rank) if no DIM= argument, else rank(array)-1
     rankPlus1, // rank(known)+1
     shaped, // rank is length of SHAPE vector
@@ -521,6 +522,9 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
         KINDInt, Rank::scalar, IntrinsicClass::inquiryFunction},
     {"lbound", {{"array", AnyData, Rank::anyOrAssumedRank}, SizeDefaultKIND},
         KINDInt, Rank::vector, IntrinsicClass::inquiryFunction},
+    {"lcobound",
+        {{"coarray", AnyData, Rank::coarray}, OptionalDIM, SizeDefaultKIND},
+        KINDInt, Rank::scalarIfDim, IntrinsicClass::inquiryFunction},
     {"leadz", {{"i", AnyInt}}, DefaultInt},
     {"len", {{"string", AnyChar, Rank::anyOrAssumedRank}, DefaultingKIND},
         KINDInt, Rank::scalar, IntrinsicClass::inquiryFunction},
@@ -800,6 +804,9 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
         KINDInt, Rank::scalar, IntrinsicClass::inquiryFunction},
     {"ubound", {{"array", AnyData, Rank::anyOrAssumedRank}, SizeDefaultKIND},
         KINDInt, Rank::vector, IntrinsicClass::inquiryFunction},
+    {"ucobound",
+        {{"coarray", AnyData, Rank::coarray}, OptionalDIM, SizeDefaultKIND},
+        KINDInt, Rank::scalarIfDim, IntrinsicClass::inquiryFunction},
     {"unpack",
         {{"vector", SameType, Rank::vector}, {"mask", AnyLogical, Rank::array},
             {"field", SameType, Rank::conformable}},
@@ -858,7 +865,7 @@ static const IntrinsicInterface genericIntrinsicFunction[]{
 };
 
 // TODO: Coarray intrinsic functions
-//   LCOBOUND, UCOBOUND, IMAGE_INDEX, COSHAPE
+//  IMAGE_INDEX, COSHAPE
 // TODO: Non-standard intrinsic functions
 //  LSHIFT, RSHIFT, SHIFT,
 //  COMPL, EQV, NEQV, INT8, JINT, JNINT, KNINT,
@@ -1640,6 +1647,7 @@ std::optional<SpecificCall> IntrinsicInterface::Match(
         // The reduction function is validated in ApplySpecificChecks().
         argOk = true;
         break;
+      case Rank::scalarIfDim:
       case Rank::locReduced:
       case Rank::rankPlus1:
       case Rank::shaped:
@@ -1835,6 +1843,9 @@ std::optional<SpecificCall> IntrinsicInterface::Match(
   case Rank::shaped:
     CHECK(shapeArgSize);
     resultRank = *shapeArgSize;
+    break;
+  case Rank::scalarIfDim:
+    resultRank = hasDimArg ? 0 : 1;
     break;
   case Rank::elementalOrBOZ:
   case Rank::shape:
@@ -2430,6 +2441,27 @@ static bool CheckForNonPositiveValues(FoldingContext &context,
   return ok;
 }
 
+static bool CheckDimAgainstCorank(SpecificCall &call, FoldingContext &context) {
+  bool ok{true};
+  if (const auto &coarrayArg{call.arguments[0]}) {
+    if (const auto &dimArg{call.arguments[1]}) {
+      if (const auto *symbol{
+              UnwrapWholeSymbolDataRef(coarrayArg->UnwrapExpr())}) {
+        const auto corank = symbol->Corank();
+        if (const auto dimNum{ToInt64(dimArg->UnwrapExpr())}) {
+          if (dimNum < 1 || dimNum > corank) {
+            ok = false;
+            context.messages().Say(dimArg->sourceLocation(),
+                "DIM=%jd dimension is out of range for coarray with corank %d"_err_en_US,
+                static_cast<std::intmax_t>(*dimNum), corank);
+          }
+        }
+      }
+    }
+  }
+  return ok;
+}
+
 // Applies any semantic checks peculiar to an intrinsic.
 static bool ApplySpecificChecks(SpecificCall &call, FoldingContext &context) {
   bool ok{true};
@@ -2470,6 +2502,8 @@ static bool ApplySpecificChecks(SpecificCall &call, FoldingContext &context) {
         }
       }
     }
+  } else if (name == "lcobound") {
+    return CheckDimAgainstCorank(call, context);
   } else if (name == "loc") {
     const auto &arg{call.arguments[0]};
     ok =
@@ -2577,6 +2611,8 @@ static bool ApplySpecificChecks(SpecificCall &call, FoldingContext &context) {
         }
       }
     }
+  } else if (name == "ucobound") {
+    return CheckDimAgainstCorank(call, context);
   }
   return ok;
 }
