@@ -505,8 +505,7 @@ public:
   void predicatedWidenCallInstruction(CallInst &I, VPValue *Def,
                                       VPUser &ArgOperands,
                                       VPTransformState &State,
-                                      Intrinsic::ID VPVectorIntrinsicID,
-                                      VPValue *BlockInMask, VPValue *EVL);
+                                      Intrinsic::ID VPVectorIntrinsicID);
 
   /// Fix the vectorized code, taking care of header phi's, live-outs, and more.
   void fixVectorizedLoop(VPTransformState &State, VPlan &Plan);
@@ -1591,7 +1590,8 @@ public:
   /// Estimate cost of an intrinsic call instruction CI if it were vectorized
   /// with factor VF.  Return the cost of the instruction, including
   /// scalarization overhead if it's needed.
-  InstructionCost getVectorIntrinsicCost(CallInst *CI, ElementCount VF) const;
+  InstructionCost getVectorIntrinsicCost(CallInst *CI, ElementCount VF,
+                                         bool IsVP = false) const;
 
   /// Estimate cost of a call instruction CI if it were vectorized with factor
   /// VF. Return the cost of the instruction, including scalarization overhead
@@ -1602,7 +1602,7 @@ public:
                                     bool &NeedToScalarize) const;
 
   InstructionCost getDeclareSimdFnCallCost(CallInst *CI, ElementCount VF,
-                                           bool &NeedToScalarize) const;
+                                           bool &NeedToScalarize);
 
   /// Returns true if the per-lane cost of VectorizationFactor A is lower than
   /// that of B.
@@ -1890,6 +1890,10 @@ public:
 
   /// Profitable vector factors.
   SmallVector<VectorizationFactor, 8> ProfitableVFs;
+
+  /// Map a (CallInst, VF) pair to its corresponding declare SIMD function
+  /// VFInfo.
+  DenseMap<InstructionVFPair, VFInfo> DeclareSIMDFnVFInfo;
 };
 } // end namespace llvm
 
@@ -3535,29 +3539,68 @@ LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
 }
 
 InstructionCost LoopVectorizationCostModel::getDeclareSimdFnCallCost(
-    CallInst *CI, ElementCount VF, bool &NeedToScalarize) const {
+    CallInst *CI, ElementCount VF, bool &NeedToScalarize) {
   Function *F = CI->getCalledFunction();
-
   if (!VFABI::isDeclareSimdFn(F))
     return InstructionCost::getInvalid();
 
-  Function *FoundVariant = nullptr;
-  if (!Legal->isMaskRequired(CI)) {
-    VFShape S = VFShape::get(*CI, VF, /*HasGlobalPred*/ false, /*HasVL*/ true);
-    FoundVariant = VFABI::findVariant(F, S);
+  SmallVector<llvm::VFParameter, 8> Parameters;
+  unsigned Pos = Parameters.size();
+  for (auto &ArgOp : CI->args()) {
+    if (TheLoop->isLoopInvariant(ArgOp)) {
+      Parameters.push_back({Pos++, VFParamKind::OMP_Uniform});
+      continue;
+    }
+    if (PSE.getSE()->isSCEVable(ArgOp->getType())) {
+      if (const SCEVAddRecExpr *AddRecSCEV = PSE.getAsAddRec(ArgOp)) {
+        const SCEV *LinearStepOrPos =
+            AddRecSCEV->getStepRecurrence(*PSE.getSE());
+        if (auto *ConstantSCEV = dyn_cast<SCEVConstant>(LinearStepOrPos)) {
+          Parameters.push_back(
+              {Pos++, VFParamKind::OMP_Linear,
+               static_cast<int>(ConstantSCEV->getValue()->getSExtValue())});
+          continue;
+        }
+      }
+    }
+    Parameters.push_back({Pos++, VFParamKind::Vector});
   }
-  if (!FoundVariant) {
-    VFShape S = VFShape::get(*CI, VF, /*HasGlobalPred*/ true, /*HasVL*/ true);
-    if (!VFABI::findVariant(F, S))
-      return InstructionCost::getInvalid();
+  if (Legal->isMaskRequired(CI))
+    Parameters.push_back({Pos++, VFParamKind::GlobalPredicate});
+  Parameters.push_back({Pos++, VFParamKind::GlobalVL});
+
+  const VFShape ExactMatch({VF, Parameters});
+  SmallVector<VFInfo, 4> Candidates;
+  for (const auto &Attr : F->getAttributes().getFnAttrs()) {
+    if (!Attr.isStringAttribute())
+      continue;
+    Optional<VFInfo> VFInfo =
+        VFABI::tryDemangleForVFABI(Attr.getKindAsString(), *F->getParent(),
+                                   /*RequireDeclaration*/ false);
+    if (VFInfo && (VFInfo.value().Shape.isCompatibleWith(ExactMatch)))
+      Candidates.push_back(VFInfo.value());
   }
+  if (Candidates.empty())
+    return InstructionCost::getInvalid();
 
   NeedToScalarize = false;
-  Type *RetTy = ToVectorTy(CI->getType(), VF);
+  VFInfo BestMatch = *std::min_element(Candidates.begin(), Candidates.end());
+  Type *RetTy = ToVectorTy(CI->getType(), BestMatch.Shape.VF);
   SmallVector<Type *, 4> Tys;
-  for (auto &ArgOp : CI->args())
-    Tys.push_back(ToVectorTy(ArgOp->getType(), VF));
-  return TTI.getCallInstrCost(F, RetTy, Tys, TTI::TCK_RecipThroughput);
+  const auto *ParamsIt = BestMatch.Shape.Parameters.begin();
+  for (auto &ArgOp : CI->args()) {
+    if (ParamsIt->ParamKind == VFParamKind::Vector)
+      Tys.push_back(ToVectorTy(ArgOp->getType(), BestMatch.Shape.VF));
+    else
+      Tys.push_back(ArgOp->getType());
+    ++ParamsIt;
+  }
+  InstructionCost Cost =
+      TTI.getCallInstrCost(F->getParent()->getFunction(BestMatch.VectorName),
+                           RetTy, Tys, TTI::TCK_RecipThroughput);
+
+  DeclareSIMDFnVFInfo[std::make_pair(CI, VF)] = BestMatch;
+  return Cost;
 }
 
 static Type *MaybeVectorizeType(Type *Elt, ElementCount VF) {
@@ -3566,10 +3609,10 @@ static Type *MaybeVectorizeType(Type *Elt, ElementCount VF) {
   return VectorType::get(Elt, VF);
 }
 
-InstructionCost
-LoopVectorizationCostModel::getVectorIntrinsicCost(CallInst *CI,
-                                                   ElementCount VF) const {
-  Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
+InstructionCost LoopVectorizationCostModel::getVectorIntrinsicCost(
+    CallInst *CI, ElementCount VF, bool IsVP) const {
+  Intrinsic::ID ID = IsVP ? getVPVectorIntrinsicIDForCall(CI, TLI)
+                          : getVectorIntrinsicIDForCall(CI, TLI);
   assert(ID && "Expected intrinsic call!");
   Type *RetTy = MaybeVectorizeType(CI->getType(), VF);
   FastMathFlags FMF;
@@ -4628,55 +4671,75 @@ void InnerLoopVectorizer::widenCallInstruction(
 
 void InnerLoopVectorizer::predicatedWidenCallInstruction(
     CallInst &CI, VPValue *Def, VPUser &ArgOperands, VPTransformState &State,
-    Intrinsic::ID VPVectorIntrinsicID, VPValue *BlockInMask, VPValue *EVL) {
+    Intrinsic::ID VPVectorIntrinsicID) {
   assert(!isa<DbgInfoIntrinsic>(CI) &&
          "DbgInfoIntrinsic should have been dropped during VPlan construction");
   State.setDebugLocFromInst(&CI);
 
+  auto DeclareSIMDFnVFInfoIt = Cost -> DeclareSIMDFnVFInfo.find({&CI, VF});
+  bool HasVFInfo = DeclareSIMDFnVFInfoIt != Cost->DeclareSIMDFnVFInfo.end();
+  assert(VPVectorIntrinsicID != Intrinsic::not_intrinsic || HasVFInfo);
+  const VFInfo *DeclareSIMDVFInfo =
+      HasVFInfo ? &DeclareSIMDFnVFInfoIt->second : nullptr;
   for (unsigned Part = 0; Part < UF; ++Part) {
     SmallVector<Type *, 2> TysForDecl = {CI.getType()};
     SmallVector<Value *, 4> Args;
     for (auto &I : enumerate(ArgOperands.operands())) {
-      // Some intrinsics have a scalar argument - don't replace it with a
-      // vector.
       Value *Arg;
-      if (!VPVectorIntrinsicID ||
-          !isVectorIntrinsicWithScalarOpAtArg(VPVectorIntrinsicID, I.index()))
-        Arg = State.get(I.value(), Part);
-      else {
-        Arg = State.get(I.value(), VPIteration(0, 0));
-        if (isVectorIntrinsicWithOverloadTypeAtArg(VPVectorIntrinsicID, I.index()))
-          TysForDecl.push_back(Arg->getType());
+      if (VPVectorIntrinsicID) {
+        if (isVectorIntrinsicWithScalarOpAtArg(VPVectorIntrinsicID,
+                                               I.index())) {
+          // Some intrinsics have a scalar argument - don't replace it with
+          // a vector.
+          Arg = State.get(I.value(), VPIteration(0, 0));
+          if (isVectorIntrinsicWithOverloadTypeAtArg(VPVectorIntrinsicID,
+                                                     I.index()))
+            TysForDecl.push_back(Arg->getType());
+        } else {
+          Arg = State.get(I.value(), Part);
+        }
+      } else {
+        // Don't add the mask operand if not needed.
+        if (I.index() == ArgOperands.getNumOperands() - 2 &&
+            !DeclareSIMDVFInfo->Shape.hasMask()) {
+          continue;
+        }
+        switch (DeclareSIMDVFInfo->Shape.Parameters[Args.size()].ParamKind) {
+        // For uniform and linear parameters, do not replace the argument
+        // with a vector.
+        case VFParamKind::OMP_Uniform:
+        case VFParamKind::OMP_Linear:
+          Arg = State.get(I.value(), VPIteration(0, 0));
+          break;
+        default:
+          Arg = State.get(I.value(), Part);
+          break;
+        }
       }
       Args.push_back(Arg);
     }
 
     // The outermost mask can be lowered as an all ones mask when using EVL.
-    if (BlockInMask) {
+    if (VPVectorIntrinsicID || DeclareSIMDVFInfo->Shape.hasMask()) {
       unsigned MaskIdx = Args.size() - 2;
-      if (isa<VPInstruction>(BlockInMask) &&
-          cast<VPInstruction>(BlockInMask)->getOpcode() == VPInstruction::ICmpULE)
+      VPValue *VPMask = ArgOperands.getOperand(MaskIdx);
+      if (isa<VPInstruction>(VPMask) &&
+          cast<VPInstruction>(VPMask)->getOpcode() == VPInstruction::ICmpULE)
         Args[MaskIdx] = State.Builder.getTrueVector(VF);
     }
 
     Function *VectorF;
+    Module *M = State.Builder.GetInsertBlock()->getModule();
     if (VPVectorIntrinsicID) {
       // Use vector version of the intrinsic.
       if (VF.isVector())
         TysForDecl[0] = VectorType::get(CI.getType()->getScalarType(), VF);
-      Module *M = State.Builder.GetInsertBlock()->getModule();
       VectorF = Intrinsic::getDeclaration(M, VPVectorIntrinsicID, TysForDecl);
       assert(VectorF && "Can't retrieve vector intrinsic.");
     } else {
-      // Use vector version of the function call.
-      VFShape Shape = VFShape::get(CI, VF, /*HasGlobalPred*/ false);
-      VectorF = VFDatabase(CI).getVectorizedFunction(Shape);
-      if (!VectorF) {
-        Shape = VFShape::get(CI, VF, /*HasGlobalPred*/ BlockInMask ? true : false,
-                             /*HasVL*/ true);
-        VectorF = VFABI::findVariant(CI.getCalledFunction(), Shape);
-      }
-      assert(VectorF && "Can't retrieve vector function.");
+      // Retrieve declare SIMD function.
+      VectorF = M->getFunction(DeclareSIMDVFInfo->VectorName);
+      assert(VectorF && "Can't retrieve declare SIMD function.");
     }
     SmallVector<OperandBundleDef, 1> OpBundles;
     CI.getOperandBundlesAsDefs(OpBundles);
@@ -8194,11 +8257,22 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
     if (RecurrenceDescriptor::isFMulAddIntrinsic(I))
       if (auto RedCost = getReductionPatternCost(I, VF, VectorTy, CostKind))
         return *RedCost;
+
     bool NeedToScalarize;
     CallInst *CI = cast<CallInst>(I);
-    InstructionCost CallCost =
-        std::min(getVectorCallCost(CI, VF, NeedToScalarize),
-                 getDeclareSimdFnCallCost(CI, VF, NeedToScalarize));
+    InstructionCost CallCost;
+    // Check if we prefer predicated widening.
+    if (foldTailByMasking() && TTI.preferPredicatedVectorOps()) {
+        // NOTE: maybe we should prioritize declare SIMD functions over VP
+        // vector intrinsics (or at least do a comparison bewtween their costs).
+        if (getVPVectorIntrinsicIDForCall(CI, TLI) != Intrinsic::not_intrinsic)
+          return getVectorIntrinsicCost(CI, VF, /*IsVP*/ true);
+
+        CallCost = getDeclareSimdFnCallCost(CI, VF, NeedToScalarize);
+        if (CallCost.isValid())
+          return CallCost;
+    }
+    CallCost = getVectorCallCost(CI, VF, NeedToScalarize);
     if (getVectorIntrinsicIDForCall(CI, TLI)) {
       InstructionCost IntrinsicCost = getVectorIntrinsicCost(CI, VF);
       return std::min(CallCost, IntrinsicCost);
@@ -9295,50 +9369,13 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
 
   ArrayRef<VPValue *> Ops = Operands.take_front(CI->arg_size());
   if (VPPredicated) {
-    VPValue *EVL = getOrCreateEVL(Plan);
-    VPValue *Mask = createBlockInMask(CI->getParent(), Plan);
-
     // NOTE: maybe we should prioritize the declare simd version.
     Intrinsic::ID VPID = getVPVectorIntrinsicIDForCall(CI, TLI);
-    if (VPID != Intrinsic::not_intrinsic)
+    if (VPID != Intrinsic::not_intrinsic ||
+        VFABI::isDeclareSimdFn(CI->getCalledFunction()))
       return new VPPredicatedWidenCallRecipe(
-          *CI, make_range(Ops.begin(), Ops.end()), VPID, Mask, EVL);
-
-    if (VFABI::isDeclareSimdFn(CI->getCalledFunction())) {
-      if (isa<VPInstruction>(Mask) &&
-          cast<VPInstruction>(Mask)->getOpcode() == VPInstruction::ICmpULE) {
-        bool NotInBranchVariantsExist = true;
-        for (ElementCount VF = Range.Start;
-             ElementCount::isKnownLT(VF, Range.End); VF *= 2) {
-          VFShape Shape =
-              VFShape::get(*CI, VF, /*HasGlobalPred*/ false, /*HasVL*/ true);
-          if (!VFABI::findVariant(CI->getCalledFunction(), Shape)) {
-            NotInBranchVariantsExist = false;
-            break;
-          }
-        }
-        if (NotInBranchVariantsExist)
-          return new VPPredicatedWidenCallRecipe(
-              *CI, make_range(Ops.begin(), Ops.end()), Intrinsic::not_intrinsic,
-              nullptr, EVL);
-      }
-
-#ifndef NDEBUG
-      bool InBranchVariantsExist = true;
-      for (ElementCount VF = Range.Start; ElementCount::isKnownLT(VF, Range.End);
-           VF *= 2) {
-        VFShape S = VFShape::get(*CI, VF, /*HasGlobalPred*/ true, /*HasVL*/ true);
-        if (!VFABI::findVariant(CI->getCalledFunction(), S)) {
-          InBranchVariantsExist = false;
-          break;
-        }
-      }
-      assert(InBranchVariantsExist && "At least inbranch variant must exist!");
-#endif
-      return new VPPredicatedWidenCallRecipe(*CI,
-                                             make_range(Ops.begin(), Ops.end()),
-                                             Intrinsic::not_intrinsic, Mask, EVL);
-    }
+          *CI, make_range(Ops.begin(), Ops.end()), VPID,
+          createBlockInMask(CI->getParent(), Plan), getOrCreateEVL(Plan));
   }
 
   Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
@@ -10539,7 +10576,7 @@ void VPWidenCallRecipe::execute(VPTransformState &State) {
 void VPPredicatedWidenCallRecipe::execute(VPTransformState &State) {
   State.ILV->predicatedWidenCallInstruction(
       *cast<CallInst>(getUnderlyingInstr()), this, *this, State,
-      VPVectorIntrinsicID, getMask(), getEVL());
+      VPVectorIntrinsicID);
 }
 
 void VPPredicatedWidenRecipe::execute(VPTransformState &State) {

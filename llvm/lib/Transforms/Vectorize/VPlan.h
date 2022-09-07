@@ -1067,9 +1067,6 @@ class VPPredicatedWidenCallRecipe : public VPRecipeBase, public VPValue {
   /// Intrinsic::not_intrinsic, a library call will be used instead.
   Intrinsic::ID VPVectorIntrinsicID;
 
-private:
-  bool IsMasked;
-
 public:
   template <typename IterT>
   VPPredicatedWidenCallRecipe(CallInst &I, iterator_range<IterT> CallArguments,
@@ -1078,12 +1075,7 @@ public:
       : VPRecipeBase(VPRecipeBase::VPPredicatedWidenCallSC, CallArguments),
         VPValue(VPValue::VPVPredicatedWidenCallSC, &I, this),
         VPVectorIntrinsicID(VPVectorIntrinsicID) {
-    if (!Mask)
-      IsMasked = false;
-    else {
-      IsMasked = true;
-      addOperand(Mask);
-    }
+    addOperand(Mask);
     addOperand(EVL);
   }
 
@@ -1101,7 +1093,7 @@ public:
   void execute(VPTransformState &State) override;
 
   /// Return the mask used by this recipe.
-  VPValue *getMask() const { return IsMasked ? getOperand(getNumOperands() - 2) : nullptr; }
+  VPValue *getMask() const { return getOperand(getNumOperands() - 2); }
 
   /// Return the explicit vector length used by this recipe.
   VPValue *getEVL() const { return getOperand(getNumOperands() - 1); }

@@ -124,6 +124,68 @@ struct VFShape {
   }
   /// Validation check on the Parameters in the VFShape.
   bool hasValidParameterList() const;
+
+  bool hasMask() const {
+    return std::find_if(Parameters.begin(), Parameters.end(),
+                        [](const VFParameter &VFP) {
+                          return VFP.ParamKind == VFParamKind::GlobalPredicate;
+                        }) != Parameters.end();
+  }
+
+  bool hasVL() const {
+    return std::find_if(Parameters.begin(), Parameters.end(),
+                        [](const VFParameter &VFP) {
+                          return VFP.ParamKind == VFParamKind::GlobalVL;
+                        }) != Parameters.end();
+  }
+
+  bool isCompatibleWith(const VFShape &Other) {
+    if (VF != Other.VF)
+      return false;
+
+    if (!hasMask() && Other.hasMask())
+      return false;
+
+    if (hasVL() != Other.hasVL())
+      return false;
+
+    int OtherNumParameters = Other.Parameters.size();
+    if (Other.hasVL())
+      OtherNumParameters--;
+    if (Other.hasMask())
+      OtherNumParameters--;
+    
+    int NumParameters = Parameters.size();
+    if (hasVL())
+      NumParameters--;
+    if (hasMask())
+      NumParameters--;
+
+    if (NumParameters != OtherNumParameters)
+      return false;
+
+    for (int I = 0; I < NumParameters; I++) {
+      VFParameter OtherVFP = Other.Parameters[I];
+      VFParameter VFP = Parameters[I];
+      switch (VFP.ParamKind) {
+      default:
+        llvm_unreachable("Unexpected VFParamKind.");
+      case VFParamKind::OMP_Uniform:
+        if (OtherVFP.ParamKind != VFParamKind::OMP_Uniform)
+          return false;
+        break;
+      case VFParamKind::OMP_Linear:
+        if (OtherVFP.ParamKind != VFParamKind::OMP_Linear ||
+            OtherVFP.LinearStepOrPos != VFP.LinearStepOrPos)
+          return false;
+        break;
+      case VFParamKind::Vector:
+        break;
+      }
+    }
+
+    return true;
+  }
 };
 
 /// Holds the VFShape for a specific scalar to vector function mapping.
@@ -132,6 +194,53 @@ struct VFInfo {
   std::string ScalarName; /// Scalar Function Name.
   std::string VectorName; /// Vector Function Name associated to this VFInfo.
   VFISAKind ISA;          /// Instruction Set Architecture.
+
+  bool operator<(const VFInfo &Other) const {
+    if (Other.Shape.hasMask() && !Shape.hasMask())
+      return true;
+    if (!Other.Shape.hasMask() && Shape.hasMask())
+      return false;
+
+    SmallVector<VFParameter, 8> Params = Shape.Parameters;
+    SmallVector<VFParameter, 8> OtherParams = Other.Shape.Parameters;
+    assert(OtherParams.size() == Params.size());
+
+    unsigned OtherScore = 0;
+    unsigned Score = 0;
+    for (size_t I = 0; I < OtherParams.size(); I++) {
+      switch (Params[I].ParamKind) {
+      case VFParamKind::OMP_Uniform: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        Score += OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ? 0 : 1;
+        break;
+      }
+      case VFParamKind::OMP_Linear: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Linear ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        Score += OtherParams[I].ParamKind == VFParamKind::OMP_Linear ? 0 : 1;
+        break;
+      }
+      case VFParamKind::Vector: {
+        assert(OtherParams[I].ParamKind == VFParamKind::OMP_Uniform ||
+               OtherParams[I].ParamKind == VFParamKind::OMP_Linear ||
+               OtherParams[I].ParamKind == VFParamKind::Vector);
+        OtherScore += OtherParams[I].ParamKind == VFParamKind::Vector ? 0 : 1;
+        break;
+      }
+      case VFParamKind::GlobalPredicate:
+        assert(OtherParams[I].ParamKind == VFParamKind::GlobalPredicate);
+        break;
+      case VFParamKind::GlobalVL:
+        assert(OtherParams[I].ParamKind == VFParamKind::GlobalVL);
+        break;
+      default:
+        llvm_unreachable("Unexpected VFParamKind found.");
+      }
+    }
+
+    return Score > OtherScore;
+  }
 };
 
 namespace VFABI {
@@ -213,8 +322,6 @@ void getVectorVariantNames(const CallInst &CI,
                            SmallVectorImpl<std::string> &VariantMappings);
 
 bool isDeclareSimdFn(Function *Fn);
-
-Function * findVariant(Function *F, VFShape Shape);
 } // end namespace VFABI
 
 /// The Vector Function Database.
