@@ -350,12 +350,17 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     if (Part == 0) {
       bool IsNUW = getOpcode() == VPInstruction::CanonicalIVIncrementNUW;
       auto *Phi = State.get(getOperand(0), 0);
-      // The loop step is equal to the vectorization factor (num of SIMD
-      // elements) times the unroll factor (num of SIMD instructions).
-      Value *Step =
-          createStepForVF(Builder, Phi->getType(), State.VF, State.UF);
+      Value *Step = nullptr;
+      if (getNumOperands() > 1)
+        // We have the EVL value available to use.
+        Step = Builder.CreateZExtOrTrunc(State.get(getOperand(1), 0),
+                                         Phi->getType());
+      else
+        // The loop step is equal to the vectorization factor (num of SIMD
+        // elements) times the unroll factor (num of SIMD instructions).
+        Step = createStepForVF(Builder, Phi->getType(), State.VF, State.UF);
+
       Next = Builder.CreateAdd(Phi, Step, Name, IsNUW, false);
-      State.NextIndex = cast<Instruction>(Next);
     } else {
       Next = State.get(this, 0);
     }

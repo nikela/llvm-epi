@@ -592,9 +592,6 @@ protected:
                     BasicBlock *MiddleBlock, BasicBlock *VectorHeader,
                     VPlan &Plan);
 
-  /// increment induction by EVL if using predicated vectorization.
-  void fixEVLInduction(VPTransformState &State);
-
   /// Handle all cross-iteration phis in the header.
   void fixCrossIterationPHIs(VPTransformState &State);
 
@@ -3849,11 +3846,6 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State,
   for (Instruction *PI : PredicatedInstructions)
     sinkScalarOperands(&*PI);
 
-  // If using predicated vector ops, we need to increment index for the next
-  // vector iteration by the EVL used in current iteration.
-  if (preferPredicatedVectorOps())
-    fixEVLInduction(State);
-
   // Remove redundant induction instructions.
   cse(VectorLoop->getHeader());
 
@@ -3873,40 +3865,6 @@ void InnerLoopVectorizer::fixVectorizedLoop(VPTransformState &State,
   setProfileInfoAfterUnrolling(LI->getLoopFor(LoopScalarBody), VectorLoop,
                                LI->getLoopFor(LoopScalarBody),
                                VF.getKnownMinValue() * UF);
-}
-
-void InnerLoopVectorizer::fixEVLInduction(VPTransformState &State) {
-  // FIXME: Add support for interleaving.
-  Instruction *NextIndex = State.NextIndex;
-  assert(NextIndex);
-  State.Builder.SetInsertPoint(NextIndex);
-  auto *NextIndexOp0 = NextIndex->getOperand(0);
-  VPValue *EVL = State.EVL;
-  auto *CurrEVL =
-      Builder.CreateZExtOrTrunc(State.get(EVL, 0), NextIndexOp0->getType());
-  ReplaceInstWithInst(NextIndex, BinaryOperator::Create(Instruction::Add,
-                                                        NextIndexOp0, CurrEVL));
-
-  // Fix instructions that need EVL value
-  if (State.NextInductionInfo.NextInduction.size() > 0) {
-    Type *StepTy = State.NextInductionInfo.Step->getType();
-    for (auto InstToFix : State.NextInductionInfo.NextInduction) {
-      Instruction *InstToReplace = cast<Instruction>(InstToFix.first);
-      Builder.SetInsertPoint(InstToReplace);
-      Value *EVLPart = State.get(EVL, InstToFix.second);
-      Value *EVLPartCast = nullptr;
-      if (StepTy->isIntegerTy())
-        EVLPartCast = Builder.CreateSExtOrTrunc(EVLPart, StepTy);
-      else
-        EVLPartCast = Builder.CreateUIToFP(EVLPart, StepTy);
-      Value *Mul =
-          Builder.CreateBinOp(State.NextInductionInfo.MulOp,
-                              State.NextInductionInfo.Step, EVLPartCast);
-      Value *MulSplat =
-          Builder.CreateVectorSplat(State.NextInductionInfo.VF, Mul);
-      InstToReplace->setOperand(1, MulSplat);
-    }
-  }
 }
 
 void InnerLoopVectorizer::fixCrossIterationPHIs(VPTransformState &State) {
@@ -9035,22 +8993,20 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
   return BlockMaskCache[BB] = BlockMask;
 }
 
-VPValue *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
-  if (EVL)
-    return EVL;
+VPWidenEVLRecipe *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
+  if (EVLRecipe)
+    return EVLRecipe;
 
   VPValue *TC = Plan->getOrCreateTripCount();
-  auto *EVLRecipe = new VPWidenEVLRecipe(TC);
-  Builder.getInsertBlock()->insert(EVLRecipe, Builder.getInsertPoint());
-  EVL = EVLRecipe->getEVL();
-  return EVL;
+  EVLRecipe = new VPWidenEVLRecipe(TC);
+  return EVLRecipe;
 }
 
 VPValue *VPRecipeBuilder::getOrCreateEVLMask(VPBasicBlock *VPBB,
                                              VPlanPtr &Plan) {
   if (!EVLMask) {
-    assert(EVL && "Cannot create EVL Mask with null EVL value");
-    auto *EVLMaskRecipe = new VPWidenEVLMaskRecipe(EVL);
+    assert(EVLRecipe && "Cannot create EVL Mask with null EVL value");
+    auto *EVLMaskRecipe = new VPWidenEVLMaskRecipe(EVLRecipe);
     VPBB->insert(EVLMaskRecipe, VPBB->getFirstNonPhi());
     EVLMask = EVLMaskRecipe->getEVLMask();
   }
@@ -9784,7 +9740,8 @@ void LoopVectorizationPlanner::buildVPlansWithVPRecipes(ElementCount MinVF,
 // loop.
 static void addCanonicalIVRecipes(VPlan &Plan, Type *IdxTy, DebugLoc DL,
                                   bool HasNUW,
-                                  bool UseLaneMaskForLoopControlFlow) {
+                                  bool UseLaneMaskForLoopControlFlow,
+                                  VPWidenEVLRecipe *EVL = nullptr) {
   Value *StartIdx = ConstantInt::get(IdxTy, 0);
   auto *StartV = Plan.getOrAddVPValue(StartIdx);
 
@@ -9796,10 +9753,13 @@ static void addCanonicalIVRecipes(VPlan &Plan, Type *IdxTy, DebugLoc DL,
 
   // Add a CanonicalIVIncrement{NUW} VPInstruction to increment the scalar
   // IV by VF * UF.
+  SmallVector<VPValue *> IVOps = {CanonicalIVPHI};
+  if (EVL)
+    IVOps.push_back(EVL);
   auto *CanonicalIVIncrement =
       new VPInstruction(HasNUW ? VPInstruction::CanonicalIVIncrementNUW
                                : VPInstruction::CanonicalIVIncrement,
-                        {CanonicalIVPHI}, DL, "index.next");
+                        IVOps, DL, "index.next");
   CanonicalIVPHI->addOperand(CanonicalIVIncrement);
 
   VPBasicBlock *EB = TopRegion->getExitingBasicBlock();
@@ -9956,10 +9916,14 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
 
   Instruction *DLInst =
       getDebugLocFromInstOrOperands(Legal->getPrimaryInduction());
+  VPWidenEVLRecipe *EVLRecipe = nullptr;
+  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
+    EVLRecipe = RecipeBuilder.getOrCreateEVL(Plan);
   addCanonicalIVRecipes(*Plan, Legal->getWidestInductionType(),
                         DLInst ? DLInst->getDebugLoc() : DebugLoc(),
                         !CM.foldTailByMasking(),
-                        CM.useActiveLaneMaskForControlFlow());
+                        CM.useActiveLaneMaskForControlFlow(),
+                        EVLRecipe);
 
   // Scan the body of the loop in a topological order to visit each basic block
   // after having visited its predecessor basic blocks.
@@ -10067,10 +10031,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
          !Plan->getVectorLoopRegion()->getEntryBasicBlock()->empty() &&
          "entry block must be set to a VPRegionBlock having a non-empty entry "
          "VPBasicBlock");
-  // Ensure EVL is available.
-  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps()) {
-    RecipeBuilder.getOrCreateEVL(Plan);
-  }
+
   RecipeBuilder.fixHeaderPhis(Plan);
 
   // ---------------------------------------------------------------------------
@@ -10178,10 +10139,9 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       else
         Builder.setInsertPoint(InsertBlock,
                                std::next(PrevRecipe->getIterator()));
-      auto *EVL = RecipeBuilder.getOrCreateEVL(Plan);
       auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
           VPInstruction::PredicatedFirstOrderRecurrenceSplice,
-          {RecurPhi, RecurPhi->getBackedgeValue(), EVL}));
+          {RecurPhi, RecurPhi->getBackedgeValue(), EVLRecipe}));
 
       RecurPhi->replaceAllUsesWith(RecurSplice);
       // Set the first operand of RecurSplice to RecurPhi again, after replacing
@@ -10256,6 +10216,10 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
         RecipeBuilder.getRecipe(Member)->eraseFromParent();
       }
   }
+  
+  // Now is a good moment to insert the VPWidenEVLRecipe.
+  if (EVLRecipe)
+    HeaderVPBB->insert(EVLRecipe, HeaderVPBB->getFirstNonPhi());
 
   std::string PlanName;
   raw_string_ostream RSO(PlanName);
@@ -10284,18 +10248,6 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   // TODO: Fold block earlier once all VPlan transforms properly maintain a
   // VPBasicBlock as exit.
   VPBlockUtils::tryToMergeBlockIntoPredecessor(TopRegion->getExiting());
-
-  // Finally make sure EVL is as early as possible. This is not very elegant
-  // but sometimes we move recipes that depend on EVL and we break the relative
-  // order.
-  if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps()) {
-    auto *EVL =
-        cast<VPRecipeBase>(RecipeBuilder.getOrCreateEVL(Plan)->getDef());
-    auto I = EVL->getParent()->getFirstNonPhi();
-    if (&*I != EVL) {
-      EVL->moveBefore(*EVL->getParent(), I);
-    }
-  }
 
   bool ValidVPlan = VPlanVerifier::verifyPlanIsValid(*Plan);
   LLVM_DEBUG(if (!ValidVPlan) { Plan->dump(); });
@@ -10502,7 +10454,6 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
         State.Builder.CreateTrunc(SetVL, State.Builder.getInt32Ty());
     State.set(getEVL(), EVL, Part);
   }
-  State.EVL = getEVL();
 }
 
 void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
@@ -10631,10 +10582,6 @@ void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
   VecInd->setDebugLoc(EntryVal->getDebugLoc());
   Instruction *LastInduction = VecInd;
 
-  State.NextInductionInfo.NextInduction.clear();
-  State.NextInductionInfo.Step = Step;
-  State.NextInductionInfo.MulOp = MulOp;
-  State.NextInductionInfo.VF = State.VF;
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     State.set(this, LastInduction, Part);
 
@@ -10644,10 +10591,6 @@ void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
     LastInduction = cast<Instruction>(
         Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
     LastInduction->setDebugLoc(EntryVal->getDebugLoc());
-
-    if (State.ILV->preferPredicatedVectorOps())
-      State.NextInductionInfo.NextInduction.push_back(
-          std::make_pair(LastInduction, Part));
   }
 
   LastInduction->setName("vec.ind.next");

@@ -43,7 +43,7 @@ class VPRecipeBuilder {
 
   VPBuilder &Builder;
 
-  VPValue *EVL = nullptr;
+  VPWidenEVLRecipe *EVLRecipe = nullptr;
 
   VPValue *EVLMask = nullptr;
 
@@ -188,7 +188,7 @@ public:
 
   /// A helper function that computes the Explicit(Active) Vector Length for the
   /// current vector iteration.
-  VPValue *getOrCreateEVL(VPlanPtr &Plan);
+  VPWidenEVLRecipe *getOrCreateEVL(VPlanPtr &Plan);
 
   /// A helper function to compute runtime EVL mask per vector iteration by
   /// current EVL and step vector.
