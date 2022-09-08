@@ -22,6 +22,7 @@
 ; CHECK-NEXT:   ModulePass Manager
 ; CHECK-NEXT:     Pre-ISel Intrinsic Lowering
 ; CHECK-NEXT:     FunctionPass Manager
+; CHECK-NEXT:       Expand large div/rem
 ; CHECK-NEXT:       Expand Atomic instructions
 ; CHECK-NEXT:       EPI Fold Broadcast Intrinsics
 ; CHECK-NEXT:     EPI FMA Contraction

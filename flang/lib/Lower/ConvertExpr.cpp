@@ -34,6 +34,7 @@
 #include "flang/Optimizer/Builder/Complex.h"
 #include "flang/Optimizer/Builder/Factory.h"
 #include "flang/Optimizer/Builder/Runtime/Character.h"
+#include "flang/Optimizer/Builder/Runtime/Derived.h"
 #include "flang/Optimizer/Builder/Runtime/RTBuilder.h"
 #include "flang/Optimizer/Builder/Runtime/Ragged.h"
 #include "flang/Optimizer/Builder/Todo.h"
@@ -1056,6 +1057,8 @@ public:
     auto recTy = ty.cast<fir::RecordType>();
     auto fieldTy = fir::FieldType::get(ty.getContext());
     mlir::Value res = builder.createTemporary(loc, recTy);
+    mlir::Value box = builder.createBox(loc, fir::ExtendedValue{res});
+    fir::runtime::genDerivedTypeInitialize(builder, loc, box);
 
     for (const auto &value : ctor.values()) {
       const Fortran::semantics::Symbol &sym = *value.first;
@@ -1448,6 +1451,14 @@ public:
       const Fortran::evaluate::Scalar<Fortran::evaluate::Type<TC, KIND>>
           &value) {
     if constexpr (TC == Fortran::common::TypeCategory::Integer) {
+      if (KIND == 16) {
+        mlir::Type ty =
+            converter.genType(Fortran::common::TypeCategory::Integer, KIND);
+        auto bigInt =
+            llvm::APInt(ty.getIntOrFloatBitWidth(), value.SignedDecimal(), 10);
+        return builder.create<mlir::arith::ConstantOp>(
+            getLoc(), ty, mlir::IntegerAttr::get(ty, bigInt));
+      }
       return genIntegerConstant<KIND>(builder.getContext(), value.ToInt64());
     } else if constexpr (TC == Fortran::common::TypeCategory::Logical) {
       return genBoolConstant(value.IsTrue());
@@ -2473,21 +2484,12 @@ public:
   static mlir::Value
   genRecordCPtrValueArg(Fortran::lower::AbstractConverter &converter,
                         mlir::Value rec, mlir::Type ty) {
-    assert(fir::isa_derived(ty));
-    auto recTy = ty.dyn_cast<fir::RecordType>();
-    assert(recTy.getTypeList().size() == 1);
-    auto fieldName = recTy.getTypeList()[0].first;
-    mlir::Type fieldTy = recTy.getTypeList()[0].second;
     fir::FirOpBuilder &builder = converter.getFirOpBuilder();
     mlir::Location loc = converter.getCurrentLocation();
-    auto fieldIndexType = fir::FieldType::get(ty.getContext());
-    mlir::Value field =
-        builder.create<fir::FieldIndexOp>(loc, fieldIndexType, fieldName, recTy,
-                                          /*typeParams=*/mlir::ValueRange{});
-    mlir::Value cAddr = builder.create<fir::CoordinateOp>(
-        loc, builder.getRefType(fieldTy), rec, field);
-    mlir::Value val = builder.create<fir::LoadOp>(loc, cAddr);
-    return builder.createConvert(loc, builder.getRefType(fieldTy), val);
+    mlir::Value cAddr =
+        fir::factory::genCPtrOrCFunptrAddr(builder, loc, rec, ty);
+    mlir::Value cVal = builder.create<fir::LoadOp>(loc, cAddr);
+    return builder.createConvert(loc, cAddr.getType(), cVal);
   }
 
   /// Given a call site for which the arguments were already lowered, generate

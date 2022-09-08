@@ -1564,6 +1564,7 @@ class SwapSysRegImm<SysReg SR, list<Register> Regs>
 def ReadFRM : ReadSysReg<SysRegFRM, [FRM]>, Sched<[]>;
 def WriteFRM : WriteSysReg<SysRegFRM, [FRM]>, Sched<[]>;
 def WriteFRMImm : WriteSysRegImm<SysRegFRM, [FRM]>, Sched<[]>;
+def SwapFRMImm : SwapSysRegImm<SysRegFRM, [FRM]>, Sched<[]>;
 
 let hasSideEffects = true in {
 def ReadFFLAGS : ReadSysReg<SysRegFFLAGS, [FFLAGS]>;
