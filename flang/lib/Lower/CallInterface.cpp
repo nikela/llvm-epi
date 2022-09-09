@@ -1055,6 +1055,12 @@ bool Fortran::lower::CallInterface<T>::PassedEntity::mayBeReadByCall() const {
     return true;
   return characteristics->GetIntent() != Fortran::common::Intent::Out;
 }
+template <typename T>
+bool Fortran::lower::CallInterface<T>::PassedEntity::isIntentOut() const {
+  if (!characteristics)
+    return true;
+  return characteristics->GetIntent() == Fortran::common::Intent::Out;
+}
 
 template <typename T>
 void Fortran::lower::CallInterface<T>::determineInterface(
