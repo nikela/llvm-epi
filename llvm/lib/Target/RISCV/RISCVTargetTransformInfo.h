@@ -379,6 +379,7 @@ public:
     case RecurKind::UMax:
     case RecurKind::FMin:
     case RecurKind::FMax:
+    case RecurKind::FMulAdd:
       return true;
     default:
       return false;

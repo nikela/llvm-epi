@@ -91,6 +91,8 @@ Bug Fixes
   `Issue 57431 <https://github.com/llvm/llvm-project/issues/57431>`_
 - Fix a crash where we attempt to define a deleted destructor. This fixes
   `Issue 57516 <https://github.com/llvm/llvm-project/issues/57516>`_
+- Fix ``__builtin_assume_aligned`` crash when the 1st arg is array type. This fixes
+  `Issue 57169 <https://github.com/llvm/llvm-project/issues/57169>`_
 
 
 Improvements to Clang's diagnostics
@@ -138,6 +140,13 @@ Non-comprehensive list of changes in this release
 - It's now possible to set the crash diagnostics directory through
   the environment variable ``CLANG_CRASH_DIAGNOSTICS_DIR``.
   The ``-fcrash-diagnostics-dir`` flag takes precedence.
+- When using header modules, inclusion of a private header and violations of
+  the `use-declaration rules
+  <https://clang.llvm.org/docs/Modules.html#use-declaration>`_ are now
+  diagnosed even when the includer is a textual header. This change can be
+  temporarily reversed with ``-Xclang
+  -fno-modules-validate-textual-header-includes``, but this flag will be
+  removed in a future Clang release.
 
 New Compiler Flags
 ------------------
@@ -169,6 +178,10 @@ Attribute Changes in Clang
 
 Windows Support
 ---------------
+- For the MinGW driver, added the options ``-mguard=none``, ``-mguard=cf`` and
+  ``-mguard=cf-nochecks`` (equivalent to ``/guard:cf-``, ``/guard:cf`` and
+  ``/guard:cf,nochecks`` in clang-cl) for enabling Control Flow Guard checks
+  and generation of address-taken function table.
 
 AIX Support
 -----------
@@ -191,6 +204,10 @@ C++ Language Changes in Clang
 
 - Implemented DR692, DR1395 and DR1432. Use the ``-fclang-abi-compat=15`` option
   to get the old partial ordering behavior regarding packs.
+- Clang's default C++/ObjC++ standard is now ``gnu++17`` instead of ``gnu++14``.
+  This means Clang will by default accept code using features from C++17 and
+  conforming GNU extensions. Projects incompatible with C++17 can add
+  ``-std=gnu++14`` to their build settings to restore the previous behaviour.
 
 C++20 Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -270,6 +287,10 @@ DWARF Support in Clang
 
 Arm and AArch64 Support in Clang
 --------------------------------
+
+- `-march` values for targeting armv2, armv2A, armv3 and armv3M have been removed.
+  Their presence gave the impression that Clang can correctly generate code for
+  them, which it cannot.
 
 Floating Point Support in Clang
 -------------------------------
