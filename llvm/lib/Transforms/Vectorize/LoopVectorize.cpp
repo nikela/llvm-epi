@@ -10910,16 +10910,17 @@ void VPReductionRecipe::execute(VPTransformState &State) {
 }
 
 void VPReplicateRecipe::execute(VPTransformState &State) {
+  Instruction *UI = getUnderlyingInstr();
   if (State.Instance) { // Generate a single instance.
     assert(!State.VF.isScalable() && "Can't scalarize a scalable vector");
-    State.ILV->scalarizeInstruction(getUnderlyingInstr(), this, *State.Instance,
+    State.ILV->scalarizeInstruction(UI, this, *State.Instance,
                                     IsPredicated, State);
     // Insert scalar instance packing it into a vector.
     if (AlsoPack && State.VF.isVector()) {
       // If we're constructing lane 0, initialize to start from poison.
       if (State.Instance->Lane.isFirstLane()) {
         Value *Poison = PoisonValue::get(
-            VectorType::get(getUnderlyingValue()->getType(), State.VF));
+            VectorType::get(UI->getType(), State.VF));
         State.set(this, Poison, State.Instance->Part);
       }
       State.ILV->packScalarIntoVectorValue(this, *State.Instance, State);
@@ -10930,14 +10931,15 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
   if (IsUniform) {
     // If the recipe is uniform across all parts (instead of just per VF), only
     // generate a single instance.
-    Instruction *UI = getUnderlyingInstr();
-    if (isa<LoadInst>(UI) &&
+    if ((isa<LoadInst>(UI) || isa<StoreInst>(UI)) &&
         all_of(operands(), [](VPValue *Op) { return !Op->getDef(); })) {
       State.ILV->scalarizeInstruction(UI, this, VPIteration(0, 0), IsPredicated,
                                       State);
-      for (unsigned Part = 1; Part < State.UF; ++Part)
-        State.set(this, State.get(this, VPIteration(0, 0)),
-                  VPIteration(Part, 0));
+      if (!UI->getType()->isVoidTy()) {
+        for (unsigned Part = 1; Part < State.UF; ++Part)
+          State.set(this, State.get(this, VPIteration(0, 0)),
+                    VPIteration(Part, 0));
+      }
       return;
     }
 
@@ -10954,9 +10956,8 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
   const unsigned EndLane = State.VF.getKnownMinValue();
   for (unsigned Part = 0; Part < State.UF; ++Part)
     for (unsigned Lane = 0; Lane < EndLane; ++Lane)
-      State.ILV->scalarizeInstruction(getUnderlyingInstr(), this,
-                                      VPIteration(Part, Lane), IsPredicated,
-                                      State);
+      State.ILV->scalarizeInstruction(UI, this, VPIteration(Part, Lane),
+                                      IsPredicated, State);
 }
 
 void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
