@@ -213,6 +213,8 @@ public:
   ///
   /// There are several different cost models that can be customized by the
   /// target. The normalization of each cost model may be target specific.
+  /// e.g. TCK_SizeAndLatency should be comparable to target thresholds such as
+  /// those derived from MCSchedModel::LoopMicroOpBufferSize etc.
   enum TargetCostKind {
     TCK_RecipThroughput, ///< Reciprocal throughput.
     TCK_Latency,         ///< The latency of instruction.
@@ -686,6 +688,9 @@ public:
   /// would typically be allowed using throughput or size cost models.
   bool hasDivRemOp(Type *DataType, bool IsSigned) const;
 
+  /// Returns the maximum bitwidth of legal div and rem instructions.
+  unsigned maxLegalDivRemBitWidth() const;
+
   /// Return true if the given instruction (assumed to be a memory access
   /// instruction) has a volatile variant. If that's the case then we can avoid
   /// addrspacecast to generic AS for volatile loads/stores. Default
@@ -830,6 +835,14 @@ public:
 
   /// Return true if the hardware has a fast square-root instruction.
   bool haveFastSqrt(Type *Ty) const;
+
+  /// Return true if the cost of the instruction is too high to speculatively
+  /// execute and should be kept behind a branch.
+  /// This normally just wraps around a getInstructionCost() call, but some
+  /// targets might report a low TCK_SizeAndLatency value that is incompatible
+  /// with the fixed TCC_Expensive value.
+  /// NOTE: This assumes the instruction passes isSafeToSpeculativelyExecute().
+  bool isExpensiveToSpeculativelyExecute(const Instruction *I) const;
 
   /// Return true if it is faster to check if a floating-point value is NaN
   /// (or not-NaN) versus a comparison against a constant FP zero value.
@@ -1644,6 +1657,7 @@ public:
                                const SmallBitVector &OpcodeMask) const = 0;
   virtual bool enableOrderedReductions() = 0;
   virtual bool hasDivRemOp(Type *DataType, bool IsSigned) = 0;
+  virtual unsigned maxLegalDivRemBitWidth() = 0;
   virtual bool hasVolatileVariant(Instruction *I, unsigned AddrSpace) = 0;
   virtual bool prefersVectorizedAddressing() = 0;
   virtual InstructionCost getScalingFactorCost(Type *Ty, GlobalValue *BaseGV,
@@ -1683,6 +1697,7 @@ public:
                                               bool *Fast) = 0;
   virtual PopcntSupportKind getPopcntSupport(unsigned IntTyWidthInBit) = 0;
   virtual bool haveFastSqrt(Type *Ty) = 0;
+  virtual bool isExpensiveToSpeculativelyExecute(const Instruction *I) = 0;
   virtual bool isFCmpOrdCheaperThanFCmpZero(Type *Ty) = 0;
   virtual InstructionCost getFPOpCost(Type *Ty) = 0;
   virtual InstructionCost getIntImmCodeSizeCost(unsigned Opc, unsigned Idx,
@@ -2098,6 +2113,9 @@ public:
   bool hasDivRemOp(Type *DataType, bool IsSigned) override {
     return Impl.hasDivRemOp(DataType, IsSigned);
   }
+  unsigned maxLegalDivRemBitWidth() override {
+    return Impl.maxLegalDivRemBitWidth();
+  }
   bool hasVolatileVariant(Instruction *I, unsigned AddrSpace) override {
     return Impl.hasVolatileVariant(I, AddrSpace);
   }
@@ -2182,6 +2200,10 @@ public:
     return Impl.getPopcntSupport(IntTyWidthInBit);
   }
   bool haveFastSqrt(Type *Ty) override { return Impl.haveFastSqrt(Ty); }
+
+  bool isExpensiveToSpeculativelyExecute(const Instruction* I) override {
+    return Impl.isExpensiveToSpeculativelyExecute(I);
+  }
 
   bool isFCmpOrdCheaperThanFCmpZero(Type *Ty) override {
     return Impl.isFCmpOrdCheaperThanFCmpZero(Ty);

@@ -447,8 +447,6 @@ struct IntrinsicLibrary {
   mlir::Value genIeeeIsNaN(mlir::Type, llvm::ArrayRef<mlir::Value>);
   fir::ExtendedValue genCAssociated(mlir::Type resultType,
                              llvm::ArrayRef<fir::ExtendedValue> args);
-  void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
-
   void genAbort(llvm::ArrayRef<fir::ExtendedValue>);
 
   /// Lowering for the ABS intrinsic. The ABS intrinsic expects one argument in
@@ -488,6 +486,7 @@ struct IntrinsicLibrary {
   fir::ExtendedValue genCount(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   void genCpuTime(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCshift(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
+  void genCFPointer(llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCFunLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   fir::ExtendedValue genCLoc(mlir::Type, llvm::ArrayRef<fir::ExtendedValue>);
   void genDateAndTime(llvm::ArrayRef<fir::ExtendedValue>);
@@ -741,7 +740,9 @@ static constexpr IntrinsicHandler handlers[]{
      /*isElemental=*/false},
     {"c_f_pointer",
      &I::genCFPointer,
-     {{{"cptr", asAddr}, {"fptr", asInquired}, {"shape", asAddr}}},
+     {{{"cptr", asValue},
+       {"fptr", asInquired},
+       {"shape", asAddr, handleDynamicOptional}}},
      /*isElemental=*/false},
     {"c_funloc", &I::genCFunLoc, {{{"x", asBox}}}, /*isElemental=*/false},
     {"c_loc", &I::genCLoc, {{{"x", asBox}}}, /*isElemental=*/false},
@@ -1057,8 +1058,7 @@ static const IntrinsicHandler *findIntrinsicHandler(llvm::StringRef name) {
   auto compare = [](const IntrinsicHandler &handler, llvm::StringRef name) {
     return name.compare(handler.name) > 0;
   };
-  auto result =
-      std::lower_bound(std::begin(handlers), std::end(handlers), name, compare);
+  auto result = llvm::lower_bound(handlers, name, compare);
   return result != std::end(handlers) && result->name == name ? result
                                                               : nullptr;
 }
@@ -2213,16 +2213,6 @@ mlir::Value IntrinsicLibrary::genIeeeIsNaN(mlir::Type resultType,
   return builder.createConvert(loc, resultType, builder.genIsNaN(loc, arg));
 }
 
-static fir::ShapeOp genShapeOp(mlir::Location loc, fir::FirOpBuilder &builder,
-                               llvm::ArrayRef<mlir::Value> shape) {
-  mlir::IndexType idxTy = builder.getIndexType();
-  llvm::SmallVector<mlir::Value> idxShape;
-  for (auto s : shape)
-    idxShape.push_back(builder.createConvert(loc, idxTy, s));
-  auto shapeTy = fir::ShapeType::get(builder.getContext(), idxShape.size());
-  return builder.create<fir::ShapeOp>(loc, shapeTy, idxShape);
-}
-
 fir::ExtendedValue
 IntrinsicLibrary::genCAssociated(mlir::Type resultType,
                                  llvm::ArrayRef<fir::ExtendedValue> args) {
@@ -2261,63 +2251,6 @@ IntrinsicLibrary::genCAssociated(mlir::Type resultType,
   }
 
   return builder.createConvert(loc, resultType, cmpOp);
-}
-
-void IntrinsicLibrary::genCFPointer(llvm::ArrayRef<fir::ExtendedValue> args) {
-  fir::ExtendedValue cptr = args[0];
-  fir::ExtendedValue fptr = args[1];
-  bool absentShape = isStaticallyAbsent(args[2]);
-
-  llvm::StringRef addrFieldName = Fortran::lower::builtin::cptrFieldName;
-  mlir::Value cptrValue = fir::getBase(cptr);
-  mlir::Value fptrValue = fir::getBase(fptr);
-  fir::RecordType recTy = cptrValue.getType()
-                              .cast<fir::ReferenceType>()
-                              .getEleTy()
-                              .cast<fir::RecordType>();
-  mlir::Type componentTy = recTy.getType(addrFieldName);
-  mlir::Type fieldTy = fir::FieldType::get(componentTy.getContext());
-  mlir::Value addrFieldIndex = builder.create<fir::FieldIndexOp>(
-      loc, fieldTy, addrFieldName, recTy,
-      /*typeParams=*/mlir::ValueRange{} /* TODO */);
-  mlir::Value addrFieldAddr = builder.create<fir::CoordinateOp>(
-      loc, builder.getRefType(componentTy), cptrValue, addrFieldIndex);
-  mlir::Value addrFieldValue = builder.create<fir::LoadOp>(loc, addrFieldAddr);
-  mlir::Type fptrBoxTy = fir::unwrapRefType(fptrValue.getType());
-  mlir::Type boxElemTy = fptrBoxTy.cast<fir::BoxType>().getEleTy();
-  mlir::Value castValue = builder.createConvert(loc, boxElemTy, addrFieldValue);
-
-  if (absentShape) {
-    mlir::Value emboxed =
-        builder.create<fir::EmboxOp>(loc, fptrBoxTy, castValue);
-    builder.create<fir::StoreOp>(loc, emboxed, fptrValue);
-    fptr.match(
-        [&](const fir::MutableBoxValue &mutableBox) {
-          fir::factory::syncMutableBoxFromIRBox(builder, loc, mutableBox);
-        },
-        [&](const auto &) {});
-  } else {
-    fir::ExtendedValue shape = args[2];
-    mlir::Value shapeValue = fir::getBase(shape);
-
-    mlir::Type shapeElemTy =
-        fir::unwrapSequenceType(fir::unwrapRefType(shapeValue.getType()));
-    llvm::SmallVector<mlir::Value> shapeValues;
-    auto rank = fptr.rank();
-    assert(rank > 0 && "Unexpected rank");
-    for (decltype(rank) dim = 0; dim < rank; ++dim) {
-      mlir::Value idxConst = builder.createIntegerConstant(
-          loc, builder.getDefaultIntegerType(), dim);
-      mlir::Value elementAddr = builder.create<fir::CoordinateOp>(
-          loc, builder.getRefType(shapeElemTy), shapeValue, idxConst);
-      mlir::Value elementValue = builder.create<fir::LoadOp>(loc, elementAddr);
-      shapeValues.push_back(elementValue);
-    }
-    mlir::Value newShape = genShapeOp(loc, builder, shapeValues);
-    mlir::Value emboxed =
-        builder.create<fir::EmboxOp>(loc, fptrBoxTy, castValue, newShape);
-    builder.create<fir::StoreOp>(loc, emboxed, fptrValue);
-  }
 }
 
 // ABORT
@@ -2610,12 +2543,10 @@ static fir::ExtendedValue
 genCLocOrCFunLoc(fir::FirOpBuilder &builder, mlir::Location loc,
                  mlir::Type resultType, llvm::ArrayRef<fir::ExtendedValue> args,
                  bool isFunc = false) {
-  assert(args.size() == 1 && resultType.isa<fir::RecordType>());
-  auto resTy = resultType.dyn_cast<fir::RecordType>();
-  assert(resTy.getTypeList().size() == 1);
-  auto fieldName = resTy.getTypeList()[0].first;
-  auto fieldTy = resTy.getTypeList()[0].second;
+  assert(args.size() == 1);
   mlir::Value res = builder.create<fir::AllocaOp>(loc, resultType);
+  mlir::Value resAddr =
+      fir::factory::genCPtrOrCFunptrAddr(builder, loc, res, resultType);
   mlir::Value argAddr;
   if (isFunc) {
     mlir::Value argValue = fir::getBase(args[0]);
@@ -2629,14 +2560,62 @@ genCLocOrCFunLoc(fir::FirOpBuilder &builder, mlir::Location loc,
     argAddr = builder.create<fir::BoxAddrOp>(loc, box->getMemTy(),
                                              fir::getBase(*box));
   }
-  mlir::Value argAddrVal = builder.createConvert(loc, fieldTy, argAddr);
-  auto fieldIndexType = fir::FieldType::get(resultType.getContext());
-  mlir::Value field = builder.create<fir::FieldIndexOp>(
-      loc, fieldIndexType, fieldName, resTy, /*typeParams=*/mlir::ValueRange{});
-  mlir::Value resAddr = builder.create<fir::CoordinateOp>(
-      loc, builder.getRefType(fieldTy), res, field);
+  mlir::Value argAddrVal = builder.createConvert(
+      loc, fir::unwrapRefType(resAddr.getType()), argAddr);
   builder.create<fir::StoreOp>(loc, argAddrVal, resAddr);
   return res;
+}
+
+// C_F_POINTER
+void IntrinsicLibrary::genCFPointer(llvm::ArrayRef<fir::ExtendedValue> args) {
+  assert(args.size() == 3);
+  // Handle CPTR argument
+  // Get the value of the C address or the result of a reference to C_LOC.
+  mlir::Value cPtr = fir::getBase(args[0]);
+  mlir::Type cPtrTy = fir::unwrapRefType(cPtr.getType());
+  mlir::Value cPtrAddr =
+      fir::factory::genCPtrOrCFunptrAddr(builder, loc, cPtr, cPtrTy);
+  mlir::Value cPtrAddrVal = builder.create<fir::LoadOp>(loc, cPtrAddr);
+
+  // Handle FPTR argument
+  const auto *fPtr = args[1].getBoxOf<fir::MutableBoxValue>();
+  assert(fPtr && "FPTR must be a pointer");
+
+  auto getCPtrExtVal = [&](fir::MutableBoxValue box) -> fir::ExtendedValue {
+    mlir::Value addr =
+        builder.createConvert(loc, fPtr->getMemTy(), cPtrAddrVal);
+    mlir::SmallVector<mlir::Value> extents;
+    if (box.hasRank()) {
+      assert(isStaticallyPresent(args[2]) &&
+             "FPTR argument must be an array if SHAPE argument exists");
+      mlir::Value shape = fir::getBase(args[2]);
+      int arrayRank = box.rank();
+      mlir::Type shapeElementType =
+          fir::unwrapSequenceType(fir::unwrapPassByRefType(shape.getType()));
+      mlir::Type idxType = builder.getIndexType();
+      for (int i = 0; i < arrayRank; ++i) {
+        mlir::Value index = builder.createIntegerConstant(loc, idxType, i);
+        mlir::Value var = builder.create<fir::CoordinateOp>(
+            loc, builder.getRefType(shapeElementType), shape, index);
+        mlir::Value load = builder.create<fir::LoadOp>(loc, var);
+        extents.push_back(builder.createConvert(loc, idxType, load));
+      }
+    }
+    if (box.isCharacter()) {
+      mlir::Value len = box.nonDeferredLenParams()[0];
+      if (box.hasRank())
+        return fir::CharArrayBoxValue{addr, len, extents};
+      return fir::CharBoxValue{addr, len};
+    }
+    if (box.isDerivedWithLenParameters())
+      TODO(loc, "get length parameters of derived type");
+    if (box.hasRank())
+      return fir::ArrayBoxValue{addr, extents};
+    return addr;
+  };
+
+  fir::factory::associateMutableBox(builder, loc, *fPtr, getCPtrExtVal(*fPtr),
+                                    /*lbounds=*/mlir::ValueRange{});
 }
 
 // C_FUNLOC

@@ -502,7 +502,7 @@ void GenerateLoopNest<scf::ForOp>::doit(
     return;
 
   // Filter out scf.for loops that were created out of parallel dimensions.
-  for (auto loop : llvm::enumerate(loopNest.loops)) {
+  for (const auto &loop : llvm::enumerate(loopNest.loops)) {
     if (procInfo[loop.index()].distributionMethod ==
         DistributionMethod::Cyclic) {
       mapLoopToProcessorIds(loop.value(), procInfo[loop.index()].procId,
@@ -704,7 +704,7 @@ void GenerateLoopNest<scf::ParallelOp>::doit(
   unpackRanges(b, loc, loopRanges, lbsStorage, ubsStorage, stepsStorage);
 
   // Modify the lb, ub, and step based on the distribution options.
-  for (auto it : llvm::enumerate(procInfo)) {
+  for (const auto &it : llvm::enumerate(procInfo)) {
     if (it.value().distributionMethod != linalg::DistributionMethod::None) {
       updateBoundsForCyclicDistribution(
           b, loc, it.value().procId, it.value().nprocs, lbsStorage[it.index()],
@@ -944,6 +944,16 @@ Value materializeOpFoldResult(OpBuilder &builder, Location loc,
                               OpFoldResult opFoldResult) {
   ImplicitLocOpBuilder b(loc, builder);
   return materializeOpFoldResult(b, opFoldResult);
+}
+
+SmallVector<Value>
+materializeOpFoldResults(OpBuilder &builder, Location loc,
+                         ArrayRef<OpFoldResult> opFoldResults) {
+  ImplicitLocOpBuilder b(loc, builder);
+  SmallVector<Value> values;
+  for (const auto &opFoldResult : opFoldResults)
+    values.push_back(materializeOpFoldResult(b, opFoldResult));
+  return values;
 }
 
 SmallVector<Optional<SliceParameters>>

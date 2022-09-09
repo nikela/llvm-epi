@@ -663,7 +663,13 @@ void Verifier::visitGlobalValue(const GlobalValue &GV) {
   if (GV.isDeclarationForLinker())
     Check(!GV.hasComdat(), "Declaration may not be in a Comdat!", &GV);
 
+  if (GV.hasDLLExportStorageClass()) {
+    Check(GV.hasDefaultVisibility(),
+          "dllexport GlobalValue must have default visibility", &GV);
+  }
   if (GV.hasDLLImportStorageClass()) {
+    Check(GV.hasDefaultVisibility(),
+          "dllimport GlobalValue must have default visibility", &GV);
     Check(!GV.isDSOLocal(), "GlobalValue with DLLImport Storage is dso_local!",
           &GV);
 
@@ -3442,8 +3448,10 @@ void Verifier::visitCallBase(CallBase &Call) {
 
   // Verify that each inlinable callsite of a debug-info-bearing function in a
   // debug-info-bearing function has a debug location attached to it. Failure to
-  // do so causes assertion failures when the inliner sets up inline scope info.
+  // do so causes assertion failures when the inliner sets up inline scope info
+  // (Interposable functions are not inlinable).
   if (Call.getFunction()->getSubprogram() && Call.getCalledFunction() &&
+      !Call.getCalledFunction()->isInterposable() &&
       Call.getCalledFunction()->getSubprogram())
     CheckDI(Call.getDebugLoc(),
             "inlinable function call in a function with "
