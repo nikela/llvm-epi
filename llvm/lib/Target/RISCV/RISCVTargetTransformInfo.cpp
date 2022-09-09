@@ -268,26 +268,6 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
   return {LowerBoundVF, UpperBoundVF};
 }
 
-InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
-                                                 Type *CondTy,
-                                                 CmpInst::Predicate VecPred,
-                                                 TTI::TargetCostKind CostKind,
-                                                 const Instruction *I) {
-  if (ValTy && isa<ScalableVectorType>(ValTy) && !isTypeLegal(ValTy))
-    return InstructionCost::getInvalid();
-
-  if (CondTy && isa<ScalableVectorType>(CondTy) && !isTypeLegal(CondTy))
-    return InstructionCost::getInvalid();
-
-  // Apparently the base cannot handle some scalable cases, so let's stop it
-  // here for now.
-  if (ValTy && isa<ScalableVectorType>(ValTy) && CondTy &&
-      isa<ScalableVectorType>(CondTy))
-    return 1;
-
-  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
-}
-
 TargetTransformInfo::PopcntSupportKind
 RISCVTTIImpl::getPopcntSupport(unsigned TyWidth) {
   assert(isPowerOf2_32(TyWidth) && "Ty width must be power of 2");
@@ -445,38 +425,38 @@ InstructionCost RISCVTTIImpl::getGatherScatterOpCost(
 // instruction counts with the following adjustments made:
 // * One vsetvli is considered free.
 static const CostTblEntry VectorIntrinsicCostTable[]{
-    {Intrinsic::floor, MVT::v2f32, 15},
-    {Intrinsic::floor, MVT::v4f32, 15},
-    {Intrinsic::floor, MVT::v8f32, 15},
-    {Intrinsic::floor, MVT::v16f32, 15},
-    {Intrinsic::floor, MVT::nxv2f32, 15},
-    {Intrinsic::floor, MVT::nxv4f32, 15},
-    {Intrinsic::floor, MVT::nxv8f32, 15},
-    {Intrinsic::floor, MVT::nxv16f32, 15},
-    {Intrinsic::floor, MVT::v2f64, 15},
-    {Intrinsic::floor, MVT::v4f64, 15},
-    {Intrinsic::floor, MVT::v8f64, 15},
-    {Intrinsic::floor, MVT::v16f64, 15},
-    {Intrinsic::floor, MVT::nxv1f64, 15},
-    {Intrinsic::floor, MVT::nxv2f64, 15},
-    {Intrinsic::floor, MVT::nxv4f64, 15},
-    {Intrinsic::floor, MVT::nxv8f64, 15},
-    {Intrinsic::ceil, MVT::v2f32, 15},
-    {Intrinsic::ceil, MVT::v4f32, 15},
-    {Intrinsic::ceil, MVT::v8f32, 15},
-    {Intrinsic::ceil, MVT::v16f32, 15},
-    {Intrinsic::ceil, MVT::nxv2f32, 15},
-    {Intrinsic::ceil, MVT::nxv4f32, 15},
-    {Intrinsic::ceil, MVT::nxv8f32, 15},
-    {Intrinsic::ceil, MVT::nxv16f32, 15},
-    {Intrinsic::ceil, MVT::v2f64, 15},
-    {Intrinsic::ceil, MVT::v4f64, 15},
-    {Intrinsic::ceil, MVT::v8f64, 15},
-    {Intrinsic::ceil, MVT::v16f64, 15},
-    {Intrinsic::ceil, MVT::nxv1f64, 15},
-    {Intrinsic::ceil, MVT::nxv2f64, 15},
-    {Intrinsic::ceil, MVT::nxv4f64, 15},
-    {Intrinsic::ceil, MVT::nxv8f64, 15},
+    {Intrinsic::floor, MVT::v2f32, 9},
+    {Intrinsic::floor, MVT::v4f32, 9},
+    {Intrinsic::floor, MVT::v8f32, 9},
+    {Intrinsic::floor, MVT::v16f32, 9},
+    {Intrinsic::floor, MVT::nxv2f32, 9},
+    {Intrinsic::floor, MVT::nxv4f32, 9},
+    {Intrinsic::floor, MVT::nxv8f32, 9},
+    {Intrinsic::floor, MVT::nxv16f32, 9},
+    {Intrinsic::floor, MVT::v2f64, 9},
+    {Intrinsic::floor, MVT::v4f64, 9},
+    {Intrinsic::floor, MVT::v8f64, 9},
+    {Intrinsic::floor, MVT::v16f64, 9},
+    {Intrinsic::floor, MVT::nxv1f64, 9},
+    {Intrinsic::floor, MVT::nxv2f64, 9},
+    {Intrinsic::floor, MVT::nxv4f64, 9},
+    {Intrinsic::floor, MVT::nxv8f64, 9},
+    {Intrinsic::ceil, MVT::v2f32, 9},
+    {Intrinsic::ceil, MVT::v4f32, 9},
+    {Intrinsic::ceil, MVT::v8f32, 9},
+    {Intrinsic::ceil, MVT::v16f32, 9},
+    {Intrinsic::ceil, MVT::nxv2f32, 9},
+    {Intrinsic::ceil, MVT::nxv4f32, 9},
+    {Intrinsic::ceil, MVT::nxv8f32, 9},
+    {Intrinsic::ceil, MVT::nxv16f32, 9},
+    {Intrinsic::ceil, MVT::v2f64, 9},
+    {Intrinsic::ceil, MVT::v4f64, 9},
+    {Intrinsic::ceil, MVT::v8f64, 9},
+    {Intrinsic::ceil, MVT::v16f64, 9},
+    {Intrinsic::ceil, MVT::nxv1f64, 9},
+    {Intrinsic::ceil, MVT::nxv2f64, 9},
+    {Intrinsic::ceil, MVT::nxv4f64, 9},
+    {Intrinsic::ceil, MVT::nxv8f64, 9},
     {Intrinsic::trunc, MVT::v2f32, 7},
     {Intrinsic::trunc, MVT::v4f32, 7},
     {Intrinsic::trunc, MVT::v8f32, 7},
@@ -493,22 +473,22 @@ static const CostTblEntry VectorIntrinsicCostTable[]{
     {Intrinsic::trunc, MVT::nxv2f64, 7},
     {Intrinsic::trunc, MVT::nxv4f64, 7},
     {Intrinsic::trunc, MVT::nxv8f64, 7},
-    {Intrinsic::round, MVT::v2f32, 10},
-    {Intrinsic::round, MVT::v4f32, 10},
-    {Intrinsic::round, MVT::v8f32, 10},
-    {Intrinsic::round, MVT::v16f32, 10},
-    {Intrinsic::round, MVT::nxv2f32, 10},
-    {Intrinsic::round, MVT::nxv4f32, 10},
-    {Intrinsic::round, MVT::nxv8f32, 10},
-    {Intrinsic::round, MVT::nxv16f32, 10},
-    {Intrinsic::round, MVT::v2f64, 10},
-    {Intrinsic::round, MVT::v4f64, 10},
-    {Intrinsic::round, MVT::v8f64, 10},
-    {Intrinsic::round, MVT::v16f64, 10},
-    {Intrinsic::round, MVT::nxv1f64, 10},
-    {Intrinsic::round, MVT::nxv2f64, 10},
-    {Intrinsic::round, MVT::nxv4f64, 10},
-    {Intrinsic::round, MVT::nxv8f64, 10},
+    {Intrinsic::round, MVT::v2f32, 9},
+    {Intrinsic::round, MVT::v4f32, 9},
+    {Intrinsic::round, MVT::v8f32, 9},
+    {Intrinsic::round, MVT::v16f32, 9},
+    {Intrinsic::round, MVT::nxv2f32, 9},
+    {Intrinsic::round, MVT::nxv4f32, 9},
+    {Intrinsic::round, MVT::nxv8f32, 9},
+    {Intrinsic::round, MVT::nxv16f32, 9},
+    {Intrinsic::round, MVT::v2f64, 9},
+    {Intrinsic::round, MVT::v4f64, 9},
+    {Intrinsic::round, MVT::v8f64, 9},
+    {Intrinsic::round, MVT::v16f64, 9},
+    {Intrinsic::round, MVT::nxv1f64, 9},
+    {Intrinsic::round, MVT::nxv2f64, 9},
+    {Intrinsic::round, MVT::nxv4f64, 9},
+    {Intrinsic::round, MVT::nxv8f64, 9},
     {Intrinsic::fabs, MVT::v2f32, 1},
     {Intrinsic::fabs, MVT::v4f32, 1},
     {Intrinsic::fabs, MVT::v8f32, 1},
@@ -1004,6 +984,67 @@ InstructionCost RISCVTTIImpl::getMemoryOpCost(unsigned Opcode, Type *Src,
     Cost += getVectorImmCost(cast<VectorType>(Src), OpInfo, CostKind);
   return Cost + BaseT::getMemoryOpCost(Opcode, Src, Alignment, AddressSpace,
                                        CostKind, OpInfo, I);
+}
+
+InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
+                                                 Type *CondTy,
+                                                 CmpInst::Predicate VecPred,
+                                                 TTI::TargetCostKind CostKind,
+                                                 const Instruction *I) {
+  // EPI stuff.
+  if (isa_and_nonnull<ScalableVectorType>(ValTy) && !isTypeLegal(ValTy))
+    return InstructionCost::getInvalid();
+
+  if (isa_and_nonnull<ScalableVectorType>(CondTy) && !isTypeLegal(CondTy))
+    return InstructionCost::getInvalid();
+  // end of EPI stuff.
+
+  if (CostKind != TTI::TCK_RecipThroughput)
+    return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind,
+                                     I);
+
+  if (isa<FixedVectorType>(ValTy) && !ST->useRVVForFixedLengthVectors())
+    return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind,
+                                     I);
+
+  // Skip if scalar size of ValTy is bigger than ELEN.
+  if (ValTy->isVectorTy() && ValTy->getScalarSizeInBits() > ST->getELEN())
+    return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind,
+                                     I);
+
+  if (Opcode == Instruction::Select && ValTy->isVectorTy()) {
+    std::pair<InstructionCost, MVT> LT = getTypeLegalizationCost(ValTy);
+    if (CondTy->isVectorTy()) {
+      if (ValTy->getScalarSizeInBits() == 1) {
+        // vmandn.mm v8, v8, v9
+        // vmand.mm v9, v0, v9
+        // vmor.mm v0, v9, v8
+        return LT.first * 3;
+      }
+      // vselect and max/min are supported natively.
+      return LT.first * 1;
+    }
+
+    // vmv.v.x v10, a0
+    // vmsne.vi v0, v10, 0
+    // vmerge.vvm v8, v9, v8, v0
+    return LT.first * 3;
+  }
+
+  if ((Opcode == Instruction::ICmp || Opcode == Instruction::FCmp) &&
+      ValTy->isVectorTy()) {
+    std::pair<InstructionCost, MVT> LT = getTypeLegalizationCost(ValTy);
+
+    // Support natively.
+    if (CmpInst::isIntPredicate(VecPred))
+      return LT.first * 1;
+
+    // TODO: Add cost for fp vector compare instruction.
+  }
+
+  // TODO: Add cost for scalar type.
+
+  return BaseT::getCmpSelInstrCost(Opcode, ValTy, CondTy, VecPred, CostKind, I);
 }
 
 void RISCVTTIImpl::getUnrollingPreferences(Loop *L, ScalarEvolution &SE,

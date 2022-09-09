@@ -1869,7 +1869,7 @@ private:
         std::string Brace;
         if (Token->BraceCount < 0) {
           assert(Token->BraceCount == -1);
-          Brace = '{';
+          Brace = "\n{";
         } else {
           Brace = '\n' + std::string(Token->BraceCount, '}');
         }
@@ -2539,7 +2539,7 @@ private:
         "UIView",
     };
 
-    for (auto Line : AnnotatedLines) {
+    for (auto *Line : AnnotatedLines) {
       if (Line->First && (Line->First->TokenText.startswith("#") ||
                           Line->First->TokenText == "__pragma" ||
                           Line->First->TokenText == "_Pragma")) {

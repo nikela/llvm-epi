@@ -677,36 +677,32 @@ void VecCloneVPPass::updateParameterUsers(Function *Clone,
 
         User->setOperand(Use->getOperandNo(), ArgElemLoad);
       } else if (ParmKinds[ArgNo].ParamKind == VFParamKind::OMP_Linear) {
-        llvm_unreachable("There should not be a not-vector parameter, for now.");
-        // FIXME: There is a plethora of linear stuff that will probably need
-        // different ways of handling it.
-        // int Stride = ParmKinds[ArgNo].LinearStepOrPos;
-        // Constant *StrideConst =
-        //     ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
-        // auto *Mul = Builder.CreateMul(StrideConst, Phi, "stride.mul");
+        int Stride = ParmKinds[ArgNo].LinearStepOrPos;
+        Constant *StrideConst =
+            ConstantInt::get(Type::getInt32Ty(Clone->getContext()), Stride);
+        auto *Mul = Builder.CreateNSWMul(StrideConst, Phi, "stride.mul");
 
-        // Value *UserOp = nullptr;
-        // if (PointerType *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
-        //   if (ParmPtrType->isOpaque())
-        //     llvm::report_fatal_error(
-        //         "Can't retrieve missing type info from the pointer itself.");
+        Value *UserOp = nullptr;
+        if (auto *ParmPtrType = dyn_cast<PointerType>(ArgTy)) {
+          Type *PointeeType = nullptr;
+          if (ParmPtrType->isOpaque())
+            // NOTE: with opaque pointers, the LinearStepOrPos field yields the
+            // value of the stride as number of bytes, which means we have to
+            // use i8 as pointee type in the GEP.
+            PointeeType = Type::getInt8Ty(Clone->getContext());
+          else
+            PointeeType = ParmPtrType->getNonOpaquePointerElementType();
 
-        //   UserOp =
-        //       Builder.CreateGEP(ParmPtrType->getNonOpaquePointerElementType(),
-        //                         &Arg, Mul, ArgName + ".gep");
-        // } else {
-        //   if (Mul->getType() != ArgTy)
-        //     Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
-        //                                       Mul->getName() + ".cast");
+          UserOp = Builder.CreateGEP(PointeeType, &Arg, Mul, ArgName + ".gep");
+        } else {
+          if (Mul->getType() != ArgTy)
+            Mul = Builder.CreateSExtOrBitCast(Mul, ArgTy,
+                                              Mul->getName() + ".cast");
 
-        //   UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
-        // }
+          UserOp = Builder.CreateAdd(&Arg, Mul, "stride.add");
+        }
 
-        // unsigned NumOps = U->getNumOperands();
-        // for (unsigned Op = 0; Op < NumOps; Op++) {
-        //   if (U->getOperand(Op) == &Arg)
-        //     U->setOperand(Op, UserOp);
-        // }
+        User->setOperand(Use->getOperandNo(), UserOp);
       }
     }
   }
@@ -818,34 +814,6 @@ bool VecCloneVPPass::runImpl(
 
   widenAllocaInstructions(Clone, AllocaMap, EntryBlock, Variant, DL, Mask, VL);
 
-  // Find the basic block containing the return. We need to know where
-  // to replace the return instruction with a store to the return vector
-  // and where to split off a loop exit block containing the loop exit
-  // condition.
-  BasicBlock *OldReturnBlock = nullptr;
-  Instruction *RetInst = nullptr;
-  unsigned NumRets = 1;
-  for (auto FuncIt = Clone->begin(), FuncEnd = Clone->end(); FuncIt != FuncEnd;
-       ++FuncIt) {
-    if (isa<ReturnInst>(FuncIt->getTerminator())) {
-      // TODO: Haven't yet found (or created) a test case where there are
-      // multiple ret instructions. Assert for now.
-      assert(NumRets == 1 &&
-             "Unsupported function due to multiple return instructions");
-      OldReturnBlock = &*FuncIt;
-      RetInst = FuncIt->getTerminator();
-      NumRets++;
-    }
-  }
-
-  // Create the loop exit basic block
-  BasicBlock *LoopExitBlock =
-      OldReturnBlock->splitBasicBlock(RetInst, "simd.loop.exit");
-  // Create a new return block that will contain the load of the return
-  // vector and the new return instruction.
-  BasicBlock *NewReturnBlock =
-      LoopExitBlock->splitBasicBlock(RetInst, "return");
-
   // Generate the phi for the loop index
   Builder.SetInsertPoint(LoopBlock->getFirstNonPHI());
   PHINode *Phi =
@@ -860,6 +828,26 @@ bool VecCloneVPPass::runImpl(
     OldAlloca->eraseFromParent();
   }
 
+  // Find all the basic blocks containing a return instruction: we need to
+  // know where to replace the return instructions with a store to the return
+  // vector.
+  SmallVector<ReturnInst *> OldReturns;
+  for (BasicBlock &BB : Clone->getBasicBlockList())
+    if (auto *RetInst = dyn_cast<ReturnInst>(BB.getTerminator()))
+      OldReturns.push_back(RetInst);
+
+  // Create the new return block that will contain the load of the return
+  // vector and the new return instruction.
+  BasicBlock *NewReturnBlock =
+      BasicBlock::Create(Clone->getContext(), "return", Clone);
+  Builder.SetInsertPoint(NewReturnBlock);
+  Builder.CreateRetVoid();
+  // Create the loop exit basic block.
+  BasicBlock *LoopExitBlock = BasicBlock::Create(
+      Clone->getContext(), "simd.loop.exit", Clone, NewReturnBlock);
+  Builder.SetInsertPoint(LoopExitBlock);
+  Builder.CreateBr(NewReturnBlock);
+
   // Create a vector alloca for the return. The return type of the clone
   // has already been widened, so the type can be used directly.
   AllocaInst *VecRetAlloca = nullptr;
@@ -869,24 +857,30 @@ bool VecCloneVPPass::runImpl(
     VecRetAlloca = Builder.CreateAlloca(VecRetTy, DL.getAllocaAddrSpace(),
                                         nullptr, "vec.ret");
 
-  // Store to the return vector the previously returned value.
-  Builder.SetInsertPoint(OldReturnBlock->getTerminator());
-  Value *StoreVal = RetInst->getOperand(0);
-  Type *StoreValTy = StoreVal->getType();
-  if (!StoreValTy->isVoidTy()) {
-    Value *MemPtr = VecRetAlloca;
-    if (!VecRetAlloca->getType()->isOpaquePointerTy()) {
-      // Cast it to a pointer to the type of the old return instruction.
-      PointerType *StoreValPtrTy =
-          PointerType::get(StoreValTy, DL.getAllocaAddrSpace());
-      MemPtr = Builder.CreateBitOrPointerCast(VecRetAlloca, StoreValPtrTy,
-                                              VecRetAlloca->getName() + ".cast");
+  // Store to the return vector the previously returned value, then
+  // (unconditionally) jump to the LoopExitBlock.
+  for (ReturnInst *RetInst : OldReturns) {
+    assert(RetInst == RetInst->getParent()->getTerminator());
+    Builder.SetInsertPoint(RetInst);
+    Value *StoreVal = RetInst->getOperand(0);
+    Type *StoreValTy = StoreVal->getType();
+    if (!StoreValTy->isVoidTy()) {
+      Value *MemPtr = VecRetAlloca;
+      if (!VecRetAlloca->getType()->isOpaquePointerTy()) {
+        // Cast it to a pointer to the type of the old return instruction.
+        PointerType *StoreValPtrTy =
+            PointerType::get(StoreValTy, DL.getAllocaAddrSpace());
+        MemPtr = Builder.CreateBitOrPointerCast(VecRetAlloca, StoreValPtrTy,
+                                                VecRetAlloca->getName() + ".cast");
+      }
+      auto *RetAllocaGep = Builder.CreateGEP(StoreValTy, MemPtr, Phi,
+                                             MemPtr->getName() + ".gep");
+      Builder.CreateAlignedStore(StoreVal, RetAllocaGep,
+                                 DL.getPrefTypeAlign(StoreValTy),
+                                 false);
     }
-    auto *RetAllocaGep = Builder.CreateGEP(StoreValTy, MemPtr, Phi,
-                                           MemPtr->getName() + ".gep");
-    Builder.CreateAlignedStore(StoreVal, RetAllocaGep,
-                               DL.getPrefTypeAlign(StoreValTy),
-                               false);
+
+    Builder.CreateBr(LoopExitBlock);
   }
 
   if (MaskAlloca)
@@ -934,7 +928,8 @@ bool VecCloneVPPass::runImpl(
   // Generate the load from the return vector and the new return instruction
   // and put them in the new return basic block.
   Value *VecReturn = nullptr;
-  Builder.SetInsertPoint(NewReturnBlock->getTerminator());
+  Instruction *RetInst = NewReturnBlock->getTerminator();
+  Builder.SetInsertPoint(RetInst);
   if (!VecRetTy->isVoidTy()) {
     if (VL) {
       auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
@@ -955,6 +950,10 @@ bool VecCloneVPPass::runImpl(
   }
   Builder.CreateRet(VecReturn);
   RetInst->eraseFromParent();
+
+  // Remove all old return instructions.
+  for (ReturnInst *RetInst : OldReturns)
+    RetInst->eraseFromParent();
 
   LLVM_DEBUG(dbgs() << "[VecCloneVP] After Loop Insertion\n");
   LLVM_DEBUG(Clone->dump());

@@ -354,7 +354,8 @@ Align AsmPrinter::getGVAlignment(const GlobalObject *GV, const DataLayout &DL,
 
 AsmPrinter::AsmPrinter(TargetMachine &tm, std::unique_ptr<MCStreamer> Streamer)
     : MachineFunctionPass(ID), TM(tm), MAI(tm.getMCAsmInfo()),
-      OutContext(Streamer->getContext()), OutStreamer(std::move(Streamer)) {
+      OutContext(Streamer->getContext()), OutStreamer(std::move(Streamer)),
+      SM(*this) {
   VerboseAsm = OutStreamer->isVerboseAsm();
 }
 
@@ -1698,8 +1699,11 @@ void AsmPrinter::emitFunctionBody() {
   // Emit target-specific gunk after the function body.
   emitFunctionBodyEnd();
 
-  if (needFuncLabelsForEHOrDebugInfo(*MF) ||
-      MAI->hasDotTypeDotSizeDirective()) {
+  // Even though wasm supports .type and .size in general, function symbols
+  // are automatically sized.
+  bool EmitFunctionSize = MAI->hasDotTypeDotSizeDirective() && !TT.isWasm();
+
+  if (needFuncLabelsForEHOrDebugInfo(*MF) || EmitFunctionSize) {
     // Create a symbol for the end of function.
     CurrentFnEnd = createTempSymbol("func_end");
     OutStreamer->emitLabel(CurrentFnEnd);
@@ -1707,7 +1711,7 @@ void AsmPrinter::emitFunctionBody() {
 
   // If the target wants a .size directive for the size of the function, emit
   // it.
-  if (MAI->hasDotTypeDotSizeDirective()) {
+  if (EmitFunctionSize) {
     // We can get the size as difference between the function label and the
     // temp label.
     const MCExpr *SizeExp = MCBinaryExpr::createSub(
@@ -2074,6 +2078,12 @@ bool AsmPrinter::doFinalization(Module &M) {
   // arbitrary sections.
   if (auto *TS = OutStreamer->getTargetStreamer())
     TS->emitConstantPools();
+
+  // Emit Stack maps before any debug info. Mach-O requires that no data or
+  // text sections come after debug info has been emitted. This matters for
+  // stack maps as they are arbitrary data, and may even have a custom format
+  // through user plugins.
+  emitStackMaps();
 
   // Finalize debug and EH information.
   for (const HandlerInfo &HI : Handlers) {
@@ -3742,7 +3752,7 @@ GCMetadataPrinter *AsmPrinter::GetOrCreateGCPrinter(GCStrategy &S) {
   report_fatal_error("no GCMetadataPrinter registered for GC: " + Twine(Name));
 }
 
-void AsmPrinter::emitStackMaps(StackMaps &SM) {
+void AsmPrinter::emitStackMaps() {
   GCModuleInfo *MI = getAnalysisIfAvailable<GCModuleInfo>();
   assert(MI && "AsmPrinter didn't require GCModuleInfo?");
   bool NeedsDefault = false;

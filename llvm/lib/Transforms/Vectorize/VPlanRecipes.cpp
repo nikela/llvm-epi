@@ -531,6 +531,64 @@ void VPInstruction::setFastMathFlags(FastMathFlags FMFNew) {
   FMF = FMFNew;
 }
 
+void VPWidenCallRecipe::execute(VPTransformState &State) {
+  auto &CI = *cast<CallInst>(getUnderlyingInstr());
+  assert(!isa<DbgInfoIntrinsic>(CI) &&
+         "DbgInfoIntrinsic should have been dropped during VPlan construction");
+  State.setDebugLocFromInst(&CI);
+
+  SmallVector<Type *, 4> Tys;
+  for (Value *ArgOperand : CI.args())
+    Tys.push_back(
+        ToVectorTy(ArgOperand->getType(), State.VF.getKnownMinValue()));
+
+  for (unsigned Part = 0; Part < State.UF; ++Part) {
+    SmallVector<Type *, 2> TysForDecl = {CI.getType()};
+    SmallVector<Value *, 4> Args;
+    for (const auto &I : enumerate(operands())) {
+      // Some intrinsics have a scalar argument - don't replace it with a
+      // vector.
+      Value *Arg;
+      if (VectorIntrinsicID == Intrinsic::not_intrinsic ||
+          !isVectorIntrinsicWithScalarOpAtArg(VectorIntrinsicID, I.index()))
+        Arg = State.get(I.value(), Part);
+      else
+        Arg = State.get(I.value(), VPIteration(0, 0));
+      if (isVectorIntrinsicWithOverloadTypeAtArg(VectorIntrinsicID, I.index()))
+        TysForDecl.push_back(Arg->getType());
+      Args.push_back(Arg);
+    }
+
+    Function *VectorF;
+    if (VectorIntrinsicID != Intrinsic::not_intrinsic) {
+      // Use vector version of the intrinsic.
+      if (State.VF.isVector())
+        TysForDecl[0] =
+            VectorType::get(CI.getType()->getScalarType(), State.VF);
+      Module *M = State.Builder.GetInsertBlock()->getModule();
+      VectorF = Intrinsic::getDeclaration(M, VectorIntrinsicID, TysForDecl);
+      assert(VectorF && "Can't retrieve vector intrinsic.");
+    } else {
+      // Use vector version of the function call.
+      const VFShape Shape = VFShape::get(CI, State.VF, false /*HasGlobalPred*/);
+#ifndef NDEBUG
+      assert(VFDatabase(CI).getVectorizedFunction(Shape) != nullptr &&
+             "Can't create vector function.");
+#endif
+      VectorF = VFDatabase(CI).getVectorizedFunction(Shape);
+    }
+    SmallVector<OperandBundleDef, 1> OpBundles;
+    CI.getOperandBundlesAsDefs(OpBundles);
+    CallInst *V = State.Builder.CreateCall(VectorF, Args, OpBundles);
+
+    if (isa<FPMathOperator>(V))
+      V->copyFastMathFlags(&CI);
+
+    State.set(this, V, Part);
+    State.addMetadata(V, &CI);
+  }
+}
+
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 void VPWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
                               VPSlotTracker &SlotTracker) const {
@@ -547,8 +605,100 @@ void VPWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
   O << "call @" << CI->getCalledFunction()->getName() << "(";
   printOperands(O, SlotTracker);
   O << ")";
+
+  if (VectorIntrinsicID)
+    O << " (using vector intrinsic)";
+  else
+    O << " (using library function)";
+}
+#endif
+
+void VPPredicatedWidenCallRecipe::execute(VPTransformState &State) {
+  auto &CI = *cast<CallInst>(getUnderlyingInstr());
+  assert(!isa<DbgInfoIntrinsic>(CI) &&
+         "DbgInfoIntrinsic should have been dropped during VPlan construction");
+  State.setDebugLocFromInst(&CI);
+
+  auto DeclareSIMDFnVFInfoIt =
+      State.DeclareSIMDFnVFInfo.find({&CI, State.VF});
+  bool HasVFInfo = DeclareSIMDFnVFInfoIt != State.DeclareSIMDFnVFInfo.end();
+  // Either we have a VP intrinsic or a VFInfo.
+  assert(VPVectorIntrinsicID != Intrinsic::not_intrinsic || HasVFInfo);
+  const VFInfo *DeclareSIMDVFInfo =
+      HasVFInfo ? &DeclareSIMDFnVFInfoIt->second : nullptr;
+  for (unsigned Part = 0; Part < State.UF; ++Part) {
+    SmallVector<Type *, 2> TysForDecl = {CI.getType()};
+    SmallVector<Value *, 4> Args;
+    for (auto &I : enumerate(operands())) {
+      Value *Arg;
+      if (VPVectorIntrinsicID) {
+        if (isVectorIntrinsicWithScalarOpAtArg(VPVectorIntrinsicID,
+                                               I.index())) {
+          // Some intrinsics have a scalar argument - don't replace it with
+          // a vector.
+          Arg = State.get(I.value(), VPIteration(0, 0));
+          if (isVectorIntrinsicWithOverloadTypeAtArg(VPVectorIntrinsicID,
+                                                     I.index()))
+            TysForDecl.push_back(Arg->getType());
+        } else {
+          Arg = State.get(I.value(), Part);
+        }
+      } else {
+        // Don't add the mask operand if not needed.
+        if (I.index() == getNumOperands() - 2 &&
+            !DeclareSIMDVFInfo->Shape.hasMask()) {
+          continue;
+        }
+        switch (DeclareSIMDVFInfo->Shape.Parameters[Args.size()].ParamKind) {
+        // For uniform and linear parameters, do not replace the argument
+        // with a vector.
+        case VFParamKind::OMP_Uniform:
+        case VFParamKind::OMP_Linear:
+          Arg = State.get(I.value(), VPIteration(0, 0));
+          break;
+        default:
+          Arg = State.get(I.value(), Part);
+          break;
+        }
+      }
+      Args.push_back(Arg);
+    }
+
+    // The outermost mask can be lowered as an all ones mask when using EVL.
+    if (VPVectorIntrinsicID || DeclareSIMDVFInfo->Shape.hasMask()) {
+      unsigned MaskIdx = Args.size() - 2;
+      VPValue *VPMask = getOperand(MaskIdx);
+      if (isa<VPInstruction>(VPMask) &&
+          cast<VPInstruction>(VPMask)->getOpcode() == VPInstruction::ICmpULE)
+        Args[MaskIdx] = State.Builder.getTrueVector(State.VF);
+    }
+
+    Function *VectorF;
+    Module *M = State.Builder.GetInsertBlock()->getModule();
+    if (VPVectorIntrinsicID) {
+      // Use vector version of the intrinsic.
+      if (State.VF.isVector())
+        TysForDecl[0] = VectorType::get(CI.getType()->getScalarType(), State.VF);
+      VectorF = Intrinsic::getDeclaration(M, VPVectorIntrinsicID, TysForDecl);
+      assert(VectorF && "Can't retrieve vector intrinsic.");
+    } else {
+      // Retrieve declare SIMD function.
+      VectorF = M->getFunction(DeclareSIMDVFInfo->VectorName);
+      assert(VectorF && "Can't retrieve declare SIMD function.");
+    }
+    SmallVector<OperandBundleDef, 1> OpBundles;
+    CI.getOperandBundlesAsDefs(OpBundles);
+    CallInst *V = State.Builder.CreateCall(VectorF, Args, OpBundles);
+
+    if (isa<FPMathOperator>(V))
+      V->copyFastMathFlags(&CI);
+
+    State.set(this, V, Part);
+    State.addMetadata(V, &CI);
+  }
 }
 
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 void VPPredicatedWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
                                         VPSlotTracker &SlotTracker) const {
   O << Indent << "PREDICATED-WIDEN-CALL ";
@@ -564,8 +714,15 @@ void VPPredicatedWidenCallRecipe::print(raw_ostream &O, const Twine &Indent,
   O << "call @" << CI->getCalledFunction()->getName() << "(";
   printOperands(O, SlotTracker);
   O << ")";
-}
 
+  if (VPVectorIntrinsicID)
+    O << " (using vector intrinsic)";
+  else
+    O << " (using library function)";
+}
+#endif
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 void VPWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
                                 VPSlotTracker &SlotTracker) const {
   O << Indent << "WIDEN-SELECT ";

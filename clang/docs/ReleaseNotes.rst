@@ -86,6 +86,11 @@ Bug Fixes
   `Issue 57387 <https://github.com/llvm/llvm-project/issues/57387>`_.
 - Fix a crash when emitting a concept-related diagnostic. This fixes
   `Issue 57415 <https://github.com/llvm/llvm-project/issues/57415>`_.
+- Fix a crash when attempting to default a virtual constexpr non-special member
+  function in a derived class. This fixes
+  `Issue 57431 <https://github.com/llvm/llvm-project/issues/57431>`_
+- Fix a crash where we attempt to define a deleted destructor. This fixes
+  `Issue 57516 <https://github.com/llvm/llvm-project/issues/57516>`_
 
 
 Improvements to Clang's diagnostics
@@ -103,9 +108,13 @@ Improvements to Clang's diagnostics
 - ``-Wformat`` now recognizes ``%b`` for the ``printf``/``scanf`` family of
   functions and ``%B`` for the ``printf`` family of functions. Fixes
   `Issue 56885: <https://github.com/llvm/llvm-project/issues/56885>`_.
-- ``-Wbitfield-constant-conversion`` now diagnoses implicit truncation when 1 is
-  assigned to a 1-bit signed integer bitfield. This fixes
-  `Issue 53253 <https://github.com/llvm/llvm-project/issues/53253>`_.
+- Introduced ``-Wsingle-bit-bitfield-constant-conversion``, grouped under
+  ``-Wbitfield-constant-conversion``, which diagnoses implicit truncation when
+  ``1`` is assigned to a 1-bit signed integer bitfield. This fixes
+  `Issue 53253 <https://github.com/llvm/llvm-project/issues/53253>`_. To reduce
+  potential false positives, this diagnostic will not diagnose use of the
+  ``true`` macro (from ``<stdbool.h>>`) in C language mode despite the macro
+  being defined to expand to ``1``.
 - ``-Wincompatible-function-pointer-types`` now defaults to an error in all C
   language modes. It may be downgraded to a warning with
   ``-Wno-error=incompatible-function-pointer-types`` or disabled entirely with
@@ -118,13 +127,17 @@ Improvements to Clang's diagnostics
 - Correctly diagnose a future keyword if it exist as a keyword in the higher
   language version and specifies in which version it will be a keyword. This
   supports both c and c++ language.
+- When diagnosing multi-level pack expansions of mismatched lengths, Clang will
+  now, in most cases, be able to point to the relevant outer parameter.
+- no_sanitize("...") on a global variable for known but not relevant sanitizers
+  is now just a warning. It now says that this will be ignored instead of
+  incorrectly saying no_sanitize only applies to functions and methods.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
-
-
-Non-comprehensive list of changes in this release
--------------------------------------------------
+- It's now possible to set the crash diagnostics directory through
+  the environment variable ``CLANG_CRASH_DIAGNOSTICS_DIR``.
+  The ``-fcrash-diagnostics-dir`` flag takes precedence.
 
 New Compiler Flags
 ------------------
@@ -166,6 +179,10 @@ AIX Support
 C Language Changes in Clang
 ---------------------------
 
+- Adjusted ``-Wformat`` warnings according to `WG14 N2562 <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2562.pdf>`_.
+  Clang will now consider default argument promotions in printf, and remove unnecessary warnings.
+  Especially ``int`` argument with specifier ``%hhd`` and ``%hd``.
+
 C2x Feature Support
 -------------------
 
@@ -196,11 +213,19 @@ C++20 Feature Support
   and `DR1734 <https://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#1734>`_.
 - Class member variables are now in scope when parsing a ``requires`` clause. Fixes
   `GH55216 <https://github.com/llvm/llvm-project/issues/55216>`_.
-
 - Correctly set expression evaluation context as 'immediate function context' in
   consteval functions.
-  This fixes `GH51182 <https://github.com/llvm/llvm-project/issues/51182>`
+  This fixes `GH51182 <https://github.com/llvm/llvm-project/issues/51182>`_.
 
+- Fixes an assert crash caused by looking up missing vtable information on ``consteval``
+  virtual functions. Fixes `GH55065 <https://github.com/llvm/llvm-project/issues/55065>`_.
+
+- Skip rebuilding lambda expressions in arguments of immediate invocations.
+  This fixes `GH56183 <https://github.com/llvm/llvm-project/issues/56183>`_,
+  `GH51695 <https://github.com/llvm/llvm-project/issues/51695>`_,
+  `GH50455 <https://github.com/llvm/llvm-project/issues/50455>`_,
+  `GH54872 <https://github.com/llvm/llvm-project/issues/54872>`_,
+  `GH54587 <https://github.com/llvm/llvm-project/issues/54587>`_.
 
 C++2b Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -269,6 +294,8 @@ libclang
 
 - Introduced the new function `clang_getUnqualifiedType`, which mimics
   the behavior of `QualType::getUnqualifiedType` for `CXType`.
+- Introduced the new function `clang_getNonReferenceType`, which mimics
+  the behavior of `QualType::getNonReferenceType` for `CXType`.
 
 Static Analyzer
 ---------------

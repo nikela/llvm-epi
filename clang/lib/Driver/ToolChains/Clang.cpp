@@ -2420,10 +2420,8 @@ void Clang::AddWebAssemblyTargetArgs(const ArgList &Args,
                                      ArgStringList &CmdArgs) const {
   // Default to "hidden" visibility.
   if (!Args.hasArg(options::OPT_fvisibility_EQ,
-                   options::OPT_fvisibility_ms_compat)) {
-    CmdArgs.push_back("-fvisibility");
-    CmdArgs.push_back("hidden");
-  }
+                   options::OPT_fvisibility_ms_compat))
+    CmdArgs.push_back("-fvisibility=hidden");
 }
 
 void Clang::AddVETargetArgs(const ArgList &Args, ArgStringList &CmdArgs) const {
@@ -2613,6 +2611,13 @@ static void CollectArgsForIntegratedAssembler(Compilation &C,
 
       switch (C.getDefaultToolChain().getArch()) {
       default:
+        break;
+      case llvm::Triple::wasm32:
+      case llvm::Triple::wasm64:
+        if (Value == "--no-type-check") {
+          CmdArgs.push_back("-mno-type-check");
+          continue;
+        }
         break;
       case llvm::Triple::thumb:
       case llvm::Triple::thumbeb:
@@ -3760,29 +3765,25 @@ static void RenderModulesOptions(Compilation &C, const Driver &D,
                      options::OPT_fno_modules_validate_input_files_content,
                      false))
       CmdArgs.push_back("-fvalidate-ast-input-files-content");
+  }
 
-    // -fmodule-name specifies the module that is currently being built (or
-    // used for header checking by -fmodule-maps).
-    Args.AddLastArg(CmdArgs, options::OPT_fmodule_name_EQ);
+  // -fmodule-name specifies the module that is currently being built (or
+  // used for header checking by -fmodule-maps).
+  Args.AddLastArg(CmdArgs, options::OPT_fmodule_name_EQ);
 
-    // -fmodule-map-file can be used to specify files containing module
-    // definitions.
-    Args.AddAllArgs(CmdArgs, options::OPT_fmodule_map_file);
+  // -fmodule-map-file can be used to specify files containing module
+  // definitions.
+  Args.AddAllArgs(CmdArgs, options::OPT_fmodule_map_file);
 
-    // -fbuiltin-module-map can be used to load the clang
-    // builtin headers modulemap file.
-    if (Args.hasArg(options::OPT_fbuiltin_module_map)) {
-      SmallString<128> BuiltinModuleMap(D.ResourceDir);
-      llvm::sys::path::append(BuiltinModuleMap, "include");
-      llvm::sys::path::append(BuiltinModuleMap, "module.modulemap");
-      if (llvm::sys::fs::exists(BuiltinModuleMap))
-        CmdArgs.push_back(
-            Args.MakeArgString("-fmodule-map-file=" + BuiltinModuleMap));
-    }
-  } else {
-    Args.ClaimAllArgs(options::OPT_fmodule_name_EQ);
-    Args.ClaimAllArgs(options::OPT_fmodule_map_file);
-    Args.ClaimAllArgs(options::OPT_fbuiltin_module_map);
+  // -fbuiltin-module-map can be used to load the clang
+  // builtin headers modulemap file.
+  if (Args.hasArg(options::OPT_fbuiltin_module_map)) {
+    SmallString<128> BuiltinModuleMap(D.ResourceDir);
+    llvm::sys::path::append(BuiltinModuleMap, "include");
+    llvm::sys::path::append(BuiltinModuleMap, "module.modulemap");
+    if (llvm::sys::fs::exists(BuiltinModuleMap))
+      CmdArgs.push_back(
+          Args.MakeArgString("-fmodule-map-file=" + BuiltinModuleMap));
   }
 
   // The -fmodule-file=<name>=<file> form specifies the mapping of module
@@ -4492,9 +4493,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   bool IsDeviceOffloadAction = !(JA.isDeviceOffloading(Action::OFK_None) ||
                                  JA.isDeviceOffloading(Action::OFK_Host));
   bool IsHostOffloadingAction =
-      (JA.isHostOffloading(Action::OFK_OpenMP) &&
-       Args.hasFlag(options::OPT_fopenmp_new_driver,
-                    options::OPT_no_offload_new_driver, true)) ||
+      JA.isHostOffloading(Action::OFK_OpenMP) ||
       (JA.isHostOffloading(C.getActiveOffloadKinds()) &&
        Args.hasFlag(options::OPT_offload_new_driver,
                     options::OPT_no_offload_new_driver, false));
@@ -4795,9 +4794,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
     if (IsUsingLTO) {
       // Only AMDGPU supports device-side LTO.
-      if (IsDeviceOffloadAction &&
-          !Args.hasFlag(options::OPT_fopenmp_new_driver,
-                        options::OPT_no_offload_new_driver, true) &&
+      if (IsDeviceOffloadAction && !JA.isDeviceOffloading(Action::OFK_OpenMP) &&
           !Args.hasFlag(options::OPT_offload_new_driver,
                         options::OPT_no_offload_new_driver, false) &&
           !Triple.isAMDGPU()) {
@@ -5007,13 +5004,13 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // Since we can't access frontend flags through hasArg, let's manually iterate
   // through them.
   bool FoundAnalyzerConfig = false;
-  for (auto Arg : Args.filtered(options::OPT_Xclang))
+  for (auto *Arg : Args.filtered(options::OPT_Xclang))
     if (StringRef(Arg->getValue()) == "-analyzer-config") {
       FoundAnalyzerConfig = true;
       break;
     }
   if (!FoundAnalyzerConfig)
-    for (auto Arg : Args.filtered(options::OPT_Xanalyzer))
+    for (auto *Arg : Args.filtered(options::OPT_Xanalyzer))
       if (StringRef(Arg->getValue()) == "-analyzer-config") {
         FoundAnalyzerConfig = true;
         break;
@@ -6022,21 +6019,17 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (const Arg *A = Args.getLastArg(options::OPT_fvisibility_EQ,
                                      options::OPT_fvisibility_ms_compat)) {
     if (A->getOption().matches(options::OPT_fvisibility_EQ)) {
-      CmdArgs.push_back("-fvisibility");
-      CmdArgs.push_back(A->getValue());
+      A->render(Args, CmdArgs);
     } else {
       assert(A->getOption().matches(options::OPT_fvisibility_ms_compat));
-      CmdArgs.push_back("-fvisibility");
-      CmdArgs.push_back("hidden");
-      CmdArgs.push_back("-ftype-visibility");
-      CmdArgs.push_back("default");
+      CmdArgs.push_back("-fvisibility=hidden");
+      CmdArgs.push_back("-ftype-visibility=default");
     }
   } else if (IsOpenMPDevice) {
     // When compiling for the OpenMP device we want protected visibility by
     // default. This prevents the device from accidentally preempting code on
     // the host, makes the system more robust, and improves performance.
-    CmdArgs.push_back("-fvisibility");
-    CmdArgs.push_back("protected");
+    CmdArgs.push_back("-fvisibility=protected");
   }
 
   if (!RawTriple.isPS4())
@@ -6970,7 +6963,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // do not pass it to other cc1 commands when save-temps is enabled
   if (C.getDriver().isSaveTempsEnabled() &&
       !isa<PreprocessJobAction>(JA)) {
-    for (auto Arg : Args.filtered(options::OPT_Xclang)) {
+    for (auto *Arg : Args.filtered(options::OPT_Xclang)) {
       Arg->claim();
       if (StringRef(Arg->getValue()) != "-finclude-default-header")
         CmdArgs.push_back(Arg->getValue());

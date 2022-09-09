@@ -44,9 +44,6 @@ enum class SparseParallelizationStrategy {
   // TODO: support reduction parallelization too?
 };
 
-/// Converts command-line parallelization flag to the strategy enum.
-SparseParallelizationStrategy sparseParallelizationStrategy(int32_t flag);
-
 /// Defines a vectorization strategy. Any inner loop is a candidate (full SIMD
 /// for parallel loops and horizontal SIMD for reduction loops). A loop is
 /// actually vectorized if (1) allowed by the strategy, and (2) the emitted
@@ -57,8 +54,10 @@ enum class SparseVectorizationStrategy {
   kAnyStorageInnerLoop
 };
 
-/// Converts command-line vectorization flag to the strategy enum.
-SparseVectorizationStrategy sparseVectorizationStrategy(int32_t flag);
+#define GEN_PASS_DECL_SPARSIFICATIONPASS
+#define GEN_PASS_DECL_SPARSETENSORCONVERSIONPASS
+#define GEN_PASS_DECL_SPARSETENSORCODEGEN
+#include "mlir/Dialect/SparseTensor/Transforms/Passes.h.inc"
 
 /// Options for the Sparsification pass.
 struct SparsificationOptions {
@@ -155,6 +154,22 @@ void populateSparseTensorCodegenPatterns(TypeConverter &typeConverter,
                                          RewritePatternSet &patterns);
 
 std::unique_ptr<Pass> createSparseTensorCodegenPass();
+
+//===----------------------------------------------------------------------===//
+// The SparseTensorStorageExpansion pass.
+//===----------------------------------------------------------------------===//
+
+/// Sparse tensor storage type converter from compound to expanded form.
+class SparseTensorStorageTupleExpander : public TypeConverter {
+public:
+  SparseTensorStorageTupleExpander();
+};
+
+/// Sets up sparse tensor storage expansion rules.
+void populateSparseTensorStorageExpansionPatterns(TypeConverter &typeConverter,
+                                                  RewritePatternSet &patterns);
+
+std::unique_ptr<Pass> createSparseTensorStorageExpansionPass();
 
 //===----------------------------------------------------------------------===//
 // Other rewriting rules and passes.
