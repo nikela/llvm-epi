@@ -3228,6 +3228,20 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
     insertShadowCheck(Shadow, Origin, &I);
   }
 
+  void handleMaskedExpandLoad(IntrinsicInst &I) {
+    // PassThru can be undef, so default visitInstruction is too strict.
+    // TODO: Provide real implementation.
+    setShadow(&I, getCleanShadow(&I));
+    setOrigin(&I, getCleanOrigin());
+  }
+
+  void handleMaskedGather(IntrinsicInst &I) {
+    // PassThru can be undef, so default visitInstruction is too strict.
+    // TODO: Provide real implementation.
+    setShadow(&I, getCleanShadow(&I));
+    setOrigin(&I, getCleanOrigin());
+  }
+
   void handleMaskedStore(IntrinsicInst &I) {
     IRBuilder<> IRB(&I);
     Value *V = I.getArgOperand(0);
@@ -3259,7 +3273,7 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
     }
   }
 
-  bool handleMaskedLoad(IntrinsicInst &I) {
+  void handleMaskedLoad(IntrinsicInst &I) {
     IRBuilder<> IRB(&I);
     Value *Addr = I.getArgOperand(0);
     const Align Alignment(
@@ -3299,16 +3313,17 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
           Acc = IRB.CreateOr(Acc, More);
         }
 
-        Value *Origin = IRB.CreateSelect(
-            IRB.CreateICmpNE(Acc, Constant::getNullValue(Acc->getType())),
-            getOrigin(PassThru), IRB.CreateLoad(MS.OriginTy, OriginPtr));
+        Value *NotNull =
+            IRB.CreateICmpNE(Acc, Constant::getNullValue(Acc->getType()));
+        Value *PtrOrigin = IRB.CreateLoad(MS.OriginTy, OriginPtr);
+        Value *Origin =
+            IRB.CreateSelect(NotNull, getOrigin(PassThru), PtrOrigin);
 
         setOrigin(&I, Origin);
       } else {
         setOrigin(&I, getCleanOrigin());
       }
     }
-    return true;
   }
 
   // Instrument BMI / BMI2 intrinsics.
@@ -3428,6 +3443,12 @@ struct MemorySanitizerVisitor : public InstVisitor<MemorySanitizerVisitor> {
       break;
     case Intrinsic::bswap:
       handleBswap(I);
+      break;
+    case Intrinsic::masked_expandload:
+      handleMaskedExpandLoad(I);
+      break;
+    case Intrinsic::masked_gather:
+      handleMaskedGather(I);
       break;
     case Intrinsic::masked_store:
       handleMaskedStore(I);
