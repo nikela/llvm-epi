@@ -117,14 +117,14 @@ def : WriteRes<WriteAtomicSTD, [AvispadoUnitMem]>;
 
 // Single precision.
 let Latency = 4 in {
-def : WriteRes<WriteFALU32, [AvispadoUnitFPALU]>;
+def : WriteRes<WriteFAdd32, [AvispadoUnitFPALU]>;
 def : WriteRes<WriteFSGNJ32, [AvispadoUnitFPALU]>;
 def : WriteRes<WriteFMinMax32, [AvispadoUnitFPALU]>;
 }
 
 // Double precision
 let Latency = 6 in {
-def : WriteRes<WriteFALU64, [AvispadoUnitFPALU]>;
+def : WriteRes<WriteFAdd64, [AvispadoUnitFPALU]>;
 def : WriteRes<WriteFSGNJ64, [AvispadoUnitFPALU]>;
 def : WriteRes<WriteFMinMax64, [AvispadoUnitFPALU]>;
 }
@@ -209,8 +209,8 @@ def : ReadAdvance<ReadAtomicSTW, 0>;
 def : ReadAdvance<ReadAtomicSTD, 0>;
 def : ReadAdvance<ReadFStoreData, 0>;
 def : ReadAdvance<ReadFMemBase, 0>;
-def : ReadAdvance<ReadFALU32, 0>;
-def : ReadAdvance<ReadFALU64, 0>;
+def : ReadAdvance<ReadFAdd32, 0>;
+def : ReadAdvance<ReadFAdd64, 0>;
 def : ReadAdvance<ReadFMul32, 0>;
 def : ReadAdvance<ReadFMA32, 0>;
 def : ReadAdvance<ReadFMul64, 0>;
