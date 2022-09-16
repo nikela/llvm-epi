@@ -62,7 +62,7 @@ DynamicLoader *DynamicLoader::FindPlugin(Process *process,
 
 DynamicLoader::DynamicLoader(Process *process) : m_process(process) {}
 
-// Accessosors to the global setting as to whether to stop at image (shared
+// Accessors to the global setting as to whether to stop at image (shared
 // library) loading/unloading.
 
 bool DynamicLoader::GetStopWhenImagesChange() const {
@@ -230,6 +230,10 @@ ModuleSP DynamicLoader::LoadBinaryWithUUIDAndAddress(Process *process,
 
   Log *log = GetLog(LLDBLog::DynamicLoader);
   if (module_sp.get()) {
+    // Ensure the Target has an architecture set in case
+    // we need it while processing this binary/eh_frame/debug info.
+    if (!target.GetArchitecture().IsValid())
+      target.SetArchitecture(module_sp->GetArchitecture());
     target.GetImages().AppendIfNeeded(module_sp, false);
 
     bool changed = false;

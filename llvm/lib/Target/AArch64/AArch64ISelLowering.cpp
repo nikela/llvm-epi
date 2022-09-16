@@ -955,6 +955,8 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
 
   setHasExtractBitsInsn(true);
 
+  setMaxDivRemBitWidthSupported(128);
+
   setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::Other, Custom);
 
   if (Subtarget->hasNEON()) {
@@ -6203,7 +6205,7 @@ void AArch64TargetLowering::saveVarArgRegisters(CCState &CCInfo,
   static const MCPhysReg GPRArgRegs[] = { AArch64::X0, AArch64::X1, AArch64::X2,
                                           AArch64::X3, AArch64::X4, AArch64::X5,
                                           AArch64::X6, AArch64::X7 };
-  unsigned NumGPRArgRegs = array_lengthof(GPRArgRegs);
+  unsigned NumGPRArgRegs = std::size(GPRArgRegs);
   if (Subtarget->isWindowsArm64EC()) {
     // In the ARM64EC ABI, only x0-x3 are used to pass arguments to varargs
     // functions.
@@ -6256,7 +6258,7 @@ void AArch64TargetLowering::saveVarArgRegisters(CCState &CCInfo,
     static const MCPhysReg FPRArgRegs[] = {
         AArch64::Q0, AArch64::Q1, AArch64::Q2, AArch64::Q3,
         AArch64::Q4, AArch64::Q5, AArch64::Q6, AArch64::Q7};
-    static const unsigned NumFPRArgRegs = array_lengthof(FPRArgRegs);
+    static const unsigned NumFPRArgRegs = std::size(FPRArgRegs);
     unsigned FirstVariadicFPR = CCInfo.getFirstUnallocated(FPRArgRegs);
 
     unsigned FPRSaveSize = 16 * (NumFPRArgRegs - FirstVariadicFPR);
@@ -13113,6 +13115,18 @@ bool AArch64TargetLowering::shouldSinkOperands(
         continue;
 
       ShuffleVectorInst *Shuffle = dyn_cast<ShuffleVectorInst>(Op);
+
+      // If the Shuffle is a splat and the operand is a zext/sext, sinking the
+      // operand and the s/zext can help create indexed s/umull. This is
+      // especially useful to prevent i64 mul being scalarized.
+      if (Shuffle && isSplatShuffle(Shuffle) &&
+          match(Shuffle->getOperand(0), m_ZExtOrSExt(m_Value()))) {
+        Ops.push_back(&Shuffle->getOperandUse(0));
+        Ops.push_back(&Op);
+        IsProfitable = true;
+        continue;
+      }
+
       if (!Shuffle || !Shuffle->isZeroEltSplat())
         continue;
 

@@ -180,6 +180,9 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   setLoadExtAction({ISD::EXTLOAD, ISD::SEXTLOAD, ISD::ZEXTLOAD}, XLenVT,
                    MVT::i1, Promote);
+  // DAGCombiner can call isLoadExtLegal for types that aren't legal.
+  setLoadExtAction({ISD::EXTLOAD, ISD::SEXTLOAD, ISD::ZEXTLOAD}, MVT::i32,
+                   MVT::i1, Promote);
 
   // TODO: add all necessary setOperationAction calls.
   setOperationAction(ISD::DYNAMIC_STACKALLOC, XLenVT, Expand);
@@ -210,6 +213,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
 
   if (Subtarget.is64Bit()) {
     setOperationAction(ISD::EH_DWARF_CFA, MVT::i64, Custom);
+
+    setOperationAction(ISD::LOAD, MVT::i32, Custom);
 
     setOperationAction({ISD::ADD, ISD::SUB, ISD::SHL, ISD::SRA, ISD::SRL},
                        MVT::i32, Custom);
@@ -1612,6 +1617,22 @@ bool RISCVTargetLowering::isCheapToSpeculateCtlz(Type *Ty) const {
   return Subtarget.hasStdExtZbb();
 }
 
+bool RISCVTargetLowering::isMaskAndCmp0FoldingBeneficial(
+    const Instruction &AndI) const {
+  // We expect to be able to match a bit extraction instruction if the Zbs
+  // extension is supported and the mask is a power of two. However, we
+  // conservatively return false if the mask would fit in an ANDI instruction,
+  // on the basis that it's possible the sinking+duplication of the AND in
+  // CodeGenPrepare triggered by this hook wouldn't decrease the instruction
+  // count and would increase code size (e.g. ANDI+BNEZ => BEXTI+BNEZ).
+  if (!Subtarget.hasStdExtZbs())
+    return false;
+  ConstantInt *Mask = dyn_cast<ConstantInt>(AndI.getOperand(1));
+  if (!Mask)
+    return false;
+  return !Mask->getValue().isSignedIntN(12) && Mask->getValue().isPowerOf2();
+}
+
 bool RISCVTargetLowering::hasAndNotCompare(SDValue Y) const {
   EVT VT = Y.getValueType();
 
@@ -1625,6 +1646,9 @@ bool RISCVTargetLowering::hasAndNotCompare(SDValue Y) const {
 }
 
 bool RISCVTargetLowering::hasBitTest(SDValue X, SDValue Y) const {
+  // Zbs provides BEXT[_I], which can be used with SEQZ/SNEZ as a bit test.
+  if (Subtarget.hasStdExtZbs())
+    return X.getValueType().isScalarInteger();
   // We can use ANDI+SEQZ/SNEZ as a bit test. Y contains the bit position.
   auto *C = dyn_cast<ConstantSDNode>(Y);
   return C && C->getAPIntValue().ule(10);
@@ -1828,6 +1852,39 @@ bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
   if (VT == MVT::f64 && !Subtarget.hasStdExtD())
     return false;
   return Imm.isZero();
+}
+
+// TODO: This is very conservative.
+bool RISCVTargetLowering::isExtractSubvectorCheap(EVT ResVT, EVT SrcVT,
+                                                  unsigned Index) const {
+  if (!isOperationLegalOrCustom(ISD::EXTRACT_SUBVECTOR, ResVT))
+    return false;
+
+  // Only support extracting a fixed from a fixed vector for now.
+  if (ResVT.isScalableVector() || SrcVT.isScalableVector())
+    return false;
+
+  unsigned ResElts = ResVT.getVectorNumElements();
+  unsigned SrcElts = SrcVT.getVectorNumElements();
+
+  // Convervatively only handle extracting half of a vector.
+  // TODO: Relax this.
+  if ((ResElts * 2) != SrcElts)
+    return false;
+
+  // The smallest type we can slide is i8.
+  // TODO: We can extract index 0 from a mask vector without a slide.
+  if (ResVT.getVectorElementType() == MVT::i1)
+    return false;
+
+  // Slide can support arbitrary index, but we only treat vslidedown.vi as
+  // cheap.
+  if (Index >= 32)
+    return false;
+
+  // TODO: We can do arbitrary slidedowns, but for now only support extracting
+  // the upper half of a vector until we have more test coverage.
+  return Index == 0 || Index == ResElts;
 }
 
 bool RISCVTargetLowering::hasBitPreservingFPLogic(EVT VT) const {
@@ -2440,6 +2497,11 @@ static SDValue lowerFP_TO_INT_SAT(SDValue Op, SelectionDAG &DAG,
   SDValue FpToInt = DAG.getNode(
       Opc, DL, DstVT, Src,
       DAG.getTargetConstant(RISCVFPRndMode::RTZ, DL, Subtarget.getXLenVT()));
+
+  // fcvt.wu.* sign extends bit 31 on RV64. FP_TO_UINT_SAT expects to zero
+  // extend.
+  if (Opc == RISCVISD::FCVT_WU_RV64)
+    FpToInt = DAG.getZeroExtendInReg(FpToInt, DL, MVT::i32);
 
   SDValue ZeroInt = DAG.getConstant(0, DL, DstVT);
   return DAG.getSelectCC(DL, Src, Src, ZeroInt, FpToInt, ISD::CondCode::SETUO);
@@ -3212,6 +3274,86 @@ static int isElementRotate(int &LoSrc, int &HiSrc, ArrayRef<int> Mask) {
   return Rotation;
 }
 
+// Lower the following shuffles to vnsrl.
+// t34: v8i8 = extract_subvector t11, Constant:i64<0>
+// t33: v8i8 = extract_subvector t11, Constant:i64<8>
+// a) t35: v8i8 = vector_shuffle<0,2,4,6,8,10,12,14> t34, t33
+// b) t35: v8i8 = vector_shuffle<1,3,5,7,9,11,13,15> t34, t33
+static SDValue lowerVECTOR_SHUFFLEAsVNSRL(const SDLoc &DL, MVT VT,
+                                          MVT ContainerVT, SDValue V1,
+                                          SDValue V2, SDValue TrueMask,
+                                          SDValue VL, ArrayRef<int> Mask,
+                                          const RISCVSubtarget &Subtarget,
+                                          SelectionDAG &DAG) {
+  // Need to be able to widen the vector.
+  if (VT.getScalarSizeInBits() >= Subtarget.getELEN())
+    return SDValue();
+
+  // Both input must be extracts.
+  if (V1.getOpcode() != ISD::EXTRACT_SUBVECTOR ||
+      V2.getOpcode() != ISD::EXTRACT_SUBVECTOR)
+    return SDValue();
+
+  // Extracting from the same source.
+  SDValue Src = V1.getOperand(0);
+  if (Src != V2.getOperand(0))
+    return SDValue();
+
+  // Src needs to have twice the number of elements.
+  if (Src.getValueType().getVectorNumElements() != (Mask.size() * 2))
+    return SDValue();
+
+  // The extracts must extract the two halves of the source.
+  if (V1.getConstantOperandVal(1) != 0 ||
+      V2.getConstantOperandVal(1) != Mask.size())
+    return SDValue();
+
+  // First index must be the first even or odd element from V1.
+  if (Mask[0] != 0 && Mask[0] != 1)
+    return SDValue();
+
+  // The others must increase by 2 each time.
+  // TODO: Support undef elements?
+  for (unsigned i = 1; i != Mask.size(); ++i)
+    if (Mask[i] != Mask[i - 1] + 2)
+      return SDValue();
+
+  // Convert the source using a container type with twice the elements. Since
+  // source VT is legal and twice this VT, we know VT isn't LMUL=8 so it is
+  // safe to double.
+  MVT DoubleContainerVT =
+      MVT::getVectorVT(ContainerVT.getVectorElementType(),
+                       ContainerVT.getVectorElementCount() * 2);
+  Src = convertToScalableVector(DoubleContainerVT, Src, DAG, Subtarget);
+
+  // Convert the vector to a wider integer type with the original element
+  // count. This also converts FP to int.
+  unsigned EltBits = ContainerVT.getScalarSizeInBits();
+  MVT WideIntEltVT = MVT::getIntegerVT(EltBits * 2);
+  MVT WideIntContainerVT =
+      MVT::getVectorVT(WideIntEltVT, ContainerVT.getVectorElementCount());
+  Src = DAG.getBitcast(WideIntContainerVT, Src);
+
+  // Convert to the integer version of the container type.
+  MVT IntEltVT = MVT::getIntegerVT(EltBits);
+  MVT IntContainerVT =
+      MVT::getVectorVT(IntEltVT, ContainerVT.getVectorElementCount());
+
+  // If we want even elements, then the shift amount is 0. Otherwise, shift by
+  // the original element size.
+  unsigned Shift = Mask[0] == 0 ? 0 : EltBits;
+  SDValue SplatShift = DAG.getNode(
+      RISCVISD::VMV_V_X_VL, DL, IntContainerVT, DAG.getUNDEF(ContainerVT),
+      DAG.getConstant(Shift, DL, Subtarget.getXLenVT()), VL);
+  SDValue Res =
+      DAG.getNode(RISCVISD::VNSRL_VL, DL, IntContainerVT, Src, SplatShift,
+                  DAG.getUNDEF(IntContainerVT), TrueMask, VL);
+  // Cast back to FP if needed.
+  Res = DAG.getBitcast(ContainerVT, Res);
+
+  return convertFromScalableVector(VT, Res, DAG, Subtarget);
+}
+
 static SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG,
                                    const RISCVSubtarget &Subtarget) {
   SDValue V1 = Op.getOperand(0);
@@ -3342,6 +3484,10 @@ static SDValue lowerVECTOR_SHUFFLE(SDValue Op, SelectionDAG &DAG,
 
     return convertFromScalableVector(VT, Res, DAG, Subtarget);
   }
+
+  if (SDValue V = lowerVECTOR_SHUFFLEAsVNSRL(
+          DL, VT, ContainerVT, V1, V2, TrueMask, VL, Mask, Subtarget, DAG))
+    return V;
 
   // Detect an interleave shuffle and lower to
   // (vmaccu.vx (vwaddu.vx lohalf(V1), lohalf(V2)), lohalf(V2), (2^eltbits - 1))
@@ -8971,6 +9117,22 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
     Results.push_back(RCW.getValue(2));
     break;
   }
+  case ISD::LOAD: {
+    if (!ISD::isNON_EXTLoad(N))
+      return;
+
+    // Use a SEXTLOAD instead of the default EXTLOAD. Similar to the
+    // sext_inreg we emit for ADD/SUB/MUL/SLLI.
+    LoadSDNode *Ld = cast<LoadSDNode>(N);
+
+    SDLoc dl(N);
+    SDValue Res = DAG.getExtLoad(ISD::SEXTLOAD, dl, MVT::i64, Ld->getChain(),
+                                 Ld->getBasePtr(), Ld->getMemoryVT(),
+                                 Ld->getMemOperand());
+    Results.push_back(DAG.getNode(ISD::TRUNCATE, dl, MVT::i32, Res));
+    Results.push_back(Res.getValue(1));
+    return;
+  }
   case ISD::MUL: {
     unsigned Size = N->getSimpleValueType(0).getSizeInBits();
     unsigned XLen = Subtarget.getXLen();
@@ -10822,6 +10984,11 @@ static SDValue performFP_TO_INT_SATCombine(SDNode *N,
   SDLoc DL(N);
   SDValue FpToInt = DAG.getNode(Opc, DL, XLenVT, Src,
                                 DAG.getTargetConstant(FRM, DL, XLenVT));
+
+  // fcvt.wu.* sign extends bit 31 on RV64. FP_TO_UINT_SAT expects to zero
+  // extend.
+  if (Opc == RISCVISD::FCVT_WU_RV64)
+    FpToInt = DAG.getZeroExtendInReg(FpToInt, DL, MVT::i32);
 
   // RISCV FP-to-int conversions saturate to the destination register size, but
   // don't produce 0 for nan.
@@ -13122,7 +13289,7 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
   }
 
   // FPR16, FPR32, and FPR64 alias each other.
-  if (State.getFirstUnallocated(ArgFPR32s) == array_lengthof(ArgFPR32s)) {
+  if (State.getFirstUnallocated(ArgFPR32s) == std::size(ArgFPR32s)) {
     UseGPRForF16_F32 = true;
     UseGPRForF64 = true;
   }
@@ -13151,7 +13318,7 @@ static bool CC_RISCV(const DataLayout &DL, RISCVABI::ABI ABI, unsigned ValNo,
       DL.getTypeAllocSize(OrigTy) == TwoXLenInBytes) {
     unsigned RegIdx = State.getFirstUnallocated(ArgGPRs);
     // Skip 'odd' register if necessary.
-    if (RegIdx != array_lengthof(ArgGPRs) && RegIdx % 2 == 1)
+    if (RegIdx != std::size(ArgGPRs) && RegIdx % 2 == 1)
       State.AllocateReg(ArgGPRs);
   }
 
@@ -14549,6 +14716,7 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(VWADDU_W_VL)
   NODE_NAME_CASE(VWSUB_W_VL)
   NODE_NAME_CASE(VWSUBU_W_VL)
+  NODE_NAME_CASE(VNSRL_VL)
   NODE_NAME_CASE(SETCC_VL)
   NODE_NAME_CASE(VSELECT_VL)
   NODE_NAME_CASE(VP_MERGE_VL)

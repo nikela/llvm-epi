@@ -236,6 +236,25 @@ def : Pat<(f64 (fpextend FPR32:$src)), (FCVT_D_S FPR32:$src)>;
 
 // FP reciprocal operation
 def : Pat<(fdiv fpimm1, FPR64:$src), (FRECIP_D $src)>;
+
+// fmadd.d: fj * fk + fa
+def : Pat<(fma FPR64:$fj, FPR64:$fk, FPR64:$fa), (FMADD_D $fj, $fk, $fa)>;
+
+// fmsub.d: fj * fk - fa
+def : Pat<(fma FPR64:$fj, FPR64:$fk, (fneg FPR64:$fa)),
+          (FMSUB_D FPR64:$fj, FPR64:$fk, FPR64:$fa)>;
+
+// fnmadd.d: -(fj * fk + fa)
+def : Pat<(fneg (fma FPR64:$fj, FPR64:$fk, FPR64:$fa)),
+          (FNMADD_D FPR64:$fj, FPR64:$fk, FPR64:$fa)>;
+
+// fnmadd.d: -fj * fk - fa (the nsz flag on the FMA)
+def : Pat<(fma_nsz (fneg FPR64:$fj), FPR64:$fk, (fneg FPR64:$fa)),
+          (FNMADD_D FPR64:$fj, FPR64:$fk, FPR64:$fa)>;
+
+// fnmsub.d: -(fj * fk - fa)
+def : Pat<(fma (fneg FPR64:$fj), FPR64:$fk, FPR64:$fa),
+          (FNMSUB_D FPR64:$fj, FPR64:$fk, FPR64:$fa)>;
 } // Predicates = [HasBasicD]
 
 /// Floating point constants
@@ -257,6 +276,11 @@ def : Pat<(bitconvert GPR:$src), (MOVGR2FR_D GPR:$src)>;
 
 // Convert FP to int
 def : Pat<(bitconvert FPR64:$src), (MOVFR2GR_D FPR64:$src)>;
+} // Predicates = [HasBasicD, IsLA64]
+
+// FP Rounding
+let Predicates = [HasBasicD, IsLA64] in {
+def : PatFpr<frint, FRINT_D, FPR64>;
 } // Predicates = [HasBasicD, IsLA64]
 
 let Predicates = [HasBasicD, IsLA32] in {
