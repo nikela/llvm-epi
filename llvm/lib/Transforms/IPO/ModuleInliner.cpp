@@ -91,8 +91,7 @@ InlineAdvisor &ModuleInlinerPass::getAdvisor(const ModuleAnalysisManager &MAM,
     // would get from the MAM can be invalidated as a result of the inliner's
     // activity.
     OwnedAdvisor = std::make_unique<DefaultInlineAdvisor>(
-        M, FAM, Params,
-        InlineContext{LTOPhase, InlinePass::ModuleInliner});
+        M, FAM, Params, InlineContext{LTOPhase, InlinePass::ModuleInliner});
 
     return *OwnedAdvisor;
   }
@@ -117,9 +116,8 @@ PreservedAnalyses ModuleInlinerPass::run(Module &M,
   LLVM_DEBUG(dbgs() << "---- Module Inliner is Running ---- \n");
 
   auto &IAA = MAM.getResult<InlineAdvisorAnalysis>(M);
-  if (!IAA.tryCreate(
-          Params, Mode, {},
-          InlineContext{LTOPhase, InlinePass::ModuleInliner})) {
+  if (!IAA.tryCreate(Params, Mode, {},
+                     InlineContext{LTOPhase, InlinePass::ModuleInliner})) {
     M.getContext().emitError(
         "Could not setup Inlining Advisor for the requested "
         "mode and/or options");
@@ -195,10 +193,6 @@ PreservedAnalyses ModuleInlinerPass::run(Module &M,
 
   // Loop forward over all of the calls.
   while (!Calls->empty()) {
-    // We expect the calls to typically be batched with sequences of calls that
-    // have the same caller, so we first set up some shared infrastructure for
-    // this caller. We also do any pruning we can at this layer on the caller
-    // alone.
     Function &F = *Calls->front().first->getCaller();
 
     LLVM_DEBUG(dbgs() << "Inlining calls in: " << F.getName() << "\n"
@@ -209,10 +203,6 @@ PreservedAnalyses ModuleInlinerPass::run(Module &M,
       return FAM.getResult<AssumptionAnalysis>(F);
     };
 
-    // Now process as many calls as we have within this caller in the sequence.
-    // We bail out as soon as the caller has to change so we can
-    // prepare the context of that new caller.
-    bool DidInline = false;
     auto P = Calls->pop();
     CallBase *CB = P.first;
     const int InlineHistoryID = P.second;
@@ -245,7 +235,6 @@ PreservedAnalyses ModuleInlinerPass::run(Module &M,
       continue;
     }
 
-    DidInline = true;
     ++NumInlined;
 
     LLVM_DEBUG(dbgs() << "    Size after inlining: " << F.getInstructionCount()
@@ -305,8 +294,6 @@ PreservedAnalyses ModuleInlinerPass::run(Module &M,
     else
       Advice->recordInlining();
 
-    if (!DidInline)
-      continue;
     Changed = true;
   }
 
