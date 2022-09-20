@@ -402,13 +402,14 @@ class EPIPseudo {
   bits<8> MergeOpIndex;
   bits<8> MaskOpIndex;
   bits<3> VLMul;
+  bits<8> DynamicFlags = -1;
 }
 
 def EPIPseudosTable : GenericTable {
   let FilterClass = "EPIPseudo";
   let CppTypeName = "EPIPseudoInfo";
   let Fields = [ "Pseudo", "BaseInstr", "VLIndex", "SEWIndex",
-                 "MergeOpIndex", "MaskOpIndex", "VLMul" ];
+                 "MergeOpIndex", "MaskOpIndex", "VLMul", "DynamicFlags" ];
   let PrimaryKey = [ "Pseudo" ];
   let PrimaryKeyName = "getEPIPseudoInfo";
 }
@@ -1431,6 +1432,51 @@ foreach m = MxList in
     }
   }
 
+  // Extended loads
+  let mayLoad = 1, mayStore = 0, hasSideEffects = 0,
+      VLMul = vlmul,
+      Constraints = "$rd = $merge" in
+  {
+    let Uses = [VL, VTYPE], DynamicFlags = 4, VLIndex = 5, SEWIndex = 6, MergeOpIndex = 1,
+        MaskOpIndex = 3,
+        BaseInstr = !cast<Instruction>("VLE" # eew # "_V") in
+      def "PseudoEPIVLE" # eew # "_EXT_V_" # LInfo
+          : Pseudo<(outs evr:$rd),
+                   (ins evr:$merge, GPR:$rs1, VMaskOp:$mask, GPR:$flags, AVL:$vl,
+                    ixlenimm:$sew),
+                   []>,
+            EPIPseudo,
+            // Sched<[WriteVPULoad, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
+
+    let Uses = [VL, VTYPE], DynamicFlags = 5, VLIndex = 6, SEWIndex = 7, MergeOpIndex = 1,
+        MaskOpIndex = 4,
+        BaseInstr = !cast<Instruction>("VLSE" # eew # "_V") in
+      def "PseudoEPIVLSE" # eew # "_EXT_V_" # LInfo
+          : Pseudo<(outs evr:$rd),
+                   (ins evr:$merge, GPR:$rs1, GPR:$rs2, VMaskOp:$mask,
+                    GPR:$flags, AVL:$vl, ixlenimm:$sew),
+                   []>,
+            EPIPseudo,
+            // Sched<[WriteVPULoadStrided, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
+
+    foreach ieew = AllowedEEW<vlmul, /* sew= */ eew>.allowed_sew in {
+      defvar ievr = RegisterClassForIndex<vlmul, /* sew= */ eew, /* eew */ ieew, evr>.r;
+      let Uses = [VL, VTYPE], DynamicFlags = 5, VLIndex = 6, SEWIndex = 7, MergeOpIndex = 1,
+          MaskOpIndex = 4,
+          BaseInstr = !cast<Instruction>("VLUXEI" # ieew #"_V") in
+        def "PseudoEPIVLXE" # eew # "I" # ieew # "_EXT_V_" # LInfo
+            : Pseudo<(outs evr:$rd),
+                     (ins evr:$merge, GPR:$rs1, ievr:$rs2, VMaskOp:$mask,
+                      GPR:$flags, AVL:$vl, ixlenimm:$sew),
+                     []>,
+              EPIPseudo,
+              // Sched<[WriteVPULoadIndexed, ReadMemBase, ReadVL, ReadVTYPE]>;
+              Sched<[]>;
+    }
+  }
+
   let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
       VLMul = vlmul in
   {
@@ -1472,6 +1518,56 @@ foreach m = MxList in
         def "PseudoEPIVSXE" # eew # "I" # ieew #"_V_" # LInfo
             : Pseudo<(outs),
                      (ins evr:$rd, GPR:$rs1, ievr:$rs2, VMaskOp:$mask, AVL:$vl,
+                          ixlenimm:$sew),
+                     []>,
+              EPIPseudo,
+              // Sched<[WriteVPUStoreIndexed, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+              Sched<[]>;
+    }
+  }
+
+  // Extended stores
+  let mayLoad = 0, mayStore = 1, hasSideEffects = 0,
+      VLMul = vlmul in
+  {
+    // Masked stores do not have a merge operand as merge is done in memory
+    let Uses = [VL, VTYPE], DynamicFlags = 3,
+        VLIndex = 4, SEWIndex = 5, MergeOpIndex = -1,
+        MaskOpIndex = 2,
+        BaseInstr = !cast<Instruction>("VSE" # eew #"_V") in
+      def "PseudoEPIVSE" # eew # "_EXT_V_" # LInfo
+          : Pseudo<(outs),
+                   (ins evr:$rd, GPR:$rs1, VMaskOp:$mask, GPR:$flags, AVL:$vl,
+                        ixlenimm:$sew),
+                   []>,
+            EPIPseudo,
+            // Sched<[WriteVPUStore, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
+
+    // Masked stores do not have a merge operand as merge is done in memory
+    let Uses = [VL, VTYPE],
+        DynamicFlags = 4, VLIndex = 5, SEWIndex = 6, MergeOpIndex = -1,
+        MaskOpIndex = 3,
+        BaseInstr = !cast<Instruction>("VSSE" # eew # "_V") in
+      def "PseudoEPIVSSE" # eew # "_EXT_V_" # LInfo
+          : Pseudo<(outs),
+                   (ins evr:$rd, GPR:$rs1, GPR:$rs2, VMaskOp:$mask, GPR:$flags, AVL:$vl,
+                        ixlenimm:$sew),
+                   []>,
+            EPIPseudo,
+            // Sched<[WriteVPUStoreStrided, ReadVPUStoreData, ReadMemBase, ReadVL, ReadVTYPE]>;
+            Sched<[]>;
+
+    foreach ieew = AllowedEEW<vlmul, /* sew= */ eew>.allowed_sew in {
+      defvar ievr = RegisterClassForIndex<vlmul, /* sew= */ eew, /* eew */ ieew, evr>.r;
+      // Masked stores do not have a merge operand as merge is done in memory
+      let Uses = [VL, VTYPE], DynamicFlags = 4,
+          VLIndex = 5, SEWIndex = 6, MergeOpIndex = -1,
+          MaskOpIndex = 3,
+          BaseInstr = !cast<Instruction>("VSUXEI" # ieew # "_V") in
+        def "PseudoEPIVSXE" # eew # "I" # ieew #"_EXT_V_" # LInfo
+            : Pseudo<(outs),
+                     (ins evr:$rd, GPR:$rs1, ievr:$rs2, VMaskOp:$mask, GPR:$flags, AVL:$vl,
                           ixlenimm:$sew),
                      []>,
               EPIPseudo,
@@ -3870,6 +3966,74 @@ multiclass pat_load {
                  AVL:$vl,
                  !or(vti.SEW, nontemporal))>;
     }
+
+    // Extended loads.
+    def : Pat<(vti.Vector (int_epi_vload_ext GPR:$rs1, GPR:$flags, AVL:$vl)),
+              (!cast<Instruction>("PseudoEPIVLE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               (vti.Vector (IMPLICIT_DEF)),
+               $rs1,
+               (vti.Mask zero_reg),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    def : Pat<(vti.Vector (int_epi_vload_ext_strided GPR:$rs1, GPR:$rs2, GPR:$flags, AVL:$vl)),
+              (!cast<Instruction>("PseudoEPIVLSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               (vti.Vector (IMPLICIT_DEF)),
+               $rs1, $rs2,
+               (vti.Mask zero_reg),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    foreach ieew = AllowedEEW<MInfo.value, /* sew */ vti.SEW>.allowed_sew in {
+      defvar ivti = GetIntVectorTypeInfo<vti, ieew>.Vti;
+      def : Pat<(vti.Vector (int_epi_vload_ext_indexed GPR:$rs1,
+                             (ivti.Vector ivti.MInfo.vrclass:$rs2), GPR:$flags, AVL:$vl)),
+                (!cast<Instruction>("PseudoEPIVLXE" # vti.SEW # "I" # ieew # "_EXT_V_" # MInfo.MX)
+                 (vti.Vector (IMPLICIT_DEF)),
+                 $rs1, $rs2,
+                 (vti.Mask zero_reg),
+                 GPR:$flags,
+                 AVL:$vl,
+                 vti.SEW)>;
+    }
+
+    def : Pat<(vti.Vector (int_epi_vload_ext_mask (vti.Vector vti.MInfo.vrclass:$merge),
+                           GPR:$rs1, GPR:$flags, (vti.Mask V0), AVL:$vl)),
+               (!cast<Instruction>("PseudoEPIVLE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+                $merge,
+                $rs1,
+                (vti.Mask V0),
+                GPR:$flags,
+                AVL:$vl,
+                vti.SEW)>;
+
+    def : Pat<(vti.Vector (int_epi_vload_ext_strided_mask
+                           (vti.Vector vti.MInfo.vrclass:$merge), GPR:$rs1, GPR:$rs2,
+                           GPR:$flags, (vti.Mask V0), AVL:$vl)),
+              (!cast<Instruction>("PseudoEPIVLSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               $merge,
+               $rs1, $rs2,
+               (vti.Mask V0),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    foreach ieew = AllowedEEW<MInfo.value, /* sew */ vti.SEW>.allowed_sew in {
+      defvar ivti = GetIntVectorTypeInfo<vti, ieew>.Vti;
+      def : Pat<(vti.Vector (int_epi_vload_ext_indexed_mask
+                             (vti.Vector vti.MInfo.vrclass:$merge), GPR:$rs1,
+                             (ivti.Vector ivti.MInfo.vrclass:$rs2), GPR:$flags,
+                             (vti.Mask V0), AVL:$vl)),
+                (!cast<Instruction>("PseudoEPIVLXE" # vti.SEW # "I" # ieew # "_EXT_V_" # MInfo.MX)
+                 $merge,
+                 $rs1, $rs2,
+                 (vti.Mask V0),
+                 GPR:$flags,
+                 AVL:$vl,
+                 vti.SEW)>;
+    }
   }
 }
 
@@ -3992,6 +4156,72 @@ multiclass pat_store {
                  (vti.Mask V0),
                  AVL:$vl,
                  !or(vti.SEW, nontemporal))>;
+    }
+
+    // Extended stores.
+    def : Pat<(int_epi_vstore_ext (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1,
+               GPR:$flags, AVL:$vl),
+               (!cast<Instruction>("PseudoEPIVSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               $rs3, $rs1,
+               (vti.Mask zero_reg),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    def : Pat<(int_epi_vstore_ext_strided
+               (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1, GPR:$rs2, GPR:$flags, AVL:$vl),
+               (!cast<Instruction>("PseudoEPIVSSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               $rs3, $rs1, $rs2,
+               (vti.Mask zero_reg),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    foreach ieew = AllowedEEW<MInfo.value, /* sew */ vti.SEW>.allowed_sew in {
+      defvar ivti = GetIntVectorTypeInfo<vti, ieew>.Vti;
+      def : Pat<(int_epi_vstore_ext_indexed
+                 (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1,
+                 (ivti.Vector ivti.MInfo.vrclass:$rs2), GPR:$flags, AVL:$vl),
+                 (!cast<Instruction>("PseudoEPIVSXE" # vti.SEW # "I" # ieew # "_EXT_V_" # MInfo.MX)
+                 $rs3, $rs1, $rs2,
+                 (vti.Mask zero_reg),
+                 GPR:$flags,
+                 AVL:$vl,
+                 vti.SEW)>;
+    }
+
+    def : Pat<(int_epi_vstore_ext_mask
+               (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1, GPR:$flags,
+               (vti.Mask V0), AVL:$vl),
+               (!cast<Instruction>("PseudoEPIVSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               $rs3, $rs1,
+               (vti.Mask V0),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    def : Pat<(int_epi_vstore_ext_strided_mask
+               (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1, GPR:$rs2, GPR:$flags,
+               (vti.Mask V0), AVL:$vl),
+               (!cast<Instruction>("PseudoEPIVSSE" # vti.SEW # "_EXT_V_" # MInfo.MX)
+               $rs3, $rs1, $rs2,
+               (vti.Mask V0),
+               GPR:$flags,
+               AVL:$vl,
+               vti.SEW)>;
+
+    foreach ieew = AllowedEEW<MInfo.value, /* sew */ vti.SEW>.allowed_sew in {
+      defvar ivti = GetIntVectorTypeInfo<vti, ieew>.Vti;
+      def : Pat<(int_epi_vstore_ext_indexed_mask
+                 (vti.Vector vti.MInfo.vrclass:$rs3), GPR:$rs1,
+                 (ivti.Vector ivti.MInfo.vrclass:$rs2), GPR:$flags,
+                 (vti.Mask V0), AVL:$vl),
+                 (!cast<Instruction>("PseudoEPIVSXE" # vti.SEW # "I" # ieew # "_EXT_V_" # MInfo.MX)
+                 $rs3, $rs1, $rs2,
+                 (vti.Mask V0),
+                 GPR:$flags,
+                 AVL:$vl,
+                 vti.SEW)>;
     }
   }
 }

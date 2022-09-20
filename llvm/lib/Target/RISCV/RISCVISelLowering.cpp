@@ -12231,8 +12231,6 @@ void RISCVTargetLowering::computeKnownBitsForTargetNode(const SDValue Op,
       break;
     case Intrinsic::epi_vsetvl:
     case Intrinsic::epi_vsetvlmax:
-    case Intrinsic::epi_vsetvl_ext:
-    case Intrinsic::epi_vsetvlmax_ext:
     case Intrinsic::riscv_vsetvli:
     case Intrinsic::riscv_vsetvlimax:
     case Intrinsic::riscv_vsetvli_opt:

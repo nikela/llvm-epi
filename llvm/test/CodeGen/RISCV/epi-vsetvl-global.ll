@@ -94,12 +94,11 @@ define <vscale x 1 x double> @test3(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:  # %bb.1: # %if.then
 ; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v9, v8, v9
-; CHECK-NEXT:    j .LBB2_3
+; CHECK-NEXT:    vfmul.vv v8, v9, v8
+; CHECK-NEXT:    ret
 ; CHECK-NEXT:  .LBB2_2: # %if.else
 ; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfsub.vv v9, v8, v9
-; CHECK-NEXT:  .LBB2_3: # %if.end
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfmul.vv v8, v9, v8
 ; CHECK-NEXT:    ret
 entry:

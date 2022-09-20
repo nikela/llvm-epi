@@ -108,14 +108,13 @@ define void @test6(i32* nocapture readonly %A, i32* nocapture %B, i64 %n) {
 ; CHECK-NEXT:    li a4, 0
 ; CHECK-NEXT:  .LBB5_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    slli a5, a4, 2
-; CHECK-NEXT:    add a6, a0, a5
-; CHECK-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
-; CHECK-NEXT:    vle32.v v8, (a6)
+; CHECK-NEXT:    slli a6, a4, 2
+; CHECK-NEXT:    add a5, a0, a6
+; CHECK-NEXT:    vle32.v v8, (a5)
 ; CHECK-NEXT:    vmsle.vi v9, v8, -3
 ; CHECK-NEXT:    vmsgt.vi v10, v8, 2
 ; CHECK-NEXT:    vmor.mm v0, v9, v10
-; CHECK-NEXT:    add a5, a5, a1
+; CHECK-NEXT:    add a5, a1, a6
 ; CHECK-NEXT:    vse32.v v8, (a5), v0.t
 ; CHECK-NEXT:    add a4, a4, a3
 ; CHECK-NEXT:    vsetvli a3, a2, e32, m1, ta, mu
