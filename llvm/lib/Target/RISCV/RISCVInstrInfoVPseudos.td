@@ -4448,9 +4448,6 @@ let hasSideEffects = 1, mayLoad = 0, mayStore = 0, Defs = [VL, VTYPE] in {
 def PseudoVSETVLI : Pseudo<(outs GPR:$rd), (ins GPRNoX0:$rs1, VTypeIOp11:$vtypei), []>;
 def PseudoVSETVLIX0 : Pseudo<(outs GPR:$rd), (ins GPRX0:$rs1, VTypeIOp11:$vtypei), []>;
 def PseudoVSETIVLI : Pseudo<(outs GPR:$rd), (ins uimm5:$rs1, VTypeIOp10:$vtypei), []>;
-// Pseudo for NonTemporal
-let Constraints = "@earlyclobber $scratch" in
-def PseudoVSETVLEXT : Pseudo<(outs GPR:$rd, GPR:$scratch), (ins GPR:$rs1, VTypeIOp11:$vtypei, GPR:$rs2), []>;
 }
 
 //===----------------------------------------------------------------------===//

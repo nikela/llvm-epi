@@ -46,8 +46,6 @@ private:
   bool expandMI(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
                 MachineBasicBlock::iterator &NextMBBI);
   bool expandVSetVL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
-  bool expandVSetVLExt(MachineBasicBlock &MBB,
-                       MachineBasicBlock::iterator MBBI);
   bool expandVMSET_VMCLR(MachineBasicBlock &MBB,
                          MachineBasicBlock::iterator MBBI, unsigned Opcode);
   bool expandVSPILL(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI);
@@ -88,8 +86,6 @@ bool RISCVExpandPseudo::expandMI(MachineBasicBlock &MBB,
   case RISCV::PseudoVSETVLIX0:
   case RISCV::PseudoVSETIVLI:
     return expandVSetVL(MBB, MBBI);
-  case RISCV::PseudoVSETVLEXT:
-    return expandVSetVLExt(MBB, MBBI);
   case RISCV::PseudoVMCLR_M_B1:
   case RISCV::PseudoVMCLR_M_B2:
   case RISCV::PseudoVMCLR_M_B4:
@@ -162,36 +158,6 @@ bool RISCVExpandPseudo::expandVSetVL(MachineBasicBlock &MBB,
       .addReg(DstReg, RegState::Define | getDeadRegState(DstIsDead))
       .add(MBBI->getOperand(1))  // VL
       .add(MBBI->getOperand(2)); // VType
-
-  MBBI->eraseFromParent(); // The pseudo instruction is gone now.
-  return true;
-}
-
-bool RISCVExpandPseudo::expandVSetVLExt(MachineBasicBlock &MBB,
-                                        MachineBasicBlock::iterator MBBI) {
-  assert(MBBI->getNumExplicitOperands() == 5 && MBBI->getNumOperands() >= 7 &&
-         "Unexpected instruction format");
-  assert(MBBI->getOpcode() == RISCV::PseudoVSETVLEXT &&
-         "Unexpected pseudo instruction");
-  const MCInstrDesc &Desc = TII->get(RISCV::VSETVL);
-  assert(Desc.getNumOperands() == 3 && "Unexpected instruction format");
-
-  DebugLoc DL = MBBI->getDebugLoc();
-  Register DstReg = MBBI->getOperand(0).getReg();
-  Register ScratchReg = MBBI->getOperand(1).getReg();
-  bool DstIsDead = MBBI->getOperand(0).isDead();
-
-  // RISCV::ORI, vtype, extra
-  BuildMI(MBB, MBBI, DL, TII->get(RISCV::ORI))
-      .addReg(ScratchReg, RegState::Define)
-      .addReg(MBBI->getOperand(4).getReg())
-      .addImm(MBBI->getOperand(3).getImm());
-
-  // RISCV::VSETVL, vl, vtype
-  BuildMI(MBB, MBBI, DL, Desc)
-      .addReg(DstReg, RegState::Define | getDeadRegState(DstIsDead))
-      .add(MBBI->getOperand(2))
-      .addReg(ScratchReg);
 
   MBBI->eraseFromParent(); // The pseudo instruction is gone now.
   return true;

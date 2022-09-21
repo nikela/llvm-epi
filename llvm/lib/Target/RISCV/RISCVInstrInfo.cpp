@@ -2153,9 +2153,6 @@ RISCV::isRVVSpillForZvlsseg(unsigned Opcode) {
 }
 
 bool RISCV::isFaultFirstLoad(const MachineInstr &MI) {
-  // The check below is not precise enough for this instruction.
-  if (MI.getOpcode() == RISCV::PseudoVSETVLEXT)
-    return false;
   return MI.getNumExplicitDefs() == 2 && MI.modifiesRegister(RISCV::VL) &&
          !MI.isInlineAsm();
 }
