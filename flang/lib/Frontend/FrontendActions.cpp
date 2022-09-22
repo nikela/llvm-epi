@@ -559,19 +559,19 @@ void CodeGenAction::generateLLVMIR() {
   llvmModule = mlir::translateModuleToLLVMIR(
       *mlirModule, *llvmCtx, moduleName ? *moduleName : "FIRModule");
 
+  if (!llvmModule) {
+    unsigned diagID = ci.getDiagnostics().getCustomDiagID(
+        clang::DiagnosticsEngine::Error, "failed to create the LLVM module");
+    ci.getDiagnostics().Report(diagID);
+    return;
+  }
+
   // Set PIC/PIE level LLVM module flags.
   if (opts.PICLevel > 0) {
     llvmModule->setPICLevel(static_cast<llvm::PICLevel::Level>(opts.PICLevel));
     if (opts.IsPIE)
       llvmModule->setPIELevel(
           static_cast<llvm::PIELevel::Level>(opts.PICLevel));
-  }
-
-  if (!llvmModule) {
-    unsigned diagID = ci.getDiagnostics().getCustomDiagID(
-        clang::DiagnosticsEngine::Error, "failed to create the LLVM module");
-    ci.getDiagnostics().Report(diagID);
-    return;
   }
 
   if (uint32_t PLevel = invoc.PICLevel) {
