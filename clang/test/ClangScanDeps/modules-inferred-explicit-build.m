@@ -2,7 +2,7 @@
 // RUN: rm -rf %t.cdb
 // RUN: mkdir -p %t.dir
 // RUN: cp %s %t.dir/modules_cdb_input.cpp
-// RUN: sed -e "s|DIR|%/t.dir|g" -e "s|FRAMEWORKS|%/S/Inputs/frameworks|g" -e "s|-E|-x objective-c -E|g" \
+// RUN: sed -e "s|DIR|%/t.dir|g" -e "s|FRAMEWORKS|%/S/Inputs/frameworks|g" -e "s|-E |-x objective-c -E |g" \
 // RUN:   %S/Inputs/modules_inferred_cdb.json > %t.cdb
 //
 // RUN: clang-scan-deps -compilation-database %t.cdb -j 1 -format experimental-full -mode preprocess-dependency-directives > %t.db

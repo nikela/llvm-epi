@@ -109,7 +109,8 @@ namespace {
     KEYMSCOMPAT   = 0x400000,
     KEYSYCL       = 0x800000,
     KEYCUDA       = 0x1000000,
-    KEYEPI        = 0x2000000,
+    KEYHLSL       = 0x2000000,
+    KEYEPI        = 0x4000000,
     KEYMAX        = KEYEPI, // The maximum key
     KEYALLCXX = KEYCXX | KEYCXX11 | KEYCXX20,
     KEYALL = (KEYMAX | (KEYMAX-1)) & ~KEYNOMS18 &
@@ -200,6 +201,8 @@ static KeywordStatus getKeywordStatusHelper(const LangOptions &LangOpts,
     return LangOpts.isSYCL() ? KS_Enabled : KS_Unknown;
   case KEYCUDA:
     return LangOpts.CUDA ? KS_Enabled : KS_Unknown;
+  case KEYHLSL:
+    return LangOpts.HLSL ? KS_Enabled : KS_Unknown;
   case KEYEPI:
     return LangOpts.EPI ? KS_Enabled : KS_Unknown;
   case KEYNOCXX:

@@ -637,9 +637,8 @@ defm : UnsupportedSchedZbs;
 defm : UnsupportedSchedZbe;
 defm : UnsupportedSchedZbf;
 defm : UnsupportedSchedZbm;
-defm : UnsupportedSchedZbp;
+defm : UnsupportedSchedZbkb;
 defm : UnsupportedSchedZbr;
-defm : UnsupportedSchedZbt;
 defm : UnsupportedSchedZfh;
 
 }
