@@ -208,9 +208,7 @@ verifyVPBasicBlock(const VPBasicBlock *VPBB,
     for (const VPValue *V : R.definedValues()) {
       for (const VPUser *U : V->users()) {
         auto *UI = dyn_cast<VPRecipeBase>(U);
-        if (!UI || isa<VPHeaderPHIRecipe>(UI)
-            // FIXME: As a PHI this is not properly modelled.
-            || isa<VPEVLPHIRecipe>(UI))
+        if (!UI || isa<VPHeaderPHIRecipe>(UI))
           continue;
 
         // If the user is in the same block, check it comes after R in the

@@ -107,8 +107,6 @@ template <typename ItrType,
 class FilterIterator {
   using inner_traits = std::iterator_traits<ItrType>;
   using Iterator = FilterIterator;
-  using T = typename std::iterator_traits<ItrType>::reference;
-  using PointerT = typename std::iterator_traits<ItrType>::pointer;
 
   PredType Pred;
   ItrType Itr, End;
@@ -139,8 +137,8 @@ public:
   Iterator operator--(int) { auto Tmp(Itr); prev(); return Tmp; }
   bool operator==(const Iterator &Other) const { return Itr == Other.Itr; }
   bool operator!=(const Iterator &Other) const { return !operator==(Other); }
-  T operator*() { return *Itr; }
-  PointerT operator->() { return &operator*(); }
+  reference operator*() { return *Itr; }
+  pointer operator->() { return &operator*(); }
   FilterIterator(PredType Pred, ItrType Itr, ItrType End)
       : Pred(Pred), Itr(Itr), End(End) {
     nextMatching();
@@ -388,6 +386,8 @@ public:
   }
 
   unsigned getDWARFEncodingSize(unsigned Encoding) {
+    if (Encoding == dwarf::DW_EH_PE_omit)
+      return 0;
     switch (Encoding & 0x0f) {
     default:
       llvm_unreachable("unknown encoding");
@@ -671,7 +671,6 @@ public:
 
   /// DWARF encoding. Available encoding types defined in BinaryFormat/Dwarf.h
   /// enum Constants, e.g. DW_EH_PE_omit.
-  unsigned TTypeEncoding = dwarf::DW_EH_PE_omit;
   unsigned LSDAEncoding = dwarf::DW_EH_PE_omit;
 
   BinaryContext(std::unique_ptr<MCContext> Ctx,

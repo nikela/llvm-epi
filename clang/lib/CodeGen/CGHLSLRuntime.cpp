@@ -46,6 +46,11 @@ void addDxilValVersion(StringRef ValVersionStr, llvm::Module &M) {
   auto *DXILValMD = M.getOrInsertNamedMetadata(DXILValKey);
   DXILValMD->addOperand(Val);
 }
+void addDisableOptimizations(llvm::Module &M) {
+  StringRef Key = "dx.disable_optimizations";
+  M.addModuleFlag(llvm::Module::ModFlagBehavior::Override, Key, 1);
+}
+
 } // namespace
 
 void CGHLSLRuntime::finishCodeGen() {
@@ -56,6 +61,8 @@ void CGHLSLRuntime::finishCodeGen() {
     addDxilValVersion(TargetOpts.DxilValidatorVersion, M);
 
   generateGlobalCtorDtorCalls();
+  if (CGM.getCodeGenOpts().OptimizationLevel == 0)
+    addDisableOptimizations(M);
 }
 
 void CGHLSLRuntime::annotateHLSLResource(const VarDecl *D, GlobalVariable *GV) {
@@ -136,6 +143,7 @@ void CGHLSLRuntime::emitEntryFunction(const FunctionDecl *FD,
   IRBuilder<> B(BB);
   llvm::SmallVector<Value *> Args;
   // FIXME: support struct parameters where semantics are on members.
+  // See: https://github.com/llvm/llvm-project/issues/57874
   for (const auto *Param : FD->parameters()) {
     Args.push_back(emitInputSemantic(B, *Param));
   }
@@ -143,6 +151,7 @@ void CGHLSLRuntime::emitEntryFunction(const FunctionDecl *FD,
   CallInst *CI = B.CreateCall(FunctionCallee(Fn), Args);
   (void)CI;
   // FIXME: Handle codegen for return type semantics.
+  // See: https://github.com/llvm/llvm-project/issues/57875
   B.CreateRetVoid();
 }
 
