@@ -42,6 +42,10 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER-NEXT:    br i1 [[TMP4]], label [[FOR_BODY:%.*]], label [[VECTOR_PH:%.*]]
 ; GATHER:       vector.ph:
 ; GATHER-NEXT:    [[TMP5:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
+; GATHER-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
+; GATHER-NEXT:    [[TMP7:%.*]] = shl i64 [[TMP6]], 1
+; GATHER-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP7]], i64 0
+; GATHER-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; GATHER-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP0]], i64 0
 ; GATHER-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; GATHER-NEXT:    [[BROADCAST_SPLATINSERT6:%.*]] = insertelement <vscale x 2 x float> poison, float [[TEMP2_COERCE1:%.*]], i64 0
@@ -56,74 +60,70 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER:       vector.body:
 ; GATHER-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; GATHER-NEXT:    [[VEC_IND:%.*]] = phi <vscale x 2 x i64> [ [[TMP5]], [[VECTOR_PH]] ], [ [[VEC_IND_NEXT:%.*]], [[VECTOR_BODY]] ]
-; GATHER-NEXT:    [[TMP6:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
-; GATHER-NEXT:    [[TMP7:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP6]], i64 2, i64 0)
-; GATHER-NEXT:    [[TMP8:%.*]] = trunc i64 [[TMP7]] to i32
-; GATHER-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i64> @llvm.vp.mul.nxv2i64(<vscale x 2 x i64> [[VEC_IND]], <vscale x 2 x i64> [[BROADCAST_SPLAT2]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[TMP9:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], <vscale x 2 x i64> [[VP_OP]]
-; GATHER-NEXT:    [[TMP10:%.*]] = getelementptr inbounds { float, float }, <vscale x 2 x { float, float }*> [[TMP9]], i64 0, i32 0
-; GATHER-NEXT:    [[TMP11:%.*]] = getelementptr inbounds { float, float }, <vscale x 2 x { float, float }*> [[TMP9]], i64 0, i32 1
-; GATHER-NEXT:    [[TMP12:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X:%.*]], <vscale x 2 x i64> [[VEC_IND]], i32 0
-; GATHER-NEXT:    [[VP_GATHER:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[TMP13:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], <vscale x 2 x i64> [[VEC_IND]], i32 1
-; GATHER-NEXT:    [[VP_GATHER3:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP13]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[TMP14:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y:%.*]], <vscale x 2 x i64> [[VEC_IND]], i32 0
-; GATHER-NEXT:    [[VP_GATHER4:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[TMP15:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], <vscale x 2 x i64> [[VEC_IND]], i32 1
-; GATHER-NEXT:    [[VP_GATHER5:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP15]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP8:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER4]], <vscale x 2 x float> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP11:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER5]], <vscale x 2 x float> [[BROADCAST_SPLAT10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP12:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER4]], <vscale x 2 x float> [[BROADCAST_SPLAT10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP13:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER5]], <vscale x 2 x float> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_GATHER14:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP11]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP17:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER]], <vscale x 2 x float> [[BROADCAST_SPLAT16]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP20:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER3]], <vscale x 2 x float> [[BROADCAST_SPLAT19]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_GATHER21:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP22:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER]], <vscale x 2 x float> [[BROADCAST_SPLAT19]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP23:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER3]], <vscale x 2 x float> [[BROADCAST_SPLAT16]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP24:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP13]], <vscale x 2 x float> [[VP_OP23]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP25:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP12]], <vscale x 2 x float> [[VP_OP22]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP26:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP25]], <vscale x 2 x float> [[VP_GATHER21]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP27:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float> [[VP_OP26]], <vscale x 2 x float> [[VP_OP24]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP28:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP20]], <vscale x 2 x float> [[VP_OP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP29:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP28]], <vscale x 2 x float> [[VP_OP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP30:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP29]], <vscale x 2 x float> [[VP_GATHER14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    [[VP_OP31:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP30]], <vscale x 2 x float> [[VP_OP11]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-NEXT:    call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> [[VP_OP27]], <vscale x 2 x float*> [[TMP10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]]), !llvm.access.group !4
-; GATHER-NEXT:    call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> [[VP_OP31]], <vscale x 2 x float*> [[TMP11]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]]), !llvm.access.group !4
-; GATHER-NEXT:    [[TMP16:%.*]] = and i64 [[TMP7]], 4294967295
-; GATHER-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP16]]
-; GATHER-NEXT:    [[SEXT:%.*]] = shl i64 [[TMP7]], 32
-; GATHER-NEXT:    [[TMP17:%.*]] = ashr exact i64 [[SEXT]], 32
-; GATHER-NEXT:    [[DOTSPLATINSERT32:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TMP17]], i64 0
-; GATHER-NEXT:    [[DOTSPLAT33:%.*]] = shufflevector <vscale x 2 x i64> [[DOTSPLATINSERT32]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-; GATHER-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT33]]
-; GATHER-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
-; GATHER-NEXT:    br i1 [[TMP18]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
+; GATHER-NEXT:    [[TMP8:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[INDEX]]
+; GATHER-NEXT:    [[TMP9:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP8]], i64 2, i64 0)
+; GATHER-NEXT:    [[TMP10:%.*]] = trunc i64 [[TMP9]] to i32
+; GATHER-NEXT:    [[VP_OP:%.*]] = call <vscale x 2 x i64> @llvm.vp.mul.nxv2i64(<vscale x 2 x i64> [[VEC_IND]], <vscale x 2 x i64> [[BROADCAST_SPLAT2]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[TMP11:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], <vscale x 2 x i64> [[VP_OP]]
+; GATHER-NEXT:    [[TMP12:%.*]] = getelementptr inbounds { float, float }, <vscale x 2 x { float, float }*> [[TMP11]], i64 0, i32 0
+; GATHER-NEXT:    [[TMP13:%.*]] = getelementptr inbounds { float, float }, <vscale x 2 x { float, float }*> [[TMP11]], i64 0, i32 1
+; GATHER-NEXT:    [[TMP14:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X:%.*]], <vscale x 2 x i64> [[VEC_IND]], i32 0
+; GATHER-NEXT:    [[VP_GATHER:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[TMP15:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], <vscale x 2 x i64> [[VEC_IND]], i32 1
+; GATHER-NEXT:    [[VP_GATHER3:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP15]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[TMP16:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y:%.*]], <vscale x 2 x i64> [[VEC_IND]], i32 0
+; GATHER-NEXT:    [[VP_GATHER4:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP16]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[TMP17:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], <vscale x 2 x i64> [[VEC_IND]], i32 1
+; GATHER-NEXT:    [[VP_GATHER5:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP8:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER4]], <vscale x 2 x float> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP11:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER5]], <vscale x 2 x float> [[BROADCAST_SPLAT10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP12:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER4]], <vscale x 2 x float> [[BROADCAST_SPLAT10]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP13:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER5]], <vscale x 2 x float> [[BROADCAST_SPLAT7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_GATHER14:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP13]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP17:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER]], <vscale x 2 x float> [[BROADCAST_SPLAT16]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP20:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER3]], <vscale x 2 x float> [[BROADCAST_SPLAT19]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_GATHER21:%.*]] = call <vscale x 2 x float> @llvm.vp.gather.nxv2f32.nxv2p0f32(<vscale x 2 x float*> [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP22:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER]], <vscale x 2 x float> [[BROADCAST_SPLAT19]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP23:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fmul.nxv2f32(<vscale x 2 x float> [[VP_GATHER3]], <vscale x 2 x float> [[BROADCAST_SPLAT16]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP24:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP13]], <vscale x 2 x float> [[VP_OP23]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP25:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP12]], <vscale x 2 x float> [[VP_OP22]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP26:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP25]], <vscale x 2 x float> [[VP_GATHER21]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP27:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float> [[VP_OP26]], <vscale x 2 x float> [[VP_OP24]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP28:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP20]], <vscale x 2 x float> [[VP_OP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP29:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP28]], <vscale x 2 x float> [[VP_OP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP30:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP29]], <vscale x 2 x float> [[VP_GATHER14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    [[VP_OP31:%.*]] = call fast <vscale x 2 x float> @llvm.vp.fadd.nxv2f32(<vscale x 2 x float> [[VP_OP30]], <vscale x 2 x float> [[VP_OP11]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]])
+; GATHER-NEXT:    call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> [[VP_OP27]], <vscale x 2 x float*> [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]]), !llvm.access.group [[ACC_GRP4:![0-9]+]]
+; GATHER-NEXT:    call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> [[VP_OP31]], <vscale x 2 x float*> [[TMP13]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP10]]), !llvm.access.group [[ACC_GRP4]]
+; GATHER-NEXT:    [[TMP18:%.*]] = and i64 [[TMP9]], 4294967295
+; GATHER-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
+; GATHER-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 2 x i64> [[VEC_IND]], [[DOTSPLAT]]
+; GATHER-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
+; GATHER-NEXT:    br i1 [[TMP19]], label [[FOR_COND_CLEANUP]], label [[VECTOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
 ; GATHER:       for.cond.cleanup:
 ; GATHER-NEXT:    ret void
 ; GATHER:       for.body:
 ; GATHER-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
-; GATHER-NEXT:    [[TMP19:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], [[TMP0]]
-; GATHER-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP19]]
+; GATHER-NEXT:    [[TMP20:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], [[TMP0]]
+; GATHER-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP20]]
 ; GATHER-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 0
 ; GATHER-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 1
 ; GATHER-NEXT:    [[ARRAYIDX4_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 0
-; GATHER-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[ARRAYIDX4_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 1
-; GATHER-NEXT:    [[ARRAYIDX4_IMAG:%.*]] = load float, float* [[ARRAYIDX4_IMAGP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX4_IMAG:%.*]] = load float, float* [[ARRAYIDX4_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[ARRAYIDX7_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], i64 [[INDVARS_IV]], i32 0
-; GATHER-NEXT:    [[ARRAYIDX7_REAL:%.*]] = load float, float* [[ARRAYIDX7_REALP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX7_REAL:%.*]] = load float, float* [[ARRAYIDX7_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[ARRAYIDX7_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], i64 [[INDVARS_IV]], i32 1
-; GATHER-NEXT:    [[ARRAYIDX7_IMAG:%.*]] = load float, float* [[ARRAYIDX7_IMAGP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX7_IMAG:%.*]] = load float, float* [[ARRAYIDX7_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[MUL_AD10:%.*]] = fmul fast float [[ARRAYIDX7_REAL]], [[TEMP2_COERCE1]]
 ; GATHER-NEXT:    [[MUL_BC11:%.*]] = fmul fast float [[ARRAYIDX7_IMAG]], [[TEMP2_COERCE0]]
 ; GATHER-NEXT:    [[MUL_AC8:%.*]] = fmul fast float [[ARRAYIDX7_REAL]], [[TEMP2_COERCE0]]
 ; GATHER-NEXT:    [[MUL_BD9_NEG:%.*]] = fmul fast float [[ARRAYIDX7_IMAG]], [[TEMP2_COERCE1]]
-; GATHER-NEXT:    [[ARRAYIDX2_IMAG:%.*]] = load float, float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX2_IMAG:%.*]] = load float, float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[MUL_AD:%.*]] = fmul fast float [[ARRAYIDX4_REAL]], [[TEMP1_COERCE1]]
 ; GATHER-NEXT:    [[MUL_BC:%.*]] = fmul fast float [[ARRAYIDX4_IMAG]], [[TEMP1_COERCE0]]
-; GATHER-NEXT:    [[ARRAYIDX2_REAL:%.*]] = load float, float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    [[ARRAYIDX2_REAL:%.*]] = load float, float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[MUL_AC:%.*]] = fmul fast float [[ARRAYIDX4_REAL]], [[TEMP1_COERCE0]]
 ; GATHER-NEXT:    [[MUL_BD_NEG:%.*]] = fmul fast float [[ARRAYIDX4_IMAG]], [[TEMP1_COERCE1]]
 ; GATHER-NEXT:    [[REASS_ADD:%.*]] = fadd fast float [[MUL_BD9_NEG]], [[MUL_BD_NEG]]
@@ -134,8 +134,8 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER-NEXT:    [[MUL_I:%.*]] = fadd fast float [[MUL_I13]], [[MUL_AD10]]
 ; GATHER-NEXT:    [[ADD_I:%.*]] = fadd fast float [[MUL_I]], [[ARRAYIDX2_IMAG]]
 ; GATHER-NEXT:    [[ADD_I23:%.*]] = fadd fast float [[ADD_I]], [[MUL_BC11]]
-; GATHER-NEXT:    store float [[ADD_R22]], float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group !4
-; GATHER-NEXT:    store float [[ADD_I23]], float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group !4
+; GATHER-NEXT:    store float [[ADD_R22]], float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
+; GATHER-NEXT:    store float [[ADD_I23]], float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; GATHER-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
 ; GATHER-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
@@ -217,12 +217,12 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED-NEXT:    [[TMP27:%.*]] = bitcast { float, float }* [[ARRAYIDX]] to i8*
 ; STRIDED-NEXT:    [[TMP28:%.*]] = getelementptr i8, i8* [[TMP27]], i64 [[TMP26]]
 ; STRIDED-NEXT:    [[TMP29:%.*]] = bitcast i8* [[TMP28]] to float*
-; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv2f32.p0f32.i64(<vscale x 2 x float> [[VP_OP32]], float* [[TMP29]], i64 [[TMP7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]]), !llvm.access.group !4
+; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv2f32.p0f32.i64(<vscale x 2 x float> [[VP_OP32]], float* [[TMP29]], i64 [[TMP7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]]), !llvm.access.group [[ACC_GRP4:![0-9]+]]
 ; STRIDED-NEXT:    [[TMP30:%.*]] = mul i64 [[INDEX]], [[TMP8]]
 ; STRIDED-NEXT:    [[TMP31:%.*]] = bitcast float* [[SCEVGEP37]] to i8*
 ; STRIDED-NEXT:    [[TMP32:%.*]] = getelementptr i8, i8* [[TMP31]], i64 [[TMP30]]
 ; STRIDED-NEXT:    [[TMP33:%.*]] = bitcast i8* [[TMP32]] to float*
-; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv2f32.p0f32.i64(<vscale x 2 x float> [[VP_OP36]], float* [[TMP33]], i64 [[TMP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]]), !llvm.access.group !4
+; STRIDED-NEXT:    call void @llvm.experimental.vp.strided.store.nxv2f32.p0f32.i64(<vscale x 2 x float> [[VP_OP36]], float* [[TMP33]], i64 [[TMP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]]), !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[TMP34:%.*]] = and i64 [[TMP10]], 4294967295
 ; STRIDED-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP34]]
 ; STRIDED-NEXT:    [[TMP35:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[WIDE_TRIP_COUNT]]
@@ -236,21 +236,21 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 0
 ; STRIDED-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 1
 ; STRIDED-NEXT:    [[ARRAYIDX4_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 0
-; STRIDED-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[ARRAYIDX4_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 1
-; STRIDED-NEXT:    [[ARRAYIDX4_IMAG:%.*]] = load float, float* [[ARRAYIDX4_IMAGP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX4_IMAG:%.*]] = load float, float* [[ARRAYIDX4_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[ARRAYIDX7_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], i64 [[INDVARS_IV]], i32 0
-; STRIDED-NEXT:    [[ARRAYIDX7_REAL:%.*]] = load float, float* [[ARRAYIDX7_REALP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX7_REAL:%.*]] = load float, float* [[ARRAYIDX7_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[ARRAYIDX7_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[Y]], i64 [[INDVARS_IV]], i32 1
-; STRIDED-NEXT:    [[ARRAYIDX7_IMAG:%.*]] = load float, float* [[ARRAYIDX7_IMAGP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX7_IMAG:%.*]] = load float, float* [[ARRAYIDX7_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[MUL_AD10:%.*]] = fmul fast float [[ARRAYIDX7_REAL]], [[TEMP2_COERCE1]]
 ; STRIDED-NEXT:    [[MUL_BC11:%.*]] = fmul fast float [[ARRAYIDX7_IMAG]], [[TEMP2_COERCE0]]
 ; STRIDED-NEXT:    [[MUL_AC8:%.*]] = fmul fast float [[ARRAYIDX7_REAL]], [[TEMP2_COERCE0]]
 ; STRIDED-NEXT:    [[MUL_BD9_NEG:%.*]] = fmul fast float [[ARRAYIDX7_IMAG]], [[TEMP2_COERCE1]]
-; STRIDED-NEXT:    [[ARRAYIDX2_IMAG:%.*]] = load float, float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX2_IMAG:%.*]] = load float, float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[MUL_AD:%.*]] = fmul fast float [[ARRAYIDX4_REAL]], [[TEMP1_COERCE1]]
 ; STRIDED-NEXT:    [[MUL_BC:%.*]] = fmul fast float [[ARRAYIDX4_IMAG]], [[TEMP1_COERCE0]]
-; STRIDED-NEXT:    [[ARRAYIDX2_REAL:%.*]] = load float, float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    [[ARRAYIDX2_REAL:%.*]] = load float, float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[MUL_AC:%.*]] = fmul fast float [[ARRAYIDX4_REAL]], [[TEMP1_COERCE0]]
 ; STRIDED-NEXT:    [[MUL_BD_NEG:%.*]] = fmul fast float [[ARRAYIDX4_IMAG]], [[TEMP1_COERCE1]]
 ; STRIDED-NEXT:    [[REASS_ADD:%.*]] = fadd fast float [[MUL_BD9_NEG]], [[MUL_BD_NEG]]
@@ -261,8 +261,8 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED-NEXT:    [[MUL_I:%.*]] = fadd fast float [[MUL_I13]], [[MUL_AD10]]
 ; STRIDED-NEXT:    [[ADD_I:%.*]] = fadd fast float [[MUL_I]], [[ARRAYIDX2_IMAG]]
 ; STRIDED-NEXT:    [[ADD_I23:%.*]] = fadd fast float [[ADD_I]], [[MUL_BC11]]
-; STRIDED-NEXT:    store float [[ADD_R22]], float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group !4
-; STRIDED-NEXT:    store float [[ADD_I23]], float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group !4
+; STRIDED-NEXT:    store float [[ADD_R22]], float* [[ARRAYIDX2_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
+; STRIDED-NEXT:    store float [[ADD_I23]], float* [[ARRAYIDX2_IMAGP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; STRIDED-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
 ; STRIDED-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]

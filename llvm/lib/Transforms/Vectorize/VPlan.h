@@ -383,22 +383,6 @@ struct VPTransformState {
   /// The loop object for the current parent region, or nullptr.
   Loop *CurrentVectorLoop = nullptr;
 
-  /// A vector of pairs of value and part that should be replaced with EVL once
-  /// the EVL is available
-  struct {
-    SmallVector<std::pair<Value *, unsigned>, 4> NextInduction;
-    Value *Step;
-    Instruction::BinaryOps MulOp;
-    ElementCount VF;
-  } NextInductionInfo;
-
-  /// Index for the next iteration.
-  Instruction *NextIndex = nullptr;
-
-  /// EVL
-  // FIXME: It is odd we need this: review.
-  VPValue *EVL = nullptr;
-
   /// LoopVersioning.  It's only set up (non-null) if memchecks were
   /// used.
   ///
