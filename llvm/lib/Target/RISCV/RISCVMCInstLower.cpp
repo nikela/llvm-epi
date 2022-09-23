@@ -234,9 +234,9 @@ static bool lowerEPIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI) 
     int OpNo = (int)MI->getOperandNo(&MO);
     assert(OpNo >= 0 && "Operand number doesn't fit in an 'int' type");
 
-    // Skip VL, SEW and MergeOp operands
+    // Skip VL, SEW and MergeOp and DynamicFlags operands
     if (OpNo == EPI->getVLIndex() || OpNo == EPI->getSEWIndex() ||
-        OpNo == EPI->getMergeOpIndex())
+        OpNo == EPI->getMergeOpIndex() || OpNo == EPI->getDynamicFlagsIndex())
       continue;
 
     MCOperand MCOp;

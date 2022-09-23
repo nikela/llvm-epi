@@ -159,8 +159,8 @@ public:
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
-  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
-                                     unsigned Index);
+  // InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
+  //                                    unsigned Index);
   InstructionCost getVectorInstrCost(const Instruction &I, Type *Val,
                                      unsigned Index);
   InstructionCost getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
@@ -275,6 +275,10 @@ public:
                                      CmpInst::Predicate VecPred,
                                      TTI::TargetCostKind CostKind,
                                      const Instruction *I = nullptr);
+
+  using BaseT::getVectorInstrCost;
+  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
+                                     unsigned Index);
 
   bool isElementTypeLegalForScalableVector(Type *Ty) const {
     return TLI->isLegalElementTypeForRVV(Ty);

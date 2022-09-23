@@ -2180,10 +2180,10 @@ define i8 @add_select_sub_both_arms_simplify_use2(i1 %b, i8 %a) {
 
 define i5 @demand_low_bits_uses(i8 %x, i8 %y) {
 ; CHECK-LABEL: @demand_low_bits_uses(
-; CHECK-NEXT:    [[M:%.*]] = mul i8 [[X:%.*]], -32
-; CHECK-NEXT:    [[A:%.*]] = add i8 [[M]], [[Y:%.*]]
+; CHECK-NEXT:    [[TMP1:%.*]] = shl i8 [[X:%.*]], 5
+; CHECK-NEXT:    [[A:%.*]] = sub i8 [[Y:%.*]], [[TMP1]]
 ; CHECK-NEXT:    call void @use(i8 [[A]])
-; CHECK-NEXT:    [[R:%.*]] = trunc i8 [[A]] to i5
+; CHECK-NEXT:    [[R:%.*]] = trunc i8 [[Y]] to i5
 ; CHECK-NEXT:    ret i5 [[R]]
 ;
   %m = mul i8 %x, -32 ; 0xE0
@@ -2193,10 +2193,12 @@ define i5 @demand_low_bits_uses(i8 %x, i8 %y) {
   ret i5 %r
 }
 
+; negative test - demands one more bit
+
 define i6 @demand_low_bits_uses_extra_bit(i8 %x, i8 %y) {
 ; CHECK-LABEL: @demand_low_bits_uses_extra_bit(
-; CHECK-NEXT:    [[M:%.*]] = mul i8 [[X:%.*]], -32
-; CHECK-NEXT:    [[A:%.*]] = add i8 [[M]], [[Y:%.*]]
+; CHECK-NEXT:    [[TMP1:%.*]] = shl i8 [[X:%.*]], 5
+; CHECK-NEXT:    [[A:%.*]] = sub i8 [[Y:%.*]], [[TMP1]]
 ; CHECK-NEXT:    call void @use(i8 [[A]])
 ; CHECK-NEXT:    [[R:%.*]] = trunc i8 [[A]] to i6
 ; CHECK-NEXT:    ret i6 [[R]]
@@ -2214,7 +2216,7 @@ define i8 @demand_low_bits_uses_commute(i8 %x, i8 %p, i8 %z) {
 ; CHECK-NEXT:    [[M:%.*]] = and i8 [[X:%.*]], -64
 ; CHECK-NEXT:    [[A:%.*]] = add i8 [[Y]], [[M]]
 ; CHECK-NEXT:    call void @use(i8 [[A]])
-; CHECK-NEXT:    [[S:%.*]] = sub i8 [[A]], [[Z:%.*]]
+; CHECK-NEXT:    [[S:%.*]] = sub i8 [[Y]], [[Z:%.*]]
 ; CHECK-NEXT:    [[R:%.*]] = shl i8 [[S]], 2
 ; CHECK-NEXT:    ret i8 [[R]]
 ;
@@ -2227,8 +2229,10 @@ define i8 @demand_low_bits_uses_commute(i8 %x, i8 %p, i8 %z) {
   ret i8 %r
 }
 
-define i8 @demand_low_bits_uses_commutei_extra_bit(i8 %x, i8 %p, i8 %z) {
-; CHECK-LABEL: @demand_low_bits_uses_commutei_extra_bit(
+; negative test - demands one more bit
+
+define i8 @demand_low_bits_uses_commute_extra_bit(i8 %x, i8 %p, i8 %z) {
+; CHECK-LABEL: @demand_low_bits_uses_commute_extra_bit(
 ; CHECK-NEXT:    [[Y:%.*]] = mul i8 [[P:%.*]], [[P]]
 ; CHECK-NEXT:    [[M:%.*]] = and i8 [[X:%.*]], -64
 ; CHECK-NEXT:    [[A:%.*]] = add i8 [[Y]], [[M]]
@@ -2253,10 +2257,10 @@ define { i64, i64 } @PR57576(i64 noundef %x, i64 noundef %y, i64 noundef %z, i64
 ; CHECK-NEXT:    [[ZW:%.*]] = zext i64 [[W:%.*]] to i128
 ; CHECK-NEXT:    [[ZZ:%.*]] = zext i64 [[Z:%.*]] to i128
 ; CHECK-NEXT:    [[SHY:%.*]] = shl nuw i128 [[ZY]], 64
-; CHECK-NEXT:    [[MW:%.*]] = mul i128 [[ZW]], -18446744073709551616
 ; CHECK-NEXT:    [[XY:%.*]] = or i128 [[SHY]], [[ZX]]
-; CHECK-NEXT:    [[SUB:%.*]] = sub i128 [[XY]], [[ZZ]]
-; CHECK-NEXT:    [[ADD:%.*]] = add i128 [[SUB]], [[MW]]
+; CHECK-NEXT:    [[TMP1:%.*]] = shl nuw i128 [[ZW]], 64
+; CHECK-NEXT:    [[TMP2:%.*]] = or i128 [[TMP1]], [[ZZ]]
+; CHECK-NEXT:    [[ADD:%.*]] = sub i128 [[XY]], [[TMP2]]
 ; CHECK-NEXT:    [[T:%.*]] = trunc i128 [[ADD]] to i64
 ; CHECK-NEXT:    [[H:%.*]] = lshr i128 [[ADD]], 64
 ; CHECK-NEXT:    [[T2:%.*]] = trunc i128 [[H]] to i64
@@ -2279,4 +2283,56 @@ define { i64, i64 } @PR57576(i64 noundef %x, i64 noundef %y, i64 noundef %z, i64
   %r1 = insertvalue { i64, i64 } poison, i64 %t, 0
   %r2 = insertvalue { i64, i64 } %r1, i64 %t2, 1
   ret { i64, i64 } %r2
+}
+
+define i8 @mul_negpow2(i8 %x, i8 %y) {
+; CHECK-LABEL: @mul_negpow2(
+; CHECK-NEXT:    [[TMP1:%.*]] = shl i8 [[X:%.*]], 1
+; CHECK-NEXT:    [[A:%.*]] = sub i8 [[Y:%.*]], [[TMP1]]
+; CHECK-NEXT:    ret i8 [[A]]
+;
+  %m = mul i8 %x, -2
+  %a = add i8 %m, %y
+  ret i8 %a
+}
+
+define <2 x i8> @mul_negpow2_commute_vec(<2 x i8> %x, <2 x i8> %p) {
+; CHECK-LABEL: @mul_negpow2_commute_vec(
+; CHECK-NEXT:    [[Y:%.*]] = mul <2 x i8> [[P:%.*]], [[P]]
+; CHECK-NEXT:    [[TMP1:%.*]] = shl <2 x i8> [[X:%.*]], <i8 3, i8 3>
+; CHECK-NEXT:    [[A:%.*]] = sub <2 x i8> [[Y]], [[TMP1]]
+; CHECK-NEXT:    ret <2 x i8> [[A]]
+;
+  %y = mul <2 x i8> %p, %p ; thwart complexity-based canonicalization
+  %m = mul <2 x i8> %x, <i8 -8, i8 -8>
+  %a = add <2 x i8> %y, %m
+  ret <2 x i8> %a
+}
+
+; negative test - extra use
+
+define i8 @mul_negpow2_use(i8 %x) {
+; CHECK-LABEL: @mul_negpow2_use(
+; CHECK-NEXT:    [[M:%.*]] = mul i8 [[X:%.*]], -2
+; CHECK-NEXT:    call void @use(i8 [[M]])
+; CHECK-NEXT:    [[A:%.*]] = add i8 [[M]], 42
+; CHECK-NEXT:    ret i8 [[A]]
+;
+  %m = mul i8 %x, -2
+  call void @use(i8 %m)
+  %a = add i8 %m, 42
+  ret i8 %a
+}
+
+; negative test - not negative-power-of-2 multiplier
+
+define i8 @mul_not_negpow2(i8 %x) {
+; CHECK-LABEL: @mul_not_negpow2(
+; CHECK-NEXT:    [[M:%.*]] = mul i8 [[X:%.*]], -3
+; CHECK-NEXT:    [[A:%.*]] = add i8 [[M]], 42
+; CHECK-NEXT:    ret i8 [[A]]
+;
+  %m = mul i8 %x, -3
+  %a = add i8 %m, 42
+  ret i8 %a
 }

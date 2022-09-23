@@ -887,7 +887,7 @@ static void addRelativeReloc(InputSectionBase &isec, uint64_t offsetInSec,
   if (part.relrDyn && isec.alignment >= 2 && offsetInSec % 2 == 0) {
     isec.relocations.push_back({expr, type, offsetInSec, addend, &sym});
     if (shard)
-      part.relrDyn->relocsVec[parallel::threadIndex].push_back(
+      part.relrDyn->relocsVec[parallel::getThreadIndex()].push_back(
           {&isec, offsetInSec});
     else
       part.relrDyn->relocs.push_back({&isec, offsetInSec});
@@ -1541,10 +1541,11 @@ template <class ELFT> void elf::scanRelocations() {
   // directly processed by InputSection::relocateNonAlloc.
 
   // Deterministic parallellism needs sorting relocations which is unsuitable
-  // for -z nocombreloc. MIPS and PPC64 use global states which are not suitable
-  // for parallelism.
-  bool serial = !config->zCombreloc || config->emachine == EM_MIPS ||
-                config->emachine == EM_PPC64;
+  // for -z nocombreloc and does not currently work with
+  // AndroidPackedRelocationSection. MIPS and PPC64 use global states which are
+  // not suitable for parallelism.
+  bool serial = !config->zCombreloc || config->androidPackDynRelocs ||
+                config->emachine == EM_MIPS || config->emachine == EM_PPC64;
   parallel::TaskGroup tg;
   for (ELFFileBase *f : ctx->objectFiles) {
     auto fn = [f]() {
@@ -1562,7 +1563,7 @@ template <class ELFT> void elf::scanRelocations() {
       tg.execute(fn);
   }
 
-  // Both the main thread and thread pool index 0 use threadIndex==0. Be
+  // Both the main thread and thread pool index 0 use getThreadIndex()==0. Be
   // careful that they don't concurrently run scanSections. When serial is
   // true, fn() has finished at this point, so running execute is safe.
   tg.execute([] {

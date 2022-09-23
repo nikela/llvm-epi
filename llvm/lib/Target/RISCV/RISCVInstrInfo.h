@@ -235,6 +235,7 @@ struct EPIPseudoInfo {
   uint8_t MergeOpIndex;
   uint8_t MaskOpIndex;
   uint8_t VLMul;
+  uint8_t DynamicFlags;
 
   int getVLIndex() const { return static_cast<int8_t>(VLIndex); }
 
@@ -243,6 +244,8 @@ struct EPIPseudoInfo {
   int getMergeOpIndex() const { return static_cast<int8_t>(MergeOpIndex); }
 
   int getMaskOpIndex() const { return static_cast<int8_t>(MaskOpIndex); }
+
+  int getDynamicFlagsIndex() const { return static_cast<int8_t>(DynamicFlags); }
 };
 
 #define GET_EPIPseudosTable_DECL

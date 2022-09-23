@@ -1038,7 +1038,10 @@ llvm::Expected<Args> Options::ParseAlias(const Args &args,
         input_line.erase(pos, tmp_arg.size());
     }
     args_copy.DeleteArgumentAtIndex(idx);
-    if (option_to_insert != CommandInterpreter::g_no_argument) {
+    if ((option_to_insert != CommandInterpreter::g_no_argument) &&
+        (OptionParser::GetOptionArgument() != nullptr) &&
+        (idx < args_copy.GetArgumentCount()) &&
+        (args_copy[idx].ref() == OptionParser::GetOptionArgument())) {
       if (input_line.size() > 0) {
         size_t pos = input_line.find(option_to_insert);
         if (pos != std::string::npos)

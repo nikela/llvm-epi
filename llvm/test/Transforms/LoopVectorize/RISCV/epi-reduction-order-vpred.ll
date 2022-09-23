@@ -45,24 +45,22 @@ define internal i32 @foo(i64 %t0) !prof !1 {
 ; CHECK-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 8 x i32> [[STEP_VEC]], [[EVL_SPLAT]]
 ; CHECK-NEXT:    [[TMP10]] = select <vscale x 8 x i1> [[EVL_MASK]], <vscale x 8 x i32> [[VP_OP4]], <vscale x 8 x i32> [[VEC_PHI]]
 ; CHECK-NEXT:    [[TMP11]] = select <vscale x 8 x i1> [[EVL_MASK]], <vscale x 8 x i32> [[VP_OP]], <vscale x 8 x i32> [[VEC_PHI1]]
-; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP13:%.*]] = mul i64 [[TMP12]], 8
-; CHECK-NEXT:    [[TMP14:%.*]] = zext i32 [[TMP6]] to i64
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP14]]
-; CHECK-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[T0]]
-; CHECK-NEXT:    br i1 [[TMP15]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof [[PROF1:![0-9]+]], !llvm.loop [[LOOP2:![0-9]+]]
+; CHECK-NEXT:    [[TMP12:%.*]] = zext i32 [[TMP6]] to i64
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP12]]
+; CHECK-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[T0]]
+; CHECK-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof [[PROF1:![0-9]+]], !llvm.loop [[LOOP2:![0-9]+]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vector.reduce.add.nxv8i32(<vscale x 8 x i32> [[TMP11]])
-; CHECK-NEXT:    [[TMP17:%.*]] = call i32 @llvm.vector.reduce.add.nxv8i32(<vscale x 8 x i32> [[TMP10]])
+; CHECK-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vector.reduce.add.nxv8i32(<vscale x 8 x i32> [[TMP11]])
+; CHECK-NEXT:    [[TMP15:%.*]] = call i32 @llvm.vector.reduce.add.nxv8i32(<vscale x 8 x i32> [[TMP10]])
 ; CHECK-NEXT:    br i1 true, label [[T17:%.*]], label [[SCALAR_PH]]
 ; CHECK:       scalar.ph:
 ; CHECK-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[T0]], [[MIDDLE_BLOCK]] ], [ 0, [[T16:%.*]] ]
-; CHECK-NEXT:    [[BC_MERGE_RDX:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP17]], [[MIDDLE_BLOCK]] ]
-; CHECK-NEXT:    [[BC_MERGE_RDX5:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[BC_MERGE_RDX:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[BC_MERGE_RDX5:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ]
 ; CHECK-NEXT:    br label [[T20:%.*]]
 ; CHECK:       t17:
-; CHECK-NEXT:    [[T18:%.*]] = phi i32 [ [[T24:%.*]], [[T20]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ]
-; CHECK-NEXT:    [[T19:%.*]] = phi i32 [ [[T28:%.*]], [[T20]] ], [ [[TMP17]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[T18:%.*]] = phi i32 [ [[T24:%.*]], [[T20]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[T19:%.*]] = phi i32 [ [[T28:%.*]], [[T20]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ]
 ; CHECK-NEXT:    br label [[T31:%.*]]
 ; CHECK:       t20:
 ; CHECK-NEXT:    [[T21:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[T29:%.*]], [[T20]] ]
@@ -109,24 +107,22 @@ define internal i32 @foo(i64 %t0) !prof !1 {
 ; CHECK1-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 2 x i32> [[STEP_VEC]], [[EVL_SPLAT]]
 ; CHECK1-NEXT:    [[TMP10]] = select <vscale x 2 x i1> [[EVL_MASK]], <vscale x 2 x i32> [[VP_OP4]], <vscale x 2 x i32> [[VEC_PHI]]
 ; CHECK1-NEXT:    [[TMP11]] = select <vscale x 2 x i1> [[EVL_MASK]], <vscale x 2 x i32> [[VP_OP]], <vscale x 2 x i32> [[VEC_PHI1]]
-; CHECK1-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[TMP13:%.*]] = mul i64 [[TMP12]], 2
-; CHECK1-NEXT:    [[TMP14:%.*]] = zext i32 [[TMP6]] to i64
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP14]]
-; CHECK1-NEXT:    [[TMP15:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[T0]]
-; CHECK1-NEXT:    br i1 [[TMP15]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof [[PROF1:![0-9]+]], !llvm.loop [[LOOP2:![0-9]+]]
+; CHECK1-NEXT:    [[TMP12:%.*]] = zext i32 [[TMP6]] to i64
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP12]]
+; CHECK1-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[T0]]
+; CHECK1-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !prof [[PROF1:![0-9]+]], !llvm.loop [[LOOP2:![0-9]+]]
 ; CHECK1:       middle.block:
-; CHECK1-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP11]])
-; CHECK1-NEXT:    [[TMP17:%.*]] = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP10]])
+; CHECK1-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP11]])
+; CHECK1-NEXT:    [[TMP15:%.*]] = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> [[TMP10]])
 ; CHECK1-NEXT:    br i1 true, label [[T17:%.*]], label [[SCALAR_PH]]
 ; CHECK1:       scalar.ph:
 ; CHECK1-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[T0]], [[MIDDLE_BLOCK]] ], [ 0, [[T16:%.*]] ]
-; CHECK1-NEXT:    [[BC_MERGE_RDX:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP17]], [[MIDDLE_BLOCK]] ]
-; CHECK1-NEXT:    [[BC_MERGE_RDX5:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ]
+; CHECK1-NEXT:    [[BC_MERGE_RDX:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ]
+; CHECK1-NEXT:    [[BC_MERGE_RDX5:%.*]] = phi i32 [ 0, [[T16]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ]
 ; CHECK1-NEXT:    br label [[T20:%.*]]
 ; CHECK1:       t17:
-; CHECK1-NEXT:    [[T18:%.*]] = phi i32 [ [[T24:%.*]], [[T20]] ], [ [[TMP16]], [[MIDDLE_BLOCK]] ]
-; CHECK1-NEXT:    [[T19:%.*]] = phi i32 [ [[T28:%.*]], [[T20]] ], [ [[TMP17]], [[MIDDLE_BLOCK]] ]
+; CHECK1-NEXT:    [[T18:%.*]] = phi i32 [ [[T24:%.*]], [[T20]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ]
+; CHECK1-NEXT:    [[T19:%.*]] = phi i32 [ [[T28:%.*]], [[T20]] ], [ [[TMP15]], [[MIDDLE_BLOCK]] ]
 ; CHECK1-NEXT:    br label [[T31:%.*]]
 ; CHECK1:       t20:
 ; CHECK1-NEXT:    [[T21:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[T29:%.*]], [[T20]] ]
