@@ -218,6 +218,26 @@ public:
             func.setType(toTy);
             rewriter.finalizeRootUpdate(func);
           }
+          // Update all the blocks too.
+          for (auto &block : func.getBlocks()) {
+            auto argTypes = block.getArgumentTypes();
+            for (auto e : llvm::enumerate(argTypes)) {
+              unsigned i = e.index();
+              auto argTy = e.value();
+              if (typeConverter.needsConversion(argTy)) {
+                rewriter.startRootUpdate(func);
+
+                auto toTy =
+                    typeConverter.convertType(argTy);
+                block.insertArgument(i, toTy, func.getLoc());
+                block.getArgument(i + 1).replaceAllUsesWith(
+                    block.getArgument(i));
+                block.eraseArgument(i + 1);
+
+                rewriter.finalizeRootUpdate(func);
+              }
+            }
+          }
         } else if (auto embox = mlir::dyn_cast<EmboxProcOp>(op)) {
           // Rewrite all `fir.emboxproc` ops to either `fir.convert` or a thunk
           // as required.
