@@ -210,6 +210,8 @@ Improvements to Clang's diagnostics
   ``LL`` suffix.
 - Clang now correctly diagnoses index that refers past the last possible element
   of FAM-like arrays.
+- Clang now correctly diagnoses a warning when defercencing a void pointer in C mode.
+  This fixes `Issue 53631 <https://github.com/llvm/llvm-project/issues/53631>`_
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -424,6 +426,10 @@ libclang
   the behavior of ``QualType::getNonReferenceType`` for ``CXType``.
 - Introduced the new function ``clang_CXXMethod_isDeleted``, which queries
   whether the method is declared ``= delete``.
+- ``clang_Cursor_getNumTemplateArguments``, ``clang_Cursor_getTemplateArgumentKind``, 
+  ``clang_Cursor_getTemplateArgumentType``, ``clang_Cursor_getTemplateArgumentValue`` and 
+  ``clang_Cursor_getTemplateArgumentUnsignedValue`` now work on struct, class,
+  and partial template specialization cursors in addition to function cursors.
 
 Static Analyzer
 ---------------
