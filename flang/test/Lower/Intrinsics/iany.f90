@@ -52,19 +52,6 @@ iany_test_8 = iany(a)
 ! CHECK:  %{{.*}} = fir.call @_FortranAIAny8(%[[a3]], %{{.*}}, %{{.*}}, %[[a5]], %[[a6]]) : (!fir.box<none>, !fir.ref<i8>, i32, i32, !fir.box<none>) -> i64
 end function
 
-! CHECK-LABEL: func @_QPiany_test_16(
-! CHECK-SAME: %[[arg0:.*]]: !fir.box<!fir.array<?xi128>>{{.*}}) -> i128 {
-integer(16) function iany_test_16(a)
-integer(16) :: a(:)
-! CHECK-DAG:  %[[c0:.*]] = arith.constant 0 : index
-! CHECK-DAG:  %[[a1:.*]] = fir.absent !fir.box<i1>
-! CHECK-DAG: %[[a3:.*]] = fir.convert %[[arg0]] : (!fir.box<!fir.array<?xi128>>) -> !fir.box<none>
-! CHECK-DAG:  %[[a5:.*]] = fir.convert %[[c0]] : (index) -> i32
-! CHECK-DAG:  %[[a6:.*]] = fir.convert %[[a1]] : (!fir.box<i1>) -> !fir.box<none>
-iany_test_16 = iany(a)
-! CHECK:  %{{.*}} = fir.call @_FortranAIAny16(%[[a3]], %{{.*}}, %{{.*}}, %[[a5]], %[[a6]]) : (!fir.box<none>, !fir.ref<i8>, i32, i32, !fir.box<none>) -> i128
-end function
-
 ! CHECK-LABEL: func @_QPiany_test2(
 ! CHECK-SAME: %[[arg0:.*]]: !fir.box<!fir.array<?x?xi32>>{{.*}}, %[[arg1:.*]]: !fir.box<!fir.array<?xi32>>{{.*}}) {
 subroutine iany_test2(a,r)
