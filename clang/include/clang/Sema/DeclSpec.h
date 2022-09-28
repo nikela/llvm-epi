@@ -333,6 +333,11 @@ public:
     // FIXME: Attributes should be included here.
   };
 
+  enum FriendSpecified : bool {
+    No,
+    Yes,
+  };
+
 private:
   // storage-class-specifier
   /*SCS*/unsigned StorageClassSpec : 3;
@@ -764,7 +769,10 @@ public:
   bool SetConstexprSpec(ConstexprSpecKind ConstexprKind, SourceLocation Loc,
                         const char *&PrevSpec, unsigned &DiagID);
 
-  bool isFriendSpecified() const { return Friend_specified; }
+  FriendSpecified isFriendSpecified() const {
+    return static_cast<FriendSpecified>(Friend_specified);
+  }
+
   SourceLocation getFriendSpecLoc() const { return FriendLoc; }
 
   bool isModulePrivateSpecified() const { return ModulePrivateLoc.isValid(); }
@@ -1806,6 +1814,13 @@ enum class DeclaratorContext {
   AliasTemplate,       // C++11 alias-declaration template.
   RequiresExpr,        // C++2a requires-expression.
   Association          // C11 _Generic selection expression association.
+};
+
+// Describes whether the current context is a context where an implicit
+// typename is allowed (C++2a [temp.res]p5]).
+enum class ImplicitTypenameContext {
+  No,
+  Yes,
 };
 
 /// Information about one declarator, including the parsed type
