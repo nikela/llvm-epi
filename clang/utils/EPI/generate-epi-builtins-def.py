@@ -647,7 +647,7 @@ def format_code(source, clang_format):
 
 LETTERS = [ chr(x) for x in range(ord('A'), ord('Z') + 1) ]
 
-def emit_markdown_document(out_file, j, clang_format):
+def emit_asciidoc_document(out_file, j, clang_format):
     inst_builtins = instantiate_builtins(j)
 
     all_docs = j["!instanceof"]["DocEPIBuiltin"]
@@ -671,7 +671,7 @@ def emit_markdown_document(out_file, j, clang_format):
     category_number = 0
     for category_id in sorted_categories:
         category_name = j[category_id]["Name"]
-        out_file.write("## {}. {}\n\n".format(LETTERS[category_number], category_name))
+        out_file.write("=== {}\n\n".format(category_name))
         sorted_docs = categories[category_id]
         sorted_docs.sort(key = lambda x : x["Builtin"]["printable"])
         builtin_number = 0
@@ -685,15 +685,15 @@ def emit_markdown_document(out_file, j, clang_format):
             documented.add(builtin_record_name)
 
             builtin_number += 1
-            out_file.write("### {}.{}. {}\n\n".format(LETTERS[category_number], builtin_number, doc["Title"]))
-            out_file.write("**Description:**\n\n{}\n\n".format(doc["Description"]))
+            out_file.write("==== {}\n\n".format(doc["Title"]))
+            out_file.write("Description::\n+\n--\n{}\n--\n\n".format(doc["Description"]))
 
             if doc["Instruction"]:
-                out_file.write("**Instruction:**\n\n")
-                out_file.write("```\n")
+                out_file.write("Instruction::\n")
+                out_file.write("[source,text]\n");
+                out_file.write("----\n")
                 out_file.write(doc["Instruction"] + "\n")
-                out_file.write("```\n")
-                out_file.write("\n")
+                out_file.write("----\n\n")
 
             # Unmasked
             # FIXME - Build an index instead of traversing all the builtins
@@ -703,35 +703,39 @@ def emit_markdown_document(out_file, j, clang_format):
                     prototypes += inst.c_prototype(doc["ParameterNames"]) + "\n";
             formatted_prototypes = format_code(prototypes, clang_format)
 
-            out_file.write("**Prototypes**:\n\n")
-            out_file.write("```cpp\n");
+            out_file.write("Prototypes::\n")
+            out_file.write("[source,cpp]\n");
+            out_file.write("----\n")
             out_file.write(formatted_prototypes.decode())
-            out_file.write("```\n");
+            out_file.write("----\n\n")
 
             if doc["Operation"]:
-                out_file.write("**Operation:**\n\n")
-                out_file.write("```\n")
+                out_file.write("Operation::\n")
+                out_file.write("[source,text]\n");
+                out_file.write("----\n")
                 out_file.write(adjust_text(doc["Operation"]) + "\n")
-                out_file.write("```\n\n")
+                out_file.write("----\n\n")
 
             # Masked
             if builtin_record["HasMask"] != 0:
-                out_file.write("**Masked prototypes**:\n\n")
+                out_file.write("Masked prototypes::\n")
                 prototypes = ""
                 for inst in inst_builtins:
                     if inst.builtin is builtin_record and inst.masked:
                         prototypes += inst.c_prototype(doc["ParameterNames"]) + "\n";
                 formatted_prototypes = format_code(prototypes, clang_format)
 
-                out_file.write("```cpp\n");
+                out_file.write("[source,cpp]\n");
+                out_file.write("----\n")
                 out_file.write(formatted_prototypes.decode())
-                out_file.write("```\n");
+                out_file.write("----\n\n")
 
                 if doc["OperationMask"]:
-                    out_file.write("**Masked operation**:\n\n")
-                    out_file.write("```\n")
+                    out_file.write("Masked operation::\n")
+                    out_file.write("[source,text]\n");
+                    out_file.write("----\n")
                     out_file.write(adjust_text(doc["OperationMask"]) + "\n")
-                    out_file.write("```\n\n")
+                    out_file.write("----\n\n")
         category_number += 1
 
     for builtin in j["!instanceof"]["EPIBuiltin"]:
@@ -1022,7 +1026,7 @@ if __name__ == "__main__":
     elif args.mode == "docs":
         if not args.clang_format:
             parser.error("You have to pass --clang-format when generating documentation")
-        emit_markdown_document(out_file, j, args.clang_format)
+        emit_asciidoc_document(out_file, j, args.clang_format)
     elif args.mode == "tests":
         emit_tests(out_file, j)
     elif args.mode == "compat-header":
